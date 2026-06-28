@@ -50,6 +50,7 @@ link the repository root; it only shows a neutral notice.
 
 | Program | Module / Lesson | Activity | Folder |
 |---|---|---|---|
-| Enterprise AI Implementation | M1 / L1 | Diagnosing Use Cases: Class Workbook | `enterprise-ai-implementation/m1l1-diagnosing-use-cases/` |
+| Enterprise AI Implementation | M1 / L1 | Diagnosing Use Cases: Class Workbook (in-class) | `enterprise-ai-implementation/m1l1-diagnosing-use-cases/` |
+| Enterprise AI Implementation | M1 / L1 | Homework 1 Builder: Use-Case Diagnosis (home practice) | `enterprise-ai-implementation/m1l1-homework-use-case-diagnosis/` |
 
 _© Wawiwa Tech | Confidential_
