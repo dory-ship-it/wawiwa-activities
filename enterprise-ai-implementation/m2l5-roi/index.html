@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EAI M2 · Lesson 5 — ROI</title>
+<style>
+  :root{--navy:#1F2C36;--turq:#0097A7;--red:#EE3124;--grey:#6F7A8A;--card:#F5F7F8;--green:#2E8B57;--ink:#243b4a;--line:#E1E6EA;--gold:#B89B5E;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#fff;line-height:1.5;}
+  header{background:var(--navy);color:#fff;padding:22px 26px;}
+  .kick{color:#8fd4dc;font-size:13px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;}
+  h1{margin:4px 0 2px;font-size:23px;} .sub{color:#c7d2d8;font-size:14px;}
+  .wrap{max-width:900px;margin:0 auto;padding:20px 22px 40px;}
+  .bar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:10px 22px;z-index:5;display:flex;align-items:center;gap:12px;}
+  .bar .track{flex:1;height:9px;background:#e9edf0;border-radius:6px;overflow:hidden;} .bar .fill{height:100%;width:0;background:var(--turq);transition:width .3s;} .bar b{color:var(--navy);font-size:13px;white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--turq);border-radius:10px;padding:16px 18px;margin:16px 0;position:relative;}
+  .card h2{margin:0 0 6px;font-size:17px;color:var(--navy);}
+  .card.req::after{content:"\25CB";position:absolute;top:14px;right:16px;font-size:20px;color:#c3ccd2;} .card.req.done::after{content:"\2713";color:var(--green);font-weight:800;}
+  .intro{border-left-color:var(--red);}
+  label{display:block;font-weight:600;font-size:13px;margin:10px 0 3px;color:var(--navy);}
+  input[type=text],textarea,select{width:100%;border:1px solid #cdd6dc;border-radius:7px;padding:8px 10px;font:inherit;font-size:14px;background:#fff;} textarea{min-height:54px;resize:vertical;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;} .row>div{flex:1;min-width:160px;}
+  details{background:#fff;border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:6px 12px;} summary{cursor:pointer;font-weight:700;color:var(--navy);padding:4px 0;} details p{margin:6px 0;font-size:14px;}
+  .hint{color:var(--grey);font-size:13px;margin:4px 0 0;} .sec{font-weight:700;color:var(--turq);font-size:13px;margin:12px 0 2px;}
+  .btnrow{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;}
+  button{background:var(--turq);color:#fff;border:0;border-radius:22px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:14px;} button.ghost{background:#fff;color:var(--turq);border:1.5px solid var(--turq);}
+  .badge{background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--grey);}
+</style>
+</head>
+<body>
+<header>
+  <div class="kick">Enterprise AI Implementation Specialist</div>
+  <h1>Module 2 · Lesson 5 — ROI: Quantitative &amp; Qualitative</h1>
+  <div class="sub">Get all four components, defend both the numbers and the story</div>
+</header>
+<div class="bar"><b id="count">0 / 3 sections done</b><div class="track"><div class="fill" id="fill"></div></div></div>
+<div class="wrap">
+
+  <div class="card intro">
+    <h2>The four components (mirror of slide 83)</h2>
+    <p>Quantitative ROI has four parts: <b>cost baseline</b> (hours x headcount x loaded labor + rework + tooling), <b>expected savings</b> (apply a 25-30% demo-to-production buffer), <b>investment</b> (build + license + change management), and <b>payback</b> (the month cumulative savings cross cumulative investment). Lead the executive deck with the payback month, not the lifetime NPV.</p>
+    <p class="hint">Use Microsoft 365 Copilot in Excel to build the model. Show assumptions explicitly; round to defensible numbers.</p>
+  </div>
+
+  <div class="card req" id="quant">
+    <h2>1 · Quantitative ROI model</h2>
+    <div class="row"><div><label>Opportunity (from your Lesson 3 set)</label><input type="text" data-req></div><div><label>Pain Owner</label><input type="text" data-req></div></div>
+    <div class="sec">Cost baseline (today's annual cost of the pain)</div>
+    <label>People hours per occurrence x frequency x loaded rate</label><input type="text" data-req>
+    <label>Other costs (licenses, error rework, opportunity cost)</label><input type="text" data-req>
+    <label>Total annual baseline</label><input type="text" data-req>
+    <div class="sec">Expected savings or uplift (annual, post-build)</div>
+    <label>Time savings + error reduction / revenue uplift (apply 25% buffer)</label><input type="text" data-req>
+    <div class="sec">Investment</div>
+    <label>Build (weeks x rate) + licenses + training/change management</label><input type="text" data-req>
+    <label>Total year-one / recurring annual</label><input type="text" data-req>
+    <div class="sec">Payback &amp; KPIs</div>
+    <label>Cumulative savings cross investment in month</label><input type="text" data-req>
+    <label>Three KPIs (leading weekly / lagging quarterly / guardrail)</label><textarea data-req></textarea>
+    <label>Sensitivity: best / base / worst (payback month + year-one net)</label><textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="qual">
+    <h2>2 · Qualitative ROI memo (one page)</h2>
+    <p class="hint">Pick a different opportunity where value does not reduce cleanly to dollars.</p>
+    <div class="row"><div><label>Opportunity</label><input type="text" data-req></div>
+      <div><label>Pattern</label><select data-req><option value="">Select…</option><option>Risk Reduction</option><option>Employee Experience</option><option>Burnout Reduction</option><option>Brand Reputation</option><option>Learning Velocity</option><option>Optionality</option><option>Innovation Signaling</option><option>Error Reduction</option></select></div></div>
+    <label>Today-state (the current pain, one paragraph)</label><textarea data-req></textarea>
+    <label>Intervention (what this opportunity does)</label><textarea data-req></textarea>
+    <label>Expected delta (calibrated honestly, with a sensitivity range)</label><textarea data-req></textarea>
+    <label>Why the dollars do not capture the value (2-3 sentences)</label><textarea data-req></textarea>
+    <label>The case for action (one paragraph, executive tone)</label><textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="cfo">
+    <h2>3 · Mock CFO challenge</h2>
+    <p class="hint">Pair up. Play skeptic on your partner's model and memo. Document for them to fix before the mini-project submission.</p>
+    <label>Three weakest assumptions in the quantitative model</label><textarea data-req placeholder="1.&#10;2.&#10;3."></textarea>
+    <label>Two weakest claims in the qualitative memo</label><textarea data-req placeholder="1.&#10;2."></textarea>
+  </div>
+
+  <div class="btnrow"><button onclick="copyAll()">Copy my ROI work</button><button class="ghost" onclick="window.print()">Print / Save as PDF</button><span class="badge" id="copied"></span></div>
+</div>
+<script>
+  var cards=[].slice.call(document.querySelectorAll('.card.req'));
+  function filled(el){return (el.value||'').trim()!=='';}
+  function refresh(){var d=0;cards.forEach(function(c){var r=[].slice.call(c.querySelectorAll('[data-req]'));var ok=r.length&&r.every(filled);c.classList.toggle('done',ok);if(ok)d++;});document.getElementById('count').textContent=d+' / '+cards.length+' sections done';document.getElementById('fill').style.width=(cards.length?d/cards.length*100:0)+'%';}
+  document.addEventListener('input',refresh);document.addEventListener('change',refresh);
+  function copyAll(){var o=[];cards.forEach(function(c){o.push('== '+c.querySelector('h2').textContent.replace(/\s+/g,' ').trim()+' ==');[].slice.call(c.querySelectorAll('label')).forEach(function(l){var f=l.nextElementSibling;if(f&&(f.tagName==='INPUT'||f.tagName==='TEXTAREA'||f.tagName==='SELECT'))o.push(l.textContent+': '+(f.value||''));});o.push('');});var t=o.join('\n');var n=document.getElementById('copied');if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){n.textContent='Copied to clipboard.';},function(){fb(t,n);});}else fb(t,n);}
+  function fb(t,n){var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy');n.textContent='Copied.';}catch(e){n.textContent='Select all and copy.';}document.body.removeChild(x);}
+  refresh();
+</script>
+</body>
+</html>

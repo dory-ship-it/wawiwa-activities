@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EAI M2 · Lesson 4 — Prioritization &amp; CoE</title>
+<style>
+  :root{--navy:#1F2C36;--turq:#0097A7;--red:#EE3124;--grey:#6F7A8A;--card:#F5F7F8;--green:#2E8B57;--ink:#243b4a;--line:#E1E6EA;--gold:#B89B5E;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#fff;line-height:1.5;}
+  header{background:var(--navy);color:#fff;padding:22px 26px;}
+  .kick{color:#8fd4dc;font-size:13px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;}
+  h1{margin:4px 0 2px;font-size:23px;} .sub{color:#c7d2d8;font-size:14px;}
+  .wrap{max-width:900px;margin:0 auto;padding:20px 22px 40px;}
+  .bar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:10px 22px;z-index:5;display:flex;align-items:center;gap:12px;}
+  .bar .track{flex:1;height:9px;background:#e9edf0;border-radius:6px;overflow:hidden;} .bar .fill{height:100%;width:0;background:var(--turq);transition:width .3s;} .bar b{color:var(--navy);font-size:13px;white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--turq);border-radius:10px;padding:16px 18px;margin:16px 0;position:relative;}
+  .card h2{margin:0 0 6px;font-size:17px;color:var(--navy);}
+  .card.req::after{content:"\25CB";position:absolute;top:14px;right:16px;font-size:20px;color:#c3ccd2;} .card.req.done::after{content:"\2713";color:var(--green);font-weight:800;}
+  .intro{border-left-color:var(--red);}
+  label{display:block;font-weight:600;font-size:13px;margin:10px 0 3px;color:var(--navy);}
+  input[type=text],textarea,select{width:100%;border:1px solid #cdd6dc;border-radius:7px;padding:8px 10px;font:inherit;font-size:14px;background:#fff;} textarea{min-height:54px;resize:vertical;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;} .row>div{flex:1;min-width:160px;}
+  details{background:#fff;border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:6px 12px;} summary{cursor:pointer;font-weight:700;color:var(--navy);padding:4px 0;} details p{margin:6px 0;font-size:14px;}
+  .hint{color:var(--grey);font-size:13px;margin:4px 0 0;}
+  .btnrow{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;}
+  button{background:var(--turq);color:#fff;border:0;border-radius:22px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:14px;} button.ghost{background:#fff;color:var(--turq);border:1.5px solid var(--turq);}
+  .badge{background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--grey);}
+</style>
+</head>
+<body>
+<header>
+  <div class="kick">Enterprise AI Implementation Specialist</div>
+  <h1>Module 2 · Lesson 4 — Prioritization &amp; the Center of Excellence</h1>
+  <div class="sub">Score, plot, calibrate, then design the operating shape</div>
+</header>
+<div class="bar"><b id="count">0 / 3 sections done</b><div class="track"><div class="fill" id="fill"></div></div></div>
+<div class="wrap">
+
+  <div class="card intro">
+    <h2>The exercise</h2>
+    <p>Score 12 opportunity cards on Value (1-5) and Effort (1-5) and plot them on the 2x2 (Quick Wins, Strategic, Time Sinks, Fill-ins). Then run mock Weighted Voting in a department-head role. Produce the consolidated segmentation and note what moved.</p>
+    <p class="hint">The 4-quadrant view is the default; the 3-segment variant (Quick Wins, Strategic, Next Bets at high-value/medium-effort) is fine when Fill-Ins and Time Sinks would just create noise.</p>
+  </div>
+
+  <div class="card" style="border-left-color:var(--gold)">
+    <h2>Reference · The Four Plays (mirror of slide 70)</h2>
+    <details><summary>When Weighted Voting produces a strange result</summary>
+      <p><b>Tie Break.</b> Two opportunities tie. Break on effort first, sponsor strength second. Pre-declare the rule before the survey.</p>
+      <p><b>Domain Weight.</b> One stakeholder dominates. Weight votes by domain (CFO 2x on finance, GC 2x on legal), set with leadership, not in the moment.</p>
+      <p><b>Pet Project.</b> A senior sponsor pushes a low-value item. Surface it with its real score, name the trade-off, let leadership decide. Never fight the sponsor in the room.</p>
+      <p><b>All 5s / All 1s.</b> A voter rates everything the same. Flatten and force a re-rank: pick your top 5 and rank them.</p>
+      <p>The plays do not change the scores; they protect the credibility of the scoring.</p>
+    </details>
+  </div>
+
+  <div class="card req" id="c1">
+    <h2>1 · What moved, and why</h2>
+    <label>Three opportunities that moved from Quick Wins to Strategic between methods, and why</label>
+    <textarea data-req placeholder="1.&#10;2.&#10;3."></textarea>
+    <label>What the movement surfaced about stakeholder priorities</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="c2">
+    <h2>2 · Calibration play used</h2>
+    <div class="row">
+      <div><label>Which Four Play governed a calibration call?</label>
+        <select data-req><option value="">Select…</option><option>Tie Break</option><option>Domain Weight</option><option>Pet Project</option><option>All 5s / All 1s</option><option>None needed</option></select></div>
+    </div>
+    <label>The rule you pre-declared (before scoring), and the trade-off it cost</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="c3">
+    <h2>3 · Sketch the Center of Excellence</h2>
+    <p class="hint">Design the operating shape of the CoE for NorthRiver. This is the seed of the full operating model in Module 6.</p>
+    <label>Intake form: three to five fields that capture a new AI request from any department</label>
+    <textarea data-req placeholder="Field 1…&#10;Field 2…&#10;Field 3…"></textarea>
+    <div class="row">
+      <div><label>Review: reviewers (named roles)</label><input type="text" data-req></div>
+      <div><label>Cadence</label><input type="text" data-req placeholder="weekly / biweekly / monthly"></div>
+    </div>
+    <label>Top three review criteria</label><input type="text" data-req>
+    <div class="row">
+      <div><label>Post-deployment comms: channel</label><input type="text" data-req placeholder="email / intranet / Slack / town hall"></div>
+      <div><label>Cadence</label><input type="text" data-req></div>
+      <div><label>Format</label><input type="text" data-req placeholder="case study / demo / one-pager"></div>
+    </div>
+  </div>
+
+  <div class="btnrow"><button onclick="copyAll()">Copy my prioritization &amp; CoE</button><button class="ghost" onclick="window.print()">Print / Save as PDF</button><span class="badge" id="copied"></span></div>
+</div>
+<script>
+  var cards=[].slice.call(document.querySelectorAll('.card.req'));
+  function filled(el){return (el.value||'').trim()!=='';}
+  function refresh(){var d=0;cards.forEach(function(c){var r=[].slice.call(c.querySelectorAll('[data-req]'));var ok=r.length&&r.every(filled);c.classList.toggle('done',ok);if(ok)d++;});document.getElementById('count').textContent=d+' / '+cards.length+' sections done';document.getElementById('fill').style.width=(cards.length?d/cards.length*100:0)+'%';}
+  document.addEventListener('input',refresh);document.addEventListener('change',refresh);
+  function copyAll(){var o=[];cards.forEach(function(c){o.push('== '+c.querySelector('h2').textContent.replace(/\s+/g,' ').trim()+' ==');[].slice.call(c.querySelectorAll('label')).forEach(function(l){var f=l.nextElementSibling;if(f&&(f.tagName==='INPUT'||f.tagName==='TEXTAREA'||f.tagName==='SELECT'))o.push(l.textContent+': '+(f.value||''));});o.push('');});var t=o.join('\n');var n=document.getElementById('copied');if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){n.textContent='Copied to clipboard.';},function(){fb(t,n);});}else fb(t,n);}
+  function fb(t,n){var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy');n.textContent='Copied.';}catch(e){n.textContent='Select all and copy.';}document.body.removeChild(x);}
+  refresh();
+</script>
+</body>
+</html>

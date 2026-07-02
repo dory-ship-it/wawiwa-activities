@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EAI M2 · Lesson 2 — As-Is Mapping</title>
+<style>
+  :root{--navy:#1F2C36;--turq:#0097A7;--red:#EE3124;--grey:#6F7A8A;--card:#F5F7F8;--green:#2E8B57;--ink:#243b4a;--line:#E1E6EA;--gold:#B89B5E;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#fff;line-height:1.5;}
+  header{background:var(--navy);color:#fff;padding:22px 26px;}
+  .kick{color:#8fd4dc;font-size:13px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;}
+  h1{margin:4px 0 2px;font-size:23px;} .sub{color:#c7d2d8;font-size:14px;}
+  .wrap{max-width:900px;margin:0 auto;padding:20px 22px 40px;}
+  .bar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:10px 22px;z-index:5;display:flex;align-items:center;gap:12px;}
+  .bar .track{flex:1;height:9px;background:#e9edf0;border-radius:6px;overflow:hidden;} .bar .fill{height:100%;width:0;background:var(--turq);transition:width .3s;} .bar b{color:var(--navy);font-size:13px;white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--turq);border-radius:10px;padding:16px 18px;margin:16px 0;position:relative;}
+  .card h2{margin:0 0 6px;font-size:17px;color:var(--navy);}
+  .card.req::after{content:"\25CB";position:absolute;top:14px;right:16px;font-size:20px;color:#c3ccd2;} .card.req.done::after{content:"\2713";color:var(--green);font-weight:800;}
+  .intro{border-left-color:var(--red);}
+  label{display:block;font-weight:600;font-size:13px;margin:10px 0 3px;color:var(--navy);}
+  input[type=text],textarea,select{width:100%;border:1px solid #cdd6dc;border-radius:7px;padding:8px 10px;font:inherit;font-size:14px;background:#fff;} textarea{min-height:54px;resize:vertical;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;} .row>div{flex:1;min-width:170px;}
+  details{background:#fff;border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:6px 12px;} summary{cursor:pointer;font-weight:700;color:var(--navy);padding:4px 0;} details p{margin:6px 0;font-size:14px;}
+  .hint{color:var(--grey);font-size:13px;margin:4px 0 0;}
+  .btnrow{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;}
+  button{background:var(--turq);color:#fff;border:0;border-radius:22px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:14px;} button.ghost{background:#fff;color:var(--turq);border:1.5px solid var(--turq);}
+  .badge{background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--grey);}
+</style>
+</head>
+<body>
+<header>
+  <div class="kick">Enterprise AI Implementation Specialist</div>
+  <h1>Module 2 · Lesson 2 — As-Is Process Mapping</h1>
+  <div class="sub">Map the messy version, not the clean one</div>
+</header>
+<div class="bar"><b id="count">0 / 3 sections done</b><div class="track"><div class="fill" id="fill"></div></div></div>
+<div class="wrap">
+
+  <div class="card intro">
+    <h2>Your task</h2>
+    <p>Pick one process from the NorthRiver case (month-end close, vendor onboarding, lease processing in the Northeast, and so on). Produce a swimlane diagram in Mermaid or Excalidraw, plus one row in the master process inventory using the fields below.</p>
+    <p class="hint">Include at least one process pain that is not tied to a core system (executive-meeting transcription, action-item tracking, a recurring approval workflow, knowledge-request handling). World 2 and World 3 are where the Specialist adds the most value.</p>
+  </div>
+
+  <div class="card" style="border-left-color:var(--gold)">
+    <h2>Reference · Swimlane template (mirror of slide 26)</h2>
+    <details><summary>How to build it</summary>
+      <p>Rows are roles, columns are time, activities live in role rows, arrows show handoffs, diamonds mark decisions. Class example: 3 rows (Requester / Manager / Finance), 4 columns (Submit / Review / Approve / Pay).</p>
+      <p>Where the example is too tidy: a real NorthRiver process has at least one looped arrow (re-approval), at least one cross-row escalation, and at least one activity nobody owns. Map that version.</p>
+    </details>
+  </div>
+
+  <div class="card req" id="c1">
+    <h2>1 · Process identity</h2>
+    <div class="row">
+      <div><label>Process name</label><input type="text" data-req></div>
+      <div><label>Owner</label><input type="text" data-req></div>
+      <div><label>Department</label><input type="text" data-req></div>
+    </div>
+    <div class="row">
+      <div><label>Systems involved</label><input type="text" data-req placeholder="e.g., Acumen 9, QuickBooks, Excel"></div>
+      <div><label>Volume / frequency</label><input type="text" data-req placeholder="e.g., 800 invoices / month"></div>
+    </div>
+  </div>
+
+  <div class="card req" id="c2">
+    <h2>2 · Top three pains &amp; their owners</h2>
+    <p class="hint">One sentence each, with a source quote. The Pain Owner is the person who actually feels it.</p>
+    <label>Pain 1 (with quote)</label><textarea data-req></textarea>
+    <label>Pain 2 (with quote)</label><textarea data-req></textarea>
+    <label>Pain 3 (with quote)</label><textarea data-req></textarea>
+    <div class="row"><div><label>Pain Owner 1</label><input type="text" data-req></div><div><label>Pain Owner 2</label><input type="text" data-req></div><div><label>Pain Owner 3</label><input type="text" data-req></div></div>
+  </div>
+
+  <div class="card req" id="c3">
+    <h2>3 · Classification &amp; sources</h2>
+    <label>Tags (World 1 / 2 / 3, plus solution-category guesses)</label>
+    <input type="text" data-req placeholder="e.g., World 2 · Automation, Document AI">
+    <div class="row">
+      <div><label>Source interview</label><input type="text" data-req></div>
+      <div><label>Diagram link or attachment</label><input type="text" data-req placeholder="Mermaid / Excalidraw link"></div>
+    </div>
+  </div>
+
+  <div class="btnrow"><button onclick="copyAll()">Copy my mapping</button><button class="ghost" onclick="window.print()">Print / Save as PDF</button><span class="badge" id="copied"></span></div>
+</div>
+<script>
+  var cards=[].slice.call(document.querySelectorAll('.card.req'));
+  function filled(el){return (el.value||'').trim()!=='';}
+  function refresh(){var d=0;cards.forEach(function(c){var r=[].slice.call(c.querySelectorAll('[data-req]'));var ok=r.length&&r.every(filled);c.classList.toggle('done',ok);if(ok)d++;});document.getElementById('count').textContent=d+' / '+cards.length+' sections done';document.getElementById('fill').style.width=(cards.length?d/cards.length*100:0)+'%';}
+  document.addEventListener('input',refresh);document.addEventListener('change',refresh);
+  function copyAll(){var o=[];cards.forEach(function(c){o.push('== '+c.querySelector('h2').textContent.replace(/\s+/g,' ').trim()+' ==');[].slice.call(c.querySelectorAll('label')).forEach(function(l){var f=l.nextElementSibling;if(f&&(f.tagName==='INPUT'||f.tagName==='TEXTAREA'||f.tagName==='SELECT'))o.push(l.textContent+': '+(f.value||''));});o.push('');});var t=o.join('\n');var n=document.getElementById('copied');if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){n.textContent='Copied to clipboard.';},function(){fb(t,n);});}else fb(t,n);}
+  function fb(t,n){var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy');n.textContent='Copied.';}catch(e){n.textContent='Select all and copy.';}document.body.removeChild(x);}
+  refresh();
+</script>
+</body>
+</html>
