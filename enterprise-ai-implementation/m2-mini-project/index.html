@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EAI M2 · Mini Project</title>
+<style>
+  :root{--navy:#1F2C36;--turq:#0097A7;--red:#EE3124;--grey:#6F7A8A;--card:#F5F7F8;--green:#2E8B57;--ink:#243b4a;--line:#E1E6EA;--gold:#B89B5E;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#fff;line-height:1.5;}
+  header{background:var(--navy);color:#fff;padding:22px 26px;}
+  .kick{color:#8fd4dc;font-size:13px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;}
+  h1{margin:4px 0 2px;font-size:23px;}
+  .sub{color:#c7d2d8;font-size:14px;}
+  .wrap{max-width:900px;margin:0 auto;padding:20px 22px 70px;}
+  .bar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:10px 22px;z-index:5;display:flex;align-items:center;gap:12px;}
+  .bar .track{flex:1;height:9px;background:#e9edf0;border-radius:6px;overflow:hidden;}
+  .bar .fill{height:100%;width:0;background:var(--turq);transition:width .3s;}
+  .bar b{color:var(--navy);font-size:13px;white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--turq);border-radius:10px;padding:16px 18px;margin:16px 0;position:relative;}
+  .card h2{margin:0 0 6px;font-size:17px;color:var(--navy);}
+  .card .w{color:var(--grey);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  .card.req::after{content:"○";position:absolute;top:14px;right:16px;font-size:20px;color:#c3ccd2;}
+  .card.req.done::after{content:"✓";color:var(--green);font-weight:800;}
+  .intro{border-left-color:var(--red);}
+  ul{margin:8px 0 8px 2px;padding-left:20px;}
+  li{margin:4px 0;font-size:14px;}
+  label{display:block;font-weight:600;font-size:13px;margin:10px 0 3px;color:var(--navy);}
+  input[type=text],textarea,select{width:100%;border:1px solid #cdd6dc;border-radius:7px;padding:8px 10px;font:inherit;font-size:14px;background:#fff;}
+  textarea{min-height:60px;resize:vertical;}
+  .chk{display:flex;align-items:flex-start;gap:8px;margin:6px 0;font-size:14px;}
+  .chk input{margin-top:3px;}
+  details{background:#fff;border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:6px 12px;}
+  summary{cursor:pointer;font-weight:700;color:var(--navy);}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0;}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top;}
+  th{background:var(--navy);color:#fff;}
+  .hint{color:var(--grey);font-size:13px;margin:4px 0 0;}
+  .pill{display:inline-block;background:#e6f4f5;color:var(--turq);font-size:11px;font-weight:700;border-radius:4px;padding:2px 7px;margin-left:6px;}
+  .btnrow{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;}
+  button{background:var(--turq);color:#fff;border:0;border-radius:22px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:14px;}
+  button.ghost{background:#fff;color:var(--turq);border:1.5px solid var(--turq);}
+  .badge{background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--grey);}
+  .foot{color:var(--grey);font-size:12px;margin-top:26px;border-top:1px solid var(--line);padding-top:12px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="kick">Enterprise AI Implementation Specialist</div>
+  <h1>Module 2 · Mini Project — AI Needs Mapping Engagement</h1>
+  <div class="sub">Culminating deliverable of Module 2 · 5 artifacts + mock executive review · 60% of the module grade</div>
+</header>
+
+<div class="bar"><b id="count">0 / 7 planned</b><div class="track"><div class="fill" id="fill"></div></div></div>
+
+<div class="wrap">
+
+  <div class="card intro">
+    <h2>What you are producing</h2>
+    <p>You take a fictional client through an end-to-end AI Needs Mapping engagement and produce the artifact set a working Implementation Specialist delivers after a 4-week discovery: an AI Opportunity Map, a prioritized shortlist, a phased roadmap, an ROI hypothesis, and a 10-slide executive presentation. You then defend it in a 20-minute mock executive review.</p>
+    <p class="hint">Use this page to plan and track your five artifacts. Each planning box shows a green check when filled. The actual artifacts are built in Excel / Notion / PowerPoint and submitted to your shared folder, this page is your cockpit, not the submission.</p>
+  </div>
+
+  <div class="card req" id="client">
+    <h2>Your client &amp; engagement stance</h2>
+    <label>Case pack assigned</label>
+    <select data-req>
+      <option value="">Select your case…</option>
+      <option>NorthRiver Holdings — real-estate investment firm</option>
+      <option>Helix BioSupply — EU B2B medical-device distributor (regulated)</option>
+      <option>Camden Foods — family-owned packaged-foods manufacturer</option>
+    </select>
+    <label>Engagement data-handling stance (front-of-submission memo)</label>
+    <textarea data-req placeholder="Which tools may touch client data, at what sensitivity tier? What did you anonymize before using a consumer AI account, and how? (Slide 18 rule.)"></textarea>
+    <p class="hint">Work within the case pack: 5 interview transcripts, org chart, systems landscape, CEO mandate. Do not invent new departments or stakeholders.</p>
+  </div>
+
+  <div class="card req" id="a1">
+    <h2>Artifact 1 · AI Opportunity Map <span class="pill">40%</span></h2>
+    <ul>
+      <li>12 to 20 opportunity cards, covering at least 4 of the 5 departments.</li>
+      <li>Each card: ID, Process, Pain (traced to an interview quote), Root Cause (5-Whys / Fishbone), Opportunity, Solution Category (Agent / Automation / BI / Document AI), Tools (April 2026 catalog), Data Sensitivity, Effort, Value, Owner/Sponsor, <b>Pain Owner</b>, Source Interview.</li>
+      <li>At least 3 cards trace to <b>inferred</b> pains (behavior described but not flagged). Process-Redesign cards need an As-Is swimlane; dominant People/Process/Policy/Data branches need a Fishbone.</li>
+      <li>Format: Notion / Airtable / Excel export. Not PDF or image.</li>
+    </ul>
+    <label>My plan for Artifact 1 (departments, tool, how I will hit 12+ cards and 3 inferred pains)</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="a2">
+    <h2>Artifact 2 · Prioritized Shortlist <span class="pill">15%</span></h2>
+    <ul>
+      <li>Top 5 opportunities with full card detail plus Rationale, Sequencing, Dependencies, and 90-day Success criteria.</li>
+      <li>At least one Quick Win (Phase 1) and one Strategic (Phase 2).</li>
+      <li>Name which of the Four Plays (Tie Break, Domain Weight, Pet Project, All 5s/All 1s) governed any calibration, with the rule pre-declared before scoring.</li>
+    </ul>
+    <label>My plan for Artifact 2 (prioritization method + likely Four Play)</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="a3">
+    <h2>Artifact 3 · 90-Day Roadmap <span class="pill">15%</span></h2>
+    <ul>
+      <li>Phase 1 (next 90 days): the 5 Quick Wins with dates and named owners.</li>
+      <li>Phase 2 (months 4-9): strategic builds with quarterly milestones.</li>
+      <li>Phase 3 (months 10+): foundational tracks (single source of truth, master data, mobility, paperless).</li>
+      <li>Critical-path dependencies + a milestone-quarter view. Format: visual (Mermaid / Lucidchart / Miro / Copilot Gantt). Include the source file.</li>
+    </ul>
+    <label>My plan for Artifact 3 (tool + phase headlines)</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="a4">
+    <h2>Artifact 4 · ROI Hypothesis <span class="pill">15%</span></h2>
+    <ul>
+      <li>Top 3 opportunities. Show the four-component math end to end: cost baseline (hours × headcount × loaded labor + rework + tooling), expected savings (25-30% demo-to-production buffer), investment (build + license + change management), payback month.</li>
+      <li>Three KPIs each (leading / lagging / guardrail) and a best/base/worst sensitivity.</li>
+      <li>Plus a one-page <b>Qualitative ROI Memo</b> for one opportunity, using one of the eight patterns (Risk Reduction, Employee Experience, Burnout Reduction, Brand Reputation, Learning Velocity, Optionality, Innovation Signaling, Error Reduction).</li>
+      <li>Format: Excel with working formulas (Copilot in Excel), one sheet per opportunity. No pasted values.</li>
+    </ul>
+    <label>My plan for Artifact 4 (top-3 picks + which qualitative pattern)</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="a5">
+    <h2>Artifact 5 · 10-Slide Executive Presentation <span class="pill">15%</span></h2>
+    <ul>
+      <li>Wawiwa Executive Pattern: Cover, Vision, Findings (top 3 patterns), Recommendations (top 5 + one-line ROI), Roadmap, Costs (with break-even), Next steps. Exactly 10 slides, no appendix.</li>
+      <li>Name a real <b>AIBP candidate</b> from the case pack (Sacred Triangle scoring + 20-40% FTE) as the in-house person who carries the work forward. You are the external Specialist; the AIBP is different.</li>
+      <li>Forward references: one line on the Center of Excellence (governance) and one naming the InfoSec interface for your highest-sensitivity opportunity.</li>
+      <li>Prep for the mock review with the "skeptical CFO" AI Q&amp;A simulation.</li>
+    </ul>
+    <label>My plan for Artifact 5 (headline vision + named AIBP candidate)</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="ailog">
+    <h2>AI Usage Log <span class="w">required in your submission folder</span></h2>
+    <p class="hint">Using AI is required, not penalized, but document it. For each: tool, prompt, output accepted / edited / discarded, and why. Un-validated AI output presented as your own analysis is grounds for a failing grade.</p>
+    <label>Start your log (add rows as you work)</label>
+    <textarea data-req placeholder="Tool | Prompt | Accepted / Edited / Discarded | Why&#10;e.g., NotebookLM | synthesize 5 transcripts into pains | Edited | invented a quote; removed it"></textarea>
+  </div>
+
+  <details>
+    <summary>Reference · Rubric &amp; submission logistics</summary>
+    <table>
+      <tr><th>Dimension</th><th>Strong</th></tr>
+      <tr><td>Card Quality — Pain Owner</td><td>Every card names a specific Pain Owner, distinct from Owner/Sponsor.</td></tr>
+      <tr><td>ROI — Quantitative</td><td>All four components with calibrated assumptions; 3-case sensitivity; payback month named.</td></tr>
+      <tr><td>ROI — Qualitative Defense</td><td>One full memo using a named pattern, calibrated language, "why dollars don't capture it".</td></tr>
+      <tr><td>Executive Deck — AIBP Naming</td><td>Named AIBP candidate with Sacred Triangle scoring and time allocation.</td></tr>
+      <tr><td>Behavior elicitation</td><td>At least 3 cards trace to inferred (not stated) pains, with quotes.</td></tr>
+    </table>
+    <p class="hint">Deadline: 14 days after the final Module 2 session. Naming: EAI-M02-MiniProject-[StudentName]-[Artifact].[ext]. Late: -5%/day, not accepted after 7 days without arrangement. Mock review sign-up within 7 days of submission.</p>
+  </details>
+
+  <div class="card" style="border-left-color:var(--gold)">
+    <h2>Pre-submission checklist</h2>
+    <div class="chk"><input type="checkbox"><span>Engagement memo with a data-handling stance is at the front of the submission.</span></div>
+    <div class="chk"><input type="checkbox"><span>Opportunity Map has 12-20 cards, 4+ departments, a Pain Owner on every card, 3+ inferred pains.</span></div>
+    <div class="chk"><input type="checkbox"><span>Shortlist names the Four Play used, with the rule pre-declared.</span></div>
+    <div class="chk"><input type="checkbox"><span>ROI workbook shows the four-component math with working formulas + a qualitative memo.</span></div>
+    <div class="chk"><input type="checkbox"><span>Deck is exactly 10 slides and names a real AIBP candidate.</span></div>
+    <div class="chk"><input type="checkbox"><span>AI Usage Log records validation decisions (accepted / edited / discarded + why).</span></div>
+    <p class="hint">The checklist is your own gate; it is not scored, but the rubric checks each item.</p>
+  </div>
+
+  <div class="btnrow">
+    <button onclick="copyPlan()">Copy my project plan</button>
+    <button class="ghost" onclick="window.print()">Print / Save as PDF</button>
+    <span class="badge" id="copied"></span>
+  </div>
+
+  <div class="foot">Wawiwa Tech · Enterprise AI Implementation Specialist · Module 2 Mini Project · Interactive planning cockpit. Runs entirely in your browser; nothing is submitted or stored on a server.</div>
+</div>
+
+<script>
+  var cards=[].slice.call(document.querySelectorAll('.card.req'));
+  function filled(el){ return (el.value||'').trim()!==''; }
+  function refresh(){
+    var done=0;
+    cards.forEach(function(card){
+      var reqs=[].slice.call(card.querySelectorAll('[data-req]'));
+      var ok=reqs.every(filled);
+      card.classList.toggle('done', ok);
+      if(ok) done++;
+    });
+    document.getElementById('count').textContent=done+' / '+cards.length+' planned';
+    document.getElementById('fill').style.width=(done/cards.length*100)+'%';
+  }
+  document.addEventListener('input', refresh);
+  document.addEventListener('change', refresh);
+  function copyPlan(){
+    var out=[];
+    cards.forEach(function(card){
+      out.push('== '+card.querySelector('h2').textContent.replace(/\s+/g,' ').trim()+' ==');
+      [].slice.call(card.querySelectorAll('label')).forEach(function(l){
+        var f=l.nextElementSibling;
+        if(f && (f.tagName==='INPUT'||f.tagName==='TEXTAREA'||f.tagName==='SELECT')) out.push(l.textContent+': '+(f.value||''));
+      });
+      out.push('');
+    });
+    var text=out.join('\n');
+    var note=document.getElementById('copied');
+    if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){note.textContent='Copied to clipboard.';},function(){fallback(text,note);}); }
+    else fallback(text,note);
+  }
+  function fallback(text,note){ var t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();try{document.execCommand('copy');note.textContent='Copied.';}catch(e){note.textContent='Select all and copy.';}document.body.removeChild(t); }
+  refresh();
+</script>
+</body>
+</html>

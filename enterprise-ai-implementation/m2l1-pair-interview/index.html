@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EAI M2 · Lesson 1 — Pair Interview</title>
+<style>
+  :root{--navy:#1F2C36;--turq:#0097A7;--red:#EE3124;--grey:#6F7A8A;--card:#F5F7F8;--green:#2E8B57;--ink:#243b4a;--line:#E1E6EA;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#fff;line-height:1.5;}
+  header{background:var(--navy);color:#fff;padding:22px 26px;}
+  .kick{color:#8fd4dc;font-size:13px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;}
+  h1{margin:4px 0 2px;font-size:23px;}
+  .sub{color:#c7d2d8;font-size:14px;}
+  .wrap{max-width:900px;margin:0 auto;padding:20px 22px 70px;}
+  .bar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:10px 22px;z-index:5;display:flex;align-items:center;gap:12px;}
+  .bar .track{flex:1;height:9px;background:#e9edf0;border-radius:6px;overflow:hidden;}
+  .bar .fill{height:100%;width:0;background:var(--turq);transition:width .3s;}
+  .bar b{color:var(--navy);font-size:13px;white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--turq);border-radius:10px;padding:16px 18px;margin:16px 0;position:relative;}
+  .card h2{margin:0 0 6px;font-size:17px;color:var(--navy);}
+  .card.req::after{content:"○";position:absolute;top:14px;right:16px;font-size:20px;color:#c3ccd2;}
+  .card.req.done::after{content:"✓";color:var(--green);font-weight:800;}
+  .intro{border-left-color:var(--red);}
+  label{display:block;font-weight:600;font-size:13px;margin:10px 0 3px;color:var(--navy);}
+  input[type=text],textarea,select{width:100%;border:1px solid #cdd6dc;border-radius:7px;padding:8px 10px;font:inherit;font-size:14px;background:#fff;}
+  textarea{min-height:52px;resize:vertical;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;}
+  .row>div{flex:1;min-width:180px;}
+  details{background:#fff;border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:6px 12px;}
+  summary{cursor:pointer;font-weight:700;color:var(--navy);padding:4px 0;}
+  details p{margin:6px 0;font-size:14px;}
+  .tag{display:inline-block;background:#e6f4f5;color:var(--turq);font-size:11px;font-weight:700;border-radius:4px;padding:2px 7px;margin-left:6px;}
+  .hint{color:var(--grey);font-size:13px;margin:4px 0 0;}
+  .persona b{color:var(--navy);}
+  .btnrow{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;}
+  button{background:var(--turq);color:#fff;border:0;border-radius:22px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:14px;}
+  button.ghost{background:#fff;color:var(--turq);border:1.5px solid var(--turq);}
+  .foot{color:var(--grey);font-size:12px;margin-top:26px;border-top:1px solid var(--line);padding-top:12px;}
+  .badge{background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--grey);}
+</style>
+</head>
+<body>
+<header>
+  <div class="kick">Enterprise AI Implementation Specialist</div>
+  <h1>Module 2 · Lesson 1 — Diagnosing Pains: The Pair Interview</h1>
+  <div class="sub">45 minutes · Work in pairs · Diagnose before you solve</div>
+</header>
+
+<div class="bar"><b id="count">0 / 6 sections done</b><div class="track"><div class="fill" id="fill"></div></div></div>
+
+<div class="wrap">
+
+  <div class="card intro">
+    <h2>How this works</h2>
+    <p>You will run a 30-minute mock discovery interview in pairs. One of you plays a NorthRiver persona (stay in character); the other plays the Implementation Specialist and runs the interview using the five-category frame. Then the Specialist fills in the Interview Log below. Use the reference cards as needed. The goal is to surface pains, name who owns them, and hear what the persona did <i>not</i> flag.</p>
+    <p class="hint">Reference cards do not need to be filled. The six numbered sections do, each shows a green check when complete.</p>
+  </div>
+
+  <div class="card" style="border-left-color:#B89B5E">
+    <h2>Reference · The five persona cards</h2>
+    <p class="hint">The persona player reads only their own card and stays in character.</p>
+    <details class="persona"><summary>A · Sarah Chen — CFO, NorthRiver Holdings</summary>
+      <p><b>Background:</b> 47, CPA, joined 2019 from real-estate accounting. Tired but committed.</p>
+      <p><b>Voice:</b> direct, well-prepared, occasionally exasperated; pushes back on vague questions.</p>
+      <p><b>Pains to surface:</b> 14-day month-end close; three accounting environments (Acumen 7, Acumen 9, QuickBooks); audit flagged six vendor-master inconsistencies; Q1 bondholder presentation stress; paper checks to 30% of vendors.</p>
+      <p><b>Posture:</b> pragmatic; analyst Henrik already uses ChatGPT; wants foundations fixed first.</p>
+    </details>
+    <details class="persona"><summary>B · Marcus Holloway — Head of Property Operations</summary>
+      <p><b>Background:</b> 61, institutional memory of the firm.</p>
+      <p><b>Voice:</b> starts with "so the way we do it is"; long pauses; tells stories; names properties.</p>
+      <p><b>Pains:</b> vendor master fragmented across 3 systems + Excel; Boston heating-failure incident (double-booked vendor) cost 40 units of rent; no central asset record; regional manager Anita holds the Northeast in memory and is near retirement.</p>
+      <p><b>Posture:</b> skeptical of generic AI; curious about AI that knows OUR properties; warms up if AI supports his judgment.</p>
+    </details>
+    <details class="persona"><summary>C · Diana Vasquez — Director of Leasing and Sales</summary>
+      <p><b>Background:</b> 43, ex-Salesforce admin, most digitally native on the team.</p>
+      <p><b>Voice:</b> confident, fast, metric-driven.</p>
+      <p><b>Pains:</b> lead intake from 6 portals + walk-ins; inconsistent CRM use across regions; 14-min response in PH vs 11-hour in NE; 6.5% vs 2.8% conversion; 84 properties' listing copy on a 2-person team.</p>
+      <p><b>Posture:</b> enthusiastic; already uses ChatGPT for listing copy; wants more.</p>
+    </details>
+    <details class="persona"><summary>D · Robert Pak — General Counsel</summary>
+      <p><b>Background:</b> 55, careful, slow to commit.</p>
+      <p><b>Voice:</b> measured, legalistic; "fact pattern", "risk profile"; long sentences.</p>
+      <p><b>Pains:</b> 800+ contracts in SharePoint with no metadata; manual Monday expiration scan (2-3 hrs); two contracts auto-renewed (one cost $40k); 30-contract review backlog.</p>
+      <p><b>Posture:</b> cautious; open to metadata extraction and search; closed to substantive review or redline.</p>
+    </details>
+    <details class="persona"><summary>E · Lin Zhao — Head of IT</summary>
+      <p><b>Background:</b> 36, three months into the role.</p>
+      <p><b>Voice:</b> direct, frustrated, technical; "fail the audit", "running on luck", "no source of truth".</p>
+      <p><b>Pains:</b> no SSO across 8+ systems; manual off-boarding leaks access; no master data layer; three disconnected ERPs; AI policy stuck in legal; 2 outsourced helpdesk staff; a September cyber audit she expects to fail.</p>
+      <p><b>Posture:</b> personally pro-AI, professionally worried about uncontrolled usage without policy.</p>
+    </details>
+  </div>
+
+  <div class="card" style="border-left-color:#B89B5E">
+    <h2>Reference · The five-category question frame</h2>
+    <p class="hint">Lead with "describe what you do" before "what hurts". Listen for value the interviewee did not name.</p>
+    <details><summary>1 · Existing structure and processes</summary><p>Walk me through your day. What did the team work on this morning? Which three tasks did you do most last week? Show me where the work lives. Then: where does it slow down or get redone?</p></details>
+    <details><summary>2 · Challenges and interfaces</summary><p>When did you last chase another team for something? How often does that repeat? Which interfaces feel heaviest? Where do things get lost across boundaries?</p></details>
+    <details><summary>3 · Systems and tools</summary><p>Open the system you use most, what did you click, copy, paste, or have to remember? What do you wish lived inside the tool? What makes you switch tools mid-task?</p></details>
+    <details><summary>4 · Management and control routines</summary><p>What meetings did you sit through? What reports did you produce or read? How long did the last monthly close take? Which routines are high-leverage vs overhead?</p></details>
+    <details><summary>5 · Improvements and opportunities</summary><p>Tell me about a time something went very well, and a time it went badly. If you had 20% time back on one thing, what would you do with it?</p></details>
+  </div>
+
+  <div class="card req" id="c1">
+    <h2>1 · Interview setup</h2>
+    <div class="row">
+      <div><label>Persona played</label><input type="text" data-req placeholder="e.g., B · Marcus Holloway"></div>
+      <div><label>Date</label><input type="text" data-req placeholder="2026-__-__"></div>
+      <div><label>Interview length (target 30 min)</label><input type="text" data-req placeholder="e.g., 28 min"></div>
+    </div>
+  </div>
+
+  <div class="card req" id="c2">
+    <h2>2 · Top three pains surfaced <span class="tag">verbatim quote where possible</span></h2>
+    <label>Pain 1</label><textarea data-req></textarea>
+    <label>Pain 2</label><textarea data-req></textarea>
+    <label>Pain 3</label><textarea data-req></textarea>
+    <label>Pain Owner for each (who actually feels it)</label>
+    <div class="row"><div><input type="text" data-req placeholder="Owner of pain 1"></div><div><input type="text" data-req placeholder="Owner of pain 2"></div><div><input type="text" data-req placeholder="Owner of pain 3"></div></div>
+  </div>
+
+  <div class="card req" id="c3">
+    <h2>3 · Follow-ups &amp; evidence</h2>
+    <label>Three follow-up questions you wish you had asked</label>
+    <textarea data-req placeholder="1.&#10;2.&#10;3."></textarea>
+    <label>Three quotes you would carry forward as evidence</label>
+    <textarea data-req placeholder="1.&#10;2.&#10;3."></textarea>
+  </div>
+
+  <div class="card req" id="c4">
+    <h2>4 · Sub-text observations</h2>
+    <label>Recurring phrases the persona used to describe pain</label>
+    <textarea data-req></textarea>
+    <label>Politics signals (who was named, who was left out, where they deflected)</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="c5">
+    <h2>5 · Reading between the lines (3 + 3)</h2>
+    <p class="hint">Inferred opportunities the interviewee did not name are the highest-leverage finds, and the most professional risk. Ground each in a quote.</p>
+    <label>Three behaviors the persona described but did not flag as a pain</label>
+    <textarea data-req placeholder="1.&#10;2.&#10;3."></textarea>
+    <label>Three inferred value opportunities (what could change if the behavior changed)</label>
+    <textarea data-req placeholder="1.&#10;2.&#10;3."></textarea>
+  </div>
+
+  <div class="card req" id="c6">
+    <h2>6 · AI synthesis &amp; critical eye</h2>
+    <p class="hint">Every AI artifact is a draft. Read it against the source, check for fabricated quotes or invented attributions, and decide whether you would sign your name to it.</p>
+    <div class="row">
+      <div><label>AI synthesis tool used</label><input type="text" data-req placeholder="e.g., NotebookLM"></div>
+      <div><label>Synthesis quality (your assessment, 1-5)</label>
+        <select data-req><option value="">Select…</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+    </div>
+    <label>What did you accept, edit, or discard from the AI output, and why?</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="btnrow">
+    <button onclick="copyLog()">Copy my interview log</button>
+    <button class="ghost" onclick="window.print()">Print / Save as PDF</button>
+    <span class="badge" id="copied"></span>
+  </div>
+
+  <div class="foot">Wawiwa Tech · Enterprise AI Implementation Specialist · Module 2, Lesson 1 · Interactive class practice. Runs entirely in your browser; nothing is submitted or stored on a server.</div>
+</div>
+
+<script>
+  var cards=[].slice.call(document.querySelectorAll('.card.req'));
+  function filled(el){ return (el.value||'').trim()!==''; }
+  function refresh(){
+    var done=0;
+    cards.forEach(function(card){
+      var reqs=[].slice.call(card.querySelectorAll('[data-req]'));
+      var ok=reqs.every(filled);
+      card.classList.toggle('done', ok);
+      if(ok) done++;
+    });
+    document.getElementById('count').textContent=done+' / '+cards.length+' sections done';
+    document.getElementById('fill').style.width=(done/cards.length*100)+'%';
+  }
+  document.addEventListener('input', refresh);
+  document.addEventListener('change', refresh);
+  function copyLog(){
+    var out=[];
+    cards.forEach(function(card){
+      out.push('== '+card.querySelector('h2').textContent.replace(/\s+/g,' ').trim()+' ==');
+      [].slice.call(card.querySelectorAll('label')).forEach(function(l){
+        var f=l.nextElementSibling;
+        if(f && (f.tagName==='INPUT'||f.tagName==='TEXTAREA'||f.tagName==='SELECT')){ out.push(l.textContent+': '+(f.value||'')); }
+        else{ // row of inputs
+          var box=l.nextElementSibling;
+          if(box && box.classList.contains('row')){ out.push(l.textContent+': '+[].slice.call(box.querySelectorAll('input,select,textarea')).map(function(i){return i.value;}).join(' | ')); }
+        }
+      });
+      // inputs directly in rows without preceding label handled above; also grab setup row inputs
+      out.push('');
+    });
+    var text=out.join('\n');
+    var note=document.getElementById('copied');
+    if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){note.textContent='Copied to clipboard.';},function(){fallback(text,note);}); }
+    else fallback(text,note);
+  }
+  function fallback(text,note){ var t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();try{document.execCommand('copy');note.textContent='Copied.';}catch(e){note.textContent='Select all and copy manually.';}document.body.removeChild(t); }
+  refresh();
+</script>
+</body>
+</html>
