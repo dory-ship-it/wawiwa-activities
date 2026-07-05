@@ -260,24 +260,59 @@
 .btn-print{background:#0097A7;color:#fff;}
 .btn-clear{background:#F5F7F8;color:#3A4555;border:1px solid #D0D5DA;}
 @media print{.controls{display:none;}}
+
+/* field coaching, requirement check, generated outputs (self-contained) */
+.guidance{margin:2px 0 8px;font-size:.85rem;}
+.guidance summary{cursor:pointer;color:#3E868F;font-weight:600;}
+.guidance p{margin:6px 0 0;background:#F5F7F8;border-left:3px solid #5AB3AA;border-radius:4px;padding:8px 10px;color:#3A4555;}
+#req-panel{border:1px solid #E6EAEE;border-radius:8px;padding:14px 16px;margin:10px 0 6px;}
+.req-item{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:.92rem;color:#3A4555;}
+.req-item .req-dot{font-weight:700;color:#B3261E;}
+.req-item.met{color:#14532D;}
+.req-item.met .req-dot{color:#16a34a;}
+.req-item .req-missing{display:block;font-size:.82rem;color:#B3261E;}
+.req-item.met .req-missing{display:none;}
+#generated-output{display:none;margin-top:24px;}
+#generated-output.visible{display:block;}
+.gen-page{border:1px solid #E6E6E8;border-radius:8px;padding:22px 26px;margin:14px 0;background:#fff;}
+.gen-page h3{font-family:'Roboto',sans-serif;color:#255777;margin:0 0 12px;}
+.gen-field{margin:0 0 12px;}
+.gen-field h4{margin:0 0 2px;font-size:.9rem;color:#255777;}
+.gen-field p{margin:0;white-space:pre-wrap;font-size:.92rem;color:#111827;}
+#pitch-script p{white-space:pre-wrap;}
+@media print{
+  .guidance,#req-panel,#req-title,#generated-output{display:none!important;}
+  body.print-summary .container>*{display:none!important;}
+  body.print-summary #generated-output{display:block!important;}
+  body.print-summary .gen-page{border:none;page-break-after:always;padding:0;}
+  body.print-summary #pitch-page{page-break-after:auto;}
+}
 </style>
 </head>
 <body>
 <div class="container" id="workspace">
 <header><div class="meta-info">Module 1 • Final Homework (Lesson 6)</div><h1>Final AI Implementation Canvas and Opening Pitch for Module 2</h1><div class="instructions"><strong>Instructions:</strong> The official closing homework of Module 1. Submit a final AI Implementation Canvas (up to 2 pages) and a 3-minute opening pitch plan for Module 2 (up to 1 page). Refine the draft from the in-class activity, do not start from scratch.</div></header>
 <h2 class="section-title">Part A · Final canvas (twelve fields)</h2>
-<div class="question-group"><label>Field 1 · Case name and business problem (one sentence; a figure if possible).</label><textarea rows="2" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
-<div class="question-group"><label>Field 2 · End user and usage context (primary and any secondary users).</label><textarea rows="2" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
-<div class="question-group"><label>Field 3 · AS-IS process summary (from the Lesson 4 map: trigger, main steps, handoffs).</label><textarea rows="3" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
-<div class="question-group"><label>Field 4 · AI intervention point (which step, and why there).</label><textarea rows="2" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
-<div class="question-group"><label>Field 5 · Proposed AI capability (what it does and does not do, in one sentence).</label><textarea rows="2" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
-<div class="question-group"><label>Field 6 · Data and knowledge sources + sensitivity (from Field 5 of the Lesson 4 map).</label><textarea rows="3" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
-<div class="question-group"><label>Field 7 · Architecture pattern (direct assistant / knowledge-based RAG / AI step in automation / process under approval), and any combination.</label><textarea rows="3" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
-<div class="question-group"><label>Field 8 · Build vs Buy decision and reasoning.</label><textarea rows="3" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
-<div class="question-group"><label>Field 9 · Structured system behavior (what to answer, what not, when to escalate).</label><textarea rows="3" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
-<div class="question-group"><label>Field 10 · Human control, escalation, and failure paths (at least three failure paths).</label><textarea rows="4" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
-<div class="question-group"><label>Field 11 · Success metric: baseline and target (from Field 8 of the Lesson 4 map).</label><textarea rows="2" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
-<div class="question-group"><label>Field 12 · Open questions and next validation steps (at least three real questions for Module 2).</label><textarea rows="3" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<div class="question-group"><label>Field 1 · Case name and business problem (one sentence; a figure if possible).</label><details class="guidance"><summary>Guidance</summary><p>One sentence: the case name plus the measurable pain.<br><em>Example: "Invoice triage at Acme: finance loses ~20 hours a week routing 500 supplier invoices by hand."</em></p></details><textarea id="f1" rows="2" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<div class="question-group"><label>Field 2 · End user and usage context (primary and any secondary users).</label><details class="guidance"><summary>Guidance</summary><p>Name the primary user and when they use it; add any secondary users.<br><em>Example: "Primary: AP clerks during morning invoice processing; secondary: procurement managers approving exceptions."</em></p></details><textarea id="f2" rows="2" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<div class="question-group"><label>Field 3 · AS-IS process summary (from the Lesson 4 map: trigger, main steps, handoffs).</label><details class="guidance"><summary>Guidance</summary><p>The trigger, then the main steps, then the handoffs.<br><em>Example: "Trigger: supplier email arrives. Steps: download, code to GL, match to PO, route. Handoff: approver signs off."</em></p></details><textarea id="f3" rows="3" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<div class="question-group"><label>Field 4 · AI intervention point (which step, and why there).</label><details class="guidance"><summary>Guidance</summary><p>Name the one step where AI enters, and why exactly there.<br><em>Example: "Step 2 (GL coding) — highest volume, repetitive, and mistakes are cheap to catch downstream."</em></p></details><textarea id="f4" rows="2" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<div class="question-group"><label>Field 5 · Proposed AI capability (what it does and does not do, in one sentence).</label><details class="guidance"><summary>Guidance</summary><p>One sentence with what it does AND what it does not do.<br><em>Example: "Suggests a GL code with a confidence score; it does not post entries or approve payments."</em></p></details><textarea id="f5" rows="2" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<div class="question-group"><label>Field 6 · Data and knowledge sources + sensitivity (from Field 5 of the Lesson 4 map).</label><details class="guidance"><summary>Guidance</summary><p>List each source with its sensitivity level.<br><em>Example: "PO database (internal), coding guidelines (internal), invoice PDFs (sensitive — contain bank details)."</em></p></details><textarea id="f6" rows="3" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<div class="question-group"><label>Field 7 · Architecture pattern (direct assistant / knowledge-based RAG / AI step in automation / process under approval), and any combination.</label><details class="guidance"><summary>Guidance</summary><p>Pick a pattern (or combination) and say why it fits.<br><em>Example: "AI step in automation, combined with knowledge-based RAG over the coding guidelines for rare cases."</em></p></details><textarea id="f7" rows="3" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<div class="question-group"><label>Field 8 · Build vs Buy decision and reasoning.</label><details class="guidance"><summary>Guidance</summary><p>State Build, Buy, Configure or Hybrid, plus a reasoning sentence.<br><em>Example: "Buy, because invoice coding is a mature vendor category and our volume does not justify a custom build."</em></p></details><textarea id="f8" rows="3" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<div class="question-group"><label>Field 9 · Structured system behavior (what to answer, what not, when to escalate).</label><details class="guidance"><summary>Guidance</summary><p>What it answers, what it refuses, and when it escalates.<br><em>Example: "Answers coding suggestions above 80% confidence; never changes amounts; escalates duplicates to a human."</em></p></details><textarea id="f9" rows="3" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<div class="question-group"><label>Field 10 · Human control, escalation, and failure paths (at least three failure paths).</label><details class="guidance"><summary>Guidance</summary><p>At least three failure paths, one per line, each with the human response.<br><em>Example: "Wrong code → weekly sample audit; low confidence → human queue; system down → manual fallback."</em></p></details><textarea id="f10" rows="4" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<div class="question-group"><label>Field 11 · Success metric: baseline and target (from Field 8 of the Lesson 4 map).</label><details class="guidance"><summary>Guidance</summary><p>One metric with a number: the baseline today and the target.<br><em>Example: "Coding time per invoice: baseline 6 minutes, target 2 minutes within 3 months."</em></p></details><textarea id="f11" rows="2" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<div class="question-group"><label>Field 12 · Open questions and next validation steps (at least three real questions for Module 2).</label><details class="guidance"><summary>Guidance</summary><p>At least three real questions, each ending with "?".<br><em>Example: "What does a coding error really cost? Which vendors pass security review? Who owns the review queue?"</em></p></details><textarea id="f12" rows="3" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
+<h2 class="section-title" id="req-title">Requirement check</h2>
+<div id="req-panel">
+<div class="req-item" id="rq-all"><span class="req-dot">✗</span><div><span class="req-label">All twelve canvas fields have an entry.</span><span class="req-missing"></span></div></div>
+<div class="req-item" id="rq-f8"><span class="req-dot">✗</span><div><span class="req-label">Field 8 · Names Build / Buy / Configure / Hybrid and gives a reasoning sentence.</span><span class="req-missing"></span></div></div>
+<div class="req-item" id="rq-f10"><span class="req-dot">✗</span><div><span class="req-label">Field 10 · Lists at least three failure paths.</span><span class="req-missing"></span></div></div>
+<div class="req-item" id="rq-f11"><span class="req-dot">✗</span><div><span class="req-label">Field 11 · Metric has a number, a baseline, and a target.</span><span class="req-missing"></span></div></div>
+<div class="req-item" id="rq-f12"><span class="req-dot">✗</span><div><span class="req-label">Field 12 · At least three open questions.</span><span class="req-missing"></span></div></div>
+</div>
 <h2 class="section-title">Part B · Opening pitch for Module 2 (3-minute plan, points not a script)</h2>
 <div class="question-group"><label>What is the problem?</label><textarea rows="2" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
 <div class="question-group"><label>Who is the user?</label><textarea rows="2" oninput="syncText(this)"></textarea><div class="print-text-output"></div></div>
@@ -296,12 +331,20 @@
 <label class="chk"><input type="checkbox"> <span>Metric with baseline and target.</span></label>
 <label class="chk"><input type="checkbox"> <span>At least three open questions for Module 2.</span></label>
 <label class="chk"><input type="checkbox"> <span>No sensitive or identifying information in the document.</span></label>
-<div class="controls"><button class="btn btn-print" onclick="exportToPDF()">Save as PDF</button><button class="btn btn-clear" onclick="clearAll()">Clear</button></div>
+<div id="generated-output">
+<h2 class="section-title">Generated outputs</h2>
+<div class="gen-page" id="gen-page1"><h3>AI Implementation Canvas — Summary (page 1 of 2)</h3><div id="gen-fields-1"></div></div>
+<div class="gen-page" id="gen-page2"><h3>AI Implementation Canvas — Summary (page 2 of 2)</h3><div id="gen-fields-2"></div></div>
+<div class="gen-page" id="pitch-page"><h3>3-Minute Pitch Script</h3><div id="pitch-script"></div></div>
+<div class="actions"><button class="btn btn-print" onclick="printSummary()">Save summary as PDF</button></div>
+</div>
+<div class="controls"><button class="btn btn-print" id="btn-generate" onclick="generateOutputs()">Generate Summary &amp; Pitch</button><button class="btn btn-print" onclick="exportToPDF()">Save as PDF</button><button class="btn btn-clear" onclick="clearAll()">Clear</button></div>
 </div>
 <script>
     function syncText(textarea) {
         const out = textarea.nextElementSibling;
         if (out && out.classList.contains('print-text-output')) out.innerText = textarea.value;
+        if (typeof updateRequirements === 'function') updateRequirements();
     }
     function toggleAccordion(caseId) {
         const card = document.getElementById(caseId);
@@ -327,6 +370,66 @@ function clearAll(){
   document.querySelectorAll('textarea').forEach(function(t){t.value='';syncText(t);});
   document.querySelectorAll('input[type=checkbox]').forEach(function(c){c.checked=false;});
 }
+
+/* --- live requirement check --- */
+function fieldVal(n){ var t=document.getElementById('f'+n); return t?t.value:''; }
+function setReq(id, ok, missing){
+  var item=document.getElementById(id);
+  item.classList.toggle('met', ok);
+  item.querySelector('.req-dot').textContent = ok ? '✓' : '✗';
+  item.querySelector('.req-missing').textContent = ok ? '' : missing;
+}
+function updateRequirements(){
+  var missing=[];
+  for(var i=1;i<=12;i++){ if(!fieldVal(i).trim()) missing.push('Field '+i); }
+  setReq('rq-all', missing.length===0, 'Still empty: '+missing.join(', ')+'.');
+  var t8=fieldVal(8);
+  var hasWord=/\b(build|buy|configure|hybrid)\b/i.test(t8);
+  var hasReason=t8.split(/[.!?\n]+/).some(function(s){ return s.trim().split(/\s+/).filter(Boolean).length>=5; });
+  var m8=[]; if(!hasWord)m8.push('name Build, Buy, Configure or Hybrid'); if(!hasReason)m8.push('add a reasoning sentence');
+  setReq('rq-f8', hasWord&&hasReason, 'Missing: '+m8.join(' and ')+'.');
+  var paths=fieldVal(10).split(/\n|;|•/).map(function(s){return s.trim();}).filter(Boolean);
+  setReq('rq-f10', paths.length>=3, paths.length+' of 3 failure paths listed (one per line).');
+  var t11=fieldVal(11);
+  var m11=[]; if(!/\d/.test(t11))m11.push('a number'); if(!/baseline/i.test(t11))m11.push('the word "baseline"'); if(!/target/i.test(t11))m11.push('the word "target"');
+  setReq('rq-f11', m11.length===0, 'Missing: '+m11.join(', ')+'.');
+  var q=(fieldVal(12).match(/\?/g)||[]).length;
+  setReq('rq-f12', q>=3, q+' of 3 questions found (end each with "?").');
+}
+
+/* --- generated outputs: 2-page summary + 3-minute pitch script --- */
+var CANVAS_LABELS=['Case name and business problem','End user and usage context','AS-IS process summary','AI intervention point','Proposed AI capability','Data and knowledge sources + sensitivity','Architecture pattern','Build vs Buy decision and reasoning','Structured system behavior','Human control, escalation, and failure paths','Success metric: baseline and target','Open questions and next validation steps'];
+function renderSummaryFields(holder, from, to){
+  holder.innerHTML='';
+  for(var i=from;i<=to;i++){
+    var d=document.createElement('div'); d.className='gen-field';
+    var h=document.createElement('h4'); h.textContent='Field '+i+' · '+CANVAS_LABELS[i-1];
+    var p=document.createElement('p'); p.textContent=fieldVal(i).trim()||'—';
+    d.appendChild(h); d.appendChild(p); holder.appendChild(d);
+  }
+}
+function generateOutputs(){
+  renderSummaryFields(document.getElementById('gen-fields-1'),1,6);
+  renderSummaryFields(document.getElementById('gen-fields-2'),7,12);
+  var parts=[['The problem',1],['The user',2],['The process today',3],['The AI capability',5],['The Build vs Buy decision',8],['Still to discover',12]];
+  var ps=document.getElementById('pitch-script'); ps.innerHTML='';
+  parts.forEach(function(pt){
+    var p=document.createElement('p');
+    var b=document.createElement('strong'); b.textContent=pt[0]+'. ';
+    p.appendChild(b); p.appendChild(document.createTextNode(fieldVal(pt[1]).trim()||'—'));
+    ps.appendChild(p);
+  });
+  var out=document.getElementById('generated-output');
+  out.classList.add('visible');
+  try{ out.scrollIntoView({behavior:'smooth'}); }catch(e){}
+}
+function printSummary(){
+  document.body.classList.add('print-summary');
+  window.print();
+  document.body.classList.remove('print-summary');
+}
+window.addEventListener('afterprint', function(){ document.body.classList.remove('print-summary'); });
+updateRequirements();
 </script>
 </body>
 </html>
