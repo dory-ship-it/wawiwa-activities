@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wawiwa · Lesson 3 Home Practice — 5 Additional Opportunity Cards</title>
+<style>
+:root{
+  --turq:#0097A7; --red:#EE3124; --char:#1F2C36; --slate:#3A4555; --slateL:#6F7A8A;
+  --card:#F5F7F8; --line:#E3E8EC; --amber:#F5A923; --green:#2E8B57; --purple:#6B46C1;
+  --tint:#EAF6F3;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--slate);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.5;font-size:15px}
+.container{max-width:900px;margin:0 auto;padding:26px 24px 60px}
+/* header */
+.masthead{display:flex;align-items:center;gap:14px;border-bottom:2px solid var(--red);
+  padding-bottom:14px;margin-bottom:18px}
+.logo{background:var(--red);color:#fff;font-weight:800;font-size:20px;letter-spacing:.5px;
+  padding:7px 12px;border-radius:3px;line-height:1}
+.mast-text .kick{color:var(--turq);font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+.mast-text h1{margin:2px 0 0;font-size:21px;color:var(--char);font-weight:800;line-height:1.2}
+.tag-home{display:inline-block;background:var(--purple);color:#fff;font-size:11px;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:20px;margin-left:auto;white-space:nowrap}
+/* intro */
+.instructions{background:var(--tint);border-left:5px solid var(--turq);border-radius:0 8px 8px 0;
+  padding:14px 18px;margin:0 0 22px}
+.instructions h2{margin:0 0 6px;font-size:14px;color:var(--turq);text-transform:uppercase;letter-spacing:.6px}
+.instructions p{margin:6px 0}
+.meta-row{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--slateL);margin-top:8px}
+.meta-row b{color:var(--char)}
+/* sections */
+.section-title{display:flex;align-items:center;gap:10px;margin:30px 0 12px;font-size:17px;
+  color:var(--char);font-weight:800;border-bottom:1px solid var(--line);padding-bottom:7px}
+.section-title .n{background:var(--turq);color:#fff;width:26px;height:26px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex:0 0 auto}
+.guidance{color:var(--slateL);font-size:13.5px;margin:0 0 10px}
+.step{margin:0 0 14px}
+.step-lead{font-weight:600;color:var(--char)}
+/* prompt card */
+.prompt{background:var(--char);border-radius:10px;padding:0;margin:12px 0 16px;overflow:hidden;border:1px solid #10202b}
+.prompt-head{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#16242e;color:#fff}
+.prompt-head .ai{background:var(--purple);color:#fff;font-size:10px;font-weight:800;letter-spacing:.5px;
+  padding:2px 7px;border-radius:4px;text-transform:uppercase}
+.prompt-head .ttl{font-size:13px;font-weight:700}
+.prompt-head .copy{margin-left:auto;background:var(--turq);color:#fff;border:0;border-radius:6px;
+  padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.prompt-head .copy:active{transform:translateY(1px)}
+.prompt pre{margin:0;padding:14px;color:#E7EEF1;font-family:"SF Mono",Consolas,Menlo,monospace;
+  font-size:12.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.prompt .why{padding:0 14px 12px;color:#9FB2BC;font-size:11.5px}
+/* fields */
+label.fl{display:block;font-weight:600;color:var(--char);font-size:13.5px;margin:12px 0 4px}
+input.tf,textarea.ta,select.sf{width:100%;border:1px solid var(--line);border-radius:7px;padding:9px 11px;
+  font:inherit;font-size:14px;color:var(--char);background:#fff}
+textarea.ta{min-height:80px;resize:vertical}
+input.tf:focus,textarea.ta:focus,select.sf:focus{outline:none;border-color:var(--turq);box-shadow:0 0 0 3px var(--tint)}
+.print-only{display:none}
+/* builder table */
+table.build{width:100%;border-collapse:collapse;margin:8px 0 6px;font-size:13px}
+table.build th{background:var(--turq);color:#fff;text-align:left;padding:7px 9px;font-weight:700;font-size:12px}
+table.build td{border:1px solid var(--line);padding:5px 6px;vertical-align:top}
+table.build input,table.build textarea,table.build select{width:100%;border:0;padding:5px;font:inherit;font-size:13px;background:transparent;resize:vertical}
+table.build input:focus,table.build textarea:focus,table.build select:focus{outline:2px solid var(--tint)}
+.rowdel{background:none;border:0;color:var(--red);font-size:16px;cursor:pointer;line-height:1}
+.req-cell.miss input{background:#FCEBEA}
+.addbtn{background:var(--tint);color:var(--turq);border:1px dashed var(--turq);border-radius:7px;
+  padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;margin:4px 0 10px}
+/* ROI */
+.roi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin:10px 0}
+.roi-out{background:var(--card);border-radius:8px;padding:12px 14px;margin:10px 0;display:grid;
+  grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.roi-out .k{font-size:11px;color:var(--slateL);text-transform:uppercase;letter-spacing:.5px}
+.roi-out .v{font-size:22px;font-weight:800;color:var(--turq);margin-top:3px}
+/* checklist */
+.checklist{background:var(--card);border-radius:10px;padding:14px 18px;margin:16px 0}
+.checklist h3{margin:0 0 4px;font-size:14px;color:var(--char);text-transform:uppercase;letter-spacing:.5px}
+.chkbar{height:8px;background:#E3E8EC;border-radius:20px;overflow:hidden;margin:8px 0 12px}
+.chkbar > i{display:block;height:100%;width:0;background:var(--green);transition:width .25s}
+.chk{display:flex;align-items:flex-start;gap:9px;margin:7px 0;font-size:14px;color:var(--char)}
+.chk input{width:17px;height:17px;margin-top:1px;accent-color:var(--green);flex:0 0 auto}
+.capstone-note{background:#F3EEFB;border-left:5px solid var(--purple);border-radius:0 8px 8px 0;
+  padding:12px 16px;margin:16px 0;font-size:13.5px}
+.callout{background:#FFF7E6;border-left:5px solid var(--amber);border-radius:0 8px 8px 0;padding:11px 16px;margin:14px 0;font-size:13.5px}
+/* controls */
+.controls{position:sticky;bottom:0;background:rgba(255,255,255,.96);border-top:1px solid var(--line);
+  padding:12px 0;margin-top:26px;display:flex;gap:12px;flex-wrap:wrap;backdrop-filter:blur(4px)}
+.btn{border:0;border-radius:8px;padding:11px 20px;font-weight:800;font-size:14px;cursor:pointer}
+.btn-print{background:var(--turq);color:#fff}
+.btn-clear{background:#fff;color:var(--slate);border:1px solid var(--line)}
+.foot{margin-top:22px;color:var(--slateL);font-size:11.5px;text-align:center}
+a{color:var(--turq)}
+@media (max-width:640px){.roi-grid,.roi-out{grid-template-columns:1fr 1fr}.tag-home{margin-left:0}}
+/* ---------- PRINT ---------- */
+@page{margin:14mm}
+@media print{
+  .controls,.copy,.addbtn,.rowdel,.tag-home{display:none !important}
+  body{font-size:12px}
+  .container{max-width:none;padding:0}
+  .prompt{border:1px solid #999}
+  input.tf,textarea.ta,select.sf,table.build input,table.build textarea,table.build select{border-color:#bbb}
+  .print-only{display:block}
+  textarea.ta{min-height:0}
+  .section-title{break-after:avoid}
+  .prompt,.checklist,.roi-out,table.build{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="masthead">
+  <div class="logo">wawiwa</div>
+  <div class="mast-text">
+    <div class="kick">Enterprise AI Implementation Specialist · Module 2</div>
+    <h1>5 Additional Opportunity Cards</h1>
+  </div>
+  <span class="tag-home">Home Practice</span>
+</div>
+<div class="instructions"><h2>How this works</h2><p>After Lesson 3 you grow your opportunity register to 15 cards and pressure-test it with two AI checks.</p><div class="meta-row"><span><b>Time:</b> 75 min</span><span><b>Deliverable:</b> 15 total opportunity cards, classification + sensitivity notes</span><span><b>Grading:</b> feeds the capstone (not graded alone)</span></div></div><div class="callout"><b>Rubric reminder.</b> Every card must name a <b>Pain Owner</b> (the role who actually feels the pain), distinct from the Owner / Sponsor who funds the work. Cards without a Pain Owner are graded <b>Weak</b>.</div><div class="section-title"><span class="n">1</span>Add 5 more opportunity cards</div><p class="guidance">Use pains from your second-department mapping. The Pain Owner field is required — empty cells are highlighted.</p><table class="build"><thead><tr><th>Pain / opportunity</th><th>Pain Owner</th><th>Sponsor</th><th>Solution category</th><th>Notes</th><th></th></tr></thead><tbody id="l3_cards" class=" req-watch"><tr class="tmpl" style="display:none"><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Assisted">Assisted</option><option value="Automated">Automated</option><option value="Augmented">Augmented</option><option value="Autonomous">Autonomous</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Assisted">Assisted</option><option value="Automated">Automated</option><option value="Augmented">Augmented</option><option value="Autonomous">Autonomous</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Assisted">Assisted</option><option value="Automated">Automated</option><option value="Augmented">Augmented</option><option value="Autonomous">Autonomous</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Assisted">Assisted</option><option value="Automated">Automated</option><option value="Augmented">Augmented</option><option value="Autonomous">Autonomous</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Assisted">Assisted</option><option value="Automated">Automated</option><option value="Augmented">Augmented</option><option value="Autonomous">Autonomous</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Assisted">Assisted</option><option value="Automated">Automated</option><option value="Augmented">Augmented</option><option value="Autonomous">Autonomous</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr></tbody></table><button class="addbtn" onclick="addRow('l3_cards')">+ Add row</button><div class="section-title"><span class="n">2</span>AI classification check</div><div class="prompt"><div class="prompt-head"><span class="ai">AI prompt</span><span class="ttl">Classify the register</span><button class="copy" onclick="copyPrompt(this)">Copy</button></div><pre>Here are my 15 opportunity cards. Classify each into one of four solution categories: Assisted, Automated, Augmented, Autonomous. For each, give one sentence of reasoning. List any card where you are uncertain.</pre><div class="why">Compare with your manual classification and note disagreements below.</div></div><label class="fl">Disagreements between the AI and your manual classification</label><textarea class="ta" data-print="p_l3_class" placeholder=""></textarea><span class="print-only" id="p_l3_class">—</span><div class="section-title"><span class="n">3</span>AI sensitivity-flag check</div><div class="prompt"><div class="prompt-head"><span class="ai">AI prompt</span><span class="ttl">Data-sensitivity scan</span><button class="copy" onclick="copyPrompt(this)">Copy</button></div><pre>Scan these interview transcripts and opportunity cards for data-sensitivity concerns: personal data, financial records, legal or HR content, or anything that should not leave the organization. For each card, flag the sensitivity level and what control it would need.</pre><div class="why">Update any card where the AI surfaces a concern you missed.</div></div><label class="fl">Cards you updated after the sensitivity scan</label><textarea class="ta" data-print="p_l3_sens" placeholder=""></textarea><span class="print-only" id="p_l3_sens">—</span><div class="checklist"><h3>Bring to class tomorrow</h3><div class="chkbar"><i></i></div><label class="chk"><input type="checkbox">15 total opportunity cards</label><label class="chk"><input type="checkbox">Every card has a Pain Owner</label><label class="chk"><input type="checkbox">AI classification run, disagreements noted</label><label class="chk"><input type="checkbox">AI sensitivity scan run, cards updated</label></div>
+<div class="controls">
+  <button class="btn btn-print" onclick="savePDF()">⬇ Save as PDF / Submit</button>
+  <button class="btn btn-clear" onclick="clearAll()">Clear all</button>
+</div>
+<div class="foot">Wawiwa Tech · Enterprise AI Implementation Specialist · Module 2 Home Practice. Fill in, then Save as PDF and submit in your LMS.</div>
+</div>
+<script>
+/* copy prompt to clipboard, with fallback */
+function copyPrompt(btn){
+  var pre=btn.closest('.prompt').querySelector('pre');
+  var txt=pre.innerText;
+  function done(){var o=btn.innerText;btn.innerText='Copied ✓';setTimeout(function(){btn.innerText=o;},1400);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback);}
+  else{fallback();}
+  function fallback(){var r=document.createRange();r.selectNode(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy');done();}catch(e){}s.removeAllRanges();}
+}
+/* mirror text inputs into a print-only span so answers show in the PDF */
+function mirror(el){var t=el.getAttribute('data-print');if(!t)return;var o=document.getElementById(t);if(o)o.textContent=el.value||'—';}
+document.addEventListener('input',function(e){
+  if(e.target.matches('[data-print]'))mirror(e.target);
+  if(e.target.closest('.req-watch'))validateReq(e.target.closest('tr'));
+  updateChecklist();roiCalc();
+});
+document.addEventListener('change',function(e){updateChecklist();});
+/* repeatable builder rows */
+function addRow(tblId){
+  var tb=document.getElementById(tblId);var tmpl=tb.querySelector('tr.tmpl');
+  var r=tmpl.cloneNode(true);r.classList.remove('tmpl');r.style.display='';
+  tb.appendChild(r);
+}
+function delRow(btn){var tr=btn.closest('tr');var tb=tr.parentNode;
+  if(tb.querySelectorAll('tr:not(.tmpl)').length>1||true){tr.remove();}updateChecklist();}
+/* required-field highlight (e.g. Pain Owner) */
+function validateReq(tr){tr.querySelectorAll('.req-cell').forEach(function(td){
+  var i=td.querySelector('input,textarea,select');td.classList.toggle('miss',i&&!i.value.trim());});}
+/* checklist progress */
+function updateChecklist(){document.querySelectorAll('.checklist').forEach(function(cl){
+  var b=cl.querySelectorAll('.chk input');var n=cl.querySelectorAll('.chk input:checked').length;
+  var bar=cl.querySelector('.chkbar > i');if(bar&&b.length)bar.style.width=(100*n/b.length)+'%';});}
+/* ROI calculator (present only on L5) */
+function roiCalc(){
+  var g=document.getElementById('roi');if(!g)return;
+  function num(id){var e=document.getElementById(id);return e?parseFloat(e.value)||0:0;}
+  var save=num('roi_save'), buf=save*0.75, inv=num('roi_inv');
+  var payback = buf>0 ? (inv/(buf/12)) : 0;
+  var setv=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  setv('out_buf', buf? ('$'+Math.round(buf).toLocaleString()) : '—');
+  setv('out_pay', (buf>0&&inv>0)? (payback<1?'<1':Math.ceil(payback))+' mo' : '—');
+  var base=num('roi_inv'); var best=num('roi_save')*0.9, worst=num('roi_save')*0.5;
+  setv('out_sens', save? ('$'+Math.round(worst).toLocaleString()+' – $'+Math.round(best).toLocaleString()) : '—');
+}
+function savePDF(){window.print();}
+function clearAll(){if(!confirm('Clear all your entries on this page?'))return;
+  document.querySelectorAll('input.tf,textarea.ta,select.sf,table.build input,table.build textarea,table.build select').forEach(function(e){if(e.type==='checkbox')e.checked=false;else e.value='';});
+  document.querySelectorAll('[data-print]').forEach(mirror);updateChecklist();roiCalc();}
+window.addEventListener('DOMContentLoaded',function(){updateChecklist();roiCalc();
+  document.querySelectorAll('[data-print]').forEach(mirror);});
+</script>
+</body>
+</html>
