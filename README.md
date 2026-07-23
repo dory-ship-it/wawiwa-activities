@@ -52,5 +52,6 @@ link the repository root; it only shows a neutral notice.
 |---|---|---|---|
 | Enterprise AI Implementation | M1 / L1 | Diagnosing Use Cases: Class Workbook (in-class) | `enterprise-ai-implementation/m1l1-diagnosing-use-cases/` |
 | Enterprise AI Implementation | M1 / L1 | Homework 1 Builder: Use-Case Diagnosis (home practice) | `enterprise-ai-implementation/m1l1-homework-use-case-diagnosis/` |
+| Enterprise AI Implementation | M1 / L1 | The Diagnosis Call: branching scenario game (in-class / practice) | `enterprise-ai-implementation/m1l1-diagnosis-call-game/` |
 
 _© Wawiwa Tech | Confidential_
