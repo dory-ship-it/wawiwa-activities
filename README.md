@@ -53,5 +53,18 @@ link the repository root; it only shows a neutral notice.
 | Enterprise AI Implementation | M1 / L1 | Diagnosing Use Cases: Class Workbook (in-class) | `enterprise-ai-implementation/m1l1-diagnosing-use-cases/` |
 | Enterprise AI Implementation | M1 / L1 | Homework 1 Builder: Use-Case Diagnosis (home practice) | `enterprise-ai-implementation/m1l1-homework-use-case-diagnosis/` |
 | Enterprise AI Implementation | M1 / L1 | The Diagnosis Call: branching scenario game (in-class / practice) | `enterprise-ai-implementation/m1l1-diagnosis-call-game/` |
+| Enterprise AI Implementation | M1 / L1 | Diagnosing an AI Use Case (Practice Studio) | `enterprise-ai-implementation/eai-m1l1-practice/` |
+| Enterprise AI Implementation | M1 / L2 | The Model's Limits (Practice Studio) | `enterprise-ai-implementation/eai-m1l2-practice/` |
+| Enterprise AI Implementation | M1 / L3 | The Work Spec and Structured Behavior (Practice Studio) | `enterprise-ai-implementation/eai-m1l3-practice/` |
+| Enterprise AI Implementation | M1 / L4 | Completing the Process Map Toward AI Architecture (Practice Studio) | `enterprise-ai-implementation/eai-m1l4-asis-map/` |
+| Enterprise AI Implementation | M1 / L5 | AI Architecture and Patterns (Practice Studio) | `enterprise-ai-implementation/eai-m1l5-practice/` |
+| Enterprise AI Implementation | M1 / L6 | AI Implementation Canvas and Opening Pitch (Practice Studio) | `enterprise-ai-implementation/eai-m1-final-canvas/` |
+| Enterprise AI Implementation | M1 / L6 | Final Homework front door (Practice Studio) | `enterprise-ai-implementation/eai-m1-final-frontdoor/` |
+| Enterprise AI Implementation | M1 | The Implementer's Path: Build vs Buy decision game, 2D (Practice Studio) | `enterprise-ai-implementation/eai-m1-decision-game/` |
+| Enterprise AI Implementation | M1 | The Implementer's Path: Build vs Buy decision game, 3D (Practice Studio) | `enterprise-ai-implementation/eai-m1-decision-game-3d/` |
+| Enterprise AI Implementation | M1 self-study | Stretch: Argue Against a Bad AI Fit (Practice Studio) | `enterprise-ai-implementation/eai-m1-s1-practice/` |
+| Enterprise AI Implementation | M1 self-study | Stretch: Critique a Weaker Canvas (Practice Studio) | `enterprise-ai-implementation/eai-m1-s7-practice/` |
+| Enterprise AI Implementation | M1 self-study | Support: The Three Lanes, One at a Time (Practice Studio) | `enterprise-ai-implementation/eai-m1-u3-practice/` |
+| Enterprise AI Implementation | M1 self-study | Support: Turn a Description Into a Decision (Practice Studio) | `enterprise-ai-implementation/eai-m1-u6-practice/` |
 
 _© Wawiwa Tech | Confidential_
