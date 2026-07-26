@@ -66,5 +66,16 @@ link the repository root; it only shows a neutral notice.
 | Enterprise AI Implementation | M1 self-study | Stretch: Critique a Weaker Canvas (Practice Studio) | `enterprise-ai-implementation/eai-m1-s7-practice/` |
 | Enterprise AI Implementation | M1 self-study | Support: The Three Lanes, One at a Time (Practice Studio) | `enterprise-ai-implementation/eai-m1-u3-practice/` |
 | Enterprise AI Implementation | M1 self-study | Support: Turn a Description Into a Decision (Practice Studio) | `enterprise-ai-implementation/eai-m1-u6-practice/` |
+| Enterprise AI Implementation | M1 / L1 | Diagnosing an AI Use Case — CLASS (Practice Studio) | `enterprise-ai-implementation/eai-m1l1-class/` |
+| Enterprise AI Implementation | M1 / L1 | Homework: Diagnose Your Own AI Use Case — HOME, personal path + resources | `enterprise-ai-implementation/eai-m1l1-home/` |
+| Enterprise AI Implementation | M1 / L2 | The Model's Limits — CLASS (Practice Studio) | `enterprise-ai-implementation/eai-m1l2-class/` |
+| Enterprise AI Implementation | M1 / L2 | Homework: Add a Language Model Layer to Your Use Case — HOME, personal path + resources | `enterprise-ai-implementation/eai-m1l2-home/` |
+| Enterprise AI Implementation | M1 / L3 | The Work Spec and Structured Behavior — CLASS, no home practice (Practice Studio) | `enterprise-ai-implementation/eai-m1l3-class/` |
+| Enterprise AI Implementation | M1 / L4 | AS-IS Process Mapping (In Class) — CLASS (Practice Studio) | `enterprise-ai-implementation/eai-m1l4-class/` |
+| Enterprise AI Implementation | M1 / L4 | Completing the Process Map Toward AI Architecture — HOME, personal path | `enterprise-ai-implementation/eai-m1l4-home/` |
+| Enterprise AI Implementation | M1 / L5 | AI Architecture and Patterns — CLASS (Practice Studio) | `enterprise-ai-implementation/eai-m1l5-class/` |
+| Enterprise AI Implementation | M1 / L5 | Homework: Complete Your AI Architecture — HOME, personal path + resources | `enterprise-ai-implementation/eai-m1l5-home/` |
+| Enterprise AI Implementation | M1 / L6 | AI Implementation Canvas for Your Own Use Case (In Class) — CLASS (Practice Studio) | `enterprise-ai-implementation/eai-m1l6-class/` |
+| Enterprise AI Implementation | M1 / L6 | AI Implementation Canvas and Opening Pitch — HOME, personal path | `enterprise-ai-implementation/eai-m1l6-home/` |
 
 _© Wawiwa Tech | Confidential_
