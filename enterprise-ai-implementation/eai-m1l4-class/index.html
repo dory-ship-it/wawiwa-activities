@@ -1838,6 +1838,41 @@ button.m-node { cursor: pointer; }
 /* the scene head and the mentor already carry the label and the help line */
 .m-console .field-head { display: none; }
 .m-console .examples { margin-left: 0; }
+
+/* single-column step: the instructions card sits on top of the answer, and
+   the AI coach only appears (inside the editor) after Check or Ask */
+.m-workgrid-single { grid-template-columns: 1fr; }
+.m-instructions {
+  background: #fff;
+  border: 1px solid #dbe7e9;
+  border-left: 5px solid var(--m-teal);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin: 0 0 16px;
+}
+.m-instructions-k {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--m-teal);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.m-instructions-p { margin: 0; font-size: 1.06rem; line-height: 1.6; color: #1e2b33; }
+.m-instructions-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--m-teal);
+  background: #eef7f5;
+  border-radius: 999px;
+  padding: 5px 12px;
+}
+.m-instructions-star { color: var(--m-gold); }
 .m-lead-strong { font-weight: 700; color: var(--m-navy); font-size: 1.12rem; }
 .m-fix-link { background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: inherit; }
 
@@ -5608,13 +5643,37 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       className: 'm-scene-wide'
     });
 
-    var grid = el('div', 'm-workgrid');
+    var grid = el('div', 'm-workgrid m-workgrid-single');
     scene.body.appendChild(grid);
 
     var console_ = el('div', 'm-console');
-    if (stop.section.instruction) {
+    // The section instruction is orientation, not per-field guidance: show it
+    // once on the first stop, not repeated identically on every stop.
+    if (idx === 0 && stop.section.instruction) {
       console_.appendChild(el('p', 'm-console-hint', stop.section.instruction));
     }
+
+    // The step's instructions, clearly labelled and placed above the answer.
+    // This is authored guidance, not the AI coach; the coach only speaks after
+    // the student clicks Check this field or Ask the coach, and its feedback
+    // renders inside the editor card below, on demand.
+    var helpText = stop.item.help || '';
+    if (helpText) {
+      var instr = el('div', 'm-instructions');
+      var ik = el('div', 'm-instructions-k');
+      ik.appendChild(el('span', null, 'Instructions'));
+      instr.appendChild(ik);
+      instr.appendChild(el('p', 'm-instructions-p', helpText));
+      var pcfg = state.missionPoints;
+      var chip = el('div', 'm-instructions-reward');
+      chip.appendChild(el('span', 'm-instructions-star', '★'));
+      chip.appendChild(el('span', null, 'Reward: +'
+        + (stop.kind === 'field' ? pcfg.field_ready : pcfg.prompt_ready)
+        + ' Insight when this stop locks in'));
+      instr.appendChild(chip);
+      console_.appendChild(instr);
+    }
+
     var editor;
     if (stop.kind === 'field') {
       editor = state.editors[stop.id] || C.fieldEditor(state, activity, stop.item, {
@@ -5629,18 +5688,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     state.editors[stop.id] = editor;
     console_.appendChild(editor.card);
     grid.appendChild(console_);
-
-    // the mentor coach column: the per-scene line is the field's own help
-    // text; the reactions stay the existing feedback blocks, unchanged
-    var coach = M.buildCoachPanel({
-      subtitle: 'on this stop',
-      line: stop.item.help || stop.section.instruction || 'Write it in your own words, then check it.'
-    });
-    var cfg = state.missionPoints;
-    coach.goal('Mission goal', 'Earn the Ready tag on this stop. Short and concrete beats long and vague.');
-    coach.reward('Reward: +' + (stop.kind === 'field' ? cfg.field_ready : cfg.prompt_ready)
-      + ' Insight when this stop locks in');
-    grid.appendChild(coach.node);
 
     var foot = scene.foot();
     var prev = el('button', 'btn btn-ghost', 'Back');
