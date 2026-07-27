@@ -4041,11 +4041,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
   }
 
-  /* the poster hero: navy band, wordmark, kicker, title, score, level */
+  /* the poster hero: navy band, wordmark, kicker, title, score, level.
+     data.title overrides the default heading, which is how a scoped export
+     (one case instead of the whole mission) names itself. */
   function drawHero(doc, activity, data) {
     var meta = activity.meta || {};
     var kicker = clean([meta.program, meta.module, meta.lesson].filter(Boolean).join('  ·  '));
-    var title = clean('Mission Report  ·  ' + (meta.title || ''));
+    var title = clean(data.title || ('Mission Report  ·  ' + (meta.title || '')));
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(15);
@@ -4180,9 +4182,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return doc;
   }
 
-  function fileName(activity) {
+  function fileName(activity, slug) {
     var id = ((activity.meta || {}).id || 'activity').replace(/[^a-z0-9-]/gi, '-');
-    return 'Wawiwa-' + id + '-report.pdf';
+    var part = slug ? '-' + String(slug).replace(/[^a-z0-9-]/gi, '-') : '';
+    return 'Wawiwa-' + id + part + '-report.pdf';
   }
 
   /* the one public entry: draw and download. Works inside an iframe embed;
@@ -4192,7 +4195,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (!jsPdfCtor()) { window.print(); return; } // vendored lib missing: last resort
     var doc = buildDoc(activity, data || {});
     try {
-      doc.save(fileName(activity));
+      doc.save(fileName(activity, data && data.fileSlug));
     } catch (e) {
       try { window.open(doc.output('bloburl'), '_blank'); } catch (e2) { /* blocked twice: give up quietly */ }
     }
@@ -4397,10 +4400,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return cfg;
   }
 
-  function buildMedallion(total) {
+  function buildMedallion(total, label) {
     var CIRC = 138.2;
     var wrap = C.svgEl(
-      '<svg viewBox="0 0 52 52" width="46" height="46" class="m-medal-svg" role="img" aria-label="Mission progress">'
+      '<svg viewBox="0 0 52 52" width="46" height="46" class="m-medal-svg" role="img" aria-label="'
+      + (label || 'Mission progress') + '">'
       + '<circle class="m-medal-track" cx="26" cy="26" r="22" fill="none" stroke-width="5"/>'
       + '<circle class="m-medal-fill" cx="26" cy="26" r="22" fill="none" stroke-width="5" stroke-linecap="round"'
       + ' stroke-dasharray="' + CIRC + '" stroke-dashoffset="' + CIRC + '" transform="rotate(-90 26 26)"/>'
@@ -4468,7 +4472,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     chip.appendChild(el('span', null, 'Insight'));
     hudRight.appendChild(chip);
 
-    var medallion = buildMedallion(opts.total || 1);
+    var medallion = buildMedallion(opts.total || 1, opts.progressLabel);
+    if (opts.progressLabel) medallion.node.title = opts.progressLabel;
     hudRight.appendChild(medallion.node);
 
     var journey = null;
@@ -5583,9 +5588,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
  * Mission Board rail in any order. A section screen shows the section title,
  * the section instruction (the case scenario) at the top, then every field of
  * that section stacked: the field label, its labeled INSTRUCTIONS card, and
- * its answer editor. Insight points and the medallion stay keyed to fields; a
- * reward toast lands each Ready field. The mission ends on a review scene and
- * a designed one-page report export.
+ * its answer editor. Insight points stay keyed to fields; the header medallion
+ * counts Ready fields on a single-case activity and completed cases on a
+ * multi-case one. A reward toast lands each Ready field. The mission ends on a
+ * review scene and a designed one-page report export; on a multi-case activity
+ * each case also exports its own scoped report.
  *
  * Mechanics are identical to before and stay field-keyed underneath: the same
  * field editors, local checks, live coach, review (levelBanner is where
@@ -5706,10 +5713,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
     state.lastPts = pts;
 
-    var ready = state.items.filter(function (entry) {
-      return itemTag(entry, activity, state) === 'Ready';
-    });
-    state.shell.hud.medallion.set(ready.length, state.items.length);
+    if (state.multiCase) {
+      // the header ring counts CASES COMPLETED (a case is complete when all
+      // its fields are Ready), never the raw field total across all cases
+      var doneCases = workStops(state.stops).filter(function (stop) {
+        return sectionStatus(stop, activity, state).done;
+      }).length;
+      state.shell.hud.medallion.set(doneCases, workStops(state.stops).length);
+    } else {
+      var ready = state.items.filter(function (entry) {
+        return itemTag(entry, activity, state) === 'Ready';
+      });
+      state.shell.hud.medallion.set(ready.length, state.items.length);
+    }
 
     // section tiles (the rail, now a secondary jump list) and the picker's
     // case cards share the same aggregate status
@@ -5756,6 +5772,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       state.barCount.textContent = state.multiCase
         ? st2.answered + ' of ' + st2.total + ' answered in this case'
         : st2.answered + '/' + st2.total + ' answered';
+      if (state.caseBackBtn && state.multiCase) {
+        // once every field of the case is Ready, the way out reads as a finish
+        state.caseBackBtn.textContent = st2.done ? 'Done with this case' : 'Back to cases';
+      }
     }
   }
 
@@ -5834,10 +5854,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (activity.meta.estimated_minutes) {
       chips.appendChild(el('span', 'meta-chip', 'About ' + activity.meta.estimated_minutes + ' minutes'));
     }
-    chips.appendChild(el('span', 'meta-chip',
-      work.length === 1 ? '1 stop' : work.length + ' stops'));
-    chips.appendChild(el('span', 'meta-chip',
-      state.items.length === 1 ? '1 field' : state.items.length + ' fields'));
+    if (state.multiCase) {
+      // cases, never the raw field total across all of them (the v2c rule)
+      chips.appendChild(el('span', 'meta-chip', work.length + ' cases'));
+    } else {
+      chips.appendChild(el('span', 'meta-chip',
+        work.length === 1 ? '1 stop' : work.length + ' stops'));
+      chips.appendChild(el('span', 'meta-chip',
+        state.items.length === 1 ? '1 field' : state.items.length + ' fields'));
+    }
     chips.appendChild(el('span', 'meta-chip' + (C.liveOn() ? ' meta-chip-live' : ''),
       C.liveOn() ? 'Live coach' : 'Local coach'));
     scene.body.appendChild(chips);
@@ -6038,6 +6063,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       backToCases.type = 'button';
       backToCases.addEventListener('click', function () { openStop(PICKER_ID); });
       foot.appendChild(backToCases);
+      state.caseBackBtn = backToCases;
     } else {
       var prev = el('button', 'btn btn-ghost', 'Back');
       prev.type = 'button';
@@ -6051,6 +6077,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     foot.appendChild(barWrap);
     state.barCount = el('span', 'm-bar-count', '');
     foot.appendChild(state.barCount);
+
+    if (state.multiCase) {
+      // each case is independently finishable: a footer-free PDF of just
+      // this case, so a student can complete one case, save it, and stop
+      // without visiting the global Mission report (which stays available)
+      var casePdf = el('button', 'btn btn-teal');
+      casePdf.type = 'button';
+      casePdf.appendChild(C.svgEl(C.SVG.download, 'btn-icon'));
+      casePdf.appendChild(el('span', null, 'Save this case as PDF'));
+      casePdf.addEventListener('click', function () {
+        window.PracticeExport.saveReport(activity, caseReportData(activity, state, stop));
+      });
+      foot.appendChild(casePdf);
+    }
 
     var next = el('button', 'btn btn-primary',
       idx + 1 < work.length ? (state.multiCase ? 'Next case' : 'Next stop') : 'Finish the mission');
@@ -6212,6 +6252,37 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     M.buildReportSheet(activity, reportData(activity, state));
   }
 
+  /* the per-case export: one section only (the case scenario, then each of
+     its fields with the student's answer and its tag). Rides the same jsPDF
+     path as the full Mission report (footer-free, embed-safe), scoped by
+     data.title and data.fileSlug. */
+  function caseReportData(activity, state, stop) {
+    var cfg = state.missionPoints;
+    var cards = [];
+    var scenario = (stop.section.instruction || '').trim();
+    if (scenario) {
+      cards.push({ title: 'The case', rows: [{ value: scenario }] });
+    }
+    var pts = 0, max = 0;
+    stop.items.forEach(function (entry, i) {
+      var text = (state.answers[entry.id] || '').trim();
+      cards.push({
+        num: i + 1,
+        title: entry.item.label,
+        tag: itemTag(entry, activity, state),
+        rows: [{ value: text || 'Not answered yet.', empty: !text }]
+      });
+      max += itemPoints(entry, cfg);
+      if (itemTag(entry, activity, state) === 'Ready') pts += itemPoints(entry, cfg);
+    });
+    return {
+      title: 'Case Report  ·  ' + shortTitle(stop.section),
+      fileSlug: stop.id,
+      scoreline: { points: pts, max: max },
+      sections: [{ title: stop.section.title, cards: cards }]
+    };
+  }
+
   /* ---------- the format ---------- */
 
   function renderCoachedCanvas(rootNode, activity, checks, state) {
@@ -6233,7 +6304,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       });
     }
 
-    state.shell = M.buildShell(rootNode, activity, { total: state.items.length });
+    state.shell = M.buildShell(rootNode, activity, state.multiCase
+      ? { total: workStops(state.stops).length, progressLabel: 'Cases completed' }
+      : { total: state.items.length });
     var stage = M.buildStage(state.shell.main);
     state.shell.main.classList.add('m-main-rail');
 
@@ -6281,6 +6354,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }
 
   C.registerFormat('coached_canvas', renderCoachedCanvas);
+
+  // a small pure surface for the deterministic tests (none of it touches
+  // the DOM): stop collection, per-section status, the per-case export data
+  window.PracticeCoachedCanvas = {
+    collectStops: collectStops,
+    sectionStatus: sectionStatus,
+    caseReportData: caseReportData
+  };
 })();
 
 /*
