@@ -2468,6 +2468,7 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
   var DEFAULT_STRINGS = {
     empty_field: 'This field is still empty. Fill it in; the canvas needs all of its fields.',
     empty_point: 'This point has no answer yet.',
+    non_answer: 'This reads as a placeholder, not an answer. Write your answer in your own words.',
     unknown_check_fail: 'Give this field more substance: a couple of concrete sentences, not a fragment.',
     pii_warning: 'Careful: this looks like {what}. Do not enter real identifying data; generalize instead (CRM system, internal policy, employee).',
     ready_note: 'Solid on the local checks.',
@@ -2501,6 +2502,35 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     for (var i = 0; i < terms.length; i++) {
       if (low.indexOf(String(terms[i]).toLowerCase()) !== -1) return true;
     }
+    return false;
+  }
+
+  /* ---------- universal non-answer guard ---------- */
+  /* An obvious non-answer never earns Ready, regardless of how permissive a
+     field's own rules are (a title rule like min_words: 2 happily passes
+     "I don't know"). This is the offline safety net: known fillers, a single
+     token repeated, or no real word content at all always land on Revise.
+     Normalization keeps letters of every script, so answers in Hebrew or
+     Spanish are never mistaken for gibberish. */
+
+  var NON_ANSWER_FILLERS = {
+    'i dont know': 1, 'dont know': 1, 'idk': 1, 'dunno': 1, 'no idea': 1,
+    'not sure': 1, 'n a': 1, 'na': 1, 'none': 1, 'nothing': 1, 'tbd': 1,
+    'test': 1, 'asdf': 1, 'xxx': 1
+  };
+
+  function isNonAnswer(text) {
+    var key = (text || '').toLowerCase()
+      .replace(/[‘’']/g, '')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
+      .trim();
+    if (!key) return true; // punctuation or symbols only ("-", "...", "???")
+    if (NON_ANSWER_FILLERS[key]) return true;
+    var tokens = key.split(' ');
+    var first = tokens[0];
+    var allSame = tokens.every(function (t) { return t === first; });
+    if (allSame && tokens.length > 1) return true; // "asdf asdf", "test test test"
+    if (allSame && /^(.)\1+$/.test(first)) return true; // "aaaaaa", "xxxxx"
     return false;
   }
 
@@ -2651,6 +2681,17 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
       return result;
     }
 
+    // the universal guard runs before any per-field rule: a filler or
+    // gibberish answer is Revise even when the field's own rules would pass
+    if (isNonAnswer(trimmed)) {
+      result.tag = TAGS.REVISE;
+      result.messages.push(strings.non_answer);
+      var isHomeGuard = !!(activity && activity.meta && activity.meta.context === 'home');
+      result.routing = isHomeGuard ? routingLine(field, activity, strings) : null;
+      result.resources = isHomeGuard ? weakResources(field, activity) : [];
+      return result;
+    }
+
     var defs = (checksFile && checksFile.definitions) || {};
     var checkIds = field.quality_checks || [];
     var failures = 0;
@@ -2710,6 +2751,11 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
       result.empty = true;
       result.tag = TAGS.REVISE;
       result.messages.push(strings.empty_point);
+      return result;
+    }
+    if (isNonAnswer(trimmed)) {
+      result.tag = TAGS.REVISE;
+      result.messages.push(strings.non_answer);
       return result;
     }
     var n = words(trimmed).length;
@@ -2981,6 +3027,7 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     TAGS: TAGS,
     evalRule: evalRule,
     detectPII: detectPII,
+    isNonAnswer: isNonAnswer,
     evaluateField: evaluateField,
     evaluatePoint: evaluatePoint,
     evaluateDecision: evaluateDecision,
@@ -3436,6 +3483,44 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function clearAnswers(activity) {
     try { localStorage.removeItem(storageKey(activity)); } catch (e) { /* ignore */ }
+    try { localStorage.removeItem(coachKey(activity)); } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- coach verdicts (the live coach is authoritative) ---------- */
+  /* When the live coach is on, its verdict drives the field's status, tile,
+     and points, not the local rules. Each verdict is stored with the exact
+     answer text it judged, so editing the answer invalidates it and the
+     silent local fallback takes over until the coach is asked again. */
+
+  function coachKey(activity) {
+    return 'practice-studio:' + activity.meta.id + ':coach';
+  }
+
+  function loadCoachVerdicts(activity) {
+    try {
+      var raw = localStorage.getItem(coachKey(activity));
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function recordCoachVerdict(state, fieldId, tag) {
+    if (!tag) return;
+    state.coachVerdicts[fieldId] = {
+      tag: tag,
+      text: (state.answers[fieldId] || '').trim()
+    };
+    try {
+      localStorage.setItem(coachKey(state.activity), JSON.stringify(state.coachVerdicts));
+    } catch (e) { /* storage blocked: the session still works */ }
+  }
+
+  // the authoritative tag for a field: the coach's verdict while it matches
+  // the current answer text, the local deterministic tag otherwise
+  function coachTagFor(state, fieldId) {
+    if (!liveOn()) return null;
+    var v = (state.coachVerdicts || {})[fieldId];
+    if (v && v.tag && v.text === (state.answers[fieldId] || '').trim()) return v.tag;
+    return null;
   }
 
   /* ---------- tags + feedback blocks (one voice for local and live) ---------- */
@@ -3576,37 +3661,61 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       return result;
     };
     ta.addEventListener('blur', function () {
-      if ((ta.value || '').trim()) check();
+      // with the coach on, no local box is painted on blur: the coach is the
+      // one voice the student sees, and the local check stays silent
+      if (!liveOn() && (ta.value || '').trim()) check();
     });
 
     var btnRow = el('div', 'btn-row');
-    var btn = el('button', 'btn btn-primary', opts.checkLabel || 'Check this field');
-    btn.type = 'button';
-    btn.addEventListener('click', check);
-    btnRow.appendChild(btn);
-
     var coachOut = null;
     if (liveOn()) {
+      // the live coach is authoritative: Check this field asks the coach and
+      // its verdict is the only one shown. The local deterministic check is
+      // the silent fallback, rendered only when the coach is capped or down.
       coachOut = el('div', 'feedback');
-      btnRow.appendChild(coachButton(state, 'Ask the coach', function (b) {
+      var askBtn = el('button', 'btn btn-coach');
+      askBtn.type = 'button';
+      askBtn.appendChild(svgEl(SVG.spark, 'btn-icon'));
+      askBtn.appendChild(el('span', null, opts.checkLabel || 'Check this field'));
+      askBtn.addEventListener('click', function () {
         if (!(state.answers[field.id] || '').trim()) { check(); return; }
-        b.disabled = true;
+        if (window.PracticeLive.capReached()) {
+          coachFallback(state, coachOut, { message: 'token_cap' }, check);
+          return;
+        }
+        askBtn.disabled = true;
         coachThinking(coachOut);
         window.PracticeLive.coachField(field, activity, state.answers[field.id])
           .then(function (r) {
-            b.disabled = false;
+            askBtn.disabled = false;
             coachBlock(coachOut, r.text, r.tag);
-            // one voice: a weak verdict surfaces the same "read this" links
-            if (r.tag && r.tag !== 'Ready') {
+            // never a contradictory pair: any earlier fallback box goes away
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+            // "read this" links stay a home-only feature (the class/home gate)
+            var isHome = !!(activity && activity.meta && activity.meta.context === 'home');
+            if (isHome && r.tag && r.tag !== 'Ready') {
               appendResources(coachOut, FB.resolveResources(field.resources, activity));
             }
+            card.classList.toggle('card-ready', r.tag === 'Ready');
+            recordCoachVerdict(state, field.id, r.tag);
             if (r.tag && opts.onResult) opts.onResult({ tag: r.tag, empty: false });
           })
           .catch(function (err) {
-            b.disabled = false;
+            askBtn.disabled = false;
             coachFallback(state, coachOut, err, check);
           });
-      }));
+      });
+      // deliberately NOT in state.coachButtons: the token-cap path disables
+      // that list, but this is the field's only Check button, so a capped
+      // session must keep it alive — each further click lands in the
+      // capReached() branch and runs the local check with the offline note.
+      btnRow.appendChild(askBtn);
+    } else {
+      var btn = el('button', 'btn btn-primary', opts.checkLabel || 'Check this field');
+      btn.type = 'button';
+      btn.addEventListener('click', check);
+      btnRow.appendChild(btn);
     }
     card.appendChild(btnRow);
     card.appendChild(feedback);
@@ -3761,6 +3870,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       activity: activity,
       checks: checks,
       answers: loadAnswers(activity),
+      coachVerdicts: loadCoachVerdicts(activity),
       checkFns: {},
       coachButtons: []
     };
@@ -3813,6 +3923,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     levelBanner: levelBanner,
     rubricBox: rubricBox,
     saveAnswers: saveAnswers,
+    clearAnswers: clearAnswers,
+    coachTagFor: coachTagFor,
     registerFormat: registerFormat,
     boot: boot
   };
@@ -5088,7 +5200,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     clearBtn.type = 'button';
     clearBtn.addEventListener('click', function () {
       if (window.confirm('Delete everything you wrote on this device? This cannot be undone.')) {
-        try { localStorage.removeItem('practice-studio:' + activity.meta.id); } catch (e) { /* ignore */ }
+        C.clearAnswers(activity);
         window.location.reload();
       }
     });
@@ -5541,6 +5653,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var text = (state.answers[entry.id] || '').trim();
     if (!text) return null;
     if (entry.kind === 'field') {
+      // the live coach is authoritative: while its verdict matches the
+      // current answer text it drives the tile, points, and report tag;
+      // the deterministic check is the silent fallback otherwise
+      var coachTag = C.coachTagFor(state, entry.id);
+      if (coachTag) return coachTag;
       return FB.evaluateField(entry.item, text, state.checks, activity).tag;
     }
     return FB.evaluatePoint(entry.item, text, state.checks).tag;
@@ -5980,7 +6097,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       out.textContent = '';
       var evalResult = FB.evaluateActivity(activity, state.checks, state.answers);
       state.lastEval = evalResult; // the designed export shows the result too
-      Object.keys(state.checkFns).forEach(function (id) { state.checkFns[id](); });
+      // with the coach on, the review never repaints local boxes into the
+      // editors: the coach's verdicts stay the one voice on each field
+      if (!C.liveOn()) {
+        Object.keys(state.checkFns).forEach(function (id) { state.checkFns[id](); });
+      }
       refreshProgress(activity, state);
       renderPath();
 
@@ -6029,7 +6150,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     clearBtn.type = 'button';
     clearBtn.addEventListener('click', function () {
       if (window.confirm('Delete everything you wrote on this device? This cannot be undone.')) {
-        try { localStorage.removeItem('practice-studio:' + activity.meta.id); } catch (e) { /* ignore */ }
+        C.clearAnswers(activity);
         window.location.reload();
       }
     });
@@ -8627,7 +8748,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       clearBtn.type = 'button';
       clearBtn.addEventListener('click', function () {
         if (window.confirm('Delete everything you wrote on this device? This cannot be undone.')) {
-          try { localStorage.removeItem('practice-studio:' + activity.meta.id); } catch (e) { /* ignore */ }
+          C.clearAnswers(activity);
           window.location.reload();
         }
       });

@@ -1895,6 +1895,87 @@ button.m-node { cursor: pointer; }
   line-height: 1.3;
 }
 .m-lead-strong { font-weight: 700; color: var(--m-navy); font-size: 1.12rem; }
+
+/* the case picker: all cases on one page as selectable cards */
+.m-picker-overall {
+  margin: 4px 0 14px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--m-teal);
+}
+.m-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 14px;
+}
+.m-case-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  background: #f4f7f8;
+  border: 1.5px solid #dfe9ea;
+  border-radius: 16px;
+  padding: 16px 18px;
+  cursor: pointer;
+  font-family: 'Assistant', 'Roboto', sans-serif;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.m-case-card:hover {
+  background: #fff;
+  border-color: var(--m-turquoise);
+  box-shadow: 0 10px 24px rgba(37, 87, 119, 0.14);
+  transform: translateY(-2px);
+}
+.m-case-head { display: flex; align-items: center; gap: 10px; }
+.m-case-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex: 0 0 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  background: var(--m-navy);
+  color: #fff;
+}
+.m-case-title {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 800;
+  font-size: 1.02rem;
+  line-height: 1.25;
+  color: var(--m-navy);
+}
+.m-case-preview {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: #4a5b63;
+}
+.m-case-st {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7c85;
+  background: #e8eeef;
+  border-radius: 999px;
+  padding: 4px 11px;
+  margin-top: auto;
+}
+.m-case-active { border-color: var(--m-turquoise); background: #fff; }
+.m-case-active .m-case-st { color: var(--m-teal); background: #e2f1ee; }
+.m-case-done { border-color: var(--m-turquoise); background: #f2faf8; }
+.m-case-done .m-case-num { background: var(--m-turquoise); }
+.m-case-done .m-case-st { color: #fff; background: var(--m-turquoise); }
 .m-fix-link { background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: inherit; }
 
 .m-support-note {
@@ -2387,6 +2468,7 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
   var DEFAULT_STRINGS = {
     empty_field: 'This field is still empty. Fill it in; the canvas needs all of its fields.',
     empty_point: 'This point has no answer yet.',
+    non_answer: 'This reads as a placeholder, not an answer. Write your answer in your own words.',
     unknown_check_fail: 'Give this field more substance: a couple of concrete sentences, not a fragment.',
     pii_warning: 'Careful: this looks like {what}. Do not enter real identifying data; generalize instead (CRM system, internal policy, employee).',
     ready_note: 'Solid on the local checks.',
@@ -2420,6 +2502,35 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     for (var i = 0; i < terms.length; i++) {
       if (low.indexOf(String(terms[i]).toLowerCase()) !== -1) return true;
     }
+    return false;
+  }
+
+  /* ---------- universal non-answer guard ---------- */
+  /* An obvious non-answer never earns Ready, regardless of how permissive a
+     field's own rules are (a title rule like min_words: 2 happily passes
+     "I don't know"). This is the offline safety net: known fillers, a single
+     token repeated, or no real word content at all always land on Revise.
+     Normalization keeps letters of every script, so answers in Hebrew or
+     Spanish are never mistaken for gibberish. */
+
+  var NON_ANSWER_FILLERS = {
+    'i dont know': 1, 'dont know': 1, 'idk': 1, 'dunno': 1, 'no idea': 1,
+    'not sure': 1, 'n a': 1, 'na': 1, 'none': 1, 'nothing': 1, 'tbd': 1,
+    'test': 1, 'asdf': 1, 'xxx': 1
+  };
+
+  function isNonAnswer(text) {
+    var key = (text || '').toLowerCase()
+      .replace(/[‘’']/g, '')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
+      .trim();
+    if (!key) return true; // punctuation or symbols only ("-", "...", "???")
+    if (NON_ANSWER_FILLERS[key]) return true;
+    var tokens = key.split(' ');
+    var first = tokens[0];
+    var allSame = tokens.every(function (t) { return t === first; });
+    if (allSame && tokens.length > 1) return true; // "asdf asdf", "test test test"
+    if (allSame && /^(.)\1+$/.test(first)) return true; // "aaaaaa", "xxxxx"
     return false;
   }
 
@@ -2570,6 +2681,17 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
       return result;
     }
 
+    // the universal guard runs before any per-field rule: a filler or
+    // gibberish answer is Revise even when the field's own rules would pass
+    if (isNonAnswer(trimmed)) {
+      result.tag = TAGS.REVISE;
+      result.messages.push(strings.non_answer);
+      var isHomeGuard = !!(activity && activity.meta && activity.meta.context === 'home');
+      result.routing = isHomeGuard ? routingLine(field, activity, strings) : null;
+      result.resources = isHomeGuard ? weakResources(field, activity) : [];
+      return result;
+    }
+
     var defs = (checksFile && checksFile.definitions) || {};
     var checkIds = field.quality_checks || [];
     var failures = 0;
@@ -2629,6 +2751,11 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
       result.empty = true;
       result.tag = TAGS.REVISE;
       result.messages.push(strings.empty_point);
+      return result;
+    }
+    if (isNonAnswer(trimmed)) {
+      result.tag = TAGS.REVISE;
+      result.messages.push(strings.non_answer);
       return result;
     }
     var n = words(trimmed).length;
@@ -2900,6 +3027,7 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     TAGS: TAGS,
     evalRule: evalRule,
     detectPII: detectPII,
+    isNonAnswer: isNonAnswer,
     evaluateField: evaluateField,
     evaluatePoint: evaluatePoint,
     evaluateDecision: evaluateDecision,
@@ -3355,6 +3483,44 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function clearAnswers(activity) {
     try { localStorage.removeItem(storageKey(activity)); } catch (e) { /* ignore */ }
+    try { localStorage.removeItem(coachKey(activity)); } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- coach verdicts (the live coach is authoritative) ---------- */
+  /* When the live coach is on, its verdict drives the field's status, tile,
+     and points, not the local rules. Each verdict is stored with the exact
+     answer text it judged, so editing the answer invalidates it and the
+     silent local fallback takes over until the coach is asked again. */
+
+  function coachKey(activity) {
+    return 'practice-studio:' + activity.meta.id + ':coach';
+  }
+
+  function loadCoachVerdicts(activity) {
+    try {
+      var raw = localStorage.getItem(coachKey(activity));
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function recordCoachVerdict(state, fieldId, tag) {
+    if (!tag) return;
+    state.coachVerdicts[fieldId] = {
+      tag: tag,
+      text: (state.answers[fieldId] || '').trim()
+    };
+    try {
+      localStorage.setItem(coachKey(state.activity), JSON.stringify(state.coachVerdicts));
+    } catch (e) { /* storage blocked: the session still works */ }
+  }
+
+  // the authoritative tag for a field: the coach's verdict while it matches
+  // the current answer text, the local deterministic tag otherwise
+  function coachTagFor(state, fieldId) {
+    if (!liveOn()) return null;
+    var v = (state.coachVerdicts || {})[fieldId];
+    if (v && v.tag && v.text === (state.answers[fieldId] || '').trim()) return v.tag;
+    return null;
   }
 
   /* ---------- tags + feedback blocks (one voice for local and live) ---------- */
@@ -3495,37 +3661,61 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       return result;
     };
     ta.addEventListener('blur', function () {
-      if ((ta.value || '').trim()) check();
+      // with the coach on, no local box is painted on blur: the coach is the
+      // one voice the student sees, and the local check stays silent
+      if (!liveOn() && (ta.value || '').trim()) check();
     });
 
     var btnRow = el('div', 'btn-row');
-    var btn = el('button', 'btn btn-primary', opts.checkLabel || 'Check this field');
-    btn.type = 'button';
-    btn.addEventListener('click', check);
-    btnRow.appendChild(btn);
-
     var coachOut = null;
     if (liveOn()) {
+      // the live coach is authoritative: Check this field asks the coach and
+      // its verdict is the only one shown. The local deterministic check is
+      // the silent fallback, rendered only when the coach is capped or down.
       coachOut = el('div', 'feedback');
-      btnRow.appendChild(coachButton(state, 'Ask the coach', function (b) {
+      var askBtn = el('button', 'btn btn-coach');
+      askBtn.type = 'button';
+      askBtn.appendChild(svgEl(SVG.spark, 'btn-icon'));
+      askBtn.appendChild(el('span', null, opts.checkLabel || 'Check this field'));
+      askBtn.addEventListener('click', function () {
         if (!(state.answers[field.id] || '').trim()) { check(); return; }
-        b.disabled = true;
+        if (window.PracticeLive.capReached()) {
+          coachFallback(state, coachOut, { message: 'token_cap' }, check);
+          return;
+        }
+        askBtn.disabled = true;
         coachThinking(coachOut);
         window.PracticeLive.coachField(field, activity, state.answers[field.id])
           .then(function (r) {
-            b.disabled = false;
+            askBtn.disabled = false;
             coachBlock(coachOut, r.text, r.tag);
-            // one voice: a weak verdict surfaces the same "read this" links
-            if (r.tag && r.tag !== 'Ready') {
+            // never a contradictory pair: any earlier fallback box goes away
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+            // "read this" links stay a home-only feature (the class/home gate)
+            var isHome = !!(activity && activity.meta && activity.meta.context === 'home');
+            if (isHome && r.tag && r.tag !== 'Ready') {
               appendResources(coachOut, FB.resolveResources(field.resources, activity));
             }
+            card.classList.toggle('card-ready', r.tag === 'Ready');
+            recordCoachVerdict(state, field.id, r.tag);
             if (r.tag && opts.onResult) opts.onResult({ tag: r.tag, empty: false });
           })
           .catch(function (err) {
-            b.disabled = false;
+            askBtn.disabled = false;
             coachFallback(state, coachOut, err, check);
           });
-      }));
+      });
+      // deliberately NOT in state.coachButtons: the token-cap path disables
+      // that list, but this is the field's only Check button, so a capped
+      // session must keep it alive — each further click lands in the
+      // capReached() branch and runs the local check with the offline note.
+      btnRow.appendChild(askBtn);
+    } else {
+      var btn = el('button', 'btn btn-primary', opts.checkLabel || 'Check this field');
+      btn.type = 'button';
+      btn.addEventListener('click', check);
+      btnRow.appendChild(btn);
     }
     card.appendChild(btnRow);
     card.appendChild(feedback);
@@ -3680,6 +3870,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       activity: activity,
       checks: checks,
       answers: loadAnswers(activity),
+      coachVerdicts: loadCoachVerdicts(activity),
       checkFns: {},
       coachButtons: []
     };
@@ -3732,6 +3923,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     levelBanner: levelBanner,
     rubricBox: rubricBox,
     saveAnswers: saveAnswers,
+    clearAnswers: clearAnswers,
+    coachTagFor: coachTagFor,
     registerFormat: registerFormat,
     boot: boot
   };
@@ -5007,7 +5200,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     clearBtn.type = 'button';
     clearBtn.addEventListener('click', function () {
       if (window.confirm('Delete everything you wrote on this device? This cannot be undone.')) {
-        try { localStorage.removeItem('practice-studio:' + activity.meta.id); } catch (e) { /* ignore */ }
+        C.clearAnswers(activity);
         window.location.reload();
       }
     });
@@ -5408,6 +5601,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   var el = C.el;
 
   var INTRO_ID = '_intro';
+  var PICKER_ID = '_cases';
   var REVIEW_ID = '_review';
 
   function shortTitle(section) {
@@ -5440,6 +5634,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       stops.push(stop);
     });
     stops.push({ kind: 'review', id: REVIEW_ID });
+    // multi-case activities land on a case picker after the intro; the picker
+    // (not the side rail) is the primary way into a case
+    state.multiCase = stops.filter(function (s) { return s.kind === 'section'; }).length > 1;
+    if (state.multiCase) {
+      stops.splice(1, 0, { kind: 'picker', id: PICKER_ID });
+    }
     return stops;
   }
 
@@ -5453,6 +5653,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var text = (state.answers[entry.id] || '').trim();
     if (!text) return null;
     if (entry.kind === 'field') {
+      // the live coach is authoritative: while its verdict matches the
+      // current answer text it drives the tile, points, and report tag;
+      // the deterministic check is the silent fallback otherwise
+      var coachTag = C.coachTagFor(state, entry.id);
+      if (coachTag) return coachTag;
       return FB.evaluateField(entry.item, text, state.checks, activity).tag;
     }
     return FB.evaluatePoint(entry.item, text, state.checks).tag;
@@ -5476,6 +5681,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }, 0);
   }
 
+  /* a section's aggregate status: all fields Ready = done,
+     some answered = in progress, none = not started */
+  function sectionStatus(stop, activity, state) {
+    var tags = stop.items.map(function (entry) { return itemTag(entry, activity, state); });
+    var answered = stop.items.filter(function (entry) {
+      return (state.answers[entry.id] || '').trim();
+    }).length;
+    return {
+      done: tags.length > 0 && tags.every(function (t) { return t === 'Ready'; }),
+      answered: answered,
+      total: stop.items.length
+    };
+  }
+
   /* ---------- HUD + rail refresh ---------- */
 
   function refreshProgress(activity, state) {
@@ -5492,38 +5711,51 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     });
     state.shell.hud.medallion.set(ready.length, state.items.length);
 
-    // a section tile aggregates its fields: all Ready = done,
-    // some answered = in progress, none = not started
+    // section tiles (the rail, now a secondary jump list) and the picker's
+    // case cards share the same aggregate status
     workStops(state.stops).forEach(function (stop) {
+      var st = sectionStatus(stop, activity, state);
       var tile = state.tileFor[stop.id];
-      if (!tile) return;
-      var tags = stop.items.map(function (entry) { return itemTag(entry, activity, state); });
-      var answered = stop.items.filter(function (entry) {
-        return (state.answers[entry.id] || '').trim();
-      }).length;
-      var done = tags.length && tags.every(function (t) { return t === 'Ready'; });
-      tile.className = 'm-tile'
-        + (state.currentId === stop.id ? ' m-tile-open' : '')
-        + (done ? ' m-tile-done' : (answered ? ' m-tile-active' : ''));
-      var dot = tile.querySelector('.m-tile-dot');
-      dot.textContent = '';
-      if (done) dot.appendChild(C.svgEl(M.GLYPH.check, 'm-tile-check'));
-      else dot.appendChild(el('span', null, String(stop.number)));
-      var sectionPts = stop.items.reduce(function (sum, entry) {
-        return sum + itemPoints(entry, cfg);
-      }, 0);
-      tile.querySelector('.m-tile-st').textContent =
-        done ? 'Complete  ·  +' + sectionPts + ' Insight'
-          : (answered ? answered + ' of ' + stop.items.length + ' answered' : 'Not started');
+      if (tile) {
+        tile.className = 'm-tile'
+          + (state.currentId === stop.id ? ' m-tile-open' : '')
+          + (st.done ? ' m-tile-done' : (st.answered ? ' m-tile-active' : ''));
+        var dot = tile.querySelector('.m-tile-dot');
+        dot.textContent = '';
+        if (st.done) dot.appendChild(C.svgEl(M.GLYPH.check, 'm-tile-check'));
+        else dot.appendChild(el('span', null, String(stop.number)));
+        var sectionPts = stop.items.reduce(function (sum, entry) {
+          return sum + itemPoints(entry, cfg);
+        }, 0);
+        tile.querySelector('.m-tile-st').textContent =
+          st.done ? 'Complete  ·  +' + sectionPts + ' Insight'
+            : (st.answered ? st.answered + ' of ' + st.total + ' answered' : 'Not started');
+      }
+      var card = state.cardFor && state.cardFor[stop.id];
+      if (card) {
+        card.className = 'm-case-card'
+          + (st.done ? ' m-case-done' : (st.answered ? ' m-case-active' : ''));
+        card.querySelector('.m-case-st').textContent =
+          st.done ? 'Done' : (st.answered ? 'In progress  ·  ' + st.answered + ' of ' + st.total : 'Not started');
+      }
     });
 
-    if (state.barFill) {
-      var answeredCount = state.items.filter(function (entry) {
-        return (state.answers[entry.id] || '').trim();
+    if (state.pickerOverall) {
+      var doneCount = workStops(state.stops).filter(function (stop) {
+        return sectionStatus(stop, activity, state).done;
       }).length;
-      state.barFill.style.width = (state.items.length
-        ? Math.round(100 * answeredCount / state.items.length) : 0) + '%';
-      state.barCount.textContent = answeredCount + '/' + state.items.length + ' answered';
+      state.pickerOverall.textContent =
+        'Cases completed: ' + doneCount + ' of ' + workStops(state.stops).length;
+    }
+
+    // the footer bar tracks the CURRENT case only (per-case progress);
+    // on single-section activities that is the whole activity anyway
+    if (state.barFill && state.currentStop && state.currentStop.kind === 'section') {
+      var st2 = sectionStatus(state.currentStop, activity, state);
+      state.barFill.style.width = (st2.total ? Math.round(100 * st2.answered / st2.total) : 0) + '%';
+      state.barCount.textContent = state.multiCase
+        ? st2.answered + ' of ' + st2.total + ' answered in this case'
+        : st2.answered + '/' + st2.total + ' answered';
     }
   }
 
@@ -5631,15 +5863,64 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       return (state.answers[entry.id] || '').trim();
     });
     var start = el('button', 'btn btn-primary btn-large',
-      started ? 'Continue the mission' : 'Start the mission');
+      state.multiCase ? (started ? 'Continue: choose a case' : 'Choose a case')
+        : (started ? 'Continue the mission' : 'Start the mission'));
     start.type = 'button';
     start.addEventListener('click', function () {
+      if (state.multiCase) { openStop(PICKER_ID); return; }
       var next = work.filter(function (s) {
         return s.items.some(function (entry) { return !(state.answers[entry.id] || '').trim(); });
       })[0] || work[0];
       openStop(next.id);
     });
     foot.appendChild(start);
+    return scene.node;
+  }
+
+  /* ---------- the case picker (multi-case activities only) ---------- */
+  /* All cases on one page as selectable cards; this, not the side rail,
+     is the primary way into a case. Any order, nothing gated. */
+
+  function buildPickerScene(activity, state, openStop) {
+    var work = workStops(state.stops);
+    var scene = M.buildScene({
+      eyebrow: activity.meta.title,
+      title: 'Choose a case to work on'
+    });
+    scene.node.querySelector('.m-scene-title').classList.add('m-scene-title-big');
+
+    state.pickerOverall = el('p', 'm-picker-overall', '');
+    scene.body.appendChild(state.pickerOverall);
+
+    var grid = el('div', 'm-picker');
+    state.cardFor = {};
+    work.forEach(function (stop) {
+      var card = el('button', 'm-case-card');
+      card.type = 'button';
+      var head = el('div', 'm-case-head');
+      head.appendChild(el('span', 'm-case-num', String(stop.number)));
+      head.appendChild(el('span', 'm-case-title', shortTitle(stop.section)));
+      card.appendChild(head);
+      var preview = (stop.section.instruction || '').trim();
+      if (preview) {
+        card.appendChild(el('p', 'm-case-preview',
+          preview.length > 160 ? preview.slice(0, 157).replace(/\s+\S*$/, '') + '…' : preview));
+      }
+      card.appendChild(el('span', 'm-case-st', 'Not started'));
+      card.addEventListener('click', function () { openStop(stop.id); });
+      state.cardFor[stop.id] = card;
+      grid.appendChild(card);
+    });
+    scene.body.appendChild(grid);
+
+    var foot = scene.foot();
+    foot.appendChild(el('span', 'm-foot-note',
+      'Open the cases in any order. Your work saves as you type.'));
+    foot.appendChild(el('span', 'm-spacer'));
+    var report = el('button', 'btn btn-teal', 'Mission report');
+    report.type = 'button';
+    report.addEventListener('click', function () { openStop(REVIEW_ID); });
+    foot.appendChild(report);
     return scene.node;
   }
 
@@ -5750,13 +6031,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     grid.appendChild(console_);
 
     var foot = scene.foot();
-    var prev = el('button', 'btn btn-ghost', 'Back');
-    prev.type = 'button';
-    if (idx === 0) prev.disabled = true;
-    prev.addEventListener('click', function () {
-      if (idx > 0) openStop(work[idx - 1].id);
-    });
-    foot.appendChild(prev);
+    if (state.multiCase) {
+      // the picker is the primary navigation: a clear way back to it,
+      // per-case progress, and a shortcut to the next case
+      var backToCases = el('button', 'btn btn-ghost', 'Back to cases');
+      backToCases.type = 'button';
+      backToCases.addEventListener('click', function () { openStop(PICKER_ID); });
+      foot.appendChild(backToCases);
+    } else {
+      var prev = el('button', 'btn btn-ghost', 'Back');
+      prev.type = 'button';
+      prev.disabled = true;
+      foot.appendChild(prev);
+    }
 
     var barWrap = el('div', 'm-bar');
     state.barFill = el('i');
@@ -5766,7 +6053,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     foot.appendChild(state.barCount);
 
     var next = el('button', 'btn btn-primary',
-      idx + 1 < work.length ? 'Next stop' : 'Finish the mission');
+      idx + 1 < work.length ? (state.multiCase ? 'Next case' : 'Next stop') : 'Finish the mission');
     next.type = 'button';
     next.addEventListener('click', function () {
       if (idx + 1 < work.length) openStop(work[idx + 1].id);
@@ -5810,7 +6097,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       out.textContent = '';
       var evalResult = FB.evaluateActivity(activity, state.checks, state.answers);
       state.lastEval = evalResult; // the designed export shows the result too
-      Object.keys(state.checkFns).forEach(function (id) { state.checkFns[id](); });
+      // with the coach on, the review never repaints local boxes into the
+      // editors: the coach's verdicts stay the one voice on each field
+      if (!C.liveOn()) {
+        Object.keys(state.checkFns).forEach(function (id) { state.checkFns[id](); });
+      }
       refreshProgress(activity, state);
       renderPath();
 
@@ -5859,7 +6150,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     clearBtn.type = 'button';
     clearBtn.addEventListener('click', function () {
       if (window.confirm('Delete everything you wrote on this device? This cannot be undone.')) {
-        try { localStorage.removeItem('practice-studio:' + activity.meta.id); } catch (e) { /* ignore */ }
+        C.clearAnswers(activity);
         window.location.reload();
       }
     });
@@ -5957,11 +6248,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }
       if (!stop) return;
       state.currentId = stop.id;
+      state.currentStop = stop;
+      if (stop.kind !== 'picker') { state.pickerOverall = null; state.cardFor = null; }
       var sceneIndex = state.stops.indexOf(stop);
       var raster = (stop.section && stop.section.background)
         || activity.meta.background || null;
       state.shell.backdrop.set(sceneIndex, raster);
       var node = stop.kind === 'intro' ? buildIntroScene(activity, state, openStop)
+        : stop.kind === 'picker' ? buildPickerScene(activity, state, openStop)
         : stop.kind === 'review' ? buildReviewScene(activity, state, openStop)
         : buildSectionScene(activity, state, stop, openStop);
       stage.swap(node);
@@ -8454,7 +8748,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       clearBtn.type = 'button';
       clearBtn.addEventListener('click', function () {
         if (window.confirm('Delete everything you wrote on this device? This cannot be undone.')) {
-          try { localStorage.removeItem('practice-studio:' + activity.meta.id); } catch (e) { /* ignore */ }
+          C.clearAnswers(activity);
           window.location.reload();
         }
       });
