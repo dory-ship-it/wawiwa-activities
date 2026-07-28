@@ -1896,6 +1896,25 @@ button.m-node { cursor: pointer; }
 }
 .m-lead-strong { font-weight: 700; color: var(--m-navy); font-size: 1.12rem; }
 
+/* the continuous layout: a spec section's title as a heading above its
+   fields, ranking above the field titles so the parts stay legible */
+.m-sectionhead {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 800;
+  font-size: 1.32rem;
+  color: var(--m-navy);
+  margin: 0 0 12px;
+  line-height: 1.28;
+}
+.m-scenario + .m-fieldblock,
+.m-sectionhead + .m-scenario { margin-top: 0; }
+.m-fieldblock + .m-sectionhead,
+.m-scenario + .m-sectionhead {
+  border-top: 3px solid var(--m-grey);
+  padding-top: 26px;
+  margin-top: 30px;
+}
+
 /* the case picker: all cases on one page as selectable cards */
 .m-picker-overall {
   margin: 4px 0 14px;
@@ -5583,12 +5602,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 /*
  * Practice Studio format: coached_canvas, the Mission workbook.
  *
- * Rendered through the shared Mission skin (engine/mission.js): each SECTION
- * of the spec is one playable stop (one screen per case), picked from the
- * Mission Board rail in any order. A section screen shows the section title,
- * the section instruction (the case scenario) at the top, then every field of
- * that section stacked: the field label, its labeled INSTRUCTIONS card, and
- * its answer editor. Insight points stay keyed to fields; the header medallion
+ * Rendered through the shared Mission skin (engine/mission.js). The layout
+ * follows the spec's meta.layout: a "cases" workbook (L1/L2 class) makes each
+ * SECTION one playable stop entered from the case picker in any order; any
+ * other spec renders its sections in order as ONE continuous screen, each
+ * section's title + instruction as a heading above its fields. Either way a
+ * screen shows the case scenario at the top, then every field stacked: the
+ * field label, its labeled INSTRUCTIONS card, and its answer editor. Insight points stay keyed to fields; the header medallion
  * counts Ready fields on a single-case activity and completed cases on a
  * multi-case one. A reward toast lands each Ready field. The mission ends on a
  * review scene and a designed one-page report export; on a multi-case activity
@@ -5621,7 +5641,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var stops = [{ kind: 'intro', id: INTRO_ID }];
     state.items = [];          // every field/prompt, flat, in spec order
     state.stopOf = {};         // field/prompt id -> its section stop
+    // The case picker is an AUTHORING decision, never a section count: only
+    // a spec that declares meta.layout "cases" is a pick-one-of-N workbook
+    // (L1/L2 class). Every other multi-section activity is one deliverable
+    // split into ordered parts and renders as one continuous screen.
+    state.multiCase = !!(activity.meta && activity.meta.layout === 'cases');
     var number = 0;
+    function register(stop) {
+      stop.items.forEach(function (entry) {
+        number += 1;
+        entry.number = number;
+        state.stopOf[entry.id] = stop;
+      });
+      state.items = state.items.concat(stop.items);
+      stops.push(stop);
+    }
+    var groups = [];
     (activity.sections || []).forEach(function (section) {
       var items = [];
       (section.type === 'fields' ? (section.fields || []) : []).forEach(function (field) {
@@ -5630,21 +5665,26 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       (section.type === 'ordered_points' ? (section.prompts || []) : []).forEach(function (prompt) {
         items.push({ kind: 'prompt', id: prompt.id, item: prompt, section: section });
       });
-      if (!items.length) return;
-      var stop = { kind: 'section', id: section.id, section: section, items: items };
-      items.forEach(function (entry) {
-        number += 1;
-        entry.number = number;
-        state.stopOf[entry.id] = stop;
-      });
-      state.items = state.items.concat(items);
-      stops.push(stop);
+      if (items.length) groups.push({ section: section, items: items });
     });
+    if (state.multiCase || groups.length <= 1) {
+      // one playable stop per section: the cases of a picker workbook, or
+      // the single screen of a single-section activity
+      groups.forEach(function (g) {
+        register({ kind: 'section', id: g.section.id, section: g.section, items: g.items });
+      });
+    } else {
+      // one CONTINUOUS activity: every section in spec order on one screen,
+      // each with its title + instruction as a heading above its fields;
+      // one progress bar over all fields, the one end review + report
+      var all = [];
+      groups.forEach(function (g) { all = all.concat(g.items); });
+      register({ kind: 'section', id: '_work', section: null, sections: groups, items: all });
+    }
     stops.push({ kind: 'review', id: REVIEW_ID });
-    // multi-case activities land on a case picker after the intro; the picker
-    // (not the side rail) is the primary way into a case
-    state.multiCase = stops.filter(function (s) { return s.kind === 'section'; }).length > 1;
     if (state.multiCase) {
+      // picker workbooks land on the case picker after the intro; the picker
+      // (not the side rail) is the primary way into a case
       stops.splice(1, 0, { kind: 'picker', id: PICKER_ID });
     }
     return stops;
@@ -5792,7 +5832,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       var dot = el('span', 'm-tile-dot', String(stop.number));
       tile.appendChild(dot);
       var txt = el('span', 'm-tile-txt');
-      txt.appendChild(el('span', 'm-tile-nm', shortTitle(stop.section)));
+      txt.appendChild(el('span', 'm-tile-nm',
+        stop.section ? shortTitle(stop.section) : activity.meta.title));
       txt.appendChild(el('span', 'm-tile-st', 'Not started'));
       tile.appendChild(txt);
       tile.addEventListener('click', function () { openStop(stop.id); });
@@ -6036,7 +6077,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var idx = work.indexOf(stop);
     var scene = M.buildScene({
       badge: 'Stop ' + (idx + 1) + ' / ' + work.length,
-      title: shortTitle(stop.section),
+      title: stop.section ? shortTitle(stop.section) : activity.meta.title,
       className: 'm-scene-wide'
     });
 
@@ -6044,15 +6085,28 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     scene.body.appendChild(grid);
 
     var console_ = el('div', 'm-console');
-    // The section instruction is the case scenario: it opens the screen, so
-    // the student reads the situation once and then works every field of it.
-    if (stop.section.instruction) {
-      console_.appendChild(el('p', 'm-console-hint m-scenario', stop.section.instruction));
+    if (stop.sections) {
+      // the continuous layout: every section in order, its title and
+      // instruction as a heading above its own fields
+      stop.sections.forEach(function (group) {
+        console_.appendChild(el('h2', 'm-sectionhead', group.section.title));
+        if (group.section.instruction) {
+          console_.appendChild(el('p', 'm-console-hint m-scenario', group.section.instruction));
+        }
+        group.items.forEach(function (entry) {
+          console_.appendChild(buildItemBlock(activity, state, entry));
+        });
+      });
+    } else {
+      // The section instruction is the case scenario: it opens the screen, so
+      // the student reads the situation once and then works every field of it.
+      if (stop.section.instruction) {
+        console_.appendChild(el('p', 'm-console-hint m-scenario', stop.section.instruction));
+      }
+      stop.items.forEach(function (entry) {
+        console_.appendChild(buildItemBlock(activity, state, entry));
+      });
     }
-
-    stop.items.forEach(function (entry) {
-      console_.appendChild(buildItemBlock(activity, state, entry));
-    });
     grid.appendChild(console_);
 
     var foot = scene.foot();
@@ -6216,16 +6270,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var cfg = state.missionPoints;
     var sections = [];
     workStops(state.stops).forEach(function (stop) {
-      var cards = stop.items.map(function (entry, i) {
-        var text = (state.answers[entry.id] || '').trim();
-        return {
-          num: entry.number || i + 1,
-          title: entry.item.label,
-          tag: itemTag(entry, activity, state),
-          rows: [{ value: text || 'Not answered yet.', empty: !text }]
-        };
+      // the continuous layout folds sections into one stop; the report keeps
+      // one section block per SPEC section either way
+      var groups = stop.sections || [{ section: stop.section, items: stop.items }];
+      groups.forEach(function (group) {
+        var cards = group.items.map(function (entry, i) {
+          var text = (state.answers[entry.id] || '').trim();
+          return {
+            num: entry.number || i + 1,
+            title: entry.item.label,
+            tag: itemTag(entry, activity, state),
+            rows: [{ value: text || 'Not answered yet.', empty: !text }]
+          };
+        });
+        sections.push({ title: group.section.title, cards: cards });
       });
-      sections.push({ title: stop.section.title, cards: cards });
     });
 
     var level = state.lastEval ? {
