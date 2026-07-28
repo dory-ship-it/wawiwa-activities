@@ -1902,6 +1902,42 @@ button.m-node { cursor: pointer; }
 }
 .m-lead-strong { font-weight: 700; color: var(--m-navy); font-size: 1.12rem; }
 
+/* the image attach block (the L5 diagram): a labelled control with a
+   dropzone, a thumbnail preview, and Replace / Remove. The input itself is
+   the keyboard path; the zone only adds drag-and-drop on top. */
+.m-attach { margin: 0 0 30px; }
+.m-attach-zone {
+  border: 2px dashed var(--m-teal);
+  border-radius: 12px;
+  padding: 16px 18px;
+  background: rgba(62, 134, 143, 0.06);
+}
+.m-attach-zone-over { background: rgba(62, 134, 143, 0.16); border-style: solid; }
+.m-attach-zone-filled { border-style: solid; }
+.m-attach-label {
+  display: block;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--m-navy);
+  margin: 0 0 8px;
+  cursor: pointer;
+}
+.m-attach-input { display: block; max-width: 100%; }
+.m-attach-input:focus-visible { outline: 3px solid var(--m-teal); outline-offset: 2px; }
+.m-attach-hint { margin: 8px 0 0; font-size: 0.82rem; color: #4c5a63; }
+.m-attach-status { margin: 8px 0 0; font-size: 0.88rem; font-weight: 600; color: var(--m-navy); min-height: 1em; }
+.m-attach-fig { margin: 12px 0 0; }
+.m-attach-thumb {
+  display: block;
+  max-width: min(420px, 100%);
+  max-height: 300px;
+  border: 1px solid var(--m-grey);
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(14, 28, 36, 0.12);
+  margin-bottom: 10px;
+}
+
 /* the continuous layout: a spec section's title as a heading above its
    fields, ranking above the field titles so the parts stay legible */
 .m-sectionhead {
@@ -4158,7 +4194,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return heroH + 10;
   }
 
-  /* one report: hero + sections of cards, flowing across pages */
+  /* one report: hero + attached images + sections of cards, across pages */
   function buildDoc(activity, data) {
     var JsPDF = jsPdfCtor();
     var doc = new JsPDF({ unit: 'mm', format: 'a4', compress: true });
@@ -4169,6 +4205,36 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       doc.addPage();
       y = MARGIN + 4;
     }
+
+    // attached diagrams (engine/attach.js data: {title, src, w, h}) ride at
+    // the top of the report, full content width, the block title as caption;
+    // drawn by jsPDF like everything else, so the export stays footer-free
+    (data.attachments || []).forEach(function (att) {
+      if (!att || !att.src || !(att.w > 0) || !(att.h > 0)) return;
+      var drawW = CONTENT_W;
+      var drawH = drawW * (att.h / att.w);
+      var maxH = BOTTOM - (MARGIN + 4) - 9; // a full page minus the caption
+      if (drawH > maxH) { drawH = maxH; drawW = drawH * (att.w / att.h); }
+      pageBreak(drawH + 12);
+      doc.setFillColor(RED[0], RED[1], RED[2]);
+      doc.rect(MARGIN, y - 3.2, 7, 1.4, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
+      doc.text(clean(att.title), MARGIN, y + 2.4);
+      y += 7;
+      try {
+        doc.addImage(att.src, 'JPEG', MARGIN, y, drawW, drawH);
+        y += drawH + 8;
+      } catch (e) {
+        // a malformed stored image never breaks the export of the writing
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(9.5);
+        doc.setTextColor(SLATE[0], SLATE[1], SLATE[2]);
+        doc.text('The attached image could not be embedded.', MARGIN, y + 2);
+        y += 8;
+      }
+    });
 
     (data.sections || []).forEach(function (section) {
       pageBreak(16);
@@ -5124,6 +5190,239 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     buildPathBlock: buildPathBlock,
     reportSection: reportSection,
     _conditionMet: conditionMet
+  };
+})();
+
+/*
+ * Practice Studio — client-side image attachment (the L5 diagram block).
+ *
+ * A spec declares attachments at the top level:
+ *   "attachments": [{ "id": "att_diagram", "title": "...", "instruction": "..." }]
+ * and coached_canvas renders one labelled attach control per entry at the top
+ * of the work screen. Everything is client-only: the student picks or drops a
+ * PNG/JPG, it is downscaled on a canvas (longest edge capped, re-encoded as
+ * JPEG) and stored as a data URL INSIDE the answers blob, so the ordinary
+ * autosave, restore, and "Clear my work" all cover it. The image never leaves
+ * the browser except inside the PDF the student saves (engine/export.js draws
+ * it with the vendored jsPDF). No network code lives here, ever.
+ *
+ * Storage form (one answers key per attachment id):
+ *   answers[att.id] = JSON string {"kind":"attachment","src":dataURL,"w":n,"h":n}
+ * Attachments are not fields: they carry no points, no rubric weight, and do
+ * not gate Ready — some students draw on paper and photograph it, others skip.
+ */
+(function () {
+  'use strict';
+
+  var MAX_EDGE = 1600;     // longest image edge after downscale, px
+  var JPEG_QUALITY = 0.7;  // re-encode quality; keeps the stored copy small
+
+  function isImageType(type) {
+    return type === 'image/png' || type === 'image/jpeg';
+  }
+
+  /* cap the longest edge, keeping the aspect ratio (pure, tested) */
+  function capDimensions(w, h, maxEdge) {
+    var cap = maxEdge || MAX_EDGE;
+    var longest = Math.max(w, h);
+    if (!longest || longest <= cap) return { w: w, h: h, scaled: false };
+    var k = cap / longest;
+    return {
+      w: Math.max(1, Math.round(w * k)),
+      h: Math.max(1, Math.round(h * k)),
+      scaled: true
+    };
+  }
+
+  /* the stored answers value for an attachment, or null when the value is
+     ordinary text / missing / malformed (pure, tested) */
+  function parseStored(value) {
+    if (typeof value !== 'string' || value.charAt(0) !== '{') return null;
+    try {
+      var obj = JSON.parse(value);
+      if (obj && obj.kind === 'attachment'
+        && typeof obj.src === 'string' && /^data:image\/jpeg[;,]/.test(obj.src)
+        && obj.w > 0 && obj.h > 0) {
+        return obj;
+      }
+    } catch (e) { /* an ordinary text answer, not an attachment */ }
+    return null;
+  }
+
+  /* every declared attachment that holds an image, in spec order — the shape
+     engine/export.js draws and reportData ships (pure, tested) */
+  function attachmentData(activity, state) {
+    var out = [];
+    ((activity && activity.attachments) || []).forEach(function (att) {
+      var stored = parseStored(((state || {}).answers || {})[att.id]);
+      if (stored) out.push({ title: att.title, src: stored.src, w: stored.w, h: stored.h });
+    });
+    return out;
+  }
+
+  /* ---------- browser-only below: read, downscale, render ---------- */
+
+  function readAndDownscale(file, done) {
+    if (!file || !isImageType(file.type)) {
+      done('That file is not a PNG or JPG image. Export your diagram as PNG or JPG and try again.');
+      return;
+    }
+    var reader = new FileReader();
+    reader.onerror = function () { done('That file could not be read. Try a different copy.'); };
+    reader.onload = function () {
+      var img = new Image();
+      img.onerror = function () { done('That file does not open as an image. Export it as PNG or JPG and try again.'); };
+      img.onload = function () {
+        try {
+          var dims = capDimensions(img.naturalWidth, img.naturalHeight, MAX_EDGE);
+          var canvas = document.createElement('canvas');
+          canvas.width = dims.w;
+          canvas.height = dims.h;
+          var ctx = canvas.getContext('2d');
+          // JPEG has no transparency: white paper behind a transparent PNG
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, dims.w, dims.h);
+          ctx.drawImage(img, 0, 0, dims.w, dims.h);
+          done(null, {
+            kind: 'attachment',
+            src: canvas.toDataURL('image/jpeg', JPEG_QUALITY),
+            w: dims.w,
+            h: dims.h
+          }, dims.scaled);
+        } catch (e) {
+          done('That image could not be processed. Try a smaller PNG or JPG.');
+        }
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /* the labelled attach control: real <label> tied to the file input (the
+     input itself is the keyboard path), drag-and-drop as an extra, thumbnail
+     with alt text, Replace / Remove buttons, and a live status line */
+  function buildEditor(state, activity, att, opts) {
+    opts = opts || {};
+    var C = window.PracticeCore;
+    var el = C.el;
+
+    var block = el('div', 'm-attach');
+    block.id = 'attach-' + att.id;
+    block.appendChild(el('h3', 'm-fieldblock-title', att.title));
+
+    if (att.instruction) {
+      var instr = el('div', 'm-instructions');
+      var ik = el('div', 'm-instructions-k');
+      ik.appendChild(el('span', null, 'Instructions'));
+      instr.appendChild(ik);
+      instr.appendChild(el('p', 'm-instructions-p', att.instruction));
+      block.appendChild(instr);
+    }
+
+    var zone = el('div', 'm-attach-zone');
+    var label = el('label', 'm-attach-label', 'Attach your diagram (PNG or JPG)');
+    var inputId = 'attach-input-' + att.id;
+    label.htmlFor = inputId;
+    zone.appendChild(label);
+    var input = el('input', 'm-attach-input');
+    input.type = 'file';
+    input.id = inputId;
+    input.accept = 'image/png,image/jpeg';
+    zone.appendChild(input);
+    zone.appendChild(el('p', 'm-attach-hint',
+      'Pick a file or drop it here. It stays on this device and saves into your PDF.'));
+    block.appendChild(zone);
+
+    var status = el('p', 'm-attach-status');
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    block.appendChild(status);
+
+    var preview = el('div', 'm-attach-preview');
+    block.appendChild(preview);
+
+    function persisted() {
+      try {
+        var raw = localStorage.getItem('practice-studio:' + activity.meta.id);
+        return !!raw && JSON.parse(raw)[att.id] === state.answers[att.id];
+      } catch (e) { return false; }
+    }
+
+    function renderPreview() {
+      preview.textContent = '';
+      var stored = parseStored(state.answers[att.id]);
+      zone.classList.toggle('m-attach-zone-filled', !!stored);
+      if (!stored) return;
+      var fig = el('figure', 'm-attach-fig');
+      var img = el('img', 'm-attach-thumb');
+      img.src = stored.src;
+      img.alt = att.title;
+      fig.appendChild(img);
+      var row = el('div', 'btn-row');
+      var replace = el('button', 'btn btn-ghost', 'Replace');
+      replace.type = 'button';
+      replace.addEventListener('click', function () { input.click(); });
+      row.appendChild(replace);
+      var remove = el('button', 'btn btn-ghost-danger', 'Remove');
+      remove.type = 'button';
+      remove.addEventListener('click', function () {
+        delete state.answers[att.id];
+        C.saveAnswers(activity, state.answers);
+        input.value = '';
+        status.textContent = 'Attachment removed.';
+        renderPreview();
+        if (opts.onChange) opts.onChange();
+      });
+      row.appendChild(remove);
+      fig.appendChild(row);
+      preview.appendChild(fig);
+    }
+
+    function accept(file) {
+      status.textContent = 'Reading the image...';
+      readAndDownscale(file, function (err, stored, scaled) {
+        if (err) { status.textContent = err; return; }
+        state.answers[att.id] = JSON.stringify(stored);
+        C.saveAnswers(activity, state.answers);
+        var note = scaled ? ' It was downscaled to keep the page fast.' : '';
+        if (!persisted()) {
+          // near the storage quota: keep the in-session copy, never crash
+          note += ' It is too large to keep saved on this device, so re-attach'
+            + ' it if you reload; it still lands in your PDF.';
+        }
+        status.textContent = 'Diagram attached.' + note;
+        renderPreview();
+        if (opts.onChange) opts.onChange();
+      });
+    }
+
+    input.addEventListener('change', function () {
+      if (input.files && input.files[0]) accept(input.files[0]);
+    });
+    zone.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      zone.classList.add('m-attach-zone-over');
+    });
+    zone.addEventListener('dragleave', function () {
+      zone.classList.remove('m-attach-zone-over');
+    });
+    zone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      zone.classList.remove('m-attach-zone-over');
+      var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) accept(file);
+    });
+
+    renderPreview();
+    return block;
+  }
+
+  window.PracticeAttach = {
+    isImageType: isImageType,
+    capDimensions: capDimensions,
+    parseStored: parseStored,
+    attachmentData: attachmentData,
+    buildEditor: buildEditor
   };
 })();
 
@@ -6128,6 +6427,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     scene.body.appendChild(grid);
 
     var console_ = el('div', 'm-console');
+    // declared image attachments (the L5 diagram) open the deliverable: they
+    // render once, at the top of the first work screen, above the sections
+    if (idx === 0 && (activity.attachments || []).length && window.PracticeAttach) {
+      activity.attachments.forEach(function (att) {
+        console_.appendChild(window.PracticeAttach.buildEditor(state, activity, att));
+      });
+    }
     if (stop.sections) {
       // the continuous layout: every section in order, its title and
       // instruction as a heading above its own fields
@@ -6346,6 +6652,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return {
       scoreline: { points: tallyPoints(activity, state, cfg), max: maxPoints(state, cfg) },
       level: level,
+      // attached diagrams ride at the top of the PDF, caption + image
+      attachments: window.PracticeAttach
+        ? window.PracticeAttach.attachmentData(activity, state) : [],
       sections: sections
     };
   }
