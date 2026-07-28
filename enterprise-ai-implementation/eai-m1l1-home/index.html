@@ -1951,10 +1951,46 @@ button.m-node { cursor: pointer; }
 .m-scenario + .m-fieldblock,
 .m-sectionhead + .m-scenario { margin-top: 0; }
 .m-fieldblock + .m-sectionhead,
-.m-scenario + .m-sectionhead {
+.m-scenario + .m-sectionhead,
+.m-notecard + .m-sectionhead {
   border-top: 3px solid var(--m-grey);
   padding-top: 26px;
   margin-top: 30px;
+}
+
+/* read-only informational card (a 'card' section, e.g. the L6 peer review):
+   no inputs, no progress; just part of the flow */
+.m-notecard {
+  background: #fff;
+  border: 1px solid #d8e2e6;
+  border-left: 6px solid var(--m-teal);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 0 0 26px;
+  box-shadow: 0 2px 10px rgba(14, 28, 36, 0.06);
+}
+.m-notecard-body {
+  margin: 0 0 12px;
+  font-size: 1.04rem;
+  line-height: 1.62;
+  color: #24343c;
+}
+.m-notecard-list {
+  margin: 0 0 12px;
+  padding-left: 22px;
+}
+.m-notecard-list li {
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: #24343c;
+  margin: 0 0 7px;
+}
+.m-notecard-foot {
+  margin: 0;
+  font-size: 1.0rem;
+  line-height: 1.58;
+  color: var(--m-navy);
+  font-weight: 500;
 }
 
 /* the case picker: all cases on one page as selectable cards */
@@ -3323,7 +3359,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function shortCanvasSummary(activity, answers) {
     var FB = root.PracticeFeedback;
-    return FB.collectFields(activity).map(function (f) {
+    // the pitch draft itself is never canvas context: the pitch call carries
+    // it separately as {pitch_text}
+    return FB.collectFields(activity).filter(function (f) {
+      return f.ai_action !== 'pitch';
+    }).map(function (f) {
       var words = redacted(answers[f.id] || '').split(/\s+/).slice(0, 20).join(' ');
       return f.label + ': ' + (words || '(empty)');
     }).join('\n');
@@ -3331,8 +3371,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function concatPitch(activity, answers) {
     var FB = root.PracticeFeedback;
-    return FB.collectPrompts(activity).map(function (p, i) {
-      return (i + 1) + '. ' + p.label + '\n' + redacted(answers[p.id] || '(empty)');
+    var prompts = FB.collectPrompts(activity);
+    if (prompts.length) {
+      return prompts.map(function (p, i) {
+        return (i + 1) + '. ' + p.label + '\n' + redacted(answers[p.id] || '(empty)');
+      }).join('\n\n');
+    }
+    // no ordered points: the pitch lives in the spec-flagged free-text field
+    // (the final homework's f13_pitch_plan)
+    return FB.collectFields(activity).filter(function (f) {
+      return f.ai_action === 'pitch';
+    }).map(function (f) {
+      return redacted(answers[f.id] || '(empty)');
     }).join('\n\n');
   }
 
@@ -3684,6 +3734,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         : 'The live coach is unavailable right now. Here is the local check instead.'));
   }
 
+  // the pitch-shaping action: live coach + home context + a spec-flagged
+  // field, nothing else. Class builds never show it even with the coach on,
+  // and coach-off builds have no PracticeLive at all.
+  function pitchActionOn(activity, field) {
+    return liveOn()
+      && !!(field && field.ai_action === 'pitch')
+      && !!(activity && activity.meta && activity.meta.context === 'home');
+  }
+
   function coachButton(state, label, onClick) {
     var btn = el('button', 'btn btn-coach');
     btn.type = 'button';
@@ -3811,9 +3870,50 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       btn.addEventListener('click', check);
       btnRow.appendChild(btn);
     }
+    // "Shape my pitch with AI" (the final homework's pitch field): a second
+    // coach action that shapes the student's OWN pitch points. It coaches
+    // structure, order, and length; it never writes the pitch. Home-gated:
+    // pitchActionOn is false in class builds even when the coach is live.
+    var pitchOut = null;
+    if (pitchActionOn(activity, field)) {
+      pitchOut = el('div', 'feedback');
+      var shapeBtn = el('button', 'btn btn-coach');
+      shapeBtn.type = 'button';
+      shapeBtn.appendChild(svgEl(SVG.spark, 'btn-icon'));
+      shapeBtn.appendChild(el('span', null, 'Shape my pitch with AI'));
+      shapeBtn.addEventListener('click', function () {
+        if (!(state.answers[field.id] || '').trim()) {
+          // nothing to shape yet, and the coach never writes the points
+          pitchOut.textContent = '';
+          pitchOut.className = 'feedback';
+          pitchOut.appendChild(el('div', 'feedback-line coach-note',
+            'Jot down a few rough pitch points first, in your own words. Then I can help you shape them.'));
+          return;
+        }
+        if (window.PracticeLive.capReached()) {
+          coachFallback(state, pitchOut, { message: 'token_cap' }, check);
+          return;
+        }
+        shapeBtn.disabled = true;
+        coachThinking(pitchOut);
+        window.PracticeLive.coachPitch(activity, state.answers)
+          .then(function (r) {
+            shapeBtn.disabled = false;
+            // shaping advice, never a verdict: no tag, nothing recorded
+            coachBlock(pitchOut, r.text, null);
+          })
+          .catch(function (err) {
+            shapeBtn.disabled = false;
+            coachFallback(state, pitchOut, err, check);
+          });
+      });
+      btnRow.appendChild(shapeBtn);
+    }
+
     card.appendChild(btnRow);
     card.appendChild(feedback);
     if (coachOut) card.appendChild(coachOut);
+    if (pitchOut) card.appendChild(pitchOut);
 
     state.checkFns[field.id] = check;
     return { card: card, check: check, textarea: ta };
@@ -4003,6 +4103,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     imageEl: imageEl,
     SVG: SVG,
     liveOn: liveOn,
+    pitchActionOn: pitchActionOn,
     tagPill: tagPill,
     feedbackBlock: feedbackBlock,
     appendResources: appendResources,
@@ -6007,12 +6108,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       (section.type === 'ordered_points' ? (section.prompts || []) : []).forEach(function (prompt) {
         items.push({ kind: 'prompt', id: prompt.id, item: prompt, section: section });
       });
-      if (items.length) groups.push({ section: section, items: items });
+      // a 'card' section is read-only information (e.g. the L6 peer-review
+      // protocol): it renders inline in the continuous flow, holds no items,
+      // and can never gate progress, Ready, or the review
+      if (items.length || section.type === 'card') groups.push({ section: section, items: items });
     });
     if (state.multiCase || groups.length <= 1) {
       // one playable stop per section: the cases of a picker workbook, or
-      // the single screen of a single-section activity
+      // the single screen of a single-section activity. Item-less card
+      // groups never become stops of their own.
       groups.forEach(function (g) {
+        if (!g.items.length) return;
         register({ kind: 'section', id: g.section.id, section: g.section, items: g.items });
       });
     } else {
@@ -6332,6 +6438,23 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return scene.node;
   }
 
+  /* a read-only informational card (a 'card' section, e.g. the L6 peer
+     review): body, optional bullet list, optional footer line. No inputs,
+     no checks, no points; purely part of the flow. */
+  function buildNoteCard(section) {
+    var card = el('div', 'm-notecard');
+    if (section.body) card.appendChild(el('p', 'm-notecard-body', section.body));
+    if ((section.bullets || []).length) {
+      var list = el('ul', 'm-notecard-list');
+      section.bullets.forEach(function (line) {
+        list.appendChild(el('li', null, line));
+      });
+      card.appendChild(list);
+    }
+    if (section.footer) card.appendChild(el('p', 'm-notecard-foot', section.footer));
+    return card;
+  }
+
   /* ---------- one field or prompt, stacked inside its section screen ---------- */
 
   function buildPromptEditor(state, activity, prompt) {
@@ -6439,6 +6562,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       // instruction as a heading above its own fields
       stop.sections.forEach(function (group) {
         console_.appendChild(el('h2', 'm-sectionhead', group.section.title));
+        if (group.section.type === 'card') {
+          console_.appendChild(buildNoteCard(group.section));
+          return;
+        }
         if (group.section.instruction) {
           console_.appendChild(el('p', 'm-console-hint m-scenario', group.section.instruction));
         }
@@ -6623,6 +6750,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       // one section block per SPEC section either way
       var groups = stop.sections || [{ section: stop.section, items: stop.items }];
       groups.forEach(function (group) {
+        // read-only card sections are information, not work: no report block
+        if (group.section.type === 'card') return;
         var cards = group.items.map(function (entry, i) {
           var text = (state.answers[entry.id] || '').trim();
           return {
@@ -6771,7 +6900,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   window.PracticeCoachedCanvas = {
     collectStops: collectStops,
     sectionStatus: sectionStatus,
-    caseReportData: caseReportData
+    caseReportData: caseReportData,
+    reportData: reportData
   };
 })();
 
