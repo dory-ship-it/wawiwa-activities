@@ -492,6 +492,12 @@ body {
   padding-top: 8px;
   margin-top: 10px;
 }
+/* the revisit target: bold + deep teal, 5.4:1 on white and >=4.5:1 on the
+   feedback tints, so it reads with or without color (WCAG 1.4.1 / 1.4.3) */
+.routing-target {
+  font-weight: 800;
+  color: var(--w-turquoise-deep);
+}
 /* per-topic "read this" links */
 .resource-row {
   display: flex;
@@ -2426,7 +2432,10 @@ button.m-node { cursor: pointer; }
 }
 .m-path-body { flex: 1; min-width: 0; }
 .m-path-focus { margin: 0; font-size: 0.9rem; color: #243239; }
-.m-path-review { margin: 5px 0 0; font-size: 0.8rem; font-weight: 600; color: var(--m-navy); }
+.m-path-review { margin: 5px 0 0; font-size: 0.8rem; font-weight: 400; color: #24343c; }
+/* the lesson/topic name inside the Revisit line: bold + mission navy,
+   7.7:1 on white, never color alone (WCAG 1.4.1 / 1.4.3) */
+.m-path-target { font-weight: 800; color: var(--m-navy); }
 .m-path-res { margin-top: 5px; font-size: 0.8rem; }
 .m-path-res .resource-for { margin-left: 6px; color: #6F7A8A; }
 .m-path-positive {
@@ -2636,13 +2645,18 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     return lessonLabel(key, activity.lesson_map);
   }
 
+  // The routing text stays one string; targets carries the resolved lesson or
+  // topic names so the renderer can emphasize them inside the sentence (v2e).
   function routingLine(field, activity, strings) {
     var routes = field.routes_to || [];
     if (!routes.length) return null;
     var labels = routes.map(function (k) {
       return routeLabel(k, activity);
     });
-    return fmt(strings.routing_line, { lessons: labels.join(' and ') });
+    return {
+      text: fmt(strings.routing_line, { lessons: labels.join(' and ') }),
+      targets: labels
+    };
   }
 
   // Resolve a resources list to renderable {title, url, for} links. Entries
@@ -2706,7 +2720,9 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
       result.tag = TAGS.REVISE;
       result.messages.push(strings.non_answer);
       var isHomeGuard = !!(activity && activity.meta && activity.meta.context === 'home');
-      result.routing = isHomeGuard ? routingLine(field, activity, strings) : null;
+      var guardLine = isHomeGuard ? routingLine(field, activity, strings) : null;
+      result.routing = guardLine ? guardLine.text : null;
+      result.routingTargets = guardLine ? guardLine.targets : [];
       result.resources = isHomeGuard ? weakResources(field, activity) : [];
       return result;
     }
@@ -2747,7 +2763,9 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
       // keep the immediate correctness feedback (result.messages) but never show
       // the lesson-revisit pointer or resources. Gated off meta.context.
       var isHome = !!(activity && activity.meta && activity.meta.context === 'home');
-      result.routing = isHome ? routingLine(field, activity, strings) : null;
+      var line = isHome ? routingLine(field, activity, strings) : null;
+      result.routing = line ? line.text : null;
+      result.routingTargets = line ? line.targets : [];
       result.resources = isHome ? weakResources(field, activity) : [];
     }
     if (result.tag === TAGS.READY && !result.messages.length) {
@@ -3564,7 +3582,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       container.appendChild(el('div', cls, m));
     });
     if (result.routing) {
-      container.appendChild(el('div', 'feedback-line routing-line', result.routing));
+      // the lesson/topic names stand out inside the sentence: bold AND an
+      // accent color that holds 4.5:1, never color alone (v2e, WCAG 1.4.1/3)
+      var routing = el('div', 'feedback-line routing-line');
+      var rest = result.routing;
+      (result.routingTargets || []).forEach(function (target) {
+        var at = rest.indexOf(target);
+        if (at === -1) return;
+        if (at > 0) routing.appendChild(document.createTextNode(rest.slice(0, at)));
+        routing.appendChild(el('strong', 'routing-target', target));
+        rest = rest.slice(at + target.length);
+      });
+      if (rest) routing.appendChild(document.createTextNode(rest));
+      container.appendChild(routing);
     }
     appendResources(container, result.resources);
   }
@@ -3692,13 +3722,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       // its verdict is the only one shown. The local deterministic check is
       // the silent fallback, rendered only when the coach is capped or down.
       coachOut = el('div', 'feedback');
+      // the label names the AI only while the click actually reaches it: a
+      // capped or offline session falls back to the local deterministic
+      // check, and the same button drops the "with AI" for honesty (v2e)
+      var plainLabel = opts.checkLabel || 'Check this field';
+      var aiLabel = plainLabel + ' with AI';
       var askBtn = el('button', 'btn btn-coach');
       askBtn.type = 'button';
       askBtn.appendChild(svgEl(SVG.spark, 'btn-icon'));
-      askBtn.appendChild(el('span', null, opts.checkLabel || 'Check this field'));
+      var askLabel = el('span', null, aiLabel);
+      askBtn.appendChild(askLabel);
       askBtn.addEventListener('click', function () {
         if (!(state.answers[field.id] || '').trim()) { check(); return; }
         if (window.PracticeLive.capReached()) {
+          askLabel.textContent = plainLabel;
           coachFallback(state, coachOut, { message: 'token_cap' }, check);
           return;
         }
@@ -3707,6 +3744,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         window.PracticeLive.coachField(field, activity, state.answers[field.id])
           .then(function (r) {
             askBtn.disabled = false;
+            askLabel.textContent = aiLabel; // a transient outage recovered
             coachBlock(coachOut, r.text, r.tag);
             // never a contradictory pair: any earlier fallback box goes away
             feedback.textContent = '';
@@ -3722,6 +3760,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           })
           .catch(function (err) {
             askBtn.disabled = false;
+            askLabel.textContent = plainLabel; // this click ran the local check
             coachFallback(state, coachOut, err, check);
           });
       });
@@ -4979,7 +5018,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         var body = el('div', 'm-path-body');
         body.appendChild(el('p', 'm-path-focus', f.focus));
         if (f.reviewLabel) {
-          body.appendChild(el('p', 'm-path-review', 'Revisit: ' + f.reviewLabel));
+          // the lesson/topic name is bold AND accent-colored (>=4.5:1), so it
+          // reads without color too; the sentence around it stays normal
+          var review = el('p', 'm-path-review', 'Revisit: ');
+          review.appendChild(el('strong', 'm-path-target', f.reviewLabel));
+          body.appendChild(review);
         }
         if (f.resources.length) resourceRows(body, f.resources);
         row.appendChild(body);
