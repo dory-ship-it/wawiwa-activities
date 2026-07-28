@@ -30,13 +30,17 @@
   --w-navy-deep: #071826;
   --w-charcoal: #1F2C36;
   --w-slate: #3A4555;
-  --w-slate-light: #6F7A8A;
+  /* text colors hold >=4.5:1 on white and the mist/tint surfaces (WCAG 1.4.3):
+     slate-light 5.5:1, ready 6.1:1, light (amber) 5.0:1 with white text,
+     red-deep 5.0:1 with white text (the brand #EE3124 stays for the logo) */
+  --w-slate-light: #5E6A79;
   --w-mist: #F5F7F8;
   --w-line: #E3E9EC;
   --w-red: #EE3124;
+  --w-red-deep: #D62A1E;
   --w-footer-teal: #5AB3AA;
-  --w-ready: #2E8B57;
-  --w-light: #D9880F;
+  --w-ready: #256F46;
+  --w-light: #B45309;
   --w-revise: #C13B3B;
   --w-radius: 14px;
   --w-shadow: 0 1px 2px rgba(31, 44, 54, 0.05), 0 8px 28px rgba(31, 44, 54, 0.07);
@@ -44,6 +48,22 @@
 }
 
 * { box-sizing: border-box; }
+
+/* a visible focus ring on every control, everywhere (WCAG 2.4.7); dark
+   surfaces override the color below where needed */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--w-turquoise-deep);
+  outline-offset: 2px;
+}
+/* headings that receive focus programmatically (step navigation) are not
+   controls; the announcement matters, a ring on a heading does not */
+h1[tabindex="-1"]:focus,
+h2[tabindex="-1"]:focus,
+h3[tabindex="-1"]:focus { outline: none; }
 
 html { scroll-behavior: smooth; }
 
@@ -79,7 +99,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--w-turquoise);
+  color: var(--w-turquoise-deep);
   margin: 0 0 10px 0;
 }
 
@@ -179,7 +199,7 @@ body {
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.25);
 }
-.hero .meta-chip-live { background: var(--w-red); border-color: var(--w-red); }
+.hero .meta-chip-live { background: var(--w-red-deep); border-color: var(--w-red-deep); }
 
 .brand-row { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
 .brand-caption {
@@ -226,7 +246,7 @@ body {
 }
 .safety-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .safety-icon { display: inline-flex; }
-.safety-title { color: var(--w-red); font-size: 0.98rem; }
+.safety-title { color: var(--w-red-deep); font-size: 0.98rem; }
 .safety-body { margin: 0 0 8px 0; color: var(--w-slate); font-size: 0.95rem; }
 .safety-local { margin: 0; font-size: 0.84rem; color: var(--w-slate-light); font-weight: 600; }
 
@@ -401,10 +421,11 @@ body {
   margin: 6px 0 12px 0;
 }
 .answer-input:focus {
-  outline: none;
+  outline: 2px solid var(--w-turquoise-deep);
+  outline-offset: 1px;
   background: #fff;
   border-color: var(--w-turquoise);
-  box-shadow: 0 0 0 4px rgba(0, 151, 167, 0.12);
+  box-shadow: 0 0 0 4px rgba(0, 151, 167, 0.16);
 }
 .answer-short { min-height: 64px; }
 
@@ -427,8 +448,8 @@ body {
 .btn-icon { display: inline-flex; }
 .btn-icon-right { order: 2; }
 
-.btn-primary { background: var(--w-turquoise); color: #fff; }
-.btn-primary:hover { background: var(--w-turquoise-deep); box-shadow: 0 6px 16px rgba(0, 151, 167, 0.3); }
+.btn-primary { background: var(--w-turquoise-deep); color: #fff; }
+.btn-primary:hover { background: #005E67; box-shadow: 0 6px 16px rgba(0, 151, 167, 0.3); }
 .btn-coach { background: var(--w-charcoal); color: #fff; }
 .btn-coach:hover { box-shadow: 0 6px 16px rgba(31, 44, 54, 0.3); }
 .btn-large { font-size: 1.02rem; padding: 13px 28px; }
@@ -480,11 +501,11 @@ body {
 .tag-ready { background: var(--w-ready); }
 .tag-light { background: var(--w-light); }
 .tag-revise { background: var(--w-revise); }
-.tag-none { background: var(--w-footer-teal); }
+.tag-none { background: var(--w-turquoise-deep); }
 
 .feedback-line { font-size: 0.93rem; margin: 4px 0; color: var(--w-slate); }
 .ok-line { color: var(--w-ready); font-weight: 600; }
-.pii-line { color: var(--w-red); font-weight: 600; }
+.pii-line { color: var(--w-red-deep); font-weight: 600; }
 .routing-line {
   color: var(--w-charcoal);
   font-weight: 600;
@@ -585,8 +606,8 @@ body {
   margin-bottom: 18px;
   color: #fff;
 }
-.level-0 { background: linear-gradient(120deg, var(--w-ready), #256F46); }
-.level-1 { background: linear-gradient(120deg, var(--w-light), #B06E0B); }
+.level-0 { background: linear-gradient(120deg, var(--w-ready), #1C5636); }
+.level-1 { background: linear-gradient(120deg, var(--w-light), #8F4A07); }
 .level-2 { background: linear-gradient(120deg, var(--w-revise), #9C2F2F); }
 .level-badge { display: inline-flex; }
 .level-label {
@@ -595,10 +616,10 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  opacity: 0.85;
+  opacity: 0.95;
 }
 .level-value { font-family: 'Roboto', sans-serif; font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
-.level-passback { font-size: 0.8rem; opacity: 0.85; margin-top: 5px; }
+.level-passback { font-size: 0.8rem; opacity: 0.95; margin-top: 5px; }
 .review-note { color: var(--w-revise); font-weight: 600; margin: 6px 0; }
 
 .rubric-box, .fix-box {
@@ -813,11 +834,20 @@ body {
   }
   .print-tile-label { font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 0.8rem; color: var(--w-charcoal); }
   .print-tile-body { margin: 0; font-size: 0.82rem; color: #222; white-space: pre-wrap; }
-  .print-empty { color: #999; font-style: italic; }
-  .print-foot { margin-top: 12px; font-size: 0.72rem; color: #7F7F7F; }
+  .print-empty { color: #767676; font-style: italic; }
+  .print-foot { margin-top: 12px; font-size: 0.72rem; color: #6B6B6B; }
 }
 
 /* ============ branching scenario: the full-screen decision game ============ */
+
+/* controls on the dark game chrome need a light focus ring (WCAG 2.4.7) */
+.game :focus-visible,
+.choice-tile:focus-visible,
+.hud-btn:focus-visible,
+.safety-line:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
 
 body.game-active { overflow: hidden; }
 body.game-active .container { box-shadow: none; }
@@ -951,7 +981,7 @@ body.game-active .container { box-shadow: none; }
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(0, 151, 167, 0.9);
+  background: rgba(0, 118, 129, 0.95);
   color: #fff;
   border-radius: 999px;
   padding: 4px 15px;
@@ -1001,7 +1031,7 @@ body.game-active .container { box-shadow: none; }
   text-align: left;
   padding: 14px 16px;
   border-radius: 14px;
-  background: rgba(7, 24, 38, 0.74);
+  background: rgba(7, 24, 38, 0.86);
   border: 1.5px solid rgba(255, 255, 255, 0.3);
   color: #fff;
   cursor: pointer;
@@ -1120,16 +1150,16 @@ body.game-active .container { box-shadow: none; }
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.25);
 }
-.title-screen .meta-chip-live { background: var(--w-red); border-color: var(--w-red); }
+.title-screen .meta-chip-live { background: var(--w-red-deep); border-color: var(--w-red-deep); }
 
 .btn-start {
-  background: var(--w-red);
+  background: var(--w-red-deep);
   color: #fff;
   font-size: 1.06rem;
   padding: 14px 30px;
   margin-top: 20px;
 }
-.btn-start:hover { box-shadow: 0 10px 26px rgba(238, 49, 36, 0.4); background: #D62A1E; }
+.btn-start:hover { box-shadow: 0 10px 26px rgba(238, 49, 36, 0.4); background: #C0261B; }
 
 .safety-mini { max-width: 520px; }
 .safety-line {
@@ -1365,13 +1395,28 @@ body.game-active .container { box-shadow: none; }
 
 :root {
   --m-red: #EE3124;
+  /* deep variants for TEXT and small filled controls: red-deep holds 5.0:1
+     and teal-deep 5.8:1 with white; the brighter brand tones stay for
+     graphics and large shapes (WCAG 1.4.3) */
+  --m-red-deep: #D62A1E;
   --m-navy: #255777;
   --m-turquoise: #5AB3AA;
   --m-teal: #3E868F;
+  --m-teal-deep: #2E6E76;
   --m-ink: #0e1c24;
   --m-grey: #E6E6E8;
   --m-gold: #F4B41A;
-  --m-panel: rgba(255, 255, 255, 0.94);
+  --m-panel: rgba(255, 255, 255, 0.97);
+}
+
+/* a visible focus ring on every mission control; the dark HUD gets white */
+.mission-active :focus-visible {
+  outline: 3px solid var(--m-teal-deep);
+  outline-offset: 2px;
+}
+.mission-active .m-topbar :focus-visible,
+.mission-active .m-node:focus-visible {
+  outline-color: #fff;
 }
 
 body.mission-active {
@@ -1448,6 +1493,8 @@ body.mission-active #activity-root { padding: 0; }
 
 /* ============ top bar HUD ============ */
 
+/* the HUD carries its own dark backing so its text holds >=4.5:1 over any
+   backdrop palette, including the light gold scenes (WCAG 1.4.3) */
 .m-topbar {
   display: flex;
   align-items: center;
@@ -1455,6 +1502,10 @@ body.mission-active #activity-root { padding: 0; }
   color: #fff;
   flex-wrap: wrap;
   text-shadow: 0 1px 8px rgba(14, 28, 36, 0.55);
+  background: rgba(10, 24, 32, 0.72);
+  border-radius: 16px;
+  padding: 8px 16px;
+  backdrop-filter: blur(6px);
 }
 .m-logo { flex: 0 0 auto; display: inline-flex; filter: drop-shadow(0 4px 10px rgba(14, 28, 36, 0.3)); }
 .m-brandline { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
@@ -1463,7 +1514,7 @@ body.mission-active #activity-root { padding: 0; }
   font-size: 0.66rem;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--m-turquoise);
+  color: #BFE5E0;
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -1494,7 +1545,6 @@ body.mission-active #activity-root { padding: 0; }
 .m-chip b { font-family: 'Roboto', sans-serif; font-size: 1.02rem; }
 .m-chip span {
   font-size: 0.68rem;
-  opacity: 0.82;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -1587,7 +1637,7 @@ button.m-node { cursor: pointer; }
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #fff;
-  background: var(--m-teal);
+  background: var(--m-teal-deep);
   padding: 5px 12px;
   border-radius: 30px;
   white-space: nowrap;
@@ -1599,7 +1649,7 @@ button.m-node { cursor: pointer; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-size: 0.7rem;
-  color: var(--m-teal);
+  color: var(--m-teal-deep);
 }
 .m-scene-title {
   font-family: 'Roboto', sans-serif;
@@ -1648,13 +1698,13 @@ button.m-node { cursor: pointer; }
   border-radius: 20px;
   transition: width 0.5s ease;
 }
-.m-bar-count { font-size: 0.76rem; font-weight: 700; color: var(--m-teal); white-space: nowrap; }
+.m-bar-count { font-size: 0.76rem; font-weight: 700; color: var(--m-teal-deep); white-space: nowrap; }
 
 /* mission-skin buttons (the engine .btn family, poster-weighted) */
 .mission-active .btn { border-radius: 40px; font-weight: 700; }
-.mission-active .btn-primary { background: var(--m-red); color: #fff; box-shadow: 0 8px 18px rgba(238, 49, 36, 0.32); }
-.mission-active .btn-primary:hover { background: #d62a1e; }
-.mission-active .btn-teal { background: var(--m-teal); color: #fff; }
+.mission-active .btn-primary { background: var(--m-red-deep); color: #fff; box-shadow: 0 8px 18px rgba(238, 49, 36, 0.32); }
+.mission-active .btn-primary:hover { background: #C0261B; }
+.mission-active .btn-teal { background: var(--m-teal-deep); color: #fff; }
 .mission-active .btn-teal:hover { box-shadow: 0 6px 16px rgba(62, 134, 143, 0.4); }
 .mission-active .btn-ghost { background: #eef3f3; color: var(--m-navy); border: none; }
 .mission-active .btn-ghost:hover { background: #e2ecec; }
@@ -1674,7 +1724,7 @@ button.m-node { cursor: pointer; }
 .m-bot { display: inline-flex; flex: 0 0 auto; }
 .m-coach-names { display: flex; flex-direction: column; line-height: 1.25; }
 .m-coach-names b { font-family: 'Roboto', sans-serif; font-size: 0.98rem; color: #fff; }
-.m-coach-names span { font-size: 0.74rem; color: var(--m-turquoise); letter-spacing: 0.03em; }
+.m-coach-names span { font-size: 0.74rem; color: #9FD9D2; letter-spacing: 0.03em; }
 .m-coach-line { margin: 0; font-size: 1.02rem; line-height: 1.55; }
 
 .m-goal { background: rgba(255, 255, 255, 0.96); border-radius: 14px; border-left: 5px solid var(--m-grey); padding: 14px 16px 14px 18px; }
@@ -1683,7 +1733,7 @@ button.m-node { cursor: pointer; }
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--m-teal);
+  color: var(--m-teal-deep);
   font-weight: 700;
 }
 .m-goal-p { margin: 6px 0 0; font-size: 1.02rem; color: #1e2b33; line-height: 1.55; }
@@ -1693,7 +1743,7 @@ button.m-node { cursor: pointer; }
   gap: 8px;
   font-size: 0.79rem;
   color: #fff;
-  background: rgba(14, 28, 36, 0.4);
+  background: rgba(14, 28, 36, 0.62);
   border-radius: 999px;
   padding: 6px 14px;
   align-self: flex-start;
@@ -1759,7 +1809,7 @@ button.m-node { cursor: pointer; }
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--m-teal);
+  color: var(--m-teal-deep);
 }
 .m-rail-group {
   margin: 8px 4px 2px;
@@ -1768,7 +1818,7 @@ button.m-node { cursor: pointer; }
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #6b7c85;
+  color: #5b6b73;
 }
 .m-rail-foot { margin-top: auto; padding: 12px 8px 4px; font-size: 0.76rem; color: #5b6b73; }
 
@@ -1806,15 +1856,15 @@ button.m-node { cursor: pointer; }
   color: var(--m-navy);
   transition: background 0.25s ease, color 0.25s ease;
 }
-.m-tile-done .m-tile-dot { background: var(--m-turquoise); color: #fff; }
+.m-tile-done .m-tile-dot { background: var(--m-teal-deep); color: #fff; }
 .m-tile-check { display: inline-flex; color: #fff; }
 .m-tile-light .m-tile-dot { background: var(--w-light); color: #fff; }
 .m-tile-revise .m-tile-dot { background: var(--w-revise); color: #fff; }
 .m-tile-active .m-tile-dot { background: #cfe3e3; }
 .m-tile-txt { display: flex; flex-direction: column; min-width: 0; }
 .m-tile-nm { font-size: 0.84rem; font-weight: 600; line-height: 1.25; color: var(--m-ink); }
-.m-tile-st { font-size: 0.7rem; color: #6b7c85; }
-.m-tile-done .m-tile-st { color: var(--m-teal); font-weight: 700; }
+.m-tile-st { font-size: 0.7rem; color: #5b6b73; }
+.m-tile-done .m-tile-st { color: var(--m-teal-deep); font-weight: 700; }
 .m-tile-report .m-tile-dot { background: var(--m-navy); }
 
 .m-workgrid {
@@ -1861,7 +1911,7 @@ button.m-node { cursor: pointer; }
   font-size: 0.8rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--m-teal);
+  color: var(--m-teal-deep);
   font-weight: 800;
   margin-bottom: 6px;
 }
@@ -1873,12 +1923,12 @@ button.m-node { cursor: pointer; }
   margin-top: 12px;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--m-teal);
+  color: var(--m-teal-deep);
   background: #eef7f5;
   border-radius: 999px;
   padding: 5px 12px;
 }
-.m-instructions-star { color: var(--m-gold); }
+.m-instructions-star { color: var(--m-gold); display: inline-flex; }
 
 /* one screen per section: the case scenario opens the screen, then every
    field of the section stacks as label + instructions card + editor */
@@ -2001,7 +2051,7 @@ button.m-node { cursor: pointer; }
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--m-teal);
+  color: var(--m-teal-deep);
 }
 .m-picker {
   display: grid;
@@ -2062,17 +2112,17 @@ button.m-node { cursor: pointer; }
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #6b7c85;
+  color: #5b6b73;
   background: #e8eeef;
   border-radius: 999px;
   padding: 4px 11px;
   margin-top: auto;
 }
 .m-case-active { border-color: var(--m-turquoise); background: #fff; }
-.m-case-active .m-case-st { color: var(--m-teal); background: #e2f1ee; }
+.m-case-active .m-case-st { color: var(--m-teal-deep); background: #e2f1ee; }
 .m-case-done { border-color: var(--m-turquoise); background: #f2faf8; }
-.m-case-done .m-case-num { background: var(--m-turquoise); }
-.m-case-done .m-case-st { color: #fff; background: var(--m-turquoise); }
+.m-case-done .m-case-num { background: var(--m-teal-deep); }
+.m-case-done .m-case-st { color: #fff; background: var(--m-teal-deep); }
 .m-fix-link { background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; font-size: inherit; }
 
 .m-support-note {
@@ -2093,9 +2143,9 @@ button.m-node { cursor: pointer; }
   margin-top: 16px;
 }
 .m-safety-head { display: flex; align-items: center; gap: 9px; margin-bottom: 6px; }
-.m-safety-title { color: var(--m-red); font-size: 0.9rem; }
+.m-safety-title { color: var(--m-red-deep); font-size: 0.9rem; }
 .m-safety-body { margin: 0 0 6px; color: #3a4555; font-size: 0.86rem; }
-.m-safety-local { margin: 0; font-size: 0.78rem; color: #6f7a8a; font-weight: 600; }
+.m-safety-local { margin: 0; font-size: 0.78rem; color: #5E6A79; font-weight: 600; }
 
 @media (max-width: 1024px) {
   .m-main-rail { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
@@ -2156,7 +2206,7 @@ button.m-node { cursor: pointer; }
   box-shadow: 0 0 0 3px rgba(90, 179, 170, 0.25);
 }
 .m-choice-committed:hover { border-color: var(--m-teal); background: #eefafa; }
-.m-choice-committed .m-choice-key { background: var(--m-teal); }
+.m-choice-committed .m-choice-key { background: var(--m-teal-deep); }
 
 /* the consequence-reveal beat */
 .m-cq { display: none; }
@@ -2177,7 +2227,7 @@ button.m-node { cursor: pointer; }
 .m-cq-who b { font-family: 'Roboto', sans-serif; font-size: 0.88rem; color: var(--m-navy); }
 .m-cq-who .tag-pill { animation-delay: 0.4s; }
 .m-cq-text { color: var(--m-ink); font-size: 0.97rem; font-weight: 600; margin: 8px 0 6px; line-height: 1.5; }
-.m-cq-pts { font-weight: 800; color: var(--m-red); font-size: 0.9rem; margin-bottom: 4px; }
+.m-cq-pts { font-weight: 800; color: var(--m-red-deep); font-size: 0.9rem; margin-bottom: 4px; }
 .m-cq-pts-none { color: #8a5a12; font-weight: 600; }
 .m-cq-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
 .m-cq .game-reflect { margin: 12px 0 4px !important; background: #fff; }
@@ -2211,7 +2261,7 @@ button.m-node { cursor: pointer; }
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--m-teal);
+  background: var(--m-teal-deep);
   color: #fff;
   display: inline-flex;
   align-items: center;
@@ -2264,7 +2314,7 @@ button.m-node { cursor: pointer; }
   color: var(--m-navy);
   font-size: 1.14rem;
 }
-.m-toast-pts { color: var(--m-red); font-weight: 800; margin-top: 2px; }
+.m-toast-pts { color: var(--m-red-deep); font-weight: 800; margin-top: 2px; }
 
 /* ============ responsive ============ */
 
@@ -2416,13 +2466,13 @@ button.m-node { cursor: pointer; }
   .m-rep-tag-light { background: var(--w-light); }
   .m-rep-tag-revise { background: var(--w-revise); }
   .m-rep-row { font-size: 0.82rem; margin: 3px 0; color: #243239; }
-  .m-rep-row-label { color: var(--m-teal); }
+  .m-rep-row-label { color: var(--m-teal-deep); }
   .m-rep-row-value { white-space: pre-wrap; }
-  .m-rep-empty { color: #999; font-style: italic; }
+  .m-rep-empty { color: #767676; font-style: italic; }
   .m-rep-foot {
     margin-top: 12px;
     font-size: 0.7rem;
-    color: #7F7F7F;
+    color: #6B6B6B;
     border-top: 1px solid var(--m-grey);
     padding-top: 6px;
   }
@@ -2449,14 +2499,14 @@ button.m-node { cursor: pointer; }
   font-size: 1.15rem;
   color: var(--m-navy);
 }
-.m-path-sub { margin: 2px 0 0; font-size: 0.78rem; color: #6F7A8A; }
+.m-path-sub { margin: 2px 0 0; font-size: 0.78rem; color: #5E6A79; }
 .m-path-rank {
   flex: 0 0 auto;
   font-family: 'Roboto', sans-serif;
   font-weight: 700;
   font-size: 0.75rem;
   color: #fff;
-  background: var(--m-teal);
+  background: var(--m-teal-deep);
   border-radius: 999px;
   padding: 4px 12px;
 }
@@ -2466,7 +2516,7 @@ button.m-node { cursor: pointer; }
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--m-teal);
+  color: var(--m-teal-deep);
   margin: 14px 0 6px;
 }
 .m-path-chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -2492,7 +2542,7 @@ button.m-node { cursor: pointer; }
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--m-red);
+  background: var(--m-red-deep);
   color: #fff;
   font-family: 'Roboto', sans-serif;
   font-weight: 700;
@@ -2509,7 +2559,7 @@ button.m-node { cursor: pointer; }
    7.7:1 on white, never color alone (WCAG 1.4.1 / 1.4.3) */
 .m-path-target { font-weight: 800; color: var(--m-navy); }
 .m-path-res { margin-top: 5px; font-size: 0.8rem; }
-.m-path-res .resource-for { margin-left: 6px; color: #6F7A8A; }
+.m-path-res .resource-for { margin-left: 6px; color: #5E6A79; }
 .m-path-positive {
   background: rgba(46, 139, 87, 0.07);
   border: 1px solid rgba(46, 139, 87, 0.30);
@@ -2756,6 +2806,65 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
   // per-topic reading, surfaced only when the answer is not yet Ready
   function weakResources(item, activity) {
     return resolveResources(item.resources, activity);
+  }
+
+  /* ---------- lesson/topic references inside free coach text ---------- */
+  /* The live coach's verdict is free model text; any "Lesson N" or topic
+     mention in it should stand out exactly like the deterministic routing
+     line. This splits a text into segments, marking real lesson/topic
+     references only: the "Lesson N" word form (English, Spanish, Hebrew)
+     and the activity's own lesson_map / section_map names, whole-name
+     matches only. Pure and DOM-free so the renderer and the tests share it. */
+
+  var LESSON_REF_RE = /\b(?:Lesson|Lecci[óo]n)\s+\d+\b|שיעור\s+\d+/gi;
+
+  function isWordChar(ch) {
+    if (!ch) return false;
+    try { return /[\p{L}\p{N}]/u.test(ch); } catch (e) { return /\w/.test(ch); }
+  }
+
+  function lessonRefSegments(text, activity) {
+    text = String(text || '');
+    var names = [];
+    [((activity || {}).lesson_map) || {}, ((activity || {}).section_map) || {}]
+      .forEach(function (map) {
+        Object.keys(map).forEach(function (key) {
+          var name = String(map[key] || '').trim();
+          if (name.length >= 4) names.push(name); // conservative: skip trivial names
+        });
+      });
+    names.sort(function (a, b) { return b.length - a.length; });
+
+    var hits = [];
+    var m;
+    LESSON_REF_RE.lastIndex = 0;
+    while ((m = LESSON_REF_RE.exec(text)) !== null) {
+      hits.push({ start: m.index, end: m.index + m[0].length });
+    }
+    var low = text.toLowerCase();
+    names.forEach(function (name) {
+      var needle = name.toLowerCase();
+      var at = low.indexOf(needle);
+      while (at !== -1) {
+        // whole-name matches only, never inside a longer word
+        if (!isWordChar(text.charAt(at - 1)) && !isWordChar(text.charAt(at + needle.length))) {
+          hits.push({ start: at, end: at + needle.length });
+        }
+        at = low.indexOf(needle, at + needle.length);
+      }
+    });
+    hits.sort(function (a, b) { return a.start - b.start || b.end - a.end; });
+
+    var segments = [];
+    var pos = 0;
+    hits.forEach(function (h) {
+      if (h.start < pos) return; // overlap: the earlier / longer match wins
+      if (h.start > pos) segments.push({ text: text.slice(pos, h.start), hit: false });
+      segments.push({ text: text.slice(h.start, h.end), hit: true });
+      pos = h.end;
+    });
+    if (pos < text.length) segments.push({ text: text.slice(pos), hit: false });
+    return segments;
   }
 
   /* ---------- field evaluation ---------- */
@@ -3146,7 +3255,8 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     collectScenes: collectScenes,
     decisionKey: decisionKey,
     routeLabel: routeLabel,
-    resolveResources: resolveResources
+    resolveResources: resolveResources,
+    lessonRefSegments: lessonRefSegments
   };
 
   root.PracticeFeedback = api;
@@ -3556,6 +3666,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   /* ---------- brand SVG library ---------- */
 
+  /* Every SVG here is either MEANINGFUL (role="img" + aria-label: the logo)
+     or DECORATIVE (aria-hidden="true": it repeats what the adjacent text
+     already says). WCAG 1.1.1; build.py enforces this split on the bundle. */
   var SVG = {
     // the red-tag wawiwa logo
     logo: '<svg viewBox="0 0 120 48" width="100" height="40" role="img" aria-label="wawiwa">'
@@ -3564,23 +3677,23 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       + '<text x="60" y="25" text-anchor="middle" font-family="Roboto, sans-serif" font-weight="800" font-size="23" fill="#fff" letter-spacing="0">wawiwa</text></svg>',
     // circular ring medallion with a check that appears when done
     ring: function (label) {
-      return '<svg viewBox="0 0 36 36" width="34" height="34" class="ring-svg">'
+      return '<svg viewBox="0 0 36 36" width="34" height="34" class="ring-svg" aria-hidden="true">'
         + '<circle class="ring-track" cx="18" cy="18" r="15.5" fill="none" stroke-width="2.5"/>'
         + '<circle class="ring-fill" cx="18" cy="18" r="15.5" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="97.4" transform="rotate(-90 18 18)"/>'
         + '<text class="ring-label" x="18" y="23" text-anchor="middle" font-family="Roboto, sans-serif" font-weight="700" font-size="13.5">' + label + '</text>'
         + '<path class="ring-check" d="M11.5 18.5l4.5 4.5 8.5-9" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     },
-    spinner: '<svg viewBox="0 0 24 24" width="18" height="18" class="spin-svg">'
+    spinner: '<svg viewBox="0 0 24 24" width="18" height="18" class="spin-svg" aria-hidden="true">'
       + '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="42" stroke-dashoffset="28"/></svg>',
-    spark: '<svg viewBox="0 0 20 20" width="14" height="14"><path d="M10 1.5l1.9 6.1 6.1 1.9-6.1 1.9L10 17.5 8.1 11.4 2 9.5l6.1-1.9z" fill="currentColor"/></svg>',
-    download: '<svg viewBox="0 0 20 20" width="15" height="15"><path d="M10 2.5v9m0 0l-3.5-3.5M10 11.5l3.5-3.5M3.5 15h13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    shield: '<svg viewBox="0 0 22 22" width="18" height="18"><path d="M11 1.8l7.5 2.8v5.6c0 4.6-3.1 8.1-7.5 9.9-4.4-1.8-7.5-5.3-7.5-9.9V4.6L11 1.8z" fill="none" stroke="#EE3124" stroke-width="1.8" stroke-linejoin="round"/><path d="M7.6 11l2.3 2.3 4.4-4.6" fill="none" stroke="#EE3124" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    // level badges for the review banner
-    badgeReady: '<svg viewBox="0 0 48 48" width="44" height="44"><circle cx="24" cy="24" r="21" fill="rgba(255,255,255,0.22)"/><path d="M14 24.5l6.5 6.5L34 17.5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    badgeLight: '<svg viewBox="0 0 48 48" width="44" height="44"><circle cx="24" cy="24" r="21" fill="rgba(255,255,255,0.22)"/><path d="M24 13v13" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="33.5" r="2.6" fill="#fff"/></svg>',
-    badgeRevise: '<svg viewBox="0 0 48 48" width="44" height="44"><circle cx="24" cy="24" r="21" fill="rgba(255,255,255,0.22)"/><path d="M17 17l14 14M31 17l-14 14" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>',
-    chevron: '<svg viewBox="0 0 20 20" width="14" height="14"><path d="M7 4l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    restart: '<svg viewBox="0 0 20 20" width="14" height="14"><path d="M4 10a6 6 0 116 6M4 10V5.5M4 10h4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    spark: '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M10 1.5l1.9 6.1 6.1 1.9-6.1 1.9L10 17.5 8.1 11.4 2 9.5l6.1-1.9z" fill="currentColor"/></svg>',
+    download: '<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M10 2.5v9m0 0l-3.5-3.5M10 11.5l3.5-3.5M3.5 15h13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    shield: '<svg viewBox="0 0 22 22" width="18" height="18" aria-hidden="true"><path d="M11 1.8l7.5 2.8v5.6c0 4.6-3.1 8.1-7.5 9.9-4.4-1.8-7.5-5.3-7.5-9.9V4.6L11 1.8z" fill="none" stroke="#EE3124" stroke-width="1.8" stroke-linejoin="round"/><path d="M7.6 11l2.3 2.3 4.4-4.6" fill="none" stroke="#EE3124" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    // level badges for the review banner (the level text sits right beside them)
+    badgeReady: '<svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"><circle cx="24" cy="24" r="21" fill="rgba(255,255,255,0.22)"/><path d="M14 24.5l6.5 6.5L34 17.5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    badgeLight: '<svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"><circle cx="24" cy="24" r="21" fill="rgba(255,255,255,0.22)"/><path d="M24 13v13" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="33.5" r="2.6" fill="#fff"/></svg>',
+    badgeRevise: '<svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"><circle cx="24" cy="24" r="21" fill="rgba(255,255,255,0.22)"/><path d="M17 17l14 14M31 17l-14 14" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>',
+    chevron: '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M7 4l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    restart: '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M4 10a6 6 0 116 6M4 10V5.5M4 10h4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
 
   var LEVEL_BADGES = [SVG.badgeReady, SVG.badgeLight, SVG.badgeRevise];
@@ -3648,6 +3761,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   /* ---------- tags + feedback blocks (one voice for local and live) ---------- */
 
+  // every check/coach feedback container is a polite live region, so a
+  // verdict (and the "coach is reading..." state) is announced to screen
+  // readers when it appears (WCAG 4.1.3). build.py asserts this survives.
+  function liveRegion(className) {
+    var region = el('div', className || 'feedback');
+    region.setAttribute('aria-live', 'polite');
+    return region;
+  }
+
   function tagPill(tag) {
     return el('span', 'tag-pill ' + (TAG_CLASS[tag] || 'tag-none'), tag);
   }
@@ -3700,7 +3822,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     });
   }
 
-  function coachBlock(container, text, tag) {
+  function coachBlock(container, text, tag, activity) {
     container.textContent = '';
     container.classList.add('has-feedback', 'coach-box');
     container.classList.remove('local-box');
@@ -3708,7 +3830,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     head.appendChild(el('span', 'feedback-title coach-title', 'Live coach'));
     if (tag) head.appendChild(tagPill(tag));
     container.appendChild(head);
-    if (text) container.appendChild(el('div', 'feedback-line', text));
+    if (text) {
+      // any "Lesson N" / topic-name reference inside the free coach text
+      // stands out exactly like the deterministic routing line: bold + the
+      // same accent class, >=4.5:1, never color alone (WCAG 1.4.1 / 1.4.3)
+      var line = el('div', 'feedback-line');
+      if (activity) {
+        FB.lessonRefSegments(text, activity).forEach(function (seg) {
+          line.appendChild(seg.hit
+            ? el('strong', 'routing-target', seg.text)
+            : document.createTextNode(seg.text));
+        });
+      } else {
+        line.textContent = text;
+      }
+      container.appendChild(line);
+    }
   }
 
   function coachThinking(container) {
@@ -3770,7 +3907,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var medal = svgEl(SVG.ring(opts.badge !== undefined ? opts.badge : (field.number !== undefined ? String(field.number) : '•')), 'field-medal');
     head.appendChild(medal);
     var labelWrap = el('div', 'field-label-wrap');
-    labelWrap.appendChild(el('h3', 'field-label', field.label));
+    var labelEl = el('h3', 'field-label', field.label);
+    labelEl.id = 'label-' + field.id;
+    labelWrap.appendChild(labelEl);
     if (field.help) labelWrap.appendChild(el('p', 'field-help', field.help));
     head.appendChild(labelWrap);
     card.appendChild(head);
@@ -3787,7 +3926,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       card.appendChild(ex);
     }
 
+    // the answer input is programmatically tied to its field label (WCAG
+    // 1.3.1 / 3.3.2 / 4.1.2); the Mission layout re-points it at the visible
+    // block heading, but the association always exists
     var ta = el('textarea', 'answer-input');
+    ta.id = 'input-' + field.id;
+    ta.setAttribute('aria-labelledby', labelEl.id);
     ta.placeholder = opts.placeholder || 'Write here. No names, IDs, or confidential text.';
     ta.value = state.answers[field.id] || '';
     ta.addEventListener('input', function () {
@@ -3796,7 +3940,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     });
     card.appendChild(ta);
 
-    var feedback = el('div', 'feedback');
+    var feedback = liveRegion();
     var check = function () {
       var result = FB.evaluateField(field, state.answers[field.id], state.checks, activity);
       feedbackBlock(feedback, result);
@@ -3816,7 +3960,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       // the live coach is authoritative: Check this field asks the coach and
       // its verdict is the only one shown. The local deterministic check is
       // the silent fallback, rendered only when the coach is capped or down.
-      coachOut = el('div', 'feedback');
+      coachOut = liveRegion();
       // the label names the AI only while the click actually reaches it: a
       // capped or offline session falls back to the local deterministic
       // check, and the same button drops the "with AI" for honesty (v2e)
@@ -3840,7 +3984,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           .then(function (r) {
             askBtn.disabled = false;
             askLabel.textContent = aiLabel; // a transient outage recovered
-            coachBlock(coachOut, r.text, r.tag);
+            coachBlock(coachOut, r.text, r.tag, activity);
             // never a contradictory pair: any earlier fallback box goes away
             feedback.textContent = '';
             feedback.className = 'feedback';
@@ -3876,7 +4020,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     // pitchActionOn is false in class builds even when the coach is live.
     var pitchOut = null;
     if (pitchActionOn(activity, field)) {
-      pitchOut = el('div', 'feedback');
+      pitchOut = liveRegion();
       var shapeBtn = el('button', 'btn btn-coach');
       shapeBtn.type = 'button';
       shapeBtn.appendChild(svgEl(SVG.spark, 'btn-icon'));
@@ -3900,7 +4044,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           .then(function (r) {
             shapeBtn.disabled = false;
             // shaping advice, never a verdict: no tag, nothing recorded
-            coachBlock(pitchOut, r.text, null);
+            coachBlock(pitchOut, r.text, null, activity);
           })
           .catch(function (err) {
             shapeBtn.disabled = false;
@@ -4105,6 +4249,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     liveOn: liveOn,
     pitchActionOn: pitchActionOn,
     tagPill: tagPill,
+    liveRegion: liveRegion,
     feedbackBlock: feedbackBlock,
     appendResources: appendResources,
     coachBlock: coachBlock,
@@ -4516,13 +4661,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       className || 'm-bot');
   }
 
-  /* small brand glyphs the skin uses (SVG, never emoji: crisp and printable) */
+  /* small brand glyphs the skin uses (SVG, never emoji: crisp and printable).
+     All decorative: the adjacent text carries the meaning (WCAG 1.1.1). */
   var GLYPH = {
-    star: '<svg viewBox="0 0 20 20" width="15" height="15" fill="#F4B41A"><path d="M10 1.6l2.5 5.2 5.7.7-4.2 3.9 1.1 5.6L10 14.2 4.9 17l1.1-5.6L1.8 7.5l5.7-.7z"/></svg>',
-    medal: '<svg viewBox="0 0 64 64" width="44" height="44"><circle cx="32" cy="26" r="17" fill="#EE3124"/><circle cx="32" cy="26" r="17" fill="none" stroke="#F4B41A" stroke-width="4"/><circle cx="32" cy="26" r="11.5" fill="#2b6f74"/><path d="M25.5 26l4.6 4.6 8.4-10.4" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 40l-3.4 15 11.4-6.4L43.4 55 40 40z" fill="#F4B41A"/></svg>',
-    magnify: '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>',
-    lock: '<svg viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 016 0V9"/></svg>',
-    check: '<svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>'
+    star: '<svg viewBox="0 0 20 20" width="15" height="15" fill="#F4B41A" aria-hidden="true"><path d="M10 1.6l2.5 5.2 5.7.7-4.2 3.9 1.1 5.6L10 14.2 4.9 17l1.1-5.6L1.8 7.5l5.7-.7z"/></svg>',
+    medal: '<svg viewBox="0 0 64 64" width="44" height="44" aria-hidden="true"><circle cx="32" cy="26" r="17" fill="#EE3124"/><circle cx="32" cy="26" r="17" fill="none" stroke="#F4B41A" stroke-width="4"/><circle cx="32" cy="26" r="11.5" fill="#2b6f74"/><path d="M25.5 26l4.6 4.6 8.4-10.4" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 40l-3.4 15 11.4-6.4L43.4 55 40 40z" fill="#F4B41A"/></svg>',
+    magnify: '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>',
+    lock: '<svg viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2"/><path d="M7 9V6.5a3 3 0 016 0V9"/></svg>',
+    check: '<svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>'
   };
 
   /* ================= the poster backdrop (background layer + slot) ================= */
@@ -4571,7 +4717,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     bg.appendChild(blobs);
     host.appendChild(bg);
     var icons = C.svgEl(
-      '<svg viewBox="0 0 100 100" preserveAspectRatio="none" width="100%" height="100%">'
+      '<svg viewBox="0 0 100 100" preserveAspectRatio="none" width="100%" height="100%" aria-hidden="true">'
       + iconLayerMarkup() + '</svg>', 'm-icons');
     host.appendChild(icons);
     host.appendChild(el('div', 'm-scrim'));
@@ -4627,9 +4773,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function buildMedallion(total, label) {
     var CIRC = 138.2;
+    var labelBase = label || 'Mission progress';
     var wrap = C.svgEl(
       '<svg viewBox="0 0 52 52" width="46" height="46" class="m-medal-svg" role="img" aria-label="'
-      + (label || 'Mission progress') + '">'
+      + labelBase + ': 0 of ' + total + '">'
       + '<circle class="m-medal-track" cx="26" cy="26" r="22" fill="none" stroke-width="5"/>'
       + '<circle class="m-medal-fill" cx="26" cy="26" r="22" fill="none" stroke-width="5" stroke-linecap="round"'
       + ' stroke-dasharray="' + CIRC + '" stroke-dashoffset="' + CIRC + '" transform="rotate(-90 26 26)"/>'
@@ -4643,6 +4790,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         var lbl = wrap.querySelector('.m-medal-lbl');
         fill.style.strokeDashoffset = String(CIRC * (1 - Math.min(done, t) / t));
         lbl.textContent = done + '/' + t;
+        // the accessible name tracks the visible count (WCAG 1.1.1)
+        var svg = wrap.querySelector('svg');
+        if (svg) svg.setAttribute('aria-label', labelBase + ': ' + done + ' of ' + t);
         wrap.classList.toggle('m-medal-full', done >= t);
       }
     };
@@ -4657,6 +4807,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       var n = el(onNav ? 'button' : 'span', 'm-node');
       if (onNav) {
         n.type = 'button';
+        // a dot button has no visible text: name it programmatically
+        n.setAttribute('aria-label', item.label || 'Stop');
         n.addEventListener('click', function () { onNav(item.id); });
       }
       n.title = item.label || '';
@@ -4801,6 +4953,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      beat. Reduced motion swaps instantly. */
 
   var SWAP_MS = 460;
+
+  /* On step/case navigation, focus moves to the heading of the new scene so
+     keyboard and screen-reader users land where the sighted eye lands
+     (WCAG 2.4.3). The heading takes tabindex="-1" (focusable by script
+     only, never in the tab order). */
+  function focusHeading(sceneNode) {
+    if (!sceneNode) return;
+    var heading = sceneNode.querySelector('.m-scene-title')
+      || sceneNode.querySelector('h1, h2');
+    if (!heading) return;
+    heading.setAttribute('tabindex', '-1');
+    try { heading.focus({ preventScroll: false }); } catch (e) { heading.focus(); }
+  }
 
   function buildScene(opts) {
     opts = opts || {};
@@ -4948,6 +5113,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     buildCoachPanel: buildCoachPanel,
     buildScene: buildScene,
     buildStage: buildStage,
+    focusHeading: focusHeading,
     buildShell: buildShell,
     toast: toast,
     buildReportSheet: buildReportSheet
@@ -5216,7 +5382,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     // optional coach phrasing: same recommendation, mentor voice. Off = the
     // deterministic version above stands as-is.
     if (C.liveOn()) {
-      var coachOut = el('div', 'feedback');
+      var coachOut = C.liveRegion();
       var btnRow = el('div', 'btn-row');
       btnRow.appendChild(C.coachButton(state, 'Hear it from the coach', function (b) {
         b.disabled = true;
@@ -5224,7 +5390,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         window.PracticeLive.coachPath(activity, summaryText(result))
           .then(function (r) {
             b.disabled = false;
-            C.coachBlock(coachOut, r.text, null);
+            C.coachBlock(coachOut, r.text, null, activity);
             state.lastPathCoachText = r.text || '';
           })
           .catch(function (err) {
@@ -5703,8 +5869,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var choices = el('div', 'm-choices');
     card.body.appendChild(choices);
 
-    // the consequence beat: the mentor reacts inside the calm zone
+    // the consequence beat: the mentor reacts inside the calm zone; a live
+    // region so the verdict is announced when it appears (WCAG 4.1.3)
     var cq = el('div', 'm-cq');
+    cq.setAttribute('aria-live', 'polite');
     card.body.appendChild(cq);
 
     function showConsequence(option, isFresh) {
@@ -5848,8 +6016,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     var btn = el('button', 'btn btn-teal', 'Review my scenario');
     btn.type = 'button';
-    var out = el('div', 'review-out');
-    var coachOut = C.liveOn() ? el('div', 'feedback') : null;
+    var out = C.liveRegion('review-out');
+    var coachOut = C.liveOn() ? C.liveRegion() : null;
 
     btn.addEventListener('click', function () {
       out.textContent = '';
@@ -5867,7 +6035,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         b.disabled = true;
         C.coachThinking(coachOut);
         window.PracticeLive.coachCanvas(activity, state.answers)
-          .then(function (r) { b.disabled = false; C.coachBlock(coachOut, r.text, null); })
+          .then(function (r) { b.disabled = false; C.coachBlock(coachOut, r.text, null, activity); })
           .catch(function (err) { b.disabled = false; C.coachFallback(state, coachOut, err, function () { btn.click(); }); });
       }));
     }
@@ -6005,10 +6173,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       state.currentSceneId = sceneId;
       state.atEnding = false;
       state.shell.backdrop.set(all.indexOf(scene), scene.background || scene.image);
-      stage.swap(buildSceneCard(activity, state, scene, function (nextId) {
+      var node = buildSceneCard(activity, state, scene, function (nextId) {
         if (nextId) playScene(nextId);
         else showEnding();
-      }));
+      });
+      stage.swap(node);
+      if (state.booted) M.focusHeading(node); // navigation moves focus to the new heading
       refreshHud(activity, state);
     }
 
@@ -6016,7 +6186,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       state.atEnding = true;
       state.currentSceneId = null;
       state.shell.backdrop.set(all.length, activity.meta.background || null);
-      stage.swap(buildEndingScene(activity, state));
+      var node = buildEndingScene(activity, state);
+      stage.swap(node);
+      if (state.booted) M.focusHeading(node);
       refreshHud(activity, state);
     }
 
@@ -6036,6 +6208,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     state.shell.backdrop.set(0, activity.meta.background || activity.meta.cover_image);
     stage.swap(buildTitleScene(activity, state, resume));
+    state.booted = true; // from here on, every scene swap moves focus
     refreshHud(activity, state);
   }
 
@@ -6463,9 +6636,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var card = el('div', 'field-card');
     card.id = 'card-' + prompt.id;
     var ta = el('textarea', 'answer-input answer-short');
+    ta.id = 'input-' + prompt.id;
+    // labelled at creation; the section screen re-points this at its
+    // visible block heading (WCAG 1.3.1 / 3.3.2)
+    ta.setAttribute('aria-label', prompt.label || 'Your answer');
     ta.placeholder = 'Points to speak from, not a script.';
     ta.value = state.answers[prompt.id] || '';
-    var feedback = el('div', 'feedback');
+    var feedback = C.liveRegion();
     var check = function () {
       var result = FB.evaluatePoint(prompt, state.answers[prompt.id], state.checks);
       C.feedbackBlock(feedback, result);
@@ -6495,7 +6672,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function buildItemBlock(activity, state, entry) {
     var block = el('div', 'm-fieldblock');
     block.id = 'block-' + entry.id;
-    block.appendChild(el('h3', 'm-fieldblock-title', entry.item.label));
+    var blockTitle = el('h3', 'm-fieldblock-title', entry.item.label);
+    blockTitle.id = 'block-title-' + entry.id;
+    block.appendChild(blockTitle);
 
     // The field's instructions, clearly labelled and placed above the answer.
     // This is authored guidance, not the AI coach; the coach only speaks after
@@ -6510,7 +6689,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       instr.appendChild(el('p', 'm-instructions-p', helpText));
       var pcfg = state.missionPoints;
       var chip = el('div', 'm-instructions-reward');
-      chip.appendChild(el('span', 'm-instructions-star', '★'));
+      // the SVG star, not a text star: decorative, hidden, and exempt from
+      // the text-contrast rule a low-contrast gold character would fail
+      chip.appendChild(C.svgEl(M.GLYPH.star, 'm-instructions-star'));
       chip.appendChild(el('span', null, 'Reward: +' + itemPoints(entry, pcfg)
         + ' Insight when this field locks in'));
       instr.appendChild(chip);
@@ -6531,6 +6712,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }
       state.editors[entry.id] = editor;
     }
+    // the visible block heading is the programmatic label of the input here
+    // (the field-head inside the editor is hidden by the Mission layout)
+    editor.textarea.setAttribute('aria-labelledby', blockTitle.id);
     block.appendChild(editor.card);
     return block;
   }
@@ -6647,8 +6831,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     var btn = el('button', 'btn btn-teal btn-large', 'Run the full review');
     btn.type = 'button';
-    var out = el('div', 'review-out');
-    var coachOut = C.liveOn() ? el('div', 'feedback') : null;
+    var out = C.liveRegion('review-out');
+    var coachOut = C.liveOn() ? C.liveRegion() : null;
 
     // the personal path (E4): home activities only; the component itself
     // gates on meta.context, so a class build renders nothing here
@@ -6705,7 +6889,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         b.disabled = true;
         C.coachThinking(coachOut);
         window.PracticeLive.coachCanvas(activity, state.answers)
-          .then(function (r) { b.disabled = false; C.coachBlock(coachOut, r.text, null); })
+          .then(function (r) { b.disabled = false; C.coachBlock(coachOut, r.text, null, activity); })
           .catch(function (err) { b.disabled = false; C.coachFallback(state, coachOut, err, function () { btn.click(); }); });
       }));
     }
@@ -6877,7 +7061,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         window.setTimeout(function () {
           var block = node.querySelector('#block-' + focusItemId);
           if (block) block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // a fix-link jump lands focus on that field heading (WCAG 2.4.3)
+          var blockTitle = node.querySelector('#block-title-' + focusItemId);
+          if (blockTitle) {
+            blockTitle.setAttribute('tabindex', '-1');
+            try { blockTitle.focus({ preventScroll: true }); } catch (e) { blockTitle.focus(); }
+          }
         }, M.reducedMotion() ? 0 : 60);
+      } else if (state.booted) {
+        // step/case navigation moves focus to the heading of the new scene
+        M.focusHeading(node);
       }
     }
     state.openTile = openStop;
