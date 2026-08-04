@@ -3,10 +3,18 @@
 Self-contained, student-facing interactive class activities for Wawiwa programs,
 published with GitHub Pages.
 
-Each activity is a single `index.html` file that collects no data and makes no
-external requests. Students open it via a direct link placed inside the gated
-course, fill it in, and use the browser's **Save as PDF** to keep a copy. Nothing
-is stored or transmitted anywhere.
+Each activity is a single `index.html` file. Activities make no external
+requests, and nothing a student types is collected or transmitted to Wawiwa or
+to any server. Some activities save in-progress answers only in the student's
+own browser (localStorage) so their work survives a reload; that data stays on
+the student's device and is never transmitted. This matches the HECVAT AI-Coach
+note. Students open an activity via a direct link placed inside the gated
+course and fill it in; where an activity offers it, the browser's **Save as
+PDF** keeps a copy.
+
+The AICY60 AI coach ships in offline mode (no network calls). Its live mode
+routes only redacted text through Wawiwa's anonymizing proxy and stays disabled
+until a DPA covers the program; it is off in every published activity today.
 
 ## Folder structure
 
@@ -64,5 +72,7 @@ link the repository root; it only shows a neutral notice.
 | Enterprise AI Implementation | M1 / L5 | Homework 5: Completing the Architecture Document and Preparing for Build vs Buy — HOME, AI coach + personal path + resources | `enterprise-ai-implementation/eai-m1l5-home/` |
 | Enterprise AI Implementation | M1 / L6 | AI Implementation Canvas for Your Own Use Case (In Class) — CLASS, AI coach (Practice Studio) | `enterprise-ai-implementation/eai-m1l6-class/` |
 | Enterprise AI Implementation | M1 / L6 | Module 1 Final Homework: AI Implementation Canvas and Opening Pitch — HOME, AI coach + personal path + resources | `enterprise-ai-implementation/eai-m1l6-home/` |
+| AI & Cybersecurity (AICY60) | T0 / E1 | AICY.T0.E1 - Media Literacy: coach debrief + personal path add-on (sits under Dor's native Rise task boxes), verbatim SME wording | `ai-and-cybersecurity/aicy-t0-media-literacy/` |
+| AI & Cybersecurity (AICY60) | T1 / E1 | AICY.T1.E1 - DeepPhishing: 6-card workbook, verbatim SME wording, AI coach + personal path, on-device autosave | `ai-and-cybersecurity/aicy-t1-deepphishing/` |
 
 _© Wawiwa Tech | Confidential_
