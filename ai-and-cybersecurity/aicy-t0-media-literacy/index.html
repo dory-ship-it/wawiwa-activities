@@ -4,117 +4,515 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Media Literacy | AICY.T0.E1</title>
+<title>Media Literacy: Debrief and Personal Path | AICY.T0.E1</title>
 <style>
   :root{
-    --ink:#1F2C36;
-    --body:#3A4555;
-    --muted:#5E6A79;
-    --line:#E3E9EC;
-    --field:#7F8C97;
-    --teal:#5AB3AA;
-    --link:#2E6E76;
+    --red:#EE3124;
+    --navy:#255777;
+    --navy-dark:#1C455F;
+    --turq:#5AB3AA;
+    --teal:#3E868F;
+    --teal-text:#2E6E76;
+    --gold:#F4B41A;
+    --ink:#20323b;
+    --body:#33454E;
+    --muted:#5C6E77;
+    --line:#DDE8EA;
+    --edge:#8496A0;
+    --tint:#F2F8F8;
+    --tint-warm:#FDF7E8;
+    --shadow:0 1px 2px rgba(37,87,119,.05), 0 10px 26px rgba(37,87,119,.09);
+    --shadow-hi:0 2px 4px rgba(37,87,119,.07), 0 16px 36px rgba(37,87,119,.14);
     --font:'Assistant',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --display:'Roboto','Assistant',system-ui,-apple-system,sans-serif;
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
   body{
     margin:0;background:#fff;color:var(--body);
-    font-family:var(--font);font-size:17px;line-height:1.6;
+    font-family:var(--font);font-size:17px;line-height:1.65;
   }
-  a{color:var(--link);text-underline-offset:2px}
-  a:hover{text-decoration-thickness:2px}
-  :focus-visible{outline:3px solid var(--link);outline-offset:2px}
+  .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;
+    clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+  :focus-visible{outline:3px solid var(--navy);outline-offset:2px;border-radius:4px}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
-  .page{max-width:720px;margin:0 auto;padding:36px 24px 56px}
+  .page{max-width:820px;margin:0 auto;padding:8px 24px 40px}
 
-  h1{font-size:1.7rem;line-height:1.2;font-weight:700;color:var(--ink);margin:0}
-  .rule{width:48px;height:4px;background:var(--teal);margin:14px 0 0}
-  .brief{margin:24px 0 32px}
+  /* ---------- section heading ---------- */
+  .sec{margin:0 0 34px}
+  .sec:last-child{margin-bottom:0}
+  .eyebrow{
+    font-family:var(--display);font-size:.72rem;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--teal-text);
+    margin:0 0 8px;
+  }
+  h2{
+    font-family:var(--display);font-size:1.42rem;line-height:1.22;font-weight:700;
+    color:var(--navy);margin:0;letter-spacing:-.2px;
+  }
+  .rule{display:block;width:52px;height:4px;border-radius:40px;
+    background:var(--turq);margin:12px 0 20px}
 
-  ol.tasks{list-style:none;counter-reset:t;margin:0;padding:0}
-  li.task{
-    counter-increment:t;
-    display:flex;gap:16px;
-    border:1px solid var(--line);border-radius:8px;
-    padding:22px 24px;margin:0 0 16px;
+  /* ---------- card ---------- */
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:16px;
+    box-shadow:var(--shadow);padding:26px 28px 24px;
+    border-top:4px solid var(--turq);
   }
-  li.task::before{
-    content:counter(t) ".";
-    flex:0 0 22px;
-    color:var(--muted);font-weight:700;
+
+  .head{display:flex;gap:14px;align-items:flex-start;margin:0 0 16px}
+  .tile{
+    flex:0 0 38px;height:38px;border-radius:11px;
+    background:var(--tint);border:1px solid #D3E6E6;
+    display:flex;align-items:center;justify-content:center;color:var(--teal-text);
   }
-  .task>div{flex:1 1 auto;min-width:0}
-  .q{margin:0;color:var(--ink)}
-  .lbl{display:block;font-size:.8rem;color:var(--muted);margin:18px 0 6px}
+  .tile svg{width:20px;height:20px;stroke:currentColor;fill:none;
+    stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .q{font-family:var(--display);font-weight:700;font-size:1.06rem;
+    line-height:1.4;color:var(--ink);margin:6px 0 0;display:block}
+
   textarea{
-    display:block;width:100%;
-    font:inherit;font-size:.97rem;color:var(--ink);
-    background:#fff;border:1px solid var(--field);border-radius:6px;
-    padding:10px 12px;resize:vertical;
+    display:block;width:100%;font:inherit;font-size:1rem;color:var(--ink);
+    background:#fff;border:1px solid var(--edge);border-radius:10px;
+    padding:12px 14px;resize:vertical;line-height:1.6;
+    transition:border-color .15s ease, box-shadow .15s ease;
   }
-  textarea:focus{border-color:var(--link)}
+  textarea:hover{border-color:var(--teal)}
+  textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(37,87,119,.12)}
 
-  @media (max-width:520px){
+  .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:18px 0 0}
+  .btn{
+    font-family:var(--display);font-size:.94rem;font-weight:700;
+    color:#fff;background:var(--navy);border:1px solid var(--navy);
+    border-radius:40px;padding:11px 22px;cursor:pointer;
+    box-shadow:0 6px 16px rgba(37,87,119,.24);
+    transition:background .15s ease, transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover{background:var(--navy-dark);transform:translateY(-1px);
+    box-shadow:0 8px 20px rgba(37,87,119,.30)}
+  .btn:active{transform:none}
+  .btn[disabled]{opacity:.6;cursor:default;transform:none;box-shadow:none}
+  .btn.ghost{
+    color:var(--navy);background:#fff;border:1.5px solid var(--navy);
+    box-shadow:none;
+  }
+  .btn.ghost:hover{background:var(--tint);color:var(--navy-dark)}
+
+  /* ---------- coach reply ---------- */
+  .reply{
+    display:flex;gap:12px;align-items:flex-start;
+    margin:18px 0 0;padding:15px 18px;border-radius:12px;
+    background:var(--tint);border-left:4px solid var(--teal);
+  }
+  .reply[hidden]{display:none}
+  .reply[data-tone="work"]{background:var(--tint-warm);border-left-color:var(--gold)}
+  .reply p{margin:0;font-size:.98rem}
+  .reply .lead{font-family:var(--display);font-weight:700;color:var(--ink);
+    display:block;margin:0 0 3px;font-size:.94rem}
+  .reply svg{flex:0 0 20px;width:20px;height:20px;margin-top:2px;
+    stroke:var(--teal-text);fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round}
+  .reply[data-tone="work"] svg{stroke:#8A5A00}
+
+  /* ---------- personal path ---------- */
+  ul.checks{list-style:none;margin:0;padding:0}
+  ul.checks li{
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+    padding:13px 0;border-bottom:1px solid var(--line);
+  }
+  ul.checks li:first-child{padding-top:0}
+  ul.checks li:last-child{border-bottom:0}
+  .num{flex:0 0 22px;font-family:var(--display);font-weight:700;
+    color:var(--muted);font-size:.92rem}
+  .cname{flex:1 1 190px;color:var(--ink);font-size:1rem}
+  .seg{display:flex;flex:0 0 auto;border-radius:40px;overflow:hidden;
+    border:1px solid var(--edge)}
+  .seg button{
+    font-family:var(--font);font-size:.88rem;font-weight:600;
+    color:var(--body);background:#fff;border:0;cursor:pointer;
+    padding:8px 15px;display:flex;align-items:center;gap:6px;
+    transition:background .15s ease, color .15s ease;
+  }
+  .seg button + button{border-left:1px solid var(--edge)}
+  .seg button:hover{background:var(--tint);color:var(--navy-dark)}
+  .seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+  .seg button[aria-pressed="true"]:hover{background:var(--navy-dark)}
+  .seg svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.6;
+    stroke-linecap:round;stroke-linejoin:round;visibility:hidden}
+  .seg button[aria-pressed="true"] svg{visibility:visible}
+
+  .pathout:not(:empty){margin:22px 0 0;padding:20px 0 0;border-top:1px solid var(--line)}
+  .pathout h3{font-family:var(--display);font-size:.72rem;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--teal-text);margin:0 0 12px}
+  ul.tells{list-style:none;margin:0;padding:0}
+  ul.tells li{display:flex;gap:12px;margin:0 0 12px;font-size:.98rem}
+  ul.tells li svg{flex:0 0 18px;width:18px;height:18px;margin-top:4px;
+    stroke:var(--teal-text);fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round}
+  ul.tells b{font-family:var(--display);color:var(--ink);font-weight:700}
+  .bridge{margin:16px 0 0;padding:14px 18px;border-radius:12px;
+    background:var(--tint);border-left:4px solid var(--turq);
+    font-size:.98rem;color:var(--ink)}
+
+  /* ---------- print / PDF ---------- */
+  .printonly{display:none}
+  @page{margin:14mm}
+  @media print{
+    body{font-size:11.5pt;line-height:1.5}
+    .page{max-width:none;padding:0}
+    .btn,.seg,.actions{display:none!important}
+    .printonly{display:block}
+    .card{box-shadow:none;border:1px solid #C9D8DB;break-inside:avoid;
+      padding:16px 18px}
+    .sec{margin-bottom:20px}
+    textarea{display:none}
+    .pv{white-space:pre-wrap;border:1px solid #C9D8DB;border-radius:8px;
+      padding:10px 12px;min-height:44px;color:#20323b}
+    .pv:empty::before{content:"(not answered)";color:#6B7B84}
+    .brand{display:flex;align-items:center;gap:12px;margin:0 0 22px;
+      padding-bottom:12px;border-bottom:2px solid #EE3124}
+    .brand .tag{background:#EE3124;color:#fff;font-family:var(--display);
+      font-weight:700;font-size:11pt;padding:4px 11px;border-radius:3px;
+      letter-spacing:.2px}
+    .brand .who{font-family:var(--display);font-weight:700;color:#255777;
+      font-size:11pt}
+    ul.checks li{padding:6px 0}
+    .pstate{font-family:var(--display);font-weight:700;color:#255777;
+      font-size:.92rem;flex:0 0 auto}
+  }
+
+  @media (max-width:560px){
     body{font-size:16px}
-    .page{padding:28px 18px 44px}
-    li.task{padding:18px 18px;gap:12px}
+    .page{padding:8px 18px 34px}
+    .card{padding:22px 20px 20px;border-radius:14px}
+    .cname{flex-basis:100%}
+    .num{flex-basis:auto}
   }
 </style>
 </head>
 <body>
+
+<h1 class="vh">Media Literacy: debrief and personal path</h1>
+
+<div class="brand printonly" aria-hidden="true">
+  <span class="tag">wawiwa</span>
+  <span class="who">Media Literacy &middot; AICY.T0.E1</span>
+</div>
+
 <div class="page">
 
-  <h1>Media Literacy</h1>
-  <div class="rule"></div>
+  <!-- ============ coach debrief ============ -->
+  <section class="sec" aria-labelledby="h-debrief">
+    <p class="eyebrow">AI Coach</p>
+    <h2 id="h-debrief">Debrief</h2>
+    <span class="rule"></span>
 
-  <p class="brief">In the assignment, the student will evaluate their ability to detect AI-generated media, including deepfakes, realistic faces, videos, artwork, and chat interactions, by testing their skills across various online identification tools.</p>
-
-  <ol class="tasks">
-
-    <li class="task">
-      <div>
-        <p class="q">Go to <a href="https://detectfakes.kellogg.northwestern.edu" target="_blank" rel="noopener">detectfakes.kellogg.northwestern.edu</a> And try the deep fake detection test, see how many you can detect!</p>
-        <label class="lbl" for="a1">Answer</label>
-        <textarea id="a1" rows="3"></textarea>
+    <div class="card">
+      <div class="head">
+        <span class="tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3v-6.5A8 8 0 0 1 11 4h2a8 8 0 0 1 8 8Z"/><path d="M9 11h6M9 15h3"/></svg>
+        </span>
+        <label class="q" for="tell">Which fooled you, and what gave it away?</label>
       </div>
-    </li>
 
-    <li class="task">
-      <div>
-        <p class="q">Try do detect real faces on <a href="https://whichfaceisreal.com/" target="_blank" rel="noopener">https://whichfaceisreal.com/</a></p>
-        <label class="lbl" for="a2">Answer</label>
-        <textarea id="a2" rows="3"></textarea>
+      <textarea id="tell" rows="4"></textarea>
+      <div class="pv printonly" id="pv-tell"></div>
+
+      <div class="actions">
+        <button type="button" class="btn" id="check">Check with AI Coach</button>
       </div>
-    </li>
 
-    <li class="task">
-      <div>
-        <p class="q">Try to detect AI videos on <a href="https://sightengine.com/ai-or-not-video" target="_blank" rel="noopener">https://sightengine.com/ai-or-not-video</a></p>
-        <label class="lbl" for="a3">Answer</label>
-        <textarea id="a3" rows="3"></textarea>
+      <div class="reply" id="reply" role="status" aria-live="polite" hidden></div>
+    </div>
+  </section>
+
+  <!-- ============ personal path ============ -->
+  <section class="sec" id="path-sec" aria-labelledby="h-path">
+    <p class="eyebrow">Personal path</p>
+    <h2 id="h-path">Which ones fooled you?</h2>
+    <span class="rule"></span>
+
+    <div class="card">
+      <ul class="checks" id="checks"></ul>
+      <div class="pathout" id="pathout" role="status" aria-live="polite"></div>
+      <div class="actions">
+        <button type="button" class="btn ghost" id="pdf">Save as PDF</button>
       </div>
-    </li>
-
-    <li class="task">
-      <div>
-        <p class="q">Try to identify AI art on <a href="https://quillbot.com/blog/human-or-ai-game/" target="_blank" rel="noopener">https://quillbot.com/blog/human-or-ai-game/</a></p>
-        <label class="lbl" for="a4">Answer</label>
-        <textarea id="a4" rows="3"></textarea>
-      </div>
-    </li>
-
-    <li class="task">
-      <div>
-        <p class="q">See if you can detect if youre talking to humans or AI <a href="https://humanornot.so/" target="_blank" rel="noopener">https://humanornot.so/</a></p>
-        <label class="lbl" for="a5">Answer</label>
-        <textarea id="a5" rows="3"></textarea>
-      </div>
-    </li>
-
-  </ol>
+    </div>
+  </section>
 
 </div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ------------------------------------------------------------------
+   * Context gate. home shows the personal path, class hides it.
+   * ?context=class on the embed URL overrides the default.
+   * ---------------------------------------------------------------- */
+  var META = { context: 'home' };
+  try{
+    var q = new URLSearchParams(window.location.search).get('context');
+    if (q === 'class' || q === 'home') META.context = q;
+  }catch(e){}
+
+  /* ------------------------------------------------------------------
+   * Live coach, wired to the Practice Studio anonymizing proxy exactly
+   * like engine/live.js. OFF for AICY60 until the DPA covers this
+   * program: flip LIVE.enabled to true and nothing else changes.
+   * With enabled:false the page makes no network requests at all.
+   * ---------------------------------------------------------------- */
+  var LIVE = {
+    enabled: false,
+    proxy_url: 'https://practice-studio-proxy.dory-08e.workers.dev',
+    session_token_cap: 25000,
+    model: null,
+    prompts: {
+      system: 'You are the coach for a Wawiwa cybersecurity awareness lesson '
+        + '(AICY60 T0, Media Literacy). The student has just run five public '
+        + 'AI-detection challenges and is naming what fooled them. Push for one '
+        + 'specific tell and tie it to spotting deepfake phishing. Two or three '
+        + 'sentences, plain and direct, no lists, no praise padding. You never '
+        + 'write phishing, malware, or synthetic-media attack content of any '
+        + 'kind; if asked, decline and return to the defensive point.',
+      grounding: 'The five challenges, in order: a deepfake video detection test '
+        + '(Kellogg, Northwestern); real versus AI-generated faces '
+        + '(whichfaceisreal.com); AI-generated video (sightengine.com); '
+        + 'AI-generated art (quillbot.com); human versus AI chat (humanornot.so). '
+        + 'A good answer names the media type and the specific detail that gave it '
+        + 'away, such as lip-to-audio sync, hairline and jaw edges, hands, teeth, '
+        + 'earrings, lighting that ignores its own source, texture that is too '
+        + 'even, or an unnaturally fast and even chat reply. The defensive point: '
+        + 'the same tells decide whether a deepfake voice or video phishing '
+        + 'attempt lands.'
+    }
+  };
+
+  var CALL_TIMEOUT_MS = 20000;
+  var usedTokens = 0;
+
+  /* PII scrub, same pattern list as engine/redact.js. Unredacted text
+     never leaves the browser. */
+  var REDACT = [
+    { re:/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, sub:'[email removed]' },
+    { re:/\+?\d(?:[\s().\-]?\d){8,}/g, sub:'[number removed]' },
+    { re:/\d{9,}/g, sub:'[number removed]' },
+    { re:/\b(?=[A-Za-z0-9_\-]{20,}(\b|$))(?=[^\s]*\d)(?=[^\s]*[A-Za-z])[A-Za-z0-9_\-]{20,}\b/g,
+      sub:'[token removed]' }
+  ];
+  function redact(text){
+    var out = String(text || '');
+    REDACT.forEach(function(p){ p.re.lastIndex = 0; out = out.replace(p.re, p.sub); });
+    return out;
+  }
+
+  function liveAvailable(){
+    return !!(LIVE.enabled && LIVE.proxy_url && usedTokens < LIVE.session_token_cap);
+  }
+
+  function callProxy(kind, call){
+    if (!liveAvailable()) return Promise.reject(new Error('live_off'));
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = controller && setTimeout(function(){ controller.abort(); }, CALL_TIMEOUT_MS);
+    var payload = {
+      kind: kind,
+      system: LIVE.prompts.system,
+      grounding: LIVE.prompts.grounding,
+      call: call,
+      session: { used_tokens: usedTokens }
+    };
+    if (LIVE.model) payload.model = LIVE.model;
+    return fetch(LIVE.proxy_url, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      signal: controller ? controller.signal : undefined,
+      body: JSON.stringify(payload)
+    }).then(function(resp){
+      if (timer) clearTimeout(timer);
+      return resp.json().then(function(data){
+        if (!resp.ok || !data.ok) throw new Error('proxy_error');
+        var u = data.usage || {};
+        usedTokens += (u.input_tokens || 0) + (u.output_tokens || 0);
+        return data.text || '';
+      });
+    }).catch(function(err){
+      if (timer) clearTimeout(timer);
+      throw err;
+    });
+  }
+
+  /* ------------------------------------------------------------------
+   * Offline coach. Deterministic guard, grounded on this practice:
+   * name the media, then name the tell, then tie it to phishing.
+   * ---------------------------------------------------------------- */
+  var MEDIA = /(video|deep\s?fake|deepfake|face|photo|image|picture|portrait|art|artwork|painting|drawing|chat|conversation|bot|voice|audio|clip)/i;
+  var TELL  = /(eye|pupil|hand|finger|teeth|tooth|ear|earring|hair|jaw|neck|skin|background|light|shadow|shade|texture|blur|edge|sync|lip|mouth|symmetr|reflection|jewel|glasses|watermark|artifact|glitch|frame|grammar|typo|spell|tone|speed|fast|slow|delay|repeat|repetit|pattern|perspective|proportion|sign|text|smooth|uniform|generic|emoji|punctuation|detail|accent|breath|blink)/i;
+  var FILLER = /^(idk|dunno|none|nothing|nope|n\/?a|na|no|yes|ok|okay|good|bad|fine|easy|hard|fun|cool|nice|all|some|maybe|dont know|don't know|[\s\-\.\?]*)$/i;
+
+  var REPLIES = {
+    empty: { tone:'work', lead:'Nothing to work with yet',
+      text:'Write two or three sentences: which of the five caught you out, and the detail that gave it away.' },
+    thin: { tone:'work', lead:'Too thin to grade',
+      text:'Name the media that fooled you, then the one detail you noticed. A tell you can point at is a tell you can reuse.' },
+    media: { tone:'work', lead:'Say which one',
+      text:'Was it the deepfake video, the faces, the AI clip, the art, or the chat? The giveaway is different for each of the five.' },
+    tell: { tone:'work', lead:'Now name the tell',
+      text:'Point at the exact detail: the lip sync, the hairline, the hands, the lighting, the reply speed. "It just looked off" will not help you next time.' },
+    good: { tone:'ok', lead:'That one transfers',
+      text:'A deepfake voice or video phishing attempt fails on the same detail. Trust that instinct when a face on a call is pushing you to act fast.' }
+  };
+
+  function judge(raw){
+    var text = String(raw || '').trim();
+    if (!text) return REPLIES.empty;
+    var words = text.split(/\s+/).filter(Boolean);
+    if (FILLER.test(text) || words.length < 4 || text.length < 14) return REPLIES.thin;
+    if (!MEDIA.test(text)) return REPLIES.media;
+    if (!TELL.test(text)) return REPLIES.tell;
+    return REPLIES.good;
+  }
+
+  /* ------------------------------------------------------------------ */
+
+  var ICON_OK   = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 13 5 5L20 6"/></svg>';
+  var ICON_WORK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>';
+  var ICON_EYE  = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.6"/></svg>';
+  var ICON_TICK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
+
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  var reply = document.getElementById('reply');
+  var tell = document.getElementById('tell');
+  var checkBtn = document.getElementById('check');
+
+  function show(r){
+    reply.hidden = false;
+    reply.setAttribute('data-tone', r.tone);
+    reply.innerHTML = (r.tone === 'ok' ? ICON_OK : ICON_WORK)
+      + '<p><span class="lead">' + esc(r.lead) + '</span>' + esc(r.text) + '</p>';
+  }
+
+  function showLive(text){
+    reply.hidden = false;
+    reply.setAttribute('data-tone','ok');
+    reply.innerHTML = ICON_OK + '<p>' + esc(text) + '</p>';
+  }
+
+  checkBtn.addEventListener('click', function(){
+    var answer = tell.value;
+    if (!liveAvailable()){ show(judge(answer)); return; }
+    checkBtn.disabled = true;
+    var was = checkBtn.textContent;
+    checkBtn.textContent = 'Checking…';
+    var call = 'The student was asked: "Which fooled you, and what gave it away?"\n\n'
+      + 'Their answer:\n"""\n' + redact(answer) + '\n"""\n\n'
+      + 'Coach them in two or three sentences.';
+    callProxy('field', call).then(function(text){
+      if (text && text.trim()) showLive(text.trim()); else show(judge(answer));
+    }).catch(function(){
+      show(judge(answer));
+    }).then(function(){
+      checkBtn.disabled = false;
+      checkBtn.textContent = was;
+    });
+  });
+
+  /* ------------------------------------------------------------------
+   * Personal path. Five toggles, one per challenge already on the
+   * page above. Each "Fooled me" returns the tell for that medium.
+   * ---------------------------------------------------------------- */
+  var CHALLENGES = [
+    { id:'c1', name:'Deepfake video test',
+      tell:'Check lip-to-audio sync first, then the jawline and hairline where the face meets the background.' },
+    { id:'c2', name:'Real vs AI faces',
+      tell:'Generated portraits slip at the edges: one odd ear, mismatched earrings, teeth that do not line up, a melting background.' },
+    { id:'c3', name:'AI video',
+      tell:'Hold on a few seconds of motion. Hands, text on signs, and reflections stop matching frame to frame.' },
+    { id:'c4', name:'AI art',
+      tell:'Shading that ignores its own light source and texture that is too even are what give AI art away.' },
+    { id:'c5', name:'Human vs AI chat',
+      tell:'AI answers fast, evenly, and politely. People mistype, drift off topic, and refuse a dull question.' }
+  ];
+
+  var BRIDGE_SOME = 'Next up in T1 DeepPhishing you build the message yourself. These same tells decide whether it lands.';
+  var BRIDGE_ALL  = 'Five for five. In T1 DeepPhishing you switch sides and build the message, so watch for these tells in your own work.';
+
+  var state = {};
+  var checks = document.getElementById('checks');
+  var pathout = document.getElementById('pathout');
+  var pathSec = document.getElementById('path-sec');
+
+  if (META.context === 'class'){
+    pathSec.parentNode.removeChild(pathSec);
+  } else {
+    CHALLENGES.forEach(function(c, i){
+      var li = document.createElement('li');
+      li.innerHTML =
+        '<span class="num" aria-hidden="true">' + (i + 1) + '</span>'
+        + '<span class="cname" id="lbl-' + c.id + '">' + esc(c.name) + '</span>'
+        + '<span class="seg" role="group" aria-labelledby="lbl-' + c.id + '">'
+        +   '<button type="button" aria-pressed="false" data-c="' + c.id + '" data-v="spotted">'
+        +     ICON_TICK + 'Spotted it</button>'
+        +   '<button type="button" aria-pressed="false" data-c="' + c.id + '" data-v="fooled">'
+        +     ICON_TICK + 'Fooled me</button>'
+        + '</span>'
+        + '<span class="pstate printonly" id="ps-' + c.id + '"></span>';
+      checks.appendChild(li);
+    });
+
+    checks.addEventListener('click', function(ev){
+      var btn = ev.target.closest ? ev.target.closest('button[data-c]') : null;
+      if (!btn) return;
+      var id = btn.getAttribute('data-c');
+      var val = btn.getAttribute('data-v');
+      state[id] = (state[id] === val) ? null : val;
+      var group = btn.parentNode.querySelectorAll('button[data-c]');
+      Array.prototype.forEach.call(group, function(b){
+        b.setAttribute('aria-pressed', state[id] === b.getAttribute('data-v') ? 'true' : 'false');
+      });
+      var ps = document.getElementById('ps-' + id);
+      if (ps) ps.textContent = state[id] === 'fooled' ? 'Fooled me'
+        : (state[id] === 'spotted' ? 'Spotted it' : '');
+      renderPath();
+    });
+
+    function renderPath(){
+      var answered = CHALLENGES.filter(function(c){ return state[c.id]; });
+      if (!answered.length){ pathout.innerHTML = ''; return; }
+      var fooled = CHALLENGES.filter(function(c){ return state[c.id] === 'fooled'; });
+      var html = '';
+      if (fooled.length){
+        html += '<h3>Watch for</h3><ul class="tells">'
+          + fooled.map(function(c){
+              return '<li>' + ICON_EYE + '<span><b>' + esc(c.name) + '.</b> '
+                + esc(c.tell) + '</span></li>';
+            }).join('')
+          + '</ul>';
+      }
+      var allDone = answered.length === CHALLENGES.length;
+      html += '<p class="bridge">'
+        + esc(allDone && !fooled.length ? BRIDGE_ALL : BRIDGE_SOME) + '</p>';
+      pathout.innerHTML = html;
+    }
+  }
+
+  /* ------------------------------------------------------------------
+   * PDF takeaway. Mirrors the answer into a print-only block, since
+   * browsers clip a scrolled textarea when printing.
+   * ---------------------------------------------------------------- */
+  function syncPrint(){
+    document.getElementById('pv-tell').textContent = tell.value.trim();
+  }
+  window.addEventListener('beforeprint', syncPrint);
+  var pdfBtn = document.getElementById('pdf');
+  if (pdfBtn){
+    pdfBtn.addEventListener('click', function(){ syncPrint(); window.print(); });
+  }
+})();
+</script>
 </body>
 </html>
