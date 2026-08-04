@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>DeepPhishing | AICY.T1.E1</title>
+<style>
+  :root{
+    --red:#EE3124;
+    --navy:#255777;
+    --navy-dark:#1C455F;
+    --turq:#5AB3AA;
+    --teal:#3E868F;
+    --teal-text:#2E6E76;
+    --gold:#F4B41A;
+    --ink:#20323b;
+    --body:#33454E;
+    --muted:#5C6E77;
+    --line:#DDE8EA;
+    --edge:#8496A0;
+    --tint:#F2F8F8;
+    --tint-warm:#FDF7E8;
+    --shadow:0 1px 2px rgba(37,87,119,.05), 0 10px 26px rgba(37,87,119,.09);
+    --font:'Assistant',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --display:'Roboto','Assistant',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:#fff;color:var(--body);
+    font-family:var(--font);font-size:17px;line-height:1.65;
+  }
+  a{color:var(--teal-text);text-underline-offset:2px}
+  a:hover{text-decoration-thickness:2px}
+  .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;
+    clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+  :focus-visible{outline:3px solid var(--navy);outline-offset:2px;border-radius:4px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+  .page{max-width:820px;margin:0 auto;padding:8px 24px 40px}
+
+  /* ---------- section heading ---------- */
+  .eyebrow{
+    font-family:var(--display);font-size:.72rem;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--teal-text);
+    margin:0 0 8px;
+  }
+  h2{
+    font-family:var(--display);font-size:1.42rem;line-height:1.22;font-weight:700;
+    color:var(--navy);margin:0;letter-spacing:-.2px;
+  }
+  .rule{display:block;width:52px;height:4px;border-radius:40px;
+    background:var(--turq);margin:12px 0 0}
+
+  /* ---------- brief ---------- */
+  .brief{margin:20px 0 30px}
+  .brief p{margin:0}
+  .teams{display:inline-flex;align-items:center;gap:7px;margin:0 0 12px;
+    font-family:var(--display);font-size:.8rem;font-weight:700;
+    letter-spacing:.03em;color:var(--teal-text);
+    background:var(--tint);border:1px solid #D3E6E6;border-radius:40px;
+    padding:6px 14px}
+  .teams svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round}
+
+  /* ---------- task cards ---------- */
+  ol.tasks{list-style:none;counter-reset:t;margin:0 0 40px;padding:0}
+  li.task{
+    background:#fff;border:1px solid var(--line);border-radius:16px;
+    box-shadow:var(--shadow);border-top:4px solid var(--turq);
+    padding:24px 28px 22px;margin:0 0 18px;
+    display:flex;gap:16px;
+  }
+  .tile{
+    counter-increment:t;flex:0 0 38px;height:38px;border-radius:11px;
+    background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--display);font-weight:700;font-size:1.06rem;
+  }
+  .tile::before{content:counter(t)}
+  .task .body{flex:1 1 auto;min-width:0}
+  .instr{margin:5px 0 0;color:var(--ink);font-size:1.02rem}
+
+  .links{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 0}
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--display);font-size:.86rem;font-weight:600;
+    color:var(--teal-text);background:#fff;
+    border:1.5px solid #CFE2E2;border-radius:40px;
+    padding:8px 15px;text-decoration:none;
+    transition:border-color .15s ease, background .15s ease, transform .15s ease;
+  }
+  .chip:hover{border-color:var(--teal);background:var(--tint);transform:translateY(-1px)}
+  .chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round}
+
+  .lbl{display:block;font-size:.78rem;color:var(--muted);margin:18px 0 6px;
+    font-weight:600}
+  textarea{
+    display:block;width:100%;font:inherit;font-size:1rem;color:var(--ink);
+    background:#fff;border:1px solid var(--edge);border-radius:10px;
+    padding:12px 14px;resize:vertical;line-height:1.6;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  textarea:hover{border-color:var(--teal)}
+  textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(37,87,119,.12)}
+  .pii{margin:9px 0 0;font-size:.86rem;color:var(--muted)}
+
+  /* ---------- coach + path shared card ---------- */
+  .sec{margin:0 0 34px}
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:16px;
+    box-shadow:var(--shadow);padding:26px 28px 24px;
+    border-top:4px solid var(--turq);
+  }
+  .head{display:flex;gap:14px;align-items:flex-start;margin:0 0 16px}
+  .head .itile{
+    flex:0 0 38px;height:38px;border-radius:11px;
+    background:var(--tint);border:1px solid #D3E6E6;
+    display:flex;align-items:center;justify-content:center;color:var(--teal-text);
+  }
+  .head .itile svg{width:20px;height:20px;stroke:currentColor;fill:none;
+    stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .q{font-family:var(--display);font-weight:700;font-size:1.06rem;
+    line-height:1.4;color:var(--ink);margin:6px 0 0;display:block}
+
+  .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:18px 0 0}
+  .btn{
+    font-family:var(--display);font-size:.94rem;font-weight:700;
+    color:#fff;background:var(--navy);border:1px solid var(--navy);
+    border-radius:40px;padding:11px 22px;cursor:pointer;
+    box-shadow:0 6px 16px rgba(37,87,119,.24);
+    transition:background .15s ease, transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover{background:var(--navy-dark);transform:translateY(-1px);
+    box-shadow:0 8px 20px rgba(37,87,119,.30)}
+  .btn:active{transform:none}
+  .btn[disabled]{opacity:.6;cursor:default;transform:none;box-shadow:none}
+
+  .reply{
+    display:flex;gap:12px;align-items:flex-start;
+    margin:18px 0 0;padding:15px 18px;border-radius:12px;
+    background:var(--tint);border-left:4px solid var(--teal);
+  }
+  .reply[hidden]{display:none}
+  .reply[data-tone="work"]{background:var(--tint-warm);border-left-color:var(--gold)}
+  .reply p{margin:0;font-size:.98rem}
+  .reply .lead{font-family:var(--display);font-weight:700;color:var(--ink);
+    display:block;margin:0 0 3px;font-size:.94rem}
+  .reply svg{flex:0 0 20px;width:20px;height:20px;margin-top:2px;
+    stroke:var(--teal-text);fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round}
+  .reply[data-tone="work"] svg{stroke:#8A5A00}
+
+  /* ---------- personal path ---------- */
+  ul.checks{list-style:none;margin:0;padding:0}
+  ul.checks li{
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+    padding:14px 0;border-bottom:1px solid var(--line);
+  }
+  ul.checks li:first-child{padding-top:0}
+  ul.checks li:last-child{border-bottom:0}
+  .cname{flex:1 1 200px;color:var(--ink);font-size:1rem}
+  .seg{display:flex;flex:0 0 auto;border-radius:40px;overflow:hidden;
+    border:1px solid var(--edge)}
+  .seg button{
+    font-family:var(--font);font-size:.88rem;font-weight:600;
+    color:var(--body);background:#fff;border:0;cursor:pointer;
+    padding:8px 15px;display:flex;align-items:center;gap:6px;
+    transition:background .15s ease, color .15s ease;
+  }
+  .seg button + button{border-left:1px solid var(--edge)}
+  .seg button:hover{background:var(--tint);color:var(--navy-dark)}
+  .seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+  .seg button[aria-pressed="true"]:hover{background:var(--navy-dark)}
+  .seg svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.6;
+    stroke-linecap:round;stroke-linejoin:round;visibility:hidden}
+  .seg button[aria-pressed="true"] svg{visibility:visible}
+
+  .pathout:not(:empty){margin:22px 0 0;padding:20px 0 0;border-top:1px solid var(--line)}
+  .pathout h3{font-family:var(--display);font-size:.72rem;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--teal-text);margin:0 0 12px}
+  ul.tips{list-style:none;margin:0;padding:0}
+  ul.tips li{display:flex;gap:12px;margin:0 0 12px;font-size:.98rem}
+  ul.tips li svg{flex:0 0 18px;width:18px;height:18px;margin-top:4px;
+    stroke:var(--teal-text);fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round}
+  ul.tips b{font-family:var(--display);color:var(--ink);font-weight:700}
+  .bridge{margin:16px 0 0;padding:14px 18px;border-radius:12px;
+    background:var(--tint);border-left:4px solid var(--turq);
+    font-size:.98rem;color:var(--ink)}
+
+  @media (max-width:560px){
+    body{font-size:16px}
+    .page{padding:8px 18px 34px}
+    li.task,.card{padding:22px 20px 20px;border-radius:14px}
+    .cname{flex-basis:100%}
+  }
+</style>
+</head>
+<body>
+
+<h1 class="vh">DeepPhishing red-team simulation</h1>
+
+<div class="page">
+
+  <!-- ============ brief ============ -->
+  <div class="brief">
+    <span class="teams">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M17.5 20a5.5 5.5 0 0 0-3-4.9"/></svg>
+      Teams of 2&ndash;4
+    </span>
+    <p>You&rsquo;ve been hired to perform a red-team simulation on a local pizzeria. Research the business, relevant health regulations, and craft a convincing inspection request that could persuade staff to download a file in a controlled test environment.</p>
+  </div>
+
+  <!-- ============ tasks ============ -->
+  <ol class="tasks" id="tasks"></ol>
+
+  <!-- ============ coach debrief ============ -->
+  <section class="sec" aria-labelledby="h-debrief">
+    <p class="eyebrow">AI Coach</p>
+    <h2 id="h-debrief">Debrief</h2>
+    <span class="rule"></span>
+    <div class="card" style="margin-top:20px">
+      <div class="head">
+        <span class="itile" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3v-6.5A8 8 0 0 1 11 4h2a8 8 0 0 1 8 8Z"/><path d="M9 11h6M9 15h3"/></svg>
+        </span>
+        <label class="q" for="tell">Which pressure made your request hard to refuse, and what would give it away?</label>
+      </div>
+      <textarea id="tell" rows="4" aria-describedby="pii-coach"></textarea>
+      <p class="pii" id="pii-coach">Don&rsquo;t include personal or identifying information in your answers.</p>
+      <div class="actions">
+        <button type="button" class="btn" id="check">Check with AI Coach</button>
+      </div>
+      <div class="reply" id="reply" role="status" aria-live="polite" hidden></div>
+    </div>
+  </section>
+
+  <!-- ============ personal path ============ -->
+  <section class="sec" id="path-sec" aria-labelledby="h-path">
+    <p class="eyebrow">Personal path</p>
+    <h2 id="h-path">Which levers did you lean on?</h2>
+    <span class="rule"></span>
+    <div class="card" style="margin-top:20px">
+      <ul class="checks" id="checks"></ul>
+      <div class="pathout" id="pathout" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ------------------------------------------------------------------
+   * Context gate. home shows the personal path, class hides it.
+   * ?context=class on the embed URL overrides the default.
+   * ---------------------------------------------------------------- */
+  var META = { context: 'home' };
+  try{
+    var q = new URLSearchParams(window.location.search).get('context');
+    if (q === 'class' || q === 'home') META.context = q;
+  }catch(e){}
+
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  var ICON_LINK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"/><path d="M19 5l-8 8"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg>';
+  var ICON_OK   = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 13 5 5L20 6"/></svg>';
+  var ICON_WORK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>';
+  var ICON_SHIELD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 8.4-7 9.5C8 19.4 5 15.4 5 11V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg>';
+  var ICON_TICK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
+
+  /* ------------------------------------------------------------------
+   * Six tasks. Instruction text is verbatim from the SME source
+   * (AICY.T1.E1 - DeepPhishing). Links ride along as labelled chips.
+   * ---------------------------------------------------------------- */
+  var TASKS = [
+    { id:'a1',
+      instr:'As a part of a Network security assessment You are tasked with infiltrating the network of this pizzeria by convincing them to download a malicious file. Gather some information about this location, health regulation and think of a convincing argument for inspection. Finally, Use ChatGPT in order to generate a convincing message encouraging the victims to download and execute an attached file.',
+      links:[
+        { label:'Pizzeria Vetri on Google Maps', url:'https://www.google.com/maps/place/Pizzeria+Vetri/@39.9463647,-75.1723536,6899m/data=!3m1!1e3!4m6!3m5!1s0x89c6c7ccba7bff77:0xca83b9208c4e3f68!8m2!3d39.9608917!4d-75.1712139!16s%2Fg%2F1pp2ty6_8' },
+        { label:'ChatGPT', url:'https://chatgpt.com' }
+      ] },
+    { id:'a2',
+      instr:'Now lets make the request more convincing, Take the role of a health inspector and create a short video message encouraging the victims to download the file. Use the sevice lipsync. Choose a relevant an avatar to deliver an inspection request that asks the pizzeria staff to complete a health-inspection form.',
+      links:[ { label:'lipsync.video', url:'https://lipsync.video/' } ] },
+    { id:'a3',
+      instr:'Create another video using recorded audio instead of text. Is the message more convincing now?',
+      links:[] },
+    { id:'a4',
+      instr:'Create another video using an avatar not from the website, choose a convincing formal looking photo online, You can use this. Is the message more convincing now?',
+      links:[ { label:'Stock photo (Pexels)', url:'https://www.pexels.com/video/woman-smiling-for-the-camera-7586535/' } ] },
+    { id:'a5',
+      instr:'Compare result with friends and try to improve result using different iteration.',
+      links:[] },
+    { id:'a6',
+      instr:'Brainstorm three ways someone could misuse this tool to impersonate or trick others.',
+      links:[] }
+  ];
+
+  var tasksEl = document.getElementById('tasks');
+  TASKS.forEach(function(t){
+    var li = document.createElement('li');
+    li.className = 'task';
+    var chips = t.links.map(function(l){
+      return '<a class="chip" href="' + l.url + '" target="_blank" rel="noopener">'
+        + ICON_LINK + esc(l.label) + '</a>';
+    }).join('');
+    li.innerHTML =
+      '<span class="tile" aria-hidden="true"></span>'
+      + '<div class="body">'
+      +   '<p class="instr" id="i-' + t.id + '">' + esc(t.instr) + '</p>'
+      +   (chips ? '<div class="links">' + chips + '</div>' : '')
+      +   '<label class="lbl" for="' + t.id + '">Your answer</label>'
+      +   '<textarea id="' + t.id + '" rows="4" aria-describedby="i-' + t.id + ' pii-' + t.id + '"></textarea>'
+      +   '<p class="pii" id="pii-' + t.id + '">Don’t include personal or identifying information in your answers.</p>'
+      + '</div>';
+    tasksEl.appendChild(li);
+  });
+
+  /* ------------------------------------------------------------------
+   * On-device autosave. Client-only: answers are written to this
+   * browser's localStorage and never transmitted anywhere. Lets the six
+   * answers plus the debrief survive a reload of the embedding Rise page.
+   * ---------------------------------------------------------------- */
+  var STORE_KEY = 'wawiwa.aicy.t1.deepphishing';
+  var FIELD_IDS = TASKS.map(function(t){ return t.id; }).concat(['tell']);
+
+  function loadSaved(){
+    try{
+      var raw = window.localStorage.getItem(STORE_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw) || {};
+      FIELD_IDS.forEach(function(id){
+        var el = document.getElementById(id);
+        if (el && typeof data[id] === 'string') el.value = data[id];
+      });
+    }catch(e){}
+  }
+  function save(){
+    try{
+      var data = {};
+      FIELD_IDS.forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) data[id] = el.value;
+      });
+      window.localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    }catch(e){}
+  }
+  loadSaved();
+  FIELD_IDS.forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', save);
+  });
+
+  /* ------------------------------------------------------------------
+   * Live coach, wired to the Practice Studio anonymizing proxy exactly
+   * like engine/live.js. OFF for AICY60 until the DPA covers this
+   * program: flip LIVE.enabled to true and nothing else changes.
+   * With enabled:false the page makes no network requests at all.
+   * ---------------------------------------------------------------- */
+  var LIVE = {
+    enabled: false,
+    proxy_url: 'https://practice-studio-proxy.dory-08e.workers.dev',
+    session_token_cap: 25000,
+    model: null,
+    prompts: {
+      system: 'You are the coach for a Wawiwa cybersecurity awareness lesson '
+        + '(AICY60 T1, DeepPhishing). This is an authorized, lab-only red-team '
+        + 'simulation. The student has just built a pretext inspection request '
+        + 'and is debriefing on what made it convincing. Name the pretext or '
+        + 'authority the pressure exploits, name the tell that would expose it, '
+        + 'and give one defensive takeaway a target could act on. Two or three '
+        + 'sentences, plain and direct, no lists. You NEVER write phishing, '
+        + 'malware, pretext scripts, or synthetic-media attack content of any '
+        + 'kind, even for the simulation; if asked, decline and return to the '
+        + 'defensive point.',
+      grounding: 'The simulation: a team poses as a health inspector and uses '
+        + 'ChatGPT and lip-sync video to pressure pizzeria staff into downloading '
+        + 'a file. The levers in play: authority (an official inspector), urgency '
+        + '(a compliance deadline), local research that makes it feel personal, a '
+        + 'realistic video avatar, and a cloned or recorded voice. The tells and '
+        + 'defenses: verify any inspector through the official register and a '
+        + 'known public number, not a number the message supplies; a real '
+        + 'regulator gives written notice and time to confirm; public business '
+        + 'details are not proof of identity; an unexpected video or voice '
+        + 'instruction is not proof it is a real person, so confirm out of band '
+        + 'before acting; never open an unsolicited attachment on the strength of '
+        + 'the message alone.'
+    }
+  };
+
+  var CALL_TIMEOUT_MS = 20000;
+  var usedTokens = 0;
+
+  var REDACT = [
+    { re:/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, sub:'[email removed]' },
+    { re:/\+?\d(?:[\s().\-]?\d){8,}/g, sub:'[number removed]' },
+    { re:/\d{9,}/g, sub:'[number removed]' },
+    { re:/\b(?=[A-Za-z0-9_\-]{20,}(\b|$))(?=[^\s]*\d)(?=[^\s]*[A-Za-z])[A-Za-z0-9_\-]{20,}\b/g,
+      sub:'[token removed]' }
+  ];
+  function redact(text){
+    var out = String(text || '');
+    REDACT.forEach(function(p){ p.re.lastIndex = 0; out = out.replace(p.re, p.sub); });
+    return out;
+  }
+  function liveAvailable(){
+    return !!(LIVE.enabled && LIVE.proxy_url && usedTokens < LIVE.session_token_cap);
+  }
+  function callProxy(kind, call){
+    if (!liveAvailable()) return Promise.reject(new Error('live_off'));
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = controller && setTimeout(function(){ controller.abort(); }, CALL_TIMEOUT_MS);
+    var payload = {
+      kind: kind, system: LIVE.prompts.system, grounding: LIVE.prompts.grounding,
+      call: call, session: { used_tokens: usedTokens }
+    };
+    if (LIVE.model) payload.model = LIVE.model;
+    return fetch(LIVE.proxy_url, {
+      method:'POST', headers:{ 'Content-Type':'application/json' },
+      signal: controller ? controller.signal : undefined,
+      body: JSON.stringify(payload)
+    }).then(function(resp){
+      if (timer) clearTimeout(timer);
+      return resp.json().then(function(data){
+        if (!resp.ok || !data.ok) throw new Error('proxy_error');
+        var u = data.usage || {};
+        usedTokens += (u.input_tokens || 0) + (u.output_tokens || 0);
+        return data.text || '';
+      });
+    }).catch(function(err){ if (timer) clearTimeout(timer); throw err; });
+  }
+
+  /* ------------------------------------------------------------------
+   * Offline coach. Deterministic guard grounded on this simulation:
+   * name the lever, name the tell, tie it to a defense.
+   * ---------------------------------------------------------------- */
+  var LEVER = /(authority|inspector|official|regulat|health|complian|licen|permit|urgen|deadline|pressure|fine|penalt|close|shut|trust|familiar|local|research|address|owner|logo|brand|avatar|video|face|voice|audio|recorded|deep\s?fake|deepfake|role|impersonat|pose|posed|posing)/i;
+  var DEFENSE = /(verify|verif|confirm|call\s?back|callback|call\b|phone|known number|official (channel|number|register)|register|hang up|out of band|independent|second|two[- ]person|check|double[- ]check|written notice|report|policy|do not open|don'?t open|attachment|unsolicited|hover|sender|domain|url|link|slow down|take time|escalat)/i;
+  var FILLER = /^(idk|dunno|none|nothing|nope|n\/?a|na|no|yes|ok|okay|good|bad|easy|hard|fun|cool|nice|all|some|maybe|dont know|don't know|[\s\-\.\?]*)$/i;
+
+  var REPLIES = {
+    empty:{ tone:'work', lead:'Nothing to work with yet',
+      text:'Write two or three sentences: which pressure made the request hard to refuse, and how a target would catch it.' },
+    thin:{ tone:'work', lead:'Too thin to grade',
+      text:'Name the pressure you leaned on, then the tell that exposes it. A lever you can name is a lever staff can be trained against.' },
+    lever:{ tone:'work', lead:'Name the pressure',
+      text:'Was it authority (the inspector), urgency (a deadline), local detail that felt personal, or a realistic face or voice? Each one has its own giveaway.' },
+    defense:{ tone:'work', lead:'Now name the defense',
+      text:'How would a target catch it? The reliable move is to verify through an official channel and a known number, never the one the message supplies.' },
+    good:{ tone:'ok', lead:'That is the lesson',
+      text:'Authority plus urgency is exactly why these land. The defense is to slow down and confirm out of band before opening anything, no matter how official the face or voice looks.' }
+  };
+  function judge(raw){
+    var text = String(raw || '').trim();
+    if (!text) return REPLIES.empty;
+    var words = text.split(/\s+/).filter(Boolean);
+    if (FILLER.test(text) || words.length < 4 || text.length < 14) return REPLIES.thin;
+    if (!LEVER.test(text)) return REPLIES.lever;
+    if (!DEFENSE.test(text)) return REPLIES.defense;
+    return REPLIES.good;
+  }
+
+  var reply = document.getElementById('reply');
+  var tell = document.getElementById('tell');
+  var checkBtn = document.getElementById('check');
+
+  function show(r){
+    reply.hidden = false;
+    reply.setAttribute('data-tone', r.tone);
+    reply.innerHTML = (r.tone === 'ok' ? ICON_OK : ICON_WORK)
+      + '<p><span class="lead">' + esc(r.lead) + '</span>' + esc(r.text) + '</p>';
+  }
+  function showLive(text){
+    reply.hidden = false;
+    reply.setAttribute('data-tone','ok');
+    reply.innerHTML = ICON_OK + '<p>' + esc(text) + '</p>';
+  }
+  checkBtn.addEventListener('click', function(){
+    var answer = tell.value;
+    if (!liveAvailable()){ show(judge(answer)); return; }
+    checkBtn.disabled = true;
+    var was = checkBtn.textContent;
+    checkBtn.textContent = 'Checking…';
+    var call = 'The student was asked: "Which pressure made your request hard to refuse, '
+      + 'and what would give it away?"\n\nTheir answer:\n"""\n' + redact(answer)
+      + '\n"""\n\nCoach them in two or three sentences.';
+    callProxy('field', call).then(function(text){
+      if (text && text.trim()) showLive(text.trim()); else show(judge(answer));
+    }).catch(function(){ show(judge(answer)); }).then(function(){
+      checkBtn.disabled = false; checkBtn.textContent = was;
+    });
+  });
+
+  /* ------------------------------------------------------------------
+   * Personal path. Reflect back the manipulation levers used, return a
+   * defensive countermeasure for each, then bridge to T2 LinkedPhishing.
+   * ---------------------------------------------------------------- */
+  var LEVERS = [
+    { id:'l1', name:'Authority (posing as an inspector)',
+      tip:'Authority is the oldest lever. A target should verify any inspector against the official register and a known public number, never a number the message supplies.' },
+    { id:'l2', name:'Urgency or a compliance deadline',
+      tip:'Urgency exists to stop people checking. A real regulator gives written notice and time to confirm; a deadline that blocks verification is the tell.' },
+    { id:'l3', name:'Local research that made it personal',
+      tip:'Address, owner name, and menu are public and cost an attacker nothing. Familiarity is not proof of identity.' },
+    { id:'l4', name:'A realistic video avatar',
+      tip:'A convincing face on video is now cheap. Treat an unexpected video instruction like any other unverified request and confirm out of band.' },
+    { id:'l5', name:'A cloned or recorded voice',
+      tip:'Voice is no longer proof it is them. Agree a call-back-to-a-known-number rule so a familiar voice alone never authorizes an action.' }
+  ];
+  var BRIDGE = 'T2 LinkedPhishing moves the same playbook onto a professional network. Carry these verification habits with you.';
+
+  var state = {};
+  var checks = document.getElementById('checks');
+  var pathout = document.getElementById('pathout');
+  var pathSec = document.getElementById('path-sec');
+
+  if (META.context === 'class'){
+    pathSec.parentNode.removeChild(pathSec);
+  } else {
+    LEVERS.forEach(function(c){
+      var li = document.createElement('li');
+      li.innerHTML =
+        '<span class="cname" id="lbl-' + c.id + '">' + esc(c.name) + '</span>'
+        + '<span class="seg" role="group" aria-labelledby="lbl-' + c.id + '">'
+        +   '<button type="button" aria-pressed="false" data-c="' + c.id + '" data-v="used">'
+        +     ICON_TICK + 'Used it</button>'
+        +   '<button type="button" aria-pressed="false" data-c="' + c.id + '" data-v="skipped">'
+        +     ICON_TICK + 'Skipped it</button>'
+        + '</span>';
+      checks.appendChild(li);
+    });
+
+    checks.addEventListener('click', function(ev){
+      var btn = ev.target.closest ? ev.target.closest('button[data-c]') : null;
+      if (!btn) return;
+      var id = btn.getAttribute('data-c');
+      var val = btn.getAttribute('data-v');
+      state[id] = (state[id] === val) ? null : val;
+      var group = btn.parentNode.querySelectorAll('button[data-c]');
+      Array.prototype.forEach.call(group, function(b){
+        b.setAttribute('aria-pressed', state[id] === b.getAttribute('data-v') ? 'true' : 'false');
+      });
+      renderPath();
+    });
+
+    function renderPath(){
+      var answered = LEVERS.filter(function(c){ return state[c.id]; });
+      if (!answered.length){ pathout.innerHTML = ''; return; }
+      var used = LEVERS.filter(function(c){ return state[c.id] === 'used'; });
+      var html = '';
+      if (used.length){
+        html += '<h3>Defend against it</h3><ul class="tips">'
+          + used.map(function(c){
+              return '<li>' + ICON_SHIELD + '<span><b>' + esc(c.name) + '.</b> '
+                + esc(c.tip) + '</span></li>';
+            }).join('')
+          + '</ul>';
+      }
+      html += '<p class="bridge">' + esc(BRIDGE) + '</p>';
+      pathout.innerHTML = html;
+    }
+  }
+})();
+</script>
+</body>
+</html>
