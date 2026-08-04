@@ -81,6 +81,8 @@
   textarea:hover{border-color:var(--teal)}
   textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(37,87,119,.12)}
 
+  .pii{margin:9px 0 0;font-size:.86rem;color:var(--muted)}
+
   .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:18px 0 0}
   .btn{
     font-family:var(--display);font-size:.94rem;font-weight:700;
@@ -161,7 +163,7 @@
   @media print{
     body{font-size:11.5pt;line-height:1.5}
     .page{max-width:none;padding:0}
-    .btn,.seg,.actions{display:none!important}
+    .btn,.seg,.actions,.pii{display:none!important}
     .printonly{display:block}
     .card{box-shadow:none;border:1px solid #C9D8DB;break-inside:avoid;
       padding:16px 18px}
@@ -216,8 +218,9 @@
         <label class="q" for="tell">Which fooled you, and what gave it away?</label>
       </div>
 
-      <textarea id="tell" rows="4"></textarea>
+      <textarea id="tell" rows="4" aria-describedby="pii"></textarea>
       <div class="pv printonly" id="pv-tell"></div>
+      <p class="pii" id="pii">Don&rsquo;t include personal or identifying information in your answers.</p>
 
       <div class="actions">
         <button type="button" class="btn" id="check">Check with AI Coach</button>
@@ -236,9 +239,6 @@
     <div class="card">
       <ul class="checks" id="checks"></ul>
       <div class="pathout" id="pathout" role="status" aria-live="polite"></div>
-      <div class="actions">
-        <button type="button" class="btn ghost" id="pdf">Save as PDF</button>
-      </div>
     </div>
   </section>
 
@@ -501,17 +501,15 @@
   }
 
   /* ------------------------------------------------------------------
-   * PDF takeaway. Mirrors the answer into a print-only block, since
-   * browsers clip a scrolled textarea when printing.
+   * No in-page print button: a Rise Embed block sandboxes print. The
+   * print styles stay, so a learner who opens this page in its own tab
+   * still gets a clean branded takeaway from the browser's own print.
+   * Mirrors the answer into a print-only block, since browsers clip a
+   * scrolled textarea when printing.
    * ---------------------------------------------------------------- */
-  function syncPrint(){
+  window.addEventListener('beforeprint', function(){
     document.getElementById('pv-tell').textContent = tell.value.trim();
-  }
-  window.addEventListener('beforeprint', syncPrint);
-  var pdfBtn = document.getElementById('pdf');
-  if (pdfBtn){
-    pdfBtn.addEventListener('click', function(){ syncPrint(); window.print(); });
-  }
+  });
 })();
 </script>
 </body>
