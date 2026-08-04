@@ -53,6 +53,16 @@
   .rule{display:block;width:52px;height:4px;border-radius:40px;
     background:var(--turq);margin:12px 0 0}
 
+  /* ---------- scenario image ---------- */
+  /* contain, not cover: the illustration is never cropped at any width.
+     The container takes the artwork's own flat background colour, so the
+     letterbox bands read as one seamless banner. */
+  .hero{
+    display:block;width:100%;height:200px;
+    object-fit:contain;background:#7C9390;
+    border-radius:16px;border:1px solid var(--line);margin:0 0 24px;
+  }
+
   /* ---------- brief ---------- */
   .brief{margin:20px 0 30px}
   .brief p{margin:0}
@@ -194,6 +204,7 @@
   @media (max-width:560px){
     body{font-size:16px}
     .page{padding:8px 18px 34px}
+    .hero{height:140px;border-radius:14px}
     li.task,.card{padding:22px 20px 20px;border-radius:14px}
     .cname{flex-basis:100%}
   }
@@ -204,6 +215,11 @@
 <h1 class="vh">DeepPhishing red-team simulation</h1>
 
 <div class="page">
+
+  <!-- Scenario illustration. Decorative: the brief below carries every fact
+       a student needs, so the image takes an empty alt rather than adding
+       redundant screen-reader noise. Local asset, never hot-linked. -->
+  <img class="hero" src="pizzeria-scenario.webp" alt="" width="2016" height="864">
 
   <!-- ============ brief ============ -->
   <div class="brief">
@@ -279,28 +295,36 @@
    * Six tasks. Instruction text is verbatim from the SME source
    * (AICY.T1.E1 - DeepPhishing). Links ride along as labelled chips.
    * ---------------------------------------------------------------- */
+  /* An answer box appears only where the task expects something written.
+     Pure action tasks (2 and 5) get the instruction and links, no field.
+     Where a task both acts and asks, the label names the written part in
+     the SME's own words. */
   var TASKS = [
     { id:'a1',
       instr:'As a part of a Network security assessment You are tasked with infiltrating the network of this pizzeria by convincing them to download a malicious file. Gather some information about this location, health regulation and think of a convincing argument for inspection. Finally, Use ChatGPT in order to generate a convincing message encouraging the victims to download and execute an attached file.',
       links:[
         { label:'Pizzeria Vetri on Google Maps', url:'https://www.google.com/maps/place/Pizzeria+Vetri/@39.9463647,-75.1723536,6899m/data=!3m1!1e3!4m6!3m5!1s0x89c6c7ccba7bff77:0xca83b9208c4e3f68!8m2!3d39.9608917!4d-75.1712139!16s%2Fg%2F1pp2ty6_8' },
         { label:'ChatGPT', url:'https://chatgpt.com' }
-      ] },
+      ],
+      answer:'The convincing argument for inspection' },
     { id:'a2',
       instr:'Now lets make the request more convincing, Take the role of a health inspector and create a short video message encouraging the victims to download the file. Use the sevice lipsync. Choose a relevant an avatar to deliver an inspection request that asks the pizzeria staff to complete a health-inspection form.',
       links:[ { label:'lipsync.video', url:'https://lipsync.video/' } ] },
     { id:'a3',
       instr:'Create another video using recorded audio instead of text. Is the message more convincing now?',
-      links:[] },
+      links:[],
+      answer:'Is the message more convincing now?' },
     { id:'a4',
       instr:'Create another video using an avatar not from the website, choose a convincing formal looking photo online, You can use this. Is the message more convincing now?',
-      links:[ { label:'Stock photo (Pexels)', url:'https://www.pexels.com/video/woman-smiling-for-the-camera-7586535/' } ] },
+      links:[ { label:'Stock photo (Pexels)', url:'https://www.pexels.com/video/woman-smiling-for-the-camera-7586535/' } ],
+      answer:'Is the message more convincing now?' },
     { id:'a5',
       instr:'Compare result with friends and try to improve result using different iteration.',
       links:[] },
     { id:'a6',
       instr:'Brainstorm three ways someone could misuse this tool to impersonate or trick others.',
-      links:[] }
+      links:[],
+      answer:'Three ways this could be misused' }
   ];
 
   var tasksEl = document.getElementById('tasks');
@@ -311,14 +335,17 @@
       return '<a class="chip" href="' + l.url + '" target="_blank" rel="noopener">'
         + ICON_LINK + esc(l.label) + '</a>';
     }).join('');
+    var field = t.answer
+      ? '<label class="lbl" for="' + t.id + '">' + esc(t.answer) + '</label>'
+        + '<textarea id="' + t.id + '" rows="4" aria-describedby="i-' + t.id + ' pii-' + t.id + '"></textarea>'
+        + '<p class="pii" id="pii-' + t.id + '">Don’t include personal or identifying information in your answers.</p>'
+      : '';
     li.innerHTML =
       '<span class="tile" aria-hidden="true"></span>'
       + '<div class="body">'
       +   '<p class="instr" id="i-' + t.id + '">' + esc(t.instr) + '</p>'
       +   (chips ? '<div class="links">' + chips + '</div>' : '')
-      +   '<label class="lbl" for="' + t.id + '">Your answer</label>'
-      +   '<textarea id="' + t.id + '" rows="4" aria-describedby="i-' + t.id + ' pii-' + t.id + '"></textarea>'
-      +   '<p class="pii" id="pii-' + t.id + '">Don’t include personal or identifying information in your answers.</p>'
+      +   field
       + '</div>';
     tasksEl.appendChild(li);
   });
@@ -329,7 +356,8 @@
    * answers plus the debrief survive a reload of the embedding Rise page.
    * ---------------------------------------------------------------- */
   var STORE_KEY = 'wawiwa.aicy.t1.deepphishing';
-  var FIELD_IDS = TASKS.map(function(t){ return t.id; }).concat(['tell']);
+  var FIELD_IDS = TASKS.filter(function(t){ return t.answer; })
+    .map(function(t){ return t.id; }).concat(['tell']);
 
   function loadSaved(){
     try{
