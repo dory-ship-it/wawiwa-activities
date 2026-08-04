@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Media Literacy | AICY.T0.E1</title>
+<style>
+  :root{
+    --ink:#1F2C36;
+    --body:#3A4555;
+    --muted:#5E6A79;
+    --line:#E3E9EC;
+    --field:#7F8C97;
+    --teal:#5AB3AA;
+    --link:#2E6E76;
+    --font:'Assistant',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:#fff;color:var(--body);
+    font-family:var(--font);font-size:17px;line-height:1.6;
+  }
+  a{color:var(--link);text-underline-offset:2px}
+  a:hover{text-decoration-thickness:2px}
+  :focus-visible{outline:3px solid var(--link);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+  .page{max-width:720px;margin:0 auto;padding:36px 24px 56px}
+
+  h1{font-size:1.7rem;line-height:1.2;font-weight:700;color:var(--ink);margin:0}
+  .rule{width:48px;height:4px;background:var(--teal);margin:14px 0 0}
+  .brief{margin:24px 0 32px}
+
+  ol.tasks{list-style:none;counter-reset:t;margin:0;padding:0}
+  li.task{
+    counter-increment:t;
+    display:flex;gap:16px;
+    border:1px solid var(--line);border-radius:8px;
+    padding:22px 24px;margin:0 0 16px;
+  }
+  li.task::before{
+    content:counter(t) ".";
+    flex:0 0 22px;
+    color:var(--muted);font-weight:700;
+  }
+  .task>div{flex:1 1 auto;min-width:0}
+  .q{margin:0;color:var(--ink)}
+  .lbl{display:block;font-size:.8rem;color:var(--muted);margin:18px 0 6px}
+  textarea{
+    display:block;width:100%;
+    font:inherit;font-size:.97rem;color:var(--ink);
+    background:#fff;border:1px solid var(--field);border-radius:6px;
+    padding:10px 12px;resize:vertical;
+  }
+  textarea:focus{border-color:var(--link)}
+
+  @media (max-width:520px){
+    body{font-size:16px}
+    .page{padding:28px 18px 44px}
+    li.task{padding:18px 18px;gap:12px}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Media Literacy</h1>
+  <div class="rule"></div>
+
+  <p class="brief">In the assignment, the student will evaluate their ability to detect AI-generated media, including deepfakes, realistic faces, videos, artwork, and chat interactions, by testing their skills across various online identification tools.</p>
+
+  <ol class="tasks">
+
+    <li class="task">
+      <div>
+        <p class="q">Go to <a href="https://detectfakes.kellogg.northwestern.edu" target="_blank" rel="noopener">detectfakes.kellogg.northwestern.edu</a> And try the deep fake detection test, see how many you can detect!</p>
+        <label class="lbl" for="a1">Answer</label>
+        <textarea id="a1" rows="3"></textarea>
+      </div>
+    </li>
+
+    <li class="task">
+      <div>
+        <p class="q">Try do detect real faces on <a href="https://whichfaceisreal.com/" target="_blank" rel="noopener">https://whichfaceisreal.com/</a></p>
+        <label class="lbl" for="a2">Answer</label>
+        <textarea id="a2" rows="3"></textarea>
+      </div>
+    </li>
+
+    <li class="task">
+      <div>
+        <p class="q">Try to detect AI videos on <a href="https://sightengine.com/ai-or-not-video" target="_blank" rel="noopener">https://sightengine.com/ai-or-not-video</a></p>
+        <label class="lbl" for="a3">Answer</label>
+        <textarea id="a3" rows="3"></textarea>
+      </div>
+    </li>
+
+    <li class="task">
+      <div>
+        <p class="q">Try to identify AI art on <a href="https://quillbot.com/blog/human-or-ai-game/" target="_blank" rel="noopener">https://quillbot.com/blog/human-or-ai-game/</a></p>
+        <label class="lbl" for="a4">Answer</label>
+        <textarea id="a4" rows="3"></textarea>
+      </div>
+    </li>
+
+    <li class="task">
+      <div>
+        <p class="q">See if you can detect if youre talking to humans or AI <a href="https://humanornot.so/" target="_blank" rel="noopener">https://humanornot.so/</a></p>
+        <label class="lbl" for="a5">Answer</label>
+        <textarea id="a5" rows="3"></textarea>
+      </div>
+    </li>
+
+  </ol>
+
+</div>
+</body>
+</html>
