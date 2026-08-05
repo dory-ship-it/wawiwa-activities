@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "meta": {
+    "id": "aicy-t1-deepphishing",
+    "publishes_to": "aicy-t1-deepphishing",
+    "program": "AI & Cybersecurity",
+    "module": "Topic 1",
+    "lesson": "AI in Cybersecurity",
+    "title": "DeepPhishing: AI Phishing Creation and Detection Practice",
+    "format": "coached_tasks",
+    "context": "home",
+    "estimated_minutes": 60,
+    "language_default": "en",
+    "source_doc": "AICY.T1.E1 - DeepPhishing.docx",
+    "source_deck": "AICY.T1.P1 - AI in Cyber security.pptx"
+  },
+  "safety": {
+    "pii_forbidden": true,
+    "student_notice": "Don't include personal or identifying information in your answers.",
+    "redact_before_ai": ["email_addresses", "phone_numbers", "long_digit_sequences", "api_key_shaped_tokens"],
+    "scope_guard": "Lab-only, authorized red-team simulation. The coach never improves or executes a real attack; it coaches the defense."
+  },
+  "grounding_ref": "grounding/grounding_pack.md",
+  "coach_prompts_ref": "grounding/coach_prompts.md",
+  "lesson_map": {
+    "C1": "AI & ML basics — supervised, unsupervised, reinforcement (deck S3-4, S8-11, S29)",
+    "C2": "New AI-era threats — AI attacks, deepfakes, AI phishing, ransomware (deck S5, S14-16)",
+    "C3": "AI for detection & response — phishing/NLP detection, anomaly & behavioral analytics (deck S6-7, S13, S15, S22, S37)",
+    "C4": "Why the lure is convincing — social engineering + the five manipulation levers (grounding pack C4)",
+    "C5": "The defenses — verify out of band, official register + known number, written notice, attachments (grounding pack C5)"
+  },
+  "topic_map_note": "AICY60 ships as one Rise SCORM with topics T0-T8 in the nav; 'review' targets below point back to sections of this topic's deck and to T0's social-engineering/deepfake material.",
+  "intro": {
+    "headline": "Build the lure, then learn to beat it",
+    "body": "This authorized, lab-only simulation lets you feel how cheaply AI now produces a convincing social-engineering lure — so you can defend against it. Do the tasks, then use the coach and personal path to turn each move into a defense."
+  },
+  "sections": [
+    {
+      "id": "tasks",
+      "title": "The simulation",
+      "type": "tasks",
+      "instruction": "Done in small teams of 2-4. You've been hired to perform a red-team simulation on a local pizzeria. Research the business, relevant health regulations, and craft a convincing inspection request that could persuade staff to download a file in a controlled test environment.",
+      "fields": [
+        {"id": "a1", "number": 1, "instr": "As a part of a Network security assessment You are tasked with infiltrating the network of this pizzeria by convincing them to download a malicious file. Gather some information about this location, health regulation and think of a convincing argument for inspection. Finally, Use ChatGPT in order to generate a convincing message encouraging the victims to download and execute an attached file.", "answer": "The convincing argument for inspection", "has_field": true, "links": ["Pizzeria Vetri on Google Maps", "ChatGPT"], "rubric_refs": ["r1_lever", "r4_detection_link"], "routes_to": ["C4", "C3"]},
+        {"id": "a2", "number": 2, "instr": "Now lets make the request more convincing, Take the role of a health inspector and create a short video message encouraging the victims to download the file. Use the sevice lipsync. Choose a relevant an avatar to deliver an inspection request that asks the pizzeria staff to complete a health-inspection form.", "has_field": false, "links": ["lipsync.video"], "rubric_refs": ["r1_lever"], "routes_to": ["C4"]},
+        {"id": "a3", "number": 3, "instr": "Create another video using recorded audio instead of text. Is the message more convincing now?", "answer": "Is the message more convincing now?", "has_field": true, "rubric_refs": ["r2_tell", "r3_defense"], "routes_to": ["C5"]},
+        {"id": "a4", "number": 4, "instr": "Create another video using an avatar not from the website, choose a convincing formal looking photo online, You can use this. Is the message more convincing now?", "answer": "Is the message more convincing now?", "has_field": true, "links": ["Stock photo (Pexels)"], "rubric_refs": ["r2_tell", "r3_defense"], "routes_to": ["C5"]},
+        {"id": "a5", "number": 5, "instr": "Compare result with friends and try to improve result using different iteration.", "has_field": false, "rubric_refs": [], "routes_to": []},
+        {"id": "a6", "number": 6, "instr": "Brainstorm three ways someone could misuse this tool to impersonate or trick others.", "answer": "Three ways this could be misused", "has_field": true, "rubric_refs": ["r3_defense", "r5_ethics"], "routes_to": ["C5", "C2"]}
+      ]
+    }
+  ],
+  "debrief": {
+    "prompt": "Which pressure made your request hard to refuse, and what would give it away?",
+    "rubric_refs": ["r1_lever", "r2_tell", "r3_defense"]
+  },
+  "rubric": [
+    {"id": "r1_lever", "name": "Names the lever", "description": "Identifies the manipulation lever used (authority, urgency, local research, video avatar, cloned/recorded voice)."},
+    {"id": "r2_tell", "name": "Names the tell", "description": "States a concrete signal that would expose the lure to a trained target."},
+    {"id": "r3_defense", "name": "Names the defense", "description": "Gives a defensive habit that beats the lever (verify out of band, official register + known number, written notice, don't open unsolicited attachments)."},
+    {"id": "r4_detection_link", "name": "Links to AI detection", "description": "Connects the lure to how AI detects it (NLP/phishing classifier flags urgency + mismatched sender + attachment; anomaly/behavioral analytics)."},
+    {"id": "r5_ethics", "name": "Ethical framing", "description": "Frames misuse and defense responsibly; recognizes the lab-only, authorized purpose."}
+  ],
+  "quality_rules": [
+    "Coach never writes or improves phishing/malware/pretext/synthetic-media attack content, even for the simulation.",
+    "Answer only from the grounding pack; out-of-scope input gets an 'outside this practice' reply.",
+    "Feedback is 2-3 sentences, plain, no lists, no ghostwriting the attack.",
+    "No student PII is sent; redact before any AI call."
+  ],
+  "outcome_logic": [
+    {"when": "lever_used:authority", "focus": "You leaned on authority (posing as an inspector). The defense: verify any inspector against the official register and a known public number, never a number the message supplies.", "review": "C5", "resource": "res_ncsc_phishing"},
+    {"when": "lever_used:urgency", "focus": "You leaned on urgency / a compliance deadline. The defense: a real regulator gives written notice and time to confirm — a deadline that blocks verification is the tell.", "review": "C5", "resource": "res_ncsc_phishing"},
+    {"when": "lever_used:local_research", "focus": "You used local research to make it feel personal. Address, owner and menu are public and cost an attacker nothing — familiarity is not proof of identity.", "review": "C4", "resource": "res_ncsc_phishing"},
+    {"when": "lever_used:video_avatar", "focus": "You used a realistic video avatar. A convincing face on video is now cheap — treat an unexpected video instruction like any unverified request and confirm out of band.", "review": "C2", "resource": "res_cisa_deepfake"},
+    {"when": "lever_used:cloned_voice", "focus": "You used a cloned or recorded voice. Voice is no longer proof it is them — agree a call-back-to-a-known-number rule so a familiar voice alone never authorizes an action.", "review": "C2", "resource": "res_ftc_voice"},
+    {"when": "bridge", "focus": "Topic 2 (LinkedPhishing) moves the same playbook onto a professional network. Carry these verification habits with you.", "review": "C3"}
+  ],
+  "resources_pool": [
+    {"id": "res_ncsc_phishing", "title": "Phishing attacks: defending your organisation", "type": "guidance", "source": "NCSC", "url": "https://www.ncsc.gov.uk/guidance/phishing", "why": "Authoritative defensive guidance on spotting and reporting phishing.", "verify_link": true},
+    {"id": "res_cisa_deepfake", "title": "Contextualizing Deepfake Threats to Organizations", "type": "advisory", "source": "CISA / NSA / FBI", "url": "https://www.cisa.gov/resources-tools/resources/contextualizing-deepfake-threats-organizations", "why": "Official advisory on deepfake video/voice threats and mitigations.", "verify_link": true},
+    {"id": "res_ftc_voice", "title": "Scammers use AI to enhance their family emergency schemes", "type": "consumer alert", "source": "FTC", "url": "https://consumer.ftc.gov/consumer-alerts/2023/03/scammers-use-ai-enhance-their-family-emergency-schemes", "why": "Plain-language alert on AI voice-cloning and the call-back defense.", "verify_link": true}
+  ],
+  "completion_levels": [
+    {"id": "ready", "name": "Ready", "when": "names a lever + a tell + a defense across the debrief"},
+    {"id": "light", "name": "Getting there", "when": "names a lever but is missing the tell or the defense"},
+    {"id": "revise", "name": "Revise", "when": "no lever/tell/defense yet — nudge with the debrief prompt"}
+  ],
+  "qa_notes": [
+    "SME sign-off required on the five defensive tips and the debrief coaching (security guidance to students).",
+    "Verify the three resource_pool URLs at QA (verify_link:true) before shipping."
+  ]
+}

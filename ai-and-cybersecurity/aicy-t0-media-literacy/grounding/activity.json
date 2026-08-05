@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "meta": {
+    "id": "aicy-t0-media-literacy",
+    "publishes_to": "aicy-t0-media-literacy",
+    "program": "AI & Cybersecurity",
+    "module": "Topic 0",
+    "lesson": "Intro to AI & Cybersecurity",
+    "title": "Media Literacy: Detecting AI-Generated Media",
+    "format": "coached_tasks",
+    "context": "home",
+    "estimated_minutes": 45,
+    "language_default": "en",
+    "source_doc": "AICY.T0.E1 - Media Literacy.pdf",
+    "source_deck": "AICY.T0.P1 - Intro-to-AI-and-Cybersecurity.pptx"
+  },
+  "safety": {
+    "pii_forbidden": true,
+    "student_notice": "Don't include personal or identifying information in your answers.",
+    "redact_before_ai": ["email_addresses", "phone_numbers", "long_digit_sequences", "api_key_shaped_tokens"],
+    "scope_guard": "Detection-and-defense exercise. The coach never helps create deepfakes or deceptive media, and never declares a specific item definitely real/fake."
+  },
+  "grounding_ref": "grounding/grounding_pack.md",
+  "coach_prompts_ref": "grounding/coach_prompts.md",
+  "lesson_map": {
+    "P1": "Foundations of Cybersecurity (deck S2-7)",
+    "P2": "Core Security Principles & the CIA Triad (S8-13)",
+    "P3": "Introduction to Artificial Intelligence (S14-20)",
+    "P4": "How Modern AI Works Under the Hood (S21-26)",
+    "P5": "AI for Cybersecurity (S27-32)",
+    "P6": "Cybersecurity for AI (S33-39)",
+    "P7": "Course Horizon & Ethics (S40-45)",
+    "C3": "Social engineering — the human attack surface (deck S13; grounding C3)",
+    "C5": "How AI is weaponized for social engineering — deepfakes, synthetic voice/video (deck S38; grounding C5)",
+    "C6": "Detection cues & the verification habit (grounding C6)"
+  },
+  "intro": {
+    "headline": "Can you still tell what's real?",
+    "body": "Generative AI makes fake faces, video, art and chat cheap and convincing — which is exactly what social engineers exploit. Test yourself against each tool below, then use the coach and personal path to turn what fooled you into a habit that won't."
+  },
+  "sections": [
+    {
+      "id": "tasks",
+      "title": "Test your media literacy",
+      "type": "tasks",
+      "instruction": "Individual assignment. Evaluate your ability to detect AI-generated media — deepfakes, realistic faces, videos, artwork, and chat — by testing yourself across these online tools. For each: record how you did and note the cue that gave it away (or fooled you).",
+      "fields": [
+        {"id": "m1", "number": 1, "instr": "Try the deepfake detection test and see how many you can detect.", "answer": "How many did you catch, and what gave the fakes away?", "has_field": true, "links": ["Detect Fakes (Northwestern)"], "rubric_refs": ["r1_cue", "r4_calibration"], "routes_to": ["C5", "C6"]},
+        {"id": "m2", "number": 2, "instr": "Try to detect real faces vs. AI-generated faces.", "answer": "Which face details gave the AI ones away?", "has_field": true, "links": ["whichfaceisreal.com"], "rubric_refs": ["r1_cue"], "routes_to": ["C6"]},
+        {"id": "m3", "number": 3, "instr": "Try to detect AI videos.", "answer": "What in the video signalled AI?", "has_field": true, "links": ["sightengine AI-or-not video"], "rubric_refs": ["r1_cue"], "routes_to": ["C6"]},
+        {"id": "m4", "number": 4, "instr": "Try to identify AI art.", "answer": "What gave the AI art away?", "has_field": true, "links": ["QuillBot Human-or-AI game"], "rubric_refs": ["r1_cue"], "routes_to": ["C6"]},
+        {"id": "m5", "number": 5, "instr": "See if you can detect if you're talking to a human or AI.", "answer": "What in the conversation tipped you off?", "has_field": true, "links": ["humanornot.so"], "rubric_refs": ["r1_cue", "r3_socialeng_link"], "routes_to": ["C5", "C3"]}
+      ]
+    }
+  ],
+  "debrief": {
+    "prompt": "Across the tools, what most reliably exposed AI media — and how would you verify a suspicious image, voice or message in real life?",
+    "rubric_refs": ["r1_cue", "r2_verify", "r3_socialeng_link"]
+  },
+  "rubric": [
+    {"id": "r1_cue", "name": "Names a concrete cue", "description": "Identifies a specific detection signal (face/eye/hand artifacts, blink/lip-sync drift, garbled text or impossible geometry, evasive/memory-less chat)."},
+    {"id": "r2_verify", "name": "States a verification habit", "description": "Gives the reliable habit: no single tool is proof — corroborate against a trusted source and confirm identity out of band before acting."},
+    {"id": "r3_socialeng_link", "name": "Links to social engineering", "description": "Connects synthetic media to how attackers weaponize it against people (deepfake voice/video, AI phishing)."},
+    {"id": "r4_calibration", "name": "Calibrated confidence", "description": "Recognizes detection is probabilistic; avoids over-trusting a single verdict or tool."}
+  ],
+  "quality_rules": [
+    "Coach never helps create deepfakes or deceptive media.",
+    "Coach never declares a specific item definitely real or fake; detection is probabilistic.",
+    "Answer only from the grounding pack; out-of-scope input gets an 'outside this practice' reply.",
+    "Feedback is 2-3 sentences, plain, no lists.",
+    "No student PII is sent; redact before any AI call."
+  ],
+  "outcome_logic": [
+    {"when": "fooled_by:faces", "focus": "AI faces fooled you. Next time scan eyes, teeth, ears, hair edges, jewelry and background for asymmetry or warping — but remember no single detail is proof.", "review": "C6", "resource": "res_cisa_deepfake"},
+    {"when": "fooled_by:video", "focus": "AI video fooled you. Watch for unnatural blinking, lip-sync drift and lighting/edge artifacts — and for any instruction on video, confirm out of band before acting.", "review": "C5", "resource": "res_cisa_deepfake"},
+    {"when": "fooled_by:art", "focus": "AI art fooled you. Look for garbled text, impossible geometry and too-perfect texture; treat provenance, not polish, as the signal.", "review": "C6", "resource": "res_media_literacy"},
+    {"when": "fooled_by:chat", "focus": "The chatbot fooled you. Generic, evasive or memory-less answers are tells — and this is exactly the social-engineering surface, so never act on identity claimed in chat alone.", "review": "C3", "resource": "res_cisa_deepfake"},
+    {"when": "bridge", "focus": "Topic 1 shows how AI both builds these lures and detects them. Carry the habit: unverified media is unverified until you corroborate it.", "review": "C5"}
+  ],
+  "resources_pool": [
+    {"id": "res_cisa_deepfake", "title": "Contextualizing Deepfake Threats to Organizations", "type": "advisory", "source": "CISA / NSA / FBI", "url": "https://www.cisa.gov/resources-tools/resources/contextualizing-deepfake-threats-organizations", "why": "Official advisory on synthetic media threats and how to verify.", "verify_link": true},
+    {"id": "res_media_literacy", "title": "How to spot AI-generated images and media", "type": "guidance", "source": "to confirm at QA", "url": "", "why": "A plain-language media-literacy reference on detection cues.", "verify_link": true}
+  ],
+  "completion_levels": [
+    {"id": "ready", "name": "Ready", "when": "names a concrete cue + a verification habit and links it to social engineering"},
+    {"id": "light", "name": "Getting there", "when": "names a cue but no verification habit"},
+    {"id": "revise", "name": "Revise", "when": "only a score, no cue or habit — nudge with the debrief prompt"}
+  ],
+  "qa_notes": [
+    "SME sign-off on the detection cues and verification coaching (defensive guidance to students).",
+    "Fill/confirm resource URLs at QA (verify_link:true); res_media_literacy URL intentionally blank pending a chosen source.",
+    "T0's existing practice may be Dor's hand-built boxes — per the design rule, add ONLY the grounded coach + personal path underneath; do not rebuild the boxes."
+  ]
+}
