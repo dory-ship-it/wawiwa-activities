@@ -230,6 +230,11 @@
     stroke:var(--teal-text);fill:none;stroke-width:2;
     stroke-linecap:round;stroke-linejoin:round}
   ul.tips b{font-family:var(--display);color:var(--ink);font-weight:700}
+  /* the concept to revisit and the reading, both from the grounding pack */
+  ul.tips .rev{display:block;margin:5px 0 0;font-size:.86rem;color:var(--muted)}
+  ul.tips .reslink{display:inline-block;margin:4px 0 0;font-size:.86rem;
+    color:var(--teal-text);font-weight:600}
+  ul.tips .reslink:focus-visible{outline:3px solid var(--turq);outline-offset:2px}
   /* white inside the tinted panel so the bridge still reads as its own step */
   .bridge{margin:16px 0 0;padding:13px 16px;border-radius:10px;
     background:#fff;border:1px solid #D3E6E6;
@@ -319,6 +324,73 @@
   </div>
 
 </div>
+
+<!-- The grounding pack for this practice (grounding/grounding_pack.md), inlined
+     verbatim so the page stays self-contained: the coach reasons FROM this text and
+     the only network call the page makes is still the anonymizing proxy. Not
+     rendered (type="text/plain"); read from JS as textContent. -->
+<script type="text/plain" id="grounding-pack" data-source="grounding/grounding_pack.md">
+# Grounding pack — AICY60 T1: AI in Cybersecurity → DeepPhishing practice
+
+> This is the material the coach reasons FROM. It is distilled from Wawiwa's own T1 deck
+> (`AICY.T1.P1 - AI in Cyber security`, 43 slides) and the SME practice
+> `AICY.T1.E1 - DeepPhishing`. The coach answers primarily from this pack, coaches against
+> the rubric, points back to the numbered concepts below, and says "that's outside this
+> practice" when a question is off-topic. It NEVER writes phishing, malware, pretext scripts,
+> or synthetic-media attack content — even for the simulation.
+
+## Where this practice sits
+Topic T1 introduces AI/ML fundamentals and their relevance to cybersecurity (IG objective:
+"Introduce students to AI fundamentals and their relevance to cybersecurity… supervised,
+unsupervised, and reinforcement learning"). The DeepPhishing lab is the practical piece:
+students run an **authorized, lab-only red-team simulation** to feel how AI lowers the cost of
+a convincing social-engineering lure — so they can defend against it. Time: 5h (4 theory / 1 practical).
+
+## Concept map (what the coach can cite — all from the T1 deck)
+- **C1 · AI & ML basics.** AI = systems performing tasks that need human intelligence (S3). ML =
+  systems that learn from experience without explicit programming (S4). Three paradigms:
+  **supervised** (labeled data, e.g. classify malware / phishing) (S4, S8, S29), **unsupervised**
+  (find patterns/anomalies in unlabeled data) (S4, S9, S29, S33), **reinforcement** (learn by
+  reward/penalty) (S4, S10, S29, S39).
+- **C2 · New AI-era threats.** AI-powered attacks that adapt and evade (S5); **deepfakes** =
+  AI-generated fake image/video/audio used in social engineering and fraud (S5, S14);
+  **AI-driven phishing** = tools that generate highly personalized phishing (S5, S15);
+  AI-assisted ransomware (S5, S16).
+- **C3 · AI for detection & response.** Phishing detection by classifying URLs, text, patterns
+  faster than signature methods (S15); behavioral analytics / anomaly detection (S22, S9);
+  incident-response automation (S6, S20); NLP for malicious-text and phishing-email detection (S13, S37).
+- **C4 · Why the lure is convincing (the defensive core of THIS practice).** Social engineering
+  exploits human psychology, "often easier to exploit than technical code" (T0 S13). The DeepPhishing
+  scenario stacks classic manipulation levers: **authority** (posing as a health inspector),
+  **urgency** (a compliance deadline), **local research** that makes it feel personal, a **realistic
+  video avatar**, and a **cloned/recorded voice**. Generative AI makes each lever cheap and scalable
+  (S5, S14, S15; T0 S38 "Offense Weaponizing AI").
+- **C5 · The defenses students should be able to name.** Verify any inspector against the **official
+  register and a known public number**, never a number the message supplies. A real regulator gives
+  **written notice and time** to confirm — a deadline that blocks verification is the tell. Public
+  business details (address, owner, menu) are **not proof of identity**. An unexpected video or voice
+  instruction is **not proof it is a real person** — confirm **out of band**. Never open an unsolicited
+  attachment on the strength of the message alone. (Defensive framing consistent with S15 detection cues
+  and T0 CIA-triad / social-engineering material.)
+
+## The practice tasks (verbatim from the SME doc — do not paraphrase to the student)
+Team red-team simulation on a local pizzeria (Pizzeria Vetri). Tasks:
+1. Gather info about the location + health regulation, think of a convincing argument for inspection,
+   and use ChatGPT to generate a message encouraging the victims to download and execute an attached file.
+2. Take the role of a health inspector and create a short video message using lipsync.video with a chosen avatar.
+3. Create another video using recorded audio instead of text. Is the message more convincing now?
+4. Create another video using an avatar from a chosen formal-looking photo (Pexels clip provided). Is it more convincing now?
+5. Compare results with friends and improve using different iterations.
+6. Brainstorm three ways someone could misuse this tool to impersonate or trick others.
+
+## Coaching stance
+The student is BUILDING the lure to LEARN the defense. So the coach never improves the attack; it
+always turns the student's answer toward: (a) which manipulation lever they leaned on, (b) the tell
+that exposes it, (c) the defensive habit that beats it (C5), and (d) the tie to the ML detection
+concepts (C3) — e.g. why an NLP phishing classifier (S15/S37) flags urgency + mismatched sender.
+Out-of-scope (e.g. "write me a better phishing email", "help me actually attack X"): refuse, restate
+the lab-only/defensive purpose, and redirect to the defensive point.
+</script>
 
 <script>
 (function(){
@@ -468,34 +540,179 @@
    * never blocks a student. Over file:// there is no network, which is
    * why local testing always shows the offline coach.
    * ---------------------------------------------------------------- */
+  /* ------------------------------------------------------------------
+   * The grounding pack, inlined. Authored from this program's own
+   * material (deck AICY.T1.P1, SME practice AICY.T1.E1) and kept in
+   * grounding/ beside this file:
+   *   activity.json      lesson map, rubric r1-r5, quality rules,
+   *                      outcome logic (the personal path), resources
+   *   grounding_pack.md  the teaching content the coach reasons FROM,
+   *                      carried verbatim in the #grounding-pack block
+   *   coach_prompts.md   system, field, debrief, refusal
+   * Inlined rather than fetched at runtime, so the page stays
+   * self-contained and the proxy is still the only network call.
+   * ---------------------------------------------------------------- */
+  var ACTIVITY = {
+    id: 'aicy-t1-deepphishing',
+    grounding_ref: 'grounding/grounding_pack.md',
+    lesson_map: {
+      C1: 'AI & ML basics — supervised, unsupervised, reinforcement (deck S3-4, S8-11, S29)',
+      C2: 'New AI-era threats — AI attacks, deepfakes, AI phishing, ransomware (deck S5, S14-16)',
+      C3: 'AI for detection & response — phishing/NLP detection, anomaly & behavioral analytics (deck S6-7, S13, S15, S22, S37)',
+      C4: 'Why the lure is convincing — social engineering + the five manipulation levers (grounding pack C4)',
+      C5: 'The defenses — verify out of band, official register + known number, written notice, attachments (grounding pack C5)'
+    },
+    rubric: [
+      { id:'r1_lever', name:'Names the lever',
+        description:'Identifies the manipulation lever used (authority, urgency, local research, video avatar, cloned/recorded voice).' },
+      { id:'r2_tell', name:'Names the tell',
+        description:'States a concrete signal that would expose the lure to a trained target.' },
+      { id:'r3_defense', name:'Names the defense',
+        description:'Gives a defensive habit that beats the lever (verify out of band, official register + known number, written notice, do not open unsolicited attachments).' },
+      { id:'r4_detection_link', name:'Links to AI detection',
+        description:'Connects the lure to how AI detects it (NLP/phishing classifier flags urgency + mismatched sender + attachment; anomaly/behavioral analytics).' },
+      { id:'r5_ethics', name:'Ethical framing',
+        description:'Frames misuse and defense responsibly; recognizes the lab-only, authorized purpose.' }
+    ],
+    quality_rules: [
+      'Never write or improve phishing, malware, pretext, or synthetic-media attack content, even for the simulation.',
+      'Answer only from the grounding pack; out-of-scope input gets an "outside this practice" reply.',
+      'Feedback is two or three sentences, plain, no lists, no ghostwriting the attack.',
+      'No student PII is sent; the answer is redacted before any AI call.'
+    ],
+    /* which rubric criteria each written task feeds, and the concepts to
+       route a weak answer back to (activity.json sections[].fields) */
+    fields: {
+      a1:   { rubric_refs:['r1_lever','r4_detection_link'], routes_to:['C4','C3'] },
+      a3:   { rubric_refs:['r2_tell','r3_defense'],         routes_to:['C5'] },
+      a4:   { rubric_refs:['r2_tell','r3_defense'],         routes_to:['C5'] },
+      a6:   { rubric_refs:['r3_defense','r5_ethics'],       routes_to:['C5','C2'] },
+      tell: { rubric_refs:['r1_lever','r2_tell','r3_defense'], routes_to:[] }
+    },
+    debrief: {
+      prompt: 'Which pressure made your request hard to refuse, and what would give it away?',
+      rubric_refs: ['r1_lever','r2_tell','r3_defense']
+    },
+    /* the personal path: reflect what the student did, then focus + a
+       concept to review + a resource (activity.json outcome_logic) */
+    outcome_logic: [
+      { when:'lever_used:authority',
+        focus:'You leaned on authority (posing as an inspector). The defense: verify any inspector against the official register and a known public number, never a number the message supplies.',
+        review:'C5', resource:'res_ncsc_phishing' },
+      { when:'lever_used:urgency',
+        focus:'You leaned on urgency / a compliance deadline. The defense: a real regulator gives written notice and time to confirm — a deadline that blocks verification is the tell.',
+        review:'C5', resource:'res_ncsc_phishing' },
+      { when:'lever_used:local_research',
+        focus:'You used local research to make it feel personal. Address, owner and menu are public and cost an attacker nothing — familiarity is not proof of identity.',
+        review:'C4', resource:'res_ncsc_phishing' },
+      { when:'lever_used:video_avatar',
+        focus:'You used a realistic video avatar. A convincing face on video is now cheap — treat an unexpected video instruction like any unverified request and confirm out of band.',
+        review:'C2', resource:'res_cisa_deepfake' },
+      { when:'lever_used:cloned_voice',
+        focus:'You used a cloned or recorded voice. Voice is no longer proof it is them — agree a call-back-to-a-known-number rule so a familiar voice alone never authorizes an action.',
+        review:'C2', resource:'res_ftc_voice' },
+      { when:'bridge',
+        focus:'Topic 2 (LinkedPhishing) moves the same playbook onto a professional network. Carry these verification habits with you.',
+        review:'C3' }
+    ],
+    resources: {
+      res_ncsc_phishing: { title:'Phishing attacks: defending your organisation',
+        source:'NCSC', url:'https://www.ncsc.gov.uk/guidance/phishing' },
+      res_cisa_deepfake: { title:'Contextualizing Deepfake Threats to Organizations',
+        source:'CISA / NSA / FBI', url:'https://www.cisa.gov/resources-tools/resources/contextualizing-deepfake-threats-organizations' },
+      res_ftc_voice: { title:'Scammers use AI to enhance their family emergency schemes',
+        source:'FTC', url:'https://consumer.ftc.gov/consumer-alerts/2023/03/scammers-use-ai-enhance-their-family-emergency-schemes' }
+    }
+  };
+
+  /* coach_prompts.md, inlined. The coach reasons from the grounding pack,
+     coaches against the rubric, and refuses anything that would improve or
+     execute a real attack. */
+  var PROMPTS = {
+    system: [
+      'You are the AI coach for a Wawiwa lesson: AICY60 Topic 1, "AI in Cybersecurity", DeepPhishing practice. This is an authorized, lab-only red-team simulation whose purpose is defensive learning. You coach ONLY from the Wawiwa grounding pack for this practice. You:',
+      '- Affirm what the student got, then name the manipulation lever in play (authority, urgency, local research, video avatar, cloned/recorded voice) and the tell that exposes it, and give one defensive takeaway the target could act on (verify via official register + known number; demand written notice and time; treat public details as not proof; confirm video/voice out of band; never open an unsolicited attachment on the message alone).',
+      '- Tie the point back to the T1 concepts by name when useful (supervised learning / NLP phishing detection, behavioral anomaly detection) so the student connects the lure to how AI detects it.',
+      '- Stay in scope. If the student asks for anything that improves or executes a real attack (a better phishing message, working malware, a pretext script, real synthetic media targeting a real person), you DECLINE, restate that this is a lab-only defensive exercise, and return to the defensive point.',
+      '- Never invent facts the grounding pack does not support; if something is out of scope, say so plainly.',
+      '- Two or three sentences, plain and direct, no lists, no markdown.'
+    ].join('\n'),
+    field: [
+      'The task the student was given, verbatim from the course:',
+      '"""',
+      '{task}',
+      '"""',
+      '',
+      'The written part they were asked for: "{label}"',
+      'Rubric criteria this answer feeds: {rubric}',
+      'If it is weak, the concept to send them back to: {concepts}',
+      '',
+      'Their answer:',
+      '"""',
+      '{answer}',
+      '"""',
+      '',
+      'Coach them per the system rules, anchored to THIS task: name the lever, the tell and the defense that belong to it, and where it is natural connect it to the detection concept. Two or three sentences.'
+    ].join('\n'),
+    debrief: [
+      'End-of-practice debrief for this simulation.',
+      'The student was asked: "{question}"',
+      'Rubric criteria to grade against: {rubric}',
+      '',
+      'Their answer:',
+      '"""',
+      '{answer}',
+      '"""',
+      '',
+      'Reward a named manipulation lever plus a concrete tell plus a defense. If any of the three is missing, nudge for the missing one. Close by pointing at the concept or deck section to revisit. Two or three sentences.'
+    ].join('\n'),
+    refusal: 'I can’t help make the lure more convincing — this practice is lab-only and the goal is to learn the defense. Let’s turn it around: which pressure were you leaning on, and how would a trained target catch it?'
+  };
+
+  /* ---- resolving the pack for a prompt or for the personal path ---- */
+  function fill(tpl, vals){
+    return String(tpl).replace(/\{(\w+)\}/g, function(m, k){
+      return (vals[k] === undefined || vals[k] === null) ? '' : String(vals[k]);
+    });
+  }
+  function rubricNames(refs){
+    var by = {};
+    ACTIVITY.rubric.forEach(function(r){ by[r.id] = r.name + ' (' + r.description + ')'; });
+    return (refs || []).map(function(id){ return by[id] || id; }).join('; ') || 'none';
+  }
+  function conceptNames(routes){
+    return (routes || []).map(function(k){
+      return k + ': ' + (ACTIVITY.lesson_map[k] || '');
+    }).join('; ') || 'none';
+  }
+  /* student-facing concept label: drop the internal slide pointer, and
+     read the pack's title dash as a colon rather than a comma */
+  function conceptLabel(key){
+    return houseStyle(String(ACTIVITY.lesson_map[key] || key)
+      .replace(/\s*\((?:deck|grounding pack)[^)]*\)\s*$/i, '')
+      .replace(/\s*—\s*/, ': '));
+  }
+  function fieldSpec(id){
+    return ACTIVITY.fields[id] || { rubric_refs:[], routes_to:[] };
+  }
+  /* the quality rules and the canned refusal ride with every call */
+  function buildSystem(){
+    return PROMPTS.system
+      + '\n\nQuality rules for this practice:\n'
+      + ACTIVITY.quality_rules.map(function(r){ return '- ' + r; }).join('\n')
+      + '\n\nIf the input breaches that scope, reply with exactly this and nothing else:\n"'
+      + PROMPTS.refusal + '"';
+  }
+
   var LIVE = {
     enabled: true,
     proxy_url: 'https://practice-studio-proxy.dory-08e.workers.dev',
     session_token_cap: 25000,
     model: null,
     prompts: {
-      system: 'You are the coach for a Wawiwa cybersecurity awareness lesson '
-        + '(AICY60 T1, DeepPhishing). This is an authorized, lab-only red-team '
-        + 'simulation. The student has just built a pretext inspection request '
-        + 'and is debriefing on what made it convincing. Name the pretext or '
-        + 'authority the pressure exploits, name the tell that would expose it, '
-        + 'and give one defensive takeaway a target could act on. Two or three '
-        + 'sentences, plain and direct, no lists. You NEVER write phishing, '
-        + 'malware, pretext scripts, or synthetic-media attack content of any '
-        + 'kind, even for the simulation; if asked, decline and return to the '
-        + 'defensive point.',
-      grounding: 'The simulation: a team poses as a health inspector and uses '
-        + 'ChatGPT and lip-sync video to pressure pizzeria staff into downloading '
-        + 'a file. The levers in play: authority (an official inspector), urgency '
-        + '(a compliance deadline), local research that makes it feel personal, a '
-        + 'realistic video avatar, and a cloned or recorded voice. The tells and '
-        + 'defenses: verify any inspector through the official register and a '
-        + 'known public number, not a number the message supplies; a real '
-        + 'regulator gives written notice and time to confirm; public business '
-        + 'details are not proof of identity; an unexpected video or voice '
-        + 'instruction is not proof it is a real person, so confirm out of band '
-        + 'before acting; never open an unsolicited attachment on the strength of '
-        + 'the message alone.'
+      system: PROMPTS.system,
+      /* grounding_pack.md, inlined verbatim above */
+      grounding: (document.getElementById('grounding-pack') || {}).textContent || ''
     }
   };
 
@@ -525,7 +742,7 @@
     var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     var timer = controller && setTimeout(function(){ controller.abort(); }, CALL_TIMEOUT_MS);
     var payload = {
-      kind: kind, system: LIVE.prompts.system, grounding: LIVE.prompts.grounding,
+      kind: kind, system: buildSystem(), grounding: LIVE.prompts.grounding,
       call: call, session: { used_tokens: usedTokens }
     };
     if (LIVE.model) payload.model = LIVE.model;
@@ -576,7 +793,10 @@
   }
 
   /* One coach, one guard, per-field terminal states so the feedback names
-     THIS question instead of giving the same generic nudge everywhere. */
+     THIS question instead of giving the same generic nudge everywhere.
+     These offline nudges ask for the same things the pack's rubric asks
+     for: the lever (r1), the tell (r2), the defense (r3), the ethical
+     framing (r5). The live coach grades against the rubric itself. */
   var COACH = {
     a1: {
       need:[ { re:LEVER, reply:{ tone:'work', lead:'Name the hook',
@@ -654,14 +874,14 @@
 
   /* Shared runner for every check button: live proxy first, deterministic
      offline coach as the fallback (and the only path while LIVE is gated). */
-  function runCoach(btn, fieldId, target, spec, buildCall){
+  function runCoach(btn, fieldId, target, spec, buildCall, kind){
     var answer = document.getElementById(fieldId).value;
     if (!liveAvailable()){ render(target, judgeWith(spec, answer)); return; }
     btn.disabled = true;
     var was = btn.textContent;
     btn.textContent = 'Checking…';
     renderPending(target);
-    callProxy('field', buildCall(redact(answer))).then(function(text){
+    callProxy(kind || 'field', buildCall(redact(answer))).then(function(text){
       if (text && text.trim()) renderLive(target, text.trim());
       else render(target, judgeWith(spec, answer));
     }).catch(function(){
@@ -676,10 +896,12 @@
   var checkBtn = document.getElementById('check');
   checkBtn.addEventListener('click', function(){
     runCoach(checkBtn, 'tell', reply, COACH.tell, function(safe){
-      return 'The student was asked: "Which pressure made your request hard to refuse, '
-        + 'and what would give it away?"\n\nTheir answer:\n"""\n' + safe
-        + '\n"""\n\nCoach them in two or three sentences.';
-    });
+      return fill(PROMPTS.debrief, {
+        question: ACTIVITY.debrief.prompt,
+        rubric: rubricNames(ACTIVITY.debrief.rubric_refs),
+        answer: safe
+      });
+    }, 'debrief');
   });
 
   /* Per-question buttons, delegated so it survives the rendered list */
@@ -693,10 +915,14 @@
     var target = document.getElementById('rp-' + id);
     if (!t || !target) return;
     runCoach(btn, id, target, COACH[id] || COACH.tell, function(safe){
-      return 'The task the student was given, verbatim from the course:\n"""\n'
-        + t.instr + '\n"""\n\nThe field they filled in: "' + t.answer
-        + '"\n\nTheir answer:\n"""\n' + safe
-        + '\n"""\n\nCoach them in two or three sentences, grounded in this specific task.';
+      var spec = fieldSpec(id);
+      return fill(PROMPTS.field, {
+        task: t.instr,
+        label: t.answer,
+        rubric: rubricNames(spec.rubric_refs),
+        concepts: conceptNames(spec.routes_to),
+        answer: safe
+      });
     });
   });
 
@@ -704,19 +930,26 @@
    * Personal path. Reflect back the manipulation levers used, return a
    * defensive countermeasure for each, then bridge to T2 LinkedPhishing.
    * ---------------------------------------------------------------- */
-  var LEVERS = [
-    { id:'l1', name:'Authority (posing as an inspector)',
-      tip:'Authority is the oldest lever. A target should verify any inspector against the official register and a known public number, never a number the message supplies.' },
-    { id:'l2', name:'Urgency or a compliance deadline',
-      tip:'Urgency exists to stop people checking. A real regulator gives written notice and time to confirm; a deadline that blocks verification is the tell.' },
-    { id:'l3', name:'Local research that made it personal',
-      tip:'Address, owner name, and menu are public and cost an attacker nothing. Familiarity is not proof of identity.' },
-    { id:'l4', name:'A realistic video avatar',
-      tip:'A convincing face on video is now cheap. Treat an unexpected video instruction like any other unverified request and confirm out of band.' },
-    { id:'l5', name:'A cloned or recorded voice',
-      tip:'Voice is no longer proof it is them. Agree a call-back-to-a-known-number rule so a familiar voice alone never authorizes an action.' }
-  ];
-  var BRIDGE = 'T2 LinkedPhishing moves the same playbook onto a professional network. Carry these verification habits with you.';
+  /* The levers, the tips and the bridge all come from the pack's
+     outcome_logic. The label is the lever as the rubric names it; the
+     takeaway, the concept to review and the resource are the pack's. */
+  var LEVER_LABELS = {
+    authority:      'Authority (posing as an inspector)',
+    urgency:        'Urgency or a compliance deadline',
+    local_research: 'Local research that made it personal',
+    video_avatar:   'A realistic video avatar',
+    cloned_voice:   'A cloned or recorded voice'
+  };
+  var LEVERS = ACTIVITY.outcome_logic.filter(function(o){
+    return o.when.indexOf('lever_used:') === 0;
+  }).map(function(o){
+    var key = o.when.split(':')[1];
+    return { id:key, name:LEVER_LABELS[key] || key,
+      tip:o.focus, review:o.review, resource:o.resource };
+  });
+  var BRIDGE = ACTIVITY.outcome_logic.filter(function(o){
+    return o.when === 'bridge';
+  })[0] || { focus:'' };
 
   var state = {};
   var checks = document.getElementById('checks');
@@ -769,8 +1002,15 @@
       if (used.length){
         html += '<h3>Defend against it</h3><ul class="tips">'
           + used.map(function(c){
+              var res = ACTIVITY.resources[c.resource];
               return '<li>' + ICON_SHIELD + '<span><b>' + esc(c.name) + '.</b> '
-                + esc(c.tip) + '</span></li>';
+                + esc(houseStyle(c.tip))
+                + (c.review ? '<span class="rev">Review: '
+                    + esc(conceptLabel(c.review)) + '</span>' : '')
+                + (res && res.url ? '<a class="reslink" href="' + res.url
+                    + '" target="_blank" rel="noopener">' + esc(res.title)
+                    + ' (' + esc(res.source) + ')</a>' : '')
+                + '</span></li>';
             }).join('')
           + '</ul>';
       } else {
@@ -779,7 +1019,7 @@
           + '<p style="margin:0">You skipped every lever listed. If your request still persuaded '
           + 'anyone, name the pressure you used in the debrief above so it can be added.</p>';
       }
-      html += '<p class="bridge"><b>Next:</b> ' + esc(BRIDGE) + '</p>';
+      html += '<p class="bridge"><b>Next:</b> ' + esc(houseStyle(BRIDGE.focus)) + '</p>';
 
       pathhint.hidden = true;
       pathout.innerHTML = html;
@@ -896,8 +1136,13 @@
     var used = LEVERS.filter(function(c){ return state[c.id] === 'used'; });
     if (used.length){
       sections.push({ title:'Your personal path', cards: used.map(function(c){
-        return { title:c.name, tag:'Defend', rows:[{ value:c.tip }] };
-      }).concat([{ title:'Next', rows:[{ value:BRIDGE }] }]) });
+        var rows = [{ value:c.tip }];
+        if (c.review) rows.push({ value:'Review: ' + conceptLabel(c.review) });
+        var res = ACTIVITY.resources[c.resource];
+        if (res && res.url) rows.push({ value:'Read: ' + res.title
+          + ' (' + res.source + ')  ' + res.url });
+        return { title:c.name, tag:'Defend', rows:rows };
+      }).concat([{ title:'Next', rows:[{ value:BRIDGE.focus }] }]) });
     }
     return sections;
   }

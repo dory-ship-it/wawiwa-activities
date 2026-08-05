@@ -153,6 +153,11 @@
     stroke:var(--teal-text);fill:none;stroke-width:2;
     stroke-linecap:round;stroke-linejoin:round}
   ul.tells b{font-family:var(--display);color:var(--ink);font-weight:700}
+  /* the concept to revisit and the reading, both from the grounding pack */
+  ul.tells .rev{display:block;margin:5px 0 0;font-size:.86rem;color:var(--muted)}
+  ul.tells .reslink{display:inline-block;margin:4px 0 0;font-size:.86rem;
+    color:var(--teal-text);font-weight:600}
+  ul.tells .reslink:focus-visible{outline:3px solid var(--turq);outline-offset:2px}
   .bridge{margin:16px 0 0;padding:14px 18px;border-radius:12px;
     background:var(--tint);border-left:4px solid var(--turq);
     font-size:.98rem;color:var(--ink)}
@@ -244,6 +249,69 @@
 
 </div>
 
+<!-- The grounding pack for this practice (grounding/grounding_pack.md), inlined
+     verbatim so the page stays self-contained: the coach reasons FROM this text and
+     the only network call the page makes is still the anonymizing proxy. Not
+     rendered (type="text/plain"); read from JS as textContent. -->
+<script type="text/plain" id="grounding-pack" data-source="grounding/grounding_pack.md">
+# Grounding pack — AICY60 T0: Intro to AI & Cybersecurity → Media Literacy practice
+
+> Material the coach reasons FROM. Distilled from Wawiwa's own T0 deck
+> (`AICY.T0.P1 - Intro to AI & Cybersecurity`, 45 slides) and the SME practice
+> `AICY.T0.E1 - Media Literacy`. The coach answers primarily from this pack, coaches against the
+> rubric, cites the numbered concepts below, and says "that's outside this practice" when off-topic.
+> It never fabricates detection "certainty"; media detection is probabilistic, so it coaches habits,
+> not verdicts.
+
+## Where this practice sits
+Topic T0 is the course intro: foundations of cybersecurity, the CIA triad, what AI/ML are, how AI is
+used for and against security, and ethics (IG objective: "Introduce students to basic concepts in AI
+and Cybersecurity"; practice: "practice media literacy and exercise ways to detect AI-made media";
+5h, 3 theory / 2 practical). The Media Literacy lab is a **detection** exercise: students test
+themselves against AI-generated media using online tools and reflect on the cues.
+
+## Concept map (what the coach can cite — all from the T0 deck)
+- **C1 · Cybersecurity foundations.** Cybersecurity = protecting networks, devices, software and data
+  from unauthorized access or attack (S3). Vulnerability / Threat / Risk (S7). Defense in depth (S12).
+- **C2 · The CIA triad.** Confidentiality, Integrity, Availability (S9-11) — the benchmark for whether
+  a system is secure (S8).
+- **C3 · Social engineering (the human attack surface).** Manipulating people into handing over access;
+  "human psychology is often easier to exploit than technical code" — people are a primary attack vector
+  (S13). Media literacy is a personal defense against this.
+- **C4 · What AI and ML are.** AI = systems doing tasks that need human intelligence (S15). ML learns
+  patterns from data (S19, S22); supervised / unsupervised / reinforcement (S23-25); deep learning &
+  neural networks (S20); generative AI / LLMs predict the next token to produce coherent language (S26).
+- **C5 · How AI is weaponized against people (why this practice matters).** Generative AI produces
+  hyper-realistic phishing and **convincing deepfake voice/video**, enabling customized social
+  engineering at scale (S38). Deepfakes and synthetic faces/voices are cheap — so "it looks/sounds real"
+  is no longer proof it is real.
+- **C6 · Detection cues & verification habits (the defensive core of THIS practice).** No single tell is
+  proof, but useful signals: faces — asymmetric or melting details around eyes, teeth, ears, hair,
+  jewelry, background warping; video — unnatural blinking, lip-sync drift, lighting/edge artifacts;
+  AI art — impossible geometry, garbled text, too-perfect texture; chat/text — evasive or generic
+  answers, no genuine memory, oddly fluent hedging. The reliable habit: **treat unverified media as
+  unverified** — corroborate against a trusted source and confirm identity out of band before acting.
+
+## The practice tasks (verbatim intent from the SME doc)
+Individual assignment. "Evaluate their ability to detect AI-generated media — including deepfakes,
+realistic faces, videos, artwork, and chat interactions — by testing their skills across various online
+identification tools." Tasks (each: try the tool, record how you did, note the cues):
+1. Deepfake detection test — detectfakes.kellogg.northwestern.edu ("see how many you can detect").
+2. Real vs. fake faces — whichfaceisreal.com.
+3. AI-or-not video — sightengine.com/ai-or-not-video.
+4. AI-or-human art — quillbot.com/blog/human-or-ai-game.
+5. Human-or-not chat — humanornot.so ("see if you can detect if you're talking to humans or AI").
+Answer column in the SME doc: "To be solved by the students" (open reflection — no fixed key).
+
+## Coaching stance
+The student is TESTING and REFLECTING, not building anything. The coach: affirms the attempt, asks
+them to name the **specific cue** that gave a fake away (or fooled them), connects it to the concept
+(deepfakes/synthetic media, C5; social engineering, C3), and reinforces the **verification habit** (C6):
+no single tool is proof; corroborate and confirm out of band. It never claims a piece of media is
+definitely real/fake, and it does not help create deceptive media. Out-of-scope (e.g. "make me a
+deepfake"): decline, restate the detection/defense purpose, redirect to cues and verification.
+</script>
+
 <script>
 (function(){
   'use strict';
@@ -259,38 +327,180 @@
   }catch(e){}
 
   /* ------------------------------------------------------------------
+   * The grounding pack, inlined. Authored from this program's own
+   * material (deck AICY.T0.P1, SME practice AICY.T0.E1) and kept in
+   * grounding/ beside this file:
+   *   activity.json      lesson map, rubric r1-r4, quality rules,
+   *                      outcome logic (the personal path), resources
+   *   grounding_pack.md  the teaching content the coach reasons FROM,
+   *                      carried verbatim in the #grounding-pack block
+   *   coach_prompts.md   system, field, debrief, refusal
+   * Inlined rather than fetched at runtime, so the page stays
+   * self-contained and the proxy is still the only network call.
+   * ---------------------------------------------------------------- */
+  var ACTIVITY = {
+    id: 'aicy-t0-media-literacy',
+    grounding_ref: 'grounding/grounding_pack.md',
+    lesson_map: {
+      P1: 'Foundations of Cybersecurity (deck S2-7)',
+      P2: 'Core Security Principles & the CIA Triad (S8-13)',
+      P3: 'Introduction to Artificial Intelligence (S14-20)',
+      P4: 'How Modern AI Works Under the Hood (S21-26)',
+      P5: 'AI for Cybersecurity (S27-32)',
+      P6: 'Cybersecurity for AI (S33-39)',
+      P7: 'Course Horizon & Ethics (S40-45)',
+      /* C3 is routed to by the pack's outcome_logic but is only named in
+         grounding_pack.md, so the label is taken from there. */
+      C3: 'Social engineering, the human attack surface (deck S13; grounding C3)',
+      C5: 'How AI is weaponized for social engineering — deepfakes, synthetic voice/video (deck S38; grounding C5)',
+      C6: 'Detection cues & the verification habit (grounding C6)'
+    },
+    rubric: [
+      { id:'r1_cue', name:'Names a concrete cue',
+        description:'Identifies a specific detection signal (face/eye/hand artifacts, blink/lip-sync drift, garbled text or impossible geometry, evasive/memory-less chat).' },
+      { id:'r2_verify', name:'States a verification habit',
+        description:'Gives the reliable habit: no single tool is proof, corroborate against a trusted source and confirm identity out of band before acting.' },
+      { id:'r3_socialeng_link', name:'Links to social engineering',
+        description:'Connects synthetic media to how attackers weaponize it against people (deepfake voice/video, AI phishing).' },
+      { id:'r4_calibration', name:'Calibrated confidence',
+        description:'Recognizes detection is probabilistic; avoids over-trusting a single verdict or tool.' }
+    ],
+    quality_rules: [
+      'Never help create deepfakes or deceptive media.',
+      'Never declare a specific item definitely real or fake; detection is probabilistic.',
+      'Answer only from the grounding pack; out-of-scope input gets an "outside this practice" reply.',
+      'Feedback is two or three sentences, plain, no lists.',
+      'No student PII is sent; the answer is redacted before any AI call.'
+    ],
+    debrief: {
+      prompt: 'Across the tools, what most reliably exposed AI media — and how would you verify a suspicious image, voice or message in real life?',
+      rubric_refs: ['r1_cue','r2_verify','r3_socialeng_link']
+    },
+    /* the personal path: reflect which media fooled them, then focus + a
+       concept to review + a resource (activity.json outcome_logic) */
+    outcome_logic: [
+      { when:'fooled_by:faces',
+        focus:'AI faces fooled you. Next time scan eyes, teeth, ears, hair edges, jewelry and background for asymmetry or warping — but remember no single detail is proof.',
+        review:'C6', resource:'res_cisa_deepfake' },
+      { when:'fooled_by:video',
+        focus:'AI video fooled you. Watch for unnatural blinking, lip-sync drift and lighting/edge artifacts — and for any instruction on video, confirm out of band before acting.',
+        review:'C5', resource:'res_cisa_deepfake' },
+      { when:'fooled_by:art',
+        focus:'AI art fooled you. Look for garbled text, impossible geometry and too-perfect texture; treat provenance, not polish, as the signal.',
+        review:'C6', resource:'res_media_literacy' },
+      { when:'fooled_by:chat',
+        focus:'The chatbot fooled you. Generic, evasive or memory-less answers are tells — and this is exactly the social-engineering surface, so never act on identity claimed in chat alone.',
+        review:'C3', resource:'res_cisa_deepfake' },
+      { when:'bridge',
+        focus:'Topic 1 shows how AI both builds these lures and detects them. Carry the habit: unverified media is unverified until you corroborate it.',
+        review:'C5' }
+    ],
+    resources: {
+      res_cisa_deepfake: { title:'Contextualizing Deepfake Threats to Organizations',
+        source:'CISA / NSA / FBI',
+        url:'https://www.cisa.gov/resources-tools/resources/contextualizing-deepfake-threats-organizations' },
+      /* url intentionally blank pending a chosen source (qa_notes): with no
+         url the reading simply is not offered, and no link is invented. */
+      res_media_literacy: { title:'How to spot AI-generated images and media',
+        source:'to confirm at QA', url:'' }
+    }
+  };
+
+  /* coach_prompts.md, inlined. The coach reasons from the grounding pack,
+     coaches against the rubric, never issues a real/fake verdict, and
+     refuses to help make synthetic or deceptive media. */
+  var PROMPTS = {
+    system: [
+      'You are the AI coach for a Wawiwa lesson: AICY60 Topic 0, "Intro to AI & Cybersecurity", Media Literacy practice. This is a detection-and-reflection exercise: the student tests themselves against AI-generated media (deepfakes, faces, video, art, chat). You coach ONLY from the Wawiwa grounding pack for this practice. You:',
+      '- Affirm the attempt, then ask the student to name the specific cue that gave a fake away, or that fooled them (face/eye/teeth/hair artifacts; blink and lip-sync drift; garbled text or impossible geometry in art; evasive or memory-less chat).',
+      '- Connect the cue to the concept by name: synthetic media / deepfakes and how AI is weaponized for social engineering (grounding C5, C3), and reinforce the verification habit (grounding C6): no single tool is proof, corroborate against a trusted source and confirm identity out of band before acting.',
+      '- NEVER declare a specific piece of media definitely real or fake; detection is probabilistic. Coach the habit, not a verdict.',
+      '- Stay in scope. If asked to CREATE a deepfake or any deceptive media, decline, restate that this is a detection/defense exercise, and redirect to cues and verification.',
+      '- Never invent facts the grounding pack does not support. Two or three sentences, plain, no lists, no markdown.'
+    ].join('\n'),
+    field: [
+      'The student just tried one of the detection tools in this practice: {task}',
+      'What they were asked to record: "{label}"',
+      'Rubric criteria this answer feeds: {rubric}',
+      'If it is weak, the concept to send them back to: {concepts}',
+      '',
+      'Their answer:',
+      '"""',
+      '{answer}',
+      '"""',
+      '',
+      'Coach that reflection: reward a named cue and a stated verification habit; if they only gave a score, ask which cue they relied on and which fooled them. Two or three sentences.'
+    ].join('\n'),
+    debrief: [
+      'End-of-practice debrief for this detection exercise.',
+      'The student was asked: "{question}"',
+      'Rubric criteria to grade against: {rubric}',
+      '',
+      'Their answer:',
+      '"""',
+      '{answer}',
+      '"""',
+      '',
+      'Reward a concrete cue plus the verification habit plus the tie to social engineering. If any of the three is missing, nudge for the missing one. Point back at the relevant concept to revisit. Two or three sentences.'
+    ].join('\n'),
+    refusal: 'I can’t help make synthetic or deceptive media — this practice is about detecting it and defending yourself. Let’s stay there: which detail gave the fake away, and how would you verify it before trusting it?'
+  };
+
+  /* ---- resolving the pack for a prompt or for the personal path ---- */
+  function fill(tpl, vals){
+    return String(tpl).replace(/\{(\w+)\}/g, function(m, k){
+      return (vals[k] === undefined || vals[k] === null) ? '' : String(vals[k]);
+    });
+  }
+  function rubricNames(refs){
+    var by = {};
+    ACTIVITY.rubric.forEach(function(r){ by[r.id] = r.name + ' (' + r.description + ')'; });
+    return (refs || []).map(function(id){ return by[id] || id; }).join('; ') || 'none';
+  }
+  /* student-facing concept label: drop the internal slide pointer, and
+     read the pack's title dash as a colon rather than a comma */
+  function conceptLabel(key){
+    return houseStyle(String(ACTIVITY.lesson_map[key] || key)
+      .replace(/\s*\((?:deck|grounding)[^)]*\)\s*$/i, '')
+      .replace(/\s*—\s*/, ': '));
+  }
+  function outcomeFor(when){
+    return ACTIVITY.outcome_logic.filter(function(o){ return o.when === when; })[0] || null;
+  }
+  /* the quality rules and the canned refusal ride with every call */
+  function buildSystem(){
+    return PROMPTS.system
+      + '\n\nQuality rules for this practice:\n'
+      + ACTIVITY.quality_rules.map(function(r){ return '- ' + r; }).join('\n')
+      + '\n\nIf the input breaches that scope, reply with exactly this and nothing else:\n"'
+      + PROMPTS.refusal + '"';
+  }
+
+  /* ------------------------------------------------------------------
    * Live coach, wired to the Practice Studio anonymizing proxy exactly
-   * like engine/live.js. OFF for AICY60 until the DPA covers this
-   * program: flip LIVE.enabled to true and nothing else changes.
-   * With enabled:false the page makes no network requests at all.
+   * like engine/live.js. Enabled for AICY60 on Dor's explicit decision
+   * (2026-08-05); the DPA position for this program is his to own.
+   * Student text is PII-scrubbed client-side before it is sent, the
+   * Worker scrubs again server-side, and a per-session token cap
+   * applies. Every failure path falls back to the offline coach, so the
+   * activity never blocks a student. Over file:// there is no network,
+   * which is why local testing always shows the offline coach.
    * ---------------------------------------------------------------- */
   var LIVE = {
-    enabled: false,
+    enabled: true,
     proxy_url: 'https://practice-studio-proxy.dory-08e.workers.dev',
     session_token_cap: 25000,
     model: null,
     prompts: {
-      system: 'You are the coach for a Wawiwa cybersecurity awareness lesson '
-        + '(AICY60 T0, Media Literacy). The student has just run five public '
-        + 'AI-detection challenges and is naming what fooled them. Push for one '
-        + 'specific tell and tie it to spotting deepfake phishing. Two or three '
-        + 'sentences, plain and direct, no lists, no praise padding. You never '
-        + 'write phishing, malware, or synthetic-media attack content of any '
-        + 'kind; if asked, decline and return to the defensive point.',
-      grounding: 'The five challenges, in order: a deepfake video detection test '
-        + '(Kellogg, Northwestern); real versus AI-generated faces '
-        + '(whichfaceisreal.com); AI-generated video (sightengine.com); '
-        + 'AI-generated art (quillbot.com); human versus AI chat (humanornot.so). '
-        + 'A good answer names the media type and the specific detail that gave it '
-        + 'away, such as lip-to-audio sync, hairline and jaw edges, hands, teeth, '
-        + 'earrings, lighting that ignores its own source, texture that is too '
-        + 'even, or an unnaturally fast and even chat reply. The defensive point: '
-        + 'the same tells decide whether a deepfake voice or video phishing '
-        + 'attempt lands.'
+      system: PROMPTS.system,
+      /* grounding_pack.md, inlined verbatim above */
+      grounding: (document.getElementById('grounding-pack') || {}).textContent || ''
     }
   };
 
-  var CALL_TIMEOUT_MS = 20000;
+  /* Measured live latency on this proxy runs to roughly 20s, so a 20s
+     abort was killing good answers. 35s, matching T1. */
+  var CALL_TIMEOUT_MS = 35000;
   var usedTokens = 0;
 
   /* PII scrub, same pattern list as engine/redact.js. Unredacted text
@@ -318,7 +528,7 @@
     var timer = controller && setTimeout(function(){ controller.abort(); }, CALL_TIMEOUT_MS);
     var payload = {
       kind: kind,
-      system: LIVE.prompts.system,
+      system: buildSystem(),
       grounding: LIVE.prompts.grounding,
       call: call,
       session: { used_tokens: usedTokens }
@@ -396,10 +606,18 @@
       + '<p><span class="lead">' + esc(r.lead) + '</span>' + esc(r.text) + '</p>';
   }
 
+  /* The live coach writes its own prose, so apply the same house rule the
+     deck pipeline applies: no em dashes, no arrow shorthand. */
+  function houseStyle(text){
+    return String(text || '')
+      .replace(/\s*—\s*/g, ', ')
+      .replace(/\s*(?:→|←|⇒)\s*/g, ', ');
+  }
+
   function showLive(text){
     reply.hidden = false;
     reply.setAttribute('data-tone','ok');
-    reply.innerHTML = ICON_OK + '<p>' + esc(text) + '</p>';
+    reply.innerHTML = ICON_OK + '<p>' + esc(houseStyle(text)) + '</p>';
   }
 
   checkBtn.addEventListener('click', function(){
@@ -408,10 +626,14 @@
     checkBtn.disabled = true;
     var was = checkBtn.textContent;
     checkBtn.textContent = 'Checking…';
-    var call = 'The student was asked: "Which fooled you, and what gave it away?"\n\n'
-      + 'Their answer:\n"""\n' + redact(answer) + '\n"""\n\n'
-      + 'Coach them in two or three sentences.';
-    callProxy('field', call).then(function(text){
+    /* The question on the page is the short form of the pack's debrief
+       prompt; the rubric it is graded against is the pack's. */
+    var call = fill(PROMPTS.debrief, {
+      question: 'Which fooled you, and what gave it away?',
+      rubric: rubricNames(ACTIVITY.debrief.rubric_refs),
+      answer: redact(answer)
+    });
+    callProxy('debrief', call).then(function(text){
       if (text && text.trim()) showLive(text.trim()); else show(judge(answer));
     }).catch(function(){
       show(judge(answer));
@@ -422,24 +644,20 @@
   });
 
   /* ------------------------------------------------------------------
-   * Personal path. Five toggles, one per challenge already on the
-   * page above. Each "Fooled me" returns the tell for that medium.
+   * Personal path. Five toggles, one per challenge already on the page
+   * above; each one carries the media type the pack's outcome_logic
+   * keys on, so a "Fooled me" returns that entry: the takeaway, the
+   * concept to review, and the reading. Nothing here is hand-written.
    * ---------------------------------------------------------------- */
   var CHALLENGES = [
-    { id:'c1', name:'Deepfake video test',
-      tell:'Check lip-to-audio sync first, then the jawline and hairline where the face meets the background.' },
-    { id:'c2', name:'Real vs AI faces',
-      tell:'Generated portraits slip at the edges: one odd ear, mismatched earrings, teeth that do not line up, a melting background.' },
-    { id:'c3', name:'AI video',
-      tell:'Hold on a few seconds of motion. Hands, text on signs, and reflections stop matching frame to frame.' },
-    { id:'c4', name:'AI art',
-      tell:'Shading that ignores its own light source and texture that is too even are what give AI art away.' },
-    { id:'c5', name:'Human vs AI chat',
-      tell:'AI answers fast, evenly, and politely. People mistype, drift off topic, and refuse a dull question.' }
+    { id:'c1', name:'Deepfake video test', key:'video' },
+    { id:'c2', name:'Real vs AI faces',    key:'faces' },
+    { id:'c3', name:'AI video',            key:'video' },
+    { id:'c4', name:'AI art',              key:'art'   },
+    { id:'c5', name:'Human vs AI chat',    key:'chat'  }
   ];
 
-  var BRIDGE_SOME = 'Next up in T1 DeepPhishing you build the message yourself. These same tells decide whether it lands.';
-  var BRIDGE_ALL  = 'Five for five. In T1 DeepPhishing you switch sides and build the message, so watch for these tells in your own work.';
+  var BRIDGE = outcomeFor('bridge') || { focus:'' };
 
   var state = {};
   var checks = document.getElementById('checks');
@@ -486,16 +704,29 @@
       var fooled = CHALLENGES.filter(function(c){ return state[c.id] === 'fooled'; });
       var html = '';
       if (fooled.length){
-        html += '<h3>Watch for</h3><ul class="tells">'
-          + fooled.map(function(c){
-              return '<li>' + ICON_EYE + '<span><b>' + esc(c.name) + '.</b> '
-                + esc(c.tell) + '</span></li>';
-            }).join('')
-          + '</ul>';
+        /* one block per media type that fooled them, in the pack's order */
+        var keys = [];
+        fooled.forEach(function(c){
+          if (keys.indexOf(c.key) === -1) keys.push(c.key);
+        });
+        var blocks = keys.map(function(k){
+          var o = outcomeFor('fooled_by:' + k);
+          if (!o) return '';
+          var names = fooled.filter(function(c){ return c.key === k; })
+            .map(function(c){ return c.name; }).join(' and ');
+          var res = ACTIVITY.resources[o.resource];
+          return '<li>' + ICON_EYE + '<span><b>' + esc(names) + '.</b> '
+            + esc(houseStyle(o.focus))
+            + (o.review ? '<span class="rev">Review: '
+                + esc(conceptLabel(o.review)) + '</span>' : '')
+            + (res && res.url ? '<a class="reslink" href="' + res.url
+                + '" target="_blank" rel="noopener">' + esc(res.title)
+                + ' (' + esc(res.source) + ')</a>' : '')
+            + '</span></li>';
+        }).join('');
+        if (blocks) html += '<h3>Watch for</h3><ul class="tells">' + blocks + '</ul>';
       }
-      var allDone = answered.length === CHALLENGES.length;
-      html += '<p class="bridge">'
-        + esc(allDone && !fooled.length ? BRIDGE_ALL : BRIDGE_SOME) + '</p>';
+      html += '<p class="bridge">' + esc(houseStyle(BRIDGE.focus)) + '</p>';
       pathout.innerHTML = html;
     }
   }
