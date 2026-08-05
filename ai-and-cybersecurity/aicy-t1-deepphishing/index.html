@@ -147,6 +147,22 @@
     box-shadow:0 8px 20px rgba(37,87,119,.30)}
   .btn:active{transform:none}
   .btn[disabled]{opacity:.6;cursor:default;transform:none;box-shadow:none}
+  /* per-question action: same control, one step down in the hierarchy so the
+     Debrief button still reads as the primary one */
+  .btn.sm{font-size:.88rem;padding:9px 18px;box-shadow:0 4px 12px rgba(37,87,119,.18)}
+  .btn.sm:hover{box-shadow:0 6px 15px rgba(37,87,119,.24)}
+
+  /* Quiet autosave cue. Visual only and aria-hidden on purpose: announcing
+     "Saved" on every debounce would spam a screen reader for no gain. */
+  .saved{
+    font-size:.82rem;color:var(--teal-text);font-weight:600;
+    display:inline-flex;align-items:center;gap:5px;
+    opacity:0;transition:opacity .25s ease;
+  }
+  .saved.on{opacity:1}
+  .saved svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.6;
+    stroke-linecap:round;stroke-linejoin:round}
+  @media (prefers-reduced-motion:reduce){.saved{transition:none}}
 
   .reply{
     display:flex;gap:12px;align-items:flex-start;
@@ -339,6 +355,11 @@
       ? '<label class="lbl" for="' + t.id + '">' + esc(t.answer) + '</label>'
         + '<textarea id="' + t.id + '" rows="4" aria-describedby="i-' + t.id + ' pii-' + t.id + '"></textarea>'
         + '<p class="pii" id="pii-' + t.id + '">Don’t include personal or identifying information in your answers.</p>'
+        + '<div class="actions">'
+        +   '<button type="button" class="btn sm" data-coach="' + t.id + '">Check with AI Coach</button>'
+        +   '<span class="saved" id="sv-' + t.id + '" aria-hidden="true">' + ICON_TICK + 'Saved</span>'
+        + '</div>'
+        + '<div class="reply" id="rp-' + t.id + '" role="status" aria-live="polite" hidden></div>'
       : '';
     li.innerHTML =
       '<span class="tile" aria-hidden="true"></span>'
@@ -380,10 +401,23 @@
       window.localStorage.setItem(STORE_KEY, JSON.stringify(data));
     }catch(e){}
   }
+  /* Debounced "Saved" cue so the student can see their text is kept. */
+  var savedTimers = {};
+  function flagSaved(id){
+    var cue = document.getElementById('sv-' + id);
+    if (!cue) return;
+    clearTimeout(savedTimers[id + '-on']);
+    clearTimeout(savedTimers[id + '-off']);
+    savedTimers[id + '-on'] = setTimeout(function(){
+      cue.classList.add('on');
+      savedTimers[id + '-off'] = setTimeout(function(){ cue.classList.remove('on'); }, 1800);
+    }, 500);
+  }
+
   loadSaved();
   FIELD_IDS.forEach(function(id){
     var el = document.getElementById(id);
-    if (el) el.addEventListener('input', save);
+    if (el) el.addEventListener('input', function(){ save(); flagSaved(id); });
   });
 
   /* ------------------------------------------------------------------
@@ -473,56 +507,138 @@
   var DEFENSE = /(verify|verif|confirm|call\s?back|callback|call\b|phone|known number|official (channel|number|register)|register|hang up|out of band|independent|second|two[- ]person|check|double[- ]check|written notice|report|policy|do not open|don'?t open|attachment|unsolicited|hover|sender|domain|url|link|slow down|take time|escalat)/i;
   var FILLER = /^(idk|dunno|none|nothing|nope|n\/?a|na|no|yes|ok|okay|good|bad|easy|hard|fun|cool|nice|all|some|maybe|dont know|don't know|[\s\-\.\?]*)$/i;
 
+  var REASON = /(because|since|more|less|convinc|natural|human|real|robot|flat|monoton|tone|emotion|accent|breath|pause|pace|sync|trust|belie|doubt|suspic|voice|audio|photo|face|formal|official|profession|credib)/i;
+
+  /* Shared guards: these two apply to every field. */
   var REPLIES = {
     empty:{ tone:'work', lead:'Nothing to work with yet',
-      text:'Write two or three sentences: which pressure made the request hard to refuse, and how a target would catch it.' },
+      text:'Write two or three sentences in the box, then check again.' },
     thin:{ tone:'work', lead:'Too thin to grade',
-      text:'Name the pressure you leaned on, then the tell that exposes it. A lever you can name is a lever staff can be trained against.' },
-    lever:{ tone:'work', lead:'Name the pressure',
-      text:'Was it authority (the inspector), urgency (a deadline), local detail that felt personal, or a realistic face or voice? Each one has its own giveaway.' },
-    defense:{ tone:'work', lead:'Now name the defense',
-      text:'How would a target catch it? The reliable move is to verify through an official channel and a known number, never the one the message supplies.' },
-    good:{ tone:'ok', lead:'That is the lesson',
-      text:'Authority plus urgency is exactly why these land. The defense is to slow down and confirm out of band before opening anything, no matter how official the face or voice looks.' }
+      text:'Give the coach something to work with: a couple of sentences that say what you did and why it worked.' }
   };
-  function judge(raw){
+
+  function countItems(text){
+    var t = String(text || '').trim();
+    var lines = t.split(/\n+/).map(function(s){ return s.trim(); }).filter(Boolean);
+    if (lines.length >= 3) return lines.length;
+    var marks = t.match(/(^|\s)(\d[\.\)]|[-•*])\s/g);
+    if (marks && marks.length >= 3) return marks.length;
+    var semis = t.split(/;/).map(function(s){ return s.trim(); }).filter(Boolean);
+    if (semis.length >= 3) return semis.length;
+    var sents = t.split(/[.!?]+\s+/).filter(function(s){ return s.trim().length > 12; });
+    if (sents.length >= 3) return sents.length;
+    return lines.length;
+  }
+
+  /* One coach, one guard, per-field terminal states so the feedback names
+     THIS question instead of giving the same generic nudge everywhere. */
+  var COACH = {
+    a1: {
+      need:[ { re:LEVER, reply:{ tone:'work', lead:'Name the hook',
+        text:'Which authority and which regulation does your argument borrow? A pretext works because it stands on a real institution, so say which one you stood on.' } } ],
+      good:{ tone:'ok', lead:'That is a working pretext',
+        text:'It lands because it borrows real authority and gives staff a reason not to pause. Keep that for the defensive half: staff need a rule that verifies the inspector, not instinct that judges the story.' }
+    },
+    a3: {
+      need:[ { re:REASON, reply:{ tone:'work', lead:'Answer it, then say why',
+        text:'Was the recorded audio more convincing than synthesised text, and what made the difference? Name the specific quality you heard.' } } ],
+      good:{ tone:'ok', lead:'Good comparison',
+        text:'Recorded audio usually wins because breathing and natural stress read as human in a way synthesis still does not. That is precisely why a familiar voice can no longer be treated as proof of identity.' }
+    },
+    a4: {
+      need:[ { re:REASON, reply:{ tone:'work', lead:'Answer it, then say why',
+        text:'Was the outside photo more convincing than the built-in avatar, and what made it so? Name what the face communicated.' } } ],
+      good:{ tone:'ok', lead:'Good comparison',
+        text:'An unfamiliar, formal face often reads as more official than a stock avatar, which is exactly why "looks professional" is worthless as evidence. Proof has to come from outside the message.' }
+    },
+    a6: {
+      need:[ { test:function(t){ return countItems(t) >= 3; }, reply:{ tone:'work', lead:'List three',
+        text:'You have fewer than three. Put each misuse on its own line, then a defense can be mapped to each one.' } } ],
+      good:{ tone:'ok', lead:'Three is the point',
+        text:'Every one of those has a matching control: verify identity out of band, agree a call-back rule, and treat unexpected media as unverified until confirmed. Misuse mapped to a control is what makes this work defensible.' }
+    },
+    tell: {
+      need:[
+        { re:LEVER, reply:{ tone:'work', lead:'Name the pressure',
+          text:'Was it authority (the inspector), urgency (a deadline), local detail that felt personal, or a realistic face or voice? Each one has its own giveaway.' } },
+        { re:DEFENSE, reply:{ tone:'work', lead:'Now name the defense',
+          text:'How would a target catch it? The reliable move is to verify through an official channel and a known number, never the one the message supplies.' } }
+      ],
+      good:{ tone:'ok', lead:'That is the lesson',
+        text:'Authority plus urgency is exactly why these land. The defense is to slow down and confirm out of band before opening anything, no matter how official the face or voice looks.' }
+    }
+  };
+
+  function judgeWith(spec, raw){
     var text = String(raw || '').trim();
     if (!text) return REPLIES.empty;
     var words = text.split(/\s+/).filter(Boolean);
     if (FILLER.test(text) || words.length < 4 || text.length < 14) return REPLIES.thin;
-    if (!LEVER.test(text)) return REPLIES.lever;
-    if (!DEFENSE.test(text)) return REPLIES.defense;
-    return REPLIES.good;
+    for (var i = 0; i < spec.need.length; i++){
+      var n = spec.need[i];
+      var ok = n.re ? n.re.test(text) : n.test(text);
+      if (!ok) return n.reply;
+    }
+    return spec.good;
   }
+  function judge(raw){ return judgeWith(COACH.tell, raw); }
 
-  var reply = document.getElementById('reply');
-  var tell = document.getElementById('tell');
-  var checkBtn = document.getElementById('check');
-
-  function show(r){
-    reply.hidden = false;
-    reply.setAttribute('data-tone', r.tone);
-    reply.innerHTML = (r.tone === 'ok' ? ICON_OK : ICON_WORK)
+  function render(el, r){
+    el.hidden = false;
+    el.setAttribute('data-tone', r.tone);
+    el.innerHTML = (r.tone === 'ok' ? ICON_OK : ICON_WORK)
       + '<p><span class="lead">' + esc(r.lead) + '</span>' + esc(r.text) + '</p>';
   }
-  function showLive(text){
-    reply.hidden = false;
-    reply.setAttribute('data-tone','ok');
-    reply.innerHTML = ICON_OK + '<p>' + esc(text) + '</p>';
+  function renderLive(el, text){
+    el.hidden = false;
+    el.setAttribute('data-tone','ok');
+    el.innerHTML = ICON_OK + '<p>' + esc(text) + '</p>';
   }
+
+  /* Shared runner for every check button: live proxy first, deterministic
+     offline coach as the fallback (and the only path while LIVE is gated). */
+  function runCoach(btn, fieldId, target, spec, buildCall){
+    var answer = document.getElementById(fieldId).value;
+    if (!liveAvailable()){ render(target, judgeWith(spec, answer)); return; }
+    btn.disabled = true;
+    var was = btn.textContent;
+    btn.textContent = 'Checking…';
+    callProxy('field', buildCall(redact(answer))).then(function(text){
+      if (text && text.trim()) renderLive(target, text.trim());
+      else render(target, judgeWith(spec, answer));
+    }).catch(function(){
+      render(target, judgeWith(spec, answer));
+    }).then(function(){
+      btn.disabled = false; btn.textContent = was;
+    });
+  }
+
+  /* Debrief card */
+  var reply = document.getElementById('reply');
+  var checkBtn = document.getElementById('check');
   checkBtn.addEventListener('click', function(){
-    var answer = tell.value;
-    if (!liveAvailable()){ show(judge(answer)); return; }
-    checkBtn.disabled = true;
-    var was = checkBtn.textContent;
-    checkBtn.textContent = 'Checking…';
-    var call = 'The student was asked: "Which pressure made your request hard to refuse, '
-      + 'and what would give it away?"\n\nTheir answer:\n"""\n' + redact(answer)
-      + '\n"""\n\nCoach them in two or three sentences.';
-    callProxy('field', call).then(function(text){
-      if (text && text.trim()) showLive(text.trim()); else show(judge(answer));
-    }).catch(function(){ show(judge(answer)); }).then(function(){
-      checkBtn.disabled = false; checkBtn.textContent = was;
+    runCoach(checkBtn, 'tell', reply, COACH.tell, function(safe){
+      return 'The student was asked: "Which pressure made your request hard to refuse, '
+        + 'and what would give it away?"\n\nTheir answer:\n"""\n' + safe
+        + '\n"""\n\nCoach them in two or three sentences.';
+    });
+  });
+
+  /* Per-question buttons, delegated so it survives the rendered list */
+  var TASK_BY_ID = {};
+  TASKS.forEach(function(t){ TASK_BY_ID[t.id] = t; });
+  tasksEl.addEventListener('click', function(ev){
+    var btn = ev.target.closest ? ev.target.closest('button[data-coach]') : null;
+    if (!btn) return;
+    var id = btn.getAttribute('data-coach');
+    var t = TASK_BY_ID[id];
+    var target = document.getElementById('rp-' + id);
+    if (!t || !target) return;
+    runCoach(btn, id, target, COACH[id] || COACH.tell, function(safe){
+      return 'The task the student was given, verbatim from the course:\n"""\n'
+        + t.instr + '\n"""\n\nThe field they filled in: "' + t.answer
+        + '"\n\nTheir answer:\n"""\n' + safe
+        + '\n"""\n\nCoach them in two or three sentences, grounded in this specific task.';
     });
   });
 
