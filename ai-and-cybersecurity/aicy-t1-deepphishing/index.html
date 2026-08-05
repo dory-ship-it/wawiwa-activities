@@ -556,11 +556,15 @@ the lab-only/defensive purpose, and redirect to the defensive point.
     id: 'aicy-t1-deepphishing',
     grounding_ref: 'grounding/grounding_pack.md',
     lesson_map: {
-      C1: 'AI & ML basics — supervised, unsupervised, reinforcement (deck S3-4, S8-11, S29)',
-      C2: 'New AI-era threats — AI attacks, deepfakes, AI phishing, ransomware (deck S5, S14-16)',
-      C3: 'AI for detection & response — phishing/NLP detection, anomaly & behavioral analytics (deck S6-7, S13, S15, S22, S37)',
-      C4: 'Why the lure is convincing — social engineering + the five manipulation levers (grounding pack C4)',
-      C5: 'The defenses — verify out of band, official register + known number, written notice, attachments (grounding pack C5)'
+      C1: 'Topic 1 · AI & ML basics — supervised, unsupervised, reinforcement learning (slides 3-4, 29)',
+      C2: 'Topic 1 · New AI-era threats — deepfakes, AI phishing, ransomware (slides 5, 14-16)',
+      C3: 'Topic 1 · AI for detection & response — AI phishing/NLP detection, anomaly analytics (slides 6-7, 15, 22, 37)',
+      C4: 'Topic 1 · Why the lure works — social engineering & the five levers (see also Topic 0, slide 13)',
+      C5: 'Topic 1 · The defenses — verify out of band, official register + known number (slide 15, detection cues)'
+    },
+    personal_path_ui: {
+      review_prefix: 'Where to review this: ',
+      resource_prefix: 'Optional extra resource (further reading, not required): '
     },
     rubric: [
       { id:'r1_lever', name:'Names the lever',
@@ -691,6 +695,19 @@ the lab-only/defensive purpose, and redirect to the defensive point.
     return houseStyle(String(ACTIVITY.lesson_map[key] || key)
       .replace(/\s*\((?:deck|grounding pack)[^)]*\)\s*$/i, '')
       .replace(/\s*—\s*/, ': '));
+  }
+  /* Personal-path pointers, straight from activity.json's personal_path_ui.
+     The review pointer NAMES the lesson and where to find it (full lesson_map
+     label, slide pointer included); the resource lead marks the link as an
+     optional extra, not a required step. */
+  function ppui(){ return ACTIVITY.personal_path_ui || {}; }
+  function reviewPointer(key){
+    return (ppui().review_prefix || 'Where to review this: ')
+      + String(ACTIVITY.lesson_map[key] || key);
+  }
+  function resourceLead(res){
+    return (ppui().resource_prefix || 'Optional extra resource (further reading, not required): ')
+      + res.title;
   }
   function fieldSpec(id){
     return ACTIVITY.fields[id] || { rubric_refs:[], routes_to:[] };
@@ -1005,10 +1022,10 @@ the lab-only/defensive purpose, and redirect to the defensive point.
               var res = ACTIVITY.resources[c.resource];
               return '<li>' + ICON_SHIELD + '<span><b>' + esc(c.name) + '.</b> '
                 + esc(houseStyle(c.tip))
-                + (c.review ? '<span class="rev">Review: '
-                    + esc(conceptLabel(c.review)) + '</span>' : '')
+                + (c.review ? '<span class="rev">'
+                    + esc(reviewPointer(c.review)) + '</span>' : '')
                 + (res && res.url ? '<a class="reslink" href="' + res.url
-                    + '" target="_blank" rel="noopener">' + esc(res.title)
+                    + '" target="_blank" rel="noopener">' + esc(resourceLead(res))
                     + ' (' + esc(res.source) + ')</a>' : '')
                 + '</span></li>';
             }).join('')
@@ -1137,9 +1154,9 @@ the lab-only/defensive purpose, and redirect to the defensive point.
     if (used.length){
       sections.push({ title:'Your personal path', cards: used.map(function(c){
         var rows = [{ value:c.tip }];
-        if (c.review) rows.push({ value:'Review: ' + conceptLabel(c.review) });
+        if (c.review) rows.push({ value: reviewPointer(c.review) });
         var res = ACTIVITY.resources[c.resource];
-        if (res && res.url) rows.push({ value:'Read: ' + res.title
+        if (res && res.url) rows.push({ value: resourceLead(res)
           + ' (' + res.source + ')  ' + res.url });
         return { title:c.name, tag:'Defend', rows:rows };
       }).concat([{ title:'Next', rows:[{ value:BRIDGE.focus }] }]) });
