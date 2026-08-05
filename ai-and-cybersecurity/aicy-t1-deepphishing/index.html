@@ -204,7 +204,21 @@
     stroke-linecap:round;stroke-linejoin:round;visibility:hidden}
   .seg button[aria-pressed="true"] svg{visibility:visible}
 
-  .pathout:not(:empty){margin:22px 0 0;padding:20px 0 0;border-top:1px solid var(--line)}
+  /* one-line intro so the section explains itself before anything is toggled */
+  .pathintro{margin:14px 0 20px;color:var(--body)}
+
+  /* resting state: the block is visibly waiting, never looks broken */
+  .pathhint{
+    margin:22px 0 0;padding:14px 18px;border-radius:12px;
+    background:#FBFDFD;border:1px dashed #CBE0E0;
+    color:var(--muted);font-size:.94rem;
+  }
+  .pathhint[hidden]{display:none}
+
+  /* result panel: clearly its own block, not a quiet footnote */
+  .pathout{margin:22px 0 0;padding:20px 22px;border-radius:12px;
+    background:var(--tint);border:1px solid #D3E6E6;border-left:4px solid var(--turq)}
+  .pathout[hidden]{display:none}
   .pathout h3{font-family:var(--display);font-size:.72rem;font-weight:700;
     letter-spacing:.14em;text-transform:uppercase;color:var(--teal-text);margin:0 0 12px}
   ul.tips{list-style:none;margin:0;padding:0}
@@ -213,9 +227,11 @@
     stroke:var(--teal-text);fill:none;stroke-width:2;
     stroke-linecap:round;stroke-linejoin:round}
   ul.tips b{font-family:var(--display);color:var(--ink);font-weight:700}
-  .bridge{margin:16px 0 0;padding:14px 18px;border-radius:12px;
-    background:var(--tint);border-left:4px solid var(--turq);
-    font-size:.98rem;color:var(--ink)}
+  /* white inside the tinted panel so the bridge still reads as its own step */
+  .bridge{margin:16px 0 0;padding:13px 16px;border-radius:10px;
+    background:#fff;border:1px solid #D3E6E6;
+    font-size:.96rem;color:var(--ink)}
+  .bridge b{font-family:var(--display);color:var(--navy)}
 
   @media (max-width:560px){
     body{font-size:16px}
@@ -275,9 +291,11 @@
     <p class="eyebrow">Personal path</p>
     <h2 id="h-path">Which levers did you lean on?</h2>
     <span class="rule"></span>
-    <div class="card" style="margin-top:20px">
+    <p class="pathintro">Reflect on which manipulation levers you leaned on, and you&rsquo;ll get a tailored defensive takeaway.</p>
+    <div class="card">
       <ul class="checks" id="checks"></ul>
-      <div class="pathout" id="pathout" role="status" aria-live="polite"></div>
+      <p class="pathhint" id="pathhint">Mark a lever above to see the defense that answers it.</p>
+      <div class="pathout" id="pathout" role="status" aria-live="polite" hidden></div>
     </div>
   </section>
 
@@ -663,6 +681,7 @@
   var state = {};
   var checks = document.getElementById('checks');
   var pathout = document.getElementById('pathout');
+  var pathhint = document.getElementById('pathhint');
   var pathSec = document.getElementById('path-sec');
 
   if (META.context === 'class'){
@@ -696,8 +715,16 @@
 
     function renderPath(){
       var answered = LEVERS.filter(function(c){ return state[c.id]; });
-      if (!answered.length){ pathout.innerHTML = ''; return; }
       var used = LEVERS.filter(function(c){ return state[c.id] === 'used'; });
+
+      /* Nothing marked yet: keep the waiting hint, hide the panel. */
+      if (!answered.length){
+        pathout.hidden = true;
+        pathout.innerHTML = '';
+        pathhint.hidden = false;
+        return;
+      }
+
       var html = '';
       if (used.length){
         html += '<h3>Defend against it</h3><ul class="tips">'
@@ -706,9 +733,17 @@
                 + esc(c.tip) + '</span></li>';
             }).join('')
           + '</ul>';
+      } else {
+        /* Everything marked "Skipped it": say so rather than showing a bare bridge. */
+        html += '<h3>Nothing to defend yet</h3>'
+          + '<p style="margin:0">You skipped every lever listed. If your request still persuaded '
+          + 'anyone, name the pressure you used in the debrief above so it can be added.</p>';
       }
-      html += '<p class="bridge">' + esc(BRIDGE) + '</p>';
+      html += '<p class="bridge"><b>Next:</b> ' + esc(BRIDGE) + '</p>';
+
+      pathhint.hidden = true;
       pathout.innerHTML = html;
+      pathout.hidden = false;
     }
   }
 })();
