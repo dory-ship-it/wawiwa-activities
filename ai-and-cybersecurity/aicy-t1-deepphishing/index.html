@@ -172,6 +172,8 @@
   }
   .reply[hidden]{display:none}
   .reply[data-tone="work"]{background:var(--tint-warm);border-left-color:var(--gold)}
+  .reply[data-tone="wait"]{background:#F7F9FA;border-left-color:var(--edge);color:var(--muted)}
+  .reply[data-tone="wait"] svg{stroke:var(--muted)}
   .reply p{margin:0;font-size:.98rem}
   .reply .lead{font-family:var(--display);font-weight:700;color:var(--ink);
     display:block;margin:0 0 3px;font-size:.94rem}
@@ -325,6 +327,7 @@
   var ICON_WORK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>';
   var ICON_SHIELD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 8.4-7 9.5C8 19.4 5 15.4 5 11V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg>';
   var ICON_TICK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
+  var ICON_WAIT = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>';
 
   /* ------------------------------------------------------------------
    * Six tasks. Instruction text is verbatim from the SME source
@@ -441,12 +444,16 @@
 
   /* ------------------------------------------------------------------
    * Live coach, wired to the Practice Studio anonymizing proxy exactly
-   * like engine/live.js. OFF for AICY60 until the DPA covers this
-   * program: flip LIVE.enabled to true and nothing else changes.
-   * With enabled:false the page makes no network requests at all.
+   * like engine/live.js. Enabled for AICY60 on Dor's explicit decision
+   * (2026-08-05); the DPA position for this program is his to own.
+   * Student text is PII-scrubbed client-side before it is sent, the
+   * Worker scrubs again server-side, and a per-session token cap applies.
+   * Every failure path falls back to the offline coach, so the activity
+   * never blocks a student. Over file:// there is no network, which is
+   * why local testing always shows the offline coach.
    * ---------------------------------------------------------------- */
   var LIVE = {
-    enabled: false,
+    enabled: true,
     proxy_url: 'https://practice-studio-proxy.dory-08e.workers.dev',
     session_token_cap: 25000,
     model: null,
@@ -476,7 +483,10 @@
     }
   };
 
-  var CALL_TIMEOUT_MS = 20000;
+  /* Measured live latency on this proxy runs to roughly 20s, so a 20s abort
+     was killing good answers. 35s, with a visible pending state so the wait
+     is explained rather than looking frozen. */
+  var CALL_TIMEOUT_MS = 35000;
   var usedTokens = 0;
 
   var REDACT = [
@@ -608,10 +618,22 @@
     el.innerHTML = (r.tone === 'ok' ? ICON_OK : ICON_WORK)
       + '<p><span class="lead">' + esc(r.lead) + '</span>' + esc(r.text) + '</p>';
   }
+  /* The live coach writes its own prose, so apply the same house rule the
+     deck pipeline applies: no em dashes, no arrow shorthand. */
+  function houseStyle(text){
+    return String(text || '')
+      .replace(/\s*—\s*/g, ', ')
+      .replace(/\s*(?:→|←|⇒)\s*/g, ', ');
+  }
   function renderLive(el, text){
     el.hidden = false;
     el.setAttribute('data-tone','ok');
-    el.innerHTML = ICON_OK + '<p>' + esc(text) + '</p>';
+    el.innerHTML = ICON_OK + '<p>' + esc(houseStyle(text)) + '</p>';
+  }
+  function renderPending(el){
+    el.hidden = false;
+    el.setAttribute('data-tone','wait');
+    el.innerHTML = ICON_WAIT + '<p>Asking the AI Coach, this can take a few seconds.</p>';
   }
 
   /* Shared runner for every check button: live proxy first, deterministic
@@ -622,6 +644,7 @@
     btn.disabled = true;
     var was = btn.textContent;
     btn.textContent = 'Checking…';
+    renderPending(target);
     callProxy('field', buildCall(redact(answer))).then(function(text){
       if (text && text.trim()) renderLive(target, text.trim());
       else render(target, judgeWith(spec, answer));
