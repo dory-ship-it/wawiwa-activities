@@ -54,12 +54,13 @@
     background:var(--turq);margin:12px 0 0}
 
   /* ---------- scenario image ---------- */
-  /* contain, not cover: the illustration is never cropped at any width.
-     The container takes the artwork's own flat background colour, so the
-     letterbox bands read as one seamless banner. */
+  /* Photographic hero: cover, so it fills the banner at any width with no
+     distortion. object-position favours the lower band where the oven mouth
+     and the pizza sit, so the subject survives the crop on narrow screens. */
   .hero{
-    display:block;width:100%;height:200px;
-    object-fit:contain;background:#7C9390;
+    display:block;width:100%;height:240px;
+    object-fit:cover;object-position:center 62%;
+    background:#1B2A2C;
     border-radius:16px;border:1px solid var(--line);margin:0 0 24px;
   }
 
@@ -236,7 +237,7 @@
   @media (max-width:560px){
     body{font-size:16px}
     .page{padding:8px 18px 34px}
-    .hero{height:140px;border-radius:14px}
+    .hero{height:170px;border-radius:14px}
     li.task,.card{padding:22px 20px 20px;border-radius:14px}
     .cname{flex-basis:100%}
   }
@@ -251,7 +252,7 @@
   <!-- Scenario illustration. Decorative: the brief below carries every fact
        a student needs, so the image takes an empty alt rather than adding
        redundant screen-reader noise. Local asset, never hot-linked. -->
-  <img class="hero" src="pizzeria-scenario.webp" alt="" width="2016" height="864">
+  <img class="hero" src="pizzeria-scenario.webp" alt="" width="2048" height="1152" decoding="async">
 
   <!-- ============ brief ============ -->
   <div class="brief">
