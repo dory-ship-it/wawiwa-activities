@@ -2567,6 +2567,19 @@ button.m-node { cursor: pointer; }
   padding: 12px 14px;
   margin-top: 12px;
 }
+/* the incomplete-canvas lead line: what is missing comes before any coaching.
+   Amber text #92400E holds 6.4:1 on the tint (WCAG 1.4.3); the words carry
+   the meaning, never the color alone (WCAG 1.4.1). */
+.m-path-missing {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #92400E;
+  background: #FFF8ED;
+  border: 1px solid #F0D9AE;
+  border-radius: 10px;
+}
 .m-path .btn-row { margin-top: 12px; }
 
 </style>
@@ -2630,6 +2643,7 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     rubric_complete: 'All {n} fields are filled.',
     rubric_incomplete: '{n} field(s) are still empty: {fields}.',
     rubric_live_only: 'Judged by the coach, not by the local checks.',
+    rubric_not_answered: 'Not answered yet.',
     pitch_incomplete_note: 'The pitch plan still has {n} unanswered point(s).',
     fix_prefix: 'Highest-value fix'
   };
@@ -2675,6 +2689,7 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
       .replace(/[^\p{L}\p{N}]+/gu, ' ')
       .trim();
     if (!key) return true; // punctuation or symbols only ("-", "...", "???")
+    if (key.length === 1) return true; // a single character ("a", "ב", "7") is never an answer
     if (NON_ANSWER_FILLERS[key]) return true;
     var tokens = key.split(' ');
     var first = tokens[0];
@@ -2682,6 +2697,16 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     if (allSame && tokens.length > 1) return true; // "asdf asdf", "test test test"
     if (allSame && /^(.)\1+$/.test(first)) return true; // "aaaaaa", "xxxxx"
     return false;
+  }
+
+  /* the one evidence test every guard shares: a field holds a REAL answer
+     only when it is non-empty after trim AND not a filler/gibberish
+     non-answer. "" and "   " and "asdf" and "a" are all the same absence
+     of evidence — a criterion, a focus card, a coach call, or a profile
+     write may not rest on any of them. */
+  function hasRealAnswer(text) {
+    var trimmed = (text || '').trim();
+    return !!trimmed && !isNonAnswer(trimmed);
   }
 
   /* ---------- PII detection (local warning + Phase 2 pre-redaction list) ---------- */
@@ -2899,6 +2924,7 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     // gibberish answer is Revise even when the field's own rules would pass
     if (isNonAnswer(trimmed)) {
       result.tag = TAGS.REVISE;
+      result.nonAnswer = true; // no evidence: the guards treat this like empty
       result.messages.push(strings.non_answer);
       var isHomeGuard = !!(activity && activity.meta && activity.meta.context === 'home');
       var guardLine = isHomeGuard ? routingLine(field, activity, strings) : null;
@@ -2973,6 +2999,7 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     }
     if (isNonAnswer(trimmed)) {
       result.tag = TAGS.REVISE;
+      result.nonAnswer = true; // no evidence: the guards treat this like empty
       result.messages.push(strings.non_answer);
       return result;
     }
@@ -3067,6 +3094,10 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     var fields = collectFields(activity);
     var prompts = collectPrompts(activity);
 
+    // evidence = a real answer: empty and non-answer ("asdf", "a") are the
+    // same absence, and none of the guards may treat them differently
+    function real(r) { return !r.empty && !r.nonAnswer; }
+
     var fieldResults = {};
     fields.forEach(function (f) {
       fieldResults[f.id] = evaluateField(f, answers[f.id], checksFile, activity);
@@ -3111,9 +3142,17 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
           return { id: crit.id, name: crit.name, tag: null, verdict: strings.rubric_live_only };
         }
         var emptyPts = prompts.filter(function (p) { return pointResults[p.id].empty; });
+        var unansweredPts = prompts.filter(function (p) { return !real(pointResults[p.id]); });
+        // no evidence at all is "not answered", never "weak": a criterion
+        // cannot be coached on work that does not exist (tag null keeps
+        // rubric_weak / rubric_revise / profile_* rules from firing)
+        if (unansweredPts.length === prompts.length) {
+          return { id: crit.id, name: crit.name, tag: null, complete: false,
+            verdict: strings.rubric_not_answered };
+        }
         if (emptyPts.length) {
           return {
-            id: crit.id, name: crit.name, tag: TAGS.REVISE,
+            id: crit.id, name: crit.name, tag: TAGS.REVISE, complete: false,
             verdict: fmt(strings.pitch_incomplete_note, { n: emptyPts.length })
           };
         }
@@ -3124,19 +3163,28 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
           if (overTotal) labels.push('the total length');
           return {
             id: crit.id, name: crit.name, tag: TAGS.LIGHT,
+            complete: !unansweredPts.length,
             verdict: fmt(strings.rubric_light, { fields: labels.join('; ') })
           };
         }
-        return { id: crit.id, name: crit.name, tag: TAGS.READY, verdict: strings.rubric_ready };
+        return { id: crit.id, name: crit.name, tag: TAGS.READY, complete: true,
+          verdict: strings.rubric_ready };
       }
       if (rubricAuto[crit.id] === 'all_fields_filled') {
-        var emptyF = fields.filter(function (f) {
-          return (f.required !== false) && fieldResults[f.id].empty;
-        });
+        var requiredF = fields.filter(function (f) { return f.required !== false; });
+        var emptyF = requiredF.filter(function (f) { return fieldResults[f.id].empty; });
+        var unansweredF = requiredF.filter(function (f) { return !real(fieldResults[f.id]); });
+        // a canvas with no real answer in it is "not answered", not "weak"
+        // (see above): "asdf" everywhere is the same absence as blank
+        if (requiredF.length && unansweredF.length === requiredF.length) {
+          return { id: crit.id, name: crit.name, tag: null, complete: false,
+            verdict: strings.rubric_not_answered };
+        }
         return {
           id: crit.id,
           name: crit.name,
           tag: emptyF.length ? TAGS.REVISE : TAGS.READY,
+          complete: !unansweredF.length,
           verdict: emptyF.length
             ? fmt(strings.rubric_incomplete, {
                 n: emptyF.length,
@@ -3153,6 +3201,21 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
       });
       if (!linked.length && !linkedScenes.length) {
         return { id: crit.id, name: crit.name, tag: null, verdict: strings.rubric_live_only };
+      }
+      // the evidence gate: a criterion whose every linked field lacks a real
+      // answer (empty OR a filler like "asdf") and whose every linked
+      // decision is unanswered has NOTHING to be judged on. It is "not
+      // answered", never "weak": tag null (the same mechanism as a
+      // coach-only criterion) so no rubric_weak / rubric_revise / profile_*
+      // rule can coach work that does not exist.
+      var anyEvidence = linked.some(function (f) {
+        return real(fieldResults[f.id]);
+      }) || linkedScenes.some(function (s) {
+        return !decisionResults[s.id].empty;
+      });
+      if (!anyEvidence) {
+        return { id: crit.id, name: crit.name, tag: null, complete: false,
+          verdict: strings.rubric_not_answered };
       }
       var worst = TAGS.READY;
       var weakLabels = [];
@@ -3172,15 +3235,24 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
         : fmt(worst === TAGS.LIGHT ? strings.rubric_light : strings.rubric_revise, {
             fields: weakLabels.join('; ')
           });
-      return { id: crit.id, name: crit.name, tag: worst, verdict: verdict };
+      // complete = every linked FIELD holds a real answer (unreached branch
+      // decisions are legitimately unanswered and never count against
+      // completeness); the profile writes only fully-evidenced dimensions
+      // on a partial run, and focus cards fire only on complete dimensions
+      var allAnswered = linked.every(function (f) {
+        return real(fieldResults[f.id]);
+      });
+      return { id: crit.id, name: crit.name, tag: worst, complete: allAnswered,
+        verdict: verdict };
     });
 
     // overall level
     var required = fields.filter(function (f) { return f.required !== false; });
-    var emptyCount = 0, reviseCount = 0, lightCount = 0;
+    var emptyCount = 0, unansweredCount = 0, reviseCount = 0, lightCount = 0;
     required.forEach(function (f) {
       var r = fieldResults[f.id];
       if (r.empty) emptyCount++;
+      if (!real(r)) unansweredCount++; // empty OR a non-answer: no evidence
       if (r.tag === TAGS.REVISE) reviseCount++;
       else if (r.tag === TAGS.LIGHT) lightCount++;
     });
@@ -3203,6 +3275,7 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
 
     // an unfinished pitch keeps the activity from a clean Ready
     var emptyPoints = prompts.filter(function (p) { return pointResults[p.id].empty; });
+    var unansweredPoints = prompts.filter(function (p) { return !real(pointResults[p.id]); });
     if (emptyPoints.length) {
       notes.push(fmt(strings.pitch_incomplete_note, { n: emptyPoints.length }));
       if (levelIndex === 0) levelIndex = 1;
@@ -3234,6 +3307,8 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
         levelIndex: levelIndex,
         emptyCount: emptyCount,
         emptyPointCount: emptyPoints.length,
+        unansweredCount: unansweredCount,
+        unansweredPointCount: unansweredPoints.length,
         reviseCount: reviseCount,
         lightCount: lightCount,
         fixes: fixes
@@ -3246,6 +3321,7 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     evalRule: evalRule,
     detectPII: detectPII,
     isNonAnswer: isNonAnswer,
+    hasRealAnswer: hasRealAnswer,
     evaluateField: evaluateField,
     evaluatePoint: evaluatePoint,
     evaluateDecision: evaluateDecision,
@@ -3496,10 +3572,45 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }).join('\n\n');
   }
 
+  /* ---------- the empty-canvas guard ---------- */
+  /* The whole-canvas call must know what is NOT there: how many required
+     fields (and pitch points) lack a REAL answer — blank, whitespace, and
+     fillers like "asdf" all count (PracticeFeedback.hasRealAnswer is the
+     one shared test). A canvas with no real answer anywhere is never sent
+     at all — there is nothing to review, and the deterministic line below
+     stands in for the coach without spending a token. */
+
+  var EMPTY_CANVAS_MSG = 'There is nothing to review yet: no field holds '
+    + 'a real answer. Write your answers first, then ask for the review again.';
+
+  function unanswered(activity, answers) {
+    var FB = root.PracticeFeedback;
+    answers = answers || {};
+    var items = FB.collectFields(activity).filter(function (f) {
+      return f.required !== false;
+    }).concat(FB.collectPrompts(activity));
+    var missing = items.filter(function (item) {
+      return !FB.hasRealAnswer(answers[item.id]);
+    }).length;
+    return { missing: missing, total: items.length };
+  }
+
+  function incompleteNote(state) {
+    if (!state.missing) return '';
+    return '\n\nIMPORTANT: this canvas is INCOMPLETE. ' + state.missing
+      + ' of ' + state.total + ' fields have no real answer yet (blank, or '
+      + 'a placeholder like "asdf"). Rules for this review: say so first '
+      + 'and name how many fields lack a real answer. Do not praise work '
+      + 'that is not there, and never open with a compliment on an '
+      + 'incomplete canvas. Coach only the fields that actually contain an '
+      + 'answer; make no claim about any other field beyond noting it has '
+      + 'no answer yet.';
+  }
+
   function buildCanvasCall(activity, answers) {
     return fill(cfg().prompts.canvas, {
       'all_fields_concatenated': concatFields(activity, answers)
-    });
+    }) + incompleteNote(unanswered(activity, answers));
   }
 
   function buildPitchCall(activity, answers) {
@@ -3568,6 +3679,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       });
     },
     coachCanvas: function (activity, answers) {
+      // an entirely empty canvas never reaches the proxy: no POST, no
+      // tokens, and no model asked to review work that does not exist
+      var state = unanswered(activity, answers);
+      if (state.total && state.missing === state.total) {
+        return Promise.resolve({ text: EMPTY_CANVAS_MSG, tag: null });
+      }
       return callProxy('canvas', buildCanvasCall(activity, answers)).then(function (text) {
         return { text: text, tag: null };
       });
@@ -3598,7 +3715,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     _buildFieldCall: buildFieldCall,
     _buildCanvasCall: buildCanvasCall,
     _buildPitchCall: buildPitchCall,
-    _parseTag: parseTag
+    _parseTag: parseTag,
+    _unanswered: unanswered,
+    _emptyCanvasMsg: EMPTY_CANVAS_MSG
   };
 
   root.PracticeLive = api;
@@ -3629,6 +3748,81 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function liveOn() {
     return !!(window.PracticeLive && window.PracticeLive.available());
+  }
+
+  /* ---------- the skin + its label map ---------- */
+  /* The engine-level skin. build.py bakes window.CENTER = {skin: 'rise'}
+     into rise builds only (a mission build carries no CENTER at all), the
+     same bootstrap channel that carries live_ai. ALL skin-dependent wording
+     lives in this ONE map: formats and the skin layer read C.LABELS /
+     C.fmtLabel instead of hardcoding strings, so nothing is scattered.
+     A null label (and a false flag) means "do not render that element":
+     the rise skin computes Insight points internally (outcome_ranks and
+     tag logic still run) but never displays them. */
+
+  var SKIN = ((window.CENTER || {}).skin === 'rise') ? 'rise' : 'mission';
+
+  var LABEL_SETS = {
+    mission: {
+      start: 'Start the mission',
+      resume: 'Continue the mission',
+      finish: 'Finish the mission',
+      next: 'Next stop',
+      nextCase: 'Next case',
+      report: 'Mission report',
+      reportHint: 'The review and the export',
+      reviewEyebrow: 'The last stop',
+      reviewBack: null, // the Mission Board rail is the way back
+      stopBadge: 'Stop {i} / {n}',
+      stopBadgeSolo: 'Stop 1 / 1',
+      railTitle: 'Mission Board',
+      railFootMany: 'Open the {n} stops in any order. Every field counts toward the mission.',
+      railFootOne: 'Work through every field to complete the mission.',
+      savePdf: 'Save the mission report (PDF)',
+      reportTitle: 'Mission Report',
+      progressLabel: 'Mission progress',
+      pathNeutral: 'Work through the stops and run the review; your recap lands here when the mission is done.',
+      reward: 'Reward: +{n} Insight when this field locks in',
+      completeStatus: 'Complete  ·  +{n} Insight',
+      insightHud: true,   // the HUD Insight chip
+      toast: true,        // the "+N Insight" reward toast
+      scoreline: true     // the gold "N of M Insight" line (sheet + PDF hero)
+    },
+    rise: {
+      start: 'Start',
+      resume: 'Continue',
+      finish: 'Finish',
+      next: 'Next',
+      nextCase: 'Next case',
+      report: 'Review and export',
+      reportHint: 'Check and download your work',
+      reviewEyebrow: 'Review',
+      reviewBack: 'Back to my work', // the rail hides on a one-part activity
+      stopBadge: 'Part {i} of {n}',
+      stopBadgeSolo: null,
+      railTitle: 'Contents',
+      railFootMany: 'Open the {n} parts in any order. Your work saves as you type.',
+      railFootOne: 'Work through every field, then review and export your work.',
+      savePdf: 'Save as PDF',
+      reportTitle: 'Practice Report',
+      progressLabel: 'Progress',
+      pathNeutral: 'Work through every field and run the review; your recap lands here when the activity is done.',
+      reward: null,
+      completeStatus: 'Complete',
+      insightHud: false,
+      toast: false,
+      scoreline: false
+    }
+  };
+
+  var LABELS = LABEL_SETS[SKIN];
+
+  // fmtLabel('reward', 25) -> the label with {n} (and {i}) filled, or null
+  // when the skin does not render that element at all
+  function fmtLabel(key, n, i) {
+    var t = LABELS[key];
+    if (t === null || t === undefined) return null;
+    return String(t).replace('{n}', String(n)).replace('{i}', String(i));
   }
 
   /* ---------- DOM helpers (textContent only, never user HTML) ---------- */
@@ -4246,6 +4440,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     svgEl: svgEl,
     imageEl: imageEl,
     SVG: SVG,
+    skin: SKIN,
+    LABELS: LABELS,
+    fmtLabel: fmtLabel,
     liveOn: liveOn,
     pitchActionOn: pitchActionOn,
     tagPill: tagPill,
@@ -4307,6 +4504,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   var SLATE = [111, 122, 138];    // #6F7A8A
   var LINE = [227, 233, 236];     // #E3E9EC
   var GOLD = [244, 180, 26];      // #F4B41A
+  var TEAL = [90, 179, 170];      // #5AB3AA (the rise rule, non-text)
+  var TEAL_DEEP = [46, 110, 118]; // #2E6E76 (rise kicker text, AA on white)
   var TAG_RGB = {
     Ready: [46, 139, 87],         // --w-ready
     Light: [217, 136, 15],        // --w-light
@@ -4381,24 +4580,37 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
   }
 
-  /* the poster hero: navy band, wordmark, kicker, title, score, level.
-     data.title overrides the default heading, which is how a scoped export
-     (one case instead of the whole mission) names itself. */
+  /* the report hero. Mission skin: the navy poster band with the gold
+     Insight scoreline. Rise skin (PracticeCore.LABELS): a light header —
+     white ground, navy title, teal rule — and NO scoreline or rank ever
+     (points stay internal on rise). data.title overrides the default
+     heading, which is how a scoped export (one case instead of the whole
+     mission) names itself. */
   function drawHero(doc, activity, data) {
+    var L = (window.PracticeCore || {}).LABELS
+      || { reportTitle: 'Mission Report', scoreline: true };
     var meta = activity.meta || {};
     var kicker = clean([meta.program, meta.module, meta.lesson].filter(Boolean).join('  ·  '));
-    var title = clean(data.title || ('Mission Report  ·  ' + (meta.title || '')));
+    var title = clean(data.title || (L.reportTitle + '  ·  ' + (meta.title || '')));
+    var dark = !!L.scoreline; // mission = the dark poster hero
+    var scoreline = dark ? data.scoreline : null;
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(15);
     var titleLines = doc.splitTextToSize(title, CONTENT_W - 12);
     var heroH = 34 + titleLines.length * 6.6
-      + (data.scoreline ? 9 : 0) + (data.level ? 10 : 0);
+      + (scoreline ? 9 : 0) + (data.level ? 10 : 0);
 
-    doc.setFillColor(NAVY[0], NAVY[1], NAVY[2]);
-    doc.rect(0, 0, PAGE_W, heroH, 'F');
-    doc.setFillColor(RED[0], RED[1], RED[2]);
-    doc.rect(0, heroH, PAGE_W, 1.6, 'F');
+    if (dark) {
+      doc.setFillColor(NAVY[0], NAVY[1], NAVY[2]);
+      doc.rect(0, 0, PAGE_W, heroH, 'F');
+      doc.setFillColor(RED[0], RED[1], RED[2]);
+      doc.rect(0, heroH, PAGE_W, 1.6, 'F');
+    } else {
+      // the light header: white ground, a short teal rule under the title
+      doc.setFillColor(TEAL[0], TEAL[1], TEAL[2]);
+      doc.rect(0, heroH, PAGE_W, 1.2, 'F');
+    }
 
     drawWordmark(doc, MARGIN, 8);
 
@@ -4406,29 +4618,31 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (kicker) {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8.5);
-      doc.setTextColor(GOLD[0], GOLD[1], GOLD[2]);
+      if (dark) doc.setTextColor(GOLD[0], GOLD[1], GOLD[2]);
+      else doc.setTextColor(TEAL_DEEP[0], TEAL_DEEP[1], TEAL_DEEP[2]);
       doc.text(kicker.toUpperCase(), MARGIN, y);
     }
     y += 7;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(15);
-    doc.setTextColor(255, 255, 255);
+    if (dark) doc.setTextColor(255, 255, 255);
+    else doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
     doc.text(titleLines, MARGIN, y);
     y += titleLines.length * 6.6;
 
-    if (data.scoreline) {
+    if (scoreline) {
       doc.setFontSize(12);
       doc.setTextColor(GOLD[0], GOLD[1], GOLD[2]);
-      var pts = String(data.scoreline.points);
+      var pts = String(scoreline.points);
       doc.text(pts, MARGIN, y);
       var x = MARGIN + doc.getTextWidth(pts) + 2;
       doc.setFontSize(9);
       doc.setTextColor(255, 255, 255);
-      var of = data.scoreline.max ? 'of ' + data.scoreline.max + ' Insight' : 'Insight';
+      var of = scoreline.max ? 'of ' + scoreline.max + ' Insight' : 'Insight';
       doc.text(of, x, y);
-      if (data.scoreline.rank) {
+      if (scoreline.rank) {
         x += doc.getTextWidth(of) + 5;
-        drawChip(doc, x, y - 4, clean(data.scoreline.rank), [62, 134, 143]);
+        drawChip(doc, x, y - 4, clean(scoreline.rank), [62, 134, 143]);
       }
       y += 9;
     }
@@ -4773,7 +4987,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function buildMedallion(total, label) {
     var CIRC = 138.2;
-    var labelBase = label || 'Mission progress';
+    var labelBase = label || C.LABELS.progressLabel;
     var wrap = C.svgEl(
       '<svg viewBox="0 0 52 52" width="46" height="46" class="m-medal-svg" role="img" aria-label="'
       + labelBase + ': 0 of ' + total + '">'
@@ -4842,12 +5056,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var hudRight = el('div', 'm-hud');
     (opts.extras || []).forEach(function (x) { hudRight.appendChild(x); });
 
-    var chip = el('div', 'm-chip');
-    chip.appendChild(C.svgEl(GLYPH.star, 'm-chip-ic'));
-    var pts = el('b', null, '0');
-    chip.appendChild(pts);
-    chip.appendChild(el('span', null, 'Insight'));
-    hudRight.appendChild(chip);
+    // the Insight chip is a mission element: the rise skin computes points
+    // internally but never displays them (C.LABELS.insightHud is false)
+    var chip = null, pts = null;
+    if (C.LABELS.insightHud) {
+      chip = el('div', 'm-chip');
+      chip.appendChild(C.svgEl(GLYPH.star, 'm-chip-ic'));
+      pts = el('b', null, '0');
+      chip.appendChild(pts);
+      chip.appendChild(el('span', null, 'Insight'));
+      hudRight.appendChild(chip);
+    }
 
     var medallion = buildMedallion(opts.total || 1, opts.progressLabel);
     if (opts.progressLabel) medallion.node.title = opts.progressLabel;
@@ -4868,11 +5087,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       setPoints: function (n) {
         n = Math.max(0, n | 0);
         if (n !== current) {
-          pts.textContent = String(n);
-          if (!reducedMotion()) {
-            chip.classList.remove('m-chip-bump');
-            void chip.offsetWidth;
-            chip.classList.add('m-chip-bump');
+          if (chip) {
+            pts.textContent = String(n);
+            if (!reducedMotion()) {
+              chip.classList.remove('m-chip-bump');
+              void chip.offsetWidth;
+              chip.classList.add('m-chip-bump');
+            }
           }
           current = n;
         }
@@ -4884,6 +5105,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   var toastNode = null, toastTimer = null;
   function toast(title, points) {
+    if (!C.LABELS.toast) return; // the rise skin never toasts points
     if (!toastNode) {
       toastNode = el('div', 'm-toast');
       toastNode.setAttribute('role', 'status');
@@ -4935,6 +5157,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         }
       },
       reward: function (text) {
+        if (C.LABELS.reward === null) return; // no reward chips on rise
         if (!reward) {
           reward = el('div', 'm-reward');
           reward.appendChild(C.svgEl(GLYPH.star, 'm-chip-ic'));
@@ -5050,8 +5273,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var meta = activity.meta;
     inner.appendChild(el('div', 'm-rep-kicker',
       [meta.program, meta.module, meta.lesson].filter(Boolean).join('  ·  ')));
-    inner.appendChild(el('h1', 'm-rep-title', 'Mission Report  ·  ' + meta.title));
-    if (data.scoreline) {
+    inner.appendChild(el('h1', 'm-rep-title', C.LABELS.reportTitle + '  ·  ' + meta.title));
+    if (data.scoreline && C.LABELS.scoreline) {
       var score = el('div', 'm-rep-score');
       score.appendChild(el('span', 'm-rep-score-n', String(data.scoreline.points)));
       score.appendChild(el('span', 'm-rep-score-of',
@@ -5166,9 +5389,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   /* ---------- condition evaluation (pure, deterministic) ---------- */
 
+  function rubricRow(evalResult, id) {
+    return (evalResult.rubric || []).filter(function (r) { return r.id === id; })[0] || null;
+  }
+
   function rubricTag(evalResult, id) {
-    var row = (evalResult.rubric || []).filter(function (r) { return r.id === id; })[0];
+    var row = rubricRow(evalResult, id);
     return row ? row.tag : null;
+  }
+
+  // a criterion with unanswered feeding fields (empty or non-answers) is
+  // not fully evidenced: no focus card may coach it until the work is in
+  function rubricIncomplete(evalResult, id) {
+    var row = rubricRow(evalResult, id);
+    return !!row && row.complete === false;
   }
 
   function conditionMet(when, activity, evalResult, answers, extras) {
@@ -5181,15 +5415,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var kind = when.split(':')[0];
     var arg = when.slice(kind.length + 1);
     if (kind === 'rubric_weak') {
+      if (rubricIncomplete(evalResult, arg)) return false;
       var t = rubricTag(evalResult, arg);
       return t === 'Light' || t === 'Revise';
     }
     if (kind === 'rubric_revise') {
+      if (rubricIncomplete(evalResult, arg)) return false;
       return rubricTag(evalResult, arg) === 'Revise';
     }
     if (kind === 'field_weak') {
+      // a field without a real answer (empty or "asdf") is "not answered",
+      // never "weak": it belongs to the missing-count line, and a focus
+      // card must not coach absent work
       var f = (evalResult.fields || {})[arg];
-      return !!f && f.tag !== 'Ready';
+      return !!f && !f.empty && !f.nonAnswer && f.tag !== 'Ready';
     }
     if (kind === 'decision_weak') {
       var d = (evalResult.decisions || {})[arg];
@@ -5222,12 +5461,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var evalResult = FB.evaluateActivity(activity, checks, answers);
     var rules = activity.outcome_logic || [];
 
+    // "unanswered" counts fields without a REAL answer: blank, whitespace,
+    // and non-answers like "asdf" are the same absence of evidence
+    var missing = (evalResult.overall.unansweredCount || 0)
+      + (evalResult.overall.unansweredPointCount || 0);
+    var incomplete = missing > 0;
+
     var focus = [];
     var positive = null;
     rules.forEach(function (rule) {
       if (!conditionMet(rule.when, activity, evalResult, answers, opts.extras)) return;
       if (rule.when === 'all_strong') {
-        if (!positive) positive = rule;
+        // an incomplete canvas can never be told it is Ready: the positive
+        // branch is suppressed entirely while required work is unanswered
+        if (!positive && !incomplete) positive = rule;
         return;
       }
       if (focus.length >= FOCUS_CAP) return;
@@ -5247,8 +5494,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return {
       evalResult: evalResult,
       neutral: !rules.length,
-      incomplete: (evalResult.overall.emptyCount || 0) > 0
-        || (evalResult.overall.emptyPointCount || 0) > 0,
+      incomplete: incomplete,
+      missing: missing,
       strengths: strengths,
       focus: focus,
       positive: positive ? {
@@ -5259,10 +5506,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     };
   }
 
+  /* the leading line of an incomplete path: what is missing comes first,
+     before any coaching, on every surface (screen, PDF, coach phrasing) */
+  function missingLine(result) {
+    // "without a real answer" reads correctly for both causes: a blank
+    // field and one holding a filler like "asdf"
+    var n = result.missing;
+    return n === 1
+      ? 'You have 1 field without a real answer yet. Fill it in, then run the review again.'
+      : 'You have ' + n + ' fields without a real answer yet. Fill those in, then run the review again.';
+  }
+
   /* the deterministic path as plain text: the PDF rows and the coach
      phrasing call both read from this same content */
   function summaryText(result) {
     var lines = [];
+    if (result.incomplete) {
+      lines.push(missingLine(result));
+    }
     if (result.strengths.length) {
       lines.push('What went well: ' + result.strengths.join('; ') + '.');
     }
@@ -5291,7 +5552,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   /* the neutral recap line, aware of whether the work is actually done */
   function neutralLine(result) {
     return result.incomplete
-      ? 'Work through the stops and run the review; your recap lands here when the mission is done.'
+      ? C.LABELS.pathNeutral
       : 'The whole activity is complete. Keep the same standard on the next one: concrete, grounded, in your own words.';
   }
 
@@ -5329,6 +5590,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     head.appendChild(headText);
     if (result.rank) head.appendChild(el('span', 'm-path-rank', result.rank));
     block.appendChild(head);
+
+    // the path leads with what is missing: the count line renders above
+    // everything else, and no card below may claim work that is not there
+    if (result.incomplete) {
+      block.appendChild(el('p', 'm-path-missing', missingLine(result)));
+    }
 
     if (result.strengths.length) {
       var strong = el('div', 'm-path-strong');
@@ -5416,6 +5683,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (!result) return null;
 
     var cards = [];
+    if (result.incomplete) {
+      // the printed record is as honest as the screen: the missing work
+      // leads, before any strength or focus card
+      cards.push({ title: 'Still unanswered', rows: [{ value: missingLine(result) }] });
+    }
     if (result.strengths.length) {
       cards.push({
         title: 'What you did well',
@@ -5456,7 +5728,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     summaryText: summaryText,
     buildPathBlock: buildPathBlock,
     reportSection: reportSection,
-    _conditionMet: conditionMet
+    _conditionMet: conditionMet,
+    _missingLine: missingLine
   };
 })();
 
@@ -6405,7 +6678,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           return sum + itemPoints(entry, cfg);
         }, 0);
         tile.querySelector('.m-tile-st').textContent =
-          st.done ? 'Complete  ·  +' + sectionPts + ' Insight'
+          st.done ? C.fmtLabel('completeStatus', sectionPts)
             : (st.answered ? st.answered + ' of ' + st.total + ' answered' : 'Not started');
       }
       var card = state.cardFor && state.cardFor[stop.id];
@@ -6444,7 +6717,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function buildRail(activity, state, openStop) {
     var rail = el('nav', 'm-rail');
-    rail.appendChild(el('h4', 'm-rail-title', 'Mission Board'));
+    rail.appendChild(el('h4', 'm-rail-title', C.LABELS.railTitle));
     var work = workStops(state.stops);
     work.forEach(function (stop, i) {
       stop.number = i + 1;
@@ -6467,15 +6740,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     rdot.appendChild(C.svgEl(M.GLYPH.star, null));
     report.appendChild(rdot);
     var rtxt = el('span', 'm-tile-txt');
-    rtxt.appendChild(el('span', 'm-tile-nm', 'Mission report'));
-    rtxt.appendChild(el('span', 'm-tile-st', 'The review and the export'));
+    rtxt.appendChild(el('span', 'm-tile-nm', C.LABELS.report));
+    rtxt.appendChild(el('span', 'm-tile-st', C.LABELS.reportHint));
     report.appendChild(rtxt);
     report.addEventListener('click', function () { openStop(REVIEW_ID); });
     rail.appendChild(report);
     rail.appendChild(el('div', 'm-rail-foot',
       work.length > 1
-        ? 'Open the ' + work.length + ' stops in any order. Every field counts toward the mission.'
-        : 'Work through every field to complete the mission.'));
+        ? C.fmtLabel('railFootMany', work.length)
+        : C.LABELS.railFootOne));
     return rail;
   }
 
@@ -6551,7 +6824,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     });
     var start = el('button', 'btn btn-primary btn-large',
       state.multiCase ? (started ? 'Continue: choose a case' : 'Choose a case')
-        : (started ? 'Continue the mission' : 'Start the mission'));
+        : (started ? C.LABELS.resume : C.LABELS.start));
     start.type = 'button';
     start.addEventListener('click', function () {
       if (state.multiCase) { openStop(PICKER_ID); return; }
@@ -6604,7 +6877,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     foot.appendChild(el('span', 'm-foot-note',
       'Open the cases in any order. Your work saves as you type.'));
     foot.appendChild(el('span', 'm-spacer'));
-    var report = el('button', 'btn btn-teal', 'Mission report');
+    var report = el('button', 'btn btn-teal', C.LABELS.report);
     report.type = 'button';
     report.addEventListener('click', function () { openStop(REVIEW_ID); });
     foot.appendChild(report);
@@ -6688,13 +6961,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       instr.appendChild(ik);
       instr.appendChild(el('p', 'm-instructions-p', helpText));
       var pcfg = state.missionPoints;
-      var chip = el('div', 'm-instructions-reward');
-      // the SVG star, not a text star: decorative, hidden, and exempt from
-      // the text-contrast rule a low-contrast gold character would fail
-      chip.appendChild(C.svgEl(M.GLYPH.star, 'm-instructions-star'));
-      chip.appendChild(el('span', null, 'Reward: +' + itemPoints(entry, pcfg)
-        + ' Insight when this field locks in'));
-      instr.appendChild(chip);
+      // the reward chip is skin-gated wording: on rise the label is null and
+      // the chip does not render at all (points still count silently)
+      var rewardText = C.fmtLabel('reward', itemPoints(entry, pcfg));
+      if (rewardText) {
+        var chip = el('div', 'm-instructions-reward');
+        // the SVG star, not a text star: decorative, hidden, and exempt from
+        // the text-contrast rule a low-contrast gold character would fail
+        chip.appendChild(C.svgEl(M.GLYPH.star, 'm-instructions-star'));
+        chip.appendChild(el('span', null, rewardText));
+        instr.appendChild(chip);
+      }
       block.appendChild(instr);
     }
 
@@ -6725,7 +7002,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var work = workStops(state.stops);
     var idx = work.indexOf(stop);
     var scene = M.buildScene({
-      badge: 'Stop ' + (idx + 1) + ' / ' + work.length,
+      // a one-part activity carries no step badge on the rise skin
+      badge: work.length > 1 ? C.fmtLabel('stopBadge', work.length, idx + 1)
+        : C.LABELS.stopBadgeSolo,
       title: stop.section ? shortTitle(stop.section) : activity.meta.title,
       className: 'm-scene-wide'
     });
@@ -6807,7 +7086,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
 
     var next = el('button', 'btn btn-primary',
-      idx + 1 < work.length ? (state.multiCase ? 'Next case' : 'Next stop') : 'Finish the mission');
+      idx + 1 < work.length ? (state.multiCase ? C.LABELS.nextCase : C.LABELS.next) : C.LABELS.finish);
     next.type = 'button';
     next.addEventListener('click', function () {
       if (idx + 1 < work.length) openStop(work[idx + 1].id);
@@ -6821,8 +7100,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function buildReviewScene(activity, state, openStop) {
     var scene = M.buildScene({
-      badge: 'Mission report',
-      eyebrow: 'The last stop',
+      badge: C.LABELS.report,
+      eyebrow: C.LABELS.reviewEyebrow,
       title: 'Review my work',
       className: 'm-scene-wide'
     });
@@ -6900,6 +7179,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     renderPath(); // present as soon as the student reaches the last stop
 
     var foot = scene.foot();
+    // on a skin that hides the rail (rise, one-part activities), the review
+    // still needs a way back to the work screen
+    if (C.LABELS.reviewBack) {
+      var backBtn = el('button', 'btn btn-ghost', C.LABELS.reviewBack);
+      backBtn.type = 'button';
+      backBtn.addEventListener('click', function () {
+        openStop(workStops(state.stops)[0].id);
+      });
+      foot.appendChild(backBtn);
+    }
     var clearBtn = el('button', 'btn btn-ghost-danger', 'Clear my work');
     clearBtn.type = 'button';
     clearBtn.addEventListener('click', function () {
@@ -6913,7 +7202,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var printBtn = el('button', 'btn btn-primary');
     printBtn.type = 'button';
     printBtn.appendChild(C.svgEl(C.SVG.download, 'btn-icon'));
-    printBtn.appendChild(el('span', null, 'Save the mission report (PDF)'));
+    printBtn.appendChild(el('span', null, C.LABELS.savePdf));
     printBtn.addEventListener('click', function () {
       // code-generated PDF: no browser print footer, embed-safe
       window.PracticeExport.saveReport(activity, reportData(activity, state));

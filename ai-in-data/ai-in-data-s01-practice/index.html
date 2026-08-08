@@ -2559,6 +2559,19 @@ body.mission-active #activity-root { padding: 0; }
   padding: 12px 14px;
   margin-top: 12px;
 }
+/* the incomplete-canvas lead line: what is missing comes before any coaching.
+   Amber text #92400E holds 6.4:1 on the tint (WCAG 1.4.3); the words carry
+   the meaning, never the color alone (WCAG 1.4.1). */
+.m-path-missing {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #92400E;
+  background: #FFF8ED;
+  border: 1px solid #F0D9AE;
+  border-radius: 8px;
+}
 .m-path .btn-row { margin-top: 12px; }
 /*#PROFILE-BEGIN*/
 
@@ -2658,6 +2671,7 @@ window.CENTER = {"skin": "rise"};
     rubric_complete: 'All {n} fields are filled.',
     rubric_incomplete: '{n} field(s) are still empty: {fields}.',
     rubric_live_only: 'Judged by the coach, not by the local checks.',
+    rubric_not_answered: 'Not answered yet.',
     pitch_incomplete_note: 'The pitch plan still has {n} unanswered point(s).',
     fix_prefix: 'Highest-value fix'
   };
@@ -2703,6 +2717,7 @@ window.CENTER = {"skin": "rise"};
       .replace(/[^\p{L}\p{N}]+/gu, ' ')
       .trim();
     if (!key) return true; // punctuation or symbols only ("-", "...", "???")
+    if (key.length === 1) return true; // a single character ("a", "ב", "7") is never an answer
     if (NON_ANSWER_FILLERS[key]) return true;
     var tokens = key.split(' ');
     var first = tokens[0];
@@ -2710,6 +2725,16 @@ window.CENTER = {"skin": "rise"};
     if (allSame && tokens.length > 1) return true; // "asdf asdf", "test test test"
     if (allSame && /^(.)\1+$/.test(first)) return true; // "aaaaaa", "xxxxx"
     return false;
+  }
+
+  /* the one evidence test every guard shares: a field holds a REAL answer
+     only when it is non-empty after trim AND not a filler/gibberish
+     non-answer. "" and "   " and "asdf" and "a" are all the same absence
+     of evidence — a criterion, a focus card, a coach call, or a profile
+     write may not rest on any of them. */
+  function hasRealAnswer(text) {
+    var trimmed = (text || '').trim();
+    return !!trimmed && !isNonAnswer(trimmed);
   }
 
   /* ---------- PII detection (local warning + Phase 2 pre-redaction list) ---------- */
@@ -2927,6 +2952,7 @@ window.CENTER = {"skin": "rise"};
     // gibberish answer is Revise even when the field's own rules would pass
     if (isNonAnswer(trimmed)) {
       result.tag = TAGS.REVISE;
+      result.nonAnswer = true; // no evidence: the guards treat this like empty
       result.messages.push(strings.non_answer);
       var isHomeGuard = !!(activity && activity.meta && activity.meta.context === 'home');
       var guardLine = isHomeGuard ? routingLine(field, activity, strings) : null;
@@ -3001,6 +3027,7 @@ window.CENTER = {"skin": "rise"};
     }
     if (isNonAnswer(trimmed)) {
       result.tag = TAGS.REVISE;
+      result.nonAnswer = true; // no evidence: the guards treat this like empty
       result.messages.push(strings.non_answer);
       return result;
     }
@@ -3095,6 +3122,10 @@ window.CENTER = {"skin": "rise"};
     var fields = collectFields(activity);
     var prompts = collectPrompts(activity);
 
+    // evidence = a real answer: empty and non-answer ("asdf", "a") are the
+    // same absence, and none of the guards may treat them differently
+    function real(r) { return !r.empty && !r.nonAnswer; }
+
     var fieldResults = {};
     fields.forEach(function (f) {
       fieldResults[f.id] = evaluateField(f, answers[f.id], checksFile, activity);
@@ -3139,9 +3170,17 @@ window.CENTER = {"skin": "rise"};
           return { id: crit.id, name: crit.name, tag: null, verdict: strings.rubric_live_only };
         }
         var emptyPts = prompts.filter(function (p) { return pointResults[p.id].empty; });
+        var unansweredPts = prompts.filter(function (p) { return !real(pointResults[p.id]); });
+        // no evidence at all is "not answered", never "weak": a criterion
+        // cannot be coached on work that does not exist (tag null keeps
+        // rubric_weak / rubric_revise / profile_* rules from firing)
+        if (unansweredPts.length === prompts.length) {
+          return { id: crit.id, name: crit.name, tag: null, complete: false,
+            verdict: strings.rubric_not_answered };
+        }
         if (emptyPts.length) {
           return {
-            id: crit.id, name: crit.name, tag: TAGS.REVISE,
+            id: crit.id, name: crit.name, tag: TAGS.REVISE, complete: false,
             verdict: fmt(strings.pitch_incomplete_note, { n: emptyPts.length })
           };
         }
@@ -3152,19 +3191,28 @@ window.CENTER = {"skin": "rise"};
           if (overTotal) labels.push('the total length');
           return {
             id: crit.id, name: crit.name, tag: TAGS.LIGHT,
+            complete: !unansweredPts.length,
             verdict: fmt(strings.rubric_light, { fields: labels.join('; ') })
           };
         }
-        return { id: crit.id, name: crit.name, tag: TAGS.READY, verdict: strings.rubric_ready };
+        return { id: crit.id, name: crit.name, tag: TAGS.READY, complete: true,
+          verdict: strings.rubric_ready };
       }
       if (rubricAuto[crit.id] === 'all_fields_filled') {
-        var emptyF = fields.filter(function (f) {
-          return (f.required !== false) && fieldResults[f.id].empty;
-        });
+        var requiredF = fields.filter(function (f) { return f.required !== false; });
+        var emptyF = requiredF.filter(function (f) { return fieldResults[f.id].empty; });
+        var unansweredF = requiredF.filter(function (f) { return !real(fieldResults[f.id]); });
+        // a canvas with no real answer in it is "not answered", not "weak"
+        // (see above): "asdf" everywhere is the same absence as blank
+        if (requiredF.length && unansweredF.length === requiredF.length) {
+          return { id: crit.id, name: crit.name, tag: null, complete: false,
+            verdict: strings.rubric_not_answered };
+        }
         return {
           id: crit.id,
           name: crit.name,
           tag: emptyF.length ? TAGS.REVISE : TAGS.READY,
+          complete: !unansweredF.length,
           verdict: emptyF.length
             ? fmt(strings.rubric_incomplete, {
                 n: emptyF.length,
@@ -3181,6 +3229,21 @@ window.CENTER = {"skin": "rise"};
       });
       if (!linked.length && !linkedScenes.length) {
         return { id: crit.id, name: crit.name, tag: null, verdict: strings.rubric_live_only };
+      }
+      // the evidence gate: a criterion whose every linked field lacks a real
+      // answer (empty OR a filler like "asdf") and whose every linked
+      // decision is unanswered has NOTHING to be judged on. It is "not
+      // answered", never "weak": tag null (the same mechanism as a
+      // coach-only criterion) so no rubric_weak / rubric_revise / profile_*
+      // rule can coach work that does not exist.
+      var anyEvidence = linked.some(function (f) {
+        return real(fieldResults[f.id]);
+      }) || linkedScenes.some(function (s) {
+        return !decisionResults[s.id].empty;
+      });
+      if (!anyEvidence) {
+        return { id: crit.id, name: crit.name, tag: null, complete: false,
+          verdict: strings.rubric_not_answered };
       }
       var worst = TAGS.READY;
       var weakLabels = [];
@@ -3200,15 +3263,24 @@ window.CENTER = {"skin": "rise"};
         : fmt(worst === TAGS.LIGHT ? strings.rubric_light : strings.rubric_revise, {
             fields: weakLabels.join('; ')
           });
-      return { id: crit.id, name: crit.name, tag: worst, verdict: verdict };
+      // complete = every linked FIELD holds a real answer (unreached branch
+      // decisions are legitimately unanswered and never count against
+      // completeness); the profile writes only fully-evidenced dimensions
+      // on a partial run, and focus cards fire only on complete dimensions
+      var allAnswered = linked.every(function (f) {
+        return real(fieldResults[f.id]);
+      });
+      return { id: crit.id, name: crit.name, tag: worst, complete: allAnswered,
+        verdict: verdict };
     });
 
     // overall level
     var required = fields.filter(function (f) { return f.required !== false; });
-    var emptyCount = 0, reviseCount = 0, lightCount = 0;
+    var emptyCount = 0, unansweredCount = 0, reviseCount = 0, lightCount = 0;
     required.forEach(function (f) {
       var r = fieldResults[f.id];
       if (r.empty) emptyCount++;
+      if (!real(r)) unansweredCount++; // empty OR a non-answer: no evidence
       if (r.tag === TAGS.REVISE) reviseCount++;
       else if (r.tag === TAGS.LIGHT) lightCount++;
     });
@@ -3231,6 +3303,7 @@ window.CENTER = {"skin": "rise"};
 
     // an unfinished pitch keeps the activity from a clean Ready
     var emptyPoints = prompts.filter(function (p) { return pointResults[p.id].empty; });
+    var unansweredPoints = prompts.filter(function (p) { return !real(pointResults[p.id]); });
     if (emptyPoints.length) {
       notes.push(fmt(strings.pitch_incomplete_note, { n: emptyPoints.length }));
       if (levelIndex === 0) levelIndex = 1;
@@ -3262,6 +3335,8 @@ window.CENTER = {"skin": "rise"};
         levelIndex: levelIndex,
         emptyCount: emptyCount,
         emptyPointCount: emptyPoints.length,
+        unansweredCount: unansweredCount,
+        unansweredPointCount: unansweredPoints.length,
         reviseCount: reviseCount,
         lightCount: lightCount,
         fixes: fixes
@@ -3274,6 +3349,7 @@ window.CENTER = {"skin": "rise"};
     evalRule: evalRule,
     detectPII: detectPII,
     isNonAnswer: isNonAnswer,
+    hasRealAnswer: hasRealAnswer,
     evaluateField: evaluateField,
     evaluatePoint: evaluatePoint,
     evaluateDecision: evaluateDecision,
@@ -3524,10 +3600,45 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }).join('\n\n');
   }
 
+  /* ---------- the empty-canvas guard ---------- */
+  /* The whole-canvas call must know what is NOT there: how many required
+     fields (and pitch points) lack a REAL answer — blank, whitespace, and
+     fillers like "asdf" all count (PracticeFeedback.hasRealAnswer is the
+     one shared test). A canvas with no real answer anywhere is never sent
+     at all — there is nothing to review, and the deterministic line below
+     stands in for the coach without spending a token. */
+
+  var EMPTY_CANVAS_MSG = 'There is nothing to review yet: no field holds '
+    + 'a real answer. Write your answers first, then ask for the review again.';
+
+  function unanswered(activity, answers) {
+    var FB = root.PracticeFeedback;
+    answers = answers || {};
+    var items = FB.collectFields(activity).filter(function (f) {
+      return f.required !== false;
+    }).concat(FB.collectPrompts(activity));
+    var missing = items.filter(function (item) {
+      return !FB.hasRealAnswer(answers[item.id]);
+    }).length;
+    return { missing: missing, total: items.length };
+  }
+
+  function incompleteNote(state) {
+    if (!state.missing) return '';
+    return '\n\nIMPORTANT: this canvas is INCOMPLETE. ' + state.missing
+      + ' of ' + state.total + ' fields have no real answer yet (blank, or '
+      + 'a placeholder like "asdf"). Rules for this review: say so first '
+      + 'and name how many fields lack a real answer. Do not praise work '
+      + 'that is not there, and never open with a compliment on an '
+      + 'incomplete canvas. Coach only the fields that actually contain an '
+      + 'answer; make no claim about any other field beyond noting it has '
+      + 'no answer yet.';
+  }
+
   function buildCanvasCall(activity, answers) {
     return fill(cfg().prompts.canvas, {
       'all_fields_concatenated': concatFields(activity, answers)
-    });
+    }) + incompleteNote(unanswered(activity, answers));
   }
 
   function buildPitchCall(activity, answers) {
@@ -3596,6 +3707,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       });
     },
     coachCanvas: function (activity, answers) {
+      // an entirely empty canvas never reaches the proxy: no POST, no
+      // tokens, and no model asked to review work that does not exist
+      var state = unanswered(activity, answers);
+      if (state.total && state.missing === state.total) {
+        return Promise.resolve({ text: EMPTY_CANVAS_MSG, tag: null });
+      }
       return callProxy('canvas', buildCanvasCall(activity, answers)).then(function (text) {
         return { text: text, tag: null };
       });
@@ -3626,7 +3743,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     _buildFieldCall: buildFieldCall,
     _buildCanvasCall: buildCanvasCall,
     _buildPitchCall: buildPitchCall,
-    _parseTag: parseTag
+    _parseTag: parseTag,
+    _unanswered: unanswered,
+    _emptyCanvasMsg: EMPTY_CANVAS_MSG
   };
 
   root.PracticeLive = api;
@@ -5298,9 +5417,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   /* ---------- condition evaluation (pure, deterministic) ---------- */
 
+  function rubricRow(evalResult, id) {
+    return (evalResult.rubric || []).filter(function (r) { return r.id === id; })[0] || null;
+  }
+
   function rubricTag(evalResult, id) {
-    var row = (evalResult.rubric || []).filter(function (r) { return r.id === id; })[0];
+    var row = rubricRow(evalResult, id);
     return row ? row.tag : null;
+  }
+
+  // a criterion with unanswered feeding fields (empty or non-answers) is
+  // not fully evidenced: no focus card may coach it until the work is in
+  function rubricIncomplete(evalResult, id) {
+    var row = rubricRow(evalResult, id);
+    return !!row && row.complete === false;
   }
 
   function conditionMet(when, activity, evalResult, answers, extras) {
@@ -5313,15 +5443,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var kind = when.split(':')[0];
     var arg = when.slice(kind.length + 1);
     if (kind === 'rubric_weak') {
+      if (rubricIncomplete(evalResult, arg)) return false;
       var t = rubricTag(evalResult, arg);
       return t === 'Light' || t === 'Revise';
     }
     if (kind === 'rubric_revise') {
+      if (rubricIncomplete(evalResult, arg)) return false;
       return rubricTag(evalResult, arg) === 'Revise';
     }
     if (kind === 'field_weak') {
+      // a field without a real answer (empty or "asdf") is "not answered",
+      // never "weak": it belongs to the missing-count line, and a focus
+      // card must not coach absent work
       var f = (evalResult.fields || {})[arg];
-      return !!f && f.tag !== 'Ready';
+      return !!f && !f.empty && !f.nonAnswer && f.tag !== 'Ready';
     }
     if (kind === 'decision_weak') {
       var d = (evalResult.decisions || {})[arg];
@@ -5338,6 +5473,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     // Both are false when no profile is present or applied, so an activity
     // carrying these rules degrades cleanly to today's behaviour.
     if (kind === 'profile_repeat' || kind === 'profile_improved') {
+      // the same evidence bar as rubric_weak: an incompletely-evidenced
+      // dimension is never a repeat and never an improvement
+      if (rubricIncomplete(evalResult, arg)) return false;
       return !!(window.PracticeProfile && window.PracticeProfile.conditionMet(
         kind, arg, rubricTag(evalResult, arg), activity));
     }
@@ -5365,6 +5503,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var evalResult = FB.evaluateActivity(activity, checks, answers);
     var rules = activity.outcome_logic || [];
 
+    // "unanswered" counts fields without a REAL answer: blank, whitespace,
+    // and non-answers like "asdf" are the same absence of evidence
+    var missing = (evalResult.overall.unansweredCount || 0)
+      + (evalResult.overall.unansweredPointCount || 0);
+    var incomplete = missing > 0;
+
     var focus = [];
     var positive = null;
     //#PROFILE-BEGIN
@@ -5376,7 +5520,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     rules.forEach(function (rule) {
       if (!conditionMet(rule.when, activity, evalResult, answers, opts.extras)) return;
       if (rule.when === 'all_strong') {
-        if (!positive) positive = rule;
+        // an incomplete canvas can never be told it is Ready: the positive
+        // branch is suppressed entirely while required work is unanswered
+        if (!positive && !incomplete) positive = rule;
         return;
       }
       if (focus.length >= FOCUS_CAP) return;
@@ -5403,8 +5549,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return {
       evalResult: evalResult,
       neutral: !rules.length,
-      incomplete: (evalResult.overall.emptyCount || 0) > 0
-        || (evalResult.overall.emptyPointCount || 0) > 0,
+      incomplete: incomplete,
+      missing: missing,
       strengths: strengths,
       focus: focus,
       positive: positive ? {
@@ -5415,10 +5561,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     };
   }
 
+  /* the leading line of an incomplete path: what is missing comes first,
+     before any coaching, on every surface (screen, PDF, coach phrasing) */
+  function missingLine(result) {
+    // "without a real answer" reads correctly for both causes: a blank
+    // field and one holding a filler like "asdf"
+    var n = result.missing;
+    return n === 1
+      ? 'You have 1 field without a real answer yet. Fill it in, then run the review again.'
+      : 'You have ' + n + ' fields without a real answer yet. Fill those in, then run the review again.';
+  }
+
   /* the deterministic path as plain text: the PDF rows and the coach
      phrasing call both read from this same content */
   function summaryText(result) {
     var lines = [];
+    if (result.incomplete) {
+      lines.push(missingLine(result));
+    }
     if (result.strengths.length) {
       lines.push('What went well: ' + result.strengths.join('; ') + '.');
     }
@@ -5485,6 +5645,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     head.appendChild(headText);
     if (result.rank) head.appendChild(el('span', 'm-path-rank', result.rank));
     block.appendChild(head);
+
+    // the path leads with what is missing: the count line renders above
+    // everything else, and no card below may claim work that is not there
+    if (result.incomplete) {
+      block.appendChild(el('p', 'm-path-missing', missingLine(result)));
+    }
 
     if (result.strengths.length) {
       var strong = el('div', 'm-path-strong');
@@ -5572,6 +5738,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (!result) return null;
 
     var cards = [];
+    if (result.incomplete) {
+      // the printed record is as honest as the screen: the missing work
+      // leads, before any strength or focus card
+      cards.push({ title: 'Still unanswered', rows: [{ value: missingLine(result) }] });
+    }
     if (result.strengths.length) {
       cards.push({
         title: 'What you did well',
@@ -5622,7 +5793,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     summaryText: summaryText,
     buildPathBlock: buildPathBlock,
     reportSection: reportSection,
-    _conditionMet: conditionMet
+    _conditionMet: conditionMet,
+    _missingLine: missingLine
   };
 })();
 
@@ -5886,6 +6058,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
  *    If the learner never answers the gate, the session is NOT merged
  *    into the stored profile: better to lose one session's history than
  *    to mix two students' records (the printed report stays their record).
+ *  - NO EVIDENCE, NO RECORD. An INCOMPLETE session (any required field or
+ *    pitch point without a real answer — blank, whitespace, or a filler
+ *    like "asdf" all count) writes only the dimensions whose feeding
+ *    fields ALL held real answers (rubric rows with complete: true); every
+ *    other dimension is left exactly as stored — no "weak" from emptiness,
+ *    no not_assessed backfill, and the session is not marked done. A run
+ *    with NO fully-evidenced dimension (the blank Finish) never touches
+ *    storage at all. Nothing is better than a false record here: a
+ *    poisoned profile is invisible and compounds for weeks.
  */
 (function () {
   'use strict';
@@ -6062,12 +6243,27 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     // proven otherwise: never merge this session into it
     if (stored && !isApplied && !confirmedFor(activity)) return;
 
+    // a field without a REAL answer (blank, whitespace, or a filler like
+    // "asdf") is missing evidence: the session is incomplete either way
+    var overall = (evalResult && evalResult.overall) || {};
+    var sessionIncomplete = (overall.unansweredCount || 0) > 0
+      || (overall.unansweredPointCount || 0) > 0;
+
+    // only fully-evidenced dimensions are ever recorded: a rubric row
+    // scores here only when every feeding field held an answer
+    // (complete !== false) AND the local checks produced a real tag.
+    // Emptiness can therefore never write "weak" into anyone's record.
     var scored = {};
     ((evalResult && evalResult.rubric) || []).forEach(function (r) {
-      if (p.dimensions.indexOf(r.id) !== -1 && TAG_TO_ENUM[r.tag]) {
+      if (p.dimensions.indexOf(r.id) !== -1 && TAG_TO_ENUM[r.tag]
+          && r.complete !== false) {
         scored[r.id] = TAG_TO_ENUM[r.tag];
       }
     });
+
+    // the blank (or unevidenced) Finish: nothing to record, nothing is
+    // touched — the stored profile stays byte-for-byte as it was
+    if (sessionIncomplete && !Object.keys(scored).length) return;
 
     var base = (isApplied && activeProfile) ? activeProfile
       : (stored || { v: 1, written: today(), sessions_done: [], dims: {} });
@@ -6084,14 +6280,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         });
         if (!replaced) entries.push({ s: p.session, t: scored[id] });
         if (entries.length > depth) entries = entries.slice(entries.length - depth);
-      } else if (!entries.length) {
+      } else if (!entries.length && !sessionIncomplete) {
         // not scored here: not_assessed, and only when there is NO prior
-        // evidence; real history is never overwritten with not_assessed
+        // evidence AND the session was actually completed; a partial run
+        // leaves unevidenced dimensions exactly as stored
         entries = [{ s: p.session, t: 'not_assessed' }];
       }
       base.dims[id] = entries;
     });
-    if (base.sessions_done.indexOf(p.session) === -1) base.sessions_done.push(p.session);
+    // an incomplete session is not a session done
+    if (!sessionIncomplete && base.sessions_done.indexOf(p.session) === -1) {
+      base.sessions_done.push(p.session);
+    }
     base.written = today();
 
     activeProfile = write(activity, base);
