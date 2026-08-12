@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "meta": {
+    "id": "eai-m3l2-class",
+    "publishes_to": "eai-m3l2-class",
+    "program": "Enterprise AI Implementation Specialist",
+    "module": "Module 3 — AI Security",
+    "lesson": "L2 — Prompt Safety, Injection Awareness and Guardrails",
+    "title": "Class practice — now it's your turn, on your case",
+    "format": "coached_tasks",
+    "context": "class",
+    "estimated_minutes": 75,
+    "language_default": "en",
+    "source_deck": "EAI-M03-L02 — FINAL for Google Slides.pptx (slides 29-33), with the worked example on slide 31 and the gate on slide 37"
+  },
+  "safety": {
+    "pii_forbidden": true,
+    "student_notice": "Don't include personal or identifying information in your answers.",
+    "redact_before_ai": [
+      "email_addresses",
+      "phone_numbers",
+      "long_digit_sequences",
+      "api_key_shaped_tokens"
+    ],
+    "scope_guard": "Description level only, and every injection example must be entirely fictional. Nothing real is uploaded to any AI tool — not documents, employee or customer data, contracts, medical or financial information or any identifying detail — not even to test an injection scenario. If a student pastes something that looks real, the coach tells them to replace it with a fictional description. The coach never writes attack text and never helps make an injection attempt more effective."
+  },
+  "grounding_ref": "grounding/grounding_pack.md",
+  "coach_prompts_ref": "grounding/coach_prompts.md",
+  "lesson_map": {
+    "C1": "M3 L2 · What Prompt Injection is and the two channels, direct and indirect (slides 7-9; slide 9 ties the four indirect channels — policy documents, emails and service requests, CRM records, uploaded files — to the sources in your own architecture)",
+    "C2": "M3 L2 · Hallucination versus Prompt Injection: two risks, two different controls (slide 6)",
+    "C3": "M3 L2 · The direct demo on the HR case: the attempt, the correct response, the escalation path (slides 10-13)",
+    "C4": "M3 L2 · The indirect demo: the hidden instruction in the policy document, why indirect is more dangerous, and the three controls that would have stopped it, none of which requires a rebuild (slides 14-16)",
+    "C5": "M3 L2 · OWASP Top 10 for LLM Applications 2025: three categories in depth, seven for recognition (slide 17)",
+    "C6": "M3 L2 · LLM01 Prompt Injection, with the direct and the indirect demo mapped onto it (slide 18)",
+    "C7": "M3 L2 · LLM02 Sensitive Information Disclosure, which needs no attacker, and the rule that LLM01 usually leads to LLM02 if it succeeds (slide 19)",
+    "C8": "M3 L2 · LLM06 Excessive Agency and the four levels of agency, from text-only answers to an autonomous agent (slide 20)",
+    "C9": "M3 L2 · The other seven OWASP categories, awareness only, for a scenario that does not fit the three core ones (slide 21)",
+    "C10": "M3 L2 · Practical Tool 1, the seven guardrail types: input validation, instruction hierarchy, output filtering, retrieval boundaries, tool permission limits, human approval, logging and review. A guardrail is a design principle, not a product (slides 23-24)",
+    "C11": "M3 L2 · Practical Tool 2, what AI may propose and where a person must approve, and the escalating capability levels of your own case (slides 25-26)",
+    "C12": "M3 L2 · The escalation path: automatic logging, alert to the business owner, Security and the DPO on repetition (slide 13), and the rule that refusal alone is not enough — logging and escalation are part of the response (slide 12)",
+    "C13": "M3 L2 · Practical Tool 3, the seven stakeholders for prompt security, what you check with each and what you must not decide alone (slides 27-28)",
+    "C14": "M3 L2 · Your role boundary: you are not becoming a CISO or a DPO, you need to know enough not to make a dangerous decision and when to stop and ask (slide 22)",
+    "C15": "M3 L2 · The worked example, the fictional HR case with all six columns filled for three scenarios (slide 31)",
+    "C16": "M3 L2 · The gate: the scenario table, the guardrails and escalation table and the readiness checklist are the entry condition to the build (slide 37)",
+    "C17": "M1 L5 · Your architecture and data-flow map, the starting point for the scenarios",
+    "C18": "M3 L1 · Your data classification and stakeholder map from 3A.1, the basis for what must not be exposed"
+  },
+  "personal_path_ui": {
+    "review_prefix": "Where to review this: ",
+    "resource_prefix": "Optional extra resource (further reading, not required): ",
+    "resources_heading": "Optional further reading (free, not required)"
+  },
+  "resources": [
+    {
+      "title": "Top 10 for LLM and Gen AI applications, 2025",
+      "source": "OWASP Gen AI Security Project",
+      "url": "https://genai.owasp.org/llm-top-10/",
+      "why": "The standard the OWASP column comes from: LLM01, LLM02 and LLM06 in depth, and the other seven when a scenario does not fit them."
+    },
+    {
+      "title": "LLM01:2025 Prompt Injection",
+      "source": "OWASP Gen AI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "why": "Read it for the risk-type column: it separates direct from indirect injection and lists prevention measures that match the seven guardrail types."
+    },
+    {
+      "title": "Adversarial Machine Learning: A Taxonomy and Terminology of Attacks and Mitigations, NIST AI 100-2 E2025",
+      "source": "NIST",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-2e2025.pdf",
+      "why": "Sections 3.3 and 3.4 treat direct prompting and indirect prompt injection as separate attack classes with their own mitigations, which is the distinction your three scenarios must hold."
+    },
+    {
+      "title": "Guidelines for secure AI system development",
+      "source": "NCSC, with CISA and international partners",
+      "url": "https://www.ncsc.gov.uk/collection/guidelines-secure-ai-system-development",
+      "why": "Use it for the guardrail and escalation columns: it places threat modelling in secure design and logging and monitoring in secure operation, before go-live."
+    }
+  ],
+  "rubric": {
+    "t1_scenario_set": {
+      "checks": [
+        "three scenarios, not one or two",
+        "at least one direct and at least one indirect",
+        "each starts from a source or an action that exists in the learner's own architecture, not a generic example"
+      ],
+      "common_miss": "Three variations of the same direct chat attempt, because indirect injection is harder to picture (slides 8-9)."
+    },
+    "scenario_description": {
+      "checks": [
+        "two or three sentences, not a label",
+        "says who is attempting what, and through which channel of the architecture",
+        "entirely fictional, no real document, person or identifier"
+      ],
+      "common_miss": "One line such as 'someone tries to get confidential data', which cannot be classified or controlled."
+    },
+    "risk_type": {
+      "checks": [
+        "names direct or indirect explicitly",
+        "may add sensitive information disclosure or excessive agency; more than one is allowed",
+        "the type matches the description, so an indirect scenario is not labelled direct"
+      ],
+      "common_miss": "Direct and indirect are swapped: a hidden instruction inside a document is called direct because a user asked the question."
+    },
+    "owasp_category": {
+      "checks": [
+        "names one of the three taught in depth: Prompt Injection, Sensitive Information Disclosure, Excessive Agency",
+        "or a brief note naming which of the other seven it belongs to",
+        "where the injection succeeds, the disclosure that follows is named too"
+      ],
+      "common_miss": "Excessive Agency used as a catch-all for anything that feels risky, or a category with no link to the description."
+    },
+    "guardrail_required": {
+      "checks": [
+        "names at least one of the seven types: input validation, instruction hierarchy, output filtering, retrieval boundaries, tool permission limits, human approval, logging and review",
+        "the control is specific to this scenario and would actually have blocked or limited the damage",
+        "no product or vendor name"
+      ],
+      "common_miss": "A generic control such as 'we will instruct the system to be careful', or drafting a detailed system prompt instead of naming the control type (slides 23-24)."
+    },
+    "escalation_rule": {
+      "checks": [
+        "says what happens when the scenario occurs, not only that it is blocked",
+        "names who is alerted and at which stage, in role titles",
+        "includes logging, because refusal alone is not enough"
+      ],
+      "common_miss": "'The system refuses' with no logging and nobody alerted (slides 12-13)."
+    },
+    "stakeholder_to_review": {
+      "checks": [
+        "names one of the seven: Security/CISO, IT/system owner, data owner, Privacy/DPO, Legal/Compliance, business process owner, Procurement/Vendors",
+        "the stakeholder is actually authorized to handle this problem",
+        "role titles, not the names of real people"
+      ],
+      "common_miss": "Everything routed to Security, or to the business owner who cannot decide the exposure level (slide 28)."
+    },
+    "t5_pair_review": {
+      "checks": [
+        "reports something that actually changed after the partner's challenge, or says honestly that nothing did",
+        "answers the missed-scenario and the specific-guardrail questions",
+        "confirms that at least one scenario is direct and at least one is indirect"
+      ],
+      "common_miss": "'My partner agreed', which usually means the four questions were not asked (slide 32)."
+    }
+  },
+  "outcome_logic": [
+    {
+      "when": "fewer than three scenarios, or direct and indirect are not both covered",
+      "path": "Add the missing channel before you leave the room. Walk the sources in your own architecture: an uploaded file, a policy document in the knowledge base, an email or service request, a free-text CRM note. Each one is an indirect channel.",
+      "review": "C1"
+    },
+    {
+      "when": "a scenario description is one line, or is not tied to the learner's own architecture",
+      "path": "Rewrite the description in two or three sentences saying who is attempting what and through which source. A scenario you cannot describe you cannot control.",
+      "review": "C15"
+    },
+    {
+      "when": "the OWASP column is empty, or Excessive Agency is used for every scenario",
+      "path": "Map each scenario to one of the three taught in depth, and where the injection succeeds add the disclosure that follows. If it fits none of them, name which of the other seven it belongs to.",
+      "review": "C5"
+    },
+    {
+      "when": "a guardrail is generic, or is a system-prompt draft rather than a control type",
+      "path": "Replace it with one of the seven types and say in one sentence how it blocks this specific scenario. A guardrail is a design principle, not a product and not a paragraph of instructions.",
+      "review": "C10"
+    },
+    {
+      "when": "an escalation rule says only that the system refuses",
+      "path": "Add the logging and the person. Refusal alone is not enough: log the event, alert the business owner, and bring in Security and the DPO on repetition.",
+      "review": "C12"
+    },
+    {
+      "when": "every scenario is routed to the same stakeholder, or to someone not authorized to decide",
+      "path": "Check the stakeholder table and move each scenario to the role that can actually act on it. Remember what you must not decide alone: the acceptable risk level, whether an exposure level is acceptable, or which documents are probably safe.",
+      "review": "C13"
+    },
+    {
+      "when": "a scenario involves the system doing something, not only answering",
+      "path": "Mark the agency level of your case and the actions that require a person's approval before execution. The more the system can do, the more a manipulation costs.",
+      "review": "C11"
+    },
+    {
+      "when": "the pair review changed nothing",
+      "path": "Ask your partner the two hard questions: which obvious scenario does my architecture imply that I missed, and is my guardrail specific enough to stop the problem.",
+      "review": "C16"
+    },
+    {
+      "when": "all three scenarios are complete and the pair review changed something",
+      "path": "You have the table the build stage asks for. Carry it straight into the home practice as Part B, and add the human-approval points and the questions for each stakeholder.",
+      "review": "C16"
+    }
+  ]
+}

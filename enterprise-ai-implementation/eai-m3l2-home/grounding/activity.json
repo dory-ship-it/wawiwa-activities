@@ -1,0 +1,226 @@
+{
+  "schema_version": "1.0",
+  "meta": {
+    "id": "eai-m3l2-home",
+    "publishes_to": "eai-m3l2-home",
+    "program": "Enterprise AI Implementation Specialist",
+    "module": "Module 3 — AI Security",
+    "lesson": "L2 — Prompt Safety, Injection Awareness and Guardrails",
+    "title": "Risk and controls document before building: Part B",
+    "format": "coached_tasks",
+    "context": "home",
+    "language_default": "en",
+    "source_deck": "EAI-M03-L02 — FINAL for Google Slides.pptx (slides 35-36)"
+  },
+  "safety": {
+    "pii_forbidden": true,
+    "student_notice": "Don't include personal or identifying information in your answers.",
+    "redact_before_ai": [
+      "email_addresses",
+      "phone_numbers",
+      "long_digit_sequences",
+      "api_key_shaped_tokens"
+    ],
+    "scope_guard": "Description level only, and every injection example entirely fictional and marked as such. No real document, employee or customer data, contract, medical or financial information, or real identifying detail goes into any AI tool, not even to test a scenario. If a participant pastes something that looks real, the coach tells them to replace it with a description.",
+    "never_soften": [
+      "Completing this document does not mean the system is secure. It is an initial risk-identification stage, not a warranty.",
+      "The guardrails defined here are a starting point, reviewed again during the build stages. Defining them is not a promise that they are sufficient."
+    ],
+    "no_attack_help": "The coach never helps write, improve or complete an injection payload and never suggests a phrasing that would work on a real system. If the participant drifts into attack technique, it names the boundary and turns them back to the guardrail."
+  },
+  "grounding_ref": "grounding/grounding_pack.md",
+  "coach_prompts_ref": "grounding/coach_prompts.md",
+  "lesson_map": {
+    "C1": "M3 L2 · What prompt injection is, and the two channels, direct and indirect (slides 7-9; slide 9 ties the four indirect channels, policy documents, emails and service requests, CRM records and uploaded files, to your own architecture)",
+    "C2": "M3 L2 · Hallucination versus injection: two risks that need completely different controls (slide 6)",
+    "C3": "M3 L2 · The direct demo on the fictional HR case: the attempt, the correct response, the escalation (slides 10-13)",
+    "C4": "M3 L2 · The indirect demo: the hidden instruction in the policy document, and the three guardrails that would have stopped it (slides 14-16)",
+    "C5": "M3 L2 · OWASP Top 10 for LLM Applications 2025, and why three categories out of ten are studied in depth (slide 17)",
+    "C6": "M3 L2 · LLM01 Prompt Injection, and how both demos map to it (slide 18)",
+    "C7": "M3 L2 · LLM02 Sensitive Information Disclosure, which needs no attacker at all (slide 19)",
+    "C8": "M3 L2 · LLM06 Excessive Agency and the four agency levels (slide 20)",
+    "C9": "M3 L2 · The other seven OWASP categories, recognition only (slide 21)",
+    "C10": "M3 L2 · Practical Tool 1, the seven types of guardrail and the threat each answers (slides 23-24)",
+    "C11": "M3 L2 · Practical Tool 2, what AI proposes and where a person must approve before execution (slide 25)",
+    "C12": "M3 L2 · Tools and agents, the four capability levels and where your case sits after the build (slide 26)",
+    "C13": "M3 L2 · The escalation path in stages, logging then the business owner then Security and the DPO (slide 13), and why refusal alone is not enough (slide 12)",
+    "C14": "M3 L2 · Practical Tool 3, the seven review stakeholders, the question for each and what you must not decide alone (slides 27-28)",
+    "C15": "M3 L2 · Your role boundary: what you recognise, who you involve, and what you never decide alone (slide 22)",
+    "C16": "M3 L2 · The worked HR example, three scenarios filled in at the expected level of detail (slide 31)",
+    "C17": "M3 L2 · The gate: the outputs required as the entry condition to the build, checked at the start of the next module (slide 37)",
+    "C18": "M3 L1 · Your four-level data classification, Practical Tool 1 (slides 11-16) — the 3A.1 line of the readiness checklist",
+    "C19": "M3 L1 · Your eleven-role stakeholder map, Practical Tool 2 (slides 23-29) — the stakeholder line of the readiness checklist"
+  },
+  "personal_path_ui": {
+    "review_prefix": "Where to review this: ",
+    "resource_prefix": "Optional extra resource (further reading, not required): ",
+    "resources_heading": "Optional further reading (free, not required)"
+  },
+  "resources": [
+    {
+      "title": "Top 10 for LLM and Gen AI applications, 2025",
+      "source": "OWASP Gen AI Security Project",
+      "url": "https://genai.owasp.org/llm-top-10/",
+      "why": "The standard behind section 2: LLM01 Prompt Injection, LLM02 Sensitive Information Disclosure and LLM06 Excessive Agency are the three you classify with."
+    },
+    {
+      "title": "Adversarial Machine Learning: A Taxonomy and Terminology of Attacks and Mitigations, AI 100-2 E2025",
+      "source": "NIST",
+      "url": "https://csrc.nist.gov/pubs/ai/100/2/e2025/final",
+      "why": "Sections 3.3 and 3.4 treat direct prompting and indirect prompt injection as separate attack classes with separate mitigations, which is the distinction section 2 asks you to hold."
+    },
+    {
+      "title": "Guidelines for secure AI system development",
+      "source": "NCSC UK with CISA and international partners",
+      "url": "https://www.ncsc.gov.uk/collection/guidelines-secure-ai-system-development",
+      "why": "Read the secure-design section for section 3: it argues for controls decided before building, which is exactly what this document is."
+    },
+    {
+      "title": "Deploying AI Systems Securely: Best Practices for Deploying Secure and Resilient AI Systems",
+      "source": "NSA, CISA, FBI and partner agencies",
+      "url": "https://media.defense.gov/2024/Apr/15/2003439257/-1/-1/0/CSI-DEPLOYING-AI-SYSTEMS-SECURELY.PDF",
+      "why": "Use it for sections 4 and 5: it is concrete about access limits, logging of inputs and outputs, and who is alerted when behaviour looks anomalous."
+    }
+  ],
+  "rubric": {
+    "t1_case_reminder": {
+      "checks": [
+        "names the business problem",
+        "names the architecture from Module 1",
+        "states the Build vs Buy decision",
+        "two or three sentences, and their own case rather than the HR demo"
+      ],
+      "common_miss": "Describes the tool but not the problem it solves, or leaves out Build vs Buy entirely."
+    },
+    "t2_scenarios": {
+      "checks": [
+        "three scenarios",
+        "at least one direct",
+        "at least one indirect, tied to a real channel in their architecture",
+        "each scenario says direct or indirect, and whether it is also sensitive information disclosure and/or excessive agency",
+        "every example is fictional and marked as such"
+      ],
+      "common_miss": "Three variations on a user typing something malicious, with no document, email, CRM note or uploaded file, or excessive agency used as a catch-all for a scenario with no action and no tool."
+    },
+    "t3_guardrails": {
+      "checks": [
+        "names guardrails from the seven by name",
+        "covers every scenario in section 2",
+        "says why that guardrail stops that specific problem",
+        "does not stop at one guardrail for everything"
+      ],
+      "common_miss": "A generic control such as instructing the system to be careful, which is not a guardrail because nothing about it can be checked."
+    },
+    "t4_approvals": {
+      "checks": [
+        "a list of concrete actions, not principles",
+        "includes an action with an external or irreversible effect, of the kind of sending an external email, updating a record or a financial decision",
+        "draws the boundary between drafting and executing"
+      ],
+      "common_miss": "States that a human is in the loop without naming a single action that stops for approval."
+    },
+    "t5_escalation": {
+      "checks": [
+        "an entry per scenario",
+        "says who is alerted",
+        "says at which stage, with logging first and repetition handled",
+        "role titles only, no real names",
+        "the target has the authority to act"
+      ],
+      "common_miss": "One destination with no stages, or escalation to a named individual, or to a role with no authority over the problem."
+    },
+    "t6_stakeholders": {
+      "checks": [
+        "names the stakeholders relevant to their own case, from the seven",
+        "at least one concrete question per stakeholder",
+        "the questions are ones they cannot answer alone"
+      ],
+      "common_miss": "A list of roles with no questions, or a question the participant has already answered for themselves."
+    },
+    "t7_readiness": {
+      "checks": [
+        "all five answered yes or no",
+        "an honest no where the work is not done",
+        "the two 3A.1 answers, data classification and stakeholders, reflect Lesson 1 outputs that actually exist"
+      ],
+      "common_miss": "Five yes answers over thin sections above, which records nothing and hides the open work the build module will look for."
+    }
+  },
+  "outcome_logic": [
+    {
+      "when": "section 2 has fewer than three scenarios",
+      "path": "Add scenarios until there are three. Start from the sources in your own architecture rather than from a blank page.",
+      "review": "C1"
+    },
+    {
+      "when": "section 2 has no indirect scenario",
+      "path": "Add an indirect one. Walk the four channels and pick the one your architecture actually has: a policy document, an incoming email or service request, a CRM free-text field, or a file a user uploads.",
+      "review": "C1"
+    },
+    {
+      "when": "section 2 has no direct scenario",
+      "path": "Add a direct one: a user typing the bypass attempt into the conversation, so the human actor is identified.",
+      "review": "C3"
+    },
+    {
+      "when": "section 2 classifies channel but never sensitive information disclosure or excessive agency",
+      "path": "Complete the classification. For each scenario say whether it is also sensitive information disclosure, or excessive agency, or both. If injection succeeds it usually becomes disclosure.",
+      "review": "C7"
+    },
+    {
+      "when": "excessive agency is claimed for a scenario with no action and no tool",
+      "path": "Excessive agency is about what the system can actually do. If nothing is sent, updated or invoked, reclassify it and keep excessive agency for the scenario where the system acts.",
+      "review": "C8"
+    },
+    {
+      "when": "section 3 is generic, or names fewer than two of the seven guardrails",
+      "path": "Replace the general statement with named guardrails from the seven, and for each one write the sentence saying what it blocks in that specific scenario.",
+      "review": "C10"
+    },
+    {
+      "when": "section 4 lists no action with an external or irreversible effect",
+      "path": "Name the actions that stop for a person: sending an external email, updating a record, a financial decision. Drafting is allowed; executing is what needs approval.",
+      "review": "C11"
+    },
+    {
+      "when": "section 5 has no stages",
+      "path": "Give the escalation stages, not just a destination: automatic logging first, then the business owner with the context, then Security and the DPO on repetition.",
+      "review": "C13"
+    },
+    {
+      "when": "section 5 names no role, or looks like a personal name",
+      "path": "Write role titles only, and check that the role you escalate to is actually authorized to handle the problem.",
+      "review": "C14"
+    },
+    {
+      "when": "section 6 has no question mark, or fewer than two stakeholders",
+      "path": "Give each relevant stakeholder one concrete question, of the kind on the stakeholder table, and keep the questions to things you must not decide alone.",
+      "review": "C14"
+    },
+    {
+      "when": "the readiness checklist is incomplete",
+      "path": "Answer all five, yes or no. A no is a result: it tells the build module what is still open.",
+      "review": "C17"
+    },
+    {
+      "when": "the readiness checklist is all yes while sections 3, 4 or 5 are thin",
+      "path": "Re-read what you wrote above before you tick yes. The checklist records the work; it does not replace it.",
+      "review": "C17"
+    },
+    {
+      "when": "the 3A.1 classification answer is no",
+      "path": "Go back to Lesson 1 and finish the four-level classification for your sources. Section 2 cannot say what must not be exposed until that exists.",
+      "review": "C18"
+    },
+    {
+      "when": "the stakeholder answer is no",
+      "path": "Go back to your Lesson 1 stakeholder map and mark which of the roles your own case touches, then bring them into section 6.",
+      "review": "C19"
+    },
+    {
+      "when": "all seven sections pass",
+      "path": "Save it as one document with a clear name and keep it to hand. It is the entry condition to the build modules, and it is checked at the start of the module. Two things it does not do: it does not make the system secure, and it does not settle the guardrails, which are reviewed again while you build.",
+      "review": "C17"
+    }
+  ]
+}

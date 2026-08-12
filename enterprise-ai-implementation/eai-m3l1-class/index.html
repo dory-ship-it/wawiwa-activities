@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Class practice — Zero Trust AI Security Principles and Data Handling</title>
+<title>Wawiwa · Zero Trust AI Security and Data Handling: Class Practice</title>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#33454E;--mut:#5C6E77;--teal:#5AB3AA;--tealtx:#2E6E76;--navy:#255777;--line:#CFE2E2;--bd:#8496A0}
@@ -40,10 +40,31 @@ button:disabled{opacity:.55;cursor:default}
 .pathpanel ul{margin:12px 0 0;padding-left:20px}
 .pathpanel li{margin-bottom:9px}
 .rev{color:var(--mut);font-size:14px;display:block;margin-top:2px}
+/* outside reading in the personal path, teal so it reads as a link, never as body text */
+.reslist{margin:16px 0 0;padding-top:13px;border-top:1px solid var(--line)}
+.reshead{display:block;color:var(--mut);font-size:13.5px;font-weight:700;margin-bottom:9px}
+.resitem{margin:0 0 10px}
+.reslink{display:inline-block;color:var(--tealtx);font-weight:600;font-size:15px}
+.reslink:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.reswhy{display:block;color:var(--mut);font-size:14px;margin-top:2px}
+/* print-only: the answer mirror and the page footer, hidden on screen */
+.pv,.printfoot{display:none}
 .foot{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);color:var(--mut);font-size:13.5px;
  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media(max-width:620px){.chk{grid-template-columns:1fr}}
-@media print{button,.pii,.warn{display:none}.card,.pathpanel{box-shadow:none;break-inside:avoid}}
+@page{margin:14mm 13mm}
+@media print{
+ button,.pii,.warn{display:none}
+ .card,.pathpanel{box-shadow:none;break-inside:avoid}
+ /* textareas print clipped or empty, so print the mirrored block instead */
+ textarea{display:none}
+ .pv{display:block;white-space:pre-wrap;border:1px solid var(--bd);border-radius:10px;
+  padding:11px 13px;font:15px/1.5 Assistant,sans-serif;color:var(--ink)}
+ .reslink{color:var(--tealtx)}
+ .reslink::after{content:' — ' attr(href);color:var(--mut);font-weight:400;font-size:12.5px;word-break:break-all}
+ .printfoot{display:block;margin-top:12px;padding-top:9px;border-top:1px solid var(--line);
+  color:var(--mut);font-size:12px;break-inside:avoid}
+}
 </style></head><body>
 <div class="wrap">
 <h1>Class practice — now it's your turn, on your case</h1>
@@ -131,6 +152,7 @@ button:disabled{opacity:.55;cursor:default}
   <span>Your answers stay on this device only. Nothing is sent anywhere except the text you send to the coach.</span>
   <span>© Wawiwa Tech · Internal use only</span>
 </div>
+<div class="printfoot" id="printfoot"></div>
 </div>
 
 <script type="text/plain" id="grounding-pack"># Grounding pack — EAI M3 L1 class practice
@@ -206,7 +228,7 @@ tell a student their exposure level is acceptable. It says who to ask instead.
 
 The practice is at description level only (slide 37). No real files go into any AI tool.
 </script>
-<script type="application/json" id="activity">{"schema_version": "1.0", "meta": {"id": "eai-m3l1-class", "publishes_to": "eai-m3l1-class", "program": "Enterprise AI Implementation Specialist", "module": "Module 3 — AI Security", "lesson": "L1 — Zero Trust AI Security Principles and Data Handling", "title": "Class practice — now it's your turn, on your case", "format": "coached_tasks", "context": "class", "estimated_minutes": 50, "language_default": "en", "source_doc": "מודול_3A_-_שיעור_1_-_Zero_Trust_ואבטחת_מידע_ארגונית (1).docx", "source_deck": "EAI-M03-L01 — Slide Deck V2.pptx (slides 37-39, with Tool 1 on 11-16 and Tool 3 on 30-31)"}, "safety": {"pii_forbidden": true, "student_notice": "Don't include personal or identifying information in your answers.", "redact_before_ai": ["email_addresses", "phone_numbers", "long_digit_sequences", "api_key_shaped_tokens"], "scope_guard": "Description level only. The practice never asks for, and the coach never invites, a real document, real employee or customer data, a contract, medical or financial information, or any real identifying detail. If a student pastes something that looks real, the coach tells them to replace it with a description."}, "grounding_ref": "grounding/grounding_pack.md", "coach_prompts_ref": "grounding/coach_prompts.md", "lesson_map": {"C1": "M3 L1 · The four-level data classification, Practical Tool 1 (slides 11-16; the summary table is slide 16)", "C2": "M3 L1 · Business process owner vs. data owner (slide 24)", "C3": "M3 L1 · The eleven-role stakeholder map, Practical Tool 2 (slides 23-29)", "C4": "M3 L1 · Minimum controls before building, Practical Tool 3 (slide 30) and what must not be uploaded (slide 31)", "C5": "M3 L1 · Every arrow in your architecture is now a security question (slide 8), including the model's own output (slide 7)", "C6": "M1 L5 · Your AI architecture and data-flow map, the source of the inventory", "C7": "M2 · Your stakeholder interviews and process mapping, the starting list for Tool 2"}, "personal_path_ui": {"review_prefix": "Where to review this: ", "resource_prefix": "Optional extra resource (further reading, not required): "}, "rubric": {"t1_inventory": {"checks": ["names more than one source", "sources trace to the Module 1 architecture rather than being invented", "includes at least one non-document source (user input, process data, or model output)"], "common_miss": "Lists only uploaded documents and forgets the user's typed question and the model's answer (slide 7)."}, "t2_classification": {"checks": ["uses the four level names: public, internal, confidential, restricted", "gives a reason per source, not just a label", "names a data owner", "distinguishes the data owner from the process owner"], "common_miss": "Everything is labelled Internal, or the person interviewed in Module 2 is written in as the data owner."}, "t3_stakeholders": {"checks": ["names roles rather than real people", "includes InfoSec/CISO or DPO where confidential or personal data is involved", "carries a concrete question per stakeholder"], "common_miss": "One generic 'ask IT' with no question, or no escalation point named at all."}, "t4_controls": {"checks": ["at least five of the ten items addressed", "separates what is already in place from what is still open", "does not claim an item is done without saying who does it"], "common_miss": "All ten marked done, which means the checklist was not really applied."}, "t5_pairs": {"checks": ["reports something the partner changed or challenged", "names the hidden Confidential item found, or says honestly that none was found"], "common_miss": "Confirms the partner agreed with everything, which usually means the challenge did not happen."}}, "outcome_logic": [{"when": "t2 uses fewer than two distinct levels", "path": "Re-open the summary table on slide 16 and re-sort your inventory. If every source really is one level, write the sentence that proves it for the two you are least sure about.", "review": "C1"}, {"when": "t2 names no data owner, or the data owner equals the process owner everywhere", "path": "Separate the two roles for at least one source before the homework. Ask who is formally accountable for the source, then ask who approves its use.", "review": "C2"}, {"when": "t1 has no user input, process data or model output", "path": "Add the model's own answer to the inventory and classify it. It is data, and it is logged.", "review": "C5"}, {"when": "t3 names no InfoSec/CISO or DPO while confidential or personal data appears in t2", "path": "Add the escalation point. Confidential and above needs the data owner plus InfoSec or the DPO, and you must not decide the exposure level alone.", "review": "C3"}, {"when": "t4 addresses fewer than five items", "path": "Fill the remaining items to five before you leave the room, and mark each as in place or still open. The open ones are what you carry into Part A.", "review": "C4"}, {"when": "all five tasks pass", "path": "You have what Part A needs. Write the one-sentence rationale for every source, then list your three open questions. Those are the entry condition to the build modules.", "review": "C4"}]}</script>
+<script type="application/json" id="activity">{"schema_version": "1.0", "meta": {"id": "eai-m3l1-class", "publishes_to": "eai-m3l1-class", "program": "Enterprise AI Implementation Specialist", "module": "Module 3 — AI Security", "lesson": "L1 — Zero Trust AI Security Principles and Data Handling", "title": "Class practice — now it's your turn, on your case", "format": "coached_tasks", "context": "class", "estimated_minutes": 50, "language_default": "en", "source_doc": "מודול_3A_-_שיעור_1_-_Zero_Trust_ואבטחת_מידע_ארגונית (1).docx", "source_deck": "EAI-M03-L01 — Slide Deck V2.pptx (slides 37-39, with Tool 1 on 11-16 and Tool 3 on 30-31)"}, "safety": {"pii_forbidden": true, "student_notice": "Don't include personal or identifying information in your answers.", "redact_before_ai": ["email_addresses", "phone_numbers", "long_digit_sequences", "api_key_shaped_tokens"], "scope_guard": "Description level only. The practice never asks for, and the coach never invites, a real document, real employee or customer data, a contract, medical or financial information, or any real identifying detail. If a student pastes something that looks real, the coach tells them to replace it with a description."}, "grounding_ref": "grounding/grounding_pack.md", "coach_prompts_ref": "grounding/coach_prompts.md", "lesson_map": {"C1": "M3 L1 · The four-level data classification, Practical Tool 1 (slides 11-16; the summary table is slide 16)", "C2": "M3 L1 · Business process owner vs. data owner (slide 24)", "C3": "M3 L1 · The eleven-role stakeholder map, Practical Tool 2 (slides 23-29)", "C4": "M3 L1 · Minimum controls before building, Practical Tool 3 (slide 30) and what must not be uploaded (slide 31)", "C5": "M3 L1 · Every arrow in your architecture is now a security question (slide 8), including the model's own output (slide 7)", "C6": "M1 L5 · Your AI architecture and data-flow map, the source of the inventory", "C7": "M2 · Your stakeholder interviews and process mapping, the starting list for Tool 2"}, "personal_path_ui": {"review_prefix": "Where to review this: ", "resource_prefix": "Optional extra resource (further reading, not required): ", "resources_heading": "Optional further reading (free, not required)"}, "resources": [{"title": "Zero Trust Architecture, SP 800-207", "source": "NIST", "url": "https://csrc.nist.gov/pubs/sp/800/207/final", "why": "The standard behind this lesson's opening rule: access is decided per request, so reachable is never the same as permitted."}, {"title": "AI Data Security: Best Practices for Securing Data Used to Train and Operate AI Systems", "source": "NSA, CISA, FBI and partner agencies", "url": "https://media.defense.gov/2025/May/22/2003720601/-1/-1/0/CSI_AI_DATA_SECURITY.PDF", "why": "Read it for task 02: it classifies data by sensitivity and states that an AI system's output carries the level of its input."}, {"title": "Guidance on AI and data protection", "source": "ICO", "url": "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/artificial-intelligence/guidance-on-ai-and-data-protection/", "why": "Use it to prepare the lawful-basis and accountability questions you take to the data owner and the DPO in task 03."}, {"title": "Top 10 for LLM and Gen AI applications", "source": "OWASP Gen AI Security Project", "url": "https://genai.owasp.org/llm-top-10/", "why": "A named risk list for task 04; sensitive information disclosure is the item this lesson keeps returning to."}], "rubric": {"t1_inventory": {"checks": ["names more than one source", "sources trace to the Module 1 architecture rather than being invented", "includes at least one non-document source (user input, process data, or model output)"], "common_miss": "Lists only uploaded documents and forgets the user's typed question and the model's answer (slide 7)."}, "t2_classification": {"checks": ["uses the four level names: public, internal, confidential, restricted", "gives a reason per source, not just a label", "names a data owner", "distinguishes the data owner from the process owner"], "common_miss": "Everything is labelled Internal, or the person interviewed in Module 2 is written in as the data owner."}, "t3_stakeholders": {"checks": ["names roles rather than real people", "includes InfoSec/CISO or DPO where confidential or personal data is involved", "carries a concrete question per stakeholder"], "common_miss": "One generic 'ask IT' with no question, or no escalation point named at all."}, "t4_controls": {"checks": ["at least five of the ten items addressed", "separates what is already in place from what is still open", "does not claim an item is done without saying who does it"], "common_miss": "All ten marked done, which means the checklist was not really applied."}, "t5_pairs": {"checks": ["reports something the partner changed or challenged", "names the hidden Confidential item found, or says honestly that none was found"], "common_miss": "Confirms the partner agreed with everything, which usually means the challenge did not happen."}}, "outcome_logic": [{"when": "t2 uses fewer than two distinct levels", "path": "Re-open the summary table on slide 16 and re-sort your inventory. If every source really is one level, write the sentence that proves it for the two you are least sure about.", "review": "C1"}, {"when": "t2 names no data owner, or the data owner equals the process owner everywhere", "path": "Separate the two roles for at least one source before the homework. Ask who is formally accountable for the source, then ask who approves its use.", "review": "C2"}, {"when": "t1 has no user input, process data or model output", "path": "Add the model's own answer to the inventory and classify it. It is data, and it is logged.", "review": "C5"}, {"when": "t3 names no InfoSec/CISO or DPO while confidential or personal data appears in t2", "path": "Add the escalation point. Confidential and above needs the data owner plus InfoSec or the DPO, and you must not decide the exposure level alone.", "review": "C3"}, {"when": "t4 addresses fewer than five items", "path": "Fill the remaining items to five before you leave the room, and mark each as in place or still open. The open ones are what you carry into Part A.", "review": "C4"}, {"when": "all five tasks pass", "path": "You have what Part A needs. Write the one-sentence rationale for every source, then list your three open questions. Those are the entry condition to the build modules.", "review": "C4"}]}</script>
 <script>
 (function(){
 "use strict";
@@ -329,24 +351,30 @@ function offline(task, v){
 }
 
 /* ---------- wire the coach buttons ---------- */
-function render(el, txt, live){
+var NOTE_LIVE='AI coach · grounded in this lesson\'s material';
+var NOTE_OFF='Checked against this lesson\'s rubric on this device.';
+/* mode: 'live'    the reply came back from the proxy
+   'offline' a genuine fallback, proxy unreachable or token cap reached
+   'plain'   a local pre-check before any call was made, so it claims neither */
+function render(el, txt, mode){
   el.hidden=false;
+  var note = mode==='live' ? NOTE_LIVE : (mode==='offline' ? NOTE_OFF : '');
   el.innerHTML='<b>Coach</b><br>'+String(txt).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')
-    + (live?'':'<br><span style="color:#5C6E77;font-size:13.5px">Checked against this lesson\'s rubric on this device.</span>');
+    + (note?'<br><span style="color:#5C6E77;font-size:13.5px">'+note+'</span>':'');
 }
 document.querySelectorAll('button.coach').forEach(function(btn){
   btn.addEventListener('click', function(){
     var task=btn.dataset.task, ta=document.getElementById(task), out=document.getElementById('out-'+task);
     var v=ta.value;
     var off=offline(task, v);
-    if(off.verdict==='empty'||off.verdict==='pii'){ render(out, off.text, false); return; }
+    if(off.verdict==='empty'||off.verdict==='pii'){ render(out, off.text, 'plain'); return; }
     btn.disabled=true; var old=btn.textContent; btn.textContent='Checking…';
     var ticks=[].map.call(document.querySelectorAll('[data-chk]:checked'), function(b){return b.nextElementSibling.textContent;});
     callProxy('task_feedback', {
       task_id:task, rubric:ACT.rubric, lesson_map:ACT.lesson_map,
       checklist_ticked:ticks, answer:redact(v)
-    }).then(function(txt){ render(out, txt||off.text, !!txt); })
-      .catch(function(){ render(out, off.text, false); })
+    }).then(function(txt){ render(out, txt||off.text, txt?'live':'offline'); })
+      .catch(function(){ render(out, off.text, 'offline'); })
       .then(function(){ btn.disabled=false; btn.textContent=old; });
   });
 });
@@ -367,11 +395,39 @@ function buildPath(){
   var el=document.getElementById('pathout'); el.hidden=false;
   el.innerHTML='<ul>'+out.map(function(p){
     return '<li>'+p[0].replace(/&/g,'&amp;').replace(/</g,'&lt;')+'<span class="rev">'+ACT.personal_path_ui.review_prefix+p[1]+'</span></li>';
-  }).join('')+'</ul>';
+  }).join('')+'</ul>'+resources();
+}
+/* Outside reading, straight from the pack's resources list, rendered under the
+   routing advice and coloured as a link, never as body text. */
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function resources(){
+  var r=ACT.resources||[]; if(!r.length) return '';
+  return '<div class="reslist"><span class="reshead">'
+    + esc((ACT.personal_path_ui||{}).resources_heading||'Optional further reading') + '</span>'
+    + r.map(function(x){
+        return '<p class="resitem"><a class="reslink" href="'+encodeURI(x.url)
+          + '" target="_blank" rel="noopener">'+esc(x.title)+' ('+esc(x.source)+')</a>'
+          + '<span class="reswhy">'+esc(x.why)+'</span></p>';
+      }).join('') + '</div>';
 }
 document.getElementById('mkpath').addEventListener('click', buildPath);
+/* Textareas print empty or clipped, so mirror each answer into a bordered
+   block that only exists on paper, and stamp the Wawiwa footer line. */
+function printViews(){
+  IDS.forEach(function(i){
+    var ta=document.getElementById(i); if(!ta) return;
+    var pv=document.getElementById('pv-'+i);
+    if(!pv){ pv=document.createElement('div'); pv.className='pv'; pv.id='pv-'+i;
+      ta.parentNode.insertBefore(pv, ta.nextSibling); }
+    pv.textContent = String(ta.value||'').trim() || 'Not answered.';
+  });
+  var pf=document.getElementById('printfoot');
+  if(pf) pf.textContent = 'Wawiwa Tech · '+ACT.meta.program+' · '+ACT.meta.module
+    + ' · '+ACT.meta.lesson+' · Internal use only';
+}
+window.addEventListener('beforeprint', printViews);
 document.getElementById('mkpdf').addEventListener('click', function(){
-  buildPath();
+  buildPath(); printViews();
   /* print is blocked inside a Rise embed, so open standalone when sandboxed */
   if (window.self !== window.top) { window.open(location.href, '_blank'); return; }
   window.print();

@@ -1,0 +1,172 @@
+{
+ "schema_version": "1.0",
+ "meta": {
+  "id": "eai-m3l1-home",
+  "publishes_to": "eai-m3l1-home",
+  "program": "Enterprise AI Implementation Specialist",
+  "module": "Module 3 — AI Security",
+  "lesson": "L1 — Zero Trust AI Security Principles and Data Handling",
+  "title": "Information Security & Privacy Readiness Document: Part A",
+  "format": "coached_tasks",
+  "context": "home",
+  "language_default": "en",
+  "source_doc": "מודול_3A_-_שיעור_1_-_Zero_Trust_ואבטחת_מידע_ארגונית (1).docx, section 11 (home-assignment brief) and the privacy warning in it",
+  "source_deck": "EAI-M03-L01 — Slide Deck V4.pptx (slides 40-41, the brief and its submission checklist; the gate on slide 42, Tool 1 on 11-16, Tool 2 on 23-29, Tool 3 on 30-31)"
+ },
+ "safety": {
+  "pii_forbidden": true,
+  "student_notice": "Don't include personal or identifying information in your answers.",
+  "redact_before_ai": [
+   "email_addresses",
+   "phone_numbers",
+   "long_digit_sequences",
+   "api_key_shaped_tokens"
+  ],
+  "scope_guard": "Description level only. The practice never asks for, and the coach never invites, a real document, real employee or customer data, a contract, medical or financial information, or any real identifying detail. If a student pastes something that looks real, the coach tells them to replace it with a description."
+ },
+ "grounding_ref": "grounding/grounding_pack.md",
+ "coach_prompts_ref": "grounding/coach_prompts.md",
+ "lesson_map": {
+  "C1": "M3 L1 · The four-level data classification, Practical Tool 1 (slides 11-16; the summary table is slide 16)",
+  "C2": "M3 L1 · Business process owner vs. data owner (slide 24)",
+  "C3": "M3 L1 · The eleven-role stakeholder map, Practical Tool 2 (slides 23-29; Information Security / CISO as the central escalation point is slide 26)",
+  "C4": "M3 L1 · Minimum controls before building, Practical Tool 3 (slide 30) and what must not be uploaded (slide 31)",
+  "C5": "M3 L1 · Every arrow in your architecture is now a security question (slide 8), including the model's own output as a data source (slide 7)",
+  "C6": "M3 L1 · The anchor: reachable is a technical fact, permitted is an organizational decision (slide 5)",
+  "C7": "M3 L1 · The brief and its submission checklist (slides 40-41), and the control gate before the build modules (slide 42)",
+  "C8": "M1 L5 · Your AI architecture and data-flow map, the source of the full inventory",
+  "C9": "M2 · Your stakeholder interviews and process mapping, the starting list for Tool 2",
+  "C10": "M1 · Your implementation canvas: the problem, the users and the Build vs Buy decision, for the case reminder"
+ },
+ "personal_path_ui": {
+  "review_prefix": "Where to review this: ",
+  "resource_prefix": "Optional extra resource (further reading, not required): ",
+  "resources_heading": "Optional further reading (free, not required)"
+ },
+ "resources": [
+  {
+   "title": "Zero Trust Architecture, SP 800-207",
+   "source": "NIST",
+   "url": "https://csrc.nist.gov/pubs/sp/800/207/final",
+   "why": "The standard behind this lesson's opening rule: access is decided per request, so reachable is never the same as permitted."
+  },
+  {
+   "title": "AI Data Security: Best Practices for Securing Data Used to Train and Operate AI Systems",
+   "source": "NSA, CISA, FBI and partner agencies",
+   "url": "https://media.defense.gov/2025/May/22/2003720601/-1/-1/0/CSI_AI_DATA_SECURITY.PDF",
+   "why": "Read it for the classification table: it classifies data by sensitivity and states that an AI system's output carries the level of its input."
+  },
+  {
+   "title": "Guidance on AI and data protection",
+   "source": "ICO",
+   "url": "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/artificial-intelligence/guidance-on-ai-and-data-protection/",
+   "why": "Use it to prepare the lawful-basis and accountability questions you take to the data owner and the DPO in the consultation map."
+  },
+  {
+   "title": "Top 10 for LLM and Gen AI applications",
+   "source": "OWASP Gen AI Security Project",
+   "url": "https://genai.owasp.org/llm-top-10/",
+   "why": "A named risk list for the controls checklist; sensitive information disclosure is the item this lesson keeps returning to."
+  }
+ ],
+ "rubric": {
+  "t1_case_reminder": {
+   "checks": [
+    "covers all four: the problem, the users, the Module 1 architecture, the Build vs Buy decision",
+    "stays at reminder length, three or four sentences",
+    "describes the case without real names, figures or documents"
+   ],
+   "common_miss": "The Build vs Buy decision is left out, or the whole case is retold at length instead of reminded."
+  },
+  "t2_inventory": {
+   "checks": [
+    "clearly fuller than the class list, not the same 5-8 lines copied over",
+    "every arrow of the Module 1 architecture is walked, so every source it touches appears",
+    "includes at least one non-document source: user input, process data, or the model's own output",
+    "each line is a source, described generally rather than named as a real file"
+   ],
+   "common_miss": "The class list is pasted in unchanged, and the user's typed question and the model's own answer are still missing (slide 7)."
+  },
+  "t3_classification": {
+   "checks": [
+    "uses the four level names: public, internal, confidential, restricted",
+    "gives a written explanation per source, not just a label",
+    "names a data owner per source, as a role, and distinguishes it from the process owner",
+    "carries the public-tool decision per source: permitted as-is, requires approval and from whom, or entirely forbidden at this stage"
+   ],
+   "common_miss": "Everything is labelled Internal, the process owner is written in as the data owner, or a source 'requires approval' with nobody named to give it."
+  },
+  "t4_stakeholders": {
+   "checks": [
+    "the full eleven-role list is considered, with 'not relevant to my case' recorded where that is the answer",
+    "roles rather than real people",
+    "InfoSec/CISO or the DPO appears wherever confidential or personal data is in play",
+    "one concrete question per relevant stakeholder"
+   ],
+   "common_miss": "Only the people already interviewed in Module 2 appear, and no escalation point is named."
+  },
+  "t5_controls": {
+   "checks": [
+    "all ten items carry a state: completed, in progress, or not yet checked",
+    "the open items are flagged rather than quietly dropped",
+    "each open item has someone who owns it"
+   ],
+   "common_miss": "All ten marked completed, which means the checklist was not really applied to the case."
+  },
+  "t6_open_questions": {
+   "checks": [
+    "at least three open questions",
+    "each is a real unresolved decision, not a task the student can close alone",
+    "each names who should answer it: security, privacy, legal, IT or other"
+   ],
+   "common_miss": "The open questions are cut because they read as gaps. A named and owned open question is a control; a hidden one is a risk."
+  }
+ },
+ "outcome_logic": [
+  {
+   "when": "t1 does not mention the Build vs Buy decision",
+   "path": "Add the Build vs Buy decision to the case reminder in one clause. Whoever reads this document needs to know whether the data is going into something you build or something you buy.",
+   "review": "C10"
+  },
+  {
+   "when": "t2 has fewer sources than the class practice produced, or no user input, process data or model output",
+   "path": "Walk all four arrows of your Module 1 architecture and add what each one touches, then add the model's own answer as its own line. It is data, and it is logged.",
+   "review": "C5"
+  },
+  {
+   "when": "t3 uses fewer than two distinct levels, or every source is Internal",
+   "path": "Re-open the summary table on slide 16 and re-sort the inventory, checking each source for a hidden Confidential element. Write the sentence that proves the level for the two you are least sure about.",
+   "review": "C1"
+  },
+  {
+   "when": "t3 names no data owner, or the data owner equals the process owner everywhere",
+   "path": "Separate the two roles for every source. Ask who is formally accountable for the source, then ask who approves its use. The submission checklist checks this line specifically.",
+   "review": "C2"
+  },
+  {
+   "when": "t3 carries no public-tool decision per source",
+   "path": "Add the third decision to each row: permitted in a public AI tool as-is, requires approval and from whom, or entirely forbidden at this stage. An approval with nobody named is not a decision.",
+   "review": "C1"
+  },
+  {
+   "when": "t4 does not cover the full role list, or names no InfoSec/CISO or DPO while confidential or personal data appears in t3",
+   "path": "Go through all eleven roles and write 'not relevant to my case' where that is the honest answer, and add the escalation point where it is not. Confidential and above needs the data owner plus InfoSec or the DPO, and the exposure level is not yours to accept.",
+   "review": "C3"
+  },
+  {
+   "when": "the ten controls are not all marked, or all ten are marked completed",
+   "path": "Give every one of the ten a state, completed, in progress or not yet checked, and name who owns the ones that are not done. All ten completed means the checklist was not applied.",
+   "review": "C4"
+  },
+  {
+   "when": "t6 has fewer than three open questions, or none names who should answer it",
+   "path": "Bring it to at least three and put a role next to each. An open question that is named and owned is a control; an open question that is hidden is a risk.",
+   "review": "C7"
+  },
+  {
+   "when": "all six sections pass",
+   "path": "Mark your document against the submission checklist on slide 41 line by line, against what is written rather than what you intended. Then save it: this is the first half of the gate, and Part B follows in Lesson 3A.2.",
+   "review": "C7"
+  }
+ ]
+}
