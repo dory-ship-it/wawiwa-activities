@@ -579,11 +579,390 @@ function printViews(){
     + ' · '+ACT.meta.lesson+' · Internal use only';
 }
 window.addEventListener('beforeprint', printViews);
+/* ---------- Save as PDF: a small self-contained PDF 1.4 writer, no libraries ----------
+   The page builds the file itself instead of calling window.print(), so the saved
+   PDF never carries a browser print header, print footer or the page URL.
+   Base-14 Helvetica only: nothing is embedded and the text stays real and selectable. */
+var WPDF=(function(){
+"use strict";
+/* Adobe base-14 advance widths, 1/1000 em, for codes 32..126 of WinAnsiEncoding.
+   Real widths, so the line wrapping below is exact rather than guessed. */
+var WR=('278 278 355 556 556 889 667 191 333 333 389 584 278 333 278 278 556 556 556 556 556 556 '
+ +'556 556 556 556 278 278 584 584 584 556 1015 667 667 722 722 667 611 778 722 278 500 667 556 '
+ +'833 722 778 667 778 722 667 611 722 667 944 667 667 611 278 278 278 469 556 333 556 556 500 '
+ +'556 556 278 556 556 222 222 500 222 833 556 556 556 556 333 500 278 556 500 722 500 500 500 '
+ +'334 260 334 584').split(' ');
+var WB=('278 333 474 556 556 889 722 238 333 333 389 584 278 333 278 278 556 556 556 556 556 556 '
+ +'556 556 556 556 333 333 584 584 584 611 975 722 722 722 722 667 611 778 722 278 556 722 611 '
+ +'833 722 778 667 778 722 667 611 722 667 944 667 667 611 333 278 333 584 556 333 556 611 556 '
+ +'611 556 333 611 611 278 278 556 278 889 611 611 611 611 389 556 333 611 556 778 556 556 500 '
+ +'389 280 389 584').split(' ');
+/* The handful of non-ASCII characters these practices actually use. All of them exist
+   in WinAnsi, so they are written as their WinAnsi code with a real width. */
+var EXT={'‘':[145,222,278],'’':[146,222,278],'“':[147,333,500],
+ '”':[148,333,500],'–':[150,556,556],'—':[151,1000,1000],
+ '…':[133,1000,1000],'·':[183,278,278],'©':[169,737,737],
+ '•':[149,350,350],'§':[167,556,556],'°':[176,400,400]};
+var EXTW={},EK;
+for(EK in EXT){ EXTW[EXT[EK][0]]=[EXT[EK][1],EXT[EK][2]]; }
+/* Anything else is turned into a sensible ASCII equivalent rather than a broken glyph. */
+var TR={' ':' ','\t':' ','‑':'-','‒':'-','―':'-','−':'-',
+ '′':"'",'″':'"','«':'"','»':'"','‚':',','„':'"',
+ '‹':'<','›':'>','×':'x','½':'1/2','¼':'1/4','¾':'3/4',
+ '→':'->','←':'<-','⇒':'=>','≤':'<=','≥':'>=','≠':'!=',
+ '≈':'~','±':'+/-','™':'(TM)','®':'(R)','€':'EUR','£':'GBP',
+ 'é':'e','è':'e','ê':'e','à':'a','á':'a','â':'a','ä':'a',
+ 'ç':'c','í':'i','î':'i','ó':'o','ô':'o','ö':'o','ú':'u',
+ 'ü':'u','ñ':'n','ß':'ss','‐':'-','ʼ':"'",'­':''};
+/* Belt and braces: the whole point of this exporter is a PDF with no address in it,
+   so anything URL-shaped is removed before it can reach the page. */
+function noUrl(s){
+  return String(s==null?'':s)
+    .replace(/\bhttps?:\/\/\S+/gi,'')
+    .replace(/\bwww\.\S+/gi,'')
+    .replace(/\babout:blank\b/gi,'')
+    .replace(/\b[\w-]+(?:\.[\w-]+)*\.(?:io|com|org|net|dev|co|gov|edu|ai|app)\b(?:\/[^\s]*)?/gi,'')
+    .replace(/[ \t]{2,}/g,' ');
+}
+function codes(s){
+  var o=[],i,ch,t;
+  s=noUrl(s).replace(/\r\n?/g,'\n');
+  for(i=0;i<s.length;i++){
+    ch=s.charAt(i);
+    if(ch==='\n'){ o.push(10); continue; }
+    if(ch>=' '&&ch<='~'){ o.push(ch.charCodeAt(0)); continue; }
+    if(EXT[ch]){ o.push(EXT[ch][0]); continue; }
+    t=TR[ch];
+    if(t!=null){ for(var j=0;j<t.length;j++) o.push(t.charCodeAt(j)); continue; }
+    /* unknown character: dropped, never emitted as a broken glyph */
+  }
+  return o;
+}
+function cw(c,b){
+  if(c>=32&&c<=126) return +(b?WB:WR)[c-32];
+  if(EXTW[c]) return EXTW[c][b?1:0];
+  return 0;
+}
+function wid(cs,sz,b){ var w=0,i; for(i=0;i<cs.length;i++) w+=cw(cs[i],b); return w*sz/1000; }
+/* PDF literal string: escape the three characters that matter, keep bytes as bytes */
+function lit(cs){
+  var s='',i,c;
+  for(i=0;i<cs.length;i++){
+    c=cs[i];
+    if(c===40||c===41||c===92) s+='\\';
+    s+=String.fromCharCode(c);
+  }
+  return s;
+}
+function wrapc(cs,sz,b,maxw){
+  var lines=[],cur=[],i,w,word,ww,sw=cw(32,b)*sz/1000,curw=0,words,p,paras=[],start=0;
+  for(i=0;i<=cs.length;i++){ if(i===cs.length||cs[i]===10){ paras.push(cs.slice(start,i)); start=i+1; } }
+  for(p=0;p<paras.length;p++){
+    words=[]; start=0;
+    for(i=0;i<=paras[p].length;i++){
+      if(i===paras[p].length||paras[p][i]===32){ if(i>start) words.push(paras[p].slice(start,i)); start=i+1; }
+    }
+    cur=[]; curw=0;
+    if(!words.length){ lines.push([]); continue; }
+    for(i=0;i<words.length;i++){
+      word=words[i]; ww=wid(word,sz,b);
+      if(ww>maxw){ /* a single token wider than the column: split it by character */
+        if(cur.length){ lines.push(cur); cur=[]; curw=0; }
+        var seg=[],sgw=0,k;
+        for(k=0;k<word.length;k++){
+          var cwd=cw(word[k],b)*sz/1000;
+          if(sgw+cwd>maxw&&seg.length){ lines.push(seg); seg=[]; sgw=0; }
+          seg.push(word[k]); sgw+=cwd;
+        }
+        if(seg.length){ cur=seg; curw=sgw; }
+        continue;
+      }
+      w=curw?curw+sw+ww:ww;
+      if(w>maxw&&cur.length){ lines.push(cur); cur=word.slice(0); curw=ww; }
+      else { if(cur.length) cur.push(32); cur=cur.concat(word); curw=w; }
+    }
+    lines.push(cur);
+  }
+  return lines;
+}
+var COL={ink:[0.200,0.271,0.306],mut:[0.361,0.431,0.467],teal:[0.353,0.702,0.667],
+ tealtx:[0.180,0.431,0.463],navy:[0.145,0.341,0.467],rule:[0.812,0.886,0.886]};
+function n3(v){ return (Math.round(v*1000)/1000)+''; }
+
+function Doc(){
+  this.pw=595.28; this.ph=841.89; this.mg=56.7;          /* A4 portrait, 20mm margins */
+  this.x0=this.mg; this.x1=this.pw-this.mg; this.cw=this.x1-this.x0;
+  this.topY=this.ph-this.mg; this.botY=this.mg+40;        /* 40pt reserved for the footer */
+  this.ops=[[]]; this.pi=0; this.y=this.topY;
+}
+Doc.prototype.page=function(){ this.ops.push([]); this.pi++; this.y=this.topY; };
+Doc.prototype.room=function(h){ if(this.y-h<this.botY) this.page(); };
+/* start a new page rather than leave a heading or an accent rule orphaned at the foot */
+Doc.prototype.reserve=function(h){ if(this.y-h<this.botY) this.page(); };
+Doc.prototype.line=function(x,y,w,th,col){
+  this.ops[this.pi].push({k:'r',x:x,y:y,w:w,h:th,c:col});
+};
+Doc.prototype.rule=function(th,col,before,after){
+  this.y-=(before||0);
+  this.room(th+2);
+  this.line(this.x0,this.y,this.cw,th,col||COL.rule);
+  this.y-=(th+(after||0));
+};
+/* One flowed text block. Wrapping is measured, so no line can pass the right margin. */
+Doc.prototype.text=function(t,o){
+  o=o||{};
+  var sz=o.size||10.5, b=!!o.bold, ind=o.indent||0, lead=o.lead||(sz*1.32);
+  var col=COL[o.col||'ink'], f=b?'F2':(o.italic?'F3':'F1');
+  var cs=codes(t), maxw=this.cw-ind, ls=wrapc(cs,sz,b,maxw), i;
+  this.y-=(o.before||0);
+  if(o.keep){ var need=lead*Math.min(ls.length,2)+ (o.after||0) + 14; if(this.y-need<this.botY) this.page(); }
+  for(i=0;i<ls.length;i++){
+    if(this.y-lead<this.botY) this.page();
+    this.y-=lead;
+    if(ls[i].length) this.ops[this.pi].push({k:'t',x:this.x0+ind,y:this.y,s:lit(ls[i]),f:f,z:sz,c:col});
+    if(o.bar) this.line(this.x0+ind-9,this.y-lead*0.22,1.7,lead,COL.teal);
+  }
+  this.y-=(o.after||0);
+  return this;
+};
+/* Serialise: pages, fonts, a real xref table and startxref. */
+function serialise(doc,footL,footR,title){
+  var np=doc.ops.length,i,j,body=[],parts=[],pos=0,offs=[];
+  /* footer on every page, sized down or wrapped so it always fits the column */
+  var fsz=7.2, avail=doc.cw-72, fl=codes(footL), lines=null;
+  while(fsz>5.9&&wid(fl,fsz,false)>avail) fsz-=0.3;
+  lines=wrapc(fl,fsz,false,avail);
+  if(lines.length>2) lines=lines.slice(0,2);
+  for(i=0;i<np;i++){
+    var ops=doc.ops[i];
+    ops.push({k:'r',x:doc.x0,y:doc.mg+27,w:doc.cw,h:0.6,c:COL.rule});
+    for(j=0;j<lines.length;j++)
+      ops.push({k:'t',x:doc.x0,y:doc.mg+17-j*(fsz+1.6),s:lit(lines[j]),f:'F1',z:fsz,c:COL.mut});
+    var pn=codes(footR.replace('{n}',i+1).replace('{m}',np));
+    ops.push({k:'t',x:doc.x1-wid(pn,fsz,false),y:doc.mg+17,s:lit(pn),f:'F1',z:fsz,c:COL.mut});
+  }
+  function stream(ops){
+    var s='',k,o,c;
+    for(k=0;k<ops.length;k++){
+      o=ops[k]; c=o.c;
+      if(o.k==='r') s+=n3(c[0])+' '+n3(c[1])+' '+n3(c[2])+' rg '+n3(o.x)+' '+n3(o.y)+' '+n3(o.w)+' '+n3(o.h)+' re f\n';
+      else s+='BT /'+o.f+' '+n3(o.z)+' Tf '+n3(c[0])+' '+n3(c[1])+' '+n3(c[2])+' rg 1 0 0 1 '+n3(o.x)+' '+n3(o.y)+' Tm ('+o.s+') Tj ET\n';
+    }
+    return s;
+  }
+  var kids='',objs=[];
+  objs[1]='<< /Type /Catalog /Pages 2 0 R >>';
+  objs[3]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
+  objs[4]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
+  objs[5]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>';
+  for(i=0;i<np;i++){
+    var pno=6+i*2, cno=pno+1, st=stream(doc.ops[i]);
+    kids+=(i?' ':'')+pno+' 0 R';
+    objs[pno]='<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+n3(doc.pw)+' '+n3(doc.ph)+'] '
+      +'/Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents '+cno+' 0 R >>';
+    objs[cno]={len:st.length,data:st};
+  }
+  objs[2]='<< /Type /Pages /Kids ['+kids+'] /Count '+np+' >>';
+  var info=6+np*2;
+  objs[info]='<< /Title ('+lit(codes(title))+') /Author (Wawiwa Tech) /Creator (Wawiwa practice page) /Producer (Wawiwa practice page) >>';
+  function put(s){ parts.push(s); pos+=s.length; }
+  put('%PDF-1.4\n%âãÏÓ\n');
+  for(i=1;i<objs.length;i++){
+    if(objs[i]==null) continue;
+    offs[i]=pos;
+    if(typeof objs[i]==='string') put(i+' 0 obj\n'+objs[i]+'\nendobj\n');
+    else put(i+' 0 obj\n<< /Length '+objs[i].len+' >>\nstream\n'+objs[i].data+'endstream\nendobj\n');
+  }
+  var xr=pos, size=objs.length, pad=function(v){ var s=''+v; while(s.length<10) s='0'+s; return s; };
+  var x='xref\n0 '+size+'\n0000000000 65535 f \n';
+  for(i=1;i<size;i++) x+=(offs[i]==null?pad(0)+' 00000 f \n':pad(offs[i])+' 00000 n \n');
+  put(x);
+  put('trailer\n<< /Size '+size+' /Root 1 0 R /Info '+info+' 0 R >>\nstartxref\n'+xr+'\n%%EOF\n');
+  var all=parts.join(''),u=new Uint8Array(all.length);
+  for(i=0;i<all.length;i++) u[i]=all.charCodeAt(i)&255;
+  return u;
+}
+return {Doc:Doc,serialise:serialise,COL:COL,noUrl:noUrl};
+})();
+
+/* ---------- read the page into an ordered list of blocks, then lay it out ---------- */
+function pdfText(el){ return String((el&&el.textContent)||'').replace(/\s+/g,' ').trim(); }
+function pdfBuild(){
+  var d=new WPDF.Doc(), M=ACT.meta||{};
+  var prog=M.program||'', mod=M.module||'', les=M.lesson||'';
+  /* header: programme, module and lesson, then the practice title */
+  d.text(prog,{size:9.5,bold:true,col:'tealtx',after:1});
+  d.text([mod,les].filter(Boolean).join(' · '),{size:9.5,col:'mut',after:6});
+  d.rule(1.8,WPDF.COL.teal,0,10);
+  var h1=document.querySelector('.wrap h1');
+  d.text(pdfText(h1)||M.title||'Practice',{size:19,bold:true,col:'navy',lead:24,after:12});
+
+  var wrap=document.querySelector('.wrap'), kids=wrap?wrap.children:[], i, firstLead=true;
+  function chkList(ul){
+    var items=ul.querySelectorAll('li'),k;
+    for(k=0;k<items.length;k++){
+      var li=items[k], cb=li.querySelector('input[type=checkbox]');
+      if(!cb) continue;
+      var sp=cb.parentNode.querySelector('span'), sel=li.querySelector('select');
+      var mark=cb.checked?'[x] ':'[ ] ';
+      var extra=sel?('  —  '+sel.value):'';
+      d.text(mark+pdfText(sp)+extra,{size:9.8,col:'ink',indent:10,lead:13.2,after:0.5});
+    }
+    d.y-=4;
+  }
+  function ynList(ul){
+    var items=ul.querySelectorAll('li'),k;
+    for(k=0;k<items.length;k++){
+      var li=items[k], q=li.querySelector('.ynq'), r=li.querySelector('input[type=radio]:checked');
+      var st=r?(r.value==='yes'?'Yes':'No'):'not answered';
+      d.text(pdfText(q)+'  —  '+st,{size:9.8,col:'ink',indent:10,lead:13.2,after:0.5});
+    }
+    d.y-=4;
+  }
+  function qsList(ul){
+    var items=ul.querySelectorAll('li'),k;
+    for(k=0;k<items.length;k++)
+      d.text('·  '+pdfText(items[k]),{size:9.6,col:'mut',indent:10,lead:12.8,after:1});
+    d.y-=3;
+  }
+  function answer(ta){
+    d.reserve(40);
+    var lab=ta.id?document.querySelector('label[for="'+ta.id+'"]'):null;
+    d.text(lab?pdfText(lab):'Your answer',{size:8.6,bold:true,col:'mut',before:3,after:2});
+    var v=String(ta.value||'').replace(/[ \t]+\n/g,'\n').trim();
+    if(v) d.text(v,{size:10.2,col:'ink',indent:12,lead:13.6,after:7,bar:true});
+    else d.text('Not answered.',{size:10.2,col:'mut',indent:12,lead:13.6,after:7,bar:true});
+  }
+  function walk(node){
+    var c=node.children,k;
+    for(k=0;k<c.length;k++){
+      var e=c[k],cl=e.className||'',tag=e.tagName;
+      if(/\b(row|out|cn|pv)\b/.test(cl)) continue;
+      if(tag==='H3'||tag==='SCRIPT'||tag==='STYLE'||tag==='BUTTON') continue;
+      if(tag==='TEXTAREA'){ answer(e); continue; }
+      if(tag==='LABEL'||tag==='SELECT'||tag==='INPUT') continue;
+      if(tag==='UL'){
+        if(/\bchk\b/.test(cl)) chkList(e);
+        else if(/\byn\b/.test(cl)) ynList(e);
+        else qsList(e);
+        continue;
+      }
+      if(tag==='P'){
+        if(/\binstr\b/.test(cl)) d.text(pdfText(e),{size:10.4,col:'ink',after:4});
+        else if(/\baid\b/.test(cl)) d.text(pdfText(e),{size:9.6,col:'mut',after:4});
+        else d.text(pdfText(e),{size:9.8,col:'mut',after:4});
+        continue;
+      }
+      if(e.children&&e.children.length) walk(e);
+    }
+  }
+  function card(sec){
+    d.reserve(62);
+    d.rule(1.6,WPDF.COL.teal,9,6);
+    var cn=sec.querySelector('.cn'), h3=sec.querySelector('h3');
+    var head=[cn?pdfText(cn):'',h3?pdfText(h3):''].filter(Boolean).join('   ');
+    if(head) d.text(head,{size:13,bold:true,col:'navy',lead:16.5,after:5,keep:true});
+    walk(sec);
+    d.y-=4;
+  }
+  function pathPanel(){
+    var po=document.getElementById('pathout');
+    if(!po||po.hidden||!pdfText(po)) return;
+    d.reserve(70);
+    d.rule(1.8,WPDF.COL.navy,12,7);
+    d.text('Your personal path',{size:14,bold:true,col:'navy',lead:18,after:5,keep:true});
+    var lis=po.querySelectorAll('ul > li'),k;
+    for(k=0;k<lis.length;k++){
+      var li=lis[k], rev=li.querySelector('.rev'), rv=rev?pdfText(rev):'';
+      var cl2=li.cloneNode(true), r2=cl2.querySelector('.rev');
+      if(r2) r2.parentNode.removeChild(r2);
+      d.text('•  '+pdfText(cl2),{size:10.2,col:'ink',indent:4,lead:13.6,after:2});
+      if(rv) d.text(rv,{size:9.2,col:'mut',indent:18,lead:12.4,after:5});
+    }
+    var rl=po.querySelector('.reslist');
+    if(rl){
+      var hd=rl.querySelector('.reshead');
+      d.text(hd?pdfText(hd):'Optional further reading',{size:8.8,bold:true,col:'mut',before:5,after:4});
+      var items=rl.querySelectorAll('.resitem');
+      for(k=0;k<items.length;k++){
+        var a=items[k].querySelector('.reslink'), why=items[k].querySelector('.reswhy');
+        d.text(pdfText(a),{size:9.8,bold:true,col:'tealtx',indent:4,lead:13,after:1});
+        if(why) d.text(pdfText(why),{size:9.2,col:'mut',indent:4,lead:12.4,after:4});
+      }
+    }
+  }
+  for(i=0;i<kids.length;i++){
+    var e=kids[i],cl=e.className||'',tag=e.tagName;
+    if(tag==='H1'||tag==='SCRIPT'||tag==='STYLE') continue;
+    if(/\b(warn|foot|printfoot)\b/.test(cl)) continue;      /* as on paper, the warning is not printed */
+    if(/\bstage\b/.test(cl)){
+      var sp=e.querySelector('span');
+      d.reserve(64);
+      d.text(pdfText(sp).toUpperCase(),{size:9,bold:true,col:'tealtx',before:12,after:4,keep:true});
+      d.rule(0.7,WPDF.COL.rule,0,4);
+      continue;
+    }
+    if(/\bpathpanel\b/.test(cl)){ pathPanel(); continue; }
+    if(tag==='SECTION'&&/\bcard\b/.test(cl)){ card(e); continue; }
+    if(tag==='P'){
+      if(firstLead&&/\blead\b/.test(cl)){ firstLead=false; continue; }  /* duplicates the header line */
+      d.text(pdfText(e),{size:9.8,col:'mut',after:5});
+      continue;
+    }
+  }
+  var footL='Wawiwa Tech · '+prog+' · '+mod+' · '+les+' · Internal use only';
+  return WPDF.serialise(d,footL,'Page {n} of {m}',pdfFileName().replace(/\.pdf$/,''));
+}
+/* Wawiwa - EAI M3 L1 - Class Practice.pdf, the same shape in every practice */
+function pdfFileName(){
+  var id=String((ACT.meta||{}).id||'practice');
+  var m=/^([a-z]+)-m(\d+)l(\d+)-(class|home)\b/.exec(id);
+  if(m) return 'Wawiwa - '+m[1].toUpperCase()+' M'+m[2]+' L'+m[3]+' - '
+    +(m[4]==='class'?'Class Practice':'Home Practice')+'.pdf';
+  return 'Wawiwa - '+id.replace(/[^\w -]/g,' ')+'.pdf';
+}
+/* Rise embeds the practice in an iframe. A cross-origin frame downloads normally; the one
+   case a browser refuses a Blob download is a sandboxed frame with an opaque origin and no
+   allow-downloads, and no event reports it. So the download is always attempted first, and
+   the standalone tab opens only on that evidence, never instead of a download that works. */
+function pdfDownloadBlocked(){
+  if(window.self===window.top) return false;
+  /* when the embedding page is same-origin the sandbox attribute itself is authoritative */
+  try{
+    var fe=window.frameElement;
+    if(fe&&fe.getAttribute){
+      var sb=fe.getAttribute('sandbox');
+      if(sb!=null) return !/\ballow-downloads\b/.test(sb);
+      return false;
+    }
+  }catch(e){}
+  /* otherwise: an opaque origin means a sandbox, and a sandbox refuses Blob downloads
+     unless allow-downloads was granted, which nothing in the frame can read */
+  try{ window.localStorage.getItem('wawiwa:probe'); }catch(e){ return true; }
+  try{ if(String(document.location.origin)==='null') return true; }catch(e){ return true; }
+  return false;
+}
+function pdfStandalone(){ try{ window.open(location.href,'_blank'); }catch(e){} }
 document.getElementById('mkpdf').addEventListener('click', function(){
   buildPath(); printViews();
-  /* print is blocked inside a Rise embed, so open standalone when sandboxed */
-  if (window.self !== window.top) { window.open(location.href, '_blank'); return; }
-  window.print();
+  var bytes;
+  try{ bytes=pdfBuild(); }
+  catch(err){ pdfStandalone(); return; }
+  var started=false;
+  try{
+    var url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    var a=document.createElement('a');
+    a.href=url; a.download=pdfFileName(); a.rel='noopener';
+    a.style.cssText='position:fixed;left:-9999px;top:0;width:1px;height:1px';
+    document.body.appendChild(a);
+    a.click();
+    started=true;
+    setTimeout(function(){
+      try{ a.parentNode.removeChild(a); }catch(e){}
+      try{ URL.revokeObjectURL(url); }catch(e){}
+    },5000);
+  }catch(err2){ started=false; }
+  if(!started||pdfDownloadBlocked()) pdfStandalone();
 });
 })();
 </script>
