@@ -18,12 +18,14 @@ h1{font-size:34px;font-weight:700;line-height:1.2;margin:0 0 10px}
 .instr{margin:0 0 12px}
 .aid{margin:0 0 12px;color:var(--mut);font-size:14.5px}
 .chk{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:1fr;gap:7px}
-.chk li{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.chk li{display:flex;align-items:flex-start}
 .chk label{display:flex;gap:8px;align-items:flex-start;font-size:14.5px;cursor:pointer;flex:1}
 .chk input{margin-top:4px;accent-color:var(--navy)}
-.st{flex:none;border:1px solid var(--bd);border-radius:8px;background:#fff;color:var(--mut);
- font:600 12.5px Assistant,sans-serif;padding:3px 7px}
-.st:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(37,87,119,.13)}
+/* reference reading: a list the student reads, with nothing to tick. A small teal dot
+   marks each line, the text stays body ink, and there is no box, badge or counter. */
+.reflist{list-style:none;margin:0 0 16px;padding:0}
+.reflist li{position:relative;padding-left:19px;margin:0 0 10px;font-size:15.5px;line-height:1.55;color:var(--ink)}
+.reflist li::before{content:'';position:absolute;left:0;top:.6em;width:6px;height:6px;border-radius:50%;background:var(--teal)}
 .fl{display:block;color:var(--mut);font-size:12.5px;font-weight:600;margin-bottom:5px}
 textarea{width:100%;background:#fff;border:1px solid var(--bd);border-radius:10px;padding:12px 14px;
  font:16px/1.5 Assistant,sans-serif;color:var(--ink);resize:vertical}
@@ -57,7 +59,6 @@ button:disabled{opacity:.55;cursor:default}
 @media print{
  button,.pii,.warn{display:none}
  .card,.pathpanel{box-shadow:none;break-inside:avoid}
- .st{border:0;padding:0;color:var(--ink)}
  /* textareas print clipped or empty, so print the mirrored block instead */
  textarea{display:none}
  .pv{display:block;white-space:pre-wrap;border:1px solid var(--bd);border-radius:10px;
@@ -128,21 +129,21 @@ button:disabled{opacity:.55;cursor:default}
 <section class="card" id="card-t5">
   <div class="cn">05</div>
   <h3>Minimum-controls checklist</h3>
-  <p class="instr">Completed as far as you can, with open items flagged.</p>
-  <ul class="chk">
-    <li><label><input type="checkbox" data-chk="0"><span>Data classification completed for every source</span></label><select class="st" data-st="0" aria-label="State"><option value="not yet checked">not yet checked</option><option value="in progress">in progress</option><option value="completed">completed</option></select></li>
-    <li><label><input type="checkbox" data-chk="1"><span>Data owner identified for every source</span></label><select class="st" data-st="1" aria-label="State"><option value="not yet checked">not yet checked</option><option value="in progress">in progress</option><option value="completed">completed</option></select></li>
-    <li><label><input type="checkbox" data-chk="2"><span>User roles identified</span></label><select class="st" data-st="2" aria-label="State"><option value="not yet checked">not yet checked</option><option value="in progress">in progress</option><option value="completed">completed</option></select></li>
-    <li><label><input type="checkbox" data-chk="3"><span>Allowed / forbidden data clearly defined</span></label><select class="st" data-st="3" aria-label="State"><option value="not yet checked">not yet checked</option><option value="in progress">in progress</option><option value="completed">completed</option></select></li>
-    <li><label><input type="checkbox" data-chk="4"><span>External tool/vendor use has been checked</span></label><select class="st" data-st="4" aria-label="State"><option value="not yet checked">not yet checked</option><option value="in progress">in progress</option><option value="completed">completed</option></select></li>
-    <li><label><input type="checkbox" data-chk="5"><span>Human approval points defined</span></label><select class="st" data-st="5" aria-label="State"><option value="not yet checked">not yet checked</option><option value="in progress">in progress</option><option value="completed">completed</option></select></li>
-    <li><label><input type="checkbox" data-chk="6"><span>Logging and access recording planned</span></label><select class="st" data-st="6" aria-label="State"><option value="not yet checked">not yet checked</option><option value="in progress">in progress</option><option value="completed">completed</option></select></li>
-    <li><label><input type="checkbox" data-chk="7"><span>Model output handling defined</span></label><select class="st" data-st="7" aria-label="State"><option value="not yet checked">not yet checked</option><option value="in progress">in progress</option><option value="completed">completed</option></select></li>
-    <li><label><input type="checkbox" data-chk="8"><span>Escalation path to InfoSec/DPO exists</span></label><select class="st" data-st="8" aria-label="State"><option value="not yet checked">not yet checked</option><option value="in progress">in progress</option><option value="completed">completed</option></select></li>
-    <li><label><input type="checkbox" data-chk="9"><span>No real identifying data used in testing</span></label><select class="st" data-st="9" aria-label="State"><option value="not yet checked">not yet checked</option><option value="in progress">in progress</option><option value="completed">completed</option></select></li>
+  <p class="instr">These are the controls that have to be in place before anything gets built. You are not ticking them off now: at this stage there is no system to check them against. Read them, then write which ones your case already answers, which are still open, and who would own each.</p>
+  <ul class="reflist">
+    <li>Data classification completed for every source</li>
+    <li>Data owner identified for every source</li>
+    <li>User roles identified</li>
+    <li>Allowed / forbidden data clearly defined</li>
+    <li>External tool/vendor use has been checked</li>
+    <li>Human approval points defined</li>
+    <li>Logging and access recording planned</li>
+    <li>Model output handling defined</li>
+    <li>Escalation path to InfoSec/DPO exists</li>
+    <li>No real identifying data used in testing</li>
   </ul>
   <label class="fl" for="t5">Your answer</label>
-  <textarea id="t5" rows="6" placeholder="Item — who owns it — what is still open"></textarea>
+  <textarea id="t5" rows="6" placeholder="Which items your case already answers, which are still open, and who would own each one"></textarea>
   <div class="row">
     <button class="coach" data-task="t5">Check with AI Coach</button>
     <span class="pii">Don&#x27;t include personal or identifying information in your answers.</span>
@@ -208,7 +209,9 @@ This is the individual continuation of the class practice, and it is deliberatel
 inventory is not just 5-8 sources as in the class practice: here a full and as-deep-as-possible
 mapping is required. The classification table adds a third decision per source: permitted in a
 public AI tool as-is, requires approval (and from whom), or entirely forbidden at this stage. The
-controls checklist covers all ten items, each marked completed, in progress or not yet checked.
+ten minimum controls are reference reading here rather than something to tick: at this point in the
+programme the student has nothing built to check them against, so they read the ten and then write
+which ones their case already answers, which are still open, and who would own each.
 
 ## The submission checklist, which is the acceptance standard (slide 41)
 Every data source from the Module 1 architecture appears in the inventory. Each source has a
@@ -273,9 +276,11 @@ in Module 2.
 Data classification completed for every source. Data owner identified for every source. User roles
 identified. Allowed / forbidden data clearly defined. External tool/vendor use has been checked.
 Human approval points defined. Logging and access recording planned. Model output handling defined.
-Escalation path to InfoSec/DPO exists. No real identifying data used in testing. In this document
-each of the ten is marked completed, in progress or not yet checked, and the open ones are flagged
-rather than removed.
+Escalation path to InfoSec/DPO exists. No real identifying data used in testing. In this practice
+the ten are read, not ticked: there is no built system yet to check them against, so the student is
+never asked to mark or complete them. What is judged is the written answer: at least five of the ten
+addressed in their own words, a clear split between what the case already answers and what is still
+open, and an owner named by role for each open item. Open items are named rather than removed.
 
 ## What must never be uploaded without explicit approval (slide 31)
 Personal identifiers. Employee data of any kind. Customer data. Confidential contracts. Financial
@@ -415,11 +420,11 @@ into any AI tool as part of the assignment.
   },
   "t5_controls": {
    "checks": [
-    "all ten items carry a state: completed, in progress, or not yet checked",
-    "the open items are flagged rather than quietly dropped",
-    "each open item has someone who owns it"
+    "addresses at least five of the ten controls in prose",
+    "separates what the case already answers from what is still open",
+    "names an owner by role for at least one open item"
    ],
-   "common_miss": "All ten marked completed, which means the checklist was not really applied to the case."
+   "common_miss": "Claims everything is covered, or lists the items back without saying which are open and who would own them."
   },
   "t6_open_questions": {
    "checks": [
@@ -462,8 +467,8 @@ into any AI tool as part of the assignment.
    "review": "C3"
   },
   {
-   "when": "the ten controls are not all marked, or all ten are marked completed",
-   "path": "Give every one of the ten a state, completed, in progress or not yet checked, and name who owns the ones that are not done. All ten completed means the checklist was not applied.",
+   "when": "t5 addresses fewer than five of the ten controls in writing, or does not separate what the case already answers from what is still open",
+   "path": "Work through at least five of the ten minimum controls in writing: which ones your case already answers, which are still open, and the role that would own each open one. Nothing is ticked at this stage because there is no system yet to check them against, so the writing is what shows the control was thought about.",
    "review": "C4"
   },
   {
@@ -492,20 +497,16 @@ var IDS = ['t1','t2','t3','t4','t5','t6'];
 
 /* ---------- persistence: on-device only ---------- */
 function save(){
-  var s={a:{},c:[],s:{},b:[]};
+  var s={a:{},b:[]};
   IDS.forEach(function(i){ var e=document.getElementById(i); if(e) s.a[i]=e.value; });
-  document.querySelectorAll('[data-chk]').forEach(function(b){ if(b.checked) s.c.push(b.dataset.chk); });
   document.querySelectorAll('[data-sub]').forEach(function(b){ if(b.checked) s.b.push(b.dataset.sub); });
-  document.querySelectorAll('select[data-st]').forEach(function(x){ s.s[x.dataset.st]=x.value; });
   try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){}
 }
 (function load(){
   var s; try{ s=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
   if(!s) return;
   IDS.forEach(function(i){ var e=document.getElementById(i); if(e&&s.a&&s.a[i]!=null) e.value=s.a[i]; });
-  (s.c||[]).forEach(function(n){ var b=document.querySelector('[data-chk="'+n+'"]'); if(b) b.checked=true; });
   (s.b||[]).forEach(function(n){ var b=document.querySelector('[data-sub="'+n+'"]'); if(b) b.checked=true; });
-  Object.keys(s.s||{}).forEach(function(n){ var x=document.querySelector('select[data-st="'+n+'"]'); if(x) x.value=s.s[n]; });
 })();
 document.addEventListener('input', save); document.addEventListener('change', save);
 
@@ -519,13 +520,27 @@ var REDACT=[
 function redact(t){ var o=String(t||''); REDACT.forEach(function(p){p.re.lastIndex=0;o=o.replace(p.re,p.sub);}); return o; }
 function looksReal(t){ return /[\w.+-]+@[\w-]+\.[\w.]{2,}|\b\d{7,}\b/.test(String(t||'')); }
 
-/* ---------- the ten controls: checkbox plus a three-state marker ---------- */
-function stSel(){ return document.querySelectorAll('select[data-st]'); }
-function stCount(v){ return [].filter.call(stSel(), function(x){ return x.value===v; }).length; }
-function stList(){ return [].map.call(stSel(), function(x){
-  var lab=x.parentNode.querySelector('span');
-  return (lab?lab.textContent:'item')+' — '+x.value+(x.parentNode.querySelector('input').checked?' (ticked)':'');
-}); }
+/* ---------- the ten minimum controls: reference reading, nothing to tick ----------
+   Section 5 lists the ten so the student knows what has to be in place. There is no built
+   system to check them against yet, so nothing is marked here and everything the coach and
+   the personal path judge comes out of the written answer. These are the words that show a
+   control was actually thought about, one pattern per control, in slide-30 order. */
+var CTRLS=[
+  /classif/i,
+  /data owner/i,
+  /user role|user access|who the users|which users/i,
+  /allowed|forbidden|permitted|prohibit|not allowed/i,
+  /external tool|third[- ]?party|vendor|public (?:ai )?tool/i,
+  /approval|approve|sign[- ]?off|human in the loop|human review/i,
+  /log|audit|access record/i,
+  /output/i,
+  /escalat|infosec|information security|ciso|dpo/i,
+  /test|dummy|synthetic|anonymi|pseudonymi|fictional|real data|real identifying/i
+];
+function ctrlHits(t){ var s=String(t||''),n=0,i; for(i=0;i<CTRLS.length;i++) if(CTRLS[i].test(s)) n++; return n; }
+var STILLOPEN=/\bopen\b|still|pending|not yet|missing|unresolved|unanswered|to do|todo|\bgap|unknown|unclear|tbd/i;
+var ANSWERED=/already|in place|covered|answered|we do|we have|i have|exists|defined|documented|done|handled|sorted/i;
+var OWNS=/owner|owns|own it|responsible|accountable|infosec|information security|ciso|dpo|privacy|legal|\bit\b|\bhr\b|manager|finance|procurement/i;
 
 /* ---------- live coach ---------- */
 function liveOn(){ return LIVE.enabled && LIVE.proxy_url && usedTokens < LIVE.session_token_cap; }
@@ -540,8 +555,12 @@ function system(){
    + "answer contains anything that looks like real data, tell the student to replace it with a "
    + "description. Coach against the rubric: say what is present, name the single most useful thing "
    + "missing, and point at the slide to revisit. Three or four sentences. No praise, no preamble. "
-   + "Never suggest removing an open question. If the student wrote nothing, say what a first line "
-   + "would contain and stop.";
+   + "Never suggest removing an open question. Section 5 lists the ten minimum controls as reading "
+   + "only: the student has nothing built yet to check them against, so never ask them to tick, mark "
+   + "or complete anything, and judge only what they wrote. For that section, look for at least five "
+   + "of the ten addressed in prose, a clear split between what the case already answers and what is "
+   + "still open, and an owner named by role for at least one open item. If the student wrote "
+   + "nothing, say what a first line would contain and stop.";
 }
 function callProxy(kind, call){
   if(!liveOn()) return Promise.reject(new Error('live_off'));
@@ -575,15 +594,12 @@ function sentences(t){ return String(t||'').split(/[.!?]+/).filter(function(x){r
 
 function offline(task, v){
   var t=String(v||'').trim(), m;
-  /* the controls section is driven by the ten state markers, so read those first */
-  if(task==='t5' && stCount('completed')===10)
-    return {verdict:'gap', text:'All ten marked completed usually means the checklist was not really applied to your case. Which of these has a named owner and a date? Mark the rest as in progress or not yet checked, and flag them as open items. Where to review this: slide 30.'};
   if(t.length<12) return {verdict:'empty', text:'Nothing to check yet. Write one line first: for this section, that means '+({
     t1:'the problem in one sentence, then who the users are.',
     t2:'one data source your solution touches, in plain words.',
     t3:'one source, its level out of the four, why, its data owner, and whether it may go into a public AI tool.',
     t4:'one role you must consult and the single question you would ask them.',
-    t5:'one of the ten items, its state, and who owns it if it is not done.',
+    t5:'one of the ten controls, whether your case already answers it, and who would own it if it does not.',
     t6:'one question you cannot answer yet, and who should answer it.'})[task]};
   if(looksReal(t)) return {verdict:'pii', text:'Stop: that looks like real data. This assignment is at description level only. Replace the identifier with a description, for example "an employee record" instead of the record itself, then check again.'};
 
@@ -619,15 +635,15 @@ function offline(task, v){
     return {verdict:'ok', text:'Roles with real questions attached, and the list worked through rather than sampled. Keep them as role titles rather than names.'};
   }
   if(task==='t5'){
-    var notyet=stCount('not yet checked');
-    if(notyet===10) return {verdict:'thin', text:'None of the ten has a state yet. Go through the list and mark each one completed, in progress or not yet checked; Part A asks for all ten, not five. Where to review this: slide 30.'};
-    if(!/open|still|pending|not yet|in progress|missing|to do/i.test(t)) return {verdict:'gap', text:'You have items but nothing written as still open. Flagging an open item is a control; dropping it is a risk, and the open ones are what feed your open questions below. Where to review this: slides 30 and 41.'};
-    if(!/owner|owns|responsible|infosec|dpo|legal|it\b|hr\b|manager|finance/i.test(t)) return {verdict:'gap', text:'The open items have no one attached. Name the role that owns each item that is not done, otherwise it cannot move before the build. Where to review this: slide 30.'};
-    return {verdict:'ok', text:'All ten have a state and the open ones are named and owned. Carry those open items straight into the open-questions section.'};
+    var hits=ctrlHits(t);
+    if(hits<5) return {verdict:'thin', text:'Your answer reaches '+hits+' of the ten controls. Take at least five of them and say, in your own words, what your case already answers there. Nothing is ticked at this stage; the writing is the work. Where to review this: slide 30.'};
+    if(!STILLOPEN.test(t)||!ANSWERED.test(t)) return {verdict:'gap', text:'The two halves are not separated. Say which of these controls your case already answers and which are still open; listing the items back, or claiming everything is covered, is exactly what this section is meant to surface. Where to review this: slides 30 and 41.'};
+    if(!OWNS.test(t)) return {verdict:'gap', text:'The open controls have nobody attached. Name the role that would own each one, otherwise it cannot move before the build starts. Where to review this: slide 30.'};
+    return {verdict:'ok', text:'You have worked through the controls in prose, separated what your case answers from what is still open, and named who would own the open ones. Carry those open items straight into the open-questions section.'};
   }
   if(task==='t6'){
     var q=lines(t).length;
-    if(q<3) return {verdict:'thin', text:'You have '+q+' of the three the assignment requires. Look at whatever you marked in progress or not yet checked in the controls checklist: each of those is usually an open question. Where to review this: slides 40 and 41.'};
+    if(q<3) return {verdict:'thin', text:'You have '+q+' of the three the assignment requires. Look at whichever of the ten controls you called still open in the section above: each of those is usually an open question. Where to review this: slides 40 and 41.'};
     if(!ANSWERER.test(t)) return {verdict:'gap', text:'The questions have no one to answer them. Put a role next to each: security, privacy, legal, IT or other. An open question that is named and owned is a control; an open question that is hidden is a risk.'};
     return {verdict:'ok', text:'Three or more real open questions, each with someone to answer it. Do not delete any of them before submitting; they are the honest part of the document.'};
   }
@@ -655,7 +671,7 @@ document.querySelectorAll('button.coach').forEach(function(btn){
     btn.disabled=true; var old=btn.textContent; btn.textContent='Checking…';
     callProxy('task_feedback', {
       task_id:task, rubric:ACT.rubric, lesson_map:ACT.lesson_map,
-      controls_states:stList(), answer:redact(v)
+      answer:redact(v)
     }).then(function(txt){ render(out, txt||off.text, txt?'live':'offline'); })
       .catch(function(){ render(out, off.text, 'offline'); })
       .then(function(){ btn.disabled=false; btn.textContent=old; });
@@ -674,8 +690,8 @@ function buildPath(){
   if(!DECIDE.test(v.t3)) out.push(['Add the third decision to each row: permitted in a public AI tool as-is, requires approval and from whom, or entirely forbidden at this stage. An approval with nobody named is not a decision.', ACT.lesson_map.C1]);
   if((/confidential|restricted|personal|medical|salary/i.test(v.t3) && !ESCAL.test(v.t4)) || !/not relevant/i.test(v.t4))
     out.push(['Go through all eleven roles and write "not relevant to my case" where that is the honest answer, and add the escalation point where it is not. Confidential and above needs the data owner plus InfoSec or the DPO.', ACT.lesson_map.C3]);
-  if(stCount('not yet checked')===10 || stCount('completed')===10)
-    out.push(['Give every one of the ten controls a state, completed, in progress or not yet checked, and name who owns the ones that are not done. All ten completed means the checklist was not applied.', ACT.lesson_map.C4]);
+  if(ctrlHits(v.t5)<5 || !STILLOPEN.test(v.t5) || !ANSWERED.test(v.t5))
+    out.push(['Work through at least five of the ten minimum controls in writing: which ones your case already answers, which are still open, and the role that would own each open one. There is nothing to tick yet, so the writing is what shows the control was thought about.', ACT.lesson_map.C4]);
   if(lines(v.t6).length<3 || !ANSWERER.test(v.t6))
     out.push(['Bring the open questions to at least three and put a role next to each. An open question that is named and owned is a control; an open question that is hidden is a risk.', ACT.lesson_map.C7]);
   if(!out.length) out.push(['Mark your document against the submission checklist on slide 41 line by line, against what is written rather than what you intended. Then save it: this is the first half of the gate, and Part B follows in Lesson 3A.2.', ACT.lesson_map.C7]);
@@ -932,17 +948,29 @@ function pdfBuild(){
   d.text(pdfText(h1)||M.title||'Practice',{size:19,bold:true,col:'navy',lead:24,after:12});
 
   var wrap=document.querySelector('.wrap'), kids=wrap?wrap.children:[], i, firstLead=true;
+  /* the submission checklist: things the student can verify on their own document, so the
+     tick state is real and it prints. Nothing else on this page carries a state. */
   function chkList(ul){
-    var items=ul.querySelectorAll('li'),k;
+    var items=ul.querySelectorAll('li'),k,any=false;
     for(k=0;k<items.length;k++){
       var li=items[k], cb=li.querySelector('input[type=checkbox]');
       if(!cb) continue;
-      var sp=cb.parentNode.querySelector('span'), sel=li.querySelector('select');
-      var mark=cb.checked?'[x] ':'[ ] ';
-      var extra=sel?('  —  '+sel.value):'';
-      d.text(mark+pdfText(sp)+extra,{size:9.8,col:'ink',indent:10,lead:13.2,after:0.5});
+      var sp=cb.parentNode.querySelector('span');
+      d.text((cb.checked?'[x] ':'[ ] ')+pdfText(sp),{size:9.8,col:'ink',indent:10,lead:13.2,after:0.5});
+      any=true;
     }
-    d.y-=4;
+    if(any) d.y-=4;
+  }
+  /* a reference list: no checkbox, no state, so the items print as a plain marked list */
+  function refList(ul){
+    var items=ul.querySelectorAll('li'),k,txt,any=false;
+    for(k=0;k<items.length;k++){
+      txt=pdfText(items[k]);
+      if(!txt) continue;
+      d.text('•  '+txt,{size:9.8,col:'ink',indent:10,lead:13.2,after:0.5});
+      any=true;
+    }
+    if(any) d.y-=4;
   }
   function ynList(ul){
     var items=ul.querySelectorAll('li'),k;
@@ -977,6 +1005,7 @@ function pdfBuild(){
       if(tag==='LABEL'||tag==='SELECT'||tag==='INPUT') continue;
       if(tag==='UL'){
         if(/\bchk\b/.test(cl)) chkList(e);
+        else if(/\breflist\b/.test(cl)) refList(e);
         else if(/\byn\b/.test(cl)) ynList(e);
         else qsList(e);
         continue;

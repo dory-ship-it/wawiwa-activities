@@ -17,7 +17,9 @@ This is the individual continuation of the class practice, and it is deliberatel
 inventory is not just 5-8 sources as in the class practice: here a full and as-deep-as-possible
 mapping is required. The classification table adds a third decision per source: permitted in a
 public AI tool as-is, requires approval (and from whom), or entirely forbidden at this stage. The
-controls checklist covers all ten items, each marked completed, in progress or not yet checked.
+ten minimum controls are reference reading here rather than something to tick: at this point in the
+programme the student has nothing built to check them against, so they read the ten and then write
+which ones their case already answers, which are still open, and who would own each.
 
 ## The submission checklist, which is the acceptance standard (slide 41)
 Every data source from the Module 1 architecture appears in the inventory. Each source has a
@@ -82,9 +84,11 @@ in Module 2.
 Data classification completed for every source. Data owner identified for every source. User roles
 identified. Allowed / forbidden data clearly defined. External tool/vendor use has been checked.
 Human approval points defined. Logging and access recording planned. Model output handling defined.
-Escalation path to InfoSec/DPO exists. No real identifying data used in testing. In this document
-each of the ten is marked completed, in progress or not yet checked, and the open ones are flagged
-rather than removed.
+Escalation path to InfoSec/DPO exists. No real identifying data used in testing. In this practice
+the ten are read, not ticked: there is no built system yet to check them against, so the student is
+never asked to mark or complete them. What is judged is the written answer: at least five of the ten
+addressed in their own words, a clear split between what the case already answers and what is still
+open, and an owner named by role for each open item. Open items are named rather than removed.
 
 ## What must never be uploaded without explicit approval (slide 31)
 Personal identifiers. Employee data of any kind. Customer data. Confidential contracts. Financial

@@ -26,6 +26,9 @@ Rules, in order of priority.
    line of it fails.
 8. If the student wrote nothing, or only a placeholder, say what a first line would contain for
    their case and stop.
+9. The ten minimum controls in section 5 are printed on the page as reference reading, not as a
+   widget. The student has nothing built yet to run them against, so never ask them to tick a box,
+   set a state, mark an item or complete the list. Coach the prose they wrote.
 
 ## Per-section focus
 
@@ -42,9 +45,12 @@ Rules, in order of priority.
 - Stakeholder consultation map: were all eleven roles considered, including the ones answered "not
   relevant to my case", are these roles rather than real people, is InfoSec or the DPO present where
   confidential or personal data appears, and is there a concrete question per stakeholder?
-- Minimum-controls checklist: do all ten items carry a state, completed, in progress or not yet
-  checked, and are the open ones flagged with someone who owns them? All ten marked completed means
-  the checklist was not applied.
+- Minimum-controls checklist: the ten controls are listed for the student to read, and nothing on
+  them is ticked or marked. Judge the written answer only: does it address at least five of the ten
+  in the student's own words, does it separate what their case already answers from what is still
+  open, and is an owner named by role for at least one open item? The usual gap is claiming
+  everything is covered, or listing the ten back without saying which are open and who would own
+  them. Never ask the student to tick, mark or complete the list.
 - Open questions: are there at least three, are they real unresolved decisions, and does each name
   who should answer it? Never encourage removing one. A named and owned open question is a control.
 
