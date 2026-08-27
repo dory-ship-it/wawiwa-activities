@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "meta": {
+    "id": "aicy-t2-linkedphishing",
+    "publishes_to": "aicy-t2-linkedphishing",
+    "program": "AI & Cybersecurity",
+    "module": "Topic 2",
+    "lesson": "AI in Cyber Attack Vectors",
+    "title": "LinkedPhishing: OSINT and AI Phishing on a Professional Profile",
+    "format": "coached_tasks",
+    "context": "home",
+    "estimated_minutes": 60,
+    "language_default": "en",
+    "source_doc": "AICY.T2.E1 - LinkedPhishing.docx",
+    "source_deck": "AICY.T2.P1 - AI-in-Cyber-Attack-Vectors-Offensive-Content.pptx"
+  },
+  "safety": {
+    "pii_forbidden": true,
+    "student_notice": "Don't include personal or identifying information in your answers. Never paste your partner's real name, profile text, or scraped data here.",
+    "redact_before_ai": ["email_addresses", "phone_numbers", "long_digit_sequences", "api_key_shaped_tokens"],
+    "scope_guard": "Lab-only, authorized red-team simulation run in pairs on a partner who has agreed to be the target. The coach never writes, improves or rates phishing content."
+  },
+  "grounding_ref": "grounding/grounding_pack.md",
+  "coach_prompts_ref": "grounding/coach_prompts.md",
+  "lesson_map": {
+    "C1": "Topic 2 · AI writes the lure, not a person — NLP crafts personalised phishing at scale (slides 5-7)",
+    "C2": "Topic 2 · The raw material is public and self-published — AI gathers from social media; offensive scraping harvests in bulk (slides 7, 31)",
+    "C3": "Topic 2 · Personalisation is the attack — AI mimics the target's own style and details (slide 6)",
+    "C4": "Topic 2 · What gives it away — detection looks for inconsistency, not bad spelling (slides 21, 35)",
+    "C5": "Topic 2 · Scale is the point — automate, optimise, personalise; the 2023 GPT phishing case on executives (slides 2, 4)"
+  },
+  "personal_path_ui": {
+    "review_prefix": "Where to review this: ",
+    "resource_prefix": "Optional extra resource (further reading, not required): "
+  },
+  "topic_map_note": "T2 is the professional-network case of the same playbook introduced in T1. The personal path carries the verification habits forward to T3.",
+  "intro": {
+    "headline": "Harvest a profile, then learn to beat what it builds",
+    "body": "You will run an OSINT and phishing simulation on a partner who agreed to be the target, then turn around and name exactly what gave the lure away."
+  },
+  "sections": [
+    {
+      "id": "tasks",
+      "title": "The simulation",
+      "type": "tasks",
+      "instruction": "This assignment is done in pairs, in the lab, on a partner who has agreed to be your target. Your job is not to write a better lure — it is to see what a public profile exposes and to name what makes the result obviously phishing.",
+      "fields": [
+        {
+          "id": "a1",
+          "number": 1,
+          "instr": "Do a manual review of your partner's linkedin profile, try to collect some usefull personal information shared by them.",
+          "answer": "What did the profile expose — and which line told you?",
+          "has_field": true,
+          "links": ["LinkedIn"],
+          "rubric_refs": ["r2_tell", "r5_ethics"],
+          "routes_to": ["C2", "C3"]
+        },
+        {
+          "id": "a2",
+          "number": 2,
+          "instr": "Use DeepSeek to scrape your partner's LinkedIn. Export this scraped data into a file so it can be used later. For best results, enable the \"search button\".",
+          "has_field": false,
+          "links": ["DeepSeek"],
+          "rubric_refs": [],
+          "routes_to": ["C2"]
+        },
+        {
+          "id": "a3",
+          "number": 3,
+          "instr": "In a new chat, paste the scraped LinkedIn info and ask it to generate a custom-made phishing message — you can also ask for a custom-made \"Hiring Proposal\" carrying a malicious file. (You run this step; do not paste the message here.)",
+          "answer": "Which detail from the profile did the model lean on hardest?",
+          "has_field": true,
+          "links": ["DeepSeek"],
+          "rubric_refs": ["r1_lever", "r3_defense"],
+          "routes_to": ["C1", "C3"]
+        },
+        {
+          "id": "a4",
+          "number": 4,
+          "instr": "Compare with your partner and others how accurate the message was.",
+          "answer": "Whose message landed closest, and what made the difference?",
+          "has_field": true,
+          "links": [],
+          "rubric_refs": ["r2_tell", "r4_detection_link"],
+          "routes_to": ["C4", "C5"]
+        },
+        {
+          "id": "a5",
+          "number": 5,
+          "instr": "Consult with your partner: what makes this message an obvious phishing attempt? What irregularities do you detect? What makes it suspicious? Then refine and recreate a more convincing attempt. (Run the refinement yourself; here, record only the tells.)",
+          "answer": "List the tells — what gave it away before you refined it?",
+          "has_field": true,
+          "links": [],
+          "rubric_refs": ["r2_tell", "r3_defense", "r4_detection_link"],
+          "routes_to": ["C4"]
+        }
+      ]
+    }
+  ],
+  "debrief": {
+    "prompt": "The message was fluent and personal and still catchable. Name one tell, and connect it to how the message was built — not to whether your partner was careless.",
+    "rubric_refs": ["r2_tell", "r3_defense", "r4_detection_link", "r5_ethics"]
+  },
+  "rubric": [
+    {"id": "r1_lever", "name": "Names the lever", "description": "Identifies the manipulation lever the message used (a shared connection, a flattering detail, a plausible role or offer, urgency, an attached 'proposal')."},
+    {"id": "r2_tell", "name": "Names the tell", "description": "States a concrete signal that would expose the lure to a trained target."},
+    {"id": "r3_defense", "name": "Names the defense", "description": "Gives a defensive habit that beats the lever (verify the sender out of band, go to the company's own careers page, never open an unsolicited attachment, confirm on a known channel)."},
+    {"id": "r4_detection_link", "name": "Links to AI detection", "description": "Connects the lure to how AI detects it (NLP/phishing classifier flags reply-path mismatch + attachment type + a deadline; anomaly analytics)."},
+    {"id": "r5_ethics", "name": "Ethical framing", "description": "Frames the OSINT and the simulation responsibly; recognises the lab-only, by-agreement, in-pairs purpose."}
+  ],
+  "quality_rules": [
+    "Coach never writes, improves or rates phishing/pretext/OSINT attack content, even for the simulation.",
+    "Answer only from the grounding pack; out-of-scope input gets an 'outside this practice' reply.",
+    "Feedback is 2-3 sentences, plain, no lists, no ghostwriting the attack.",
+    "No student PII or scraped profile data is sent; redact before any AI call."
+  ],
+  "outcome_logic": [
+    {"when": "lever_used:shared_connection", "focus": "You leaned on a shared connection or mutual name. The defense: a real referral survives a direct message to the person named — check with them on a channel you already trust, not the one the message arrived on.", "review": "C3", "resource": "res_ncsc_phishing"},
+    {"when": "lever_used:flattery", "focus": "You leaned on a flattering, profile-sourced detail. The defense: remember that every impressive detail came from a page the target published — being known is not being verified.", "review": "C3", "resource": "res_ncsc_phishing"},
+    {"when": "lever_used:offer", "focus": "You leaned on a plausible job offer or proposal. The defense: go to the company's own careers page and apply or ask there, never through the link or attachment you were sent.", "review": "C1", "resource": "res_ncsc_phishing"},
+    {"when": "lever_used:urgency", "focus": "You leaned on urgency — a closing window, a panel that meets tomorrow. The defense: a real opportunity gives you time to confirm; a deadline that blocks verification is the tell.", "review": "C4", "resource": "res_ncsc_phishing"},
+    {"when": "lever_used:attachment", "focus": "You leaned on an attached 'proposal' or 'role description' carrying a file. The defense: never open an unsolicited attachment; a genuine role description is a link to a page you can reach yourself.", "review": "C4", "resource": "res_cisa_deepfake"},
+    {"when": "bridge", "focus": "Topic 3 (Snyking in) carries the same OSINT-to-intrusion playbook one step further. Take these verification habits with you.", "review": "C4"}
+  ],
+  "resources_pool": [
+    {"id": "res_ncsc_phishing", "title": "Phishing attacks: defending your organisation", "type": "guidance", "source": "NCSC", "url": "https://www.ncsc.gov.uk/guidance/phishing", "why": "Authoritative defensive guidance on spotting and reporting phishing.", "verify_link": false},
+    {"id": "res_cisa_deepfake", "title": "Contextualizing Deepfake Threats to Organizations", "type": "advisory", "source": "CISA / NSA / FBI", "url": "https://www.cisa.gov/news-events/alerts/2023/09/12/nsa-fbi-and-cisa-release-cybersecurity-information-sheet-deepfake-threats", "why": "Official advisory on synthetic-media and impersonation threats.", "verify_link": false},
+    {"id": "res_ftc_jobscam", "title": "Job scams", "type": "consumer alert", "source": "FTC", "url": "https://consumer.ftc.gov/articles/job-scams", "why": "Plain-language guide to fake-recruiter and fake-offer scams and how to check them.", "verify_link": false}
+  ],
+  "completion_levels": [
+    {"id": "ready", "name": "Ready", "when": "names a lever + a tell + a defense across the debrief"},
+    {"id": "light", "name": "Getting there", "when": "names a lever but is missing the tell or the defense"},
+    {"id": "revise", "name": "Revise", "when": "no lever/tell/defense yet — nudge with the debrief prompt"}
+  ],
+  "qa_notes": [
+    "Task wording in fields a1, a2 preserves the SME docx verbatim, including 'usefull' and 'linkedin'. Actionable steps a3 and a5 add a bracketed 'do not paste here' clause to keep attack content and PII out of the page; the SME instruction itself is unchanged.",
+    "Deck is EXCYT-branded (source from production). Concepts grounded to slides 2-7, 21, 31, 35.",
+    "Live coach hard-refuses any request to write or sharpen a message or prompt; see coach_prompts refusal."
+  ]
+}
