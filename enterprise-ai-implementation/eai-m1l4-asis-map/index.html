@@ -2629,12 +2629,56 @@ window.ASSETS = {"design-samples/hero.jpg": "data:image/jpeg;base64,/9j/4AAQSkZJ
     }
   };
 
+  /* Identity patterns are a floor, not a per-activity preference: unlike
+     PII_PATTERNS above they are NOT filtered by safety.redact_before_ai,
+     so an activity spec cannot narrow or switch them off. They mirror the
+     gate in live.js, which blocks the send outright. */
+  var IDENTITY_PATTERNS = {
+    government_ids: {
+      label: 'a government ID number',
+      re: /\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/
+    },
+    street_addresses: {
+      label: 'a street address',
+      re: /\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/i
+    },
+    postal_codes: {
+      label: 'a postal code',
+      re: /\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/i
+    },
+    person_names: {
+      label: "a person\u2019s name",
+      re: /\b(?:full|real|last|first|maiden|legal)\s+name\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/
+    },
+    person_names_2: {
+      label: "a person\u2019s name",
+      re: /\b(?:his|her|their|my)\s+(?:[a-z]+\s+){0,2}name\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i
+    },
+    person_names_3: {
+      label: "a person\u2019s name",
+      re: /\b(?:is|was|are|were)\s+named\s+["\u201c']?[A-Z][A-Za-z'\u2019-]+\s+[A-Z][A-Za-z'\u2019-]+/
+    },
+    person_names_4: {
+      label: "a person\u2019s name",
+      re: /\bsurname\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i
+    },
+    person_names_5: {
+      label: "a person\u2019s name",
+      re: /\b(?:the\s+(?:owner|manager|contact|partner|target|victim|customer|client|employee|colleague|student|person|candidate|recruiter))\b[^.\n]{0,28}\b(?:named|name\s*(?:is|was|:|=)|called)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i
+    },
+    dates_of_birth: {
+      label: 'a date of birth',
+      re: /\b(?:date\s+of\s+birth|d\.?o\.?b\.?|born(?:\s+on)?)\s*(?:is|:|=)?\s*\d/i
+    }
+  };
+
   var DEFAULT_STRINGS = {
     empty_field: 'This field is still empty. Fill it in; the canvas needs all of its fields.',
     empty_point: 'This point has no answer yet.',
     non_answer: 'This reads as a placeholder, not an answer. Write your answer in your own words.',
     unknown_check_fail: 'Give this field more substance: a couple of concrete sentences, not a fragment.',
     pii_warning: 'Careful: this looks like {what}. Do not enter real identifying data; generalize instead (CRM system, internal policy, employee).',
+    identity_warning: 'This carries {what} belonging to a real person. The coach will not send an answer containing it, and it should not be here at all. Describe what you mean in categories, for example \u201ca home city\u201d or \u201can employer\u201d, rather than the detail itself.',
     ready_note: 'Solid on the local checks.',
     routing_line: 'This field rests on {lessons}. Revisit before you revise.',
     routing_line_decision: 'This choice leans on {lessons}. Revisit it before Module 2.',
@@ -2720,6 +2764,13 @@ window.ASSETS = {"design-samples/hero.jpg": "data:image/jpeg;base64,/9j/4AAQSkZJ
     for (var i = 0; i < keys.length; i++) {
       var p = PII_PATTERNS[keys[i]];
       if (p && p.re.test(text || '')) found.push({ type: keys[i], label: p.label });
+    }
+    // identity patterns always run, whatever the spec asked for
+    var ids = Object.keys(IDENTITY_PATTERNS);
+    for (var j = 0; j < ids.length; j++) {
+      var q = IDENTITY_PATTERNS[ids[j]];
+      q.re.lastIndex = 0;
+      if (q.re.test(text || '')) found.push({ type: ids[j], label: q.label, identity: true });
     }
     return found;
   }
@@ -2912,6 +2963,13 @@ window.ASSETS = {"design-samples/hero.jpg": "data:image/jpeg;base64,/9j/4AAQSkZJ
     pii.forEach(function (p) {
       result.piiWarnings.push(fmt(strings.pii_warning, { what: p.label }));
     });
+    // a real person's identifying detail is not a "careful" nudge: the coach
+    // will refuse to send this answer at all, so the local verdict says so
+    result.identityPII = pii.some(function (p) { return p.identity; });
+    if (result.identityPII) {
+      result.piiWarnings = [fmt(strings.identity_warning,
+        { what: pii.filter(function (p) { return p.identity; })[0].label })];
+    }
 
     if (!trimmed) {
       result.empty = true;
@@ -2963,6 +3021,11 @@ window.ASSETS = {"design-samples/hero.jpg": "data:image/jpeg;base64,/9j/4AAQSkZJ
     // PII anywhere blocks a clean Ready: the exercise forbids identifying data.
     if (result.tag === TAGS.READY && result.piiWarnings.length) {
       result.tag = TAGS.LIGHT;
+    }
+    // a real person's detail is never Light: it has to come out before the
+    // answer can be checked at all, so it is always Revise.
+    if (result.identityPII) {
+      result.tag = TAGS.REVISE;
     }
 
     if (result.tag !== TAGS.READY) {
@@ -3321,6 +3384,7 @@ window.ASSETS = {"design-samples/hero.jpg": "data:image/jpeg;base64,/9j/4AAQSkZJ
     TAGS: TAGS,
     evalRule: evalRule,
     detectPII: detectPII,
+    IDENTITY_PATTERNS: IDENTITY_PATTERNS,
     isNonAnswer: isNonAnswer,
     hasRealAnswer: hasRealAnswer,
     evaluateField: evaluateField,
@@ -3413,6 +3477,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   var PATTERNS = [
     { name: 'email_addresses', re: /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, sub: '[email removed]' },
+    { name: 'government_ids', re: /\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/g, sub: '[id removed]' },
+    { name: 'street_addresses', re: /\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/gi, sub: '[address removed]' },
+    { name: 'postal_codes', re: /\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/gi, sub: '[postcode removed]' },
     { name: 'phone_numbers', re: /\+?\d(?:[\s().\-]?\d){8,}/g, sub: '[number removed]' },
     { name: 'long_digit_sequences', re: /\d{9,}/g, sub: '[number removed]' },
     {
@@ -3445,9 +3512,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
  *
  * What it sends per call: the coach system prompt, the activity's grounding
  * pack, and one call prompt with the student's REDACTED text substituted in.
- * No identifier of any kind. What it never does: block the student. Every
- * failure path rejects quickly so the engine can fall back to the local
- * deterministic feedback.
+ * No identifier of any kind. Every failure path rejects quickly so the
+ * engine can fall back to the local deterministic feedback.
+ *
+ * The ONE thing it does block: an answer carrying a real person's
+ * identifying detail is never sent at all (see the identity gate below).
  *
  * Prompt templates come from the activity's coach_prompts.md (bundled at
  * build time into window.LIVE.prompts). The placeholder vocabulary this
@@ -3621,6 +3690,81 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     });
   }
 
+  /* ---------- the identity gate (layer 1) ----------
+     The redactor is layer 2: it scrubs an email or a digit run out of the
+     text on its way to the proxy. It never covered a name, a street or a
+     postcode, so on its own it is not a control over identity.
+
+     This is layer 1. An answer carrying a real person's identifying detail
+     is not scrubbed, it is NOT SENT: no POST, no proxy, no vendor, no token
+     spend. It blocks the VALUE and allows the CATEGORY, because describing
+     the category is what these activities actually ask for. "The About
+     section gave a home city" passes; "he lives at 24 2nd Street" does not.
+
+     These patterns are unconditional. Unlike safety.redact_before_ai, an
+     activity spec cannot narrow or disable them: identity is a floor.
+
+     Resolving rather than rejecting is deliberate. Every call site already
+     renders a coach box on resolve, so the student gets a real Revise
+     verdict and a usable instruction, instead of the generic "the live
+     coach is unavailable" fallback that a rejection would produce. */
+
+  var PII_GATE = [
+    { what: 'an email address',
+      re: /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/ },
+    { what: 'a government ID number',
+      re: /\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/ },
+    { what: 'a phone or ID number',
+      re: /\+?\d(?:[\s().\-]?\d){6,}/ },
+    { what: 'a street address',
+      re: /\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/i },
+    { what: 'a postal code',
+      re: /\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/i },
+    { what: 'a person\u2019s name',
+      re: /\b(?:full|real|last|first|maiden|legal)\s+name\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/ },
+    { what: 'a person\u2019s name',
+      re: /\b(?:his|her|their|my)\s+(?:[a-z]+\s+){0,2}name\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i },
+    { what: 'a person\u2019s name',
+      re: /\b(?:is|was|are|were)\s+named\s+["\u201c']?[A-Z][A-Za-z'\u2019-]+\s+[A-Z][A-Za-z'\u2019-]+/ },
+    { what: 'a person\u2019s name',
+      re: /\bsurname\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i },
+    { what: 'a person\u2019s name',
+      re: /\b(?:the\s+(?:owner|manager|contact|partner|target|victim|customer|client|employee|colleague|student|person|candidate|recruiter))\b[^.\n]{0,28}\b(?:named|name\s*(?:is|was|:|=)|called)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i },
+    { what: 'a date of birth',
+      re: /\b(?:date\s+of\s+birth|d\.?o\.?b\.?|born(?:\s+on)?)\s*(?:is|:|=)?\s*\d/i }
+  ];
+
+  function piiHit(text) {
+    var t = String(text || '');
+    for (var i = 0; i < PII_GATE.length; i++) {
+      PII_GATE[i].re.lastIndex = 0;
+      if (PII_GATE[i].re.test(t)) return PII_GATE[i].what;
+    }
+    return null;
+  }
+
+  /* every answer on the canvas, since a whole-canvas call carries them all */
+  function piiHitAnswers(answers) {
+    answers = answers || {};
+    var keys = Object.keys(answers);
+    for (var i = 0; i < keys.length; i++) {
+      var hit = piiHit(answers[keys[i]]);
+      if (hit) return hit;
+    }
+    return null;
+  }
+
+  function piiBlocked(what) {
+    return {
+      text: 'Not sent. This answer carries ' + what + ' belonging to a real person, so it '
+          + 'was not sent to the coach and did not leave this page. Describe what you saw in '
+          + 'categories, for example \u201ca home city\u201d or \u201can employer\u201d, rather '
+          + 'than the detail itself, then ask again.',
+      tag: 'Revise',
+      blocked: true
+    };
+  }
+
   /* ---------- proxy transport ---------- */
 
   function callProxy(kind, call) {
@@ -3675,11 +3819,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     capReached: capReached,
     usage: usage,
     coachField: function (field, activity, studentText) {
+      var hit = piiHit(studentText);
+      if (hit) return Promise.resolve(piiBlocked(hit));
       return callProxy('field', buildFieldCall(field, activity, studentText)).then(function (text) {
         return { text: text, tag: parseTag(text) };
       });
     },
     coachCanvas: function (activity, answers) {
+      var hit = piiHitAnswers(answers);
+      if (hit) return Promise.resolve(piiBlocked(hit));
       // an entirely empty canvas never reaches the proxy: no POST, no
       // tokens, and no model asked to review work that does not exist
       var state = unanswered(activity, answers);
@@ -3691,6 +3839,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       });
     },
     coachPitch: function (activity, answers) {
+      var hit = piiHitAnswers(answers);
+      if (hit) return Promise.resolve(piiBlocked(hit));
       return callProxy('pitch', buildPitchCall(activity, answers)).then(function (text) {
         return { text: text, tag: parseTag(text) };
       });
@@ -3718,6 +3868,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     _buildPitchCall: buildPitchCall,
     _parseTag: parseTag,
     _unanswered: unanswered,
+    _piiHit: piiHit,
+    _piiHitAnswers: piiHitAnswers,
+    _piiBlocked: piiBlocked,
     _emptyCanvasMsg: EMPTY_CANVAS_MSG
   };
 

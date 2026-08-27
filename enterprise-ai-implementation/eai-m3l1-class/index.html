@@ -258,12 +258,31 @@ document.addEventListener('input', save); document.addEventListener('change', sa
 /* ---------- redact before anything leaves the page ---------- */
 var REDACT=[
   {re:/[\w.+-]+@[\w-]+\.[\w.]{2,}/g, sub:'[email removed]'},
+  {re:/\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/g, sub:'[id removed]'},
+  {re:/\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/gi, sub:'[address removed]'},
+  {re:/\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/gi, sub:'[postcode removed]'},
   {re:/(?:\+?\d[\d\-\s().]{7,}\d)/g, sub:'[number removed]'},
   {re:/\b\d{7,}\b/g, sub:'[digits removed]'},
   {re:/\b[A-Za-z0-9_\-]{24,}\b/g, sub:'[token removed]'}
 ];
 function redact(t){ var o=String(t||''); REDACT.forEach(function(p){p.re.lastIndex=0;o=o.replace(p.re,p.sub);}); return o; }
-function looksReal(t){ return /[\w.+-]+@[\w-]+\.[\w.]{2,}|\b\d{7,}\b/.test(String(t||'')); }
+/* Widened 2026-08-27. The old test was email-or-seven-digits, which let a
+   name, a street and a postcode straight through. These mirror the gate in
+   engine/live.js: they block the VALUE and allow the CATEGORY. */
+var LOOKS_REAL = [
+  /[\w.+-]+@[\w-]+\.[\w.]{2,}/,
+  /\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/,
+  /\b\d{7,}\b/,
+  /\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'’-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/i,
+  /\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/i,
+  /\b(?:full|real|last|first|maiden|legal)\s+name\s*(?:is|was|:|=)\s*["“']?[A-Z][A-Za-z'’-]+/,
+  /\b(?:his|her|their|my)\s+(?:[a-z]+\s+){0,2}name\s*(?:is|was|:|=)\s*["“']?[A-Z][A-Za-z'’-]+/i,
+  /\b(?:is|was|are|were)\s+named\s+["“']?[A-Z][A-Za-z'’-]+\s+[A-Z][A-Za-z'’-]+/,
+  /\bsurname\s*(?:is|was|:|=)\s*["“']?[A-Z][A-Za-z'’-]+/i,
+  /\b(?:the\s+(?:owner|manager|contact|partner|target|victim|customer|client|employee|colleague|student|person|candidate|recruiter))\b[^.\n]{0,28}\b(?:named|name\s*(?:is|was|:|=)|called)\s*["“']?[A-Z][A-Za-z'’-]+/i,
+  /\b(?:date\s+of\s+birth|d\.?o\.?b\.?|born(?:\s+on)?)\s*(?:is|:|=)?\s*\d/i
+];
+function looksReal(t){ var s=String(t||''); return LOOKS_REAL.some(function(re){ re.lastIndex=0; return re.test(s); }); }
 
 /* ---------- live coach ---------- */
 function liveOn(){ return LIVE.enabled && LIVE.proxy_url && usedTokens < LIVE.session_token_cap; }

@@ -758,7 +758,15 @@ the lab-only/defensive purpose, and redirect to the defensive point.
     { what:'a postal code',
       re:/\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/i },
     { what:"a person\u2019s name",
-      re:/\b(?:(?:full|real|last|first|maiden|legal)\s+name|name|surname)\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/ },
+      re:/\b(?:full|real|last|first|maiden|legal)\s+name\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/ },
+    { what:"a person\u2019s name",
+      re:/\b(?:his|her|their|my)\s+(?:[a-z]+\s+){0,2}name\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i },
+    { what:"a person\u2019s name",
+      re:/\b(?:is|was|are|were)\s+named\s+["\u201c']?[A-Z][A-Za-z'\u2019-]+\s+[A-Z][A-Za-z'\u2019-]+/ },
+    { what:"a person\u2019s name",
+      re:/\bsurname\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i },
+    { what:"a person\u2019s name",
+      re:/\b(?:the\s+(?:owner|manager|contact|partner|target|victim|customer|client|employee|colleague|student|person|candidate|recruiter))\b[^.\n]{0,28}\b(?:named|name\s*(?:is|was|:|=)|called)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i },
     { what:'a date of birth',
       re:/\b(?:date\s+of\s+birth|d\.?o\.?b\.?|born(?:\s+on)?)\s*(?:is|:|=)?\s*\d/i }
   ];

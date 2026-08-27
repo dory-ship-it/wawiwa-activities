@@ -840,6 +840,9 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
 
   var PATTERNS = [
     { name: 'email_addresses', re: /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, sub: '[email removed]' },
+    { name: 'government_ids', re: /\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/g, sub: '[id removed]' },
+    { name: 'street_addresses', re: /\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/gi, sub: '[address removed]' },
+    { name: 'postal_codes', re: /\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/gi, sub: '[postcode removed]' },
     { name: 'phone_numbers', re: /\+?\d(?:[\s().\-]?\d){8,}/g, sub: '[number removed]' },
     { name: 'long_digit_sequences', re: /\d{9,}/g, sub: '[number removed]' },
     {
@@ -989,6 +992,65 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     });
   }
 
+  /* ---------- the identity gate (layer 1) ----------
+     Retrofitted 2026-08-27. This page has no Practice Studio source to
+     rebuild from, so the gate is injected directly, matching engine/live.js.
+     An answer carrying a real person's identifying detail is NOT SENT:
+     no POST, no proxy, no vendor. It blocks the VALUE and allows the
+     CATEGORY. Resolving rather than rejecting means the existing call
+     sites render it as a normal coach box with a Revise verdict. */
+  var PII_GATE = [
+    { what: 'an email address',
+      re: /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/ },
+    { what: 'a government ID number',
+      re: /\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/ },
+    { what: 'a phone or ID number',
+      re: /\+?\d(?:[\s().\-]?\d){6,}/ },
+    { what: 'a street address',
+      re: /\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/i },
+    { what: 'a postal code',
+      re: /\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/i },
+    { what: 'a person\u2019s name',
+      re: /\b(?:full|real|last|first|maiden|legal)\s+name\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/ },
+    { what: 'a person\u2019s name',
+      re: /\b(?:his|her|their|my)\s+(?:[a-z]+\s+){0,2}name\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i },
+    { what: 'a person\u2019s name',
+      re: /\b(?:is|was|are|were)\s+named\s+["\u201c']?[A-Z][A-Za-z'\u2019-]+\s+[A-Z][A-Za-z'\u2019-]+/ },
+    { what: 'a person\u2019s name',
+      re: /\bsurname\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i },
+    { what: 'a person\u2019s name',
+      re: /\b(?:the\s+(?:owner|manager|contact|partner|target|victim|customer|client|employee|colleague|student|person|candidate|recruiter))\b[^.\n]{0,28}\b(?:named|name\s*(?:is|was|:|=)|called)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i },
+    { what: 'a date of birth',
+      re: /\b(?:date\s+of\s+birth|d\.?o\.?b\.?|born(?:\s+on)?)\s*(?:is|:|=)?\s*\d/i }
+  ];
+  function piiHit(text) {
+    var t = String(text || '');
+    for (var i = 0; i < PII_GATE.length; i++) {
+      PII_GATE[i].re.lastIndex = 0;
+      if (PII_GATE[i].re.test(t)) return PII_GATE[i].what;
+    }
+    return null;
+  }
+  function piiHitAnswers(answers) {
+    answers = answers || {};
+    var keys = Object.keys(answers);
+    for (var i = 0; i < keys.length; i++) {
+      var hit = piiHit(answers[keys[i]]);
+      if (hit) return hit;
+    }
+    return null;
+  }
+  function piiBlocked(what) {
+    return {
+      text: 'Not sent. This answer carries ' + what + ' belonging to a real person, so it '
+          + 'was not sent to the coach and did not leave this page. Describe what you saw in '
+          + 'categories, for example \u201ca home city\u201d or \u201can employer\u201d, rather '
+          + 'than the detail itself, then ask again.',
+      tag: 'Revise',
+      blocked: true
+    };
+  }
+
   /* ---------- proxy transport ---------- */
 
   function callProxy(kind, call) {
@@ -1038,16 +1100,22 @@ window.LIVE = {"enabled": true, "proxy_url": "https://practice-studio-proxy.dory
     capReached: capReached,
     usage: usage,
     coachField: function (field, activity, studentText) {
+      var hit = piiHit(studentText);
+      if (hit) return Promise.resolve(piiBlocked(hit));
       return callProxy('field', buildFieldCall(field, activity, studentText)).then(function (text) {
         return { text: text, tag: parseTag(text) };
       });
     },
     coachCanvas: function (activity, answers) {
+      var hit = piiHitAnswers(answers);
+      if (hit) return Promise.resolve(piiBlocked(hit));
       return callProxy('canvas', buildCanvasCall(activity, answers)).then(function (text) {
         return { text: text, tag: null };
       });
     },
     coachPitch: function (activity, answers) {
+      var hit = piiHitAnswers(answers);
+      if (hit) return Promise.resolve(piiBlocked(hit));
       return callProxy('pitch', buildPitchCall(activity, answers)).then(function (text) {
         return { text: text, tag: parseTag(text) };
       });
