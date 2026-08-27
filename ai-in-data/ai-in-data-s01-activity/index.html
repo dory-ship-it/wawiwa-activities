@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What's Running This?</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  /* Straight from the Session 1 deck. Light field, colour used as meaning.
+     Teal is this game's identity colour, green is a correct call, red is a
+     wrong one, blue is for the question put to the room. */
+  --bg:#F5F7FA;--surface:#fff;
+  --ink:#22304A;--text:#22304A;--text-dim:#4A566B;--text-light:#778396;
+  --blue:#4E7FC1;--blue-bg:#EEF4FB;
+  --teal:#3FA8B8;--teal-bg:#EBF6F8;--teal-dark:#33909E;
+  --green:#5CAB88;--green-bg:#EEF7F2;--green-dark:#4A9473;
+  --purple:#8A73C7;--purple-bg:#F4F1FC;
+  --red:#C75A55;--red-bg:#FBEEED;--red-dark:#A8443F;
+  --line:#DDE4ED;
+  --radius:14px;--shadow:0 2px 12px rgba(34,48,74,.08);--shadow-lg:0 8px 30px rgba(34,48,74,.13);
+}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.screen{display:none;min-height:100vh;padding:2.5rem;}
+.screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+h1,h2{font-family:'Heebo',sans-serif;}
+.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--teal);}
+
+.btn{
+  padding:1rem 3rem;border-radius:10px;border:none;cursor:pointer;
+  font-family:'Heebo',sans-serif;font-size:1.1rem;font-weight:800;
+  background:var(--teal);color:#fff;transition:all .2s;
+}
+.btn:hover{background:var(--teal-dark);transform:translateY(-2px);box-shadow:0 8px 22px rgba(63,168,184,.32);}
+.btn.next{background:var(--ink);}
+.btn.next:hover{background:#33456A;box-shadow:0 8px 22px rgba(34,48,74,.25);}
+.btn:focus-visible,.opt:focus-visible{outline:3px solid var(--teal);outline-offset:3px;}
+
+/* WELCOME - one screen, three things on it */
+#welcome{text-align:center;gap:1.8rem;}
+#welcome .divider-line{width:44px;height:4px;background:var(--teal);border-radius:2px;}
+#welcome h1{font-size:4.2rem;line-height:1.1;font-weight:900;color:var(--ink);letter-spacing:-.02em;}
+#welcome h1 em{font-style:normal;color:var(--teal);}
+#welcome p{font-size:1.35rem;color:var(--text-dim);max-width:20em;line-height:1.55;}
+
+/* ROUND */
+#round-screen{gap:1.4rem;padding:2.2rem;max-width:960px;margin:0 auto;width:100%;justify-content:flex-start;}
+.round-header{text-align:center;width:100%;}
+.round-counter{font-size:.73rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:2.5px;}
+.progress-bar{display:flex;gap:.5rem;justify-content:center;margin-top:.6rem;}
+.progress-dot{width:10px;height:10px;border-radius:50%;background:#dde1ec;transition:all .3s;}
+.progress-dot.active{background:var(--teal);transform:scale(1.35);}
+.progress-dot.done{background:var(--green);}
+.progress-dot.wrong{background:var(--red);}
+
+.situation{
+  width:100%;background:var(--surface);border-radius:var(--radius);
+  padding:1.9rem 2.1rem;box-shadow:var(--shadow);border-left:6px solid var(--teal);
+  font-size:1.6rem;line-height:1.5;color:var(--ink);font-weight:500;
+}
+.opts{display:flex;flex-direction:column;gap:.55rem;width:100%;}
+.opt{
+  display:flex;align-items:center;gap:1rem;width:100%;text-align:left;cursor:pointer;
+  background:var(--surface);border:2px solid var(--line);border-radius:10px;
+  padding:.95rem 1.4rem;font-family:'Heebo',sans-serif;font-size:1.15rem;
+  color:var(--ink);font-weight:600;transition:all .18s;
+}
+.opt:hover:not(:disabled){border-color:var(--teal);background:var(--teal-bg);transform:translateX(3px);}
+.opt:disabled{cursor:default;transform:none;}
+.opt .k{
+  flex-shrink:0;width:32px;height:32px;border-radius:9px;background:var(--bg);
+  color:var(--text-light);display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;font-weight:800;transition:all .18s;
+}
+/* Colour and shape together, so the signal survives a projector and a
+   learner who does not separate red from green. */
+.opt.right{border-color:var(--green);background:var(--green-bg);}
+.opt.right .k{background:var(--green);color:#fff;border-radius:50%;}
+.opt.wrong{border-color:var(--red);background:var(--red-bg);}
+.opt.wrong .k{background:var(--red);color:#fff;border-radius:50%;}
+.opt.dim{opacity:.4;}
+
+/* REVEAL */
+#reveal{width:100%;display:flex;flex-direction:column;gap:1rem;}
+.reveal-card{
+  width:100%;background:var(--surface);border-radius:var(--radius);
+  padding:1.5rem 1.8rem;box-shadow:var(--shadow-lg);border-left:6px solid var(--green);
+}
+.reveal-card .label{
+  font-size:.7rem;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--green);margin-bottom:.5rem;
+}
+.reveal-card .head{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem;}
+.reveal-card .badge{
+  width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;flex-shrink:0;
+}
+.reveal-card .headline{font-size:1.3rem;font-weight:800;color:var(--ink);line-height:1.3;}
+.reveal-card p{font-size:1.05rem;line-height:1.75;color:var(--text-dim);}
+.reveal-card p+p{margin-top:.7rem;}
+.ask-card{
+  width:100%;background:var(--blue-bg);border-radius:var(--radius);
+  padding:1.1rem 1.6rem;border-left:6px solid var(--blue);
+  display:flex;gap:.7rem;align-items:baseline;
+}
+.ask-card::before{content:'?';font-weight:900;color:var(--blue);font-size:1.2rem;flex-shrink:0;}
+.ask-card p{font-size:1.05rem;line-height:1.65;color:var(--ink);font-weight:500;}
+
+/* FINAL */
+#final{text-align:center;gap:1.3rem;}
+.score{font-size:5rem;font-weight:900;color:var(--teal);line-height:1;}
+.score span{color:var(--text-light);font-size:.36em;font-weight:700;}
+.verdict{font-size:1.2rem;color:var(--text-dim);max-width:34em;line-height:1.6;}
+.recap{
+  max-width:620px;width:100%;background:var(--surface);border-radius:var(--radius);
+  padding:1.5rem 1.8rem;box-shadow:var(--shadow);text-align:left;
+}
+.recap-point{display:flex;gap:.8rem;padding:.6rem 0;font-size:1.02rem;line-height:1.6;color:var(--text-dim);}
+.recap-point+.recap-point{border-top:1px solid var(--line);}
+.recap-point .num{font-weight:900;color:var(--teal);flex-shrink:0;}
+.recap-point strong{color:var(--ink);}
+.again{
+  max-width:620px;font-size:1rem;color:var(--text-dim);line-height:1.6;
+  background:var(--teal-bg);border-radius:var(--radius);padding:.9rem 1.4rem;
+}
+.again strong{color:var(--ink);}
+.hint{font-size:.82rem;color:var(--text-light);}
+
+@media(max-width:768px){
+  .screen{padding:1.4rem;}
+  #welcome h1{font-size:2.4rem;}
+  #welcome p{font-size:1.1rem;}
+  .situation{font-size:1.15rem;padding:1.3rem 1.4rem;}
+  .opt{font-size:1rem;}
+  .score{font-size:3.4rem;}
+}
+</style>
+</head>
+<body>
+
+<div id="welcome" class="screen active">
+  <div class="eyebrow">AI for Smarter Data Work &middot; Session 1</div>
+  <div class="divider-line"></div>
+  <h1>What&rsquo;s <em>Running</em> This?</h1>
+  <p>Nine situations. Decide what is behind each one.</p>
+  <button class="btn" onclick="startGame()">Start</button>
+</div>
+
+<div id="round-screen" class="screen">
+  <div class="round-header">
+    <div class="round-counter" id="roundCounter">ROUND 1 OF 9</div>
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="situation" id="situation"></div>
+  <div class="opts" id="opts"></div>
+  <div id="reveal"></div>
+  <p class="hint" id="hint">Press 1 to 5 to choose.</p>
+</div>
+
+<div id="final" class="screen">
+  <div class="eyebrow">You finished all nine</div>
+  <div class="score" id="score">0<span>&thinsp;/&thinsp;9</span></div>
+  <p class="verdict" id="verdict"></p>
+  <div class="recap">
+    <div class="recap-point"><span class="num">1</span><span><strong>Automatic is not intelligent.</strong> A reminder, a formula and a routing threshold all run on their own. None of them learned anything.</span></div>
+    <div class="recap-point"><span class="num">2</span><span><strong>Most AI never speaks to you.</strong> The feed, the fraud alert and the spam filter are the AI you meet most, and not one of them is a chatbot.</span></div>
+  </div>
+  <div class="again" id="again" style="display:none"></div>
+  <button class="btn" onclick="startGame()">Play again</button>
+</div>
+
+<script>
+/* The five options never change, so a learner compares the same categories
+   every round instead of reading a new answer set each time. That is left
+   for them to notice rather than announced up front. */
+const OPTIONS = [
+  "Rule-based automation",
+  "Machine learning",
+  "Generative AI",
+  "Not AI at all",
+  "Not enough information"
+];
+
+/* Order is deliberate. Two clean rounds establish the categories, the middle
+   rounds split a room, and the two genuinely ambiguous ones come last, once
+   "not enough information" has stopped feeling like giving up. */
+const ROUNDS = [
+  {
+    text: "Every Monday at 9:00, your calendar sends the team the same stand-up reminder.",
+    answer: 0,
+    why: "Somebody set the day and the time. Nothing is learned and nothing is estimated. It will send the same reminder forever, until a person changes it.",
+    note: "Automatic is not the same as intelligent. This is the cleanest example of that on the list.",
+    ask: "What else at work runs on a rule nobody has looked at in years?"
+  },
+  {
+    text: "A formula in a spreadsheet adds up a column of expenses and shows the total.",
+    answer: 3,
+    why: "This is arithmetic a person wrote down. There is no model, no training data and no estimate. It is exactly as right or wrong as the formula is.",
+    note: "It runs on its own, so it can feel like software doing something clever. It is doing what it was told, once.",
+    ask: "Where would you rather have a formula than a model, and why?"
+  },
+  {
+    text: "An email arrives and goes straight into the spam folder.",
+    answer: 1,
+    why: "A modern filter learned from millions of messages that people marked as spam, and it estimates a probability for each new one.",
+    note: "The earliest filters really were rule-based, blocking named senders and specific words. If you argued rule-based for that reason, the reasoning is sound and the technology moved on.",
+    ask: "What could make this filter start sending real mail to spam?"
+  },
+  {
+    text: "A streaming service puts a film you have never heard of at the top of your home screen.",
+    answer: 1,
+    why: "It learned from what people with similar viewing histories watched next, and it is estimating how likely you are to watch this one.",
+    note: "It never speaks to you, so it does not feel like AI. Most of the AI you meet in a day never speaks to you.",
+    ask: "Whose behaviour is it actually learning from, and who does that leave out?"
+  },
+  {
+    text: "Your bank texts you about a card payment it describes as unusual.",
+    answer: 1,
+    why: "It compared this transaction against patterns learned from millions of others and returned a probability that it is unusual for you.",
+    note: "Notice what it did not do. It did not decide the payment was fraud. It returned a score, and a rule or a person acted on that score.",
+    ask: "The model gave a score. Who should decide what happens next?"
+  },
+  {
+    text: "Three hundred survey comments come back, and a tool returns one paragraph summarising what people said.",
+    answer: 2,
+    why: "That paragraph did not exist anywhere before. Nothing was selected or scored. New text was produced from the patterns in the input.",
+    note: "This is where fluent and correct come apart. The paragraph will read well whether or not it represents what those three hundred people said.",
+    ask: "How would you check that summary without reading all three hundred comments?"
+  },
+  {
+    text: "Any invoice over five thousand dollars is routed to a manager for approval.",
+    answer: 0,
+    why: "A person chose five thousand. The system compares and routes. Change the threshold to four thousand and the behaviour changes immediately, because there is nothing to retrain.",
+    note: "Approval workflows feel sophisticated. This one is a single comparison.",
+    ask: "What would have to change here before a model would be worth adding?"
+  },
+  {
+    text: "Free-text complaints arrive with no category, and a tool sorts each one into one of six fixed categories.",
+    answer: 4,
+    why: "Both answers are live. If a model was trained on labelled examples of those six categories, it is machine learning. If a language model is reading each complaint and choosing, it is generative AI. The result on your screen looks identical either way.",
+    note: "You cannot tell from the output. That is the point of this round, and it is the situation you will meet most often at work.",
+    ask: "Who in the company could tell you which of the two it is?"
+  },
+  {
+    text: "Your phone suggests the next word while you are typing a message.",
+    answer: 4,
+    why: "An older keyboard used word frequency and the words you type most, which is close to a rule. A current one runs a small language model on the device. Both are shipping right now and the suggestion looks the same.",
+    note: "This one is also a preview. A system predicting the most probable next word is exactly what a large language model does, at a far larger scale.",
+    ask: "It only predicts the next likely word. So why does it sound right?"
+  }
+];
+
+let current = 0, score = 0, locked = false, results = [];
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function startGame(){ current=0; score=0; results=[]; showRound(); showScreen('round-screen'); }
+
+function dots(){
+  document.getElementById('progressBar').innerHTML = ROUNDS.map((_,i)=>{
+    let cls = 'progress-dot';
+    if(results[i] === true) cls += ' done';
+    else if(results[i] === false) cls += ' wrong';
+    else if(i === current) cls += ' active';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function showRound(){
+  locked = false;
+  const r = ROUNDS[current];
+  document.getElementById('roundCounter').textContent = `ROUND ${current+1} OF ${ROUNDS.length}`;
+  document.getElementById('situation').textContent = r.text;
+  document.getElementById('reveal').innerHTML = '';
+  document.getElementById('hint').textContent = 'Press 1 to 5 to choose.';
+  dots();
+  document.getElementById('opts').innerHTML = OPTIONS.map((label,n)=>
+    `<button class="opt" onclick="choose(${n})"><span class="k">${n+1}</span><span>${label}</span></button>`
+  ).join('');
+}
+
+function choose(n){
+  if(locked) return;                 /* an answer cannot be changed once it is in */
+  locked = true;
+  const r = ROUNDS[current];
+  const right = (n === r.answer);
+  results[current] = right;
+  if(right) score++;
+  dots();
+
+  document.querySelectorAll('#opts .opt').forEach((b,k)=>{
+    b.disabled = true;
+    if(k === r.answer){ b.classList.add('right'); b.querySelector('.k').textContent = '✓'; }
+    else if(k === n){ b.classList.add('wrong'); b.querySelector('.k').textContent = '✕'; }
+    else b.classList.add('dim');
+  });
+
+  const last = current >= ROUNDS.length - 1;
+  document.getElementById('reveal').innerHTML =
+    `<div class="reveal-card">
+       <div class="label">The answer</div>
+       <div class="head">
+         <span class="badge">✓</span>
+         <span class="headline">${OPTIONS[r.answer]}</span>
+       </div>
+       <p>${r.why}</p>
+       <p>${r.note}</p>
+     </div>
+     <div class="ask-card"><p>${r.ask}</p></div>
+     <button class="btn next" id="nextBtn" onclick="nextRound()">${last ? 'See how you did' : 'Next situation'}</button>`;
+  document.getElementById('hint').textContent = 'Press Enter for the next one.';
+  document.getElementById('nextBtn').focus();
+}
+
+function nextRound(){
+  current++;
+  if(current >= ROUNDS.length) return finish();
+  showRound();
+}
+
+function finish(){
+  document.getElementById('score').innerHTML = `${score}<span>&thinsp;/&thinsp;${ROUNDS.length}</span>`;
+  document.getElementById('verdict').textContent =
+    score >= 8 ? 'You can tell these apart from the result alone, and on the two that nobody can, you said so.'
+    : score >= 5 ? 'The categories are there. The rounds that caught you are the ones worth rereading.'
+    : 'Worth another run. Read the reasons rather than the score, and look for what the system had to learn in order to work at all.';
+
+  const missed = results.map((ok,i)=>ok ? null : i+1).filter(Boolean);
+  const again = document.getElementById('again');
+  if(missed.length){
+    again.style.display = 'block';
+    again.innerHTML = `<strong>Worth a second look:</strong> round${missed.length>1?'s':''} ${missed.join(', ')}.`;
+  } else {
+    again.style.display = 'none';
+  }
+  showScreen('final');
+}
+
+/* Keyboard, so the instructor can run it from the front of the room without
+   hunting for a small target with a mouse. */
+document.addEventListener('keydown', e=>{
+  if(!document.getElementById('round-screen').classList.contains('active')) return;
+  if(e.key >= '1' && e.key <= '5' && !locked) choose(parseInt(e.key,10)-1);
+  else if((e.key === 'Enter' || e.key === ' ') && locked){ e.preventDefault(); nextRound(); }
+});
+</script>
+</body>
+</html>

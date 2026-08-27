@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Quality: What Can You Conclude?</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  /* Unchanged from the Session 1 game, so the two sit together in the same
+     course environment. Teal is the game identity, green marks a correct
+     call, red a wrong one, blue is reserved for the data being shown. */
+  --bg:#F5F7FA;--surface:#fff;
+  --ink:#22304A;--text:#22304A;--text-dim:#4A566B;--text-light:#778396;
+  --blue:#4E7FC1;--blue-bg:#EEF4FB;
+  --teal:#3FA8B8;--teal-bg:#EBF6F8;--teal-dark:#33909E;
+  --green:#5CAB88;--green-bg:#EEF7F2;--green-dark:#4A9473;
+  --purple:#8A73C7;--purple-bg:#F4F1FC;
+  --red:#C75A55;--red-bg:#FBEEED;--red-dark:#A8443F;
+  --line:#DDE4ED;
+  --radius:14px;--shadow:0 2px 12px rgba(34,48,74,.08);--shadow-lg:0 8px 30px rgba(34,48,74,.13);
+}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.screen{display:none;min-height:100vh;padding:2.5rem;}
+.screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+h1,h2{font-family:'Heebo',sans-serif;}
+.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--teal);}
+
+.btn{
+  padding:1rem 3rem;border-radius:10px;border:none;cursor:pointer;
+  font-family:'Heebo',sans-serif;font-size:1.1rem;font-weight:800;
+  background:var(--teal);color:#fff;transition:all .2s;
+}
+.btn:hover{background:var(--teal-dark);transform:translateY(-2px);box-shadow:0 8px 22px rgba(63,168,184,.32);}
+.btn.next{background:var(--ink);}
+.btn.next:hover{background:#33456A;box-shadow:0 8px 22px rgba(34,48,74,.25);}
+.btn:focus-visible,.opt:focus-visible{outline:3px solid var(--teal);outline-offset:3px;}
+
+/* WELCOME */
+#welcome{text-align:center;gap:1.8rem;}
+#welcome .divider-line{width:44px;height:4px;background:var(--teal);border-radius:2px;}
+#welcome h1{font-size:3.9rem;line-height:1.1;font-weight:900;color:var(--ink);letter-spacing:-.02em;}
+#welcome h1 em{font-style:normal;color:var(--teal);}
+#welcome p{font-size:1.35rem;color:var(--text-dim);max-width:22em;line-height:1.55;}
+
+/* QUESTION */
+#round-screen{gap:1.2rem;padding:2rem 2.2rem;max-width:1040px;margin:0 auto;width:100%;justify-content:flex-start;}
+.round-header{text-align:center;width:100%;}
+.round-counter{font-size:.73rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:2.5px;}
+.progress-bar{display:flex;gap:.5rem;justify-content:center;margin-top:.6rem;}
+.progress-dot{width:10px;height:10px;border-radius:50%;background:#dde1ec;transition:all .3s;}
+.progress-dot.active{background:var(--teal);transform:scale(1.35);}
+/* Seen, not scored. The dot records where the class has been, and nothing
+   about whether they were right. */
+.progress-dot.done{background:var(--teal);opacity:.45;}
+
+.situation{
+  width:100%;background:var(--surface);border-radius:var(--radius);
+  padding:1.5rem 1.9rem;box-shadow:var(--shadow);border-left:6px solid var(--teal);
+}
+.situation .stitle{
+  font-size:.72rem;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--teal);margin-bottom:.7rem;
+}
+/* What the class is given. Never a description of the problem: the heading is
+   "what you know" because some of it is a field definition, some a key, some
+   an expected count, and only sometimes a rule. */
+.know{background:var(--blue-bg);border-left:4px solid var(--blue);border-radius:8px;
+      padding:.75rem 1.1rem;margin-bottom:1rem;}
+.know .klabel{font-size:.68rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+      color:var(--blue);margin-bottom:.3rem;}
+.know ul{margin:0 0 0 1.15rem;}
+.know li{font-size:1.22rem;line-height:1.5;color:var(--ink);font-weight:500;}
+.know code{font-family:'Heebo',sans-serif;font-weight:800;}
+
+.dlabel{font-size:.68rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+        color:var(--text-light);margin-bottom:.4rem;}
+
+/* Read from the back of a room, so the type is large and the rows are few. */
+table.grid{width:100%;border-collapse:collapse;font-size:1.45rem;}
+table.grid th{
+  background:var(--blue);color:#fff;text-align:left;font-weight:700;
+  padding:.55rem 1rem;font-size:1.12rem;letter-spacing:.5px;
+}
+table.grid td{padding:.62rem 1rem;border-bottom:1px solid var(--line);color:var(--ink);
+  font-weight:600;transition:background .25s;}
+table.grid tr:last-child td{border-bottom:none;}
+/* Nothing is highlighted until the answer is in. Marking the cell first would
+   hand over the answer. */
+table.grid td.mark{background:var(--teal-bg);box-shadow:inset 0 0 0 2px var(--teal);
+  font-weight:800;border-radius:4px;}
+
+.facts{display:flex;gap:1rem;flex-wrap:wrap;}
+.fact{flex:1 1 0;min-width:180px;background:var(--bg);border:2px solid var(--line);
+      border-radius:10px;padding:.9rem 1.1rem;text-align:center;}
+.fact .flabel{font-size:.86rem;font-weight:700;color:var(--text-light);
+      text-transform:uppercase;letter-spacing:1.2px;}
+.fact .fval{font-size:2.6rem;font-weight:900;color:var(--ink);line-height:1.15;}
+.fact.mark{border-color:var(--teal);background:var(--teal-bg);}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;width:100%;}
+.opt{
+  display:flex;align-items:center;gap:1rem;width:100%;text-align:left;cursor:pointer;
+  background:var(--surface);border:2px solid var(--line);border-radius:10px;
+  padding:.85rem 1.3rem;font-family:'Heebo',sans-serif;font-size:1.12rem;
+  color:var(--ink);font-weight:600;transition:all .18s;
+}
+.opt.wide{grid-column:1 / -1;}
+.opt:hover:not(:disabled){border-color:var(--teal);background:var(--teal-bg);transform:translateX(3px);}
+.opt:disabled{cursor:default;transform:none;}
+.opt .k{
+  flex-shrink:0;width:32px;height:32px;border-radius:9px;background:var(--bg);
+  color:var(--text-light);display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;font-weight:800;transition:all .18s;
+}
+/* Colour and shape together, so the signal survives a projector and a
+   learner who does not separate red from green. */
+.opt.right{border-color:var(--green);background:var(--green-bg);}
+.opt.right .k{background:var(--green);color:#fff;border-radius:50%;}
+.opt.wrong{border-color:var(--red);background:var(--red-bg);}
+.opt.wrong .k{background:var(--red);color:#fff;border-radius:50%;}
+.opt.dim{opacity:.4;}
+
+/* REVEAL */
+#reveal{width:100%;display:flex;flex-direction:column;gap:1rem;}
+.reveal-card{
+  width:100%;background:var(--surface);border-radius:var(--radius);
+  padding:1.3rem 1.7rem;box-shadow:var(--shadow-lg);border-left:6px solid var(--green);
+}
+.reveal-card .label{
+  font-size:.7rem;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--green);margin-bottom:.5rem;
+}
+.reveal-card .head{display:flex;align-items:center;gap:.7rem;margin-bottom:.6rem;}
+.reveal-card .badge{
+  width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;flex-shrink:0;
+}
+.reveal-card .headline{font-size:1.3rem;font-weight:800;color:var(--ink);line-height:1.3;}
+.reveal-card p{font-size:1.08rem;line-height:1.65;color:var(--text-dim);}
+
+/* CLOSE */
+#final{text-align:center;gap:1.3rem;}
+#final h2{font-size:2.6rem;font-weight:900;color:var(--ink);line-height:1.15;max-width:16em;}
+.recap{
+  max-width:660px;width:100%;background:var(--surface);border-radius:var(--radius);
+  padding:1.4rem 1.8rem;box-shadow:var(--shadow);text-align:left;
+}
+.recap-point{display:flex;gap:.8rem;padding:.6rem 0;font-size:1.02rem;line-height:1.6;color:var(--text-dim);}
+.recap-point+.recap-point{border-top:1px solid var(--line);}
+.recap-point .num{font-weight:900;color:var(--teal);flex-shrink:0;}
+.recap-point strong{color:var(--ink);}
+.hint{font-size:.82rem;color:var(--text-light);}
+
+@media(max-width:860px){
+  .opts{grid-template-columns:1fr;}
+}
+@media(max-width:768px){
+  .screen{padding:1.4rem;}
+  #welcome h1{font-size:2.3rem;}
+  #welcome p{font-size:1.1rem;}
+  .situation .sbody{font-size:1.12rem;}
+  .situation ul{font-size:1.02rem;}
+  table.grid{font-size:1rem;}
+  .opt{font-size:1rem;}
+  #final h2{font-size:1.8rem;}
+}
+</style>
+</head>
+<body>
+
+<div id="welcome" class="screen active">
+  <div class="eyebrow">AI for Smarter Data Work &middot; Session 2</div>
+  <div class="divider-line"></div>
+  <h1>Data Quality: <em>What Can You Conclude?</em></h1>
+  <p>Choose the best answer based only on the information shown.</p>
+  <button class="btn" onclick="startGame()">Start</button>
+</div>
+
+<div id="round-screen" class="screen">
+  <div class="round-header">
+    <div class="round-counter" id="roundCounter">1 / 8</div>
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="situation" id="situation"></div>
+  <div class="opts" id="opts"></div>
+  <div id="reveal"></div>
+  <p class="hint" id="hint">Press 1 to 7 to choose.</p>
+</div>
+
+<div id="final" class="screen">
+  <div class="eyebrow">All eight cases</div>
+  <h2>Careful conclusions beat fast ones.</h2>
+  <div class="recap">
+    <div class="recap-point"><span class="num">1</span><span><strong>A repeated value is not automatically a duplicate.</strong> First decide what one row represents and what identifies a record.</span></div>
+    <div class="recap-point"><span class="num">2</span><span><strong>An unusual value is not automatically wrong.</strong> An outlier is a reason to review, not a verdict.</span></div>
+    <div class="recap-point"><span class="num">3</span><span><strong>Invalid means a stated rule was broken.</strong> Strange on its own is not enough.</span></div>
+    <div class="recap-point"><span class="num">4</span><span><strong>A record that never arrived leaves no blank cell.</strong> Once the expected number is known, you can confirm it.</span></div>
+    <div class="recap-point"><span class="num">5</span><span><strong>Need more context is a professional answer.</strong> When the evidence does not settle it, say so.</span></div>
+  </div>
+  <button class="btn" onclick="startGame()">Play again</button>
+</div>
+
+<script>
+/* The same seven options appear on every question, in the same order. Nothing
+   is filtered out for being irrelevant: choosing from the whole framework each
+   time is part of what is being practised. */
+const OPTIONS = [
+  "Missing",
+  "Duplicate",
+  "Inconsistent",
+  "Invalid",
+  "Outlier",
+  "Need more context",
+  "Not an issue"
+];
+
+/* Order is deliberate. The first four establish the vocabulary with clean
+   cases. The last four need row meaning, a rule, or context that has not been
+   given. The division is never shown to the class. */
+const QUESTIONS = [
+  {
+    title: "Clinic records",
+    know: ["Phone is required.",
+           "<code>000-000-0000</code> means no phone number was collected."],
+    table: {
+      head: ["Patient_ID", "Phone", "Visit"],
+      rows: [["P-204","480-555-0182","Mar 3"],
+             ["P-205","000-000-0000","Mar 3"],
+             ["P-206","602-555-0119","Mar 4"]],
+      mark: [[1,1]]
+    },
+    answer: 0,
+    why: "The format is valid, so nothing here breaks a rule. A required value is still absent, because the placeholder stands for no number at all."
+  },
+  {
+    title: "Restaurant reservations",
+    know: ["Party_Size cannot exceed Table_Seats."],
+    table: {
+      head: ["Res_ID", "Table", "Table_Seats", "Party_Size"],
+      rows: [["R-11","T4","4","4"],
+             ["R-12","T2","2","6"],
+             ["R-13","T7","8","5"]],
+      mark: [[1,2],[1,3]]
+    },
+    answer: 3,
+    why: "Six guests are seated at a table with two seats. A stated rule is broken, so this is a confirmed invalid value."
+  },
+  {
+    title: "Support tickets",
+    know: ["<code>Opened</code> stores the date the ticket was opened."],
+    table: {
+      head: ["Ticket", "Opened"],
+      rows: [["T-881","2026-03-04"],
+             ["T-882","03/04/2026"],
+             ["T-883","Mar 4, 2026"]],
+      mark: [[0,1],[1,1],[2,1]]
+    },
+    answer: 2,
+    why: "The same type of value is represented in different formats. None is necessarily invalid, but the representation is inconsistent."
+  },
+  {
+    title: "Course registrations",
+    know: ["One row is one student enrolled in one course for one term.",
+           "Key is Student, Course and Term."],
+    table: {
+      head: ["Student", "Course", "Term"],
+      rows: [["S-1180","BIO-101","Fall"],
+             ["S-1180","BIO-101","Fall"],
+             ["S-1180","CHM-101","Fall"]],
+      mark: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]]
+    },
+    answer: 1,
+    why: "Two rows share all three parts of the key. The third row is a different course, so it is a second valid registration and not a duplicate."
+  },
+  {
+    title: "Delivery times",
+    know: ["Delivery time must be between 5 and 240 minutes."],
+    table: {
+      head: ["Order", "Delivery_Minutes"],
+      rows: [["D-51","28"],["D-52","31"],["D-53","213"],["D-54","26"]],
+      mark: [[2,1]]
+    },
+    answer: 4,
+    why: "213 minutes is unusual compared with the other deliveries, but it is still inside the allowed range. Unusual does not mean invalid."
+  },
+  {
+    title: "Price history",
+    know: ["One row is one price change.",
+           "Key is Product and Effective_Date."],
+    table: {
+      head: ["Product", "Effective_Date", "Price"],
+      rows: [["SKU-70","Jan 3","$19.99"],
+             ["SKU-70","Feb 8","$24.99"],
+             ["SKU-70","Mar 14","$19.99"]],
+      mark: [[0,1],[1,1],[2,1]]
+    },
+    answer: 6,
+    why: "Each row is a separate price change, identified by Product and Effective_Date. The price returned to an earlier value, which is a valid history."
+  },
+  {
+    title: "Transactions",
+    know: ["<code>Amount</code> is the transaction amount."],
+    table: {
+      head: ["Transaction", "Amount"],
+      rows: [["T-441","$120"],["T-442","-$85"],["T-443","$49"]],
+      mark: [[1,1]]
+    },
+    answer: 5,
+    why: "Minus $85 could be a valid refund or reversal, or it could be an error. We need to know how this system represents refunds before deciding."
+  },
+  {
+    title: "June payroll file",
+    know: ["One row is one employee for one month.",
+           "HR reports 412 active employees in June."],
+    facts: [["Expected employees","412"],
+            ["Rows received","397"],
+            ["Blank cells","0"]],
+    markFacts: [0,1],
+    answer: 0,
+    why: "The expected number of records is known, and 15 employee records are absent. Missing records do not require blank cells."
+  }
+];
+
+let current = 0, locked = false, seen = [];
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function startGame(){ current=0; seen=[]; showQuestion(); showScreen('round-screen'); }
+
+function dots(){
+  document.getElementById('progressBar').innerHTML = QUESTIONS.map((_,i)=>{
+    let cls = 'progress-dot';
+    if(i === current) cls += ' active';
+    else if(seen[i]) cls += ' done';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function situationHTML(q, revealed){
+  let html = `<div class="stitle">${q.title}</div>`;
+  html += `<div class="know"><div class="klabel">What you know</div><ul>${
+    q.know.map(k=>`<li>${k}</li>`).join('')
+  }</ul></div>`;
+  html += `<div class="dlabel">Data</div>`;
+  if(q.table){
+    const t = q.table;
+    const marked = revealed && t.mark ? t.mark : [];
+    const isMarked = (r,c) => marked.some(m=>m[0]===r && m[1]===c);
+    html += `<table class="grid"><thead><tr>${
+      t.head.map(hd=>`<th>${hd}</th>`).join('')
+    }</tr></thead><tbody>${
+      t.rows.map((row,ri)=>`<tr>${
+        row.map((cell,ci)=>`<td class="${isMarked(ri,ci)?'mark':''}">${cell}</td>`).join('')
+      }</tr>`).join('')
+    }</tbody></table>`;
+  }
+  if(q.facts){
+    const marked = revealed && q.markFacts ? q.markFacts : [];
+    html += `<div class="facts">${
+      q.facts.map((f,i)=>`<div class="fact${marked.includes(i)?' mark':''}">
+        <div class="flabel">${f[0]}</div><div class="fval">${f[1]}</div></div>`).join('')
+    }</div>`;
+  }
+  return html;
+}
+
+function showQuestion(){
+  locked = false;
+  const q = QUESTIONS[current];
+  document.getElementById('roundCounter').textContent = `${current+1} / ${QUESTIONS.length}`;
+  document.getElementById('situation').innerHTML = situationHTML(q, false);
+  document.getElementById('reveal').innerHTML = '';
+  document.getElementById('hint').textContent = 'Press 1 to 7 to choose.';
+  dots();
+  document.getElementById('opts').innerHTML = OPTIONS.map((label,n)=>
+    `<button class="opt${n===OPTIONS.length-1?' wide':''}" onclick="choose(${n})"><span class="k">${n+1}</span><span>${label}</span></button>`
+  ).join('');
+}
+
+function choose(n){
+  if(locked) return;                    /* an answer cannot be changed once it is in */
+  locked = true;
+  seen[current] = true;
+  const q = QUESTIONS[current];
+  dots();
+  document.getElementById('situation').innerHTML = situationHTML(q, true);
+
+  document.querySelectorAll('#opts .opt').forEach((b,k)=>{
+    b.disabled = true;
+    if(k === q.answer){ b.classList.add('right'); b.querySelector('.k').textContent = '✓'; }
+    else if(k === n){ b.classList.add('wrong'); b.querySelector('.k').textContent = '✕'; }
+    else b.classList.add('dim');
+  });
+
+  const last = current >= QUESTIONS.length - 1;
+  document.getElementById('reveal').innerHTML =
+    `<div class="reveal-card">
+       <div class="label">The answer</div>
+       <div class="head">
+         <span class="badge">✓</span>
+         <span class="headline">${OPTIONS[q.answer]}</span>
+       </div>
+       <p>${q.why}</p>
+     </div>
+     <button class="btn next" id="nextBtn" onclick="nextQuestion()">${last ? 'Close' : 'Next'}</button>`;
+  document.getElementById('hint').textContent = 'Press Enter for the next one.';
+  document.getElementById('nextBtn').focus();
+}
+
+function nextQuestion(){
+  current++;
+  if(current >= QUESTIONS.length) return showScreen('final');
+  showQuestion();
+}
+
+/* Keyboard, so the instructor can run it from the front of the room without
+   hunting for a small target with a mouse. */
+document.addEventListener('keydown', e=>{
+  if(!document.getElementById('round-screen').classList.contains('active')) return;
+  if(e.key >= '1' && e.key <= '7' && !locked) choose(parseInt(e.key,10)-1);
+  else if((e.key === 'Enter' || e.key === ' ') && locked){ e.preventDefault(); nextQuestion(); }
+});
+</script>
+</body>
+</html>
