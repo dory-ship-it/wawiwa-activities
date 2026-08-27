@@ -242,7 +242,7 @@
 
       <textarea id="tell" rows="4" aria-describedby="pii"></textarea>
       <div class="pv printonly" id="pv-tell"></div>
-      <p class="pii" id="pii">Don&rsquo;t include personal or identifying information in your answers.</p>
+      <p class="pii" id="pii">Describe what you saw in categories, never the detail itself. Answers carrying a real person&rsquo;s details are blocked before they are sent.</p>
 
       <div class="actions">
         <button type="button" class="btn" id="check">Check with AI Coach</button>
@@ -402,7 +402,7 @@ deepfake"): decline, restate the detection/defense purpose, redirect to cues and
       'Never declare a specific item definitely real or fake; detection is probabilistic.',
       'Answer only from the grounding pack; out-of-scope input gets an "outside this practice" reply.',
       'Feedback is two or three sentences, plain, no lists.',
-      'No student PII is sent; the answer is redacted before any AI call.'
+      'An answer carrying a real person\u2019s identifying detail is blocked in the browser and never sent; whatever passes the gate is redacted again before any AI call.'
     ],
     debrief: {
       prompt: 'Across the tools, what most reliably exposed AI media — and how would you verify a suspicious image, voice or message in real life?',
@@ -446,6 +446,7 @@ deepfake"): decline, restate the detection/defense purpose, redirect to cues and
       '- Connect the cue to the concept by name: synthetic media / deepfakes and how AI is weaponized for social engineering (grounding C5, C3), and reinforce the verification habit (grounding C6): no single tool is proof, corroborate against a trusted source and confirm identity out of band before acting.',
       '- NEVER declare a specific piece of media definitely real or fake; detection is probabilistic. Coach the habit, not a verdict.',
       '- Stay in scope. If asked to CREATE a deepfake or any deceptive media, decline, restate that this is a detection/defense exercise, and redirect to cues and verification.',
+      '- NEVER confirm, repeat, summarise, validate or praise personal data about a real person. If an answer names a home address, a full name, an email, a phone number, a government ID or a date of birth, do not treat it as a correct answer: say plainly that the detail must come out, and ask for the category rather than the value.',
       '- Never invent facts the grounding pack does not support. Two or three sentences, plain, no lists, no markdown.'
     ].join('\n'),
     field: [
@@ -548,8 +549,51 @@ deepfake"): decline, restate the detection/defense purpose, redirect to cues and
 
   /* PII scrub, same pattern list as engine/redact.js. Unredacted text
      never leaves the browser. */
+  /* ---------- layer 1: the pre-send gate ----------
+     The redactor below never covered a name, a street or a postcode, so on
+     its own it is not a control over identity. The gate blocks the coach
+     call outright: the text is never sent, never proxied, never logged.
+     It blocks the VALUE and allows the CATEGORY, because naming the
+     category is what these tasks actually ask for. */
+  var PII_GATE = [
+    { what:'an email address',
+      re:/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/ },
+    { what:'a government ID number',
+      re:/\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/ },
+    { what:'a phone or ID number',
+      re:/\+?\d(?:[\s().\-]?\d){6,}/ },
+    { what:'a street address',
+      re:/\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/i },
+    { what:'a postal code',
+      re:/\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/i },
+    { what:"a person\u2019s name",
+      re:/\b(?:(?:full|real|last|first|maiden|legal)\s+name|name|surname)\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/ },
+    { what:'a date of birth',
+      re:/\b(?:date\s+of\s+birth|d\.?o\.?b\.?|born(?:\s+on)?)\s*(?:is|:|=)?\s*\d/i }
+  ];
+  function piiHit(text){
+    var t = String(text || '');
+    for (var i = 0; i < PII_GATE.length; i++){
+      PII_GATE[i].re.lastIndex = 0;
+      if (PII_GATE[i].re.test(t)) return PII_GATE[i].what;
+    }
+    return null;
+  }
+  function piiBlock(what){
+    return { tone:'work', lead:'Not sent. ',
+      text:'That answer carries ' + what + ' belonging to a real person, so it was not sent anywhere, '
+         + 'not to the coach and not off this page. Describe what you saw in categories, for example '
+         + '\u201ca home city\u201d or \u201can employer\u201d, rather than the detail itself, then check again.' };
+  }
+
+  /* ---------- layer 2: the redactor ----------
+     Anything the gate lets through is still scrubbed before the call. */
   var REDACT = [
     { re:/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, sub:'[email removed]' },
+    { re:/\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/g, sub:'[id removed]' },
+    { re:/\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/gi,
+      sub:'[address removed]' },
+    { re:/\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/gi, sub:'[postcode removed]' },
     { re:/\+?\d(?:[\s().\-]?\d){8,}/g, sub:'[number removed]' },
     { re:/\d{9,}/g, sub:'[number removed]' },
     { re:/\b(?=[A-Za-z0-9_\-]{20,}(\b|$))(?=[^\s]*\d)(?=[^\s]*[A-Za-z])[A-Za-z0-9_\-]{20,}\b/g,
@@ -657,14 +701,28 @@ deepfake"): decline, restate the detection/defense purpose, redirect to cues and
       .replace(/\s*(?:→|←|⇒)\s*/g, ', ');
   }
 
+  /* A live reply is not automatically a pass. When the coach declines, the
+     card has to look declined; a green tick on a refusal reads to the
+     student as "correct, carry on", which is the opposite of the point. */
+  function liveTone(text){
+    var t = String(text || '');
+    if (t.indexOf(PROMPTS.refusal.slice(0, 40)) !== -1) return 'work';
+    return /\b(?:outside this practice|never|do not|don\u2019t|don't|stop|remove|instead of|must not|not on a public)\b/i.test(t)
+      ? 'work' : 'ok';
+  }
   function showLive(text){
+    var tone = liveTone(text);
     reply.hidden = false;
-    reply.setAttribute('data-tone','ok');
-    reply.innerHTML = ICON_OK + '<p>' + esc(houseStyle(text)) + '</p>';
+    reply.setAttribute('data-tone', tone);
+    reply.innerHTML = (tone === 'ok' ? ICON_OK : ICON_WORK) + '<p>' + esc(houseStyle(text)) + '</p>';
   }
 
   checkBtn.addEventListener('click', function(){
     var answer = tell.value;
+    /* The gate runs before liveAvailable() so the rule holds identically
+       whether the coach is live or offline: this answer goes nowhere. */
+    var hit = piiHit(answer);
+    if (hit){ show(piiBlock(hit)); return; }
     if (!liveAvailable()){ show(judge(answer)); return; }
     checkBtn.disabled = true;
     var was = checkBtn.textContent;

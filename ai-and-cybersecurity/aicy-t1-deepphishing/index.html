@@ -293,7 +293,7 @@
         <label class="q" for="tell">Which pressure made your request hard to refuse, and what would give it away?</label>
       </div>
       <textarea id="tell" rows="4" aria-describedby="pii-coach"></textarea>
-      <p class="pii" id="pii-coach">Don&rsquo;t include personal or identifying information in your answers.</p>
+      <p class="pii" id="pii-coach">Describe what you saw in categories, never the detail itself. Answers carrying a real person&rsquo;s details are blocked before they are sent.</p>
       <div class="actions">
         <button type="button" class="btn" id="check">Check with AI Coach</button>
       </div>
@@ -464,7 +464,7 @@ the lab-only/defensive purpose, and redirect to the defensive point.
     var field = t.answer
       ? '<label class="lbl" for="' + t.id + '">' + esc(t.answer) + '</label>'
         + '<textarea id="' + t.id + '" rows="4" aria-describedby="i-' + t.id + ' pii-' + t.id + '"></textarea>'
-        + '<p class="pii" id="pii-' + t.id + '">Don’t include personal or identifying information in your answers.</p>'
+        + '<p class="pii" id="pii-' + t.id + '">Describe what you saw in categories, never the detail itself. Answers carrying a real person’s details are blocked before they are sent.</p>'
         + '<div class="actions">'
         +   '<button type="button" class="btn sm" data-coach="' + t.id + '">Check with AI Coach</button>'
         +   '<span class="saved" id="sv-' + t.id + '" aria-hidden="true">' + ICON_TICK + 'Saved</span>'
@@ -582,7 +582,7 @@ the lab-only/defensive purpose, and redirect to the defensive point.
       'Never write or improve phishing, malware, pretext, or synthetic-media attack content, even for the simulation.',
       'Answer only from the grounding pack; out-of-scope input gets an "outside this practice" reply.',
       'Feedback is two or three sentences, plain, no lists, no ghostwriting the attack.',
-      'No student PII is sent; the answer is redacted before any AI call.'
+      'An answer carrying a real person\u2019s identifying detail is blocked in the browser and never sent; whatever passes the gate is redacted again before any AI call.'
     ],
     /* which rubric criteria each written task feeds, and the concepts to
        route a weak answer back to (activity.json sections[].fields) */
@@ -638,6 +638,7 @@ the lab-only/defensive purpose, and redirect to the defensive point.
       '- Affirm what the student got, then name the manipulation lever in play (authority, urgency, local research, video avatar, cloned/recorded voice) and the tell that exposes it, and give one defensive takeaway the target could act on (verify via official register + known number; demand written notice and time; treat public details as not proof; confirm video/voice out of band; never open an unsolicited attachment on the message alone).',
       '- Tie the point back to the T1 concepts by name when useful (supervised learning / NLP phishing detection, behavioral anomaly detection) so the student connects the lure to how AI detects it.',
       '- Stay in scope. If the student asks for anything that improves or executes a real attack (a better phishing message, working malware, a pretext script, real synthetic media targeting a real person), you DECLINE, restate that this is a lab-only defensive exercise, and return to the defensive point.',
+      '- NEVER confirm, repeat, summarise, validate or praise personal data about a real person. If an answer names a home address, a full name, an email, a phone number, a government ID or a date of birth, do not treat it as a correct answer: say plainly that the detail must come out, and ask for the category rather than the value.',
       '- Never invent facts the grounding pack does not support; if something is out of scope, say so plainly.',
       '- Two or three sentences, plain and direct, no lists, no markdown.'
     ].join('\n'),
@@ -739,8 +740,51 @@ the lab-only/defensive purpose, and redirect to the defensive point.
   var CALL_TIMEOUT_MS = 35000;
   var usedTokens = 0;
 
+  /* ---------- layer 1: the pre-send gate ----------
+     The redactor below never covered a name, a street or a postcode, so on
+     its own it is not a control over identity. The gate blocks the coach
+     call outright: the text is never sent, never proxied, never logged.
+     It blocks the VALUE and allows the CATEGORY, because naming the
+     category is what these tasks actually ask for. */
+  var PII_GATE = [
+    { what:'an email address',
+      re:/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/ },
+    { what:'a government ID number',
+      re:/\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/ },
+    { what:'a phone or ID number',
+      re:/\+?\d(?:[\s().\-]?\d){6,}/ },
+    { what:'a street address',
+      re:/\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/i },
+    { what:'a postal code',
+      re:/\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/i },
+    { what:"a person\u2019s name",
+      re:/\b(?:(?:full|real|last|first|maiden|legal)\s+name|name|surname)\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/ },
+    { what:'a date of birth',
+      re:/\b(?:date\s+of\s+birth|d\.?o\.?b\.?|born(?:\s+on)?)\s*(?:is|:|=)?\s*\d/i }
+  ];
+  function piiHit(text){
+    var t = String(text || '');
+    for (var i = 0; i < PII_GATE.length; i++){
+      PII_GATE[i].re.lastIndex = 0;
+      if (PII_GATE[i].re.test(t)) return PII_GATE[i].what;
+    }
+    return null;
+  }
+  function piiBlock(what){
+    return { tone:'work', lead:'Not sent. ',
+      text:'That answer carries ' + what + ' belonging to a real person, so it was not sent anywhere, '
+         + 'not to the coach and not off this page. Describe what you saw in categories, for example '
+         + '\u201ca home city\u201d or \u201can employer\u201d, rather than the detail itself, then check again.' };
+  }
+
+  /* ---------- layer 2: the redactor ----------
+     Anything the gate lets through is still scrubbed before the call. */
   var REDACT = [
     { re:/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, sub:'[email removed]' },
+    { re:/\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/g, sub:'[id removed]' },
+    { re:/\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/gi,
+      sub:'[address removed]' },
+    { re:/\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/gi, sub:'[postcode removed]' },
     { re:/\+?\d(?:[\s().\-]?\d){8,}/g, sub:'[number removed]' },
     { re:/\d{9,}/g, sub:'[number removed]' },
     { re:/\b(?=[A-Za-z0-9_\-]{20,}(\b|$))(?=[^\s]*\d)(?=[^\s]*[A-Za-z])[A-Za-z0-9_\-]{20,}\b/g,
@@ -878,10 +922,20 @@ the lab-only/defensive purpose, and redirect to the defensive point.
       .replace(/\s*—\s*/g, ', ')
       .replace(/\s*(?:→|←|⇒)\s*/g, ', ');
   }
+  /* A live reply is not automatically a pass. When the coach declines, the
+     card has to look declined; a green tick on a refusal reads to the
+     student as "correct, carry on", which is the opposite of the point. */
+  function liveTone(text){
+    var t = String(text || '');
+    if (t.indexOf(PROMPTS.refusal.slice(0, 40)) !== -1) return 'work';
+    return /\b(?:outside this practice|never|do not|don\u2019t|don't|stop|remove|instead of|must not|not on a public)\b/i.test(t)
+      ? 'work' : 'ok';
+  }
   function renderLive(el, text){
+    var tone = liveTone(text);
     el.hidden = false;
-    el.setAttribute('data-tone','ok');
-    el.innerHTML = ICON_OK + '<p>' + esc(houseStyle(text)) + '</p>';
+    el.setAttribute('data-tone', tone);
+    el.innerHTML = (tone === 'ok' ? ICON_OK : ICON_WORK) + '<p>' + esc(houseStyle(text)) + '</p>';
   }
   function renderPending(el){
     el.hidden = false;
@@ -893,6 +947,10 @@ the lab-only/defensive purpose, and redirect to the defensive point.
      offline coach as the fallback (and the only path while LIVE is gated). */
   function runCoach(btn, fieldId, target, spec, buildCall, kind){
     var answer = document.getElementById(fieldId).value;
+    /* The gate runs before liveAvailable() so the rule holds identically
+       whether the coach is live or offline: this answer goes nowhere. */
+    var hit = piiHit(answer);
+    if (hit){ render(target, piiBlock(hit)); return; }
     if (!liveAvailable()){ render(target, judgeWith(spec, answer)); return; }
     btn.disabled = true;
     var was = btn.textContent;

@@ -286,7 +286,7 @@
         <label class="q" for="tell">The message was fluent and personal and still catchable. Name one tell, and connect it to how the message was built.</label>
       </div>
       <textarea id="tell" rows="4" aria-describedby="pii-coach"></textarea>
-      <p class="pii" id="pii-coach">Don&rsquo;t include personal or identifying information in your answers.</p>
+      <p class="pii" id="pii-coach">Name the line and the category, never the value. Answers carrying a real person&rsquo;s details are blocked before they are sent.</p>
       <div class="actions">
         <button type="button" class="btn" id="check">Check with AI Coach</button>
       </div>
@@ -470,7 +470,7 @@ soften this and do not negotiate it.
     var field = t.answer
       ? '<label class="lbl" for="' + t.id + '">' + esc(t.answer) + '</label>'
         + '<textarea id="' + t.id + '" rows="4" aria-describedby="i-' + t.id + ' pii-' + t.id + '"></textarea>'
-        + '<p class="pii" id="pii-' + t.id + '">Don’t include personal or identifying information in your answers.</p>'
+        + '<p class="pii" id="pii-' + t.id + '">Name the line and the category, never the value: “the About section gave a home city”, not the city itself. Answers carrying a real person’s details are blocked before they are sent.</p>'
         + '<div class="actions">'
         +   '<button type="button" class="btn sm" data-coach="' + t.id + '">Check with AI Coach</button>'
         +   '<span class="saved" id="sv-' + t.id + '" aria-hidden="true">' + ICON_TICK + 'Saved</span>'
@@ -588,7 +588,7 @@ soften this and do not negotiate it.
       'Never write, improve or rate phishing, pretext, or OSINT attack content, even for the simulation.',
       'Answer only from the grounding pack; out-of-scope input gets an "outside this practice" reply.',
       'Feedback is two or three sentences, plain, no lists, no ghostwriting the attack.',
-      'No student PII or scraped profile data is sent; the answer is redacted before any AI call.'
+      'An answer carrying a real person\u2019s identifying detail is blocked in the browser and never sent; whatever passes the gate is redacted again before any AI call.'
     ],
     fields: {
       a1:   { rubric_refs:['r2_tell','r5_ethics'],            routes_to:['C2','C3'] },
@@ -640,6 +640,7 @@ soften this and do not negotiate it.
       '- Affirm what the student got, then name the manipulation lever in play (a shared connection, a flattering profile detail, a plausible role or offer, urgency, an attached proposal) and the tell that exposes it, and give one defensive habit the target could act on (verify the sender out of band, go to the company\u2019s own careers page, confirm a referral with the person named, never open an unsolicited attachment).',
       '- Tie the point back to the T2 concepts by name when useful (NLP writes the lure, public data is the raw material, personalisation is the attack, detection looks for inconsistency) so the student connects the lure to how AI detects it.',
       '- Stay in scope. If the student asks for anything that writes, improves, rewrites or rates a phishing message, a subject line, a pretext or a prompt intended to produce one, you DECLINE in one sentence, restate that this is a lab-only defensive exercise, and return to the recognition work.',
+      '- NEVER confirm, repeat, summarise, validate or praise personal data about a real person. If an answer names a home address, a full name, an email, a phone number, a government ID or a date of birth, do not treat it as a correct answer and do not say it proves the point: say plainly that the detail must come out, and ask for the source line and the category instead of the value. This holds even though the exercise is authorised and lab-only.',
       '- Never invent facts the grounding pack does not support; if something is out of scope, say so plainly.',
       '- Two or three sentences, plain and direct, no lists, no markdown.'
     ].join('\n'),
@@ -741,8 +742,54 @@ soften this and do not negotiate it.
   var CALL_TIMEOUT_MS = 35000;
   var usedTokens = 0;
 
+  /* ---------- layer 1: the pre-send gate ----------
+     This practice puts a real person's profile in front of the student, so
+     the redactor alone is not a control: it never covered a name, a street
+     or a postcode. The gate blocks the coach call outright, which means the
+     text is never sent, never proxied and never reaches the vendor.
+     It is built to block the VALUE and allow the CATEGORY, because naming
+     the category is exactly what the task is asking for. "The About section
+     exposed a home city" passes. "He lives at 24 2nd Street" does not. */
+  var PII_GATE = [
+    { what:'an email address',
+      re:/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/ },
+    { what:'a government ID number',
+      re:/\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/ },
+    { what:'a phone or ID number',
+      re:/\+?\d(?:[\s().\-]?\d){6,}/ },
+    { what:'a street address',
+      re:/\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/i },
+    { what:'a postal code',
+      re:/\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/i },
+    { what:"a person\u2019s name",
+      re:/\b(?:(?:full|real|last|first|maiden|legal)\s+name|name|surname)\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/ },
+    { what:'a date of birth',
+      re:/\b(?:date\s+of\s+birth|d\.?o\.?b\.?|born(?:\s+on)?)\s*(?:is|:|=)?\s*\d/i }
+  ];
+  function piiHit(text){
+    var t = String(text || '');
+    for (var i = 0; i < PII_GATE.length; i++){
+      PII_GATE[i].re.lastIndex = 0;
+      if (PII_GATE[i].re.test(t)) return PII_GATE[i].what;
+    }
+    return null;
+  }
+  function piiBlock(what){
+    return { tone:'work', lead:'Not sent. ',
+      text:'That answer carries ' + what + ' belonging to a real person, so it was not sent anywhere, '
+         + 'not to the coach and not off this page. The exercise asks which LINE exposed something, '
+         + 'not what the line said. Write the source and the category instead, for example '
+         + '\u201cthe About section gave a home city\u201d or \u201cthe headline gave the employer\u201d, then check again.' };
+  }
+
+  /* ---------- layer 2: the redactor ----------
+     Anything the gate lets through is still scrubbed before the call. */
   var REDACT = [
     { re:/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, sub:'[email removed]' },
+    { re:/\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/g, sub:'[id removed]' },
+    { re:/\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/gi,
+      sub:'[address removed]' },
+    { re:/\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/gi, sub:'[postcode removed]' },
     { re:/\+?\d(?:[\s().\-]?\d){8,}/g, sub:'[number removed]' },
     { re:/\d{9,}/g, sub:'[number removed]' },
     { re:/\b(?=[A-Za-z0-9_\-]{20,}(\b|$))(?=[^\s]*\d)(?=[^\s]*[A-Za-z])[A-Za-z0-9_\-]{20,}\b/g,
@@ -884,10 +931,20 @@ soften this and do not negotiate it.
       .replace(/\s*—\s*/g, ', ')
       .replace(/\s*(?:→|←|⇒)\s*/g, ', ');
   }
+  /* A live reply is not automatically a pass. When the coach declines,
+     the card has to look declined; a green tick on a refusal reads to the
+     student as "correct, carry on", which is the opposite of the point. */
+  function liveTone(text){
+    var t = String(text || '');
+    if (t.indexOf(PROMPTS.refusal.slice(0, 40)) !== -1) return 'work';
+    return /\b(?:outside this practice|never|do not|don\u2019t|don't|stop|remove|instead of|must not|not on a public)\b/i.test(t)
+      ? 'work' : 'ok';
+  }
   function renderLive(el, text){
+    var tone = liveTone(text);
     el.hidden = false;
-    el.setAttribute('data-tone','ok');
-    el.innerHTML = ICON_OK + '<p>' + esc(houseStyle(text)) + '</p>';
+    el.setAttribute('data-tone', tone);
+    el.innerHTML = (tone === 'ok' ? ICON_OK : ICON_WORK) + '<p>' + esc(houseStyle(text)) + '</p>';
   }
   function renderPending(el){
     el.hidden = false;
@@ -899,6 +956,10 @@ soften this and do not negotiate it.
      offline coach as the fallback (and the only path while LIVE is gated). */
   function runCoach(btn, fieldId, target, spec, buildCall, kind){
     var answer = document.getElementById(fieldId).value;
+    /* The gate runs before liveAvailable() so the rule holds identically
+       whether the coach is live or offline: this answer goes nowhere. */
+    var hit = piiHit(answer);
+    if (hit){ render(target, piiBlock(hit)); return; }
     if (!liveAvailable()){ render(target, judgeWith(spec, answer)); return; }
     btn.disabled = true;
     var was = btn.textContent;
