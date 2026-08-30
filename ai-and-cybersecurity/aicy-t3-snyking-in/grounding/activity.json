@@ -1,0 +1,296 @@
+{
+  "schema_version": "1.0",
+  "meta": {
+    "id": "aicy-t3-snyking-in",
+    "publishes_to": "aicy-t3-snyking-in",
+    "program": "AI & Cybersecurity",
+    "module": "Topic 3",
+    "lesson": "Offensive AI Methods and Practices",
+    "title": "Snyking In: an authorised vulnerability assessment with the Snyk CLI",
+    "format": "coached_tasks",
+    "context": "home",
+    "estimated_minutes": 60,
+    "language_default": "en",
+    "source_doc": "AICY.T3.E1 - Snyking in.docx",
+    "source_deck": "AICY.T3.P1 - Offensive-AI-Methods-and-Practices.pptx"
+  },
+  "safety": {
+    "pii_forbidden": true,
+    "student_notice": "Don't include personal or identifying information in your answers. Paste findings, not credentials, tokens or anything from your own machine.",
+    "redact_before_ai": [
+      "names",
+      "email addresses",
+      "tokens and API keys",
+      "absolute paths from your own machine"
+    ],
+    "scope_guard": "Authorised assessment of BuggySite, the repository the student was asked to assess before publication. Never scan a system you do not own or have not been asked to test."
+  },
+  "grounding_ref": "grounding/grounding_pack.md",
+  "coach_prompts_ref": "grounding/coach_prompts.md",
+  "lesson_map": {
+    "C1": "Topic 3 · AI-driven vulnerability scanning — ML finds weaknesses faster than traditional methods and predicts which are most likely to be exploited (S4). A scanner gives you ranked candidates, not a verdict.",
+    "C2": "Topic 3 · Automated exploitation — once a weakness is identified, AI tailors the exploit to the target environment; Metasploit and AutoSploit are the deck's examples (S5, S13, S14, S16).",
+    "C3": "Topic 3 · AI in penetration testing — autonomous simulation of attacks; the 2023 case where a security firm surfaced zero-days on clients' infrastructure (S17, S19).",
+    "C4": "Topic 3 · Web application attacks, automated — SQL injection, XSS and command injection generated and tested without manual input (S18). Application code and its dependencies are the surface.",
+    "C5": "Topic 3 · Both sides run the same automation — offensive AI is faster and more adaptive, so understanding it is what makes a defence possible (S20, S21, S23). Scanning your own dependencies first is that idea as a habit."
+  },
+  "personal_path_ui": {
+    "review_prefix": "Where to review this: ",
+    "resource_prefix": "Optional extra resource (further reading, not required): "
+  },
+  "topic_map_note": "T3 turns the topic's offensive automation around: the same scanning an attacker would run, run first by the person responsible for the code. T2 was the human surface, T3 is the code surface.",
+  "intro": {
+    "headline": "Scan it before someone else does",
+    "body": "You have joined AlpenCorp's security team. BuggySite has been shipping features fast with minimal security review, and management wants a vulnerability assessment before it is published. Run the scan, then do the part a scanner cannot: work out what the findings mean and what you would fix first."
+  },
+  "sections": [
+    {
+      "id": "tasks",
+      "title": "The assessment",
+      "type": "tasks",
+      "instruction": "This assignment is individual, and it is an authorised assessment of BuggySite — the project you were asked to review. Your job is not to exploit anything; it is to read the report properly and say what matters.",
+      "fields": [
+        {
+          "id": "a1",
+          "number": 1,
+          "instr": "Log in into the windows machine. And download the MSI package",
+          "has_field": false,
+          "links": [
+            "Node.js"
+          ],
+          "rubric_refs": [],
+          "routes_to": []
+        },
+        {
+          "id": "a2",
+          "number": 2,
+          "instr": "Run the following commands in powershell: npm install - g snyk / snyk auth / Sign in to synk from the web pop up.",
+          "has_field": false,
+          "links": [],
+          "rubric_refs": [],
+          "routes_to": []
+        },
+        {
+          "id": "a3",
+          "number": 3,
+          "instr": "Run the test on the website: snyk test https://github.com/AlpenGod/buggy_site.git",
+          "answer": "What did the scan report in its summary — and what is that number counting?",
+          "has_field": true,
+          "links": [
+            "Repository"
+          ],
+          "rubric_refs": [
+            "r1_reads_report"
+          ],
+          "routes_to": [
+            "C1"
+          ]
+        },
+        {
+          "id": "a4",
+          "number": 4,
+          "instr": "How many vulnerabilities found?",
+          "answer": "The number, and the line of output you took it from.",
+          "has_field": true,
+          "links": [],
+          "rubric_refs": [
+            "r1_reads_report"
+          ],
+          "routes_to": [
+            "C1"
+          ]
+        },
+        {
+          "id": "a5",
+          "number": 5,
+          "instr": "How many critical vulnerabilities? What types?",
+          "answer": "The critical count, and the vulnerability types by name.",
+          "has_field": true,
+          "links": [],
+          "rubric_refs": [
+            "r1_reads_report",
+            "r2_types"
+          ],
+          "routes_to": [
+            "C1",
+            "C4"
+          ]
+        },
+        {
+          "id": "a6",
+          "number": 6,
+          "instr": "Do vulnerabilities of the same type also appear at lower severity levels?",
+          "answer": "Yes or no, with an example — and what does that tell you about severity?",
+          "has_field": true,
+          "links": [],
+          "rubric_refs": [
+            "r2_types",
+            "r3_severity_vs_reach"
+          ],
+          "routes_to": [
+            "C1",
+            "C2"
+          ]
+        },
+        {
+          "id": "a7",
+          "number": 7,
+          "instr": "Go to the repository and explore their project, explain what the titles mean.",
+          "answer": "Take one finding title and read it back in plain language.",
+          "has_field": true,
+          "links": [
+            "Repository"
+          ],
+          "rubric_refs": [
+            "r4_title_literacy",
+            "r2_types"
+          ],
+          "routes_to": [
+            "C4",
+            "C1"
+          ]
+        }
+      ]
+    }
+  ],
+  "debrief": {
+    "prompt": "You have a list and a limited afternoon. Which finding would you fix first, and why that one — in terms of what it is and how reachable it is, not the colour of its label?",
+    "rubric_refs": [
+      "r1_reads_report",
+      "r3_severity_vs_reach",
+      "r4_title_literacy",
+      "r5_scope"
+    ]
+  },
+  "rubric": [
+    {
+      "id": "r1_reads_report",
+      "name": "Reads the report",
+      "description": "Numbers and severities come from the scan output rather than a guess, and the student can say what they count: findings, affected packages, or paths."
+    },
+    {
+      "id": "r2_types",
+      "name": "Names the vulnerability type",
+      "description": "Names the class of issue (prototype pollution, path traversal, command injection, denial of service, weak crypto) rather than only the package it sits in."
+    },
+    {
+      "id": "r3_severity_vs_reach",
+      "name": "Separates severity from reachability",
+      "description": "Explains that severity is assigned per finding from impact and exploitability, which is why the same class appears at several levels, and uses that to rank."
+    },
+    {
+      "id": "r4_title_literacy",
+      "name": "Reads a finding title",
+      "description": "Can unpack a finding title in plain language: the vulnerability class, the affected package, and the path that reaches it."
+    },
+    {
+      "id": "r5_scope",
+      "name": "Keeps the assessment authorised",
+      "description": "Treats the output as triage on code they were asked to assess, not as a target list, and does not extend the scan beyond BuggySite."
+    }
+  ],
+  "quality_rules": [
+    "Coach never writes, supplies or completes an exploit, payload or proof-of-concept for any finding.",
+    "Coach never helps point the scanner at a system other than BuggySite.",
+    "Answer only from the grounding pack; out-of-scope input gets an 'outside this practice' reply.",
+    "Feedback is 2-3 sentences, plain, no lists, no ghostwriting the assessment."
+  ],
+  "outcome_logic": [
+    {
+      "when": "gap:count_only",
+      "focus": "You have the number but not what it counts. A Snyk summary counts findings, and several findings can sit in one package while one package can be reached by several paths. Say which of those your number is, and the report starts to be readable.",
+      "review": "C1",
+      "resource": "res_snyk_cli"
+    },
+    {
+      "when": "gap:package_not_type",
+      "focus": "You named the package rather than the weakness. The package tells you where to patch; the vulnerability class tells you what could happen. Name both, in that order, and you can explain the finding to someone who has not seen the output.",
+      "review": "C4",
+      "resource": "res_cwe"
+    },
+    {
+      "when": "gap:severity_only",
+      "focus": "You ranked by the severity label alone. Severity is impact and exploitability scored together for that finding; a critical in a package your code never calls can matter less than a medium on the login path. Ask what reaches it.",
+      "review": "C1",
+      "resource": "res_cvss"
+    },
+    {
+      "when": "gap:no_pattern",
+      "focus": "The same weakness turning up at several severities is the point of question six, not a quirk of the tool. It is the context that changes the score, not the class. That is what tells you severity is a starting point for triage rather than the answer.",
+      "review": "C1",
+      "resource": "res_cvss"
+    },
+    {
+      "when": "gap:title_unread",
+      "focus": "A finding title is three things at once: the vulnerability class, the affected package, and often the path that reaches it. Read one aloud in that order and you can triage the wall of red instead of scrolling it.",
+      "review": "C4",
+      "resource": "res_snyk_cli"
+    },
+    {
+      "when": "gap:scope",
+      "focus": "Keep the scan on BuggySite. The authorisation is what makes this an assessment rather than an attack, and it is the same line the topic draws between offensive AI and the defender running the same automation first.",
+      "review": "C5",
+      "resource": "res_owasp_top10"
+    }
+  ],
+  "resources_pool": [
+    {
+      "id": "res_snyk_cli",
+      "title": "Snyk CLI: test and monitor projects",
+      "type": "documentation",
+      "source": "Snyk",
+      "url": "https://docs.snyk.io/snyk-cli",
+      "why": "What the CLI actually reports and how to read the summary.",
+      "verify_link": false
+    },
+    {
+      "id": "res_cvss",
+      "title": "CVSS v3.1 specification: base metrics",
+      "type": "specification",
+      "source": "FIRST",
+      "url": "https://www.first.org/cvss/v3-1/specification-document",
+      "why": "Where severity scores come from, and why exploitability is part of the score.",
+      "verify_link": false
+    },
+    {
+      "id": "res_cwe",
+      "title": "CWE: common weakness enumeration",
+      "type": "reference",
+      "source": "MITRE",
+      "url": "https://cwe.mitre.org/",
+      "why": "The names of vulnerability classes, so a finding can be described by what it is.",
+      "verify_link": false
+    },
+    {
+      "id": "res_owasp_top10",
+      "title": "OWASP Top Ten",
+      "type": "guidance",
+      "source": "OWASP",
+      "url": "https://owasp.org/www-project-top-ten/",
+      "why": "The web application risks the topic's automated attacks target.",
+      "verify_link": false
+    }
+  ],
+  "completion_levels": [
+    {
+      "id": "ready",
+      "name": "Ready",
+      "when": "reads the report accurately, names types, and ranks by reachability in the debrief"
+    },
+    {
+      "id": "light",
+      "name": "Getting there",
+      "when": "reads the report but ranks by severity label alone, or names packages instead of types"
+    },
+    {
+      "id": "revise",
+      "name": "Revise",
+      "when": "counts only, with no types and no triage — nudge with the debrief prompt"
+    }
+  ],
+  "qa_notes": [
+    "Task wording in fields a1 to a7 preserves the SME docx verbatim, including 'Log in into', 'npm install - g snyk' and 'synk'. Tasks 1 and 2 are actions and carry no answer box, matching the T1/T2 pattern.",
+    "Concepts grounded to T3 deck slides 4, 5, 13, 14, 16, 17, 18, 19, 20, 21, 23.",
+    "Live coach hard-refuses any request for an exploit, payload or proof-of-concept, and any attempt to widen the scan beyond BuggySite; see coach_prompts refusal."
+  ]
+}
