@@ -101,6 +101,26 @@
   }
   .btn.ghost:hover{background:var(--tint);color:var(--navy-dark)}
 
+
+  /* ---------- exercise identifier ----------
+     The exercise code has to be readable on the page itself, not only on the
+     deck slide and in the practice film. Trainer-reported, 31 Aug 2026. */
+  .exhead{
+    display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;
+    margin:2px 0 22px;padding:0 0 14px;border-bottom:1px solid var(--line);
+  }
+  .exhead .exlabel{
+    font-family:var(--display);font-size:.72rem;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--teal-text);
+  }
+  .exhead .exid{
+    font-family:var(--display);font-size:.95rem;font-weight:700;
+    color:var(--navy);
+  }
+  .exhead .exname{font-size:.95rem;font-weight:600;color:var(--body)}
+  .exhead .exname::before{content:"\00b7";margin-right:9px;color:var(--edge)}
+  @media print{.exhead{display:none}}
+
   /* ---------- coach reply ---------- */
   .reply{
     display:flex;gap:12px;align-items:flex-start;
@@ -226,6 +246,7 @@
 
 <div class="page">
 
+  <p class="exhead"><span class="exlabel">Hands-on exercise</span><span class="exid">AICY.T0.E1</span><span class="exname">Media Literacy</span></p>
   <!-- ============ coach debrief ============ -->
   <section class="sec" aria-labelledby="h-debrief">
     <p class="eyebrow">AI Coach</p>
