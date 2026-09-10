@@ -72,6 +72,10 @@ link the repository root; it only shows a neutral notice.
 | Enterprise AI Implementation | M1 / L5 | Homework 5: Completing the Architecture Document and Preparing for Build vs Buy — HOME, AI coach + personal path + resources | `enterprise-ai-implementation/eai-m1l5-home/` |
 | Enterprise AI Implementation | M1 / L6 | AI Implementation Canvas for Your Own Use Case (In Class) — CLASS, AI coach (Practice Studio) | `enterprise-ai-implementation/eai-m1l6-class/` |
 | Enterprise AI Implementation | M1 / L6 | Module 1 Final Homework: AI Implementation Canvas and Opening Pitch — HOME, AI coach + personal path + resources | `enterprise-ai-implementation/eai-m1l6-home/` |
+| Digital Marketing Specialist | M1 / L1 | Class practice: read the real thing — CLASS, AI coach (Practice Studio) | `digital-marketing/dm-m1l1-class/` |
+| Digital Marketing Specialist | M1 / L1 | Home practice: the digital report and trend research — HOME, AI coach + personal path | `digital-marketing/dm-m1l1-home/` |
+| Digital Marketing Specialist | M2 / L1 | Class practice: read the market before you spend in it — CLASS, AI coach (Practice Studio). Rebuilt 10 Sep 2026 against the split lesson 1 | `digital-marketing/dm-m2l1-class/` |
+| Digital Marketing Specialist | M2 / L1 | Home practice: finish the research the plan is built on — HOME, AI coach + personal path. Rebuilt 10 Sep 2026 | `digital-marketing/dm-m2l1-home/` |
 | AI & Cybersecurity (AICY60) | T0 / E1 | AICY.T0.E1 - Media Literacy: coach debrief + personal path add-on (sits under Dor's native Rise task boxes), verbatim SME wording | `ai-and-cybersecurity/aicy-t0-media-literacy/` |
 | AI & Cybersecurity (AICY60) | T1 / E1 | AICY.T1.E1 - DeepPhishing: 6-card workbook, verbatim SME wording, AI coach + personal path, on-device autosave | `ai-and-cybersecurity/aicy-t1-deepphishing/` |
 
