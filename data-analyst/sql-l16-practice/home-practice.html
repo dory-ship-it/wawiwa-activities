@@ -7013,14 +7013,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   /* a section's aggregate status: all fields Ready = done,
      some answered = in progress, none = not started */
   function sectionStatus(stop, activity, state) {
-    var tags = stop.items.map(function (entry) { return itemTag(entry, activity, state); });
-    var answered = stop.items.filter(function (entry) {
+    var reqItems = stop.items.filter(function (entry) {
+      return !(entry.item && entry.item.required === false);
+    });
+    var tags = reqItems.map(function (entry) { return itemTag(entry, activity, state); });
+    var answered = reqItems.filter(function (entry) {
       return (state.answers[entry.id] || '').trim();
     }).length;
     return {
       done: tags.length > 0 && tags.every(function (t) { return t === 'Ready'; }),
       answered: answered,
-      total: stop.items.length
+      total: reqItems.length
     };
   }
 
@@ -7043,10 +7046,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }).length;
       state.shell.hud.medallion.set(doneCases, workStops(state.stops).length);
     } else {
-      var ready = state.items.filter(function (entry) {
+      var reqItems = state.items.filter(function (entry) {
+        return !(entry.item && entry.item.required === false);
+      });
+      var ready = reqItems.filter(function (entry) {
         return itemTag(entry, activity, state) === 'Ready';
       });
-      state.shell.hud.medallion.set(ready.length, state.items.length);
+      state.shell.hud.medallion.set(ready.length, reqItems.length);
     }
 
     // section tiles (the rail, now a secondary jump list) and the picker's
