@@ -7,45 +7,50 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Merriweather:ital,opsz,wght@0,18..144,300;0,18..144,400&display=swap">
 <style>
   :root{
-    --ground:#FAFAFA; --card:#FFFFFF;
-    --ink:#1D1D1F; --ink-2:#4A4A4F; --muted:#86868B;
-    --hair:#E8E8EA; --field:#F2F2F4;
-    --accent:#3E9B93; --accent-soft:#EAF4F3;
-    --shadow:0 1px 2px rgba(0,0,0,.04), 0 12px 40px -12px rgba(0,0,0,.10);
-    --shadow-soft:0 1px 2px rgba(0,0,0,.03);
+    --ground:#EAF2F1; --card:#FFFFFF;
+    --ink:#17201F; --ink-2:#44514F; --muted:#7C8A88;
+    --hair:#E2EAE9; --field:#F1F6F5;
+    --accent:#2F8F86; --accent-soft:#DFEFED;
+    --shadow:0 1px 2px rgba(23,32,31,.05), 0 18px 44px -18px rgba(23,32,31,.22);
+    --shadow-soft:0 1px 2px rgba(23,32,31,.05);
     --ease:cubic-bezier(.2,.7,.2,1);
   }
   @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-    --ground:#000; --card:#1C1C1E; --ink:#F5F5F7; --ink-2:#D2D2D6; --muted:#8E8E93;
-    --hair:#2C2C2E; --field:#262629; --accent:#5AC8BE; --accent-soft:#17302E;
-    --shadow:0 1px 2px rgba(0,0,0,.5), 0 16px 48px -16px rgba(0,0,0,.7);
+    --ground:#0C1312; --card:#18211F; --ink:#EDF3F2; --ink-2:#C6D2D0; --muted:#8A9997;
+    --hair:#26312F; --field:#212B29; --accent:#5CC9BE; --accent-soft:#153330;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 52px -18px rgba(0,0,0,.8);
     --shadow-soft:0 1px 2px rgba(0,0,0,.4);
   }}
   :root[data-theme="dark"]{
-    --ground:#000; --card:#1C1C1E; --ink:#F5F5F7; --ink-2:#D2D2D6; --muted:#8E8E93;
-    --hair:#2C2C2E; --field:#262629; --accent:#5AC8BE; --accent-soft:#17302E;
-    --shadow:0 1px 2px rgba(0,0,0,.5), 0 16px 48px -16px rgba(0,0,0,.7);
+    --ground:#0C1312; --card:#18211F; --ink:#EDF3F2; --ink-2:#C6D2D0; --muted:#8A9997;
+    --hair:#26312F; --field:#212B29; --accent:#5CC9BE; --accent-soft:#153330;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 52px -18px rgba(0,0,0,.8);
     --shadow-soft:0 1px 2px rgba(0,0,0,.4);
   }
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{background:var(--ground); color:var(--ink); font-family:"Lato",-apple-system,BlinkMacSystemFont,system-ui,sans-serif; -webkit-font-smoothing:antialiased}
-  .stage{display:flex; flex-direction:column; align-items:center; padding:22px 20px 26px; gap:14px}
-  .eyebrow{font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
-  .card{width:100%; max-width:600px; background:var(--card); border-radius:22px; box-shadow:var(--shadow); padding:34px 38px 28px; display:flex; flex-direction:column; gap:20px}
+  body{
+    background:var(--ground); color:var(--ink);
+    background-image:radial-gradient(120% 70% at 50% 0%, var(--accent-soft) 0%, transparent 62%);
+    background-repeat:no-repeat;
+    font-family:"Lato",-apple-system,BlinkMacSystemFont,system-ui,sans-serif; -webkit-font-smoothing:antialiased;
+  }
+  .stage{display:flex; flex-direction:column; align-items:center; padding:18px 18px 20px; gap:12px}
+  .eyebrow{font-size:11.5px; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--accent)}
+  .card{width:100%; max-width:588px; background:var(--card); border-radius:20px; box-shadow:var(--shadow); padding:28px 34px 24px; display:flex; flex-direction:column; gap:18px}
   .card.quiet{padding:16px 22px; box-shadow:var(--shadow-soft); gap:8px; border:1px solid var(--hair)}
-  .scene{display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 -8px}
-  .scene svg{width:13px; height:13px; flex:none; stroke:var(--muted)}
-  .q{font-family:"Merriweather",Georgia,serif; font-weight:300; font-size:clamp(21px,3.2vw,26px); line-height:1.45; letter-spacing:-.008em; margin:0; text-wrap:pretty}
+  .scene{display:flex; align-items:center; gap:8px; font-size:11px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--accent); margin:0 0 -6px}
+  .scene svg{width:13px; height:13px; flex:none; stroke:var(--accent)}
+  .q{font-family:"Merriweather",Georgia,serif; font-weight:300; font-size:clamp(19px,2.6vw,22px); line-height:1.4; letter-spacing:-.006em; margin:0; text-wrap:pretty; color:var(--ink)}
   .fieldwrap{display:flex; flex-direction:column; gap:10px}
-  textarea{width:100%; min-height:128px; resize:none; background:var(--field); border:none; border-radius:14px; padding:18px 20px; font-family:"Lato",system-ui,sans-serif; font-size:16.5px; line-height:1.6; color:var(--ink); transition:box-shadow .25s var(--ease)}
+  textarea{width:100%; min-height:96px; resize:none; background:var(--field); border:none; border-radius:14px; padding:18px 20px; font-family:"Lato",system-ui,sans-serif; font-size:16.5px; line-height:1.6; color:var(--ink); transition:box-shadow .25s var(--ease)}
   textarea::placeholder{color:var(--muted)}
   textarea:focus{outline:none; box-shadow:0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent)}
   .privacy{display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5; color:var(--muted); padding-inline-start:4px; margin:0}
   .privacy svg{width:13px; height:13px; flex:none; margin-top:3px; stroke:var(--muted)}
   .foot{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap}
   .hint{font-size:13.5px; color:var(--muted)}
-  button{font-family:"Lato",system-ui,sans-serif; font-size:16px; font-weight:700; border:none; border-radius:980px; padding:13px 30px; background:var(--accent); color:#fff; cursor:pointer; transition:transform .18s var(--ease), opacity .18s var(--ease), filter .18s var(--ease)}
+  button{font-family:"Lato",system-ui,sans-serif; font-size:15.5px; font-weight:700; border:none; border-radius:980px; padding:11px 26px; background:var(--accent); color:#fff; cursor:pointer; transition:transform .18s var(--ease), opacity .18s var(--ease), filter .18s var(--ease)}
   button:hover{filter:brightness(1.06)} button:active{transform:scale(.97)}
   button:disabled{opacity:.3; cursor:default; transform:none; filter:none}
   button.ghost{background:transparent; color:var(--accent); padding:13px 10px; font-weight:400}
@@ -67,13 +72,13 @@
   .dots i{width:6px; height:6px; border-radius:50%; background:var(--muted); display:block; animation:blip 1.15s ease-in-out infinite}
   .dots i:nth-child(2){animation-delay:.16s} .dots i:nth-child(3){animation-delay:.32s}
   @keyframes blip{0%,60%,100%{opacity:.25; transform:translateY(0)} 30%{opacity:.9; transform:translateY(-3px)}}
-  .coach-body{font-family:"Merriweather",Georgia,serif; font-weight:300; font-size:17px; line-height:1.62; margin:0}
+  .coach-body{font-family:"Merriweather",Georgia,serif; font-weight:300; font-size:16px; line-height:1.58; margin:0}
   .coach-body span{opacity:0; animation:word .5s var(--ease) forwards}
   @keyframes word{to{opacity:1}}
   .grp{display:flex; flex-direction:column; gap:2px}
   .grp + .grp{margin-top:10px}
   .grp .lbl{font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding-bottom:8px}
-  .grp a{display:flex; align-items:baseline; gap:14px; padding:14px 2px; border-top:1px solid var(--hair); text-decoration:none; color:inherit; transition:opacity .2s var(--ease)}
+  .grp a{display:flex; align-items:baseline; gap:14px; padding:12px 2px; border-top:1px solid var(--hair); text-decoration:none; color:inherit; transition:opacity .2s var(--ease)}
   .grp a:hover{opacity:.6}
   .grp .nm{font-size:16px; font-weight:700; flex:none}
   .grp .why{font-size:14.5px; color:var(--muted); line-height:1.5}
@@ -87,7 +92,7 @@
     .enter,.coach-body span,.dots i,.mark .halo,.mark .glyph{animation:none!important; opacity:1!important}
     *{transition:none!important}
   }
-  @media (max-width:560px){.card{padding:26px 22px 22px; border-radius:20px} .stage{padding:16px 14px 20px}}
+  @media (max-width:560px){.card{padding:22px 20px 20px; border-radius:18px} .stage{padding:14px 12px 16px}}
 </style>
 </head>
 <body>
@@ -200,7 +205,7 @@ window.ACTIVITY = {
   "id": "ai-in-data-l02-reflection",
   "eyebrow": "In class · Lesson 2",
   "scene": "From the film · The quality gate",
-  "question": "You are about to ask an AI to help design the duplicate checks for the weekly order file. What would you put in the request, and what would you deliberately keep inside the workbook?",
+  "question": "You are about to ask an AI to design the duplicate checks for the weekly order file. What goes into the request, and what stays inside the workbook?",
   "placeholder": "A sentence or two is enough.",
   "privacy": "Keep it about the work. Don't paste rows from the workbook, and don't type names, email addresses, phone numbers or anything else personal — yours or anyone else's.",
   "fallbackReply": "Holding the rows back is the call most people skip, so that part is right. What is worth sharpening is the other half: the shape of the problem is the grain, the field names and the rules you already know, and a list of columns on its own will not get you a check you can actually test.",
@@ -325,7 +330,7 @@ window.ACTIVITY = {
 
   ta.addEventListener('input', function(){
     send.disabled = ta.value.trim().length < 8;
-    ta.style.height='auto'; ta.style.height = Math.max(128, ta.scrollHeight)+'px';
+    ta.style.height='auto'; ta.style.height = Math.max(96, ta.scrollHeight)+'px';
   });
   function show(el){ el.hidden=false; el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
   function finish(){ coachHead.classList.remove('thinking'); coachState.textContent=''; show(coachFoot); }
