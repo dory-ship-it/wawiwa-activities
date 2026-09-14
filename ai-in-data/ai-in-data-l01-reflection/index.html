@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 1 · Reflection</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Merriweather:ital,opsz,wght@0,18..144,300;0,18..144,400&display=swap">
+<style>
+  :root{
+    --ground:#FAFAFA; --card:#FFFFFF;
+    --ink:#1D1D1F; --ink-2:#4A4A4F; --muted:#86868B;
+    --hair:#E8E8EA; --field:#F2F2F4;
+    --accent:#3E9B93; --accent-soft:#EAF4F3;
+    --shadow:0 1px 2px rgba(0,0,0,.04), 0 12px 40px -12px rgba(0,0,0,.10);
+    --shadow-soft:0 1px 2px rgba(0,0,0,.03);
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+    --ground:#000; --card:#1C1C1E; --ink:#F5F5F7; --ink-2:#D2D2D6; --muted:#8E8E93;
+    --hair:#2C2C2E; --field:#262629; --accent:#5AC8BE; --accent-soft:#17302E;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 16px 48px -16px rgba(0,0,0,.7);
+    --shadow-soft:0 1px 2px rgba(0,0,0,.4);
+  }}
+  :root[data-theme="dark"]{
+    --ground:#000; --card:#1C1C1E; --ink:#F5F5F7; --ink-2:#D2D2D6; --muted:#8E8E93;
+    --hair:#2C2C2E; --field:#262629; --accent:#5AC8BE; --accent-soft:#17302E;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 16px 48px -16px rgba(0,0,0,.7);
+    --shadow-soft:0 1px 2px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--ground); color:var(--ink); font-family:"Lato",-apple-system,BlinkMacSystemFont,system-ui,sans-serif; -webkit-font-smoothing:antialiased}
+  .stage{min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 24px 80px; gap:16px}
+  .eyebrow{font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+  .card{width:100%; max-width:600px; background:var(--card); border-radius:22px; box-shadow:var(--shadow); padding:42px 44px 34px; display:flex; flex-direction:column; gap:22px}
+  .card.quiet{padding:16px 22px; box-shadow:var(--shadow-soft); gap:8px; border:1px solid var(--hair)}
+  .scene{display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 -8px}
+  .scene svg{width:13px; height:13px; flex:none; stroke:var(--muted)}
+  .q{font-family:"Merriweather",Georgia,serif; font-weight:300; font-size:clamp(21px,3.2vw,26px); line-height:1.45; letter-spacing:-.008em; margin:0; text-wrap:pretty}
+  .fieldwrap{display:flex; flex-direction:column; gap:10px}
+  textarea{width:100%; min-height:128px; resize:none; background:var(--field); border:none; border-radius:14px; padding:18px 20px; font-family:"Lato",system-ui,sans-serif; font-size:16.5px; line-height:1.6; color:var(--ink); transition:box-shadow .25s var(--ease)}
+  textarea::placeholder{color:var(--muted)}
+  textarea:focus{outline:none; box-shadow:0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent)}
+  .privacy{display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5; color:var(--muted); padding-inline-start:4px; margin:0}
+  .privacy svg{width:13px; height:13px; flex:none; margin-top:3px; stroke:var(--muted)}
+  .foot{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap}
+  .hint{font-size:13.5px; color:var(--muted)}
+  button{font-family:"Lato",system-ui,sans-serif; font-size:16px; font-weight:700; border:none; border-radius:980px; padding:13px 30px; background:var(--accent); color:#fff; cursor:pointer; transition:transform .18s var(--ease), opacity .18s var(--ease), filter .18s var(--ease)}
+  button:hover{filter:brightness(1.06)} button:active{transform:scale(.97)}
+  button:disabled{opacity:.3; cursor:default; transform:none; filter:none}
+  button.ghost{background:transparent; color:var(--accent); padding:13px 10px; font-weight:400}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+  .recall .lbl{font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+  .recall .txt{font-family:"Merriweather",Georgia,serif; font-weight:300; font-size:15px; line-height:1.55; color:var(--ink-2); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  .coach-head{display:flex; align-items:center; gap:11px}
+  .mark{position:relative; width:28px; height:28px; flex:none; display:flex; align-items:center; justify-content:center}
+  .mark .halo{position:absolute; inset:-5px; border-radius:50%; background:radial-gradient(circle, var(--accent) 0%, transparent 68%); opacity:0; transform:scale(.7)}
+  .mark .glyph{position:relative; width:28px; height:28px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center}
+  .mark .glyph svg{width:15px; height:15px; display:block}
+  .coach-head.thinking .halo{animation:breathe 1.9s ease-in-out infinite}
+  .coach-head.thinking .glyph{animation:spin 3.4s linear infinite}
+  @keyframes breathe{0%,100%{opacity:0; transform:scale(.7)} 50%{opacity:.30; transform:scale(1.18)}}
+  @keyframes spin{to{transform:rotate(180deg)}}
+  .coach-name{font-size:13.5px; font-weight:700}
+  .coach-state{font-size:13px; color:var(--muted); margin-inline-start:auto}
+  .dots{display:inline-flex; gap:5px; align-items:center; height:20px}
+  .dots i{width:6px; height:6px; border-radius:50%; background:var(--muted); display:block; animation:blip 1.15s ease-in-out infinite}
+  .dots i:nth-child(2){animation-delay:.16s} .dots i:nth-child(3){animation-delay:.32s}
+  @keyframes blip{0%,60%,100%{opacity:.25; transform:translateY(0)} 30%{opacity:.9; transform:translateY(-3px)}}
+  .coach-body{font-family:"Merriweather",Georgia,serif; font-weight:300; font-size:17px; line-height:1.62; margin:0}
+  .coach-body span{opacity:0; animation:word .5s var(--ease) forwards}
+  @keyframes word{to{opacity:1}}
+  .grp{display:flex; flex-direction:column; gap:2px}
+  .grp + .grp{margin-top:10px}
+  .grp .lbl{font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding-bottom:8px}
+  .grp a{display:flex; align-items:baseline; gap:14px; padding:14px 2px; border-top:1px solid var(--hair); text-decoration:none; color:inherit; transition:opacity .2s var(--ease)}
+  .grp a:hover{opacity:.6}
+  .grp .nm{font-size:16px; font-weight:700; flex:none}
+  .grp .why{font-size:14.5px; color:var(--muted); line-height:1.5}
+  .grp .arrow{margin-inline-start:auto; color:var(--accent); font-size:17px; line-height:1; flex:none}
+  .done{font-family:"Merriweather",Georgia,serif; font-weight:300; font-size:19px; line-height:1.55; margin:0}
+  .done small{display:block; font-family:"Lato",sans-serif; font-size:14px; color:var(--muted); margin-top:12px; font-weight:400}
+  .enter{animation:rise .42s var(--ease) both}
+  @keyframes rise{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+  [hidden]{display:none!important}
+  @media (prefers-reduced-motion:reduce){
+    .enter,.coach-body span,.dots i,.mark .halo,.mark .glyph{animation:none!important; opacity:1!important}
+    *{transition:none!important}
+  }
+  @media (max-width:560px){.card{padding:30px 24px 26px; border-radius:20px} .stage{padding:38px 18px 60px}}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     Reflection Practice · Wawiwa
+     Everything that changes per lesson is in ACTIVITY below.
+     Nothing under it is edited to make a new lesson.
+     ============================================================ -->
+<script>
+window.ACTIVITY = {
+  "id": "ai-in-data-l01-reflection",
+  "eyebrow": "In class · Lesson 1",
+  "scene": "From the film · The festival",
+  "question": "Your summary of the 180 festival requests says noise complaints were the top issue, and your manager is about to move the stage. Which part of that sentence could you not stand behind, and what would you do about it?",
+  "placeholder": "A sentence or two is enough.",
+  "privacy": "Keep it about the work. Don't type names, email addresses, phone numbers or anything else personal — yours or anyone else's.",
+  "coachReply": "You named the claim rather than defending it, and that is the whole habit this lesson is after. The half worth tightening is the next step: saying you would check it is not a plan until you name what you would check it against — the column you counted, and what the number should have been.",
+  "review": [
+    {
+      "name": "Why a confident answer can still be wrong",
+      "why": "Lesson 1, slides 19 to 25",
+      "url": ""
+    },
+    {
+      "name": "Five questions before you prompt",
+      "why": "Lesson 1, slide 32",
+      "url": ""
+    }
+  ],
+  "extra": [
+    {
+      "name": "The festival, again",
+      "why": "Re-watch the film",
+      "url": "https://vimeo.com/1221194601"
+    },
+    {
+      "name": "Audio overview",
+      "why": "The lesson, read aloud",
+      "url": ""
+    }
+  ],
+  "closing": "Your graded work for this lesson is in Canvas."
+};
+</script>
+
+<div class="stage">
+  <div class="eyebrow" id="eyebrow"></div>
+
+  <div class="card enter" id="cardQ">
+    <p class="scene" id="scene" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 8 6 4-6 4V8z"/><rect x="2" y="4" width="20" height="16" rx="3"/></svg>
+      <span id="sceneTxt"></span>
+    </p>
+    <p class="q" id="question"></p>
+    <div class="fieldwrap">
+      <textarea id="answer" aria-label="Your answer"></textarea>
+      <p class="privacy">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <span id="privacyTxt"></span>
+      </p>
+    </div>
+    <div class="foot">
+      <span class="hint">Nothing here is graded, and nothing is handed in.</span>
+      <button id="send" disabled>Check my thinking</button>
+    </div>
+  </div>
+
+  <div class="card quiet recall" id="cardRecall" hidden>
+    <span class="lbl">You wrote</span>
+    <span class="txt" id="recallTxt"></span>
+  </div>
+
+  <div class="card" id="cardCoach" hidden>
+    <div class="coach-head thinking" id="coachHead">
+      <span class="mark" aria-hidden="true">
+        <span class="halo"></span>
+        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></span>
+      </span>
+      <span class="coach-name">Wawiwa AI Coach</span>
+      <span class="coach-state" id="coachState"><span class="dots" role="status" aria-label="The coach is writing"><i></i><i></i><i></i></span></span>
+    </div>
+    <p class="coach-body" id="coachBody"></p>
+    <div class="foot" id="coachFoot" hidden>
+      <span class="hint">Worth another look.</span>
+      <button id="toPath">What to review</button>
+    </div>
+  </div>
+
+  <div class="card" id="cardPath" hidden>
+    <div class="grp" id="grpReview"><span class="lbl">What to review</span></div>
+    <div class="grp" id="grpExtra"><span class="lbl">Extra resources</span></div>
+    <div class="foot">
+      <span class="hint">Open any of them, or carry on.</span>
+      <button id="toDone">I'm done</button>
+    </div>
+  </div>
+
+  <div class="card" id="cardDone" hidden>
+    <p class="done">That's it for this one.<small id="doneSub"></small></p>
+    <div class="foot"><span class="hint"></span><button class="ghost" id="again">Run it again</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var A = window.ACTIVITY, $ = function(i){ return document.getElementById(i); };
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  $('eyebrow').textContent = A.eyebrow;
+  $('question').textContent = A.question;
+  $('answer').placeholder = A.placeholder;
+  $('privacyTxt').textContent = A.privacy;
+  $('doneSub').textContent = A.closing;
+  if (A.scene){ $('scene').hidden = false; $('sceneTxt').textContent = A.scene; }
+
+  function rows(host, list, external){
+    list.forEach(function(r){
+      var a = document.createElement('a');
+      a.href = r.url || '#';
+      if (external){ a.target = '_blank'; a.rel = 'noopener'; }
+      else if (!r.url){ a.addEventListener('click', function(e){ e.preventDefault(); }); }
+      var nm = document.createElement('span'); nm.className='nm'; nm.textContent = r.name;
+      var wy = document.createElement('span'); wy.className='why'; wy.textContent = r.why;
+      var ar = document.createElement('span'); ar.className='arrow'; ar.setAttribute('aria-hidden','true');
+      ar.innerHTML = external ? '&#8599;' : '&rsaquo;';
+      a.appendChild(nm); a.appendChild(wy); a.appendChild(ar);
+      host.appendChild(a);
+    });
+  }
+  rows($('grpReview'), A.review, false);
+  rows($('grpExtra'), A.extra, true);
+
+  var ta=$('answer'), send=$('send'), cardQ=$('cardQ'), cardRecall=$('cardRecall'),
+      cardCoach=$('cardCoach'), coachHead=$('coachHead'), coachState=$('coachState'),
+      coachBody=$('coachBody'), coachFoot=$('coachFoot'), cardPath=$('cardPath'), cardDone=$('cardDone');
+
+  ta.addEventListener('input', function(){
+    send.disabled = ta.value.trim().length < 8;
+    ta.style.height='auto'; ta.style.height = Math.max(128, ta.scrollHeight)+'px';
+  });
+  function show(el){ el.hidden=false; el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
+  function finish(){ coachHead.classList.remove('thinking'); coachState.textContent=''; show(coachFoot); }
+  function speak(text){
+    coachBody.textContent='';
+    if (REDUCED){ coachBody.textContent=text; finish(); return; }
+    var w = text.split(' ');
+    w.forEach(function(word,i){
+      var s=document.createElement('span');
+      s.textContent = word + (i<w.length-1?' ':'');
+      s.style.animationDelay = (i*26)+'ms';
+      coachBody.appendChild(s);
+    });
+    setTimeout(finish, w.length*26 + 420);
+  }
+
+  send.addEventListener('click', function(){
+    // LIVE COACH: replace this block with the proxy call. The redactor runs first,
+    // exactly as it does in the Practice Studio activities.
+    $('recallTxt').textContent = ta.value.trim();
+    cardQ.hidden = true;
+    show(cardRecall);
+    setTimeout(function(){
+      show(cardCoach);
+      setTimeout(function(){ speak(A.coachReply); }, REDUCED ? 0 : 900);
+    }, 240);
+  });
+  $('toPath').addEventListener('click', function(){ cardCoach.hidden=true; show(cardPath); $('eyebrow').textContent='Worth another look'; });
+  $('toDone').addEventListener('click', function(){ cardPath.hidden=true; cardRecall.hidden=true; show(cardDone); $('eyebrow').textContent=A.eyebrow; });
+  $('again').addEventListener('click', function(){
+    [cardDone,cardRecall,cardPath,cardCoach].forEach(function(c){ c.hidden=true; });
+    coachFoot.hidden=true; coachBody.textContent=''; coachHead.classList.add('thinking');
+    coachState.innerHTML='<span class="dots" role="status" aria-label="The coach is writing"><i></i><i></i><i></i></span>';
+    ta.value=''; ta.style.height=''; send.disabled=true; show(cardQ); ta.focus();
+  });
+})();
+</script>
+</body>
+</html>
