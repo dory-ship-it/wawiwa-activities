@@ -29,17 +29,18 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0}
+  /* No page ground. The card floats on whatever is behind the embed, so any
+     space the host iframe leaves over is the host's own background, not ours. */
   body{
-    background:var(--ground); color:var(--ink);
-    background-image:radial-gradient(120% 70% at 50% 0%, var(--accent-soft) 0%, transparent 62%);
-    background-repeat:no-repeat;
+    background:transparent; color:var(--ink);
     font-family:"Lato",-apple-system,BlinkMacSystemFont,system-ui,sans-serif; -webkit-font-smoothing:antialiased;
   }
-  .stage{display:flex; flex-direction:column; align-items:center; padding:18px 18px 20px; gap:12px}
-  .eyebrow{font-size:11.5px; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--accent)}
+  .stage{display:flex; flex-direction:column; align-items:center; padding:12px 14px 14px; gap:12px}
+  .eyebrow{display:none}
   .card{width:100%; max-width:588px; background:var(--card); border-radius:20px; box-shadow:var(--shadow); padding:28px 34px 24px; display:flex; flex-direction:column; gap:18px}
   .card.quiet{padding:16px 22px; box-shadow:var(--shadow-soft); gap:8px; border:1px solid var(--hair)}
-  .scene{display:flex; align-items:center; gap:8px; font-size:11px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--accent); margin:0 0 -6px}
+  .scene{display:flex; align-items:center; gap:8px; font-size:11px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--accent); margin:0 0 -6px; flex-wrap:wrap}
+  .scene .dim{color:var(--muted); font-weight:700}
   .scene svg{width:13px; height:13px; flex:none; stroke:var(--accent)}
   .q{font-family:"Merriweather",Georgia,serif; font-weight:300; font-size:clamp(19px,2.6vw,22px); line-height:1.4; letter-spacing:-.006em; margin:0; text-wrap:pretty; color:var(--ink)}
   .fieldwrap{display:flex; flex-direction:column; gap:10px}
@@ -243,7 +244,7 @@ window.ACTIVITY = {
   <div class="card enter" id="cardQ">
     <p class="scene" id="scene" hidden>
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 8 6 4-6 4V8z"/><rect x="2" y="4" width="20" height="16" rx="3"/></svg>
-      <span id="sceneTxt"></span>
+      <span id="sceneLabel"></span><span class="dim" id="sceneTxt"></span>
     </p>
     <p class="q" id="question"></p>
     <div class="fieldwrap">
@@ -300,12 +301,13 @@ window.ACTIVITY = {
   var A = window.ACTIVITY, $ = function(i){ return document.getElementById(i); };
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  $('eyebrow').textContent = A.eyebrow;
+  $('sceneLabel').textContent = A.eyebrow;
   $('question').textContent = A.question;
   $('answer').placeholder = A.placeholder;
   $('privacyTxt').textContent = A.privacy;
   $('doneSub').textContent = A.closing;
-  if (A.scene){ $('scene').hidden = false; $('sceneTxt').textContent = A.scene; }
+  $('scene').hidden = false;
+  if (A.scene){ $('sceneTxt').textContent = ' \u00b7 ' + A.scene; }
 
   function rows(host, list, external){
     list.forEach(function(r){
@@ -368,8 +370,8 @@ window.ACTIVITY = {
       deliver(A.fallbackReply);
     }
   });
-  $('toPath').addEventListener('click', function(){ cardCoach.hidden=true; show(cardPath); $('eyebrow').textContent='Worth another look'; });
-  $('toDone').addEventListener('click', function(){ cardPath.hidden=true; cardRecall.hidden=true; show(cardDone); $('eyebrow').textContent=A.eyebrow; });
+  $('toPath').addEventListener('click', function(){ cardCoach.hidden=true; show(cardPath); });
+  $('toDone').addEventListener('click', function(){ cardPath.hidden=true; cardRecall.hidden=true; show(cardDone); });
   $('again').addEventListener('click', function(){
     [cardDone,cardRecall,cardPath,cardCoach].forEach(function(c){ c.hidden=true; });
     coachFoot.hidden=true; coachBody.textContent=''; coachHead.classList.add('thinking');
