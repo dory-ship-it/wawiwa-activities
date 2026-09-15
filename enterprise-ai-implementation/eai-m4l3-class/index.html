@@ -1,0 +1,866 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wawiwa &middot; Class practice: specify first, then build the core</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ------------------------------------------------------------------
+     Wawiwa practice, clean sheet. The AI in Data reflection design,
+     carried onto the Enterprise AI workbook. Same tokens, same motion,
+     same restraint; the accent and the typeface are this course's own,
+     read from the EAI Rise theme, not invented here.
+     ------------------------------------------------------------------ */
+  :root{
+    --card:#FFFFFF;
+    --ink:#17201F; --ink-2:#44514F; --muted:#667573;
+    --hair:#E2EAE9; --field:#F1F6F5;
+    --accent:#2E6E76; --accent-soft:#DFEFED;
+    --shadow:0 1px 2px rgba(23,32,31,.05), 0 18px 44px -18px rgba(23,32,31,.22);
+    --shadow-soft:0 1px 2px rgba(23,32,31,.05);
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+    --card:#18211F; --ink:#EDF3F2; --ink-2:#C6D2D0; --muted:#8A9997;
+    --hair:#26312F; --field:#212B29; --accent:#5CC9BE; --accent-soft:#153330;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 52px -18px rgba(0,0,0,.8);
+    --shadow-soft:0 1px 2px rgba(0,0,0,.4);
+  }}
+  :root[data-theme="dark"]{
+    --card:#18211F; --ink:#EDF3F2; --ink-2:#C6D2D0; --muted:#8A9997;
+    --hair:#26312F; --field:#212B29; --accent:#5CC9BE; --accent-soft:#153330;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 52px -18px rgba(0,0,0,.8);
+    --shadow-soft:0 1px 2px rgba(0,0,0,.4);
+  }
+  /* Dark mode inverts the button ink. White on the bright teal is 1.9:1 and fails AA;
+     dark ink on it is 9.6:1. The ghost button keeps the accent as its text colour.
+     --muted is #667573, not the #7C8A88 the AI in Data pages use: that value is 3.59:1
+     on white and fails AA for the privacy line, which is reading text. 4.82:1 here. */
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){ --on-accent:#0C1312; }}
+  :root[data-theme="dark"]{ --on-accent:#0C1312; }
+  :root{ --on-accent:#FFFFFF; }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  /* No page ground: the cards float on whatever is behind the embed, so any
+     space the host iframe leaves over is the host block's own colour. */
+  body{background:transparent; color:var(--ink);
+    font-family:"Assistant",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:620px; margin:0 auto; padding:14px 14px 28px; display:flex; flex-direction:column; gap:14px}
+
+  h1{font-size:clamp(22px,3.2vw,26px); font-weight:700; line-height:1.25; letter-spacing:-.014em; margin:0}
+  .lead{color:var(--muted); margin:0; font-size:15px; line-height:1.55}
+  .head{display:flex; flex-direction:column; gap:7px; padding:4px 6px 0}
+
+  .warn{background:var(--card); border:1px solid var(--hair); border-radius:16px;
+    box-shadow:var(--shadow-soft); padding:16px 20px; font-size:14.5px; line-height:1.55; color:var(--ink-2);
+    display:flex; gap:11px; align-items:flex-start}
+  .warn svg{width:15px; height:15px; flex:none; margin-top:3px; stroke:var(--accent)}
+
+  /* Stage divider: a quiet label, no rule, no box. */
+  .stage{display:flex; align-items:baseline; gap:10px; margin:14px 2px -2px}
+  .stage span{font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+  .stage i{display:none}
+
+  .card{background:var(--card); border:1px solid var(--hair); border-radius:20px;
+    box-shadow:var(--shadow); padding:26px 30px 24px; display:flex; flex-direction:column; gap:14px;
+    animation:rise .42s var(--ease) both}
+  .cn{font-size:11px; font-weight:700; letter-spacing:.12em; color:var(--accent); margin:0 0 -6px}
+  .card h3{margin:0; font-size:19px; font-weight:700; line-height:1.3; letter-spacing:-.008em}
+  .instr{margin:0; font-size:15.5px; line-height:1.6; color:var(--ink-2)}
+  .aid{margin:0; color:var(--muted); font-size:14px; line-height:1.55}
+
+  .chk{list-style:none; margin:2px 0 0; padding:0; display:flex; flex-direction:column; gap:10px}
+  .chk label{display:flex; gap:9px; align-items:flex-start; font-size:14.5px; line-height:1.5; cursor:pointer; color:var(--ink-2)}
+  .chk input{margin:3px 0 0; accent-color:var(--accent); width:15px; height:15px; flex:none}
+
+  .fl{display:block; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--muted); margin:2px 0 -5px}
+  textarea{width:100%; min-height:104px; resize:none; background:var(--field); border:none; border-radius:14px;
+    padding:16px 18px; font-family:"Assistant",system-ui,sans-serif; font-size:16px; line-height:1.6;
+    color:var(--ink); transition:box-shadow .25s var(--ease)}
+  textarea::placeholder{color:var(--muted)}
+  textarea:focus{outline:none; box-shadow:0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent)}
+
+  .row{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:3px}
+  .pii{display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5; color:var(--muted); margin:-4px 0 0; padding-inline-start:3px}
+  .pii svg{width:13px; height:13px; flex:none; margin-top:3px; stroke:var(--muted)}
+
+  button{font-family:"Assistant",system-ui,sans-serif; font-size:15px; font-weight:700; border:none;
+    border-radius:980px; padding:10px 24px; background:var(--accent); color:var(--on-accent); cursor:pointer;
+    transition:transform .18s var(--ease), opacity .18s var(--ease), filter .18s var(--ease)}
+  button:hover{filter:brightness(1.08)} button:active{transform:scale(.97)}
+  button:disabled{opacity:.3; cursor:default; transform:none; filter:none}
+  button.pdf{background:transparent; color:var(--accent); padding:11px 8px; font-weight:400}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+
+  /* The coach reply. A quiet mark, the name, then the words. No box inside a box. */
+  .out{display:flex; flex-direction:column; gap:9px; padding-top:16px; border-top:1px solid var(--hair)}
+  .out .ch{display:flex; align-items:center; gap:10px}
+  .out .mark{width:24px; height:24px; border-radius:50%; background:var(--accent); flex:none;
+    display:flex; align-items:center; justify-content:center}
+  .out .mark svg{width:13px; height:13px; display:block; fill:var(--on-accent); stroke:none}
+  .out b{font-size:13px; font-weight:700; letter-spacing:.01em}
+  .out .body{font-size:15.5px; line-height:1.62; color:var(--ink-2); margin:0}
+  .out .note{font-size:12.5px; color:var(--muted)}
+
+  .pathpanel{background:var(--card); border:1px solid var(--hair); border-radius:20px;
+    box-shadow:var(--shadow); padding:26px 30px 22px; display:flex; flex-direction:column; gap:13px; margin-top:6px}
+  .pathpanel h2{margin:0; font-size:19px; font-weight:700; letter-spacing:-.008em}
+  .pathpanel ul{margin:4px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:2px}
+  .pathpanel li{border-top:1px solid var(--hair); padding:13px 2px; font-size:15.5px; line-height:1.6; color:var(--ink-2)}
+  .pathpanel li:first-child{border-top:none; padding-top:4px}
+  .rev{display:block; font-size:13px; color:var(--muted); margin-top:6px}
+  .reslist{display:flex; flex-direction:column; gap:2px; margin-top:16px}
+  .reshead{font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding-bottom:6px}
+  .resitem{margin:0; border-top:1px solid var(--hair); padding:12px 2px}
+  .reslink{color:var(--accent); font-weight:700; font-size:15.5px; text-decoration:none}
+  .reslink:hover{opacity:.65}
+  .reswhy{display:block; font-size:14px; color:var(--muted); line-height:1.55; margin-top:4px}
+
+  .foot{display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    font-size:12.5px; color:var(--muted); padding:6px 6px 0; line-height:1.5}
+
+  @keyframes rise{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+  [hidden]{display:none!important}
+  .pv{display:none}
+  @media (prefers-reduced-motion:reduce){ .card{animation:none} *{transition:none!important} }
+  @media (max-width:560px){
+    .card,.pathpanel{padding:22px 20px 18px; border-radius:18px}
+    .chk{grid-template-columns:1fr}
+    .wrap{padding:12px 12px 22px}
+  }
+  @media print{
+    .wrap{max-width:none}
+    button,.pii,.warn{display:none}
+    .card,.pathpanel{box-shadow:none; border:1px solid var(--hair); break-inside:avoid}
+    textarea{display:none}
+    .pv{display:block; white-space:pre-wrap; border:1px solid var(--hair); border-radius:12px;
+      padding:12px 14px; font-size:15px; line-height:1.5; color:var(--ink)}
+    .reslink::after{content:' — ' attr(href); color:var(--muted); font-weight:400; font-size:12px; word-break:break-all}
+    .printfoot{display:block; margin-top:12px; padding-top:9px; border-top:1px solid var(--hair);
+      color:var(--muted); font-size:12px; break-inside:avoid}
+  }
+</style></head><body>
+<div class="wrap">
+
+<div class="head">
+  <h1>Class practice: specify first, then build the core</h1>
+  <p class="lead">Module 4 &middot; Vibe Coding &nbsp;&middot;&nbsp; Lesson 3 &nbsp;&middot;&nbsp; Stage A 20 min, Stage B 25 min</p>
+</div>
+
+<div class="warn">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 4.4-3.1 8.3-8 9-4.9-.7-8-4.6-8-9V7l8-4z"/></svg>
+  <span>Work on one idea only. Bring the business process you mapped in Module 1 or Module 2 if you have one, and use dummy data throughout.</span>
+</div>
+
+<div class="stage"><span>Stage A &mdash; individual work, 20 minutes</span><i></i></div>
+
+<section class="card" id="card-t1">
+  <div class="cn">01</div>
+  <h3>The eight questions, on your idea</h3>
+  <p class="instr">Answer all eight on one idea only. Short answers are fine; missing answers are not.</p>
+  <p class="aid">Question 1 is the one that decides the rest: if you cannot name one central person, you are not ready to name a problem.</p>
+  <label class="fl" for="t1">Your eight answers</label>
+  <textarea id="t1" rows="8" placeholder="1. Who exactly &hellip;  2. Which problem &hellip;  3. What changes &hellip;"></textarea>
+  <span class="pii"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>Keep it about the work. No names, email addresses, phone numbers or anything else personal, yours or anyone else&rsquo;s.</span>
+  <div class="row">
+    <button class="coach" data-task="t1">Check with AI Coach</button>
+  </div>
+  <div class="out" id="out-t1" hidden></div>
+</section>
+
+<section class="card" id="card-t2">
+  <div class="cn">02</div>
+  <h3>Core, Supporting, Future</h3>
+  <p class="instr">Sort the capabilities into the three tiers. Today you build the Core only.</p>
+  <p class="aid">If everything is Core, nothing is. The tiers exist so the first build can finish.</p>
+  <label class="fl" for="t2">Your three tiers</label>
+  <textarea id="t2" rows="6" placeholder="Core: &hellip;&#10;Supporting: &hellip;&#10;Future: &hellip;"></textarea>
+  <span class="pii"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>Keep it about the work. No names, email addresses, phone numbers or anything else personal, yours or anyone else&rsquo;s.</span>
+  <div class="row">
+    <button class="coach" data-task="t2">Check with AI Coach</button>
+  </div>
+  <div class="out" id="out-t2" hidden></div>
+</section>
+
+<section class="card" id="card-t3">
+  <div class="cn">03</div>
+  <h3>The data model</h3>
+  <p class="instr">One entity, then every field on it: the name, its type, whether it is required, and its default.</p>
+  <p class="aid">Entity is the thing you track. Fields are what you record about it. Type is what kind of value each field holds.</p>
+  <label class="fl" for="t3">Entity, fields, type, required, default</label>
+  <textarea id="t3" rows="7" placeholder="Entity: &hellip;&#10;field &mdash; type &mdash; required? &mdash; default"></textarea>
+  <span class="pii"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>Keep it about the work. No names, email addresses, phone numbers or anything else personal, yours or anyone else&rsquo;s.</span>
+  <div class="row">
+    <button class="coach" data-task="t3">Check with AI Coach</button>
+  </div>
+  <div class="out" id="out-t3" hidden></div>
+</section>
+
+<div class="stage"><span>Stage B &mdash; pairs, 25 minutes</span><i></i></div>
+
+<section class="card" id="card-t4">
+  <div class="cn">04</div>
+  <h3>Acceptance criteria, as yes-or-no checks</h3>
+  <p class="instr">Write the checks that decide whether the build worked. Each one has to be answerable yes or no by looking at the screen.</p>
+  <p class="aid">&ldquo;It works well&rdquo; cannot be checked. &ldquo;It cannot be saved without a name&rdquo; can.</p>
+  <label class="fl" for="t4">Your acceptance criteria</label>
+  <textarea id="t4" rows="6" placeholder="1. A record can be created&#10;2. It cannot be saved without a name&#10;3. &hellip;"></textarea>
+  <span class="pii"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>Keep it about the work. No names, email addresses, phone numbers or anything else personal, yours or anyone else&rsquo;s.</span>
+  <div class="row">
+    <button class="coach" data-task="t4">Check with AI Coach</button>
+  </div>
+  <div class="out" id="out-t4" hidden></div>
+</section>
+
+<section class="card" id="card-t5">
+  <div class="cn">05</div>
+  <h3>The first prompt, and what the platform decided</h3>
+  <p class="instr">Translate the specification into a first prompt and build the Core only, one step at a time. Then run your partner through your criteria.</p>
+  <label class="fl" for="t5">The prompt, and the decision you never specified</label>
+  <textarea id="t5" rows="7" placeholder="The prompt you derived &mdash; what your partner found against your criteria &mdash; one decision the platform took that you never specified"></textarea>
+  <span class="pii"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>Keep it about the work. No names, email addresses, phone numbers or anything else personal, yours or anyone else&rsquo;s.</span>
+  <div class="row">
+    <button class="coach" data-task="t5">Check with AI Coach</button>
+  </div>
+  <div class="out" id="out-t5" hidden></div>
+</section>
+
+<div class="pathpanel">
+  <h2>Your personal path</h2>
+  <p class="lead">Built from what you wrote above, and pointing back into this lesson.</p>
+  <div class="row" style="justify-content:flex-start">
+    <button class="path" id="mkpath">Build my personal path</button>
+    <button class="pdf" id="mkpdf">Save as PDF</button>
+  </div>
+  <div id="pathout" hidden></div>
+</div>
+
+<div class="foot">
+  <span>Your answers stay on this device only. Nothing is sent anywhere except the text you send to the coach.</span>
+  <span>&copy; Wawiwa Tech &middot; Internal use only</span>
+</div>
+<div class="printfoot" id="printfoot"></div>
+</div>
+
+<script type="text/plain" id="grounding-pack"># Grounding pack — EAI M4 L3 class practice
+The lesson's slides are the authority. The coach reasons only from what is here.
+
+## The practice
+Slide 28. One idea only, 45 minutes. Stage A is 20 minutes individual: the eight questions, the
+three tiers, the data model, the acceptance criteria. Stage B is 25 minutes in pairs: translate the
+specification into a first prompt, build the core only, run your partner through your criteria, and
+find one decision the platform took that you never specified. Dummy data throughout.
+
+## The eight questions
+Slides 11 to 21, one at a time. Who exactly is this for. Which problem. What changes if it works.
+The main scenario. What is in and what is out. What the user sees and does, step by step. What
+information the system needs. How we will know it works. Question 1 decides the rest: if you cannot
+name one central person, you are not ready to name a problem. Questions 3 and 8 are the ones people
+skip, and they are the two that let you tell whether the build worked.
+
+## The three tiers
+Core, Supporting, Future. Not every capability matters equally. Today you build the Core only. If
+everything is Core, nothing is, and the build will not finish. Putting something in Supporting or
+Future protects the first build; it is not a demotion.
+
+## The data model
+Question 7. An entity is the thing the system tracks. Fields are the details recorded about it.
+Every field gets a type, whether it is required, and a default. A field with no type is where the
+wrong value gets in and stays, and if you do not decide, the platform will.
+
+## The acceptance criteria
+Question 8. Written as yes-or-no checks, answerable by looking at the screen. "A record can be
+created." "It cannot be saved without a name." "A record appears in the list." "The empty state is
+clear." "It works on a phone." "Works well" and "easy to use" cannot be checked and are not
+criteria.
+
+## Specification against prompt
+The specification is the source of truth for the product. The prompt is the current task for the
+tool. The check asks whether the result matches the specification, and the improvement is one small
+controlled change. They work together and do not do the same job.
+
+## Out of scope for the coach
+The coach never writes the specification for the student: it asks the question they skipped and
+lets them answer. It never names a build platform, a price or a plan.
+</script>
+<script type="application/json" id="activity">{"schema_version": "1.0", "meta": {"id": "eai-m4l3-class", "publishes_to": "eai-m4l3-class", "program": "Enterprise AI Implementation Specialist", "module": "Module 4 — Vibe Coding", "lesson": "L3 — From Need to Specification", "title": "Class practice: specify first, then build the core", "format": "coached_tasks", "context": "class", "estimated_minutes": 45, "language_default": "en", "source_deck": "EAI-M04-L03 — Slide Deck V1.pptx (slide 28)", "design": "Reflection-practice clean sheet, Mode A: the design only. Structure and content unchanged."}, "safety": {"pii_forbidden": true, "student_notice": "Keep it about the work. No names, email addresses, phone numbers or anything else personal, yours or anyone else's.", "redact_before_ai": ["email_addresses", "phone_numbers", "long_digit_sequences", "api_key_shaped_tokens"], "scope_guard": "Dummy data only, description level. The practice never asks for, and the coach never invites, real customer or employee data, a contract, medical or financial information, or any real identifying detail."}, "lesson_map": {"C1": "M4 L3 · The eight questions, one at a time (slides 11 to 21)", "C2": "M4 L3 · Core, Supporting and Future: not every capability matters equally (the three tiers)", "C3": "M4 L3 · Entity, fields, type, required, default (question 7)", "C4": "M4 L3 · Acceptance criteria as yes-or-no checks (question 8)", "C5": "M4 L3 · From specification to build, and the transfer (slides 22 to 27)"}, "personal_path_ui": {"review_prefix": "Where to review this: ", "resource_prefix": "Optional extra resource (further reading, not required): ", "resources_heading": "Optional further reading (free, not required)"}, "resources": [], "task_ids": ["t1", "t2", "t3", "t4", "t5"], "offline": {"first_line": {"t1": "your answer to question 1: who exactly is this for.", "t2": "one capability, and which tier it is in.", "t3": "the entity, and one field on it.", "t4": "one check that can be answered yes or no.", "t5": "the first line of the prompt you derived."}, "rules": {"t1": [{"min_len": 120, "msg": "Eight questions cannot be answered in a line or two. Short answers are fine, but all eight need one. The ones people skip are 3 and 8, and those are the two that decide whether you can tell the build worked.", "review": "C1", "path": "Answer all eight questions on one idea. The specification is the source of truth for everything after it; a half-answered one cannot do that job."}], "t2": [{"any": ["\\bcore\\b"], "msg": "No Core named. Sort the capabilities into the three tiers and name what you are building today, or the build will spread and finish nothing.", "review": "C2"}, {"any": ["\\b(supporting|future)\\b"], "msg": "You have a Core but nothing below it. Putting a capability in Supporting or Future is how you protect the first build; it is not a demotion.", "review": "C2", "path": "Put something in Supporting or Future. If everything is Core, the first build has no chance of finishing."}], "t3": [{"any": ["\\b(text|number|date|yes|no|boolean|status|list|link|true|false|type)\\b"], "msg": "The fields are there but their types are not. Every field has a type, and the type is what stops the wrong value going in later.", "review": "C3", "path": "Give every field a type. A field with no type is where the wrong value gets in and stays."}, {"any": ["\\b(required|mandatory|must|optional|default)\\b"], "msg": "Nothing says which fields are required or what the defaults are. That is the part the platform will otherwise decide for you.", "review": "C3"}], "t4": [{"any": ["\\b(can|cannot|is|does|shows|appears|saved|created|blocked|prevented|displays)\\b"], "msg": "These read as goals rather than checks. Rewrite each one so it can be answered yes or no by looking at the screen.", "review": "C4", "path": "Rewrite the acceptance criteria as yes-or-no checks. A criterion you cannot answer by looking at the screen cannot tell you whether the build worked."}, {"none": ["\\b(works well|good|nice|easy to use|user friendly|intuitive)\\b"], "msg": "&ldquo;Works well&rdquo; and &ldquo;easy to use&rdquo; cannot be checked. Replace them with something observable.", "review": "C4"}], "t5": [{"any": ["\\b(decided|assumed|added|chose|created|invented|unasked|did not specify|never specified|by itself|automatically)\\b"], "msg": "Name one decision the platform took that your specification never covered. Every gap in the specification gets filled by something, and finding one is the point of this stage.", "review": "C5", "path": "Find one decision the platform took that you never specified. That gap is what the specification exists to close next time."}]}, "ok": {"t1": "All eight answered on one idea. That is the source of truth for everything after it.", "t2": "Three tiers, with a Core small enough to finish. Build that and nothing else today.", "t3": "Entity, fields and types. That is the model the platform would otherwise invent for you.", "t4": "Checks that can be answered by looking. Hand them to your partner and let them try to fail your build.", "t5": "A prompt derived from the specification, and a gap found. Both belong in the pack you hand in."}, "all_pass": "You have the pack: eight questions answered, the tiers, the data model, the criteria as yes-or-no checks, the first prompt derived from them, and the one decision the platform took that you never specified.", "all_pass_review": "C5", "pii_text": "Stop: that looks like real data. This practice is at description level only. Replace the identifier with a description, for example \"a customer request\" instead of the request itself, then check again."}}</script>
+<script>
+(function(){
+"use strict";
+var ACT = JSON.parse(document.getElementById('activity').textContent);
+var LIVE = { enabled:true, proxy_url:'https://practice-studio-proxy.dory-08e.workers.dev',
+  session_token_cap:25000, model:null,
+  grounding:(document.getElementById('grounding-pack')||{}).textContent||'' };
+var CALL_TIMEOUT_MS = 30000, usedTokens = 0;
+var KEY = 'wawiwa:'+ACT.meta.id;
+var IDS = ['t1', 't2', 't3', 't4', 't5'];
+
+/* ---------- persistence: on-device only ---------- */
+function save(){
+  var s={a:{},c:[]};
+  IDS.forEach(function(i){ var e=document.getElementById(i); if(e) s.a[i]=e.value; });
+  document.querySelectorAll('[data-chk]').forEach(function(b){ if(b.checked) s.c.push(b.dataset.chk); });
+  try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){}
+}
+(function load(){
+  var s; try{ s=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
+  if(!s) return;
+  IDS.forEach(function(i){ var e=document.getElementById(i); if(e&&s.a&&s.a[i]!=null) e.value=s.a[i]; });
+  (s.c||[]).forEach(function(n){ var b=document.querySelector('[data-chk="'+n+'"]'); if(b) b.checked=true; });
+})();
+document.addEventListener('input', save); document.addEventListener('change', save);
+
+/* ---------- redact before anything leaves the page ---------- */
+var REDACT=[
+  {re:/[\w.+-]+@[\w-]+\.[\w.]{2,}/g, sub:'[email removed]'},
+  {re:/\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/g, sub:'[id removed]'},
+  {re:/\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/gi, sub:'[address removed]'},
+  {re:/\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/gi, sub:'[postcode removed]'},
+  {re:/(?:\+?\d[\d\-\s().]{7,}\d)/g, sub:'[number removed]'},
+  {re:/\b\d{7,}\b/g, sub:'[digits removed]'},
+  {re:/\b[A-Za-z0-9_\-]{24,}\b/g, sub:'[token removed]'}
+];
+function redact(t){ var o=String(t||''); REDACT.forEach(function(p){p.re.lastIndex=0;o=o.replace(p.re,p.sub);}); return o; }
+/* Widened 2026-08-27. The old test was email-or-seven-digits, which let a
+   name, a street and a postcode straight through. These mirror the gate in
+   engine/live.js: they block the VALUE and allow the CATEGORY. */
+var LOOKS_REAL = [
+  /[\w.+-]+@[\w-]+\.[\w.]{2,}/,
+  /\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/,
+  /\b\d{7,}\b/,
+  /\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'’-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/i,
+  /\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/i,
+  /\b(?:full|real|last|first|maiden|legal)\s+name\s*(?:is|was|:|=)\s*["“']?[A-Z][A-Za-z'’-]+/,
+  /\b(?:his|her|their|my)\s+(?:[a-z]+\s+){0,2}name\s*(?:is|was|:|=)\s*["“']?[A-Z][A-Za-z'’-]+/i,
+  /\b(?:is|was|are|were)\s+named\s+["“']?[A-Z][A-Za-z'’-]+\s+[A-Z][A-Za-z'’-]+/,
+  /\bsurname\s*(?:is|was|:|=)\s*["“']?[A-Z][A-Za-z'’-]+/i,
+  /\b(?:the\s+(?:owner|manager|contact|partner|target|victim|customer|client|employee|colleague|student|person|candidate|recruiter))\b[^.\n]{0,28}\b(?:named|name\s*(?:is|was|:|=)|called)\s*["“']?[A-Z][A-Za-z'’-]+/i,
+  /\b(?:date\s+of\s+birth|d\.?o\.?b\.?|born(?:\s+on)?)\s*(?:is|:|=)?\s*\d/i
+];
+function looksReal(t){ var s=String(t||''); return LOOKS_REAL.some(function(re){ re.lastIndex=0; return re.test(s); }); }
+
+/* ---------- live coach ---------- */
+function liveOn(){ return LIVE.enabled && LIVE.proxy_url && usedTokens < LIVE.session_token_cap; }
+function system(){
+  return "You are the practice coach for Wawiwa, Enterprise AI Implementation Specialist, Module 4 Lesson 3 (From Need to Specification), coaching one student turning a stated need into a specification a build platform can execute.\n"
+   + "Reason ONLY from the grounding pack below; if a question is outside it, say so. Never write the specification for the student. Ask the question they skipped and let them answer it. Never name a build platform, a price or a plan. "
+   + "If the answer contains anything that looks like real data, tell the student to replace it with a description. Coach against the rules in the activity config: say what is present, name the single most useful thing missing, and point at the slide to revisit. Three or four sentences. No praise, no preamble. If the student wrote nothing, say what a first line would contain and stop.";
+}
+function callProxy(kind, call){
+  if(!liveOn()) return Promise.reject(new Error('live_off'));
+  var ctl = typeof AbortController!=='undefined' ? new AbortController() : null;
+  var timer = ctl && setTimeout(function(){ ctl.abort(); }, CALL_TIMEOUT_MS);
+  return fetch(LIVE.proxy_url, { method:'POST', headers:{'Content-Type':'application/json'},
+    signal: ctl?ctl.signal:undefined,
+    body: JSON.stringify({kind:kind, system:system(), grounding:LIVE.grounding, call:call,
+      session:{used_tokens:usedTokens}})
+  }).then(function(r){ if(timer) clearTimeout(timer);
+    return r.json().then(function(d){
+      if(!r.ok||!d.ok) throw new Error('proxy_error');
+      var u=d.usage||{}; usedTokens += (u.input_tokens||0)+(u.output_tokens||0);
+      return d.text||'';
+    });
+  }).catch(function(e){ if(timer) clearTimeout(timer); throw e; });
+}
+
+/* ---------- offline coach: declarative, driven by ACT.offline ----------
+   Identical on every page in the module. What differs per lesson lives in the
+   activity JSON, so a rule change is a content edit, never a code edit. */
+function tickCount(){ return document.querySelectorAll('[data-chk]:checked').length; }
+function reRules(list){ return (list||[]).map(function(s){ return new RegExp(s,'i'); }); }
+function anyHit(res, t){ return res.some(function(r){ r.lastIndex=0; return r.test(t); }); }
+function review(code){ var m=ACT.lesson_map||{}; return code && m[code] ? ' Where to review this: '+m[code] : ''; }
+/* Returns the first rule this answer fails, or null when it passes them all. */
+function firstFail(task, t){
+  var rules=(ACT.offline&&ACT.offline.rules&&ACT.offline.rules[task])||[], i, r;
+  for(i=0;i<rules.length;i++){
+    r=rules[i];
+    if(r.min_ticks!=null && tickCount()<r.min_ticks)
+      return {text:String(r.msg).replace('{ticks}', tickCount()), review:r.review};
+    if(r.min_len!=null && t.length<r.min_len) return r;
+    if(r.any && !anyHit(reRules(r.any), t)) return r;
+    if(r.none && anyHit(reRules(r.none), t)) return r;
+    if(r.none_short && anyHit(reRules(r.none_short), t) && t.length<(r.short_under||90)) return r;
+  }
+  return null;
+}
+function offline(task, v){
+  var t=String(v||'').trim(), o=ACT.offline||{};
+  if(t.length<12) return {verdict:'empty', text:'Nothing to check yet. Write one line first: for this task, that means '+((o.first_line||{})[task]||'one line of your own.')};
+  if(looksReal(t)) return {verdict:'pii', text:o.pii_text||'Stop: that looks like real data. This practice is at description level only. Replace the identifier with a description, then check again.'};
+  var f=firstFail(task, t);
+  if(f) return {verdict:'gap', text:f.msg?String(f.msg).replace('{ticks}', tickCount())+review(f.review):f.text+review(f.review)};
+  return {verdict:'ok', text:(o.ok||{})[task]||'Noted.'};
+}
+
+/* ---------- wire the coach buttons ---------- */
+var NOTE_LIVE='AI coach · grounded in this lesson\'s material';
+var NOTE_OFF='Checked against this lesson\'s rubric on this device.';
+/* mode: 'live'    the reply came back from the proxy
+   'offline' a genuine fallback, proxy unreachable or token cap reached
+   'plain'   a local pre-check before any call was made, so it claims neither */
+function render(el, txt, mode){
+  el.hidden=false;
+  var note = mode==='live' ? NOTE_LIVE : (mode==='offline' ? NOTE_OFF : '');
+  el.innerHTML='<div class="ch"><span class="mark"><svg viewBox="0 0 24 24"><path d="M12 3.6l1.55 4.85L18.4 10l-4.85 1.55L12 16.4l-1.55-4.85L5.6 10l4.85-1.55z"/></svg></span><b>Coach</b></div>'
+    + '<p class="body">'+String(txt).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</p>'
+    + (note?'<span class="note">'+note+'</span>':'');
+}
+document.querySelectorAll('button.coach').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var task=btn.dataset.task, ta=document.getElementById(task), out=document.getElementById('out-'+task);
+    var v=ta.value;
+    var off=offline(task, v);
+    if(off.verdict==='empty'||off.verdict==='pii'){ render(out, off.text, 'plain'); return; }
+    btn.disabled=true; var old=btn.textContent; btn.textContent='Checking…';
+    var ticks=[].map.call(document.querySelectorAll('[data-chk]:checked'), function(b){return b.nextElementSibling.textContent;});
+    callProxy('task_feedback', {
+      task_id:task, rubric:ACT.rubric, lesson_map:ACT.lesson_map,
+      checklist_ticked:ticks, answer:redact(v)
+    }).then(function(txt){ render(out, txt||off.text, txt?'live':'offline'); })
+      .catch(function(){ render(out, off.text, 'offline'); })
+      .then(function(){ btn.disabled=false; btn.textContent=old; });
+  });
+});
+
+/* ---------- personal path ---------- */
+/* ---------- personal path ----------
+   The same rules again, read across every answer at once, so the path is never
+   out of step with what the coach said task by task. */
+function buildPath(){
+  var out=[], seen={}, o=ACT.offline||{};
+  IDS.forEach(function(id){
+    var v=String((document.getElementById(id)||{}).value||'').trim();
+    if(!v) return;
+    var f=firstFail(id, v);
+    if(!f) return;
+    var line=(f.path||f.msg||f.text), key=String(line).slice(0,40);
+    if(seen[key]) return; seen[key]=1;
+    out.push([String(line).replace('{ticks}', tickCount()), (ACT.lesson_map||{})[f.review]||'']);
+  });
+  if(!out.length) out.push([o.all_pass||'You have what the homework needs. Write it up while it is fresh.', (ACT.lesson_map||{})[o.all_pass_review]||'']);
+  var el=document.getElementById('pathout'); el.hidden=false;
+  el.innerHTML='<ul>'+out.map(function(p){
+    return '<li>'+String(p[0]).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      + (p[1]?'<span class="rev">'+ACT.personal_path_ui.review_prefix+p[1]+'</span>':'')+'</li>';
+  }).join('')+'</ul>'+resources();
+}
+/* Outside reading, straight from the pack's resources list, rendered under the
+   routing advice and coloured as a link, never as body text. */
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function resources(){
+  var r=ACT.resources||[]; if(!r.length) return '';
+  return '<div class="reslist"><span class="reshead">'
+    + esc((ACT.personal_path_ui||{}).resources_heading||'Optional further reading') + '</span>'
+    + r.map(function(x){
+        return '<p class="resitem"><a class="reslink" href="'+encodeURI(x.url)
+          + '" target="_blank" rel="noopener">'+esc(x.title)+' ('+esc(x.source)+')</a>'
+          + '<span class="reswhy">'+esc(x.why)+'</span></p>';
+      }).join('') + '</div>';
+}
+document.getElementById('mkpath').addEventListener('click', buildPath);
+/* Textareas print empty or clipped, so mirror each answer into a bordered
+   block that only exists on paper, and stamp the Wawiwa footer line. */
+function printViews(){
+  IDS.forEach(function(i){
+    var ta=document.getElementById(i); if(!ta) return;
+    var pv=document.getElementById('pv-'+i);
+    if(!pv){ pv=document.createElement('div'); pv.className='pv'; pv.id='pv-'+i;
+      ta.parentNode.insertBefore(pv, ta.nextSibling); }
+    pv.textContent = String(ta.value||'').trim() || 'Not answered.';
+  });
+  var pf=document.getElementById('printfoot');
+  if(pf) pf.textContent = 'Wawiwa Tech · '+ACT.meta.program+' · '+ACT.meta.module
+    + ' · '+ACT.meta.lesson+' · Internal use only';
+}
+window.addEventListener('beforeprint', printViews);
+/* ---------- Save as PDF: a small self-contained PDF 1.4 writer, no libraries ----------
+   The page builds the file itself instead of calling window.print(), so the saved
+   PDF never carries a browser print header, print footer or the page URL.
+   Base-14 Helvetica only: nothing is embedded and the text stays real and selectable. */
+var WPDF=(function(){
+"use strict";
+/* Adobe base-14 advance widths, 1/1000 em, for codes 32..126 of WinAnsiEncoding.
+   Real widths, so the line wrapping below is exact rather than guessed. */
+var WR=('278 278 355 556 556 889 667 191 333 333 389 584 278 333 278 278 556 556 556 556 556 556 '
+ +'556 556 556 556 278 278 584 584 584 556 1015 667 667 722 722 667 611 778 722 278 500 667 556 '
+ +'833 722 778 667 778 722 667 611 722 667 944 667 667 611 278 278 278 469 556 333 556 556 500 '
+ +'556 556 278 556 556 222 222 500 222 833 556 556 556 556 333 500 278 556 500 722 500 500 500 '
+ +'334 260 334 584').split(' ');
+var WB=('278 333 474 556 556 889 722 238 333 333 389 584 278 333 278 278 556 556 556 556 556 556 '
+ +'556 556 556 556 333 333 584 584 584 611 975 722 722 722 722 667 611 778 722 278 556 722 611 '
+ +'833 722 778 667 778 722 667 611 722 667 944 667 667 611 333 278 333 584 556 333 556 611 556 '
+ +'611 556 333 611 611 278 278 556 278 889 611 611 611 611 389 556 333 611 556 778 556 556 500 '
+ +'389 280 389 584').split(' ');
+/* The handful of non-ASCII characters these practices actually use. All of them exist
+   in WinAnsi, so they are written as their WinAnsi code with a real width. */
+var EXT={'‘':[145,222,278],'’':[146,222,278],'“':[147,333,500],
+ '”':[148,333,500],'–':[150,556,556],'—':[151,1000,1000],
+ '…':[133,1000,1000],'·':[183,278,278],'©':[169,737,737],
+ '•':[149,350,350],'§':[167,556,556],'°':[176,400,400]};
+var EXTW={},EK;
+for(EK in EXT){ EXTW[EXT[EK][0]]=[EXT[EK][1],EXT[EK][2]]; }
+/* Anything else is turned into a sensible ASCII equivalent rather than a broken glyph. */
+var TR={' ':' ','\t':' ','‑':'-','‒':'-','―':'-','−':'-',
+ '′':"'",'″':'"','«':'"','»':'"','‚':',','„':'"',
+ '‹':'<','›':'>','×':'x','½':'1/2','¼':'1/4','¾':'3/4',
+ '→':'->','←':'<-','⇒':'=>','≤':'<=','≥':'>=','≠':'!=',
+ '≈':'~','±':'+/-','™':'(TM)','®':'(R)','€':'EUR','£':'GBP',
+ 'é':'e','è':'e','ê':'e','à':'a','á':'a','â':'a','ä':'a',
+ 'ç':'c','í':'i','î':'i','ó':'o','ô':'o','ö':'o','ú':'u',
+ 'ü':'u','ñ':'n','ß':'ss','‐':'-','ʼ':"'",'­':''};
+/* Belt and braces: the whole point of this exporter is a PDF with no address in it,
+   so anything URL-shaped is removed before it can reach the page. */
+function noUrl(s){
+  return String(s==null?'':s)
+    .replace(/\bhttps?:\/\/\S+/gi,'')
+    .replace(/\bwww\.\S+/gi,'')
+    .replace(/\babout:blank\b/gi,'')
+    .replace(/\b[\w-]+(?:\.[\w-]+)*\.(?:io|com|org|net|dev|co|gov|edu|ai|app)\b(?:\/[^\s]*)?/gi,'')
+    .replace(/[ \t]{2,}/g,' ');
+}
+function codes(s){
+  var o=[],i,ch,t;
+  s=noUrl(s).replace(/\r\n?/g,'\n');
+  for(i=0;i<s.length;i++){
+    ch=s.charAt(i);
+    if(ch==='\n'){ o.push(10); continue; }
+    if(ch>=' '&&ch<='~'){ o.push(ch.charCodeAt(0)); continue; }
+    if(EXT[ch]){ o.push(EXT[ch][0]); continue; }
+    t=TR[ch];
+    if(t!=null){ for(var j=0;j<t.length;j++) o.push(t.charCodeAt(j)); continue; }
+    /* unknown character: dropped, never emitted as a broken glyph */
+  }
+  return o;
+}
+function cw(c,b){
+  if(c>=32&&c<=126) return +(b?WB:WR)[c-32];
+  if(EXTW[c]) return EXTW[c][b?1:0];
+  return 0;
+}
+function wid(cs,sz,b){ var w=0,i; for(i=0;i<cs.length;i++) w+=cw(cs[i],b); return w*sz/1000; }
+/* PDF literal string: escape the three characters that matter, keep bytes as bytes */
+function lit(cs){
+  var s='',i,c;
+  for(i=0;i<cs.length;i++){
+    c=cs[i];
+    if(c===40||c===41||c===92) s+='\\';
+    s+=String.fromCharCode(c);
+  }
+  return s;
+}
+function wrapc(cs,sz,b,maxw){
+  var lines=[],cur=[],i,w,word,ww,sw=cw(32,b)*sz/1000,curw=0,words,p,paras=[],start=0;
+  for(i=0;i<=cs.length;i++){ if(i===cs.length||cs[i]===10){ paras.push(cs.slice(start,i)); start=i+1; } }
+  for(p=0;p<paras.length;p++){
+    words=[]; start=0;
+    for(i=0;i<=paras[p].length;i++){
+      if(i===paras[p].length||paras[p][i]===32){ if(i>start) words.push(paras[p].slice(start,i)); start=i+1; }
+    }
+    cur=[]; curw=0;
+    if(!words.length){ lines.push([]); continue; }
+    for(i=0;i<words.length;i++){
+      word=words[i]; ww=wid(word,sz,b);
+      if(ww>maxw){ /* a single token wider than the column: split it by character */
+        if(cur.length){ lines.push(cur); cur=[]; curw=0; }
+        var seg=[],sgw=0,k;
+        for(k=0;k<word.length;k++){
+          var cwd=cw(word[k],b)*sz/1000;
+          if(sgw+cwd>maxw&&seg.length){ lines.push(seg); seg=[]; sgw=0; }
+          seg.push(word[k]); sgw+=cwd;
+        }
+        if(seg.length){ cur=seg; curw=sgw; }
+        continue;
+      }
+      w=curw?curw+sw+ww:ww;
+      if(w>maxw&&cur.length){ lines.push(cur); cur=word.slice(0); curw=ww; }
+      else { if(cur.length) cur.push(32); cur=cur.concat(word); curw=w; }
+    }
+    lines.push(cur);
+  }
+  return lines;
+}
+var COL={ink:[0.200,0.271,0.306],mut:[0.361,0.431,0.467],teal:[0.353,0.702,0.667],
+ tealtx:[0.180,0.431,0.463],navy:[0.145,0.341,0.467],rule:[0.812,0.886,0.886]};
+function n3(v){ return (Math.round(v*1000)/1000)+''; }
+
+function Doc(){
+  this.pw=595.28; this.ph=841.89; this.mg=56.7;          /* A4 portrait, 20mm margins */
+  this.x0=this.mg; this.x1=this.pw-this.mg; this.cw=this.x1-this.x0;
+  this.topY=this.ph-this.mg; this.botY=this.mg+40;        /* 40pt reserved for the footer */
+  this.ops=[[]]; this.pi=0; this.y=this.topY;
+}
+Doc.prototype.page=function(){ this.ops.push([]); this.pi++; this.y=this.topY; };
+Doc.prototype.room=function(h){ if(this.y-h<this.botY) this.page(); };
+/* start a new page rather than leave a heading or an accent rule orphaned at the foot */
+Doc.prototype.reserve=function(h){ if(this.y-h<this.botY) this.page(); };
+Doc.prototype.line=function(x,y,w,th,col){
+  this.ops[this.pi].push({k:'r',x:x,y:y,w:w,h:th,c:col});
+};
+Doc.prototype.rule=function(th,col,before,after){
+  this.y-=(before||0);
+  this.room(th+2);
+  this.line(this.x0,this.y,this.cw,th,col||COL.rule);
+  this.y-=(th+(after||0));
+};
+/* One flowed text block. Wrapping is measured, so no line can pass the right margin. */
+Doc.prototype.text=function(t,o){
+  o=o||{};
+  var sz=o.size||10.5, b=!!o.bold, ind=o.indent||0, lead=o.lead||(sz*1.32);
+  var col=COL[o.col||'ink'], f=b?'F2':(o.italic?'F3':'F1');
+  var cs=codes(t), maxw=this.cw-ind, ls=wrapc(cs,sz,b,maxw), i;
+  this.y-=(o.before||0);
+  if(o.keep){ var need=lead*Math.min(ls.length,2)+ (o.after||0) + 14; if(this.y-need<this.botY) this.page(); }
+  for(i=0;i<ls.length;i++){
+    if(this.y-lead<this.botY) this.page();
+    this.y-=lead;
+    if(ls[i].length) this.ops[this.pi].push({k:'t',x:this.x0+ind,y:this.y,s:lit(ls[i]),f:f,z:sz,c:col});
+    if(o.bar) this.line(this.x0+ind-9,this.y-lead*0.22,1.7,lead,COL.teal);
+  }
+  this.y-=(o.after||0);
+  return this;
+};
+/* Serialise: pages, fonts, a real xref table and startxref. */
+function serialise(doc,footL,footR,title){
+  var np=doc.ops.length,i,j,body=[],parts=[],pos=0,offs=[];
+  /* footer on every page, sized down or wrapped so it always fits the column */
+  var fsz=7.2, avail=doc.cw-72, fl=codes(footL), lines=null;
+  while(fsz>5.9&&wid(fl,fsz,false)>avail) fsz-=0.3;
+  lines=wrapc(fl,fsz,false,avail);
+  if(lines.length>2) lines=lines.slice(0,2);
+  for(i=0;i<np;i++){
+    var ops=doc.ops[i];
+    ops.push({k:'r',x:doc.x0,y:doc.mg+27,w:doc.cw,h:0.6,c:COL.rule});
+    for(j=0;j<lines.length;j++)
+      ops.push({k:'t',x:doc.x0,y:doc.mg+17-j*(fsz+1.6),s:lit(lines[j]),f:'F1',z:fsz,c:COL.mut});
+    var pn=codes(footR.replace('{n}',i+1).replace('{m}',np));
+    ops.push({k:'t',x:doc.x1-wid(pn,fsz,false),y:doc.mg+17,s:lit(pn),f:'F1',z:fsz,c:COL.mut});
+  }
+  function stream(ops){
+    var s='',k,o,c;
+    for(k=0;k<ops.length;k++){
+      o=ops[k]; c=o.c;
+      if(o.k==='r') s+=n3(c[0])+' '+n3(c[1])+' '+n3(c[2])+' rg '+n3(o.x)+' '+n3(o.y)+' '+n3(o.w)+' '+n3(o.h)+' re f\n';
+      else s+='BT /'+o.f+' '+n3(o.z)+' Tf '+n3(c[0])+' '+n3(c[1])+' '+n3(c[2])+' rg 1 0 0 1 '+n3(o.x)+' '+n3(o.y)+' Tm ('+o.s+') Tj ET\n';
+    }
+    return s;
+  }
+  var kids='',objs=[];
+  objs[1]='<< /Type /Catalog /Pages 2 0 R >>';
+  objs[3]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
+  objs[4]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
+  objs[5]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>';
+  for(i=0;i<np;i++){
+    var pno=6+i*2, cno=pno+1, st=stream(doc.ops[i]);
+    kids+=(i?' ':'')+pno+' 0 R';
+    objs[pno]='<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+n3(doc.pw)+' '+n3(doc.ph)+'] '
+      +'/Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents '+cno+' 0 R >>';
+    objs[cno]={len:st.length,data:st};
+  }
+  objs[2]='<< /Type /Pages /Kids ['+kids+'] /Count '+np+' >>';
+  var info=6+np*2;
+  objs[info]='<< /Title ('+lit(codes(title))+') /Author (Wawiwa Tech) /Creator (Wawiwa practice page) /Producer (Wawiwa practice page) >>';
+  function put(s){ parts.push(s); pos+=s.length; }
+  put('%PDF-1.4\n%âãÏÓ\n');
+  for(i=1;i<objs.length;i++){
+    if(objs[i]==null) continue;
+    offs[i]=pos;
+    if(typeof objs[i]==='string') put(i+' 0 obj\n'+objs[i]+'\nendobj\n');
+    else put(i+' 0 obj\n<< /Length '+objs[i].len+' >>\nstream\n'+objs[i].data+'endstream\nendobj\n');
+  }
+  var xr=pos, size=objs.length, pad=function(v){ var s=''+v; while(s.length<10) s='0'+s; return s; };
+  var x='xref\n0 '+size+'\n0000000000 65535 f \n';
+  for(i=1;i<size;i++) x+=(offs[i]==null?pad(0)+' 00000 f \n':pad(offs[i])+' 00000 n \n');
+  put(x);
+  put('trailer\n<< /Size '+size+' /Root 1 0 R /Info '+info+' 0 R >>\nstartxref\n'+xr+'\n%%EOF\n');
+  var all=parts.join(''),u=new Uint8Array(all.length);
+  for(i=0;i<all.length;i++) u[i]=all.charCodeAt(i)&255;
+  return u;
+}
+return {Doc:Doc,serialise:serialise,COL:COL,noUrl:noUrl};
+})();
+
+/* ---------- read the page into an ordered list of blocks, then lay it out ---------- */
+function pdfText(el){ return String((el&&el.textContent)||'').replace(/\s+/g,' ').trim(); }
+function pdfBuild(){
+  var d=new WPDF.Doc(), M=ACT.meta||{};
+  var prog=M.program||'', mod=M.module||'', les=M.lesson||'';
+  /* header: programme, module and lesson, then the practice title */
+  d.text(prog,{size:9.5,bold:true,col:'tealtx',after:1});
+  d.text([mod,les].filter(Boolean).join(' · '),{size:9.5,col:'mut',after:6});
+  d.rule(1.8,WPDF.COL.teal,0,10);
+  var h1=document.querySelector('.wrap h1');
+  d.text(pdfText(h1)||M.title||'Practice',{size:19,bold:true,col:'navy',lead:24,after:12});
+
+  var wrap=document.querySelector('.wrap'), kids=wrap?wrap.children:[], i, firstLead=true;
+  function chkList(ul){
+    var items=ul.querySelectorAll('li'),k;
+    for(k=0;k<items.length;k++){
+      var li=items[k], cb=li.querySelector('input[type=checkbox]');
+      if(!cb) continue;
+      var sp=cb.parentNode.querySelector('span'), sel=li.querySelector('select');
+      var mark=cb.checked?'[x] ':'[ ] ';
+      var extra=sel?('  —  '+sel.value):'';
+      d.text(mark+pdfText(sp)+extra,{size:9.8,col:'ink',indent:10,lead:13.2,after:0.5});
+    }
+    d.y-=4;
+  }
+  function ynList(ul){
+    var items=ul.querySelectorAll('li'),k;
+    for(k=0;k<items.length;k++){
+      var li=items[k], q=li.querySelector('.ynq'), r=li.querySelector('input[type=radio]:checked');
+      var st=r?(r.value==='yes'?'Yes':'No'):'not answered';
+      d.text(pdfText(q)+'  —  '+st,{size:9.8,col:'ink',indent:10,lead:13.2,after:0.5});
+    }
+    d.y-=4;
+  }
+  function qsList(ul){
+    var items=ul.querySelectorAll('li'),k;
+    for(k=0;k<items.length;k++)
+      d.text('·  '+pdfText(items[k]),{size:9.6,col:'mut',indent:10,lead:12.8,after:1});
+    d.y-=3;
+  }
+  function answer(ta){
+    d.reserve(40);
+    var lab=ta.id?document.querySelector('label[for="'+ta.id+'"]'):null;
+    d.text(lab?pdfText(lab):'Your answer',{size:8.6,bold:true,col:'mut',before:3,after:2});
+    var v=String(ta.value||'').replace(/[ \t]+\n/g,'\n').trim();
+    if(v) d.text(v,{size:10.2,col:'ink',indent:12,lead:13.6,after:7,bar:true});
+    else d.text('Not answered.',{size:10.2,col:'mut',indent:12,lead:13.6,after:7,bar:true});
+  }
+  function walk(node){
+    var c=node.children,k;
+    for(k=0;k<c.length;k++){
+      var e=c[k],cl=e.className||'',tag=e.tagName;
+      if(/\b(row|out|cn|pv)\b/.test(cl)) continue;
+      if(tag==='H3'||tag==='SCRIPT'||tag==='STYLE'||tag==='BUTTON') continue;
+      if(tag==='TEXTAREA'){ answer(e); continue; }
+      if(tag==='LABEL'||tag==='SELECT'||tag==='INPUT') continue;
+      if(tag==='UL'){
+        if(/\bchk\b/.test(cl)) chkList(e);
+        else if(/\byn\b/.test(cl)) ynList(e);
+        else qsList(e);
+        continue;
+      }
+      if(tag==='P'){
+        if(/\binstr\b/.test(cl)) d.text(pdfText(e),{size:10.4,col:'ink',after:4});
+        else if(/\baid\b/.test(cl)) d.text(pdfText(e),{size:9.6,col:'mut',after:4});
+        else d.text(pdfText(e),{size:9.8,col:'mut',after:4});
+        continue;
+      }
+      if(e.children&&e.children.length) walk(e);
+    }
+  }
+  function card(sec){
+    d.reserve(62);
+    d.rule(1.6,WPDF.COL.teal,9,6);
+    var cn=sec.querySelector('.cn'), h3=sec.querySelector('h3');
+    var head=[cn?pdfText(cn):'',h3?pdfText(h3):''].filter(Boolean).join('   ');
+    if(head) d.text(head,{size:13,bold:true,col:'navy',lead:16.5,after:5,keep:true});
+    walk(sec);
+    d.y-=4;
+  }
+  function pathPanel(){
+    var po=document.getElementById('pathout');
+    if(!po||po.hidden||!pdfText(po)) return;
+    d.reserve(70);
+    d.rule(1.8,WPDF.COL.navy,12,7);
+    d.text('Your personal path',{size:14,bold:true,col:'navy',lead:18,after:5,keep:true});
+    var lis=po.querySelectorAll('ul > li'),k;
+    for(k=0;k<lis.length;k++){
+      var li=lis[k], rev=li.querySelector('.rev'), rv=rev?pdfText(rev):'';
+      var cl2=li.cloneNode(true), r2=cl2.querySelector('.rev');
+      if(r2) r2.parentNode.removeChild(r2);
+      d.text('•  '+pdfText(cl2),{size:10.2,col:'ink',indent:4,lead:13.6,after:2});
+      if(rv) d.text(rv,{size:9.2,col:'mut',indent:18,lead:12.4,after:5});
+    }
+    var rl=po.querySelector('.reslist');
+    if(rl){
+      var hd=rl.querySelector('.reshead');
+      d.text(hd?pdfText(hd):'Optional further reading',{size:8.8,bold:true,col:'mut',before:5,after:4});
+      var items=rl.querySelectorAll('.resitem');
+      for(k=0;k<items.length;k++){
+        var a=items[k].querySelector('.reslink'), why=items[k].querySelector('.reswhy');
+        d.text(pdfText(a),{size:9.8,bold:true,col:'tealtx',indent:4,lead:13,after:1});
+        if(why) d.text(pdfText(why),{size:9.2,col:'mut',indent:4,lead:12.4,after:4});
+      }
+    }
+  }
+  for(i=0;i<kids.length;i++){
+    var e=kids[i],cl=e.className||'',tag=e.tagName;
+    if(tag==='H1'||tag==='SCRIPT'||tag==='STYLE') continue;
+    if(/\b(warn|foot|printfoot)\b/.test(cl)) continue;      /* as on paper, the warning is not printed */
+    if(/\bstage\b/.test(cl)){
+      var sp=e.querySelector('span');
+      d.reserve(64);
+      d.text(pdfText(sp).toUpperCase(),{size:9,bold:true,col:'tealtx',before:12,after:4,keep:true});
+      d.rule(0.7,WPDF.COL.rule,0,4);
+      continue;
+    }
+    if(/\bpathpanel\b/.test(cl)){ pathPanel(); continue; }
+    if(tag==='SECTION'&&/\bcard\b/.test(cl)){ card(e); continue; }
+    if(tag==='P'){
+      if(firstLead&&/\blead\b/.test(cl)){ firstLead=false; continue; }  /* duplicates the header line */
+      d.text(pdfText(e),{size:9.8,col:'mut',after:5});
+      continue;
+    }
+  }
+  var footL='Wawiwa Tech · '+prog+' · '+mod+' · '+les+' · Internal use only';
+  return WPDF.serialise(d,footL,'Page {n} of {m}',pdfFileName().replace(/\.pdf$/,''));
+}
+/* Wawiwa - EAI M3 L1 - Class Practice.pdf, the same shape in every practice */
+function pdfFileName(){
+  var id=String((ACT.meta||{}).id||'practice');
+  var m=/^([a-z]+)-m(\d+)l(\d+)-(class|home)\b/.exec(id);
+  if(m) return 'Wawiwa - '+m[1].toUpperCase()+' M'+m[2]+' L'+m[3]+' - '
+    +(m[4]==='class'?'Class Practice':'Home Practice')+'.pdf';
+  return 'Wawiwa - '+id.replace(/[^\w -]/g,' ')+'.pdf';
+}
+/* Rise embeds the practice in an iframe. A cross-origin frame downloads normally; the one
+   case a browser refuses a Blob download is a sandboxed frame with an opaque origin and no
+   allow-downloads, and no event reports it. So the download is always attempted first, and
+   the standalone tab opens only on that evidence, never instead of a download that works. */
+function pdfDownloadBlocked(){
+  if(window.self===window.top) return false;
+  /* when the embedding page is same-origin the sandbox attribute itself is authoritative */
+  try{
+    var fe=window.frameElement;
+    if(fe&&fe.getAttribute){
+      var sb=fe.getAttribute('sandbox');
+      if(sb!=null) return !/\ballow-downloads\b/.test(sb);
+      return false;
+    }
+  }catch(e){}
+  /* otherwise: an opaque origin means a sandbox, and a sandbox refuses Blob downloads
+     unless allow-downloads was granted, which nothing in the frame can read */
+  try{ window.localStorage.getItem('wawiwa:probe'); }catch(e){ return true; }
+  try{ if(String(document.location.origin)==='null') return true; }catch(e){ return true; }
+  return false;
+}
+function pdfStandalone(){ try{ window.open(location.href,'_blank'); }catch(e){} }
+document.getElementById('mkpdf').addEventListener('click', function(){
+  buildPath(); printViews();
+  var bytes;
+  try{ bytes=pdfBuild(); }
+  catch(err){ pdfStandalone(); return; }
+  var started=false;
+  try{
+    var url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    var a=document.createElement('a');
+    a.href=url; a.download=pdfFileName(); a.rel='noopener';
+    a.style.cssText='position:fixed;left:-9999px;top:0;width:1px;height:1px';
+    document.body.appendChild(a);
+    a.click();
+    started=true;
+    setTimeout(function(){
+      try{ a.parentNode.removeChild(a); }catch(e){}
+      try{ URL.revokeObjectURL(url); }catch(e){}
+    },5000);
+  }catch(err2){ started=false; }
+  if(!started||pdfDownloadBlocked()) pdfStandalone();
+});
+})();
+</script>
+
+</body></html>
