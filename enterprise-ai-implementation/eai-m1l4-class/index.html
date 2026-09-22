@@ -2582,6 +2582,537 @@ button.m-node { cursor: pointer; }
 }
 .m-path .btn-row { margin-top: 12px; }
 
+
+
+
+
+
+
+
+/* >>> WAWIWA CLEAN SHEET (M1 mission shell) >>> */
+
+/* =====================================================================
+   CLEAN SHEET — Module 1 mission shell (Practice Studio, coached_canvas)
+   22 September 2026.
+
+   Appended after the page's own stylesheet, so it wins on order alone
+   and needs almost no !important. It changes NOTHING about the markup,
+   the runtime, window.ACTIVITY, the coach, the scoring or the PDF: the
+   mission board, the stops, the medal and the report all still work.
+   What it removes is the decorative layer — the navy/red gradient, the
+   blobs, the line-art motif, the scrim, the deep drop shadows and the
+   gold-and-red accent scheme — and puts the Apple-quiet sheet used for
+   M2/M3/M4 in its place: a transparent page, white surfaces, hairline
+   borders, one teal accent.
+   ===================================================================== */
+
+:root{
+  --cs-bg:        transparent;
+  --cs-card:      #FFFFFF;
+  --cs-card-2:    #FAFBFB;
+  --cs-hair:      #E4E8E8;
+  --cs-hair-soft: #EDF0F0;
+  --cs-ink:       #10201F;
+  --cs-ink-2:     #33403F;
+  --cs-muted:     #667573;   /* 4.82:1 on white — WCAG AA */
+  --cs-accent:    #2E6E76;
+  --cs-accent-2:  #EAF2F2;
+  --cs-on-accent: #FFFFFF;
+  --cs-radius:    20px;
+  --cs-radius-s:  12px;
+}
+
+/* ---------- page ---------- */
+
+body,
+body.mission-active{
+  background: var(--cs-bg);
+  color: var(--cs-ink-2);
+}
+body.mission-active .container{ background: none; }
+
+/* the decorative layer goes away entirely */
+.m-stage-bg,
+.m-bg-blobs,
+.m-bg-slot,
+.m-blob,
+.m-icons,
+.m-scrim{ display: none !important; }
+
+.m-app{ padding: 0; }
+.m-main{ margin-top: 0; padding: 18px 22px 22px; gap: 20px; }
+
+/* both columns start at the top and share one height, instead of the scene
+   floating in the middle of a white field */
+.m-stagewrap{ align-items: stretch; }
+
+/* ---------- top bar ---------- */
+
+.m-topbar{
+  color: var(--cs-ink);
+  text-shadow: none;
+  background: var(--cs-card);
+  border-bottom: 1px solid var(--cs-hair);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 14px 20px;
+}
+.m-logo{ filter: none; }
+.m-brand-k{ color: var(--cs-muted); font-weight: 600; letter-spacing: .16em; }
+.m-brand-t{ color: var(--cs-ink); font-weight: 600; }
+
+.m-chip{
+  background: var(--cs-accent-2);
+  border: none;
+  color: var(--cs-accent);
+  backdrop-filter: none;
+  padding: 6px 14px;
+}
+.m-chip b{ color: var(--cs-accent); font-weight: 600; }
+.m-chip span{ color: var(--cs-muted); letter-spacing: .08em; }
+.m-chip-bump{ animation: none; }
+
+.m-medal-track{ stroke: var(--cs-hair); }
+.m-medal-fill{ stroke: var(--cs-accent); }
+.m-medal-lbl{ fill: var(--cs-muted); font-weight: 600; }
+
+/* ---------- the two panels ---------- */
+
+.m-rail,
+.m-scene{
+  background: var(--cs-card);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius);
+  box-shadow: none;
+}
+.m-rail-title{ color: var(--cs-muted); font-weight: 600; letter-spacing: .12em; }
+.m-rail-foot{ color: var(--cs-muted); }
+
+.m-tile{
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--cs-radius-s);
+}
+.m-tile:hover{ background: var(--cs-card-2); }
+.m-tile-open{
+  background: var(--cs-card-2);
+  border-color: var(--cs-hair);
+  box-shadow: none;
+}
+.m-tile-dot{
+  background: var(--cs-accent-2);
+  color: var(--cs-accent);
+  font-weight: 600;
+}
+.m-tile-active .m-tile-dot,
+.m-tile-report .m-tile-dot{ background: var(--cs-accent); color: var(--cs-on-accent); }
+.m-tile-nm{ color: var(--cs-ink); font-weight: 600; }
+.m-tile-st{ color: var(--cs-muted); }
+
+/* ---------- the scene ---------- */
+
+.m-enter{ animation: none; }
+
+.m-eyebrow{ color: var(--cs-muted); font-weight: 600; letter-spacing: .14em; }
+.m-scene-title,
+.m-scene-title-big{ color: var(--cs-ink); font-weight: 600; letter-spacing: -0.01em; }
+.m-lead{ color: var(--cs-ink-2); }
+.m-lead-strong{ color: var(--cs-ink); font-weight: 600; }
+.m-badge{
+  background: var(--cs-accent-2);
+  color: var(--cs-accent);
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+.m-scene-foot{
+  border-top: 1px solid var(--cs-hair-soft);
+  background: transparent;
+}
+.m-foot-note{ color: var(--cs-muted); }
+.m-bar{ background: var(--cs-hair); }
+.m-bar i{ background: var(--cs-accent); }
+.m-bar-count{ color: var(--cs-muted); font-weight: 600; }
+
+/* the AI-coach welcome panel: a quiet card, not a navy slab */
+.m-mentor-say{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-ink-2);
+  box-shadow: none;
+}
+.m-mentor-say b{ color: var(--cs-ink); font-weight: 600; }
+.m-mentor-text{ color: var(--cs-ink-2); }
+
+.meta-chip{
+  background: var(--cs-accent-2);
+  color: var(--cs-accent);
+  font-weight: 600;
+}
+.meta-chip-live{ background: var(--cs-accent); color: var(--cs-on-accent); }
+
+/* ---------- the safety notice ---------- */
+
+.m-safety{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+}
+.m-safety-title{ color: var(--cs-ink); font-weight: 600; }
+.m-safety-body,
+.m-safety-local{ color: var(--cs-muted); font-weight: 400; }
+
+/* ---------- the case picker ---------- */
+
+.m-case-card{
+  background: var(--cs-card);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+}
+.m-case-card:hover{
+  background: var(--cs-card-2);
+  border-color: var(--cs-hair);
+  box-shadow: none;
+  transform: none;
+}
+.m-case-num{ background: var(--cs-accent-2); color: var(--cs-accent); font-weight: 600; }
+.m-case-title{ color: var(--cs-ink); font-weight: 600; }
+.m-case-preview{ color: var(--cs-muted); }
+.m-case-st{ background: transparent; color: var(--cs-muted); padding-left: 0; font-weight: 600; }
+
+/* ---------- the working screen ---------- */
+
+.m-console-hint{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-muted);
+}
+.m-scenario{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-left: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-ink-2);
+}
+.m-instructions{
+  background: transparent;
+  border: 1px solid var(--cs-hair);
+  border-left: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+}
+.m-instructions-k{ color: var(--cs-muted); font-weight: 600; letter-spacing: .12em; }
+.m-instructions-p{ color: var(--cs-ink-2); }
+.m-instructions-reward{
+  background: transparent;
+  border: 1px solid var(--cs-hair);
+  color: var(--cs-muted);
+  font-weight: 400;
+}
+.m-instructions-star{ color: var(--cs-muted); }
+
+.m-fieldblock + .m-fieldblock{ border-top: 1px solid var(--cs-hair-soft); }
+.m-fieldblock-title{ color: var(--cs-ink); font-weight: 600; }
+
+.field-card{ border-color: var(--cs-hair); border-radius: var(--cs-radius-s); }
+.field-card:hover{ box-shadow: none; }
+.field-card:focus-within{ border-color: var(--cs-accent); box-shadow: none; }
+.field-label{ color: var(--cs-ink); font-weight: 600; }
+.field-help{ color: var(--cs-muted); }
+
+.ring-track{ stroke: var(--cs-hair); }
+.ring-fill{ stroke: var(--cs-accent); }
+.ring-label{ fill: var(--cs-muted); }
+
+.answer-input{
+  background: var(--cs-card);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-ink);
+}
+.answer-input:focus{
+  border-color: var(--cs-accent);
+  outline: 2px solid var(--cs-accent);
+  outline-offset: 1px;
+  box-shadow: none;
+}
+
+/* ---------- buttons: one accent, no lift, no red ---------- */
+
+.btn{ border-radius: 10px; font-weight: 600; box-shadow: none; }
+.btn:hover{ transform: none; box-shadow: none; }
+.mission-active .btn-primary,
+.btn-primary,
+.mission-active .btn-teal,
+.btn-teal,
+.btn-coach{
+  background: var(--cs-accent);
+  color: var(--cs-on-accent);
+  box-shadow: none;
+}
+.mission-active .btn-primary:hover,
+.btn-primary:hover,
+.mission-active .btn-teal:hover,
+.btn-teal:hover,
+.btn-coach:hover{ background: #255C63; box-shadow: none; }
+.mission-active .btn-ghost,
+.btn-ghost,
+.btn-ghost-danger{
+  background: transparent;
+  border: 1px solid var(--cs-hair);
+  color: var(--cs-muted);
+}
+.mission-active .btn-ghost:hover,
+.btn-ghost:hover{ background: var(--cs-card-2); border-color: var(--cs-hair); }
+
+/* ---------- feedback and the coach ---------- */
+
+.feedback.has-feedback{ animation: none; border-radius: var(--cs-radius-s); }
+.feedback.local-box{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-left: 1px solid var(--cs-hair);
+}
+.mission-active .feedback-title,
+.feedback-title{ color: var(--cs-muted); font-weight: 600; }
+.feedback-line{ color: var(--cs-ink-2); }
+.coach-note{ color: var(--cs-muted); }
+
+.tag-pill{
+  animation: none;
+  background: transparent;
+  border: 1px solid var(--cs-hair);
+  color: var(--cs-muted);
+  font-weight: 600;
+}
+.tag-revise,
+.tag-ready,
+.tag-light{ background: transparent; color: var(--cs-muted); }
+
+/* the score toast: quiet, not a fanfare */
+.m-toast{ box-shadow: none; border: 1px solid var(--cs-hair); background: var(--cs-card); }
+.m-toast-big{ color: var(--cs-ink); font-weight: 600; }
+.m-toast-pts{ color: var(--cs-accent); font-weight: 600; }
+
+/* ---------- dark mode, matching the M2/M3/M4 sheet ---------- */
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --cs-card:      #141A1A;
+    --cs-card-2:    #1B2222;
+    --cs-hair:      #2A3333;
+    --cs-hair-soft: #232B2B;
+    --cs-ink:       #ECF1F0;
+    --cs-ink-2:     #C6D0CE;
+    --cs-muted:     #93A19F;
+    --cs-accent:    #5CC9BE;
+    --cs-accent-2:  #1E2B2B;
+    --cs-on-accent: #0B1414;
+  }
+}
+:root[data-theme="dark"]{
+  --cs-card:      #141A1A;
+  --cs-card-2:    #1B2222;
+  --cs-hair:      #2A3333;
+  --cs-hair-soft: #232B2B;
+  --cs-ink:       #ECF1F0;
+  --cs-ink-2:     #C6D0CE;
+  --cs-muted:     #93A19F;
+  --cs-accent:    #5CC9BE;
+  --cs-accent-2:  #1E2B2B;
+  --cs-on-accent: #0B1414;
+}
+
+/* ---------- what the first pass missed: headings, the mission report,
+              the path review and the exported sheet ---------- */
+
+.m-scene,
+.m-report-sheet{ color: var(--cs-ink-2); }
+
+.m-sectionhead{ color: var(--cs-ink); font-weight: 600; }
+.m-fieldblock + .m-sectionhead,
+.m-scenario + .m-sectionhead,
+.m-notecard + .m-sectionhead{ border-top: 1px solid var(--cs-hair-soft); }
+
+.m-notecard{
+  background: var(--cs-card);
+  border: 1px solid var(--cs-hair);
+  border-left: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  box-shadow: none;
+}
+.m-notecard-body,
+.m-notecard-list li{ color: var(--cs-ink-2); }
+.m-notecard-foot{ color: var(--cs-muted); font-weight: 400; }
+
+.m-support-note{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-muted);
+}
+
+/* the gold star on every reward row: one quiet mark, not thirty gold ones */
+.m-instructions-star,
+.m-instructions-star svg,
+.m-instructions-star svg *{ color: var(--cs-muted); fill: var(--cs-muted); stroke: none; }
+
+/* ---------- the ending scene ---------- */
+
+.m-rank{
+  background: transparent;
+  border: 1px solid var(--cs-hair);
+  color: var(--cs-muted);
+  font-weight: 600;
+}
+.m-score-n{ color: var(--cs-accent); font-weight: 600; }
+.m-score-of{ color: var(--cs-muted); }
+
+.m-recap-row{ border: 1px solid var(--cs-hair); background: var(--cs-card); border-radius: var(--cs-radius-s); }
+.m-recap-step{ background: var(--cs-accent-2); color: var(--cs-accent); font-weight: 600; }
+.m-recap-title{ color: var(--cs-ink); font-weight: 600; }
+.m-recap-choice{ color: var(--cs-muted); }
+
+/* ---------- the path review ---------- */
+
+.m-path-title{ color: var(--cs-ink); font-weight: 600; }
+.m-path-sub{ color: var(--cs-muted); }
+.m-path-rank{ background: var(--cs-accent-2); color: var(--cs-accent); font-weight: 600; }
+.m-path-k{ color: var(--cs-muted); font-weight: 600; }
+.m-path-chip{ background: transparent; border: 1px solid var(--cs-hair); color: var(--cs-muted); font-weight: 400; }
+.m-path-card{ background: var(--cs-card); border: 1px solid var(--cs-hair); border-radius: var(--cs-radius-s); }
+.m-path-num{ background: var(--cs-accent-2); color: var(--cs-accent); font-weight: 600; }
+.m-path-focus,
+.m-path-review{ color: var(--cs-ink-2); }
+.m-path-target{ color: var(--cs-ink); font-weight: 600; }
+.m-path-res .resource-for{ color: var(--cs-muted); }
+.m-path-positive{ background: var(--cs-card-2); border: 1px solid var(--cs-hair); border-radius: var(--cs-radius-s); }
+.m-path-missing{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-ink-2);
+  font-weight: 400;
+}
+
+/* ---------- the mission report on screen ---------- */
+
+.m-rep-hero{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-ink-2);
+}
+.m-rep-motif{ display: none; }
+.m-rep-kicker{ color: var(--cs-muted); font-weight: 600; }
+.m-rep-title{ color: var(--cs-ink); font-weight: 600; }
+.m-rep-score-n{ color: var(--cs-accent); font-weight: 600; }
+.m-rep-score-of{ color: var(--cs-muted); }
+.m-rep-rank{ background: transparent; border: 1px solid var(--cs-hair); color: var(--cs-muted); }
+.m-rep-level,
+.m-rep-level-0,
+.m-rep-level-1,
+.m-rep-level-2{ background: transparent; border: 1px solid var(--cs-hair); color: var(--cs-muted); font-weight: 600; }
+.m-rep-section-title{
+  color: var(--cs-ink);
+  font-weight: 600;
+  border-bottom: 1px solid var(--cs-hair);
+}
+.m-rep-card{ border: 1px solid var(--cs-hair); border-left: 1px solid var(--cs-hair); border-radius: var(--cs-radius-s); }
+.m-rep-card-num{ background: var(--cs-accent-2); color: var(--cs-accent); font-weight: 600; }
+.m-rep-card-title{ color: var(--cs-ink); font-weight: 600; }
+.m-rep-tag,
+.m-rep-tag-ready,
+.m-rep-tag-light,
+.m-rep-tag-revise{ background: transparent; border: 1px solid var(--cs-hair); color: var(--cs-muted); font-weight: 600; }
+.m-rep-row{ color: var(--cs-ink-2); }
+.m-rep-row-label{ color: var(--cs-muted); }
+.m-rep-empty{ color: var(--cs-muted); }
+.m-rep-foot{ color: var(--cs-muted); border-top: 1px solid var(--cs-hair); }
+
+/* ---------- the exported PDF sheet ---------- */
+
+.print-hero{
+  background: #FAFBFB;
+  border: 1px solid #E4E8E8;
+  border-radius: 12px;
+  color: #33403F;
+}
+.print-motif{ display: none; }
+.print-kicker{ color: #667573; font-weight: 600; }
+.print-title{ color: #10201F; font-weight: 600; }
+.print-level,
+.print-level-0,
+.print-level-1,
+.print-level-2{ background: transparent; border: 1px solid #E4E8E8; color: #667573; }
+.print-section-title{ color: #10201F; font-weight: 600; border-bottom: 1px solid #E4E8E8; }
+.print-tile{ border: 1px solid #E4E8E8; border-left: 1px solid #E4E8E8; border-radius: 10px; }
+.print-tile-num{ color: #667573; }
+.print-tile-label{ color: #10201F; font-weight: 600; }
+.print-tile-body{ color: #33403F; }
+.print-empty,
+.print-foot,
+.print-path-choice{ color: #667573; }
+.print-path-row{ border-bottom: 1px solid #EDF0F0; }
+.print-path-tag{ background: transparent; border: 1px solid #E4E8E8; color: #667573; }
+
+/* ---------- the rubric review: verdict as words, not as a red slab ----------
+   The three levels stop being coloured gradients. The wording ("Ready to
+   submit" / "Requires significant revision") already carries the verdict, and
+   a single outlined pill per row reads the same in both themes and does not
+   fail contrast the way white-on-amber did. */
+
+.level-banner,
+.level-banner.level-0,
+.level-banner.level-1,
+.level-banner.level-2,
+.level-0,
+.level-1,
+.level-2{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-ink-2);
+}
+.level-label{ color: var(--cs-muted); font-weight: 600; opacity: 1; }
+.level-value{ color: var(--cs-ink); font-weight: 600; }
+.level-passback{ color: var(--cs-muted); opacity: 1; }
+/* the glyph carries inline fill/stroke attributes for the PDF export, so the
+   disc and the mark are recoloured one at a time; a blanket rule fills the X
+   solid and the mark disappears. */
+.level-badge svg circle{ fill: var(--cs-accent-2); }
+.level-badge svg path{ stroke: var(--cs-accent); }
+
+.rubric-box,
+.fix-box{
+  background: var(--cs-card);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+}
+.rubric-name{ color: var(--cs-ink); font-weight: 600; }
+.rubric-verdict{ color: var(--cs-ink-2); }
+.ok-line{ color: var(--cs-muted); font-weight: 400; }
+
+.review-note{ color: var(--cs-ink-2); font-weight: 400; }
+.review-note-line{ color: var(--cs-muted); }
+.review-part{ border-top: 1px solid var(--cs-hair-soft); }
+
+.fix-link,
+.resource-link,
+.routing-target{ color: var(--cs-accent); font-weight: 600; }
+.fix-why,
+.resource-for{ color: var(--cs-muted); }
+.routing-line{ color: var(--cs-ink-2); font-weight: 400; border-top: 1px solid var(--cs-hair-soft); }
+.pii-line{ color: var(--cs-ink-2); font-weight: 600; }
+.scaffold-notice{ background: var(--cs-card-2); }
+.scaffold-notice .safety-body{ color: var(--cs-ink-2); }
+
+/* a field that passed: the ring fills with the accent, nothing turns green */
+.field-card.card-ready{ border-color: var(--cs-hair); }
+.card-ready .ring-fill{ stroke: var(--cs-accent); fill: var(--cs-accent); }
+.card-ready .ring-track{ stroke: var(--cs-accent); }
+
+/* <<< WAWIWA CLEAN SHEET (M1 mission shell) <<< */
 </style>
 </head>
 <body>
