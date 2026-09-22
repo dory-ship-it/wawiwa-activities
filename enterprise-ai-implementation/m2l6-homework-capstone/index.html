@@ -4,108 +4,207 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wawiwa · Lesson 6 Home Practice — Capstone Production</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --turq:#0097A7; --red:#EE3124; --char:#1F2C36; --slate:#3A4555; --slateL:#6F7A8A;
-  --card:#F5F7F8; --line:#E3E8EC; --amber:#F5A923; --green:#2E8B57; --purple:#6B46C1;
-  --tint:#EAF6F3;
-}
-*{box-sizing:border-box}
-body{margin:0;background:#fff;color:var(--slate);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  line-height:1.5;font-size:15px}
-.container{max-width:900px;margin:0 auto;padding:26px 24px 60px}
-/* header */
-.masthead{display:flex;align-items:center;gap:14px;border-bottom:2px solid var(--red);
-  padding-bottom:14px;margin-bottom:18px}
-.logo{background:var(--red);color:#fff;font-weight:800;font-size:20px;letter-spacing:.5px;
-  padding:7px 12px;border-radius:3px;line-height:1}
-.mast-text .kick{color:var(--turq);font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase}
-.mast-text h1{margin:2px 0 0;font-size:21px;color:var(--char);font-weight:800;line-height:1.2}
-.tag-home{display:inline-block;background:var(--purple);color:#fff;font-size:11px;font-weight:700;
-  letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:20px;margin-left:auto;white-space:nowrap}
-/* intro */
-.instructions{background:var(--tint);border-left:5px solid var(--turq);border-radius:0 8px 8px 0;
-  padding:14px 18px;margin:0 0 22px}
-.instructions h2{margin:0 0 6px;font-size:14px;color:var(--turq);text-transform:uppercase;letter-spacing:.6px}
-.instructions p{margin:6px 0}
-.meta-row{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--slateL);margin-top:8px}
-.meta-row b{color:var(--char)}
-/* sections */
-.section-title{display:flex;align-items:center;gap:10px;margin:30px 0 12px;font-size:17px;
-  color:var(--char);font-weight:800;border-bottom:1px solid var(--line);padding-bottom:7px}
-.section-title .n{background:var(--turq);color:#fff;width:26px;height:26px;border-radius:50%;
-  display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex:0 0 auto}
-.guidance{color:var(--slateL);font-size:13.5px;margin:0 0 10px}
-.step{margin:0 0 14px}
-.step-lead{font-weight:600;color:var(--char)}
-/* prompt card */
-.prompt{background:var(--char);border-radius:10px;padding:0;margin:12px 0 16px;overflow:hidden;border:1px solid #10202b}
-.prompt-head{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#16242e;color:#fff}
-.prompt-head .ai{background:var(--purple);color:#fff;font-size:10px;font-weight:800;letter-spacing:.5px;
-  padding:2px 7px;border-radius:4px;text-transform:uppercase}
-.prompt-head .ttl{font-size:13px;font-weight:700}
-.prompt-head .copy{margin-left:auto;background:var(--turq);color:#fff;border:0;border-radius:6px;
-  padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer}
-.prompt-head .copy:active{transform:translateY(1px)}
-.prompt pre{margin:0;padding:14px;color:#E7EEF1;font-family:"SF Mono",Consolas,Menlo,monospace;
-  font-size:12.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
-.prompt .why{padding:0 14px 12px;color:#9FB2BC;font-size:11.5px}
-/* fields */
-label.fl{display:block;font-weight:600;color:var(--char);font-size:13.5px;margin:12px 0 4px}
-input.tf,textarea.ta,select.sf{width:100%;border:1px solid var(--line);border-radius:7px;padding:9px 11px;
-  font:inherit;font-size:14px;color:var(--char);background:#fff}
-textarea.ta{min-height:80px;resize:vertical}
-input.tf:focus,textarea.ta:focus,select.sf:focus{outline:none;border-color:var(--turq);box-shadow:0 0 0 3px var(--tint)}
-.print-only{display:none}
-/* builder table */
-table.build{width:100%;border-collapse:collapse;margin:8px 0 6px;font-size:13px}
-table.build th{background:var(--turq);color:#fff;text-align:left;padding:7px 9px;font-weight:700;font-size:12px}
-table.build td{border:1px solid var(--line);padding:5px 6px;vertical-align:top}
-table.build input,table.build textarea,table.build select{width:100%;border:0;padding:5px;font:inherit;font-size:13px;background:transparent;resize:vertical}
-table.build input:focus,table.build textarea:focus,table.build select:focus{outline:2px solid var(--tint)}
-.rowdel{background:none;border:0;color:var(--red);font-size:16px;cursor:pointer;line-height:1}
-.req-cell.miss input{background:#FCEBEA}
-.addbtn{background:var(--tint);color:var(--turq);border:1px dashed var(--turq);border-radius:7px;
-  padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;margin:4px 0 10px}
-/* ROI */
-.roi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin:10px 0}
-.roi-out{background:var(--card);border-radius:8px;padding:12px 14px;margin:10px 0;display:grid;
-  grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
-.roi-out .k{font-size:11px;color:var(--slateL);text-transform:uppercase;letter-spacing:.5px}
-.roi-out .v{font-size:22px;font-weight:800;color:var(--turq);margin-top:3px}
-/* checklist */
-.checklist{background:var(--card);border-radius:10px;padding:14px 18px;margin:16px 0}
-.checklist h3{margin:0 0 4px;font-size:14px;color:var(--char);text-transform:uppercase;letter-spacing:.5px}
-.chkbar{height:8px;background:#E3E8EC;border-radius:20px;overflow:hidden;margin:8px 0 12px}
-.chkbar > i{display:block;height:100%;width:0;background:var(--green);transition:width .25s}
-.chk{display:flex;align-items:flex-start;gap:9px;margin:7px 0;font-size:14px;color:var(--char)}
-.chk input{width:17px;height:17px;margin-top:1px;accent-color:var(--green);flex:0 0 auto}
-.capstone-note{background:#F3EEFB;border-left:5px solid var(--purple);border-radius:0 8px 8px 0;
-  padding:12px 16px;margin:16px 0;font-size:13.5px}
-.callout{background:#FFF7E6;border-left:5px solid var(--amber);border-radius:0 8px 8px 0;padding:11px 16px;margin:14px 0;font-size:13.5px}
-/* controls */
-.controls{position:sticky;bottom:0;background:rgba(255,255,255,.96);border-top:1px solid var(--line);
-  padding:12px 0;margin-top:26px;display:flex;gap:12px;flex-wrap:wrap;backdrop-filter:blur(4px)}
-.btn{border:0;border-radius:8px;padding:11px 20px;font-weight:800;font-size:14px;cursor:pointer}
-.btn-print{background:var(--turq);color:#fff}
-.btn-clear{background:#fff;color:var(--slate);border:1px solid var(--line)}
-.foot{margin-top:22px;color:var(--slateL);font-size:11.5px;text-align:center}
-a{color:var(--turq)}
-@media (max-width:640px){.roi-grid,.roi-out{grid-template-columns:1fr 1fr}.tag-home{margin-left:0}}
-/* ---------- PRINT ---------- */
-@page{margin:14mm}
-@media print{
-  .controls,.copy,.addbtn,.rowdel,.tag-home{display:none !important}
-  body{font-size:12px}
-  .container{max-width:none;padding:0}
-  .prompt{border:1px solid #999}
-  input.tf,textarea.ta,select.sf,table.build input,table.build textarea,table.build select{border-color:#bbb}
-  .print-only{display:block}
-  textarea.ta{min-height:0}
-  .section-title{break-after:avoid}
-  .prompt,.checklist,.roi-out,table.build{break-inside:avoid}
-}
+  /* ------------------------------------------------------------------
+     Wawiwa clean sheet — the M2 HOMEWORK family (masthead, instructions,
+     numbered sections, the AI prompt card, builder tables, the ROI grid,
+     the checklist and the sticky controls).
+     Six pages share one stylesheet; this replaces it. Same tokens and
+     restraint as _clean-sheet-m2-workbook.css.
+     NOTHING in the page's content, markup or script is changed: the
+     stylesheet is swapped in and nothing else.
+     ------------------------------------------------------------------ */
+  :root{
+    --card:#FFFFFF;
+    --ink:#17201F; --ink-2:#44514F; --muted:#667573;
+    --hair:#E2EAE9; --field:#F1F6F5;
+    --accent:#2E6E76; --accent-soft:#DFEFED; --on-accent:#FFFFFF;
+    --good:#2E6E76;
+    --brand-red:#EE3124;
+    --shadow:0 1px 2px rgba(23,32,31,.05), 0 18px 44px -18px rgba(23,32,31,.22);
+    --shadow-soft:0 1px 2px rgba(23,32,31,.05);
+    --ease:cubic-bezier(.2,.7,.2,1);
+    /* names the page markup still refers to inline, kept so nothing breaks */
+    --turq:#2E6E76; --red:#EE3124; --char:#17201F; --slate:#44514F; --slateL:#667573;
+    --line:#E2EAE9; --amber:#667573; --green:#2E6E76; --purple:#667573; --tint:#DFEFED;
+  }
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+    --card:#18211F; --ink:#EDF3F2; --ink-2:#C6D2D0; --muted:#8A9997;
+    --hair:#26312F; --field:#212B29; --accent:#5CC9BE; --accent-soft:#153330;
+    --on-accent:#0C1312; --good:#5CC9BE;
+    --turq:#5CC9BE; --char:#EDF3F2; --slate:#C6D2D0; --slateL:#8A9997;
+    --line:#26312F; --amber:#8A9997; --green:#5CC9BE; --purple:#8A9997; --tint:#153330;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 52px -18px rgba(0,0,0,.8);
+    --shadow-soft:0 1px 2px rgba(0,0,0,.4);
+  }}
+  :root[data-theme="dark"]{
+    --card:#18211F; --ink:#EDF3F2; --ink-2:#C6D2D0; --muted:#8A9997;
+    --hair:#26312F; --field:#212B29; --accent:#5CC9BE; --accent-soft:#153330;
+    --on-accent:#0C1312; --good:#5CC9BE;
+    --turq:#5CC9BE; --char:#EDF3F2; --slate:#C6D2D0; --slateL:#8A9997;
+    --line:#26312F; --amber:#8A9997; --green:#5CC9BE; --purple:#8A9997; --tint:#153330;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 52px -18px rgba(0,0,0,.8);
+    --shadow-soft:0 1px 2px rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  /* No page ground: the sheet floats on whatever is behind the embed. */
+  body{background:transparent; color:var(--ink-2); line-height:1.6; font-size:15.5px;
+    font-family:"Assistant",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  .container{max-width:720px; margin:0 auto; padding:22px 16px 56px}
+
+  /* ---------- masthead: the Wawiwa mark stays, the red rule goes ---------- */
+  .masthead{display:flex; align-items:center; gap:14px; border-bottom:1px solid var(--hair);
+    padding-bottom:16px; margin-bottom:22px}
+  .logo{background:var(--brand-red); color:#fff; font-weight:700; font-size:18px;
+    letter-spacing:.3px; padding:7px 12px; border-radius:6px; line-height:1}
+  .mast-text .kick{color:var(--muted); font-weight:700; font-size:11px;
+    letter-spacing:.12em; text-transform:uppercase}
+  .mast-text h1{margin:6px 0 0; font-size:clamp(20px,3vw,24px); color:var(--ink);
+    font-weight:700; line-height:1.25; letter-spacing:-.014em}
+  .tag-home{display:inline-block; background:transparent; border:1px solid var(--hair);
+    color:var(--muted); font-size:11px; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; padding:4px 11px; border-radius:980px;
+    margin-left:auto; white-space:nowrap}
+
+  /* ---------- the opening instructions ---------- */
+  .instructions{background:var(--card); border:1px solid var(--hair); border-left:1px solid var(--hair);
+    border-radius:16px; box-shadow:var(--shadow-soft); padding:18px 22px; margin:0 0 26px}
+  .instructions h2{margin:0 0 8px; font-size:11px; color:var(--muted); font-weight:700;
+    letter-spacing:.12em; text-transform:uppercase}
+  .instructions p{margin:8px 0; color:var(--ink-2)}
+  .meta-row{display:flex; gap:20px; flex-wrap:wrap; font-size:13px; color:var(--muted); margin-top:12px}
+  .meta-row b{color:var(--ink); font-weight:600}
+
+  /* ---------- numbered sections ---------- */
+  .section-title{display:flex; align-items:center; gap:12px; margin:36px 0 12px;
+    font-size:19px; color:var(--ink); font-weight:700; letter-spacing:-.008em;
+    border-bottom:1px solid var(--hair); padding-bottom:10px}
+  .section-title .n{background:var(--accent-soft); color:var(--accent); width:26px; height:26px;
+    border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; flex:0 0 auto}
+  .guidance{color:var(--muted); font-size:14px; margin:0 0 12px}
+  .step{margin:0 0 16px}
+  .step-lead{font-weight:600; color:var(--ink)}
+
+  /* ---------- the AI prompt card: a quiet card, not a black terminal ---------- */
+  .prompt{background:var(--field); border:1px solid var(--hair); border-radius:16px;
+    padding:0; margin:14px 0 18px; overflow:hidden}
+  .prompt-head{display:flex; align-items:center; gap:10px; padding:11px 16px;
+    background:transparent; border-bottom:1px solid var(--hair); color:var(--ink)}
+  .prompt-head .ai{background:transparent; border:1px solid var(--hair); color:var(--muted);
+    font-size:10px; font-weight:700; letter-spacing:.08em; padding:3px 8px;
+    border-radius:980px; text-transform:uppercase}
+  .prompt-head .ttl{font-size:13px; font-weight:600; color:var(--ink)}
+  .prompt-head .copy{margin-left:auto; background:var(--accent); color:var(--on-accent);
+    border:0; border-radius:980px; padding:6px 14px; font-size:12px; font-weight:600;
+    cursor:pointer; font-family:inherit; transition:background .2s var(--ease)}
+  .prompt-head .copy:hover{background:#255C63}
+  .prompt pre{margin:0; padding:16px; color:var(--ink-2); background:transparent;
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:12.5px; line-height:1.6; white-space:pre-wrap; word-break:break-word}
+  .prompt .why{padding:0 16px 14px; color:var(--muted); font-size:12px}
+
+  /* ---------- fields ---------- */
+  label.fl{display:block; font-weight:600; color:var(--ink); font-size:14px; margin:14px 0 6px}
+  input.tf,textarea.ta,select.sf{width:100%; border:1px solid var(--hair); border-radius:12px;
+    padding:11px 13px; font:inherit; font-size:15px; color:var(--ink); background:var(--card);
+    transition:border-color .2s var(--ease), box-shadow .2s var(--ease)}
+  textarea.ta{min-height:88px; resize:vertical; line-height:1.6}
+  input.tf:focus,textarea.ta:focus,select.sf:focus{outline:none; border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft)}
+  .print-only{display:none}
+
+  /* ---------- builder table ---------- */
+  table.build{width:100%; border-collapse:separate; border-spacing:0; margin:10px 0 8px;
+    font-size:14px; border:1px solid var(--hair); border-radius:14px; overflow:hidden}
+  table.build th{background:var(--field); color:var(--muted); text-align:left; padding:10px 12px;
+    font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    border-bottom:1px solid var(--hair)}
+  table.build td{border-top:1px solid var(--hair); padding:6px 8px; vertical-align:top}
+  table.build tr:first-child td{border-top:0}
+  table.build input,table.build textarea,table.build select{width:100%; border:0; padding:6px;
+    font:inherit; font-size:14px; color:var(--ink); background:transparent; resize:vertical}
+  table.build input:focus,table.build textarea:focus,table.build select:focus{
+    outline:2px solid var(--accent-soft); border-radius:8px}
+  .rowdel{background:none; border:0; color:var(--muted); font-size:16px; cursor:pointer; line-height:1}
+  .rowdel:hover{color:var(--ink)}
+  .req-cell.miss input{background:var(--field)}
+  .req-watch{}
+  .addbtn{background:transparent; color:var(--accent); border:1px dashed var(--hair);
+    border-radius:12px; padding:9px 16px; font-weight:600; font-size:13.5px; cursor:pointer;
+    margin:6px 0 12px; font-family:inherit; transition:border-color .2s var(--ease)}
+  .addbtn:hover{border-color:var(--accent)}
+
+  /* ---------- the ROI readout ---------- */
+  .roi-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 22px; margin:12px 0}
+  .roi-out{background:var(--card); border:1px solid var(--hair); border-radius:16px;
+    box-shadow:var(--shadow-soft); padding:16px 18px; margin:12px 0;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px; text-align:center}
+  .roi-out .k{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em;
+    font-weight:700}
+  .roi-out .v{font-size:24px; font-weight:700; color:var(--accent); margin-top:5px;
+    letter-spacing:-.02em}
+
+  /* ---------- checklist ---------- */
+  .checklist{background:var(--card); border:1px solid var(--hair); border-radius:20px;
+    box-shadow:var(--shadow-soft); padding:20px 24px; margin:20px 0}
+  .checklist h3{margin:0 0 6px; font-size:11px; color:var(--muted); font-weight:700;
+    letter-spacing:.12em; text-transform:uppercase}
+  .chkbar{height:4px; background:var(--field); border-radius:980px; overflow:hidden; margin:10px 0 14px}
+  .chkbar > i{display:block; height:100%; width:0; background:var(--accent); border-radius:980px;
+    transition:width .42s var(--ease)}
+  .chk{display:flex; align-items:flex-start; gap:11px; margin:9px 0; font-size:15px; color:var(--ink-2)}
+  .chk input{width:17px; height:17px; margin-top:2px; accent-color:var(--accent); flex:0 0 auto}
+
+  .capstone-note,
+  .callout{background:var(--field); border:1px solid var(--hair); border-left:1px solid var(--hair);
+    border-radius:14px; padding:14px 18px; margin:18px 0; font-size:14.5px; color:var(--ink-2)}
+
+  /* ---------- the sticky controls ---------- */
+  .controls{position:sticky; bottom:0; z-index:5;
+    background:color-mix(in srgb, var(--card) 88%, transparent);
+    border-top:1px solid var(--hair); padding:14px 0; margin-top:30px;
+    display:flex; gap:12px; flex-wrap:wrap;
+    -webkit-backdrop-filter:saturate(1.6) blur(8px); backdrop-filter:saturate(1.6) blur(8px)}
+  .btn{border:0; border-radius:980px; padding:11px 22px; font-weight:600; font-size:14.5px;
+    cursor:pointer; font-family:inherit; transition:background .2s var(--ease)}
+  .btn-print{background:var(--accent); color:var(--on-accent)}
+  .btn-print:hover{background:#255C63}
+  .btn-clear{background:transparent; color:var(--muted); border:1px solid var(--hair)}
+  .btn-clear:hover{color:var(--ink)}
+  .foot{margin-top:26px; color:var(--muted); font-size:12px; text-align:center}
+
+  @media (max-width:640px){
+    .container{padding:18px 16px 48px}
+    .roi-grid{grid-template-columns:1fr}
+    .roi-out{grid-template-columns:1fr 1fr}
+    .tag-home{margin-left:0}
+  }
+
+  /* ---------- print: ink on paper, the same quiet sheet ---------- */
+  @page{margin:14mm}
+  @media print{
+    .controls,.copy,.addbtn,.rowdel,.tag-home{display:none !important}
+    body{font-size:12px; background:#fff; color:#000}
+    .container{max-width:none; padding:0}
+    .instructions,.checklist,.roi-out,.prompt,.capstone-note,.callout{box-shadow:none; border:1px solid #ccc}
+    .prompt pre{color:#222}
+    input.tf,textarea.ta,select.sf,table.build input,table.build textarea,table.build select{border-color:#bbb}
+    table.build{border:1px solid #bbb}
+    .print-only{display:block}
+    textarea.ta{min-height:0}
+    .section-title{break-after:avoid}
+    .prompt,.checklist,.roi-out,table.build{break-inside:avoid}
+  }
+
 </style>
 <style id="wawiwa-print-fix">@media print{@page{margin:0 !important}body{padding:12mm !important;box-sizing:border-box}}</style>
 </head>
