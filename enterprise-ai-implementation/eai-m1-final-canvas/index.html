@@ -2582,6 +2582,563 @@ button.m-node { cursor: pointer; }
 }
 .m-path .btn-row { margin-top: 12px; }
 
+
+
+
+
+
+
+
+/* >>> WAWIWA CLEAN SHEET (M1 mission shell) >>> */
+
+/* =====================================================================
+   CLEAN SHEET — Module 1 mission shell (Practice Studio, coached_canvas)
+   22 September 2026.
+
+   Appended after the page's own stylesheet, so it wins on order alone
+   and needs almost no !important. It changes NOTHING about the markup,
+   the runtime, window.ACTIVITY, the coach, the scoring or the PDF: the
+   mission board, the stops, the medal and the report all still work.
+   What it removes is the decorative layer — the navy/red gradient, the
+   blobs, the line-art motif, the scrim, the deep drop shadows and the
+   gold-and-red accent scheme — and puts the Apple-quiet sheet used for
+   M2/M3/M4 in its place: a transparent page, white surfaces, hairline
+   borders, one teal accent.
+   ===================================================================== */
+
+:root{
+  --cs-bg:        transparent;
+  --cs-card:      #FFFFFF;
+  --cs-card-2:    #FAFBFB;
+  --cs-hair:      #E4E8E8;
+  --cs-hair-soft: #EDF0F0;
+  --cs-ink:       #10201F;
+  --cs-ink-2:     #33403F;
+  --cs-muted:     #667573;   /* 4.82:1 on white — WCAG AA */
+  --cs-accent:    #2E6E76;
+  --cs-accent-2:  #EAF2F2;
+  --cs-on-accent: #FFFFFF;
+  --cs-radius:    20px;
+  --cs-radius-s:  12px;
+}
+
+/* ---------- page ---------- */
+
+body,
+body.mission-active{
+  background: var(--cs-bg);
+  color: var(--cs-ink-2);
+}
+body.mission-active .container{ background: none; }
+
+/* the decorative layer goes away entirely */
+.m-stage-bg,
+.m-bg-blobs,
+.m-bg-slot,
+.m-blob,
+.m-icons,
+.m-scrim{ display: none !important; }
+
+.m-app{ padding: 0; }
+.m-main{ margin-top: 0; padding: 18px 22px 22px; gap: 20px; }
+
+/* both columns start at the top and share one height, instead of the scene
+   floating in the middle of a white field */
+.m-stagewrap{ align-items: stretch; }
+
+/* ---------- top bar ---------- */
+
+.m-topbar{
+  color: var(--cs-ink);
+  text-shadow: none;
+  background: var(--cs-card);
+  border-bottom: 1px solid var(--cs-hair);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 14px 20px;
+}
+.m-logo{ filter: none; }
+.m-brand-k{ color: var(--cs-muted); font-weight: 600; letter-spacing: .16em; }
+.m-brand-t{ color: var(--cs-ink); font-weight: 600; }
+
+.m-chip{
+  background: var(--cs-accent-2);
+  border: none;
+  color: var(--cs-accent);
+  backdrop-filter: none;
+  padding: 6px 14px;
+}
+.m-chip b{ color: var(--cs-accent); font-weight: 600; }
+.m-chip span{ color: var(--cs-muted); letter-spacing: .08em; }
+.m-chip-bump{ animation: none; }
+
+.m-medal-track{ stroke: var(--cs-hair); }
+.m-medal-fill{ stroke: var(--cs-accent); }
+.m-medal-lbl{ fill: var(--cs-muted); font-weight: 600; }
+
+/* ---------- the two panels ---------- */
+
+.m-rail,
+.m-scene{
+  background: var(--cs-card);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius);
+  box-shadow: none;
+}
+.m-rail-title{ color: var(--cs-muted); font-weight: 600; letter-spacing: .12em; }
+.m-rail-foot{ color: var(--cs-muted); }
+
+.m-tile{
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--cs-radius-s);
+}
+.m-tile:hover{ background: var(--cs-card-2); }
+.m-tile-open{
+  background: var(--cs-card-2);
+  border-color: var(--cs-hair);
+  box-shadow: none;
+}
+.m-tile-dot{
+  background: var(--cs-accent-2);
+  color: var(--cs-accent);
+  font-weight: 600;
+}
+.m-tile-active .m-tile-dot,
+.m-tile-report .m-tile-dot{ background: var(--cs-accent); color: var(--cs-on-accent); }
+.m-tile-nm{ color: var(--cs-ink); font-weight: 600; }
+.m-tile-st{ color: var(--cs-muted); }
+
+/* ---------- the scene ---------- */
+
+.m-enter{ animation: none; }
+
+.m-eyebrow{ color: var(--cs-muted); font-weight: 600; letter-spacing: .14em; }
+.m-scene-title,
+.m-scene-title-big{ color: var(--cs-ink); font-weight: 600; letter-spacing: -0.01em; }
+.m-lead{ color: var(--cs-ink-2); }
+.m-lead-strong{ color: var(--cs-ink); font-weight: 600; }
+.m-badge{
+  background: var(--cs-accent-2);
+  color: var(--cs-accent);
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+.m-scene-foot{
+  border-top: 1px solid var(--cs-hair-soft);
+  background: transparent;
+}
+.m-foot-note{ color: var(--cs-muted); }
+.m-bar{ background: var(--cs-hair); }
+.m-bar i{ background: var(--cs-accent); }
+.m-bar-count{ color: var(--cs-muted); font-weight: 600; }
+
+/* the AI-coach welcome panel: a quiet card, not a navy slab */
+.m-mentor-say{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-ink-2);
+  box-shadow: none;
+}
+.m-mentor-say b{ color: var(--cs-ink); font-weight: 600; }
+.m-mentor-text{ color: var(--cs-ink-2); }
+
+.meta-chip{
+  background: var(--cs-accent-2);
+  color: var(--cs-accent);
+  font-weight: 600;
+}
+.meta-chip-live{ background: var(--cs-accent); color: var(--cs-on-accent); }
+
+/* ---------- the safety notice ---------- */
+
+.m-safety{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+}
+.m-safety-title{ color: var(--cs-ink); font-weight: 600; }
+.m-safety-body,
+.m-safety-local{ color: var(--cs-muted); font-weight: 400; }
+
+/* ---------- the case picker ---------- */
+
+.m-case-card{
+  background: var(--cs-card);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+}
+.m-case-card:hover{
+  background: var(--cs-card-2);
+  border-color: var(--cs-hair);
+  box-shadow: none;
+  transform: none;
+}
+.m-case-num{ background: var(--cs-accent-2); color: var(--cs-accent); font-weight: 600; }
+.m-case-title{ color: var(--cs-ink); font-weight: 600; }
+.m-case-preview{ color: var(--cs-muted); }
+.m-case-st{ background: transparent; color: var(--cs-muted); padding-left: 0; font-weight: 600; }
+
+/* ---------- the working screen ---------- */
+
+.m-console-hint{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-muted);
+}
+.m-scenario{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-left: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-ink-2);
+}
+.m-instructions{
+  background: transparent;
+  border: 1px solid var(--cs-hair);
+  border-left: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+}
+.m-instructions-k{ color: var(--cs-muted); font-weight: 600; letter-spacing: .12em; }
+.m-instructions-p{ color: var(--cs-ink-2); }
+.m-instructions-reward{
+  background: transparent;
+  border: 1px solid var(--cs-hair);
+  color: var(--cs-muted);
+  font-weight: 400;
+}
+.m-instructions-star{ color: var(--cs-muted); }
+
+.m-fieldblock + .m-fieldblock{ border-top: 1px solid var(--cs-hair-soft); }
+.m-fieldblock-title{ color: var(--cs-ink); font-weight: 600; }
+
+.field-card{ border-color: var(--cs-hair); border-radius: var(--cs-radius-s); }
+.field-card:hover{ box-shadow: none; }
+.field-card:focus-within{ border-color: var(--cs-accent); box-shadow: none; }
+.field-label{ color: var(--cs-ink); font-weight: 600; }
+.field-help{ color: var(--cs-muted); }
+
+.ring-track{ stroke: var(--cs-hair); }
+.ring-fill{ stroke: var(--cs-accent); }
+.ring-label{ fill: var(--cs-muted); }
+
+.answer-input{
+  background: var(--cs-card);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-ink);
+}
+.answer-input:focus{
+  border-color: var(--cs-accent);
+  outline: 2px solid var(--cs-accent);
+  outline-offset: 1px;
+  box-shadow: none;
+}
+
+/* ---------- buttons: one accent, no lift, no red ---------- */
+
+.btn{ border-radius: 10px; font-weight: 600; box-shadow: none; }
+.btn:hover{ transform: none; box-shadow: none; }
+.mission-active .btn-primary,
+.btn-primary,
+.mission-active .btn-teal,
+.btn-teal,
+.btn-coach{
+  background: var(--cs-accent);
+  color: var(--cs-on-accent);
+  box-shadow: none;
+}
+.mission-active .btn-primary:hover,
+.btn-primary:hover,
+.mission-active .btn-teal:hover,
+.btn-teal:hover,
+.btn-coach:hover{ background: #255C63; box-shadow: none; }
+.mission-active .btn-ghost,
+.btn-ghost,
+.btn-ghost-danger{
+  background: transparent;
+  border: 1px solid var(--cs-hair);
+  color: var(--cs-muted);
+}
+.mission-active .btn-ghost:hover,
+.btn-ghost:hover{ background: var(--cs-card-2); border-color: var(--cs-hair); }
+
+/* ---------- feedback and the coach ---------- */
+
+.feedback.has-feedback{ animation: none; border-radius: var(--cs-radius-s); }
+.feedback.local-box{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-left: 1px solid var(--cs-hair);
+}
+.mission-active .feedback-title,
+.feedback-title{ color: var(--cs-muted); font-weight: 600; }
+.feedback-line{ color: var(--cs-ink-2); }
+.coach-note{ color: var(--cs-muted); }
+
+.tag-pill{
+  animation: none;
+  background: transparent;
+  border: 1px solid var(--cs-hair);
+  color: var(--cs-muted);
+  font-weight: 600;
+}
+.tag-revise,
+.tag-ready,
+.tag-light{ background: transparent; color: var(--cs-muted); }
+
+/* the score toast: quiet, not a fanfare */
+.m-toast{ box-shadow: none; border: 1px solid var(--cs-hair); background: var(--cs-card); }
+.m-toast-big{ color: var(--cs-ink); font-weight: 600; }
+.m-toast-pts{ color: var(--cs-accent); font-weight: 600; }
+
+/* ---------- dark mode, matching the M2/M3/M4 sheet ---------- */
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --cs-card:      #141A1A;
+    --cs-card-2:    #1B2222;
+    --cs-hair:      #2A3333;
+    --cs-hair-soft: #232B2B;
+    --cs-ink:       #ECF1F0;
+    --cs-ink-2:     #C6D0CE;
+    --cs-muted:     #93A19F;
+    --cs-accent:    #5CC9BE;
+    --cs-accent-2:  #1E2B2B;
+    --cs-on-accent: #0B1414;
+  }
+}
+:root[data-theme="dark"]{
+  --cs-card:      #141A1A;
+  --cs-card-2:    #1B2222;
+  --cs-hair:      #2A3333;
+  --cs-hair-soft: #232B2B;
+  --cs-ink:       #ECF1F0;
+  --cs-ink-2:     #C6D0CE;
+  --cs-muted:     #93A19F;
+  --cs-accent:    #5CC9BE;
+  --cs-accent-2:  #1E2B2B;
+  --cs-on-accent: #0B1414;
+}
+
+/* ---------- what the first pass missed: headings, the mission report,
+              the path review and the exported sheet ---------- */
+
+.m-scene,
+.m-report-sheet{ color: var(--cs-ink-2); }
+
+.m-sectionhead{ color: var(--cs-ink); font-weight: 600; }
+.m-fieldblock + .m-sectionhead,
+.m-scenario + .m-sectionhead,
+.m-notecard + .m-sectionhead{ border-top: 1px solid var(--cs-hair-soft); }
+
+.m-notecard{
+  background: var(--cs-card);
+  border: 1px solid var(--cs-hair);
+  border-left: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  box-shadow: none;
+}
+.m-notecard-body,
+.m-notecard-list li{ color: var(--cs-ink-2); }
+.m-notecard-foot{ color: var(--cs-muted); font-weight: 400; }
+
+.m-support-note{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-muted);
+}
+
+/* the gold star on every reward row: one quiet mark, not thirty gold ones */
+.m-instructions-star,
+.m-instructions-star svg,
+.m-instructions-star svg *{ color: var(--cs-muted); fill: var(--cs-muted); stroke: none; }
+
+/* ---------- the ending scene ---------- */
+
+.m-rank{
+  background: transparent;
+  border: 1px solid var(--cs-hair);
+  color: var(--cs-muted);
+  font-weight: 600;
+}
+.m-score-n{ color: var(--cs-accent); font-weight: 600; }
+.m-score-of{ color: var(--cs-muted); }
+
+.m-recap-row{ border: 1px solid var(--cs-hair); background: var(--cs-card); border-radius: var(--cs-radius-s); }
+.m-recap-step{ background: var(--cs-accent-2); color: var(--cs-accent); font-weight: 600; }
+.m-recap-title{ color: var(--cs-ink); font-weight: 600; }
+.m-recap-choice{ color: var(--cs-muted); }
+
+/* ---------- the path review ---------- */
+
+.m-path-title{ color: var(--cs-ink); font-weight: 600; }
+.m-path-sub{ color: var(--cs-muted); }
+.m-path-rank{ background: var(--cs-accent-2); color: var(--cs-accent); font-weight: 600; }
+.m-path-k{ color: var(--cs-muted); font-weight: 600; }
+.m-path-chip{ background: transparent; border: 1px solid var(--cs-hair); color: var(--cs-muted); font-weight: 400; }
+.m-path-card{ background: var(--cs-card); border: 1px solid var(--cs-hair); border-radius: var(--cs-radius-s); }
+.m-path-num{ background: var(--cs-accent-2); color: var(--cs-accent); font-weight: 600; }
+.m-path-focus,
+.m-path-review{ color: var(--cs-ink-2); }
+.m-path-target{ color: var(--cs-ink); font-weight: 600; }
+.m-path-res .resource-for{ color: var(--cs-muted); }
+.m-path-positive{ background: var(--cs-card-2); border: 1px solid var(--cs-hair); border-radius: var(--cs-radius-s); }
+.m-path-missing{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-ink-2);
+  font-weight: 400;
+}
+
+/* ---------- the mission report on screen ---------- */
+
+.m-rep-hero{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-ink-2);
+}
+.m-rep-motif{ display: none; }
+.m-rep-kicker{ color: var(--cs-muted); font-weight: 600; }
+.m-rep-title{ color: var(--cs-ink); font-weight: 600; }
+.m-rep-score-n{ color: var(--cs-accent); font-weight: 600; }
+.m-rep-score-of{ color: var(--cs-muted); }
+.m-rep-rank{ background: transparent; border: 1px solid var(--cs-hair); color: var(--cs-muted); }
+.m-rep-level,
+.m-rep-level-0,
+.m-rep-level-1,
+.m-rep-level-2{ background: transparent; border: 1px solid var(--cs-hair); color: var(--cs-muted); font-weight: 600; }
+.m-rep-section-title{
+  color: var(--cs-ink);
+  font-weight: 600;
+  border-bottom: 1px solid var(--cs-hair);
+}
+.m-rep-card{ border: 1px solid var(--cs-hair); border-left: 1px solid var(--cs-hair); border-radius: var(--cs-radius-s); }
+.m-rep-card-num{ background: var(--cs-accent-2); color: var(--cs-accent); font-weight: 600; }
+.m-rep-card-title{ color: var(--cs-ink); font-weight: 600; }
+.m-rep-tag,
+.m-rep-tag-ready,
+.m-rep-tag-light,
+.m-rep-tag-revise{ background: transparent; border: 1px solid var(--cs-hair); color: var(--cs-muted); font-weight: 600; }
+.m-rep-row{ color: var(--cs-ink-2); }
+.m-rep-row-label{ color: var(--cs-muted); }
+.m-rep-empty{ color: var(--cs-muted); }
+.m-rep-foot{ color: var(--cs-muted); border-top: 1px solid var(--cs-hair); }
+
+/* ---------- the exported PDF sheet ---------- */
+
+.print-hero{
+  background: #FAFBFB;
+  border: 1px solid #E4E8E8;
+  border-radius: 12px;
+  color: #33403F;
+}
+.print-motif{ display: none; }
+.print-kicker{ color: #667573; font-weight: 600; }
+.print-title{ color: #10201F; font-weight: 600; }
+.print-level,
+.print-level-0,
+.print-level-1,
+.print-level-2{ background: transparent; border: 1px solid #E4E8E8; color: #667573; }
+.print-section-title{ color: #10201F; font-weight: 600; border-bottom: 1px solid #E4E8E8; }
+.print-tile{ border: 1px solid #E4E8E8; border-left: 1px solid #E4E8E8; border-radius: 10px; }
+.print-tile-num{ color: #667573; }
+.print-tile-label{ color: #10201F; font-weight: 600; }
+.print-tile-body{ color: #33403F; }
+.print-empty,
+.print-foot,
+.print-path-choice{ color: #667573; }
+.print-path-row{ border-bottom: 1px solid #EDF0F0; }
+.print-path-tag{ background: transparent; border: 1px solid #E4E8E8; color: #667573; }
+
+/* ---------- the rubric review: verdict as words, not as a red slab ----------
+   The three levels stop being coloured gradients. The wording ("Ready to
+   submit" / "Requires significant revision") already carries the verdict, and
+   a single outlined pill per row reads the same in both themes and does not
+   fail contrast the way white-on-amber did. */
+
+.level-banner,
+.level-banner.level-0,
+.level-banner.level-1,
+.level-banner.level-2,
+.level-0,
+.level-1,
+.level-2{
+  background: var(--cs-card-2);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+  color: var(--cs-ink-2);
+}
+.level-label{ color: var(--cs-muted); font-weight: 600; opacity: 1; }
+.level-value{ color: var(--cs-ink); font-weight: 600; }
+.level-passback{ color: var(--cs-muted); opacity: 1; }
+/* the glyph carries inline fill/stroke attributes for the PDF export, so the
+   disc and the mark are recoloured one at a time; a blanket rule fills the X
+   solid and the mark disappears. */
+.level-badge svg circle{ fill: var(--cs-accent-2); }
+.level-badge svg path{ stroke: var(--cs-accent); }
+
+.rubric-box,
+.fix-box{
+  background: var(--cs-card);
+  border: 1px solid var(--cs-hair);
+  border-radius: var(--cs-radius-s);
+}
+.rubric-name{ color: var(--cs-ink); font-weight: 600; }
+.rubric-verdict{ color: var(--cs-ink-2); }
+.ok-line{ color: var(--cs-muted); font-weight: 400; }
+
+.review-note{ color: var(--cs-ink-2); font-weight: 400; }
+.review-note-line{ color: var(--cs-muted); }
+.review-part{ border-top: 1px solid var(--cs-hair-soft); }
+
+.fix-link,
+.resource-link,
+.routing-target{ color: var(--cs-accent); font-weight: 600; }
+.fix-why,
+.resource-for{ color: var(--cs-muted); }
+.routing-line{ color: var(--cs-ink-2); font-weight: 400; border-top: 1px solid var(--cs-hair-soft); }
+.pii-line{ color: var(--cs-ink-2); font-weight: 600; }
+.scaffold-notice{ background: var(--cs-card-2); }
+.scaffold-notice .safety-body{ color: var(--cs-ink-2); }
+
+/* a field that passed: the ring fills with the accent, nothing turns green */
+.field-card.card-ready{ border-color: var(--cs-hair); }
+.card-ready .ring-fill{ stroke: var(--cs-accent); fill: var(--cs-accent); }
+.card-ready .ring-track{ stroke: var(--cs-accent); }
+
+/* <<< WAWIWA CLEAN SHEET (M1 mission shell) <<< */
+
+
+
+/* >>> WAWIWA LOGO >>> */
+:root{
+  --w-logo: url("data:image/png;base64,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");
+  --w-logo-h: 34px;
+  --w-logo-w: 90px;
+}
+.m-topbar .m-logo{
+  background-image: var(--w-logo);
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: contain;
+  background-color: transparent;
+  width: var(--w-logo-w);
+  height: var(--w-logo-h);
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  filter: none;
+}
+.m-topbar .m-logo svg{ display: none; }
+/* <<< WAWIWA LOGO <<< */
 </style>
 </head>
 <body>
