@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>AI Forensics | AICY.T5.E1</title>
+<style>
+  /* ==================================================================
+     AICY60 practice — the light in-class design, Mode A.
+     Mode A of the wawiwa-reflection-practice format: the visual language
+     only. Structure, task order and every word of the SME's instructions
+     are unchanged from the previous version of this file. Nothing below
+     this comment changes what the page says, only how it looks.
+
+     The one behavioural change: the PDF export is gone. A page that tells
+     a student nothing is handed in must not offer them a report to save.
+     Dropping it also drops the vendored jsPDF, ~306KB.
+
+     No page ground. body is transparent, the card floats, so whatever
+     space the host Rise block leaves around the embed takes the host's
+     own colour and the empty box above and below disappears. This is the
+     fix; padding is not.
+     ================================================================== */
+  :root{
+    /* one accent, taken from the course's own Rise theme turquoise
+       (#5AB3AA), darkened only as far as contrast requires */
+    --accent:#3E9B93;
+    --accent-soft:#E8F3F1;
+    --ink:#17201F;
+    --body-ink:#3A4644;
+    --muted:#7C8A88;
+    --line:#E2EAE9;
+    --field:#F1F6F5;
+    --card:#FFFFFF;
+    --shadow:0 1px 2px rgba(23,32,31,.04), 0 14px 40px rgba(23,32,31,.07);
+    --radius:20px;
+    --radius-sm:14px;
+    --font:'Assistant',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --accent:#5CC9BE; --accent-soft:#1E2E2C;
+      --ink:#EDF3F2; --body-ink:#C6D2D0; --muted:#8FA09D;
+      --line:#293533; --field:#141C1B; --card:#18211F;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 14px 40px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:transparent;color:var(--body-ink);
+    font-family:var(--font);font-size:16.5px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;
+    clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+  .printonly{display:none}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+  /* one motion only: 8px rise plus fade */
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .page>*{animation:rise .42s var(--ease) both}
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+  }
+
+  /* ---------- the floating card ---------- */
+  .page{
+    max-width:588px;margin:0 auto;padding:30px 30px 34px;
+    background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+    animation:none;
+  }
+
+  /* ---------- the one label line, folded into the card ---------- */
+  .exhead{
+    display:flex;flex-wrap:wrap;align-items:baseline;gap:9px;
+    margin:0 0 22px;padding:0 0 15px;border-bottom:1px solid var(--line);
+  }
+  .exhead .exlabel{
+    font-size:.64rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--accent);
+  }
+  .exhead .exid{font-size:.8rem;font-weight:700;color:var(--ink);letter-spacing:.01em}
+  .exhead .exname{font-size:.8rem;font-weight:400;color:var(--muted)}
+  .exhead .exname::before{content:"\00b7";margin-right:9px;color:var(--line)}
+
+  /* ---------- scenario image ---------- */
+  .hero{
+    display:block;width:100%;height:150px;object-fit:cover;object-position:50% 68%;
+    border-radius:var(--radius-sm);margin:0 0 22px;
+  }
+
+  /* ---------- the brief ---------- */
+  .brief{margin:0 0 26px}
+  .brief p{margin:0;color:var(--body-ink)}
+  .teams{
+    display:inline-flex;align-items:center;gap:7px;margin:0 0 10px;
+    font-size:.74rem;font-weight:600;letter-spacing:.02em;color:var(--muted);
+  }
+  .teams svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round}
+
+  /* ---------- the tasks ---------- */
+  .tasks{list-style:none;counter-reset:t;margin:0;padding:0}
+  .task{
+    counter-increment:t;display:grid;grid-template-columns:26px 1fr;gap:14px;
+    padding:20px 0;border-top:1px solid var(--line);
+  }
+  .task:first-child{border-top:0;padding-top:0}
+  .tile{
+    width:26px;height:26px;border-radius:50%;background:var(--field);
+    display:flex;align-items:center;justify-content:center;
+    font-size:.76rem;font-weight:700;color:var(--muted);
+  }
+  .tile::before{content:counter(t)}
+  .task .body{min-width:0}
+  .instr{margin:2px 0 0;color:var(--body-ink)}
+
+  /* ---------- link chips ---------- */
+  .links{display:flex;flex-wrap:wrap;gap:8px;margin:13px 0 0}
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:6px 13px;border:1px solid var(--line);border-radius:999px;
+    font-size:.8rem;color:var(--ink);text-decoration:none;background:transparent;
+    transition:border-color .18s var(--ease),background .18s var(--ease);
+  }
+  .chip:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .chip svg{width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round}
+
+  /* ---------- fields ---------- */
+  .lbl,.q{
+    display:block;margin:16px 0 8px;
+    font-size:.86rem;font-weight:600;color:var(--ink);
+  }
+  textarea{
+    display:block;width:100%;padding:13px 15px;
+    border:1px solid transparent;border-radius:var(--radius-sm);background:var(--field);
+    font:inherit;font-size:.95rem;color:var(--ink);resize:vertical;
+    transition:border-color .18s var(--ease);
+  }
+  textarea:focus{border-color:var(--accent);outline:none}
+  .pii{margin:9px 0 0;font-size:.76rem;line-height:1.5;color:var(--muted)}
+
+  /* ---------- buttons ---------- */
+  .actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:13px 0 0}
+  .btn{
+    appearance:none;border:1px solid var(--line);background:transparent;
+    padding:9px 19px;border-radius:999px;cursor:pointer;
+    font:inherit;font-size:.84rem;font-weight:600;color:var(--ink);
+    display:inline-flex;align-items:center;gap:8px;
+    transition:border-color .18s var(--ease),background .18s var(--ease);
+  }
+  .btn:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .btn[disabled]{opacity:.45;cursor:default}
+  .btn.sm{padding:7px 16px;font-size:.8rem}
+  .btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round}
+  .saved{
+    display:none;align-items:center;gap:5px;font-size:.76rem;color:var(--muted);
+  }
+  .saved.on{display:inline-flex}
+  .saved svg{width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:2.2;
+    stroke-linecap:round;stroke-linejoin:round}
+
+  /* ---------- the coach reply ---------- */
+  .reply{
+    margin:14px 0 0;padding:15px 17px;border-radius:var(--radius-sm);
+    background:var(--field);font-size:.93rem;color:var(--body-ink);
+    animation:rise .42s var(--ease) both;
+  }
+  .reply[hidden]{display:none}
+  .reply p{margin:0 0 9px}
+  .reply p:last-child{margin:0}
+  .reply b,.reply strong{color:var(--ink);font-weight:600}
+
+  /* ---------- sections ---------- */
+  .sec{margin:34px 0 0;padding:26px 0 0;border-top:1px solid var(--line)}
+  .eyebrow{
+    margin:0 0 6px;font-size:.64rem;font-weight:700;letter-spacing:.15em;
+    text-transform:uppercase;color:var(--accent);
+  }
+  h2{margin:0;font-size:1.06rem;line-height:1.35;font-weight:700;color:var(--ink);
+    letter-spacing:-.01em}
+  h3{margin:18px 0 9px;font-size:.86rem;font-weight:700;color:var(--ink);
+    letter-spacing:.01em}
+  .rule{display:none}                 /* hierarchy comes from weight, not rules */
+  .card{margin:16px 0 0}
+  .card .head{display:block}
+  .itile{display:none}                /* one accent, no decorative icon tiles */
+  .pathintro{margin:9px 0 0;font-size:.9rem;color:var(--muted)}
+
+  /* ---------- personal path ---------- */
+  .checks{list-style:none;margin:16px 0 0;padding:0}
+  .checks li{
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+    gap:10px;padding:12px 0;border-top:1px solid var(--line);
+  }
+  .checks li:first-child{border-top:0;padding-top:0}
+  .cname{font-size:.88rem;color:var(--ink)}
+  .seg{display:inline-flex;gap:6px}
+  .seg button{
+    appearance:none;border:1px solid var(--line);background:transparent;
+    padding:5px 12px;border-radius:999px;cursor:pointer;
+    font:inherit;font-size:.76rem;color:var(--muted);
+    display:inline-flex;align-items:center;gap:5px;
+    transition:border-color .18s var(--ease),color .18s var(--ease),background .18s var(--ease);
+  }
+  .seg button svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2;
+    stroke-linecap:round;stroke-linejoin:round;opacity:0}
+  .seg button[aria-pressed="true"]{
+    border-color:var(--accent);background:var(--accent-soft);color:var(--ink);font-weight:600;
+  }
+  .seg button[aria-pressed="true"] svg{opacity:1;stroke:var(--accent)}
+  .pathhint{margin:14px 0 0;font-size:.8rem;color:var(--muted)}
+  .pathhint[hidden]{display:none}
+  .pathout{
+    margin:16px 0 0;padding:17px 19px;border-radius:var(--radius-sm);background:var(--field);
+    animation:rise .42s var(--ease) both;
+  }
+  .pathout[hidden]{display:none}
+  .pathout h3:first-child{margin-top:0}
+  .tips{list-style:none;margin:0;padding:0}
+  .tips li{
+    display:grid;grid-template-columns:16px 1fr;gap:10px;
+    padding:11px 0;border-top:1px solid var(--line);font-size:.9rem;
+  }
+  .tips li:first-child{border-top:0;padding-top:0}
+  .tips svg{width:15px;height:15px;margin-top:3px;stroke:var(--muted);fill:none;
+    stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tips b{color:var(--ink);font-weight:600}
+  .rev{display:block;margin:5px 0 0;font-size:.82rem;color:var(--muted)}
+  .reslink{
+    display:inline-block;margin:6px 0 0;font-size:.82rem;color:var(--accent);
+    text-decoration:none;border-bottom:1px solid transparent;
+  }
+  .reslink::after{content:" \2197";color:var(--muted)}
+  .reslink:hover{border-bottom-color:var(--accent)}
+  .bridge{margin:15px 0 0;padding:13px 0 0;border-top:1px solid var(--line);
+    font-size:.88rem;color:var(--body-ink)}
+  .bridge b{color:var(--ink)}
+  .tag,.pstate,.who,.pv,.num,.tells,.lead,.brand{font-size:.88rem;color:var(--body-ink)}
+
+  /* ---------- what this is, and what is due ---------- */
+  .notgraded{
+    margin:22px 0 26px;padding:15px 17px;border-radius:var(--radius-sm);
+    background:var(--accent-soft);font-size:.86rem;line-height:1.55;color:var(--body-ink);
+  }
+  .notgraded b{color:var(--ink);font-weight:600}
+  .duebar{
+    margin:18px 0 0;padding:16px 0 0;border-top:1px solid var(--line);
+    font-size:.86rem;color:var(--muted);text-align:left;
+  }
+  .duebar b{color:var(--ink);font-weight:700}
+
+  @media (max-width:560px){
+    body{font-size:16px}
+    .page{padding:24px 20px 28px;border-radius:16px}
+    .hero{height:120px}
+    .checks li{justify-content:flex-start}
+  }
+</style>
+</head>
+<body>
+
+<h1 class="vh">AI Forensics log investigation</h1>
+
+<div class="page">
+
+  <p class="exhead"><span class="exlabel">Hands-on exercise</span><span class="exid">AICY.T5.E1</span><span class="exname">AI Forensics</span></p>
+
+  <!-- What this page is. Added Sep 2026 with the Mode A restyle, to the same
+       wording rule as AI in Data: say what is graded, say what is not, and
+       name the Canvas area rather than the LMS. -->
+  <p class="notgraded"><b>Nothing here is graded.</b> This is in-class practice. You work through it with the trainer while the topic is taught, nothing on this page is checked, and nothing is handed in from it. Your graded work for this topic is a quiz in Canvas.</p>
+
+  <!-- ============ brief ============ -->
+  <div class="brief">
+    <span class="teams">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M17.5 20a5.5 5.5 0 0 0-3-4.9"/></svg>
+      Individual
+    </span>
+    <p>A cyber attack has hit your company. You have three log files, the authentication log, the file-activity log and the network log, and an LLM to help you read them. Your job is to reconstruct what the attacker did, step by step, and to back every finding with the line in the logs that proves it.</p>
+  </div>
+
+  <!-- ============ tasks ============ -->
+  <ol class="tasks" id="tasks"></ol>
+
+  <!-- ============ coach debrief ============ -->
+  <section class="sec" aria-labelledby="h-debrief">
+    <p class="eyebrow">AI Coach</p>
+    <h2 id="h-debrief">Debrief</h2>
+    <span class="rule"></span>
+    <div class="card" style="margin-top:20px">
+      <div class="head">
+        <span class="itile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3v-6.5A8 8 0 0 1 11 4h2a8 8 0 0 1 8 8Z"/><path d="M9 11h6M9 15h3"/></svg>
+        </span>
+        <label class="q" for="tell">You have a pile of scattered log lines and an LLM that will answer anything you ask. Which single finding are you most confident in, and what in the logs makes you sure, rather than that the model said so?</label>
+      </div>
+      <textarea id="tell" rows="4" aria-describedby="pii-coach"></textarea>
+      <p class="pii" id="pii-coach">Paste findings, not secrets: no real credentials, tokens, or absolute paths from your machine. Answers carrying identifying details are blocked before they are sent.</p>
+      <div class="actions">
+        <button type="button" class="btn" id="check">Check with AI Coach</button>
+      </div>
+      <div class="reply" id="reply" role="status" aria-live="polite" hidden></div>
+    </div>
+  </section>
+
+  <!-- ============ personal path ============ -->
+  <section class="sec" id="path-sec" aria-labelledby="h-path">
+    <p class="eyebrow">Personal path</p>
+    <h2 id="h-path">Where did your investigation stop short?</h2>
+    <span class="rule"></span>
+    <p class="pathintro">Mark the habits that describe how you ran the investigation, and you&rsquo;ll get the move that answers each one.</p>
+    <div class="card">
+      <ul class="checks" id="checks"></ul>
+      <p class="pathhint" id="pathhint">Mark one above to see the move that answers it.</p>
+      <div class="pathout" id="pathout" role="status" aria-live="polite" hidden></div>
+    </div>
+  </section>
+
+  <!-- The closing line. Same words in the courseware, in Canvas and here. -->
+  <p class="duebar">What’s due after this lesson: <b>Topic 5 Quiz</b>, in Assignments.</p>
+
+</div>
+
+<!-- The grounding pack for this practice (grounding/grounding_pack.md), inlined
+     verbatim so the page stays self-contained: the coach reasons FROM this text and
+     the only network call the page makes is still the anonymizing proxy. Not
+     rendered (type="text/plain"); read from JS as textContent. -->
+<script type="text/plain" id="grounding-pack" data-source="grounding/grounding_pack.md">
+# Grounding pack — AICY60 T5: AI Integration in Cybersecurity Tools → AI Forensics practice
+> Material the coach reasons FROM. Distilled from Wawiwa's own T5 deck
+> (AICY.T5.P1 - AI Integration in Cybersecurity Tools) and the SME practice
+> AICY.T5.E1 - AI Forensics. The coach answers primarily from this pack, coaches against the
+> rubric, and never invents forensic conclusions the logs do not support.
+
+## The exercise
+An individual investigation. The student is given three log files from a compromised environment and
+uses an LLM (ChatGPT) to read and correlate them, then answers eight questions about what happened.
+The point is not to "catch" the attacker by hand: it is to see how an LLM turns noisy, scattered logs
+into a timeline, and to check every claim the model makes against the log evidence.
+
+The three logs:
+- auth_sysmon.txt  — authentication and Sysmon events (logins, process starts).
+- file_activity.txt — file create/modify/encrypt/delete events on the hosts.
+- network.txt       — network connections and outbound transfers.
+
+## The attack chain (what the logs actually show)
+1. Reconnaissance and brute force: repeated failed logins and scanning across the network.
+2. Initial access: a successful login as an attacker-controlled admin account (AttackerAdmin) on PC01.
+3. Backdoor download: PowerShell with Invoke-WebRequest pulls a malicious script from an external
+   server (backdoor.ps1 -> backdoor.exe).
+4. Impact on data: sensitive files on PC01 are encrypted and then exfiltrated to an external IP
+   (signs of exfiltration and possible ransomware).
+5. Lateral movement: psexec.exe is used to run commands remotely on PC02, PC03 and PC04.
+6. Detection and containment: the SIEM/IDS flag the failed logins, the suspicious process
+   (backdoor.exe), unusual Kerberos activity and abnormal outbound traffic; the account is locked and
+   outbound traffic blocked.
+
+## How the security tools detect it (T5 concepts)
+AI-driven tools correlate signals a human skim would miss: many failed logins then a success, a new
+unsigned process, Kerberos anomalies, and a spike of outbound traffic to an unknown IP. Darktrace
+learns normal network behaviour and isolates deviations; Splunk/QRadar SIEM correlate events across
+sources; CrowdStrike and Cylance flag the malicious process on the endpoint. The same correlation the
+student does by hand with an LLM is what these tools do automatically and in real time.
+
+## Why the LLM matters, and its limit
+A two-minute manual skim of three logs is hopeless — too many lines, no single view. An LLM reads all
+three at once and proposes a timeline in seconds. But an LLM will also state an attacker name, a time
+or a technique that is NOT in the data. So every claim is a lead to verify: find the log line that
+proves it before writing it down. An answer is only as strong as the evidence behind it.
+
+## Coaching stance
+The student is investigating authorised logs after the fact. The coach:
+- rewards answers that cite concrete log evidence (an account, an IP, a process, a command) and name
+  the attack stage correctly;
+- pushes the habit of verifying the LLM against the logs, and of correlating across all three files;
+- ties findings to the T5 tools (AI-driven SIEM, endpoint AI, anomaly detection);
+- refuses to help plan or run a real intrusion, or to invent evidence, and turns the student back to
+  the log lines;
+- never repeats real credentials, tokens or machine paths a student pastes by mistake.
+
+</script>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ------------------------------------------------------------------
+   * Context gate. home shows the personal path, class hides it.
+   * ?context=class on the embed URL overrides the default.
+   * ---------------------------------------------------------------- */
+  var META = { context: 'home' };
+  try{
+    var q = new URLSearchParams(window.location.search).get('context');
+    if (q === 'class' || q === 'home') META.context = q;
+  }catch(e){}
+
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  var ICON_LINK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"/><path d="M19 5l-8 8"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg>';
+  var ICON_OK   = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 13 5 5L20 6"/></svg>';
+  var ICON_WORK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>';
+  var ICON_SHIELD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 8.4-7 9.5C8 19.4 5 15.4 5 11V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg>';
+  var ICON_TICK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
+  var ICON_WAIT = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>';
+
+  /* ------------------------------------------------------------------
+   * Five tasks. Instruction text follows the SME source
+   * (AICY.T5.E1 - AI Forensics). Links ride along as labelled chips.
+   * ---------------------------------------------------------------- */
+  /* An answer box appears only where the task expects something written.
+     The pure action task (2) gets the instruction and links, no field.
+     Where a task both acts and asks, the label names the written part in
+     the SME's own words. */
+  var TASKS = [
+    { id:'a1',
+      instr:'Take a quick look at the three logs you have been given. Spend no more than two minutes and see whether anything looks suspicious.',
+      links:[ { label:'auth_sysmon.txt', url:'auth_sysmon.txt' }, { label:'file_activity.txt', url:'file_activity.txt' }, { label:'network.txt', url:'network.txt' } ],
+      answer:'In two minutes of skimming, what stood out \u2014 and how easy was it to tell?' },
+    { id:'a2',
+      instr:'Upload all three logs to ChatGPT and ask it to investigate them together. Use ChatGPT to analyse the logs and answer the questions below.',
+      links:[ { label:'ChatGPT', url:'https://chatgpt.com' } ] },
+    { id:'a3',
+      instr:'What type of cyber attack took place in this scenario?',
+      links:[],
+      answer:'Name the type of attack, and the evidence in the logs that points to it.' },
+    { id:'a4',
+      instr:'How did the attacker first gain access to the system?',
+      links:[],
+      answer:'The method of initial access, and the log lines that show it.' },
+    { id:'a5',
+      instr:'What tool or command did the attacker use to download the backdoor?',
+      links:[],
+      answer:'The tool or command, quoted from the log.' },
+    { id:'a6',
+      instr:'What happened to the sensitive files on PC01?',
+      links:[],
+      answer:'What was done to the files, and how the logs show it.' },
+    { id:'a7',
+      instr:'What technique was used for lateral movement across the network?',
+      links:[],
+      answer:'The technique, and which machines it reached.' },
+    { id:'a8',
+      instr:'How did the security systems (SIEM / IDS / firewall) detect the attack?',
+      links:[],
+      answer:'What the security systems flagged, backed by log evidence.' },
+    { id:'a9',
+      instr:'Why was the attacker\u2019s account eventually locked?',
+      links:[],
+      answer:'The reason the account was locked.' },
+    { id:'a10',
+      instr:'List the attack in chronological order, from first access to containment.',
+      links:[],
+      answer:'The steps of the attack, in order.' }
+  ];
+
+  var tasksEl = document.getElementById('tasks');
+  TASKS.forEach(function(t){
+    var li = document.createElement('li');
+    li.className = 'task';
+    var chips = t.links.map(function(l){
+      return '<a class="chip" href="' + l.url + '" target="_blank" rel="noopener">'
+        + ICON_LINK + esc(l.label) + '</a>';
+    }).join('');
+    var field = t.answer
+      ? '<label class="lbl" for="' + t.id + '">' + esc(t.answer) + '</label>'
+        + '<textarea id="' + t.id + '" rows="4" aria-describedby="i-' + t.id + ' pii-' + t.id + '"></textarea>'
+        + '<p class="pii" id="pii-' + t.id + '">Paste findings, not secrets: no real credentials, tokens, or absolute paths from your machine.</p>'
+        + '<div class="actions">'
+        +   '<button type="button" class="btn sm" data-coach="' + t.id + '">Check with AI Coach</button>'
+        +   '<span class="saved" id="sv-' + t.id + '" aria-hidden="true">' + ICON_TICK + 'Saved</span>'
+        + '</div>'
+        + '<div class="reply" id="rp-' + t.id + '" role="status" aria-live="polite" hidden></div>'
+      : '';
+    li.innerHTML =
+      '<span class="tile" aria-hidden="true"></span>'
+      + '<div class="body">'
+      +   '<p class="instr" id="i-' + t.id + '">' + esc(t.instr) + '</p>'
+      +   (chips ? '<div class="links">' + chips + '</div>' : '')
+      +   field
+      + '</div>';
+    tasksEl.appendChild(li);
+  });
+
+  /* ------------------------------------------------------------------
+   * On-device autosave. Client-only: answers are written to this
+   * browser's localStorage and never transmitted anywhere. Lets the six
+   * answers plus the debrief survive a reload of the embedding Rise page.
+   * ---------------------------------------------------------------- */
+  var STORE_KEY = 'wawiwa.aicy.t5.aiforensics';
+  var FIELD_IDS = TASKS.filter(function(t){ return t.answer; })
+    .map(function(t){ return t.id; }).concat(['tell']);
+
+  function loadSaved(){
+    try{
+      var raw = window.localStorage.getItem(STORE_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw) || {};
+      FIELD_IDS.forEach(function(id){
+        var el = document.getElementById(id);
+        if (el && typeof data[id] === 'string') el.value = data[id];
+      });
+    }catch(e){}
+  }
+  function save(){
+    try{
+      var data = {};
+      FIELD_IDS.forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) data[id] = el.value;
+      });
+      window.localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    }catch(e){}
+  }
+  /* Debounced "Saved" cue so the student can see their text is kept. */
+  var savedTimers = {};
+  function flagSaved(id){
+    var cue = document.getElementById('sv-' + id);
+    if (!cue) return;
+    clearTimeout(savedTimers[id + '-on']);
+    clearTimeout(savedTimers[id + '-off']);
+    savedTimers[id + '-on'] = setTimeout(function(){
+      cue.classList.add('on');
+      savedTimers[id + '-off'] = setTimeout(function(){ cue.classList.remove('on'); }, 1800);
+    }, 500);
+  }
+
+  loadSaved();
+  FIELD_IDS.forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', function(){ save(); flagSaved(id); });
+  });
+
+  /* ------------------------------------------------------------------
+   * Live coach, wired to the Practice Studio anonymizing proxy exactly
+   * like engine/live.js. Enabled for AICY60 on Dor's explicit decision
+   * (2026-08-05); the DPA position for this program is his to own.
+   * Student text is PII-scrubbed client-side before it is sent, the
+   * Worker scrubs again server-side, and a per-session token cap applies.
+   * Every failure path falls back to the offline coach, so the activity
+   * never blocks a student. Over file:// there is no network, which is
+   * why local testing always shows the offline coach.
+   * ---------------------------------------------------------------- */
+  /* ------------------------------------------------------------------
+   * The grounding pack, inlined. Authored from this program's own
+   * material (deck AICY.T4.P1, SME practice AICY.T4.E1) and kept in
+   * grounding/ beside this file:
+   *   activity.json      lesson map, rubric r1-r5, quality rules,
+   *                      outcome logic (the personal path), resources
+   *   grounding_pack.md  the teaching content the coach reasons FROM,
+   *                      carried verbatim in the #grounding-pack block
+   *   coach_prompts.md   system, field, debrief, refusal
+   * Inlined rather than fetched at runtime, so the page stays
+   * self-contained and the proxy is still the only network call.
+   * ---------------------------------------------------------------- */
+  var ACTIVITY = {
+    id: 'aicy-t5-ai-forensics',
+    grounding_ref: 'grounding/grounding_pack.md',
+    lesson_map: {
+      C1: 'Topic 5 · AI/LLM-assisted log analysis — an LLM reads and correlates large, noisy logs far faster than a manual skim, which is why the two-minute skim feels hopeless',
+      C2: 'Topic 5 · The attack chain — brute-force logins, a successful login as an attacker account, a PowerShell download of a backdoor, file encryption and exfiltration, then lateral movement with psexec',
+      C3: 'Topic 5 · How AI-driven security tools detect it — SIEM/IDS correlate failed logins, suspicious processes, unusual Kerberos activity and abnormal outbound traffic, then contain it (Darktrace, Splunk, CrowdStrike)',
+      C4: 'Topic 5 · Correlation across sources — the full picture only appears when the authentication, file-activity and network logs are read together, not one at a time',
+      C5: 'Topic 5 · Reading it as a defender, responsibly — an investigation works from the log evidence, checks what the LLM claims against the logs, and stays on the case it was given'
+    },
+    personal_path_ui: {
+      review_prefix: 'Where to review this: ',
+      resource_prefix: 'Optional extra resource (further reading, not required): '
+    },
+    rubric: [
+      { id:'r1_uses_evidence', name:'Cites log evidence',
+        description:'Backs each answer with something concrete from the logs — an account, an IP, a process, a command — rather than a guess or a paraphrase of the question.' },
+      { id:'r2_attack_stage', name:'Names the attack stage',
+        description:'Names the stage correctly (initial access, backdoor download, encryption/exfiltration, lateral movement) rather than only "an attack" or "hacking".' },
+      { id:'r3_correlates', name:'Correlates across logs',
+        description:'Connects events across the authentication, file-activity and network logs into one ordered timeline.' },
+      { id:'r4_verifies_llm', name:'Checks the LLM',
+        description:'Treats the LLM answer as a lead to verify against the logs, not as proof, and can point to the line that confirms it.' },
+      { id:'r5_detection', name:'Explains the detection',
+        description:'Explains how the SIEM/IDS/firewall detected and contained the attack, tied to what the logs recorded.' },
+      { id:'r6_scope', name:'Keeps it an investigation',
+        description:'Treats this as an authorised investigation of the given logs, does not invent evidence, and does not paste real secrets.' }
+    ],
+    quality_rules: [
+      'Never invent forensic conclusions the logs do not support; if the evidence is not there, say so.',
+      'Never help plan or carry out a real intrusion; this is an after-the-fact investigation of logs.',
+      'Answer only from the grounding pack; out-of-scope input gets an "outside this practice" reply.',
+      'Feedback is two or three sentences, plain, no lists.'
+    ],
+    fields: {
+      a1:  { rubric_refs:['r1_uses_evidence'],                              routes_to:['C1'] },
+      a3:  { rubric_refs:['r2_attack_stage','r1_uses_evidence'],            routes_to:['C2'] },
+      a4:  { rubric_refs:['r2_attack_stage','r1_uses_evidence'],            routes_to:['C2'] },
+      a5:  { rubric_refs:['r1_uses_evidence'],                              routes_to:['C2'] },
+      a6:  { rubric_refs:['r2_attack_stage','r1_uses_evidence'],            routes_to:['C2'] },
+      a7:  { rubric_refs:['r2_attack_stage','r1_uses_evidence'],            routes_to:['C2'] },
+      a8:  { rubric_refs:['r5_detection','r1_uses_evidence'],               routes_to:['C3'] },
+      a9:  { rubric_refs:['r5_detection'],                                  routes_to:['C3'] },
+      a10: { rubric_refs:['r3_correlates'],                                 routes_to:['C2','C4'] },
+      tell:{ rubric_refs:['r3_correlates','r4_verifies_llm','r5_detection','r6_scope'], routes_to:[] }
+    },
+    debrief: {
+      prompt: 'You have a pile of scattered log lines and an LLM that will answer anything you ask. Which single finding are you most confident in, and what in the logs makes you sure, rather than that the model said so?',
+      rubric_refs: ['r3_correlates','r4_verifies_llm','r5_detection','r6_scope']
+    },
+    outcome_logic: [
+      { when:'lever_used:trusted_llm',
+        focus:'You took the model answer without checking it against the logs. An LLM will confidently name an attacker or a time that is not in the data, so treat every claim as a lead and find the line that proves it before you write it down.',
+        review:'C5', resource:'res_nist_ir' },
+      { when:'lever_used:no_evidence',
+        focus:'You gave conclusions without pointing to a log line. A finding a defender can act on names the account, IP, process or command it rests on; the evidence is what separates an investigation from a guess.',
+        review:'C1', resource:'res_sans_dfir' },
+      { when:'lever_used:single_log',
+        focus:'You read one log rather than all three together. The story only appears across them: the failed logins in one, the backdoor and encryption in another, the exfiltration in the network log. Correlating the sources is the whole skill.',
+        review:'C4', resource:'res_sans_dfir' },
+      { when:'lever_used:no_timeline',
+        focus:'You did not put the events in order. A timeline from first access to containment is what turns scattered lines into an attack you can explain and defend against.',
+        review:'C2', resource:'res_nist_ir' },
+      { when:'lever_used:stage_unclear',
+        focus:'You could not name the attack stages. Learn the chain, initial access, backdoor, encryption and exfiltration, lateral movement, containment, and each log line drops into a place you can name.',
+        review:'C2', resource:'res_mitre_attack' },
+      { when:'lever_used:scope_drift',
+        focus:'Keep it to the logs you were given. An investigation works the case in front of it; running this against live company systems or other people data is a different thing with different rules.',
+        review:'C5', resource:'res_nist_ir' },
+      { when:'bridge',
+        focus:'The rest of Topic 5 is the tooling that does this at scale: AI-driven SIEM correlating these same signals across a whole network in real time. Carry the timeline you built as the thing those tools produce automatically.',
+        review:'C3' }
+    ],
+    resources: {
+      res_sans_dfir: { title:'Digital Forensics and Incident Response',
+        source:'SANS', url:'https://www.sans.org/cyber-security-courses/?focus-area=digital-forensics-incident-response' },
+      res_nist_ir: { title:'Computer Security Incident Handling Guide (SP 800-61)',
+        source:'NIST', url:'https://csrc.nist.gov/pubs/sp/800/61/r2/final' },
+      res_mitre_attack: { title:'MITRE ATT&CK',
+        source:'MITRE', url:'https://attack.mitre.org/' }
+    }
+  };
+
+  /* coach_prompts.md, inlined. The coach reasons from the grounding pack,
+     coaches against the rubric, and refuses anything that would improve or
+     execute a real attack. */
+  var PROMPTS = {
+    system: [
+      'You are the AI coach for a Wawiwa lesson: AICY60 Topic 5, "AI Integration in Cybersecurity Tools", the AI Forensics practice. The student investigates a multi-stage intrusion from three log files (authentication, file activity, network) using an LLM, then answers questions about what happened. You coach ONLY from the Wawiwa grounding pack for this practice. You:',
+      '- Affirm what the student got, then name the one thing that would most improve the answer (the evidence to cite, the attack stage to name, the timeline, or checking the LLM against the logs).',
+      '- Tie the point back to the T5 concepts by name when useful (LLM-assisted log analysis, the attack chain, AI-driven detection and containment, correlation across logs, responsible investigation).',
+      '- Push the habit of verifying the LLM: an answer is only as good as the log line behind it.',
+      '- Stay in scope. This is an investigation of the given logs. NEVER help plan or run a real intrusion, and refuse in one sentence, turning the student back to the evidence.',
+      '- Never confirm, repeat or summarise real credentials, tokens or machine paths a student pastes by mistake; tell them to remove it and carry on with the finding.',
+      '- Never invent facts the grounding pack does not support; if something is out of scope, say so plainly.',
+      '- Two or three sentences, plain and direct, no lists, no markdown.'
+    ].join('\n'),
+    field: [
+      'The task the student was given, verbatim from the course:',
+      '"""',
+      '{task}',
+      '"""',
+      '',
+      'The written part they were asked for: "{label}"',
+      'Rubric criteria this answer feeds: {rubric}',
+      'If it is weak, the concept to send them back to: {concepts}',
+      '',
+      'Their answer:',
+      '"""',
+      '{answer}',
+      '"""',
+      '',
+      'Coach them per the system rules, anchored to THIS task: the evidence in the logs, the attack stage, and checking the LLM claim against the log line.'
+    ].join('\n'),
+    debrief: [
+      'End-of-practice debrief for this exercise.',
+      'The student was asked: "{question}"',
+      'Rubric criteria to grade against: {rubric}',
+      '',
+      'Their answer:',
+      '"""',
+      '{answer}',
+      '"""',
+      '',
+      'Reward a finding the student is confident in AND can tie to a specific log line, correlated across the three logs. Push back gently on answers that rest on what the model said rather than on the evidence.'
+    ].join('\n'),
+    refusal: 'That’s outside this practice. This is an investigation of the three logs you were given, and I won’t help plan or run a real attack. Tell me which log lines you are working from and what they show, and we’ll build the finding together.'
+  };
+
+  /* ---- resolving the pack for a prompt or for the personal path ---- */
+  function fill(tpl, vals){
+    return String(tpl).replace(/\{(\w+)\}/g, function(m, k){
+      return (vals[k] === undefined || vals[k] === null) ? '' : String(vals[k]);
+    });
+  }
+  function rubricNames(refs){
+    var by = {};
+    ACTIVITY.rubric.forEach(function(r){ by[r.id] = r.name + ' (' + r.description + ')'; });
+    return (refs || []).map(function(id){ return by[id] || id; }).join('; ') || 'none';
+  }
+  function conceptNames(routes){
+    return (routes || []).map(function(k){
+      return k + ': ' + (ACTIVITY.lesson_map[k] || '');
+    }).join('; ') || 'none';
+  }
+  /* student-facing concept label: drop the internal slide pointer, and
+     read the pack's title dash as a colon rather than a comma */
+  function conceptLabel(key){
+    return houseStyle(String(ACTIVITY.lesson_map[key] || key)
+      .replace(/\s*\((?:deck|grounding pack)[^)]*\)\s*$/i, '')
+      .replace(/\s*—\s*/, ': '));
+  }
+  /* Personal-path pointers, straight from activity.json's personal_path_ui.
+     The review pointer NAMES the lesson and where to find it (full lesson_map
+     label, slide pointer included); the resource lead marks the link as an
+     optional extra, not a required step. */
+  function ppui(){ return ACTIVITY.personal_path_ui || {}; }
+  function reviewPointer(key){
+    return (ppui().review_prefix || 'Where to review this: ')
+      + String(ACTIVITY.lesson_map[key] || key);
+  }
+  function resourceLead(res){
+    return (ppui().resource_prefix || 'Optional extra resource (further reading, not required): ')
+      + res.title;
+  }
+  function fieldSpec(id){
+    return ACTIVITY.fields[id] || { rubric_refs:[], routes_to:[] };
+  }
+  /* the quality rules and the canned refusal ride with every call */
+  function buildSystem(){
+    return PROMPTS.system
+      + '\n\nQuality rules for this practice:\n'
+      + ACTIVITY.quality_rules.map(function(r){ return '- ' + r; }).join('\n')
+      + '\n\nIf the input breaches that scope, reply with exactly this and nothing else:\n"'
+      + PROMPTS.refusal + '"';
+  }
+
+  var LIVE = {
+    enabled: true,
+    proxy_url: 'https://practice-studio-proxy.dory-08e.workers.dev',
+    session_token_cap: 25000,
+    model: null,
+    prompts: {
+      system: PROMPTS.system,
+      /* grounding_pack.md, inlined verbatim above */
+      grounding: (document.getElementById('grounding-pack') || {}).textContent || ''
+    }
+  };
+
+  /* Measured live latency on this proxy runs to roughly 20s, so a 20s abort
+     was killing good answers. 35s, with a visible pending state so the wait
+     is explained rather than looking frozen. */
+  var CALL_TIMEOUT_MS = 35000;
+  var usedTokens = 0;
+
+  /* ---------- layer 1: the pre-send gate ----------
+     This practice puts a real person's profile in front of the student, so
+     the redactor alone is not a control: it never covered a name, a street
+     or a postcode. The gate blocks the coach call outright, which means the
+     text is never sent, never proxied and never reaches the vendor.
+     It is built to block the VALUE and allow the CATEGORY, because naming
+     the category is exactly what the task is asking for. "The About section
+     exposed a home city" passes. "He lives at 24 2nd Street" does not. */
+  var PII_GATE = [
+    { what:'an email address',
+      re:/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/ },
+    { what:'a government ID number',
+      re:/\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/ },
+    { what:'a phone or ID number',
+      re:/\+?\d(?:[\s().\-]?\d){6,}/ },
+    { what:'a street address',
+      re:/\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/i },
+    { what:'a postal code',
+      re:/\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/i },
+    { what:"a person\u2019s name",
+      re:/\b(?:full|real|last|first|maiden|legal)\s+name\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/ },
+    { what:"a person\u2019s name",
+      re:/\b(?:his|her|their|my)\s+(?:[a-z]+\s+){0,2}name\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i },
+    { what:"a person\u2019s name",
+      re:/\b(?:is|was|are|were)\s+named\s+["\u201c']?[A-Z][A-Za-z'\u2019-]+\s+[A-Z][A-Za-z'\u2019-]+/ },
+    { what:"a person\u2019s name",
+      re:/\bsurname\s*(?:is|was|:|=)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i },
+    { what:"a person\u2019s name",
+      re:/\b(?:the\s+(?:owner|manager|contact|partner|target|victim|customer|client|employee|colleague|student|person|candidate|recruiter))\b[^.\n]{0,28}\b(?:named|name\s*(?:is|was|:|=)|called)\s*["\u201c']?[A-Z][A-Za-z'\u2019-]+/i },
+    { what:'a date of birth',
+      re:/\b(?:date\s+of\s+birth|d\.?o\.?b\.?|born(?:\s+on)?)\s*(?:is|:|=)?\s*\d/i }
+  ];
+  function piiHit(text){
+    var t = String(text || '');
+    for (var i = 0; i < PII_GATE.length; i++){
+      PII_GATE[i].re.lastIndex = 0;
+      if (PII_GATE[i].re.test(t)) return PII_GATE[i].what;
+    }
+    return null;
+  }
+  function piiBlock(what){
+    return { tone:'work', lead:'Not sent. ',
+      text:'That answer carries ' + what + ' belonging to a real person, so it was not sent anywhere, '
+         + 'not to the coach and not off this page. The exercise asks which LINE exposed something, '
+         + 'not what the line said. Write the source and the category instead, for example '
+         + '\u201cthe About section gave a home city\u201d or \u201cthe headline gave the employer\u201d, then check again.' };
+  }
+
+  /* ---------- layer 2: the redactor ----------
+     Anything the gate lets through is still scrubbed before the call. */
+  var REDACT = [
+    { re:/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, sub:'[email removed]' },
+    { re:/\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/g, sub:'[id removed]' },
+    { re:/\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/gi,
+      sub:'[address removed]' },
+    { re:/\b(?:zip|postal)\s*code\b\s*(?:is|:|=|,)?\s*[A-Za-z0-9][A-Za-z0-9-]{2,9}\b/gi, sub:'[postcode removed]' },
+    { re:/\+?\d(?:[\s().\-]?\d){8,}/g, sub:'[number removed]' },
+    { re:/\d{9,}/g, sub:'[number removed]' },
+    { re:/\b(?=[A-Za-z0-9_\-]{20,}(\b|$))(?=[^\s]*\d)(?=[^\s]*[A-Za-z])[A-Za-z0-9_\-]{20,}\b/g,
+      sub:'[token removed]' }
+  ];
+  function redact(text){
+    var out = String(text || '');
+    REDACT.forEach(function(p){ p.re.lastIndex = 0; out = out.replace(p.re, p.sub); });
+    return out;
+  }
+  function liveAvailable(){
+    return !!(LIVE.enabled && LIVE.proxy_url && usedTokens < LIVE.session_token_cap);
+  }
+  function callProxy(kind, call){
+    if (!liveAvailable()) return Promise.reject(new Error('live_off'));
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = controller && setTimeout(function(){ controller.abort(); }, CALL_TIMEOUT_MS);
+    var payload = {
+      kind: kind, system: buildSystem(), grounding: LIVE.prompts.grounding,
+      call: call, session: { used_tokens: usedTokens }
+    };
+    if (LIVE.model) payload.model = LIVE.model;
+    return fetch(LIVE.proxy_url, {
+      method:'POST', headers:{ 'Content-Type':'application/json' },
+      signal: controller ? controller.signal : undefined,
+      body: JSON.stringify(payload)
+    }).then(function(resp){
+      if (timer) clearTimeout(timer);
+      return resp.json().then(function(data){
+        if (!resp.ok || !data.ok) throw new Error('proxy_error');
+        var u = data.usage || {};
+        usedTokens += (u.input_tokens || 0) + (u.output_tokens || 0);
+        return data.text || '';
+      });
+    }).catch(function(err){ if (timer) clearTimeout(timer); throw err; });
+  }
+
+  /* ------------------------------------------------------------------
+   * Offline coach. Deterministic guard grounded on this simulation:
+   * name the lever, name the tell, tie it to a defense.
+   * ---------------------------------------------------------------- */
+  var LEVER = /(log|line|event|eventid|ip|address|account|user|process|command|powershell|invoke|psexec|backdoor|encrypt|exfiltrat|kerberos|login|fail|brute|lateral|pc0|admin|traffic|outbound|\d{1,3}\.\d{1,3})/i;
+  var DEFENSE = /(detect|siem|ids|firewall|correlat|flag|alert|block|lock|contain|anomal|kerberos|outbound|monitor|suspicious|signature|behaviou?r)/i;
+  var FILLER = /^(idk|dunno|none|nothing|nope|n\/?a|na|no|yes|ok|okay|good|bad|easy|hard|fun|cool|nice|all|some|maybe|dont know|don't know|[\s\-\.\?]*)$/i;
+
+  var REASON = /(because|since|shows|indicat|evidence|log|line|confirm|correlat|so |which|due to|reveal)/i;
+
+  /* Shared guards: these two apply to every field. */
+  var REPLIES = {
+    empty:{ tone:'work', lead:'Nothing to work with yet',
+      text:'Write two or three sentences in the box, then check again.' },
+    thin:{ tone:'work', lead:'Too thin to grade',
+      text:'Give the coach something to work with: a couple of sentences that say what you did and why it worked.' }
+  };
+
+  function countItems(text){
+    var t = String(text || '').trim();
+    var lines = t.split(/\n+/).map(function(s){ return s.trim(); }).filter(Boolean);
+    if (lines.length >= 3) return lines.length;
+    var marks = t.match(/(^|\s)(\d[\.\)]|[-•*])\s/g);
+    if (marks && marks.length >= 3) return marks.length;
+    var semis = t.split(/;/).map(function(s){ return s.trim(); }).filter(Boolean);
+    if (semis.length >= 3) return semis.length;
+    var sents = t.split(/[.!?]+\s+/).filter(function(s){ return s.trim().length > 12; });
+    if (sents.length >= 3) return sents.length;
+    return lines.length;
+  }
+
+  /* One coach, one guard, per-field terminal states so the feedback names
+     THIS question instead of giving the same generic nudge everywhere.
+     These offline nudges ask for the same things the pack's rubric asks
+     for: the lever (r1), the tell (r2), the defense (r3), the ethical
+     framing (r5). The live coach grades against the rubric itself. */
+  var COACH = {
+    a1: {
+      need:[ { re:LEVER, reply:{ tone:'work', lead:'Say what you noticed',
+        text:'Even in two minutes, name one thing that looked off, a burst of failed logins, an odd process, an unfamiliar IP, and note how hard it was to be sure. That difficulty is the point: it is why the next step hands the logs to an LLM.' } } ],
+      good:{ tone:'ok', lead:'That is the honest read',
+        text:'You saw that a raw skim of three logs is hard to trust, which is exactly why an LLM earns its place here. Hold what caught your eye, because you will check whether the model finds the same thing.' }
+    },
+    a3: {
+      need:[
+        { re:LEVER, reply:{ tone:'work', lead:'Point to the evidence',
+          text:'Name the attack, then the lines behind it: the failed-then-successful logins, the downloaded backdoor, the encrypted and exfiltrated files. The type is only as good as the evidence you can show for it.' } },
+        { re:REASON, reply:{ tone:'work', lead:'Now say why',
+          text:'Tie the label to the log: it is a multi-stage intrusion because the logs show initial access, then malware, then exfiltration, then lateral movement, in that order.' } }
+      ],
+      good:{ tone:'ok', lead:'Named and evidenced',
+        text:'A multi-stage intrusion, and you can point to the stages in the logs rather than just naming it. That is the read an incident report is built on.' }
+    },
+    a8: {
+      need:[ { re:DEFENSE, reply:{ tone:'work', lead:'Name what flagged it',
+        text:'Say what the security systems keyed on: repeated failed logins, the suspicious process, unusual Kerberos activity, the abnormal outbound traffic. Those are the signals an AI-driven SIEM correlates automatically.' } } ],
+      good:{ tone:'ok', lead:'That is the detection',
+        text:'You connected the attack to what the tools actually saw, which is the bridge from this hand investigation to the AI-driven SIEM the rest of the topic is about.' }
+    },
+    a10: {
+      need:[ { re:LEVER, reply:{ tone:'work', lead:'Put it in order',
+        text:'Lay the events out from first to last: brute force, successful login, backdoor download, encryption and exfiltration, lateral movement, then detection and containment. The order is the story.' } } ],
+      good:{ tone:'ok', lead:'That is the timeline',
+        text:'A clean sequence from first access to containment, correlated across the three logs. That is the artefact the whole exercise was building toward.' }
+    },
+    tell: {
+      need:[
+        { re:LEVER, reply:{ tone:'work', lead:'Anchor it to a line',
+          text:'Name the finding you trust and the exact evidence under it, an account, an IP, a process, a command, not just what the model concluded.' } },
+        { re:REASON, reply:{ tone:'work', lead:'Say why you trust it',
+          text:'What in the logs confirms it? A finding you can trace to a line is one you can defend; a finding that rests on the model saying so is not.' } }
+      ],
+      good:{ tone:'ok', lead:'Evidence, not just the model',
+        text:'You picked a finding and tied it to the log line that proves it, rather than to what the LLM asserted. That habit, verify against the evidence, is the real skill this practice teaches.' }
+    }
+  };
+
+  function judgeWith(spec, raw){
+    var text = String(raw || '').trim();
+    if (!text) return REPLIES.empty;
+    var words = text.split(/\s+/).filter(Boolean);
+    if (FILLER.test(text) || words.length < 4 || text.length < 14) return REPLIES.thin;
+    for (var i = 0; i < spec.need.length; i++){
+      var n = spec.need[i];
+      var ok = n.re ? n.re.test(text) : n.test(text);
+      if (!ok) return n.reply;
+    }
+    return spec.good;
+  }
+  function judge(raw){ return judgeWith(COACH.tell, raw); }
+
+  function render(el, r){
+    el.hidden = false;
+    el.setAttribute('data-tone', r.tone);
+    el.innerHTML = (r.tone === 'ok' ? ICON_OK : ICON_WORK)
+      + '<p><span class="lead">' + esc(r.lead) + '</span>' + esc(r.text) + '</p>';
+  }
+  /* The live coach writes its own prose, so apply the same house rule the
+     deck pipeline applies: no em dashes, no arrow shorthand. */
+  function houseStyle(text){
+    return String(text || '')
+      .replace(/\s*—\s*/g, ', ')
+      .replace(/\s*(?:→|←|⇒)\s*/g, ', ');
+  }
+  /* A live reply is not automatically a pass. When the coach declines,
+     the card has to look declined; a green tick on a refusal reads to the
+     student as "correct, carry on", which is the opposite of the point. */
+  function liveTone(text){
+    var t = String(text || '');
+    if (t.indexOf(PROMPTS.refusal.slice(0, 40)) !== -1) return 'work';
+    return /\b(?:outside this practice|never|do not|don\u2019t|don't|stop|remove|instead of|must not|not on a public)\b/i.test(t)
+      ? 'work' : 'ok';
+  }
+  function renderLive(el, text){
+    var tone = liveTone(text);
+    el.hidden = false;
+    el.setAttribute('data-tone', tone);
+    el.innerHTML = (tone === 'ok' ? ICON_OK : ICON_WORK) + '<p>' + esc(houseStyle(text)) + '</p>';
+  }
+  function renderPending(el){
+    el.hidden = false;
+    el.setAttribute('data-tone','wait');
+    el.innerHTML = ICON_WAIT + '<p>Asking the AI Coach, this can take a few seconds.</p>';
+  }
+
+  /* Shared runner for every check button: live proxy first, deterministic
+     offline coach as the fallback (and the only path while LIVE is gated). */
+  function runCoach(btn, fieldId, target, spec, buildCall, kind){
+    var answer = document.getElementById(fieldId).value;
+    /* The gate runs before liveAvailable() so the rule holds identically
+       whether the coach is live or offline: this answer goes nowhere. */
+    var hit = piiHit(answer);
+    if (hit){ render(target, piiBlock(hit)); return; }
+    if (!liveAvailable()){ render(target, judgeWith(spec, answer)); return; }
+    btn.disabled = true;
+    var was = btn.textContent;
+    btn.textContent = 'Checking…';
+    renderPending(target);
+    callProxy(kind || 'field', buildCall(redact(answer))).then(function(text){
+      if (text && text.trim()) renderLive(target, text.trim());
+      else render(target, judgeWith(spec, answer));
+    }).catch(function(){
+      render(target, judgeWith(spec, answer));
+    }).then(function(){
+      btn.disabled = false; btn.textContent = was;
+    });
+  }
+
+  /* Debrief card */
+  var reply = document.getElementById('reply');
+  var checkBtn = document.getElementById('check');
+  checkBtn.addEventListener('click', function(){
+    runCoach(checkBtn, 'tell', reply, COACH.tell, function(safe){
+      return fill(PROMPTS.debrief, {
+        question: ACTIVITY.debrief.prompt,
+        rubric: rubricNames(ACTIVITY.debrief.rubric_refs),
+        answer: safe
+      });
+    }, 'debrief');
+  });
+
+  /* Per-question buttons, delegated so it survives the rendered list */
+  var TASK_BY_ID = {};
+  TASKS.forEach(function(t){ TASK_BY_ID[t.id] = t; });
+  tasksEl.addEventListener('click', function(ev){
+    var btn = ev.target.closest ? ev.target.closest('button[data-coach]') : null;
+    if (!btn) return;
+    var id = btn.getAttribute('data-coach');
+    var t = TASK_BY_ID[id];
+    var target = document.getElementById('rp-' + id);
+    if (!t || !target) return;
+    runCoach(btn, id, target, COACH[id] || COACH.tell, function(safe){
+      var spec = fieldSpec(id);
+      return fill(PROMPTS.field, {
+        task: t.instr,
+        label: t.answer,
+        rubric: rubricNames(spec.rubric_refs),
+        concepts: conceptNames(spec.routes_to),
+        answer: safe
+      });
+    });
+  });
+
+  /* ------------------------------------------------------------------
+   * Personal path. Reflect back the manipulation levers used, return a
+   * triage move for each, then bridge to the next topic.
+   * ---------------------------------------------------------------- */
+  /* The levers, the tips and the bridge all come from the pack's
+     outcome_logic. The label is the lever as the rubric names it; the
+     takeaway, the concept to review and the resource are the pack's. */
+  var LEVER_LABELS = {
+    trusted_llm:      'I took ChatGPT’s answer without checking it against the logs',
+    no_evidence:      'I gave conclusions without pointing to a log line',
+    single_log:       'I looked at one log, not all three together',
+    no_timeline:      'I did not put the events in order',
+    stage_unclear:    'I could not name the attack stages',
+    scope_drift:      'I wondered about running this on real company systems'
+  };
+  var LEVERS = ACTIVITY.outcome_logic.filter(function(o){
+    return o.when.indexOf('lever_used:') === 0;
+  }).map(function(o){
+    var key = o.when.split(':')[1];
+    return { id:key, name:LEVER_LABELS[key] || key,
+      tip:o.focus, review:o.review, resource:o.resource };
+  });
+  var BRIDGE = ACTIVITY.outcome_logic.filter(function(o){
+    return o.when === 'bridge';
+  })[0] || { focus:'' };
+
+  var state = {};
+  var checks = document.getElementById('checks');
+  var pathout = document.getElementById('pathout');
+  var pathhint = document.getElementById('pathhint');
+  var pathSec = document.getElementById('path-sec');
+
+  if (META.context === 'class'){
+    pathSec.parentNode.removeChild(pathSec);
+  } else {
+    LEVERS.forEach(function(c){
+      var li = document.createElement('li');
+      li.innerHTML =
+        '<span class="cname" id="lbl-' + c.id + '">' + esc(c.name) + '</span>'
+        + '<span class="seg" role="group" aria-labelledby="lbl-' + c.id + '">'
+        +   '<button type="button" aria-pressed="false" data-c="' + c.id + '" data-v="used">'
+        +     ICON_TICK + 'That was me</button>'
+        +   '<button type="button" aria-pressed="false" data-c="' + c.id + '" data-v="skipped">'
+        +     ICON_TICK + 'Not me</button>'
+        + '</span>';
+      checks.appendChild(li);
+    });
+
+    checks.addEventListener('click', function(ev){
+      var btn = ev.target.closest ? ev.target.closest('button[data-c]') : null;
+      if (!btn) return;
+      var id = btn.getAttribute('data-c');
+      var val = btn.getAttribute('data-v');
+      state[id] = (state[id] === val) ? null : val;
+      var group = btn.parentNode.querySelectorAll('button[data-c]');
+      Array.prototype.forEach.call(group, function(b){
+        b.setAttribute('aria-pressed', state[id] === b.getAttribute('data-v') ? 'true' : 'false');
+      });
+      renderPath();
+    });
+
+    function renderPath(){
+      var answered = LEVERS.filter(function(c){ return state[c.id]; });
+      var used = LEVERS.filter(function(c){ return state[c.id] === 'used'; });
+
+      /* Nothing marked yet: keep the waiting hint, hide the panel. */
+      if (!answered.length){
+        pathout.hidden = true;
+        pathout.innerHTML = '';
+        pathhint.hidden = false;
+        return;
+      }
+
+      var html = '';
+      if (used.length){
+        html += '<h3>Sharpen your read</h3><ul class="tips">'
+          + used.map(function(c){
+              var res = ACTIVITY.resources[c.resource];
+              return '<li>' + ICON_SHIELD + '<span><b>' + esc(c.name) + '.</b> '
+                + esc(houseStyle(c.tip))
+                + (c.review ? '<span class="rev">'
+                    + esc(reviewPointer(c.review)) + '</span>' : '')
+                + (res && res.url ? '<a class="reslink" href="' + res.url
+                    + '" target="_blank" rel="noopener">' + esc(resourceLead(res))
+                    + ' (' + esc(res.source) + ')</a>' : '')
+                + '</span></li>';
+            }).join('')
+          + '</ul>';
+      } else {
+        /* Everything marked "Skipped it": say so rather than showing a bare bridge. */
+        html += '<h3>Nothing to sharpen</h3>'
+          + '<p style="margin:0">None of these described your run. If something else got in the way of understanding the attack, say so in the debrief above so it can be added.</p>';
+      }
+      html += '<p class="bridge"><b>Next:</b> ' + esc(houseStyle(BRIDGE.focus)) + '</p>';
+
+      pathhint.hidden = true;
+      pathout.innerHTML = html;
+      pathout.hidden = false;
+    }
+  }
+
+  })();
+</script>
+
+</body>
+</html>
