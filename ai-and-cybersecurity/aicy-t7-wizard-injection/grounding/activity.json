@@ -1,0 +1,158 @@
+{
+  "id": "aicy-t7-wizard-injection",
+  "topic": "AICY60 T7 - Prompt Injection",
+  "exercise": "AICY.T7.E1 - Wizard Injection",
+  "mode": "Mode A - clean design over the SME task, coach + personal path",
+  "coach_status": "AWAITING SME REVIEW - coach prompt authored by Claude 28 Sep 2026, not yet SME-approved",
+  "grounding_ref": "grounding/grounding_pack.md",
+  "source_doc": "00b - Source (from production, Sep 2026)/T7 - Prompt Injection/Practice/ - the E1 exercise is the Word file misnamed 'Alexander Wright CV.pdf'",
+  "lesson_map": {
+    "C1": "Topic 7 · Why an LLM can be injected: one uniform token stream, the system prompt and the context conflict (deck slides 9-12)",
+    "C2": "Topic 7 · Prompt injection and the threat model: overriding the system prompt, what the attacker wants, context confusion (deck slides 14-17)",
+    "C3": "Topic 7 · Direct prompt injection, the eight levels: direct requests, reversal and framing, output segmentation, encoding, context shifting, linguistic opposites, formatting meta-prompts, narrative jailbreaks (deck slides 19-27)",
+    "C4": "Topic 7 · Mitigations: separation of API roles, double-ended guardrails, least privilege (deck slides 42-45)",
+    "C5": "Topic 7 · Practising responsibly: injection techniques are tried on a sanctioned training target like Gandalf, never on a real product"
+  },
+  "rubric": [
+    {
+      "id": "r1_technique",
+      "name": "Names the technique",
+      "description": "Names the injection technique used (direct request, reversal or framing, segmentation, encoding, context shift, opposites, meta-prompt, narrative jailbreak)."
+    },
+    {
+      "id": "r2_why",
+      "name": "Explains why it worked",
+      "description": "Explains which guardrail the level added and why the prompt got past it, not just that it worked."
+    },
+    {
+      "id": "r3_iterates",
+      "name": "Iterates",
+      "description": "Shows what failed first and how the next attempt changed, instead of only the final prompt."
+    },
+    {
+      "id": "r4_defence",
+      "name": "Thinks like a defender",
+      "description": "Can say what would have stopped the prompt: role separation, input and output guardrails, least privilege."
+    },
+    {
+      "id": "r5_scope",
+      "name": "Keeps it on Gandalf",
+      "description": "Treats this as a sanctioned challenge; does not carry the prompts to a real AI product or system."
+    }
+  ],
+  "outcome_logic": [
+    {
+      "when": "lever_used:no_why",
+      "focus": "You wrote down what worked but not why. Each level adds one guardrail, a keyword block, an output filter, a second model checking the answer; the skill is naming which one your prompt slipped past.",
+      "review": "C3",
+      "resource": "res_owasp"
+    },
+    {
+      "when": "lever_used:one_trick",
+      "focus": "You kept reusing one trick. The levels are built so each technique stops working at some point; switch families, from reversal to encoding to context shifting to narrative, rather than rewording the same prompt.",
+      "review": "C3",
+      "resource": "res_lakera"
+    },
+    {
+      "when": "lever_used:gave_up",
+      "focus": "You stopped at an early level. When a level blocks you, read what it refused: the refusal tells you which guardrail was added, and the deck slide for that level names the family of techniques to try next.",
+      "review": "C3",
+      "resource": "res_lakera"
+    },
+    {
+      "when": "lever_used:copied",
+      "focus": "You used a prompt from someone else or from the internet without working out why it worked. Copying gets the password; understanding the guardrail is what you will need as the one building the defences.",
+      "review": "C2",
+      "resource": "res_owasp"
+    },
+    {
+      "when": "lever_used:no_defence",
+      "focus": "You did not think about what would have stopped your prompt. For each level you beat, name the fix: keep system and user roles apart, filter the output as well as the input, give the model nothing it should not reveal.",
+      "review": "C4",
+      "resource": "res_owasp"
+    },
+    {
+      "when": "lever_used:scope_drift",
+      "focus": "Keep these prompts on Gandalf. It is a sanctioned training target; trying the same techniques on a real product or a company’s assistant is a different thing with different rules.",
+      "review": "C5",
+      "resource": null
+    },
+    {
+      "when": "bridge",
+      "focus": "The next practice moves the injection out of the chat box and into the files an AI reads: hidden text in a CV and a photo. Same weakness, no typing required.",
+      "review": "C2"
+    }
+  ],
+  "resources_pool": {
+    "res_owasp": {
+      "title": "OWASP Top 10 for LLM Applications: Prompt Injection",
+      "source": "OWASP",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+    },
+    "res_lakera": {
+      "title": "Gandalf, the prompt injection challenge",
+      "source": "Lakera",
+      "url": "https://gandalf.lakera.ai/"
+    }
+  },
+  "tasks": [
+    {
+      "id": "a0",
+      "instr": "Open the Gandalf AI Challenge.",
+      "links": [
+        {
+          "label": "Gandalf AI Challenge",
+          "url": "https://gandalf.lakera.ai/"
+        }
+      ]
+    },
+    {
+      "id": "l1",
+      "instr": "Solve Gandalf AI level 1",
+      "links": [],
+      "answer": "The prompt that got you through, and why it beat this level’s defence."
+    },
+    {
+      "id": "l2",
+      "instr": "Solve Gandalf AI level 2",
+      "links": [],
+      "answer": "The prompt that got you through, and why it beat this level’s defence."
+    },
+    {
+      "id": "l3",
+      "instr": "Solve Gandalf AI level 3",
+      "links": [],
+      "answer": "The prompt that got you through, and why it beat this level’s defence."
+    },
+    {
+      "id": "l4",
+      "instr": "Solve Gandalf AI level 4",
+      "links": [],
+      "answer": "The prompt that got you through, and why it beat this level’s defence."
+    },
+    {
+      "id": "l5",
+      "instr": "Solve Gandalf AI level 5",
+      "links": [],
+      "answer": "The prompt that got you through, and why it beat this level’s defence."
+    },
+    {
+      "id": "l6",
+      "instr": "Solve Gandalf AI level 6",
+      "links": [],
+      "answer": "The prompt that got you through, and why it beat this level’s defence."
+    },
+    {
+      "id": "l7",
+      "instr": "Solve Gandalf AI level 7",
+      "links": [],
+      "answer": "The prompt that got you through, and why it beat this level’s defence."
+    },
+    {
+      "id": "l8",
+      "instr": "Solve Gandalf AI level 8",
+      "links": [],
+      "answer": "The prompt that got you through, and why it beat this level’s defence."
+    }
+  ]
+}

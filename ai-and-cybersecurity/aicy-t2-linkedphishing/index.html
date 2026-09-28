@@ -175,6 +175,13 @@
   .reply p{margin:0 0 9px}
   .reply p:last-child{margin:0}
   .reply b,.reply strong{color:var(--ink);font-weight:600}
+  /* the coach reply icon: sized, so it does not fill the card (fix 28 Sep 2026) */
+  .reply:not([hidden]){display:flex;align-items:flex-start;gap:10px}
+  .reply>svg{flex:0 0 16px;width:16px;height:16px;margin-top:4px;fill:none;stroke:var(--muted);
+    stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .reply[data-tone="ok"]>svg{stroke:var(--accent)}
+  .reply .lead{font-weight:600;color:var(--ink);margin-right:6px}
+  .reply .lead::after{content:"."}
 
   /* ---------- sections ---------- */
   .sec{margin:34px 0 0;padding:26px 0 0;border-top:1px solid var(--line)}

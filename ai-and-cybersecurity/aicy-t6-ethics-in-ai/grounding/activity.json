@@ -1,0 +1,249 @@
+{
+  "id": "aicy-t6-ethics-in-ai",
+  "topic": "AICY60 T6 - Ethics, Legal, and Future Directions",
+  "exercise": "AICY.T6.E1 - Ethics in AI",
+  "mode": "Mode A - clean design over the SME task, coach + personal path",
+  "coach_status": "AWAITING SME REVIEW - coach prompt authored by Claude 28 Sep 2026, not yet SME-approved",
+  "grounding_ref": "grounding/grounding_pack.md",
+  "source_doc": "00b - Source (from production, Sep 2026)/T6 -  Ethics, Legal, and Future Directions/Practice/AICY.T6.E1 - Ethics in AI/AICY.T6.E1 - Ethics in AI.docx",
+  "lesson_map": {
+    "C1": "Topic 6 · Ethical issues in AI-powered cybersecurity: privacy, misuse and accountability (deck slides 3-4, 8)",
+    "C2": "Topic 6 · AI misuse and offensive AI: AI-generated phishing, deepfakes, influence operations, cyberwarfare (deck slides 9-10, 21-22)",
+    "C3": "Topic 6 · Legal frameworks: GDPR, CCPA, the EU AI Act and the global legal landscape (deck slides 6-7, 11, 15, 43)",
+    "C4": "Topic 6 · Ethical design: fairness, bias detection, transparency and security of AI systems (deck slides 23, 38)",
+    "C5": "Topic 6 · Governance and accountability: who is responsible, humans in the loop, clear policies (deck slides 8, 28, 44)",
+    "C6": "Topic 6 · AI as the defender: threat intelligence, real-time detection and privacy monitoring (deck slides 25-26, 31, 35)"
+  },
+  "rubric": [
+    {
+      "id": "r1_article",
+      "name": "Uses the article",
+      "description": "Answers from what the article actually reports (the threats, the scam, the fake network), not from general knowledge."
+    },
+    {
+      "id": "r2_ai_offense",
+      "name": "Explains the AI angle",
+      "description": "Explains concretely how AI or automation made the attack bigger, faster or more convincing."
+    },
+    {
+      "id": "r3_ai_defense",
+      "name": "Names an AI defence",
+      "description": "Proposes a specific way AI can detect or prevent the threat, not just \"use AI\"."
+    },
+    {
+      "id": "r4_two_sides",
+      "name": "Weighs both sides",
+      "description": "On the ethical questions, states a position AND the strongest argument against it."
+    },
+    {
+      "id": "r5_frameworks",
+      "name": "Connects to the frameworks",
+      "description": "Ties the argument to accountability, transparency, privacy, bias, or the laws in Topic 6 (GDPR, CCPA, the EU AI Act)."
+    },
+    {
+      "id": "r6_scope",
+      "name": "Discusses, does not expose",
+      "description": "Discusses real incidents and public figures as reported, without adding personal data about private people."
+    }
+  ],
+  "outcome_logic": [
+    {
+      "when": "lever_used:one_sided",
+      "focus": "You argued one side of the ethical questions. Every one of them has a real cost either way: a human in the loop is slower, full autonomy has no one to answer for mistakes. Name the strongest argument against your position before you settle on it.",
+      "review": "C5",
+      "resource": "res_oecd"
+    },
+    {
+      "when": "lever_used:not_from_article",
+      "focus": "You answered from general knowledge rather than from the article. The incident questions ask what happened in Romania: the threats that grew, the figure used in the deepfake, the fake network. Go back to the article and quote the detail.",
+      "review": "C2",
+      "resource": null
+    },
+    {
+      "when": "lever_used:offense_only",
+      "focus": "You explained how AI helps the attacker but not how it defends. For each incident, name the AI tool on the defender’s side: deepfake detection, anomaly detection on accounts, threat intelligence that links a fake network.",
+      "review": "C6",
+      "resource": "res_enisa"
+    },
+    {
+      "when": "lever_used:no_accountability",
+      "focus": "You did not say who answers when the AI gets it wrong. Accountability is the question behind half of Topic 6: the vendor, the company that deployed it, or the analyst who trusted it. Pick one and say why.",
+      "review": "C5",
+      "resource": "res_oecd"
+    },
+    {
+      "when": "lever_used:no_law",
+      "focus": "You did not connect your answers to the laws in Topic 6. Monitoring employees and analysing personal data are exactly what GDPR, CCPA and the EU AI Act regulate; one sentence tying your position to them makes it defensible.",
+      "review": "C3",
+      "resource": "res_euaiact"
+    },
+    {
+      "when": "lever_used:privacy_blind",
+      "focus": "You accepted monitoring in the name of security without asking what it costs. Transparency, data minimisation and a clear limit on what is analysed are what keep a security tool from becoming surveillance.",
+      "review": "C1",
+      "resource": "res_euaiact"
+    },
+    {
+      "when": "bridge",
+      "focus": "Topic 7 turns the lens on the AI itself: prompt injection, where an attacker talks a model into breaking its own rules. The accountability question you argued here comes straight back.",
+      "review": "C5"
+    }
+  ],
+  "resources_pool": {
+    "res_euaiact": {
+      "title": "The EU Artificial Intelligence Act, at a glance",
+      "source": "European Commission",
+      "url": "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai"
+    },
+    "res_oecd": {
+      "title": "OECD AI Principles",
+      "source": "OECD",
+      "url": "https://oecd.ai/en/ai-principles"
+    },
+    "res_enisa": {
+      "title": "ENISA Threat Landscape",
+      "source": "ENISA",
+      "url": "https://www.enisa.europa.eu/topics/cyber-threats/threat-landscape"
+    }
+  },
+  "tasks": [
+    {
+      "id": "r1",
+      "instr": "Article 1: “Cyberfraud in Romania up over 40pct in 2024, malware attacks up 286.8pct”",
+      "links": [
+        {
+          "label": "Article 1 (AGERPRES)",
+          "url": "https://agerpres.ro/english/2025/08/27/cyberfraud-in-romania-up-over-40pct-in-2024-malware-attacks-up-286-8pct-official-report--1478992"
+        }
+      ]
+    },
+    {
+      "id": "a1",
+      "instr": "What types of cyber threats increased the most in 2024 in Romania?",
+      "links": [],
+      "answer": "The threats that grew the most, from the article."
+    },
+    {
+      "id": "a2",
+      "instr": "How does automation or AI make these attacks more dangerous?",
+      "links": [],
+      "answer": "How AI or automation makes them worse."
+    },
+    {
+      "id": "a3",
+      "instr": "What role could AI play in defending against these threats?",
+      "links": [],
+      "answer": "The defensive role AI could play."
+    },
+    {
+      "id": "r2",
+      "instr": "Article 2: “National Bank of Romania Warns Consumers About Deepfake Videos”",
+      "links": [
+        {
+          "label": "Article 2 (PYMNTS)",
+          "url": "https://www.pymnts.com/news/security-and-risk/2024/national-bank-of-romania-warns-consumers-about-deepfake-videos/"
+        }
+      ]
+    },
+    {
+      "id": "a4",
+      "instr": "What was the attack performed?",
+      "links": [],
+      "answer": "The attack, in a sentence or two."
+    },
+    {
+      "id": "a5",
+      "instr": "In what way was the figure misused in the scam?",
+      "links": [],
+      "answer": "How the public figure was misused."
+    },
+    {
+      "id": "a6",
+      "instr": "How could AI be used to help identify or prevent deepfake scams?",
+      "links": [],
+      "answer": "How AI could spot or stop it."
+    },
+    {
+      "id": "r3",
+      "instr": "Article 3: “Meta Busts Fake Influence Ops in Romania, Azerbaijan & Taiwan”",
+      "links": [
+        {
+          "label": "Article 3 (The Hacker News)",
+          "url": "https://thehackernews.com/2025/05/meta-disrupts-influence-ops-targeting.html"
+        }
+      ]
+    },
+    {
+      "id": "a7",
+      "instr": "What was the goal of the fake accounts on social media?",
+      "links": [],
+      "answer": "The goal of the fake accounts."
+    },
+    {
+      "id": "a8",
+      "instr": "How might AI have been used to make the posts look real?",
+      "links": [],
+      "answer": "How AI could have made them convincing."
+    },
+    {
+      "id": "a9",
+      "instr": "How can platforms use AI to detect fake networks?",
+      "links": [],
+      "answer": "How platforms could detect them with AI."
+    },
+    {
+      "id": "g1",
+      "instr": "General question: Who should be held accountable if an AI system makes a wrong security decision (e.g., blocking legitimate users or missing a real threat)?",
+      "links": [],
+      "answer": "Your group’s position, and the strongest argument against it."
+    },
+    {
+      "id": "g2",
+      "instr": "General question: Should AI systems in cybersecurity be allowed to make autonomous decisions, or must humans always remain “in the loop”?",
+      "links": [],
+      "answer": "Your group’s position, and where you draw the line."
+    },
+    {
+      "id": "g3",
+      "instr": "General question: How transparent should companies be when they use AI to monitor employees or customers for security purposes?",
+      "links": [],
+      "answer": "Your group’s position."
+    },
+    {
+      "id": "g4",
+      "instr": "General question: To what extent is it ethical for AI to analyze personal data (emails, chats, browsing habits) in the name of security?",
+      "links": [],
+      "answer": "Your group’s position, and the limit you would set."
+    },
+    {
+      "id": "g5",
+      "instr": "General question: How can organizations ensure that AI-driven security tools don’t become tools for mass surveillance?",
+      "links": [],
+      "answer": "The safeguards you would put in place."
+    },
+    {
+      "id": "g6",
+      "instr": "General question: Could AI in cybersecurity unfairly target certain groups or geographies due to biased training data?",
+      "links": [],
+      "answer": "Your group’s view, with an example."
+    },
+    {
+      "id": "g7",
+      "instr": "General question: Is it ethical for governments or organizations to use AI offensively (e.g., in hacking back, cyber warfare, or automated penetration testing)?",
+      "links": [],
+      "answer": "Your group’s position, and the strongest argument against it."
+    },
+    {
+      "id": "g8",
+      "instr": "General question: How can security professionals balance trust in AI tools with their own expertise?",
+      "links": [],
+      "answer": "How you would strike the balance."
+    },
+    {
+      "id": "g9",
+      "instr": "General question: Should users be informed when AI, rather than a human, is responsible for detecting and responding to threats on their systems?",
+      "links": [],
+      "answer": "Your group’s position."
+    }
+  ]
+}
