@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>File Lab · Synchronous fs</title>
+<!--
+  Wawiwa · AI Full Stack Developer · Node module · Self-study 15 (Synchronous File System Operations)
+  Workbook 1 of 3: File Lab (recognition, predict-then-run). Covers Word sections 2-3.
+  No AI coach and no network calls: a plain embedded activity. The coached check-in (Part 4) is built in Practice Studio.
+  Every terminal output shown here was verified with a real run on Node 22.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Unit design tokens (shared by every Node self-study workbook) ---------- */
+  :root{
+    --ink:#0f1f33; --muted:#4a5b70; --wash:#eef4f1; --card:#ffffff; --line:#d7e1e6;
+    --kicker:#0b6f78; --focus:#1a66d6;
+    --radius:16px; --radius-sm:10px; --shadow:0 1px 2px rgba(15,31,51,.06),0 8px 24px rgba(15,31,51,.06);
+    --font:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,"Cascadia Code",Consolas,monospace;
+    /* Family accent for self-study 15-17 (how Node works): Node green */
+    --accent:#2d7a31; --accent-soft:#e3f1e2; --accent-ink:#1d5520;
+    --ok:#2d7a31; --ok-soft:#e3f1e2; --err:#b3261e; --err-soft:#fbe7e5;
+    /* This workbook's identity: explorer + terminal */
+    --folder:#e2a336; --file:#5b7fa6;
+    --term-bg:#0f1b29; --term-ink:#d6e2ee; --term-dim:#8aa0b6; --term-prompt:#7fdc86; --term-err:#ff8a80;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  .brandbar{display:flex;align-items:center;gap:14px;padding:0 4px 14px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+  .brandbar svg{flex:0 0 auto;width:92px;height:auto}
+  .brandline{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+  .brandline .bk{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kicker)}
+  .brandline .bt{font-size:.95rem;font-weight:700;color:var(--ink)}
+  html,body{margin:0}
+  body{font-family:var(--font);color:var(--ink);background:var(--wash);line-height:1.5;font-size:16px}
+  :focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 40px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  code,.mono{font-family:var(--mono);font-size:.92em}
+
+  /* ---------- Header ---------- */
+  .hero{display:flex;gap:24px;align-items:center;justify-content:space-between;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px 28px;margin-bottom:20px;overflow:hidden;position:relative}
+  .kicker{font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--kicker);margin:0 0 6px}
+  h1{font-size:clamp(1.6rem,3vw,2.2rem);line-height:1.15;margin:0 0 8px}
+  .lead{margin:0;color:var(--muted);max-width:52ch}
+  .hero svg{flex:0 0 auto;width:190px;height:auto}
+  @media (max-width:640px){.hero{flex-direction:column;align-items:flex-start}.hero svg{width:150px;align-self:center}}
+
+  /* ---------- Progress ---------- */
+  .progress{display:flex;align-items:center;gap:12px;margin:0 0 16px}
+  .dots{display:flex;gap:6px;list-style:none;margin:0;padding:0}
+  .dots li{width:28px;height:6px;border-radius:3px;background:var(--line)}
+  .dots li.done{background:var(--accent)}
+  .dots li.now{background:var(--accent);opacity:.45}
+  .progress p{margin:0;font-size:.9rem;color:var(--muted)}
+
+  /* ---------- Layout ---------- */
+  .grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .panel-h{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .panel-h svg{width:16px;height:16px}
+
+  /* ---------- Code panel ---------- */
+  .code{margin:0;padding:10px 0;font-family:var(--mono);font-size:.9rem;list-style:none;counter-reset:ln}
+  .code li{display:flex;flex-wrap:wrap;gap:14px;padding:5px 16px;border-left:3px solid transparent;color:#8b98a8;transition:background .2s}
+  .code li::before{counter-increment:ln;content:counter(ln);width:1.4em;text-align:right;color:#a7b2bf;flex:0 0 auto}
+  .code li.ran{color:var(--ink)}
+  .code li.now{background:#fff7e0;border-left-color:var(--folder);color:var(--ink)}
+  .code li.crashed{background:var(--err-soft);border-left-color:var(--err);color:var(--ink)}
+  .code .str{color:#9a4b12}.code .fn{color:#1d5aa6}.code .kw{color:#7a3fa0}
+  .code li:not(.ran):not(.now):not(.crashed) span{color:inherit}
+  .tag{margin-left:auto;font-family:var(--font);font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--kicker);background:#e1f1f2;border-radius:999px;padding:1px 8px;align-self:center;white-space:nowrap}
+
+  /* ---------- Predict card ---------- */
+  .predict{padding:20px 20px 22px;border-top:1px solid var(--line)}
+  .step-label{font-size:.8rem;font-weight:700;color:var(--kicker);letter-spacing:.06em;text-transform:uppercase;margin:0 0 4px}
+  .predict h2{font-size:1.15rem;margin:0 0 12px;line-height:1.3}
+  fieldset{border:0;padding:0;margin:0}
+  legend{padding:0;margin:0 0 10px;font-weight:500}
+  .opt{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s}
+  .opt:hover{border-color:#9fb3c2}
+  .opt input{margin-top:4px;accent-color:var(--accent);width:18px;height:18px;flex:0 0 auto}
+  .opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+  .opt.is-right,.opt.is-right:has(input:checked){border-color:var(--ok);background:var(--ok-soft)}
+  .opt.is-wrong,.opt.is-wrong:has(input:checked){border-color:var(--err);background:var(--err-soft)}
+  .opt .mark{margin-left:auto;font-weight:700;font-size:.85rem;white-space:nowrap}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  button{font:inherit}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:11px 20px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;transition:filter .15s,transform .05s}
+  .btn:hover{filter:brightness(1.08)}.btn:active{transform:translateY(1px)}
+  .btn[disabled]{background:#b8c4cc;cursor:not-allowed;filter:none}
+  .btn.ghost{background:transparent;color:var(--accent-ink);box-shadow:inset 0 0 0 1.5px var(--accent)}
+  .btn svg{width:16px;height:16px}
+  .feedback{margin-top:14px;border-radius:var(--radius-sm);padding:14px 16px;display:none}
+  .feedback.show{display:block}
+  .feedback.good{background:var(--ok-soft)}
+  .feedback.bad{background:#fff3df}
+  .feedback h3{font-size:1rem;margin:0 0 4px}
+  .feedback p{margin:0}
+  .feedback .from{margin-top:8px;font-size:.88rem;color:var(--muted)}
+  .feedback .from b{color:var(--ink)}
+
+  /* ---------- Explorer ---------- */
+  .tree{list-style:none;margin:0;padding:10px 8px 12px}
+  .tree ul{list-style:none;margin:0;padding:0 0 0 20px}
+  .node{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:6px 8px;font-family:var(--mono);font-size:.9rem;color:var(--ink);cursor:pointer}
+  .node:hover{background:#f1f5f8}
+  .node[aria-pressed="true"]{background:#e8eef4}
+  .node svg{width:18px;height:18px;flex:0 0 auto}
+  .node .badge{margin-left:auto;font-family:var(--font);font-size:.7rem;font-weight:700;border-radius:999px;padding:1px 8px}
+  .badge.new{background:var(--accent-soft);color:var(--accent-ink)}
+  .badge.changed{background:#fff0cc;color:#7a5200}
+  .appear{animation:pop .45s ease-out}
+  @keyframes pop{0%{opacity:0;transform:translateY(-4px) scale(.98);background:#fff7e0}60%{opacity:1;background:#fff7e0}100%{transform:none;background:transparent}}
+  .viewer{border-top:1px solid var(--line);padding:12px 16px 14px}
+  .viewer .vh{font-size:.78rem;color:var(--muted);margin:0 0 6px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  .viewer pre{margin:0;font-family:var(--mono);font-size:.88rem;background:#f6f8fa;border-radius:8px;padding:10px 12px;white-space:pre-wrap;min-height:2.6em}
+  .viewer .empty{color:var(--muted);font-style:italic;font-family:var(--font)}
+
+  /* ---------- Terminal ---------- */
+  .term{background:var(--term-bg);color:var(--term-ink);margin-top:20px}
+  .term .panel-h{color:var(--term-dim);border-color:#23364a}
+  .status{margin-left:auto;display:inline-flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-weight:500;font-size:.78rem;color:var(--term-dim)}
+  .status .led{width:8px;height:8px;border-radius:50%;background:#58c26b}
+  .status.busy{color:#ffd27a}.status.busy .led{background:#ffb020;animation:blink .5s infinite alternate}
+  @keyframes blink{to{opacity:.3}}
+  .term pre{margin:0;padding:14px 16px 16px;font-family:var(--mono);font-size:.84rem;line-height:1.55;white-space:pre-wrap;word-break:break-word;min-height:120px;max-height:320px;overflow:auto}
+  .term .p{color:var(--term-prompt)}.term .d{color:var(--term-dim)}.term .e{color:var(--term-err)}
+
+  /* ---------- Finish ---------- */
+  .finish{display:none;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px 28px;margin-top:20px}
+  .finish.show{display:block}
+  .finish h2{margin:0 0 6px}
+  .takeaways{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:16px 0 18px;padding:0;list-style:none}
+  @media (max-width:760px){.takeaways{grid-template-columns:1fr}}
+  .takeaways li{border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:14px}
+  .takeaways svg{width:28px;height:28px;margin-bottom:6px}
+  .takeaways b{display:block;margin-bottom:2px}
+  .takeaways span{color:var(--muted);font-size:.93rem}
+  .score{font-weight:700;color:var(--accent-ink)}
+
+  /* ---------- Part B: run it for real ---------- */
+  .partb{margin-top:28px}
+  .partb[hidden]{display:none}
+  .partb-head{display:flex;gap:20px;align-items:center;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 26px;border-left:6px solid var(--accent)}
+  .partb-head h2{margin:0 0 4px;font-size:1.35rem}
+  .partb-head p{margin:0;color:var(--muted)}
+  .partb-head svg{flex:0 0 auto;width:120px;height:auto}
+  @media (max-width:640px){.partb-head{flex-direction:column;align-items:flex-start}.partb-head svg{width:100px}}
+  .tasks{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:16px}
+  .task{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px;display:grid;grid-template-columns:44px minmax(0,1fr);gap:16px}
+  .task.locked{opacity:.55}
+  .task.locked .task-body{pointer-events:none}
+  .num{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--accent-soft);color:var(--accent-ink);font-size:1.1rem}
+  .task.done .num{background:var(--accent);color:#fff}
+  .task h3{margin:6px 0 8px;font-size:1.08rem}
+  .task ol.how{margin:0 0 12px;padding-left:20px}
+  .task ol.how li{margin-bottom:4px}
+  .snippet{position:relative;background:var(--term-bg);color:var(--term-ink);border-radius:var(--radius-sm);margin:0 0 14px}
+  .snippet pre{margin:0;padding:14px 16px;padding-right:88px;font-family:var(--mono);font-size:.86rem;white-space:pre-wrap;word-break:break-word}
+  .copy{position:absolute;top:8px;right:8px;border:0;border-radius:999px;padding:6px 12px;font-size:.78rem;font-weight:700;background:#23364a;color:#d6e2ee;cursor:pointer}
+  .copy:hover{background:#2f4760}
+  .field label{display:block;font-weight:700;margin-bottom:6px}
+  .field .help{display:block;font-weight:400;color:var(--muted);font-size:.9rem;margin-top:2px}
+  .field input{width:100%;font:inherit;font-family:var(--mono);font-size:.92rem;padding:11px 12px;border:1.5px solid #9fb3c2;border-radius:var(--radius-sm);background:#fff;color:var(--ink)}
+  .field input:focus-visible{border-color:var(--focus)}
+  .field input[aria-invalid="true"]{border-color:var(--err)}
+  .kbd{font-family:var(--mono);background:#eef2f5;border-radius:6px;padding:1px 6px;font-size:.9em}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="brandbar">
+    <svg viewBox="0 0 120 48" width="100" height="40" role="img" aria-label="wawiwa"><rect x="0" y="0" width="120" height="34" rx="2" fill="#EE3124"/><path d="M26 33 L46 33 L26 47 Z" fill="#EE3124"/><text x="60" y="25" text-anchor="middle" font-family="Roboto, sans-serif" font-weight="800" font-size="23" fill="#fff" letter-spacing="0">wawiwa</text></svg>
+    <div class="brandline"><span class="bk">AI Full-Stack Developer · Node.js · Self-study 15</span><span class="bt">Synchronous File System Operations</span></div>
+  </div>
+
+  <header class="hero">
+    <div>
+      <h1>File Lab</h1>
+      <p class="lead"><b>Part A:</b> step through a script line by line, like a debugger, and predict what each line does to your project folder. <b>Part B:</b> run the same code in Cursor and check your results.</p>
+    </div>
+    <svg viewBox="0 0 200 140" aria-hidden="true" focusable="false">
+      <rect x="18" y="30" width="118" height="84" rx="10" fill="#f3c46b"/>
+      <path d="M18 42a10 10 0 0 1 10-10h32l10 10h56a10 10 0 0 1 10 10v8H18z" fill="#e2a336"/>
+      <rect x="18" y="52" width="118" height="62" rx="10" fill="#f0b64e"/>
+      <g transform="translate(72 10)">
+        <path d="M0 8a8 8 0 0 1 8-8h38l18 18v58a8 8 0 0 1-8 8H8a8 8 0 0 1-8-8z" fill="#fff" stroke="#5b7fa6" stroke-width="2.5"/>
+        <path d="M46 0v12a6 6 0 0 0 6 6h12" fill="none" stroke="#5b7fa6" stroke-width="2.5"/>
+        <rect x="11" y="30" width="34" height="5" rx="2.5" fill="#a9bdd3"/>
+        <rect x="11" y="42" width="42" height="5" rx="2.5" fill="#a9bdd3"/>
+        <rect x="11" y="54" width="26" height="5" rx="2.5" fill="#a9bdd3"/>
+      </g>
+      <g transform="translate(112 74)">
+        <rect width="80" height="54" rx="9" fill="#0f1b29"/>
+        <circle cx="12" cy="11" r="3" fill="#ff8a80"/><circle cx="22" cy="11" r="3" fill="#ffd27a"/><circle cx="32" cy="11" r="3" fill="#7fdc86"/>
+        <path d="M12 28l8 6-8 6" fill="none" stroke="#7fdc86" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="26" y="38" width="22" height="4" rx="2" fill="#d6e2ee"/>
+      </g>
+    </svg>
+  </header>
+
+  <div class="progress" aria-hidden="true">
+    <ol class="dots" id="dots"></ol>
+    <p id="progressText"></p>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: script + prediction -->
+    <section class="panel" aria-labelledby="codeTitle">
+      <div class="panel-h" id="codeTitle">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1h7l3 3v11H3z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        index.js
+      </div>
+      <ol class="code" id="code" aria-label="The script, line by line"></ol>
+
+      <div class="predict" id="predict">
+        <p class="step-label" id="stepLabel"></p>
+        <h2 id="qTitle" tabindex="-1"></h2>
+        <fieldset>
+          <legend class="sr-only" id="qLegend"></legend>
+          <div id="options"></div>
+        </fieldset>
+        <div class="actions">
+          <button class="btn" id="runBtn" type="button" disabled>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>
+            Run this line
+          </button>
+          <button class="btn" id="nextBtn" type="button" hidden>Next line</button>
+        </div>
+        <div class="feedback" id="feedback" role="status" aria-live="polite" tabindex="-1"></div>
+      </div>
+    </section>
+
+    <!-- RIGHT: explorer + terminal -->
+    <div>
+      <section class="panel" aria-labelledby="exTitle">
+        <div class="panel-h" id="exTitle">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 3h5l1.5 1.5H15V13H1z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          Project folder
+        </div>
+        <ul class="tree" id="tree" aria-label="Project folder. Select a file to see what is inside."></ul>
+        <div class="viewer">
+          <p class="vh" id="viewerTitle">Select a file</p>
+          <pre id="viewer" aria-live="polite"><span class="empty">Nothing selected</span></pre>
+        </div>
+      </section>
+
+      <section class="panel term" aria-labelledby="termTitle">
+        <div class="panel-h" id="termTitle">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4l4 4-4 4M8 12h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Terminal
+          <span class="status" id="status"><span class="led"></span><span id="statusText">Node: idle</span></span>
+        </div>
+        <pre id="term" role="log" aria-live="polite" aria-label="Terminal output"></pre>
+      </section>
+    </div>
+  </div>
+
+  <section class="partb" id="partB" hidden aria-labelledby="partBTitle">
+    <div class="partb-head">
+      <svg viewBox="0 0 140 100" aria-hidden="true" focusable="false">
+        <rect x="14" y="8" width="112" height="72" rx="8" fill="#0f1b29"/>
+        <rect x="14" y="8" width="112" height="14" rx="8" fill="#23364a"/>
+        <circle cx="25" cy="15" r="2.6" fill="#ff8a80"/><circle cx="33" cy="15" r="2.6" fill="#ffd27a"/><circle cx="41" cy="15" r="2.6" fill="#7fdc86"/>
+        <rect x="22" y="30" width="26" height="42" rx="3" fill="#18293b"/>
+        <rect x="26" y="36" width="16" height="3" rx="1.5" fill="#e2a336"/><rect x="30" y="44" width="14" height="3" rx="1.5" fill="#8aa0b6"/><rect x="26" y="52" width="16" height="3" rx="1.5" fill="#e9d44d"/>
+        <path d="M58 38l6 4-6 4" fill="none" stroke="#7fdc86" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="68" y="40" width="40" height="3.5" rx="1.75" fill="#d6e2ee"/>
+        <rect x="58" y="54" width="54" height="3.5" rx="1.75" fill="#ff8a80"/>
+        <rect x="58" y="62" width="36" height="3.5" rx="1.75" fill="#8aa0b6"/>
+        <rect x="4" y="80" width="132" height="8" rx="4" fill="#b8c4cc"/>
+      </svg>
+      <div>
+        <p class="kicker">Part B</p>
+        <h2 id="partBTitle" tabindex="-1">Now run it for real</h2>
+        <p>Same code, your computer. Do each task in Cursor, then type what you see. Work in a new, empty folder: these scripts create real files.</p>
+      </div>
+    </div>
+    <ol class="tasks" id="tasks"></ol>
+  </section>
+
+  <section class="finish" id="finish" aria-labelledby="finishTitle">
+    <h2 id="finishTitle" tabindex="-1">What you just saw</h2>
+    <p>You predicted <span class="score" id="score"></span> lines right, and you ran the code yourself. Here is what to take back to the lesson:</p>
+    <ul class="takeaways">
+      <li>
+        <svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 8a3 3 0 0 1 3-3h6l2.5 2.5H22a3 3 0 0 1 3 3V20a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" fill="#f0b64e"/></svg>
+        <b><code>mkdirSync</code> creates a directory</b>
+        <span>It throws an error if the directory exists, and the script stops there.</span>
+      </li>
+      <li>
+        <svg viewBox="0 0 28 28" aria-hidden="true"><path d="M7 3h10l5 5v17H7z" fill="#fff" stroke="#5b7fa6" stroke-width="2"/><path d="M11 14h8M11 18h6" stroke="#5b7fa6" stroke-width="2" stroke-linecap="round"/></svg>
+        <b><code>writeFileSync</code> creates or overrides</b>
+        <span>It creates the file if it does not exist, and replaces all its content if it does.</span>
+      </li>
+      <li>
+        <svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="10" fill="none" stroke="#2d7a31" stroke-width="2.5"/><path d="M14 8v6l4 3" fill="none" stroke="#2d7a31" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <b>Every Sync call makes Node wait</b>
+        <span>Nothing else runs until it finishes. That is what "blocks the event loop" means. You will see why it matters later in this self-study.</span>
+      </li>
+    </ul>
+    <div class="actions">
+      <button class="btn ghost" id="restartBtn" type="button">Start over</button>
+    </div>
+    <p style="margin:14px 0 0;color:var(--muted)">Done? Continue with the lesson below this activity.</p>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  /* The script is exactly the Word lesson's code for sections 2-3, plus two experiment lines
+     that show the lesson's own notes ("Overrides file if exists", "Throws error if directory exists"). */
+  var LINES = [
+    {html:'<span class="kw">const</span> fs = <span class="fn">require</span>(<span class="str">"fs"</span>);'},
+    {html:'fs.<span class="fn">mkdirSync</span>(<span class="str">"data"</span>);'},
+    {html:'fs.<span class="fn">writeFileSync</span>(<span class="str">"data/info.txt"</span>, <span class="str">"Hello FS"</span>);'},
+    {html:'fs.<span class="fn">writeFileSync</span>(<span class="str">"data/info.txt"</span>, <span class="str">"Hello again"</span>);', tag:'Experiment'},
+    {html:'fs.<span class="fn">mkdirSync</span>(<span class="str">"data"</span>);', tag:'Experiment'}
+  ];
+
+  var STEPS = [
+    {
+      q:'What changes in your project folder when this line runs?',
+      opts:[
+        {t:'Nothing. <code>fs</code> is built into Node, so it just loads.', ok:true},
+        {t:'A new folder named <code>fs</code> appears.'},
+        {t:'Node downloads <code>fs</code> into <code>node_modules</code>.'}
+      ],
+      good:'Right. Nothing on disk changes.',
+      bad:'Not quite. Nothing on disk changes.',
+      why:'<code>fs</code> is a core module, like you saw in class in the Core Modules lesson: no install and no <code>node_modules</code>. The line only gives your script access to the file system.',
+      from:'Node provides: Sync functions, Async functions. In this lesson: sync only.',
+      term:[], apply:function(s){}
+    },
+    {
+      q:'What happens when this line runs?',
+      opts:[
+        {t:'A folder named <code>data</code> appears.', ok:true},
+        {t:'A file named <code>data</code> appears.'},
+        {t:'Nothing yet. The folder appears only when you write a file into it.'}
+      ],
+      good:'Right. The folder is created at once.',
+      bad:'Not quite. The folder is created at once.',
+      why:'<code>mkdirSync</code> creates the directory, and Node waits until it is done before moving to the next line. Watch the status light in the terminal: that short wait is what blocks the event loop.',
+      from:'Notes: Throws error if directory exists. Blocks the event loop.',
+      term:[], apply:function(s){ s.data=true; s.fresh='data'; }
+    },
+    {
+      q:'<code>info.txt</code> does not exist yet. What happens?',
+      opts:[
+        {t:'An error. The file has to exist before you can write to it.'},
+        {t:'Node creates <code>info.txt</code> inside <code>data</code>, with the text <code>Hello FS</code>.', ok:true},
+        {t:'Node creates an empty <code>info.txt</code>. You add the text in a second step.'}
+      ],
+      good:'Right. One line creates the file and writes to it.',
+      bad:'Not quite. One line creates the file and writes to it.',
+      why:'If the file is missing, <code>writeFileSync</code> creates it and writes the text in the same call. Select <code>info.txt</code> in the Explorer to see what is inside.',
+      from:'Behavior: Creates file if not exists.',
+      term:[], apply:function(s){ s.file='Hello FS'; s.fresh='info'; s.mark='new'; }
+    },
+    {
+      q:'Same file, new text. What is in <code>info.txt</code> now?',
+      opts:[
+        {t:'Two lines: <code>Hello FS</code>, then <code>Hello again</code>.'},
+        {t:'Only <code>Hello again</code>.', ok:true},
+        {t:'An error, because the file already exists.'}
+      ],
+      good:'Right. The old text is gone.',
+      bad:'Not quite. The old text is gone.',
+      why:'<code>writeFileSync</code> replaces everything in the file. To add text without losing what is there, you will use <code>appendFileSync</code> in the next section.',
+      from:'Behavior: Overrides file if exists.',
+      term:[], apply:function(s){ s.file='Hello again'; s.fresh='info'; s.mark='changed'; }
+    },
+    {
+      q:'<code>data</code> already exists. What happens when you create it again?',
+      opts:[
+        {t:'Nothing. Node sees the folder and skips the line.'},
+        {t:'Node creates a second folder, <code>data (1)</code>.'},
+        {t:'Node throws an error and the script stops.', ok:true}
+      ],
+      good:'Right. Node throws an error and stops.',
+      bad:'Not quite. Node throws an error and stops.',
+      why:'Read the terminal: <code>EEXIST: file already exists</code>. The script crashed on this line, so anything after it would never run. Remember this error. You will meet it again in the practice.',
+      from:'Notes: Throws error if directory exists.',
+      crash:true,
+      term:[
+        '<span class="e">node:fs:1370</span>',
+        '<span class="d">  const result = binding.mkdir(</span>',
+        '<span class="d">                         ^</span>',
+        '',
+        '<span class="e">Error: EEXIST: file already exists, mkdir \'data\'</span>',
+        '<span class="d">    at Object.mkdirSync (node:fs:1370:26)</span>',
+        '<span class="d">    at Object.&lt;anonymous&gt; (index.js:5:4)</span>',
+        '<span class="d">    ...</span>',
+        '<span class="d">  code: \'EEXIST\',</span>',
+        '<span class="d">  syscall: \'mkdir\',</span>',
+        '<span class="d">  path: \'data\'</span>',
+        '<span class="d">}</span>'
+      ],
+      apply:function(s){}
+    }
+  ];
+
+  /* ---------- Part B: real runs in Cursor. Expected values verified on Node 22 (same messages on Windows). ---------- */
+  function norm(v){ return String(v||'').trim().replace(/^["'`]+|["'`]+$/g,'').replace(/\s+/g,' ').toLowerCase(); }
+  var CWD_HINT = 'Node could not find the path. Make sure your terminal is inside your <code>fs-lab</code> folder (run <span class="kbd">cd fs-lab</span>), then run again. Paths like <code>"data"</code> start from the folder you run the command in.';
+
+  var TASKS = [
+    {
+      title:'Run lines 1 to 3',
+      how:['Create a new, empty folder named <code>fs-lab</code> and open it in Cursor.',
+           'Create a file named <code>index.js</code> and paste the code below. Save it.',
+           'In Cursor\'s terminal, run <span class="kbd">node index.js</span>',
+           'Open <code>data/info.txt</code> in the Explorer.'],
+      code:'const fs = require("fs");\nfs.mkdirSync("data");\nfs.writeFileSync("data/info.txt", "Hello FS");',
+      label:'What does data/info.txt say?', help:'Type the text exactly as you see it in the file.',
+      check:function(v){
+        var n = norm(v);
+        if (n==='hello fs') return {ok:true, msg:'Right. The script created the folder and the file in one run.', from:'Creates file if not exists.'};
+        if (n.indexOf('enoent')>-1) return {msg:CWD_HINT};
+        if (n.indexOf('eexist')>-1) return {msg:'There is already a <code>data</code> folder here. Start from an empty folder, or delete <code>data</code> and run again.'};
+        if (n==='hello again') return {msg:'That is the text from the experiment line. For this task, paste only lines 1 to 3.'};
+        if (n==='') return {msg:'Type what you see inside the file. If you cannot find <code>data/info.txt</code>, check that the script ran without errors.'};
+        return {msg:'Not what the file should say. Open <code>data/info.txt</code> again and compare it with line 3 of the code.'};
+      }
+    },
+    {
+      title:'Add line 4 and run again',
+      how:['Add this line at the end of <code>index.js</code> and save.',
+           'Run <span class="kbd">node index.js</span> again, without deleting anything.',
+           'Read the terminal output. Find the line that starts with <code>Error:</code>'],
+      code:'fs.writeFileSync("data/info.txt", "Hello again");',
+      label:'Paste the line that starts with Error:', help:'Copy it from the terminal. The first lines of the output show where the error happened, so look a little further down.',
+      check:function(v){
+        var n = norm(v);
+        if (n.indexOf('eexist')>-1) return {ok:true, msg:'Right: <code>EEXIST: file already exists, mkdir \'data\'</code>. Line 2 tried to create <code>data</code> again, and the script stopped right there. Line 4 never ran.', from:'Throws error if directory exists.'};
+        if (n.indexOf('node:fs')===0) return {msg:'That line shows where in Node the error happened. Look a few lines down for the one that starts with <code>Error:</code>'};
+        if (n.indexOf('enoent')>-1) return {msg:CWD_HINT};
+        if (n==='') return {msg:'Did the script finish with no error? Check that lines 1 to 3 are still in the file. Line 2 runs again, and <code>data</code> already exists.'};
+        return {msg:'That does not look like the error line. Run the script again and copy the line that starts with <code>Error:</code>'};
+      }
+    },
+    {
+      title:'Clear the way and run once more',
+      how:['In Cursor\'s Explorer, delete the <code>data</code> folder (right-click, Delete).',
+           'Run <span class="kbd">node index.js</span> again.',
+           'Open <code>data/info.txt</code>.'],
+      code:null,
+      label:'What does data/info.txt say now?', help:'All four lines ran this time.',
+      check:function(v){
+        var n = norm(v);
+        if (n==='hello again') return {ok:true, msg:'Right. Line 3 wrote <code>Hello FS</code>, then line 4 replaced it. Nothing of the first text is left.', from:'Overrides file if exists.'};
+        if (n==='hello fs') return {msg:'Line 4 should have changed the file. Did you save <code>index.js</code> after adding it?'};
+        if (n.indexOf('hello fs')>-1 && n.indexOf('hello again')>-1) return {msg:'Look again. <code>writeFileSync</code> does not add to a file.'};
+        if (n.indexOf('eexist')>-1) return {msg:'The <code>data</code> folder is still there. Delete it first, then run again.'};
+        if (n.indexOf('enoent')>-1) return {msg:CWD_HINT};
+        return {msg:'Not what the file should say. Open <code>data/info.txt</code> again and compare it with the last line of your code.'};
+      }
+    }
+  ];
+
+  var $ = function(id){ return document.getElementById(id); };
+  var state, step, answered, correct, selectedFile, task, inB, answers = [], okFb = [];
+  var TOTAL = STEPS.length + TASKS.length;
+
+  function reset(){
+    state = {data:false, file:null, fresh:null, mark:null};
+    step = 0; answered = false; correct = 0; selectedFile = null; task = 0; inB = false; answers = []; okFb = [];
+    $('term').innerHTML = '<span class="p">$</span> node index.js <span class="d">(stepping line by line)</span>';
+    $('finish').classList.remove('show');
+    $('partB').hidden = true;
+    $('predict').hidden = false;
+    renderCode(); renderTree(); renderViewer(); renderStep(); renderProgress();
+  }
+
+  function renderProgress(){
+    var d = $('dots'); d.innerHTML = '';
+    var doneCount = inB ? STEPS.length + task : step + (answered ? 1 : 0);
+    var nowIdx = inB ? STEPS.length + task : step;
+    for (var i=0;i<TOTAL;i++){
+      var li = document.createElement('li');
+      if (i < doneCount) li.className = 'done';
+      else if (i===nowIdx) li.className = 'now';
+      d.appendChild(li);
+    }
+    $('progressText').textContent = inB
+      ? 'Part B · Task ' + Math.min(task+1, TASKS.length) + ' of ' + TASKS.length
+      : 'Part A · Line ' + Math.min(step+1, STEPS.length) + ' of ' + STEPS.length;
+  }
+
+  function copyCode(btn, text, pre){
+    var done = function(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1600); };
+    var fallback = function(){
+      var r = document.createRange(); r.selectNodeContents(pre);
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      btn.textContent = 'Press Ctrl+C';
+    };
+    try {
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback);
+      else fallback();
+    } catch(e){ fallback(); }
+  }
+
+  function renderTasks(){
+    var ol = $('tasks'); ol.innerHTML = '';
+    TASKS.forEach(function(t,i){
+      var li = document.createElement('li');
+      li.className = 'task' + (i < task ? ' done' : '') + (i > task ? ' locked' : '');
+      if (i > task) li.setAttribute('aria-disabled','true');
+      var id = 'ans' + i;
+      li.innerHTML =
+        '<div class="num" aria-hidden="true">' + (i < task ? '✓' : (i+1)) + '</div>' +
+        '<div class="task-body">' +
+          '<h3 id="th' + i + '" tabindex="-1">Task ' + (i+1) + ': ' + t.title + (i > task ? ' <span class="sr-only">(locked until the previous task is done)</span>' : '') + '</h3>' +
+          '<ol class="how">' + t.how.map(function(h){ return '<li>' + h + '</li>'; }).join('') + '</ol>' +
+          (t.code ? '<div class="snippet"><pre id="code' + i + '">' + t.code.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</pre><button type="button" class="copy" data-i="' + i + '" aria-label="Copy the code for task ' + (i+1) + '">Copy</button></div>' : '') +
+          '<div class="field"><label for="' + id + '">' + t.label + '<span class="help" id="' + id + 'h">' + t.help + '</span></label>' +
+          '<input type="text" id="' + id + '" autocomplete="off" spellcheck="false" aria-describedby="' + id + 'h"' + (i !== task ? ' disabled' : '') + '></div>' +
+          (i < task ? '' : '<div class="actions"><button type="button" class="btn" data-check="' + i + '"' + (i !== task ? ' disabled' : '') + '>Check</button></div>') +
+          '<div class="feedback' + (i < task ? ' show good' : '') + '" id="fb' + i + '" role="status" aria-live="polite">' + (i < task ? okFb[i] : '') + '</div>' +
+        '</div>';
+      ol.appendChild(li);
+      if (answers[i] !== undefined) li.querySelector('input').value = answers[i];
+    });
+    Array.prototype.forEach.call(ol.querySelectorAll('.copy'), function(b){
+      var i = +b.getAttribute('data-i');
+      b.addEventListener('click', function(){ copyCode(b, TASKS[i].code, $('code'+i)); });
+    });
+    Array.prototype.forEach.call(ol.querySelectorAll('[data-check]'), function(b){
+      b.addEventListener('click', function(){ checkTask(+b.getAttribute('data-check')); });
+    });
+    Array.prototype.forEach.call(ol.querySelectorAll('input'), function(inp,i){
+      inp.addEventListener('keydown', function(e){ if (e.key==='Enter') checkTask(i); });
+    });
+  }
+
+  function checkTask(i){
+    if (i !== task) return;
+    var inp = $('ans'+i), fb = $('fb'+i), r = TASKS[i].check(inp.value);
+    fb.className = 'feedback show ' + (r.ok ? 'good' : 'bad');
+    if (r.ok){
+      inp.setAttribute('aria-invalid','false');
+      answers[i] = inp.value;
+      okFb[i] = '<h3>Checked</h3><p>' + r.msg + '</p><p class="from"><b>From the lesson:</b> ' + r.from + '</p>';
+      fb.innerHTML = '<h3>Checked</h3><p>' + r.msg + '</p><p class="from"><b>From the lesson:</b> ' + r.from + '</p>' +
+        '<div class="actions"><button type="button" class="btn" id="goNext' + i + '">' + (i < TASKS.length-1 ? 'Next task' : 'See what you learned') + '</button></div>';
+      $('goNext'+i).addEventListener('click', function(){
+        task++; renderProgress();
+        if (task < TASKS.length){ renderTasks(); $('th'+task).focus(); }
+        else { renderTasks(); showFinish(); }
+      });
+      $('goNext'+i).focus();
+    } else {
+      inp.setAttribute('aria-invalid','true');
+      fb.innerHTML = '<h3>Not yet</h3><p>' + r.msg + '</p>';
+    }
+  }
+
+  function showFinish(){
+    $('score').textContent = correct + ' of ' + STEPS.length;
+    $('finish').classList.add('show');
+    $('finishTitle').focus();
+  }
+
+  function startPartB(){
+    inB = true; task = 0;
+    $('predict').hidden = true;
+    $('partB').hidden = false;
+    renderTasks(); renderProgress();
+    $('partBTitle').focus();
+    $('partB').scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'});
+  }
+
+  function renderCode(){
+    var ol = $('code'); ol.innerHTML = '';
+    LINES.forEach(function(l,i){
+      var li = document.createElement('li');
+      li.innerHTML = '<span>' + l.html + '</span>' + (l.tag ? '<span class="tag">' + l.tag + '</span>' : '');
+      if (i < step || (i===step && answered)) li.className = (STEPS[i].crash && i===step && answered) ? 'crashed' : 'ran';
+      else if (i===step) { li.className = 'now'; li.setAttribute('aria-current','step'); }
+      ol.appendChild(li);
+      if (answers[i] !== undefined) li.querySelector('input').value = answers[i];
+    });
+  }
+
+  var ICON_FOLDER = '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M1.5 4.5a1.5 1.5 0 0 1 1.5-1.5h4l1.5 1.5H15a1.5 1.5 0 0 1 1.5 1.5v7.5A1.5 1.5 0 0 1 15 15H3a1.5 1.5 0 0 1-1.5-1.5z" fill="#e2a336"/></svg>';
+  var ICON_FILE = '<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 1.5h6.5L14 5v11.5H4z" fill="#fff" stroke="#5b7fa6" stroke-width="1.4"/><path d="M6.5 9h5M6.5 12h3.5" stroke="#5b7fa6" stroke-width="1.4" stroke-linecap="round"/></svg>';
+  var ICON_JS = '<svg viewBox="0 0 18 18" aria-hidden="true"><rect x="2" y="2" width="14" height="14" rx="3" fill="#e9d44d"/><text x="9" y="13" text-anchor="middle" font-size="7" font-weight="700" font-family="sans-serif" fill="#2b2b2b">JS</text></svg>';
+
+  function nodeBtn(key, icon, label, badge, fresh){
+    return '<li><button type="button" class="node' + (fresh ? ' appear' : '') + '" data-key="' + key + '" aria-pressed="' + (selectedFile===key) + '">' +
+      icon + '<span>' + label + '</span>' + (badge ? '<span class="badge ' + badge + '">' + (badge==='new'?'new':'changed') + '</span>' : '') + '</button>';
+  }
+
+  function renderTree(){
+    var html = '<li><div class="node" style="cursor:default">' + ICON_FOLDER + '<span>my-project</span></div><ul>';
+    if (state.data){
+      html += nodeBtn('data', ICON_FOLDER, 'data', state.fresh==='data'?'new':null, state.fresh==='data');
+      if (state.file !== null){
+        html += '<ul>' + nodeBtn('info', ICON_FILE, 'info.txt', state.fresh==='info'?state.mark:null, state.fresh==='info') + '</li></ul>';
+      }
+      html += '</li>';
+    }
+    html += nodeBtn('index', ICON_JS, 'index.js', null, false) + '</li>';
+    html += '</ul></li>';
+    $('tree').innerHTML = html;
+    Array.prototype.forEach.call($('tree').querySelectorAll('button.node'), function(b){
+      b.addEventListener('click', function(){ selectedFile = b.getAttribute('data-key'); renderTree(); renderViewer(); });
+    });
+  }
+
+  function renderViewer(){
+    var t = $('viewerTitle'), v = $('viewer');
+    if (selectedFile==='info' && state.file!==null){ t.textContent = 'data/info.txt'; v.textContent = state.file; }
+    else if (selectedFile==='data' && state.data){ t.textContent = 'data/'; v.innerHTML = state.file!==null ? 'info.txt' : '<span class="empty">Empty folder</span>'; }
+    else if (selectedFile==='index'){ t.textContent = 'index.js'; v.textContent = 'const fs = require("fs");\nfs.mkdirSync("data");\nfs.writeFileSync("data/info.txt", "Hello FS");\nfs.writeFileSync("data/info.txt", "Hello again");\nfs.mkdirSync("data");'; }
+    else { t.textContent = 'Select a file'; v.innerHTML = '<span class="empty">Nothing selected</span>'; }
+  }
+
+  function renderStep(){
+    var s = STEPS[step];
+    $('stepLabel').textContent = 'Line ' + (step+1) + ' · Predict';
+    $('qTitle').innerHTML = s.q;
+    $('qLegend').innerHTML = s.q;
+    var box = $('options'); box.innerHTML = '';
+    s.opts.forEach(function(o,i){
+      var id = 'o' + step + '_' + i;
+      var lab = document.createElement('label');
+      lab.className = 'opt'; lab.setAttribute('for', id);
+      lab.innerHTML = '<input type="radio" name="pred" id="' + id + '" value="' + i + '"><span>' + o.t + '</span>';
+      box.appendChild(lab);
+    });
+    Array.prototype.forEach.call(box.querySelectorAll('input'), function(inp){
+      inp.addEventListener('change', function(){ $('runBtn').disabled = false; });
+    });
+    $('runBtn').disabled = true; $('runBtn').hidden = false;
+    $('nextBtn').hidden = true;
+    var fb = $('feedback'); fb.className = 'feedback'; fb.innerHTML = '';
+    answered = false;
+  }
+
+  function setBusy(on){
+    var st = $('status');
+    st.classList.toggle('busy', on);
+    $('statusText').textContent = on ? 'Node: busy, waiting for the file system' : 'Node: idle';
+  }
+
+  function run(){
+    var picked = document.querySelector('input[name="pred"]:checked');
+    if (!picked) return;
+    var s = STEPS[step], choice = +picked.value, right = !!s.opts[choice].ok;
+    $('runBtn').disabled = true;
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="pred"]'), function(i){ i.disabled = true; });
+    setBusy(true);
+    var delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 750;
+    setTimeout(function(){
+      setBusy(false);
+      answered = true; if (right) correct++;
+      s.apply(state);
+      if (step===2 || step===3) selectedFile = 'info';
+      if (s.term.length) $('term').innerHTML += '\n' + s.term.join('\n');
+      else if (step>0) $('term').innerHTML += '\n<span class="d">✓ line ' + (step+1) + ' done</span>';
+      else $('term').innerHTML += '\n<span class="d">✓ line 1 done (no output)</span>';
+      if (s.crash) setTimeout(function(){ $('term').innerHTML += '\n\n<span class="d">Node.js v22</span>\n<span class="p">$</span> '; $('term').scrollTop = 1e6; }, 0);
+      $('term').scrollTop = 1e6;
+
+      // mark options
+      var labels = document.querySelectorAll('#options .opt');
+      s.opts.forEach(function(o,i){
+        if (o.ok){ labels[i].classList.add('is-right'); labels[i].insertAdjacentHTML('beforeend','<span class="mark" style="color:var(--ok)">Correct answer</span>'); }
+        else if (i===choice){ labels[i].classList.add('is-wrong'); labels[i].insertAdjacentHTML('beforeend','<span class="mark" style="color:var(--err)">Your prediction</span>'); }
+      });
+
+      var fb = $('feedback');
+      fb.className = 'feedback show ' + (right ? 'good' : 'bad');
+      fb.innerHTML = '<h3>' + (right ? s.good : s.bad) + '</h3><p>' + s.why + '</p><p class="from"><b>From the lesson:</b> ' + s.from + '</p>';
+      renderCode(); renderTree(); renderViewer(); renderProgress();
+      state.fresh = null;
+      $('runBtn').hidden = true;
+      var nb = $('nextBtn'); nb.hidden = false;
+      nb.textContent = step < STEPS.length-1 ? 'Next line' : 'Go to Part B: run it for real';
+      fb.focus();
+    }, delay);
+  }
+
+  function next(){
+    if (step < STEPS.length-1){ step++; renderCode(); renderStep(); renderProgress(); $('qTitle').focus(); }
+    else { startPartB(); }
+  }
+
+  $('runBtn').addEventListener('click', run);
+  $('nextBtn').addEventListener('click', next);
+  $('restartBtn').addEventListener('click', function(){ reset(); $('qTitle').focus(); });
+  reset();
+})();
+</script>
+</body>
+</html>
