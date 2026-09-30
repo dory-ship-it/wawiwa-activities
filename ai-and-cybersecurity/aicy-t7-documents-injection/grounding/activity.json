@@ -1,0 +1,178 @@
+{
+  "id": "aicy-t7-documents-injection",
+  "topic": "AICY60 T7 - Prompt Injection",
+  "exercise": "AICY.T7.E2 - Documents Injection",
+  "mode": "Mode A - clean design over the SME task, coach + personal path",
+  "coach_status": "AWAITING SME REVIEW - coach prompt authored by Claude 28 Sep 2026, not yet SME-approved",
+  "grounding_ref": "grounding/grounding_pack.md",
+  "source_doc": "00b - Source (from production, Sep 2026)/T7 - Prompt Injection/Practice/ - the E2 exercise is the PDF misnamed 'AICY.T7.E2 - Documents Injection - Solution.pdf'",
+  "lesson_map": {
+    "C1": "Topic 7 · Indirect prompt injection, the silent threat vector: hidden instructions in files the model reads (deck slides 28-29)",
+    "C2": "Topic 7 · Hiding the payload in a document: white-font steganography, off-page text, layered text boxes (deck slides 32-34)",
+    "C3": "Topic 7 · Images and metadata: multimodal image exploits, EXIF metadata, and why uploads strip metadata (deck slides 35-37)",
+    "C4": "Topic 7 · Consequences: poisoned resume pipelines, the summary trap, fraudulent decisions, data exfiltration (deck slides 30-31, 39-41)",
+    "C5": "Topic 7 · Mitigations: separation of API roles, double-ended guardrails, least privilege (deck slides 43-45)",
+    "C6": "Topic 7 · Practising responsibly: the injection stays in your own copy of the practice files, never in a real application or someone else’s document"
+  },
+  "rubric": [
+    {
+      "id": "r1_method",
+      "name": "Describes the hiding method",
+      "description": "Says exactly how the instruction was hidden (white font, tiny or off-page text, a layer behind an image, text in the picture, a metadata field)."
+    },
+    {
+      "id": "r2_observed",
+      "name": "Reports what the AI did",
+      "description": "Reports what the model actually returned, rather than what was expected."
+    },
+    {
+      "id": "r3_why",
+      "name": "Explains why it obeyed",
+      "description": "Explains that the model reads the file’s text as input it may follow, because instructions and data share one stream."
+    },
+    {
+      "id": "r4_impact",
+      "name": "Sees the real impact",
+      "description": "Connects it to a real pipeline, such as automated CV screening or summarising, and what a wrong decision costs."
+    },
+    {
+      "id": "r5_defence",
+      "name": "Names a defence",
+      "description": "Names what would stop it: metadata stripping, role separation, input and output guardrails, a human check on high-stakes decisions."
+    },
+    {
+      "id": "r6_scope",
+      "name": "Keeps it to the practice files",
+      "description": "Does the injection only in the provided CV and photo, never in a real application or someone else’s document."
+    }
+  ],
+  "outcome_logic": [
+    {
+      "when": "lever_used:visible_only",
+      "focus": "You only tried a visible instruction. The threat in Topic 7 is the one a human reviewer cannot see: white text, text pushed off the page, a text box behind an image. Try at least one hidden method and compare what the AI does.",
+      "review": "C2",
+      "resource": "res_owasp"
+    },
+    {
+      "when": "lever_used:no_why",
+      "focus": "You recorded what happened but not why the model obeyed. It reads everything in the file as input, and nothing tells it which text is data and which is an instruction. That missing boundary is the whole vulnerability.",
+      "review": "C1",
+      "resource": "res_owasp"
+    },
+    {
+      "when": "lever_used:no_impact",
+      "focus": "You treated it as a trick rather than a risk. The same hidden line in a real CV decides who gets an interview in an automated HR pipeline; say what a wrong yes or no costs.",
+      "review": "C4",
+      "resource": "res_owasp"
+    },
+    {
+      "when": "lever_used:exif_unexplained",
+      "focus": "You did not work out why the EXIF injection failed. Look at what happens to a photo’s metadata when it is uploaded, and why that step quietly neutralises the attack.",
+      "review": "C3",
+      "resource": null
+    },
+    {
+      "when": "lever_used:no_defence",
+      "focus": "You did not name a defence. For each method that worked, say what would have stopped it: stripping metadata and hidden text, separating the document from the instructions, checking the output, keeping a human on high-stakes decisions.",
+      "review": "C5",
+      "resource": "res_owasp"
+    },
+    {
+      "when": "lever_used:scope_drift",
+      "focus": "Keep the injection inside your own copy of the practice files. Putting hidden instructions in a real application, or in someone else’s document, is not practice.",
+      "review": "C6",
+      "resource": null
+    },
+    {
+      "when": "bridge",
+      "focus": "You have now seen injection from both doors, typed into the chat and hidden in a file. The Topic 7 mitigations are the same for both: separate the roles, guard the input and the output, and give the model as little power as the job needs.",
+      "review": "C5"
+    }
+  ],
+  "resources_pool": {
+    "res_owasp": {
+      "title": "OWASP Top 10 for LLM Applications: Prompt Injection",
+      "source": "OWASP",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+    }
+  },
+  "tasks": [
+    {
+      "id": "a1",
+      "instr": "Take the attached CV and ask your preferred AI to summarize it.",
+      "links": [
+        {
+          "label": "Alexander Wright CV.docx",
+          "url": "Alexander Wright CV.docx"
+        },
+        {
+          "label": "ChatGPT",
+          "url": "https://chatgpt.com"
+        }
+      ]
+    },
+    {
+      "id": "a2",
+      "instr": "Add an instruction in the beginning of the doc to give the response in rhymes. Ask AI to summarize it again.",
+      "links": [],
+      "answer": "What did the AI do with your instruction?"
+    },
+    {
+      "id": "a3",
+      "instr": "Make the instruction hidden from humans but visible to AI – use white text font. Ask AI to summarize it again.",
+      "links": [],
+      "answer": "Did the hidden instruction still work? What came back?"
+    },
+    {
+      "id": "a4",
+      "instr": "Find another method to hide instructions in this doc. Ask AI to summarize it again and make sure you get the response in rhymes.",
+      "links": [],
+      "answer": "The method you used, and whether the rhymes came back."
+    },
+    {
+      "id": "a5",
+      "instr": "Ask your AI model to evaluate if this candidate is good for a position as a Lead Developer (definitely yes!). Next ask it if it’s a good candidate for a SOC Analyst position (probably not!).",
+      "links": [],
+      "answer": "What the AI concluded for each position."
+    },
+    {
+      "id": "a6",
+      "instr": "Inject a prompt into the CV that will convince the AI that this CV is the perfect one for any and all positions, and try to turn the AI evaluation for a mechanic position into a positive response.",
+      "links": [],
+      "answer": "How you hid the injection, and what the AI said about the mechanic position."
+    },
+    {
+      "id": "a7",
+      "instr": "Now let’s do some injections with a photo: take funcat.jpg and ask an AI to describe it for you.",
+      "links": [
+        {
+          "label": "funcat.jpg",
+          "url": "funcat.jpg"
+        }
+      ]
+    },
+    {
+      "id": "a8",
+      "instr": "Now add some text to the photo, and try to make it hidden to humans.",
+      "links": [],
+      "answer": "How you hid the text, and what the AI said about the photo this time."
+    },
+    {
+      "id": "a9",
+      "instr": "Try again while using another language.",
+      "links": [],
+      "answer": "Did the other language change the result?"
+    },
+    {
+      "id": "a10",
+      "instr": "Next, try to make the same rhyming injection but through the EXIF metadata (google how to edit it!).",
+      "links": []
+    },
+    {
+      "id": "a11",
+      "instr": "Why did the EXIF method not work?",
+      "links": [],
+      "answer": "Your explanation."
+    }
+  ]
+}

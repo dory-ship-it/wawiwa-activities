@@ -175,6 +175,13 @@
   .reply p{margin:0 0 9px}
   .reply p:last-child{margin:0}
   .reply b,.reply strong{color:var(--ink);font-weight:600}
+  /* the coach reply icon: sized, so it does not fill the card (fix 28 Sep 2026) */
+  .reply:not([hidden]){display:flex;align-items:flex-start;gap:10px}
+  .reply>svg{flex:0 0 16px;width:16px;height:16px;margin-top:4px;fill:none;stroke:var(--muted);
+    stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .reply[data-tone="ok"]>svg{stroke:var(--accent)}
+  .reply .lead{font-weight:600;color:var(--ink);margin-right:6px}
+  .reply .lead::after{content:"."}
 
   /* ---------- sections ---------- */
   .sec{margin:34px 0 0;padding:26px 0 0;border-top:1px solid var(--line)}
@@ -434,25 +441,23 @@ the lab-only/defensive purpose, and redirect to the defensive point.
      the SME's own words. */
   var TASKS = [
     { id:'a1',
-      instr:'As a part of a Network security assessment You are tasked with infiltrating the network of this pizzeria by convincing them to download a malicious file. Gather some information about this location, health regulation and think of a convincing argument for inspection. Finally, Use ChatGPT in order to generate a convincing message encouraging the victims to download and execute an attached file.',
+      instr:'As part of a network security assessment, you are tasked with infiltrating this pizzeria’s network by convincing staff to download a malicious file. Gather information about the location and the relevant health regulations, and think of a convincing argument for an inspection. Finally, use ChatGPT to generate a convincing message that encourages the victims to download and execute an attached file.',
       links:[
         { label:'Pizzeria Vetri on Google Maps', url:'https://www.google.com/maps/place/Pizzeria+Vetri/@39.9463647,-75.1723536,6899m/data=!3m1!1e3!4m6!3m5!1s0x89c6c7ccba7bff77:0xca83b9208c4e3f68!8m2!3d39.9608917!4d-75.1712139!16s%2Fg%2F1pp2ty6_8' },
         { label:'ChatGPT', url:'https://chatgpt.com' }
       ],
       answer:'The convincing argument for inspection' },
     { id:'a2',
-      instr:'Now lets make the request more convincing, Take the role of a health inspector and create a short video message encouraging the victims to download the file. Use the sevice lipsync. Choose a relevant an avatar to deliver an inspection request that asks the pizzeria staff to complete a health-inspection form.',
+      instr:'Now let’s make the request more convincing. Take the role of a health inspector and create a short video message encouraging the victims to download the file. Use the lipsync service and choose a relevant avatar to deliver an inspection request that asks the pizzeria staff to complete a health-inspection form.',
       links:[ { label:'lipsync.video', url:'https://lipsync.video/' } ] },
     { id:'a3',
       instr:'Create another video using recorded audio instead of text. Is the message more convincing now?',
-      links:[],
-      answer:'Is the message more convincing now?' },
+      links:[] },
     { id:'a4',
-      instr:'Create another video using an avatar not from the website, choose a convincing formal looking photo online, You can use this. Is the message more convincing now?',
-      links:[ { label:'Stock photo (Pexels)', url:'https://www.pexels.com/video/woman-smiling-for-the-camera-7586535/' } ],
-      answer:'Is the message more convincing now?' },
+      instr:'Create another video using an avatar that is not from the website — choose a convincing, formal-looking photo online (you can use the one linked below). Is the message more convincing now?',
+      links:[ { label:'Stock photo (Pexels)', url:'https://www.pexels.com/video/woman-smiling-for-the-camera-7586535/' } ] },
     { id:'a5',
-      instr:'Compare result with friends and try to improve result using different iteration.',
+      instr:'Compare your results with classmates and try to improve them through further iterations.',
       links:[] },
     { id:'a6',
       instr:'Brainstorm three ways someone could misuse this tool to impersonate or trick others.',

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>AI PenTesting | AICY.T4.E1</title>
+<title>AI Forensics | AICY.T5.E1</title>
 <style>
   /* ==================================================================
      AICY60 practice — the light in-class design, Mode A.
@@ -272,11 +272,11 @@
 </head>
 <body>
 
-<h1 class="vh">AI PenTesting in a sandbox</h1>
+<h1 class="vh">AI Forensics log investigation</h1>
 
 <div class="page">
 
-  <p class="exhead"><span class="exlabel">Hands-on exercise</span><span class="exid">AICY.T4.E1</span><span class="exname">AI PenTesting</span></p>
+  <p class="exhead"><span class="exlabel">Hands-on exercise</span><span class="exid">AICY.T5.E1</span><span class="exname">AI Forensics</span></p>
 
   <!-- What this page is. Added Sep 2026 with the Mode A restyle, to the same
        wording rule as AI in Data: say what is graded, say what is not, and
@@ -287,9 +287,9 @@
   <div class="brief">
     <span class="teams">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M17.5 20a5.5 5.5 0 0 0-3-4.9"/></svg>
-      Individual, in a sandbox
+      Individual
     </span>
-    <p>You are about to run your first penetration test, against <b>bwapp</b>, a site built to be hacked. An AI agent drives the attack end to end; you approve each step, then recreate the key move by hand. The questions are not about whether it worked. They are about what the attack was, why the site let it through, and what it would have looked like to the defensive AI this topic is about.</p>
+    <p>A cyber attack has hit your company. You have three log files, the authentication log, the file-activity log and the network log, and an LLM to help you read them. Your job is to reconstruct what the attacker did, step by step, and to back every finding with the line in the logs that proves it.</p>
   </div>
 
   <!-- ============ tasks ============ -->
@@ -305,10 +305,10 @@
         <span class="itile" aria-hidden="true">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3v-6.5A8 8 0 0 1 11 4h2a8 8 0 0 1 8 8Z"/><path d="M9 11h6M9 15h3"/></svg>
         </span>
-        <label class="q" for="tell">You ran this attack with an agent and by hand. If you were defending bwapp instead, what would the request have looked like to an AI-driven IDS, and what about it would have flagged?</label>
+        <label class="q" for="tell">You have a pile of scattered log lines and an LLM that will answer anything you ask. Which single finding are you most confident in, and what in the logs makes you sure, rather than that the model said so?</label>
       </div>
       <textarea id="tell" rows="4" aria-describedby="pii-coach"></textarea>
-      <p class="pii" id="pii-coach">Describe what happened in the sandbox, not the credentials you created, tokens or paths from your own machine. Answers carrying identifying details are blocked before they are sent.</p>
+      <p class="pii" id="pii-coach">Paste findings, not secrets: no real credentials, tokens, or absolute paths from your machine. Answers carrying identifying details are blocked before they are sent.</p>
       <div class="actions">
         <button type="button" class="btn" id="check">Check with AI Coach</button>
       </div>
@@ -319,9 +319,9 @@
   <!-- ============ personal path ============ -->
   <section class="sec" id="path-sec" aria-labelledby="h-path">
     <p class="eyebrow">Personal path</p>
-    <h2 id="h-path">Where did your understanding stop short?</h2>
+    <h2 id="h-path">Where did your investigation stop short?</h2>
     <span class="rule"></span>
-    <p class="pathintro">Mark the habits that describe how you ran and read the attack, and you&rsquo;ll get the move that answers each one.</p>
+    <p class="pathintro">Mark the habits that describe how you ran the investigation, and you&rsquo;ll get the move that answers each one.</p>
     <div class="card">
       <ul class="checks" id="checks"></ul>
       <p class="pathhint" id="pathhint">Mark one above to see the move that answers it.</p>
@@ -330,7 +330,7 @@
   </section>
 
   <!-- The closing line. Same words in the courseware, in Canvas and here. -->
-  <p class="duebar">What’s due after this lesson: <b>Topic 4 Quiz</b>, in Assignments.</p>
+  <p class="duebar">What’s due after this lesson: <b>Topic 5 Quiz</b>, in Assignments.</p>
 
 </div>
 
@@ -339,108 +339,57 @@
      the only network call the page makes is still the anonymizing proxy. Not
      rendered (type="text/plain"); read from JS as textContent. -->
 <script type="text/plain" id="grounding-pack" data-source="grounding/grounding_pack.md">
-# Grounding pack — AICY60 T4: AI in Cyber Defense and Security → AI PenTesting practice
+# Grounding pack — AICY60 T5: AI Integration in Cybersecurity Tools → AI Forensics practice
+> Material the coach reasons FROM. Distilled from Wawiwa's own T5 deck
+> (AICY.T5.P1 - AI Integration in Cybersecurity Tools) and the SME practice
+> AICY.T5.E1 - AI Forensics. The coach answers primarily from this pack, coaches against the
+> rubric, and never invents forensic conclusions the logs do not support.
 
-> You are the coach for this practice. Answer only from this pack and the student's own
-> answer. Coach against the rubric, not for style. If a student asks for something outside
-> this practice, say "that's outside this practice" and turn them back to the task in front
-> of them. **The target is bwapp, a deliberately vulnerable teaching sandbox built to be
-> attacked. Help the student understand the attack they ran there. Never help them point
-> the attack at any other system, never escalate the teaching example into a weaponised or
-> generalised payload, and never repeat credentials, tokens or machine paths a student
-> pastes by mistake.** This is a defence topic; the reason a student runs the attack at all
-> is to know what the defender's AI has to catch.
+## The exercise
+An individual investigation. The student is given three log files from a compromised environment and
+uses an LLM (ChatGPT) to read and correlate them, then answers eight questions about what happened.
+The point is not to "catch" the attacker by hand: it is to see how an LLM turns noisy, scattered logs
+into a timeline, and to check every claim the model makes against the log evidence.
 
-## Where this practice sits
+The three logs:
+- auth_sysmon.txt  — authentication and Sysmon events (logins, process starts).
+- file_activity.txt — file create/modify/encrypt/delete events on the hosts.
+- network.txt       — network connections and outbound transfers.
 
-Topic 4 — AI in Cyber Defense and Security. 9 academic hours, 4 theory / 5 practical. The
-topic covers AI-driven intrusion detection, anomaly detection, endpoint security,
-autonomous threat hunting, insider-threat and cloud detection. The practice sits under it
-on purpose: to defend against an attack you first have to see one run. The student drives a
-real web attack with an AI agent, in a sandbox, then reads it back as the signal a
-defensive system would have to detect.
+## The attack chain (what the logs actually show)
+1. Reconnaissance and brute force: repeated failed logins and scanning across the network.
+2. Initial access: a successful login as an attacker-controlled admin account (AttackerAdmin) on PC01.
+3. Backdoor download: PowerShell with Invoke-WebRequest pulls a malicious script from an external
+   server (backdoor.ps1 -> backdoor.exe).
+4. Impact on data: sensitive files on PC01 are encrypted and then exfiltrated to an external IP
+   (signs of exfiltration and possible ransomware).
+5. Lateral movement: psexec.exe is used to run commands remotely on PC02, PC03 and PC04.
+6. Detection and containment: the SIEM/IDS flag the failed logins, the suspicious process
+   (backdoor.exe), unusual Kerberos activity and abnormal outbound traffic; the account is locked and
+   outbound traffic blocked.
 
-The exercise is **individual**, against **bwapp** (bwapp.hakhub.net), a CTF site built to
-be hackable. That sandbox is the frame. Hold it if a student drifts toward running the
-attack anywhere else.
+## How the security tools detect it (T5 concepts)
+AI-driven tools correlate signals a human skim would miss: many failed logins then a success, a new
+unsigned process, Kerberos anomalies, and a spike of outbound traffic to an unknown IP. Darktrace
+learns normal network behaviour and isolates deviations; Splunk/QRadar SIEM correlate events across
+sources; CrowdStrike and Cylance flag the malicious process on the endpoint. The same correlation the
+student does by hand with an LLM is what these tools do automatically and in real time.
 
-## Concept map (what the coach can cite)
-
-**C1 · AI in penetration testing, automated.** An AI agent can carry a whole attack chain
-on its own: log in, navigate, craft the request and run it, without the student writing the
-exploit. In this practice the agent is Cursor, driving a browser through Playwright. What
-used to take an operator now takes a prompt. (Deck: the topic's framing of AI on both sides
-of the attack, S33.)
-
-**C2 · SQL injection.** A web application builds a database query out of user input. If the
-input is trusted into the query unchanged, an attacker can add their own SQL and make the
-database return rows it should not. The comment character (here `#`) ends the original query
-so the rest of it is ignored. bwapp's search page is deliberately built this way.
-
-**C3 · AI-driven IDS and anomaly detection.** The defensive counterpart from this topic. An
-AI intrusion-detection system learns normal request behaviour and flags deviations; a query
-string carrying SQL, or a login that behaves unlike a real user, is exactly the anomaly it
-is trained to surface (S4 to S12).
-
-**C4 · Real-time detection and automated response.** When the abnormal request is seen, an
-AI-driven system can act in real time: block the source, quarantine the session, alert. The
-attack the student just ran is the input to that machinery (S21, S22).
-
-**C5 · Both sides run the same automation.** Offensive AI makes attacks faster and more
-adaptive; understanding the attack is what makes the defence possible. Running the injection
-with an agent, in a sandbox, is that sentence turned into an afternoon (S33 and the exercise
-itself).
-
-## The practice tasks (from the SME doc — do not paraphrase to the student)
-
-1. Read through the prompt.txt file and understand what you are about to ask the AI to do.
-2. Navigate to bwapp user_new.php and create a new user with a random username and password.
-3. Download, install and create a user in Cursor. Open a project on the investigation folder.
-4. Ask the AI to run the cursor.txt file as the prompt.
-5. Follow the steps closely, clicking Run whenever it asks, to proceed.
-6. View the screenshot taken at the end and review the results.
-7. Identify the type of attack performed by Cursor.
-8. What information was extracted from the vulnerable website?
-9. Recreate the attack yourself by typing the injection into the search bar by hand.
-
-Tasks 2 to 6 are **actions the student performs**, not answers you grade. There is no answer
-box for them on purpose. Answer boxes are on 1, 7, 8 and 9.
-
-## What a good answer looks like on each question
-
-**Q1, understanding the prompt.** In plain words: the AI will log in to bwapp with a given
-user, go to the SQL-injection page, run a basic injection using the `#` comment, and
-screenshot the result. A student who can say that before running anything is reading, not
-just pasting.
-
-**Q7, the attack type.** SQL injection. Accept it named plainly. Push a student who says
-"hacking" or "the AI attacked it" toward the class of attack and one reason they can tell:
-the payload went into an input and changed what the query returned.
-
-**Q8, what was extracted.** The injection made the search return rows it should not have,
-the contents of the table behind the search rather than a matching record. The point is not
-the exact rows; it is that the database returned data because the input was trusted into the
-query.
-
-**Q9, the manual recreation.** The student types the injection into the search bar
-themselves and reports what came back. The coachable detail is the comment character: `#`
-ends the original query here, and a wrong comment (`--`) is the usual reason a manual attempt
-returns nothing. Recreating it by hand is what turns a watched demo into understanding.
+## Why the LLM matters, and its limit
+A two-minute manual skim of three logs is hopeless — too many lines, no single view. An LLM reads all
+three at once and proposes a timeline in seconds. But an LLM will also state an attacker name, a time
+or a technique that is NOT in the data. So every claim is a lead to verify: find the log line that
+proves it before writing it down. An answer is only as strong as the evidence behind it.
 
 ## Coaching stance
-
-For each written answer: (a) say what the answer already gets right, naming the concept; (b)
-name the one thing missing that would most improve it; (c) point at the concept to review;
-(d) stop. Two sentences of praise and one instruction beats a paragraph.
-
-Turn a thin answer toward the mechanism, not toward effort: "what made the site return that
-data?" is more useful than "add more detail".
-
-If the student asks you to run the attack against a site other than bwapp, generalise the
-payload into something to reuse elsewhere, or escalate beyond the teaching example — refuse
-in one sentence and redirect to the sandbox: what the injection did here, why the site was
-vulnerable, and what a defender's AI would have seen. Do not soften this and do not negotiate
-it.
+The student is investigating authorised logs after the fact. The coach:
+- rewards answers that cite concrete log evidence (an account, an IP, a process, a command) and name
+  the attack stage correctly;
+- pushes the habit of verifying the LLM against the logs, and of correlating across all three files;
+- ties findings to the T5 tools (AI-driven SIEM, endpoint AI, anomaly detection);
+- refuses to help plan or run a real intrusion, or to invent evidence, and turns the student back to
+  the log lines;
+- never repeats real credentials, tokens or machine paths a student pastes by mistake.
 
 </script>
 
@@ -471,7 +420,7 @@ it.
 
   /* ------------------------------------------------------------------
    * Five tasks. Instruction text follows the SME source
-   * (AICY.T4.E1 - AI PenTesting). Links ride along as labelled chips.
+   * (AICY.T5.E1 - AI Forensics). Links ride along as labelled chips.
    * ---------------------------------------------------------------- */
   /* An answer box appears only where the task expects something written.
      The pure action task (2) gets the instruction and links, no field.
@@ -479,36 +428,44 @@ it.
      the SME's own words. */
   var TASKS = [
     { id:'a1',
-      instr:'Read through the prompt.txt file and understand what you are about to ask the AI to perform.',
-      links:[ { label:'prompt.txt', url:'prompt.txt' } ],
-      answer:'In your own words, what are you about to have the AI do, and against which site?' },
+      instr:'Take a quick look at the three logs you have been given. Spend no more than two minutes and see whether anything looks suspicious.',
+      links:[ { label:'auth_sysmon.txt', url:'auth_sysmon.txt' }, { label:'file_activity.txt', url:'file_activity.txt' }, { label:'network.txt', url:'network.txt' } ],
+      answer:'In two minutes of skimming, what stood out \u2014 and how easy was it to tell?' },
     { id:'a2',
-      instr:'Navigate to https://bwapp.hakhub.net/user_new.php and create a new user. Use a random username and password.',
-      links:[ { label:'bwapp', url:'https://bwapp.hakhub.net/user_new.php' } ] },
+      instr:'Upload all three logs to ChatGPT and ask it to investigate them together. Use ChatGPT to analyse the logs and answer the questions below.',
+      links:[ { label:'ChatGPT', url:'https://chatgpt.com' } ] },
     { id:'a3',
-      instr:'Download, install and create a user in Cursor. Open a new project in Cursor and choose the investigation folder.',
-      links:[ { label:'Cursor', url:'https://cursor.com/' } ] },
+      instr:'What type of cyber attack took place in this scenario?',
+      links:[],
+      answer:'Name the type of attack, and the evidence in the logs that points to it.' },
     { id:'a4',
-      instr:'Ask the AI to run the cursor.txt file as the prompt.',
-      links:[] },
+      instr:'How did the attacker first gain access to the system?',
+      links:[],
+      answer:'The method of initial access, and the log lines that show it.' },
     { id:'a5',
-      instr:'Follow the steps closely and click Run whenever it asks, to proceed to the next step.',
-      links:[] },
+      instr:'What tool or command did the attacker use to download the backdoor?',
+      links:[],
+      answer:'The tool or command, quoted from the log.' },
     { id:'a6',
-      instr:'View the screenshot taken at the end and review the results.',
-      links:[] },
+      instr:'What happened to the sensitive files on PC01?',
+      links:[],
+      answer:'What was done to the files, and how the logs show it.' },
     { id:'a7',
-      instr:'Identify the type of attack performed by Cursor.',
+      instr:'What technique was used for lateral movement across the network?',
       links:[],
-      answer:'Name the attack type, and one reason you can tell.' },
+      answer:'The technique, and which machines it reached.' },
     { id:'a8',
-      instr:'What information was extracted from the vulnerable website?',
+      instr:'How did the security systems (SIEM / IDS / firewall) detect the attack?',
       links:[],
-      answer:'What did the injection return, and why was the site willing to return it?' },
+      answer:'What the security systems flagged, backed by log evidence.' },
     { id:'a9',
-      instr:'Recreate the attack yourself by manually entering the injection code into the search bar.',
-      links:[ { label:'bwapp', url:'https://bwapp.hakhub.net/sqli_1.php' } ],
-      answer:'What did you type, what came back, and did the comment character matter?' }
+      instr:'Why was the attacker\u2019s account eventually locked?',
+      links:[],
+      answer:'The reason the account was locked.' },
+    { id:'a10',
+      instr:'List the attack in chronological order, from first access to containment.',
+      links:[],
+      answer:'The steps of the attack, in order.' }
   ];
 
   var tasksEl = document.getElementById('tasks');
@@ -522,7 +479,7 @@ it.
     var field = t.answer
       ? '<label class="lbl" for="' + t.id + '">' + esc(t.answer) + '</label>'
         + '<textarea id="' + t.id + '" rows="4" aria-describedby="i-' + t.id + ' pii-' + t.id + '"></textarea>'
-        + '<p class="pii" id="pii-' + t.id + '">Describe the sandbox run, not secrets: no credentials you created, no tokens, no absolute paths from your machine.</p>'
+        + '<p class="pii" id="pii-' + t.id + '">Paste findings, not secrets: no real credentials, tokens, or absolute paths from your machine.</p>'
         + '<div class="actions">'
         +   '<button type="button" class="btn sm" data-coach="' + t.id + '">Check with AI Coach</button>'
         +   '<span class="saved" id="sv-' + t.id + '" aria-hidden="true">' + ICON_TICK + 'Saved</span>'
@@ -544,7 +501,7 @@ it.
    * browser's localStorage and never transmitted anywhere. Lets the six
    * answers plus the debrief survive a reload of the embedding Rise page.
    * ---------------------------------------------------------------- */
-  var STORE_KEY = 'wawiwa.aicy.t4.aipentesting';
+  var STORE_KEY = 'wawiwa.aicy.t5.aiforensics';
   var FIELD_IDS = TASKS.filter(function(t){ return t.answer; })
     .map(function(t){ return t.id; }).concat(['tell']);
 
@@ -611,82 +568,85 @@ it.
    * self-contained and the proxy is still the only network call.
    * ---------------------------------------------------------------- */
   var ACTIVITY = {
-    id: 'aicy-t4-ai-pentesting',
+    id: 'aicy-t5-ai-forensics',
     grounding_ref: 'grounding/grounding_pack.md',
     lesson_map: {
-      C1: 'Topic 4 \u00b7 AI in penetration testing, automated \u2014 an AI agent runs the whole attack chain: log in, navigate, craft and send the request. Here the agent is Cursor driving a browser (slide 33)',
-      C2: 'Topic 4 \u00b7 SQL injection \u2014 user input trusted into a database query lets an attacker add their own SQL; the # comment ends the original query. bwapp\u2019s search page is built to be vulnerable',
-      C3: 'Topic 4 \u00b7 AI-driven IDS and anomaly detection \u2014 an AI IDS learns normal behaviour and flags the abnormal request this attack produces (slides 4-12)',
-      C4: 'Topic 4 \u00b7 Real-time detection and response \u2014 once the abnormal request is seen, an AI system can block, quarantine or alert as it happens (slides 21-22)',
-      C5: 'Topic 4 \u00b7 Both sides run the same automation \u2014 you ran the attack to understand it; the defence in this topic is the same automation pointed the other way (slide 33)'
+      C1: 'Topic 5 · AI/LLM-assisted log analysis — an LLM reads and correlates large, noisy logs far faster than a manual skim, which is why the two-minute skim feels hopeless',
+      C2: 'Topic 5 · The attack chain — brute-force logins, a successful login as an attacker account, a PowerShell download of a backdoor, file encryption and exfiltration, then lateral movement with psexec',
+      C3: 'Topic 5 · How AI-driven security tools detect it — SIEM/IDS correlate failed logins, suspicious processes, unusual Kerberos activity and abnormal outbound traffic, then contain it (Darktrace, Splunk, CrowdStrike)',
+      C4: 'Topic 5 · Correlation across sources — the full picture only appears when the authentication, file-activity and network logs are read together, not one at a time',
+      C5: 'Topic 5 · Reading it as a defender, responsibly — an investigation works from the log evidence, checks what the LLM claims against the logs, and stays on the case it was given'
     },
     personal_path_ui: {
       review_prefix: 'Where to review this: ',
       resource_prefix: 'Optional extra resource (further reading, not required): '
     },
     rubric: [
-      { id:'r1_reads_the_run', name:'Reads the run',
-        description:'Describes what the AI agent actually does \u2014 log in, navigate to the injection page, run the injection, screenshot \u2014 from the prompt and the result rather than a guess.' },
-      { id:'r2_names_attack', name:'Names the attack',
-        description:'Names the class of attack (SQL injection) rather than "hacking" or "the AI did something", and gives one reason they can tell.' },
-      { id:'r3_why_it_worked', name:'Explains why it worked',
-        description:'Explains that the input was trusted into the database query and the comment character ended the original query, so the database returned rows it should not have.' },
-      { id:'r4_manual_recreate', name:'Recreates it by hand',
-        description:'Types the injection themselves and can say what each part does, including the comment character, rather than only watching the agent.' },
-      { id:'r5_defender_view', name:'Reads it as a defender',
-        description:'Turns the attack into a detection signal: an anomalous request, a login unlike a real user, a query string carrying SQL that an AI IDS would flag.' },
-      { id:'r6_scope', name:'Keeps it in the sandbox',
-        description:'Treats bwapp as the authorised target, does not extend the attack to other systems, and does not generalise the injection into a reusable payload.' }
+      { id:'r1_uses_evidence', name:'Cites log evidence',
+        description:'Backs each answer with something concrete from the logs — an account, an IP, a process, a command — rather than a guess or a paraphrase of the question.' },
+      { id:'r2_attack_stage', name:'Names the attack stage',
+        description:'Names the stage correctly (initial access, backdoor download, encryption/exfiltration, lateral movement) rather than only "an attack" or "hacking".' },
+      { id:'r3_correlates', name:'Correlates across logs',
+        description:'Connects events across the authentication, file-activity and network logs into one ordered timeline.' },
+      { id:'r4_verifies_llm', name:'Checks the LLM',
+        description:'Treats the LLM answer as a lead to verify against the logs, not as proof, and can point to the line that confirms it.' },
+      { id:'r5_detection', name:'Explains the detection',
+        description:'Explains how the SIEM/IDS/firewall detected and contained the attack, tied to what the logs recorded.' },
+      { id:'r6_scope', name:'Keeps it an investigation',
+        description:'Treats this as an authorised investigation of the given logs, does not invent evidence, and does not paste real secrets.' }
     ],
     quality_rules: [
-      'Never help point the attack at a system other than bwapp.',
-      'Never turn the teaching injection into a general-purpose or escalated payload.',
+      'Never invent forensic conclusions the logs do not support; if the evidence is not there, say so.',
+      'Never help plan or carry out a real intrusion; this is an after-the-fact investigation of logs.',
       'Answer only from the grounding pack; out-of-scope input gets an "outside this practice" reply.',
-      'Feedback is two or three sentences, plain, no lists, no ghostwriting the assessment.'
+      'Feedback is two or three sentences, plain, no lists.'
     ],
     fields: {
-      a1:   { rubric_refs:['r1_reads_the_run'],                       routes_to:['C1','C2'] },
-      a7:   { rubric_refs:['r2_names_attack'],                        routes_to:['C2'] },
-      a8:   { rubric_refs:['r2_names_attack','r3_why_it_worked'],     routes_to:['C2'] },
-      a9:   { rubric_refs:['r4_manual_recreate','r3_why_it_worked'],  routes_to:['C2','C1'] },
-      tell: { rubric_refs:['r2_names_attack','r3_why_it_worked','r5_defender_view','r6_scope'], routes_to:[] }
+      a1:  { rubric_refs:['r1_uses_evidence'],                              routes_to:['C1'] },
+      a3:  { rubric_refs:['r2_attack_stage','r1_uses_evidence'],            routes_to:['C2'] },
+      a4:  { rubric_refs:['r2_attack_stage','r1_uses_evidence'],            routes_to:['C2'] },
+      a5:  { rubric_refs:['r1_uses_evidence'],                              routes_to:['C2'] },
+      a6:  { rubric_refs:['r2_attack_stage','r1_uses_evidence'],            routes_to:['C2'] },
+      a7:  { rubric_refs:['r2_attack_stage','r1_uses_evidence'],            routes_to:['C2'] },
+      a8:  { rubric_refs:['r5_detection','r1_uses_evidence'],               routes_to:['C3'] },
+      a9:  { rubric_refs:['r5_detection'],                                  routes_to:['C3'] },
+      a10: { rubric_refs:['r3_correlates'],                                 routes_to:['C2','C4'] },
+      tell:{ rubric_refs:['r3_correlates','r4_verifies_llm','r5_detection','r6_scope'], routes_to:[] }
     },
     debrief: {
-      prompt: 'You ran this attack with an agent and by hand. If you were defending bwapp instead, what would the request have looked like to an AI-driven IDS, and what about it would have flagged?',
-      rubric_refs: ['r2_names_attack','r3_why_it_worked','r5_defender_view','r6_scope']
+      prompt: 'You have a pile of scattered log lines and an LLM that will answer anything you ask. Which single finding are you most confident in, and what in the logs makes you sure, rather than that the model said so?',
+      rubric_refs: ['r3_correlates','r4_verifies_llm','r5_detection','r6_scope']
     },
     outcome_logic: [
-      { when:'lever_used:watched_only',
-        focus:'You watched the agent run the attack but could not say what each step did. Walk it back in order: it logged in, opened the injection page, sent one request with a payload, and screenshotted the result. Naming the steps is what turns a demo into something you can defend against.',
-        review:'C1', resource:'res_owasp_sqli' },
-      { when:'lever_used:named_tool_not_attack',
-        focus:'You described what Cursor did rather than the attack it performed. The tool is the agent; the attack is SQL injection. Name the attack class, and the tool becomes a detail rather than the answer.',
-        review:'C2', resource:'res_owasp_sqli' },
-      { when:'lever_used:no_why',
-        focus:'You said data came out but not why the site returned it. The input was trusted straight into the database query, so your text became part of the query. That is the one sentence that explains every SQL injection.',
-        review:'C2', resource:'res_owasp_sqli' },
-      { when:'lever_used:comment_char_unclear',
-        focus:'The comment character is doing real work: here # ends the original query so everything after it is ignored, which is why the wrong comment returns nothing. Say what the # cut off, and the payload stops being magic.',
-        review:'C2', resource:'res_portswigger_sqli' },
-      { when:'lever_used:manual_skipped',
-        focus:'You let the agent do it and did not recreate it by hand. Typing the injection yourself is where it stops being a screenshot and starts being something you understand. Do question nine before you close the lab.',
-        review:'C1', resource:'res_owasp_sqli' },
+      { when:'lever_used:trusted_llm',
+        focus:'You took the model answer without checking it against the logs. An LLM will confidently name an attacker or a time that is not in the data, so treat every claim as a lead and find the line that proves it before you write it down.',
+        review:'C5', resource:'res_nist_ir' },
+      { when:'lever_used:no_evidence',
+        focus:'You gave conclusions without pointing to a log line. A finding a defender can act on names the account, IP, process or command it rests on; the evidence is what separates an investigation from a guess.',
+        review:'C1', resource:'res_sans_dfir' },
+      { when:'lever_used:single_log',
+        focus:'You read one log rather than all three together. The story only appears across them: the failed logins in one, the backdoor and encryption in another, the exfiltration in the network log. Correlating the sources is the whole skill.',
+        review:'C4', resource:'res_sans_dfir' },
+      { when:'lever_used:no_timeline',
+        focus:'You did not put the events in order. A timeline from first access to containment is what turns scattered lines into an attack you can explain and defend against.',
+        review:'C2', resource:'res_nist_ir' },
+      { when:'lever_used:stage_unclear',
+        focus:'You could not name the attack stages. Learn the chain, initial access, backdoor, encryption and exfiltration, lateral movement, containment, and each log line drops into a place you can name.',
+        review:'C2', resource:'res_mitre_attack' },
       { when:'lever_used:scope_drift',
-        focus:'Keep it on bwapp. The sandbox is what makes this practice and not an offence, and it is the same line this topic draws: you run the attack to learn what the defensive AI must catch, not to point it at a live site.',
-        review:'C5', resource:'res_ncsc_pentest' },
+        focus:'Keep it to the logs you were given. An investigation works the case in front of it; running this against live company systems or other people data is a different thing with different rules.',
+        review:'C5', resource:'res_nist_ir' },
       { when:'bridge',
-        focus:'The rest of Topic 4 is the other half of this: the IDS, anomaly detection and real-time response that would see exactly the request you just sent. Carry the attack over as the thing they detect.',
+        focus:'The rest of Topic 5 is the tooling that does this at scale: AI-driven SIEM correlating these same signals across a whole network in real time. Carry the timeline you built as the thing those tools produce automatically.',
         review:'C3' }
     ],
     resources: {
-      res_owasp_sqli: { title:'OWASP: SQL Injection',
-        source:'OWASP', url:'https://owasp.org/www-community/attacks/SQL_Injection' },
-      res_portswigger_sqli: { title:'SQL injection: how it works',
-        source:'PortSwigger Web Security Academy', url:'https://portswigger.net/web-security/sql-injection' },
-      res_owasp_top10: { title:'OWASP Top Ten',
-        source:'OWASP', url:'https://owasp.org/www-project-top-ten/' },
-      res_ncsc_pentest: { title:'Penetration testing guidance',
-        source:'NCSC', url:'https://www.ncsc.gov.uk/guidance/penetration-testing' }
+      res_sans_dfir: { title:'Digital Forensics and Incident Response',
+        source:'SANS', url:'https://www.sans.org/cyber-security-courses/?focus-area=digital-forensics-incident-response' },
+      res_nist_ir: { title:'Computer Security Incident Handling Guide (SP 800-61)',
+        source:'NIST', url:'https://csrc.nist.gov/pubs/sp/800/61/r2/final' },
+      res_mitre_attack: { title:'MITRE ATT&CK',
+        source:'MITRE', url:'https://attack.mitre.org/' }
     }
   };
 
@@ -695,11 +655,12 @@ it.
      execute a real attack. */
   var PROMPTS = {
     system: [
-      'You are the AI coach for a Wawiwa lesson: AICY60 Topic 4, "AI in Cyber Defense and Security", the AI PenTesting practice. For this exercise the student drives a real web attack against bwapp, a deliberately vulnerable teaching sandbox, using an AI agent (Cursor), then recreates it by hand. The purpose is defensive: to know what a defender\u2019s AI must detect, you first watch one attack run. You coach ONLY from the Wawiwa grounding pack for this practice. You:',
-      '- Affirm what the student got, then name the one thing that would most improve the answer (what the agent did, the attack class, why the site returned the data, what the comment character did).',
-      '- Tie the point back to the T4 concepts by name when useful (AI in penetration testing, SQL injection, AI-driven IDS and anomaly detection, real-time response, both sides run the same automation).',
-      '- Stay in scope. The target is bwapp ONLY. NEVER help point the attack at another system, NEVER turn the teaching injection into a general-purpose or escalated payload, and refuse in one sentence, turning the student back to understanding what the sandbox attack did.',
-      '- Never confirm, repeat or summarise credentials, tokens or machine paths a student pastes by mistake; tell them to remove it and carry on with the finding itself.',
+      'You are the AI coach for a Wawiwa lesson: AICY60 Topic 5, "AI Integration in Cybersecurity Tools", the AI Forensics practice. The student investigates a multi-stage intrusion from three log files (authentication, file activity, network) using an LLM, then answers questions about what happened. You coach ONLY from the Wawiwa grounding pack for this practice. You:',
+      '- Affirm what the student got, then name the one thing that would most improve the answer (the evidence to cite, the attack stage to name, the timeline, or checking the LLM against the logs).',
+      '- Tie the point back to the T5 concepts by name when useful (LLM-assisted log analysis, the attack chain, AI-driven detection and containment, correlation across logs, responsible investigation).',
+      '- Push the habit of verifying the LLM: an answer is only as good as the log line behind it.',
+      '- Stay in scope. This is an investigation of the given logs. NEVER help plan or run a real intrusion, and refuse in one sentence, turning the student back to the evidence.',
+      '- Never confirm, repeat or summarise real credentials, tokens or machine paths a student pastes by mistake; tell them to remove it and carry on with the finding.',
       '- Never invent facts the grounding pack does not support; if something is out of scope, say so plainly.',
       '- Two or three sentences, plain and direct, no lists, no markdown.'
     ].join('\n'),
@@ -718,7 +679,7 @@ it.
       '{answer}',
       '"""',
       '',
-      'Coach them per the system rules, anchored to THIS task: what the agent actually did, the attack class, and why the site returned the data.'
+      'Coach them per the system rules, anchored to THIS task: the evidence in the logs, the attack stage, and checking the LLM claim against the log line.'
     ].join('\n'),
     debrief: [
       'End-of-practice debrief for this exercise.',
@@ -730,9 +691,9 @@ it.
       '{answer}',
       '"""',
       '',
-      'Reward an answer that turns the attack into a detection signal a defender\u2019s AI would see: an anomalous request, a login unlike a real user, a query string carrying SQL. Push back gently on answers that stay on the attacker\u2019s side, or that treat the screenshot as the finding.'
+      'Reward a finding the student is confident in AND can tie to a specific log line, correlated across the three logs. Push back gently on answers that rest on what the model said rather than on the evidence.'
     ].join('\n'),
-    refusal: 'That\u2019s outside this practice. The target is bwapp, the sandbox you were given, and I won\u2019t help point the attack elsewhere or turn it into a payload to reuse. Tell me what went into the search bar and what came back, and we\u2019ll work out why the site returned it and what a defender\u2019s AI would have flagged.'
+    refusal: 'That’s outside this practice. This is an investigation of the three logs you were given, and I won’t help plan or run a real attack. Tell me which log lines you are working from and what they show, and we’ll build the finding together.'
   };
 
   /* ---- resolving the pack for a prompt or for the personal path ---- */
@@ -898,11 +859,11 @@ it.
    * Offline coach. Deterministic guard grounded on this simulation:
    * name the lever, name the tell, tie it to a defense.
    * ---------------------------------------------------------------- */
-  var LEVER = /(sql|injection|inject|payload|query|database|db|table|search|comment|#|--|login|attack|exploit|vulnerab|bwapp|cursor|agent|playwright|request|input|field|extract|dump|record|row|user|password|credential)/i;
-  var DEFENSE = /(detect|ids|anomaly|monitor|alert|block|quarantin|isolat|flag|signal|log|baseline|behaviou?r|defen|respons|real.?time|sanitis|sanitiz|paramet|escap|validate|input validation|prepared|firewall|waf)/i;
+  var LEVER = /(log|line|event|eventid|ip|address|account|user|process|command|powershell|invoke|psexec|backdoor|encrypt|exfiltrat|kerberos|login|fail|brute|lateral|pc0|admin|traffic|outbound|\d{1,3}\.\d{1,3})/i;
+  var DEFENSE = /(detect|siem|ids|firewall|correlat|flag|alert|block|lock|contain|anomal|kerberos|outbound|monitor|suspicious|signature|behaviou?r)/i;
   var FILLER = /^(idk|dunno|none|nothing|nope|n\/?a|na|no|yes|ok|okay|good|bad|easy|hard|fun|cool|nice|all|some|maybe|dont know|don't know|[\s\-\.\?]*)$/i;
 
-  var REASON = /(because|since|input|query|database|db|trust|unsanit|comment|#|end|ignore|return|row|record|table|extract|search|login|payload|inject|reach|flag|detect|anomal|request|why)/i;
+  var REASON = /(because|since|shows|indicat|evidence|log|line|confirm|correlat|so |which|due to|reveal)/i;
 
   /* Shared guards: these two apply to every field. */
   var REPLIES = {
@@ -932,42 +893,42 @@ it.
      framing (r5). The live coach grades against the rubric itself. */
   var COACH = {
     a1: {
-      need:[ { re:REASON, reply:{ tone:'work', lead:'Say the plan back',
-        text:'In plain words: the agent will log in to bwapp, open the injection page, send one request with a payload, and screenshot the result. Saying that before you run it is the difference between reading the prompt and pasting it.' } } ],
-      good:{ tone:'ok', lead:'You read it, not just ran it',
-        text:'You can state what the agent is about to do and where, which is exactly the habit a defender needs: describe the attack before it happens. Hold that picture, because the later questions check it against what actually came back.' }
+      need:[ { re:LEVER, reply:{ tone:'work', lead:'Say what you noticed',
+        text:'Even in two minutes, name one thing that looked off, a burst of failed logins, an odd process, an unfamiliar IP, and note how hard it was to be sure. That difficulty is the point: it is why the next step hands the logs to an LLM.' } } ],
+      good:{ tone:'ok', lead:'That is the honest read',
+        text:'You saw that a raw skim of three logs is hard to trust, which is exactly why an LLM earns its place here. Hold what caught your eye, because you will check whether the model finds the same thing.' }
     },
-    a7: {
-      need:[ { re:LEVER, reply:{ tone:'work', lead:'Name the class, not the tool',
-        text:'Cursor is the agent; the attack is SQL injection. Name the attack class and one reason you can tell: the payload went into an input and changed what the query returned.' } } ],
-      good:{ tone:'ok', lead:'That is the attack named',
-        text:'SQL injection is the class, and you can say how you know rather than just that the AI did something. That is the name a defensive system is trying to catch, which is where the rest of the topic picks up.' }
+    a3: {
+      need:[
+        { re:LEVER, reply:{ tone:'work', lead:'Point to the evidence',
+          text:'Name the attack, then the lines behind it: the failed-then-successful logins, the downloaded backdoor, the encrypted and exfiltrated files. The type is only as good as the evidence you can show for it.' } },
+        { re:REASON, reply:{ tone:'work', lead:'Now say why',
+          text:'Tie the label to the log: it is a multi-stage intrusion because the logs show initial access, then malware, then exfiltration, then lateral movement, in that order.' } }
+      ],
+      good:{ tone:'ok', lead:'Named and evidenced',
+        text:'A multi-stage intrusion, and you can point to the stages in the logs rather than just naming it. That is the read an incident report is built on.' }
     },
     a8: {
-      need:[
-        { re:LEVER, reply:{ tone:'work', lead:'Say what came back',
-          text:'Name what the injection returned: rows from the table behind the search, not a matching record. The exact rows matter less than the fact that data came out at all.' } },
-        { re:REASON, reply:{ tone:'work', lead:'Now say why',
-          text:'The site returned it because your input was trusted straight into the query, so your text became part of the SQL. That one sentence explains every injection you will ever see.' } }
-      ],
-      good:{ tone:'ok', lead:'Mechanism, not just result',
-        text:'You have both halves: what came out, and why the site was willing to give it up. That is the reachability a defender reasons about, and it is what an AI IDS is watching the request for.' }
+      need:[ { re:DEFENSE, reply:{ tone:'work', lead:'Name what flagged it',
+        text:'Say what the security systems keyed on: repeated failed logins, the suspicious process, unusual Kerberos activity, the abnormal outbound traffic. Those are the signals an AI-driven SIEM correlates automatically.' } } ],
+      good:{ tone:'ok', lead:'That is the detection',
+        text:'You connected the attack to what the tools actually saw, which is the bridge from this hand investigation to the AI-driven SIEM the rest of the topic is about.' }
     },
-    a9: {
-      need:[ { re:LEVER, reply:{ tone:'work', lead:'Say what you typed',
-        text:'Give the injection you put in the search bar and what came back. Then the detail that matters: here the comment is #, and the wrong comment returns nothing, which is why -- fails on this site.' } } ],
-      good:{ tone:'ok', lead:'You own it now',
-        text:'Typing it yourself, comment character and all, is what turns the agent\u2019s run into something you understand. You could describe this request to someone building the detection for it, which is the whole point of running it.' }
+    a10: {
+      need:[ { re:LEVER, reply:{ tone:'work', lead:'Put it in order',
+        text:'Lay the events out from first to last: brute force, successful login, backdoor download, encryption and exfiltration, lateral movement, then detection and containment. The order is the story.' } } ],
+      good:{ tone:'ok', lead:'That is the timeline',
+        text:'A clean sequence from first access to containment, correlated across the three logs. That is the artefact the whole exercise was building toward.' }
     },
     tell: {
       need:[
-        { re:LEVER, reply:{ tone:'work', lead:'Describe the request',
-          text:'Say what the malicious request actually looked like: a login that behaves unlike a real user, or a search field carrying SQL. "It got hacked" is not something an IDS can act on.' } },
-        { re:DEFENSE, reply:{ tone:'work', lead:'Now what flags it',
-          text:'Name what an AI-driven IDS would key on: the query string carrying SQL syntax, the deviation from normal search traffic, the pattern of the automated run. That is the topic\u2019s detection material meeting the attack you just ran.' } }
+        { re:LEVER, reply:{ tone:'work', lead:'Anchor it to a line',
+          text:'Name the finding you trust and the exact evidence under it, an account, an IP, a process, a command, not just what the model concluded.' } },
+        { re:REASON, reply:{ tone:'work', lead:'Say why you trust it',
+          text:'What in the logs confirms it? A finding you can trace to a line is one you can defend; a finding that rests on the model saying so is not.' } }
       ],
-      good:{ tone:'ok', lead:'That is the defender\u2019s read',
-        text:'You turned the attack into a signal: an abnormal request an AI IDS learns to flag, not just "someone got in". That is the bridge from this exercise to the rest of Topic 4.' }
+      good:{ tone:'ok', lead:'Evidence, not just the model',
+        text:'You picked a finding and tied it to the log line that proves it, rather than to what the LLM asserted. That habit, verify against the evidence, is the real skill this practice teaches.' }
     }
   };
 
@@ -1085,12 +1046,12 @@ it.
      outcome_logic. The label is the lever as the rubric names it; the
      takeaway, the concept to review and the resource are the pack's. */
   var LEVER_LABELS = {
-    watched_only:          'I watched the agent run it but could not say what each step did',
-    named_tool_not_attack: 'I described what Cursor did, not the attack class',
-    no_why:                'I said the data came out but not why the site returned it',
-    comment_char_unclear:  'I was not sure what the # comment character was doing',
-    manual_skipped:        'I let the agent do it and did not recreate it by hand',
-    scope_drift:           'I wondered about pointing the attack at a real site'
+    trusted_llm:      'I took ChatGPT’s answer without checking it against the logs',
+    no_evidence:      'I gave conclusions without pointing to a log line',
+    single_log:       'I looked at one log, not all three together',
+    no_timeline:      'I did not put the events in order',
+    stage_unclear:    'I could not name the attack stages',
+    scope_drift:      'I wondered about running this on real company systems'
   };
   var LEVERS = ACTIVITY.outcome_logic.filter(function(o){
     return o.when.indexOf('lever_used:') === 0;

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>AI PenTesting | AICY.T4.E1</title>
+<title>Ethics in AI | AICY.T6.E1</title>
 <style>
   /* ==================================================================
      AICY60 practice — the light in-class design, Mode A.
@@ -272,11 +272,11 @@
 </head>
 <body>
 
-<h1 class="vh">AI PenTesting in a sandbox</h1>
+<h1 class="vh">Ethics in AI discussion</h1>
 
 <div class="page">
 
-  <p class="exhead"><span class="exlabel">Hands-on exercise</span><span class="exid">AICY.T4.E1</span><span class="exname">AI PenTesting</span></p>
+  <p class="exhead"><span class="exlabel">Hands-on exercise</span><span class="exid">AICY.T6.E1</span><span class="exname">Ethics in AI</span></p>
 
   <!-- What this page is. Added Sep 2026 with the Mode A restyle, to the same
        wording rule as AI in Data: say what is graded, say what is not, and
@@ -287,9 +287,10 @@
   <div class="brief">
     <span class="teams">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M17.5 20a5.5 5.5 0 0 0-3-4.9"/></svg>
-      Individual, in a sandbox
+      Groups of 6+
     </span>
-    <p>You are about to run your first penetration test, against <b>bwapp</b>, a site built to be hacked. An AI agent drives the attack end to end; you approve each step, then recreate the key move by hand. The questions are not about whether it worked. They are about what the attack was, why the site let it through, and what it would have looked like to the defensive AI this topic is about.</p>
+    <p>Here are some recent cyber incidents that happened in Romania. Read them closely and review the details of these incidents based on your experience with previous lessons.</p>
+    <p style="margin-top:10px">Follow that with a wider ethical discussion about the usage of AI in Cyber Security Systems. These questions are encouraged to be discussed in class: debate, raise ideas and awareness.</p>
   </div>
 
   <!-- ============ tasks ============ -->
@@ -305,10 +306,10 @@
         <span class="itile" aria-hidden="true">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3v-6.5A8 8 0 0 1 11 4h2a8 8 0 0 1 8 8Z"/><path d="M9 11h6M9 15h3"/></svg>
         </span>
-        <label class="q" for="tell">You ran this attack with an agent and by hand. If you were defending bwapp instead, what would the request have looked like to an AI-driven IDS, and what about it would have flagged?</label>
+        <label class="q" for="tell">Pick the one ethical question your group disagreed about most. Where did you land, and what is the strongest argument against your own position?</label>
       </div>
       <textarea id="tell" rows="4" aria-describedby="pii-coach"></textarea>
-      <p class="pii" id="pii-coach">Describe what happened in the sandbox, not the credentials you created, tokens or paths from your own machine. Answers carrying identifying details are blocked before they are sent.</p>
+      <p class="pii" id="pii-coach">Discuss the incidents, not people: don’t add personal details about anyone beyond what the articles report. Answers carrying identifying details are blocked before they are sent.</p>
       <div class="actions">
         <button type="button" class="btn" id="check">Check with AI Coach</button>
       </div>
@@ -319,9 +320,9 @@
   <!-- ============ personal path ============ -->
   <section class="sec" id="path-sec" aria-labelledby="h-path">
     <p class="eyebrow">Personal path</p>
-    <h2 id="h-path">Where did your understanding stop short?</h2>
+    <h2 id="h-path">Where did your argument stop short?</h2>
     <span class="rule"></span>
-    <p class="pathintro">Mark the habits that describe how you ran and read the attack, and you&rsquo;ll get the move that answers each one.</p>
+    <p class="pathintro">Mark the habits that describe how your group answered, and you&rsquo;ll get the move that answers each one.</p>
     <div class="card">
       <ul class="checks" id="checks"></ul>
       <p class="pathhint" id="pathhint">Mark one above to see the move that answers it.</p>
@@ -330,7 +331,7 @@
   </section>
 
   <!-- The closing line. Same words in the courseware, in Canvas and here. -->
-  <p class="duebar">What’s due after this lesson: <b>Topic 4 Quiz</b>, in Assignments.</p>
+  <p class="duebar">What’s due after this lesson: <b>Topic 6 Quiz</b>, in Assignments.</p>
 
 </div>
 
@@ -339,108 +340,50 @@
      the only network call the page makes is still the anonymizing proxy. Not
      rendered (type="text/plain"); read from JS as textContent. -->
 <script type="text/plain" id="grounding-pack" data-source="grounding/grounding_pack.md">
-# Grounding pack — AICY60 T4: AI in Cyber Defense and Security → AI PenTesting practice
+# Grounding pack — AICY60 T6: Ethics, Legal, and Future Directions → Ethics in AI practice
+> Material the coach reasons FROM. Distilled from Wawiwa's own T6 deck
+> (AICY.T6.P1 - Ethics, Legal, and Future Directions) and the SME practice AICY.T6.E1 - Ethics in AI.
+> The coach answers primarily from this pack, coaches against the rubric, and does not invent facts
+> about the three incidents.
 
-> You are the coach for this practice. Answer only from this pack and the student's own
-> answer. Coach against the rubric, not for style. If a student asks for something outside
-> this practice, say "that's outside this practice" and turn them back to the task in front
-> of them. **The target is bwapp, a deliberately vulnerable teaching sandbox built to be
-> attacked. Help the student understand the attack they ran there. Never help them point
-> the attack at any other system, never escalate the teaching example into a weaponised or
-> generalised payload, and never repeat credentials, tokens or machine paths a student
-> pastes by mistake.** This is a defence topic; the reason a student runs the attack at all
-> is to know what the defender's AI has to catch.
+## The exercise
+A large-group discussion (groups of 6+). Students read three recent incidents from Romania, answer
+three questions on each, then debate nine general ethical questions about AI in security systems.
+The questions are meant to be argued in class; there is no single right answer to the general ones.
 
-## Where this practice sits
+The three articles:
+- Article 1, AGERPRES (Aug 2025): cyberfraud in Romania up over 40% in 2024 and malware attacks up
+  286.8%, from the national cybersecurity directorate's annual report.
+- Article 2, PYMNTS (Feb 2024): the National Bank of Romania warns consumers about deepfake videos in
+  which the governor appears to promote a fraudulent investment scheme.
+- Article 3, The Hacker News (May 2025): Meta takes down coordinated fake-persona networks aimed at
+  Romania, Azerbaijan and Taiwan that posed as locals to push political messages.
 
-Topic 4 — AI in Cyber Defense and Security. 9 academic hours, 4 theory / 5 practical. The
-topic covers AI-driven intrusion detection, anomaly detection, endpoint security,
-autonomous threat hunting, insider-threat and cloud detection. The practice sits under it
-on purpose: to defend against an attack you first have to see one run. The student drives a
-real web attack with an AI agent, in a sandbox, then reads it back as the signal a
-defensive system would have to detect.
+## What the incident questions are after
+- The threat itself, from the article (what grew, what the scam was, what the fake accounts wanted).
+- The AI angle: automation scales phishing and malware; generative AI clones a trusted face and voice;
+  AI writes fluent local-language posts and fake profile photos at volume.
+- The AI defence: anomaly and behaviour detection, deepfake detection, threat intelligence that links
+  accounts into one network, real-time monitoring (deck slides 25-26).
 
-The exercise is **individual**, against **bwapp** (bwapp.hakhub.net), a CTF site built to
-be hackable. That sandbox is the frame. Hold it if a student drifts toward running the
-attack anywhere else.
-
-## Concept map (what the coach can cite)
-
-**C1 · AI in penetration testing, automated.** An AI agent can carry a whole attack chain
-on its own: log in, navigate, craft the request and run it, without the student writing the
-exploit. In this practice the agent is Cursor, driving a browser through Playwright. What
-used to take an operator now takes a prompt. (Deck: the topic's framing of AI on both sides
-of the attack, S33.)
-
-**C2 · SQL injection.** A web application builds a database query out of user input. If the
-input is trusted into the query unchanged, an attacker can add their own SQL and make the
-database return rows it should not. The comment character (here `#`) ends the original query
-so the rest of it is ignored. bwapp's search page is deliberately built this way.
-
-**C3 · AI-driven IDS and anomaly detection.** The defensive counterpart from this topic. An
-AI intrusion-detection system learns normal request behaviour and flags deviations; a query
-string carrying SQL, or a login that behaves unlike a real user, is exactly the anomaly it
-is trained to surface (S4 to S12).
-
-**C4 · Real-time detection and automated response.** When the abnormal request is seen, an
-AI-driven system can act in real time: block the source, quarantine the session, alert. The
-attack the student just ran is the input to that machinery (S21, S22).
-
-**C5 · Both sides run the same automation.** Offensive AI makes attacks faster and more
-adaptive; understanding the attack is what makes the defence possible. Running the injection
-with an agent, in a sandbox, is that sentence turned into an afternoon (S33 and the exercise
-itself).
-
-## The practice tasks (from the SME doc — do not paraphrase to the student)
-
-1. Read through the prompt.txt file and understand what you are about to ask the AI to do.
-2. Navigate to bwapp user_new.php and create a new user with a random username and password.
-3. Download, install and create a user in Cursor. Open a project on the investigation folder.
-4. Ask the AI to run the cursor.txt file as the prompt.
-5. Follow the steps closely, clicking Run whenever it asks, to proceed.
-6. View the screenshot taken at the end and review the results.
-7. Identify the type of attack performed by Cursor.
-8. What information was extracted from the vulnerable website?
-9. Recreate the attack yourself by typing the injection into the search bar by hand.
-
-Tasks 2 to 6 are **actions the student performs**, not answers you grade. There is no answer
-box for them on purpose. Answer boxes are on 1, 7, 8 and 9.
-
-## What a good answer looks like on each question
-
-**Q1, understanding the prompt.** In plain words: the AI will log in to bwapp with a given
-user, go to the SQL-injection page, run a basic injection using the `#` comment, and
-screenshot the result. A student who can say that before running anything is reading, not
-just pasting.
-
-**Q7, the attack type.** SQL injection. Accept it named plainly. Push a student who says
-"hacking" or "the AI attacked it" toward the class of attack and one reason they can tell:
-the payload went into an input and changed what the query returned.
-
-**Q8, what was extracted.** The injection made the search return rows it should not have,
-the contents of the table behind the search rather than a matching record. The point is not
-the exact rows; it is that the database returned data because the input was trusted into the
-query.
-
-**Q9, the manual recreation.** The student types the injection into the search bar
-themselves and reports what came back. The coachable detail is the comment character: `#`
-ends the original query here, and a wrong comment (`--`) is the usual reason a manual attempt
-returns nothing. Recreating it by hand is what turns a watched demo into understanding.
+## Topic 6 concepts the general questions draw on
+- Privacy: AI security tools need large volumes of user data; consent and minimisation (slides 3-4, 31).
+- Misuse: the same AI powers deepfakes, phishing and offensive operations (slides 9-10, 21-22).
+- Accountability: who is responsible when an autonomous AI decision causes harm; clear policies and
+  humans in the loop (slides 8, 28, 44).
+- Ethical design: fairness, bias detection, transparency, explainability, audit trails (slides 23, 38).
+- Law: GDPR (EU data privacy), CCPA (California), the EU AI Act for high-risk AI, and a global landscape
+  that ranges from strict (EU) to lighter (US) to surveillance-heavy (China) (slides 6-7, 11, 15, 43).
+- Case studies in the deck that help an argument: Clearview AI (privacy), Tesla GAN phishing (misuse),
+  Uber self-driving crash (accountability), Facebook GDPR compliance (compliance) (slides 5, 10, 24, 30).
 
 ## Coaching stance
-
-For each written answer: (a) say what the answer already gets right, naming the concept; (b)
-name the one thing missing that would most improve it; (c) point at the concept to review;
-(d) stop. Two sentences of praise and one instruction beats a paragraph.
-
-Turn a thin answer toward the mechanism, not toward effort: "what made the site return that
-data?" is more useful than "add more detail".
-
-If the student asks you to run the attack against a site other than bwapp, generalise the
-payload into something to reuse elsewhere, or escalate beyond the teaching example — refuse
-in one sentence and redirect to the sandbox: what the injection did here, why the site was
-vulnerable, and what a defender's AI would have seen. Do not soften this and do not negotiate
-it.
+- Reward answers that use the article's facts and name a concrete AI technique on either side.
+- On the general questions, reward a clear position plus the strongest counter-argument, tied to a
+  Topic 6 concept or law. Never tell the student which side is "correct".
+- Keep public figures as the articles report them; do not add personal data about private people.
+- Stay in scope: this is a discussion of reported incidents, not a how-to for deepfakes or fake
+  networks; decline those in one sentence.
 
 </script>
 
@@ -470,46 +413,153 @@ it.
   var ICON_WAIT = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>';
 
   /* ------------------------------------------------------------------
-   * Five tasks. Instruction text follows the SME source
-   * (AICY.T4.E1 - AI PenTesting). Links ride along as labelled chips.
+   * The tasks. Instruction text follows the SME source
+   * (AICY.T6.E1 - Ethics in AI). Links ride along as labelled chips.
    * ---------------------------------------------------------------- */
   /* An answer box appears only where the task expects something written.
      The pure action task (2) gets the instruction and links, no field.
      Where a task both acts and asks, the label names the written part in
      the SME's own words. */
   var TASKS = [
-    { id:'a1',
-      instr:'Read through the prompt.txt file and understand what you are about to ask the AI to perform.',
-      links:[ { label:'prompt.txt', url:'prompt.txt' } ],
-      answer:'In your own words, what are you about to have the AI do, and against which site?' },
-    { id:'a2',
-      instr:'Navigate to https://bwapp.hakhub.net/user_new.php and create a new user. Use a random username and password.',
-      links:[ { label:'bwapp', url:'https://bwapp.hakhub.net/user_new.php' } ] },
-    { id:'a3',
-      instr:'Download, install and create a user in Cursor. Open a new project in Cursor and choose the investigation folder.',
-      links:[ { label:'Cursor', url:'https://cursor.com/' } ] },
-    { id:'a4',
-      instr:'Ask the AI to run the cursor.txt file as the prompt.',
-      links:[] },
-    { id:'a5',
-      instr:'Follow the steps closely and click Run whenever it asks, to proceed to the next step.',
-      links:[] },
-    { id:'a6',
-      instr:'View the screenshot taken at the end and review the results.',
-      links:[] },
-    { id:'a7',
-      instr:'Identify the type of attack performed by Cursor.',
-      links:[],
-      answer:'Name the attack type, and one reason you can tell.' },
-    { id:'a8',
-      instr:'What information was extracted from the vulnerable website?',
-      links:[],
-      answer:'What did the injection return, and why was the site willing to return it?' },
-    { id:'a9',
-      instr:'Recreate the attack yourself by manually entering the injection code into the search bar.',
-      links:[ { label:'bwapp', url:'https://bwapp.hakhub.net/sqli_1.php' } ],
-      answer:'What did you type, what came back, and did the comment character matter?' }
-  ];
+  {
+    "id": "r1",
+    "instr": "Article 1: “Cyberfraud in Romania up over 40pct in 2024, malware attacks up 286.8pct”",
+    "links": [
+      {
+        "label": "Article 1 (AGERPRES)",
+        "url": "https://agerpres.ro/english/2025/08/27/cyberfraud-in-romania-up-over-40pct-in-2024-malware-attacks-up-286-8pct-official-report--1478992"
+      }
+    ]
+  },
+  {
+    "id": "a1",
+    "instr": "What types of cyber threats increased the most in 2024 in Romania?",
+    "links": [],
+    "answer": "The threats that grew the most, from the article."
+  },
+  {
+    "id": "a2",
+    "instr": "How does automation or AI make these attacks more dangerous?",
+    "links": [],
+    "answer": "How AI or automation makes them worse."
+  },
+  {
+    "id": "a3",
+    "instr": "What role could AI play in defending against these threats?",
+    "links": [],
+    "answer": "The defensive role AI could play."
+  },
+  {
+    "id": "r2",
+    "instr": "Article 2: “National Bank of Romania Warns Consumers About Deepfake Videos”",
+    "links": [
+      {
+        "label": "Article 2 (PYMNTS)",
+        "url": "https://www.pymnts.com/news/security-and-risk/2024/national-bank-of-romania-warns-consumers-about-deepfake-videos/"
+      }
+    ]
+  },
+  {
+    "id": "a4",
+    "instr": "What was the attack performed?",
+    "links": [],
+    "answer": "The attack, in a sentence or two."
+  },
+  {
+    "id": "a5",
+    "instr": "In what way was the figure misused in the scam?",
+    "links": [],
+    "answer": "How the public figure was misused."
+  },
+  {
+    "id": "a6",
+    "instr": "How could AI be used to help identify or prevent deepfake scams?",
+    "links": [],
+    "answer": "How AI could spot or stop it."
+  },
+  {
+    "id": "r3",
+    "instr": "Article 3: “Meta Busts Fake Influence Ops in Romania, Azerbaijan & Taiwan”",
+    "links": [
+      {
+        "label": "Article 3 (The Hacker News)",
+        "url": "https://thehackernews.com/2025/05/meta-disrupts-influence-ops-targeting.html"
+      }
+    ]
+  },
+  {
+    "id": "a7",
+    "instr": "What was the goal of the fake accounts on social media?",
+    "links": [],
+    "answer": "The goal of the fake accounts."
+  },
+  {
+    "id": "a8",
+    "instr": "How might AI have been used to make the posts look real?",
+    "links": [],
+    "answer": "How AI could have made them convincing."
+  },
+  {
+    "id": "a9",
+    "instr": "How can platforms use AI to detect fake networks?",
+    "links": [],
+    "answer": "How platforms could detect them with AI."
+  },
+  {
+    "id": "g1",
+    "instr": "General question: Who should be held accountable if an AI system makes a wrong security decision (e.g., blocking legitimate users or missing a real threat)?",
+    "links": [],
+    "answer": "Your group’s position, and the strongest argument against it."
+  },
+  {
+    "id": "g2",
+    "instr": "General question: Should AI systems in cybersecurity be allowed to make autonomous decisions, or must humans always remain “in the loop”?",
+    "links": [],
+    "answer": "Your group’s position, and where you draw the line."
+  },
+  {
+    "id": "g3",
+    "instr": "General question: How transparent should companies be when they use AI to monitor employees or customers for security purposes?",
+    "links": [],
+    "answer": "Your group’s position."
+  },
+  {
+    "id": "g4",
+    "instr": "General question: To what extent is it ethical for AI to analyze personal data (emails, chats, browsing habits) in the name of security?",
+    "links": [],
+    "answer": "Your group’s position, and the limit you would set."
+  },
+  {
+    "id": "g5",
+    "instr": "General question: How can organizations ensure that AI-driven security tools don’t become tools for mass surveillance?",
+    "links": [],
+    "answer": "The safeguards you would put in place."
+  },
+  {
+    "id": "g6",
+    "instr": "General question: Could AI in cybersecurity unfairly target certain groups or geographies due to biased training data?",
+    "links": [],
+    "answer": "Your group’s view, with an example."
+  },
+  {
+    "id": "g7",
+    "instr": "General question: Is it ethical for governments or organizations to use AI offensively (e.g., in hacking back, cyber warfare, or automated penetration testing)?",
+    "links": [],
+    "answer": "Your group’s position, and the strongest argument against it."
+  },
+  {
+    "id": "g8",
+    "instr": "General question: How can security professionals balance trust in AI tools with their own expertise?",
+    "links": [],
+    "answer": "How you would strike the balance."
+  },
+  {
+    "id": "g9",
+    "instr": "General question: Should users be informed when AI, rather than a human, is responsible for detecting and responding to threats on their systems?",
+    "links": [],
+    "answer": "Your group’s position."
+  }
+];
 
   var tasksEl = document.getElementById('tasks');
   TASKS.forEach(function(t){
@@ -522,7 +572,7 @@ it.
     var field = t.answer
       ? '<label class="lbl" for="' + t.id + '">' + esc(t.answer) + '</label>'
         + '<textarea id="' + t.id + '" rows="4" aria-describedby="i-' + t.id + ' pii-' + t.id + '"></textarea>'
-        + '<p class="pii" id="pii-' + t.id + '">Describe the sandbox run, not secrets: no credentials you created, no tokens, no absolute paths from your machine.</p>'
+        + '<p class="pii" id="pii-' + t.id + '">Discuss the incidents, not people: no personal details beyond what the articles report.</p>'
         + '<div class="actions">'
         +   '<button type="button" class="btn sm" data-coach="' + t.id + '">Check with AI Coach</button>'
         +   '<span class="saved" id="sv-' + t.id + '" aria-hidden="true">' + ICON_TICK + 'Saved</span>'
@@ -544,7 +594,7 @@ it.
    * browser's localStorage and never transmitted anywhere. Lets the six
    * answers plus the debrief survive a reload of the embedding Rise page.
    * ---------------------------------------------------------------- */
-  var STORE_KEY = 'wawiwa.aicy.t4.aipentesting';
+  var STORE_KEY = 'wawiwa.aicy.t6.ethicsinai';
   var FIELD_IDS = TASKS.filter(function(t){ return t.answer; })
     .map(function(t){ return t.id; }).concat(['tell']);
 
@@ -600,7 +650,7 @@ it.
    * ---------------------------------------------------------------- */
   /* ------------------------------------------------------------------
    * The grounding pack, inlined. Authored from this program's own
-   * material (deck AICY.T4.P1, SME practice AICY.T4.E1) and kept in
+   * material (deck AICY.T6.P1, SME practice AICY.T6.E1) and kept in
    * grounding/ beside this file:
    *   activity.json      lesson map, rubric r1-r5, quality rules,
    *                      outcome logic (the personal path), resources
@@ -611,129 +661,300 @@ it.
    * self-contained and the proxy is still the only network call.
    * ---------------------------------------------------------------- */
   var ACTIVITY = {
-    id: 'aicy-t4-ai-pentesting',
-    grounding_ref: 'grounding/grounding_pack.md',
-    lesson_map: {
-      C1: 'Topic 4 \u00b7 AI in penetration testing, automated \u2014 an AI agent runs the whole attack chain: log in, navigate, craft and send the request. Here the agent is Cursor driving a browser (slide 33)',
-      C2: 'Topic 4 \u00b7 SQL injection \u2014 user input trusted into a database query lets an attacker add their own SQL; the # comment ends the original query. bwapp\u2019s search page is built to be vulnerable',
-      C3: 'Topic 4 \u00b7 AI-driven IDS and anomaly detection \u2014 an AI IDS learns normal behaviour and flags the abnormal request this attack produces (slides 4-12)',
-      C4: 'Topic 4 \u00b7 Real-time detection and response \u2014 once the abnormal request is seen, an AI system can block, quarantine or alert as it happens (slides 21-22)',
-      C5: 'Topic 4 \u00b7 Both sides run the same automation \u2014 you ran the attack to understand it; the defence in this topic is the same automation pointed the other way (slide 33)'
+  "id": "aicy-t6-ethics-in-ai",
+  "grounding_ref": "grounding/grounding_pack.md",
+  "lesson_map": {
+    "C1": "Topic 6 · Ethical issues in AI-powered cybersecurity: privacy, misuse and accountability (deck slides 3-4, 8)",
+    "C2": "Topic 6 · AI misuse and offensive AI: AI-generated phishing, deepfakes, influence operations, cyberwarfare (deck slides 9-10, 21-22)",
+    "C3": "Topic 6 · Legal frameworks: GDPR, CCPA, the EU AI Act and the global legal landscape (deck slides 6-7, 11, 15, 43)",
+    "C4": "Topic 6 · Ethical design: fairness, bias detection, transparency and security of AI systems (deck slides 23, 38)",
+    "C5": "Topic 6 · Governance and accountability: who is responsible, humans in the loop, clear policies (deck slides 8, 28, 44)",
+    "C6": "Topic 6 · AI as the defender: threat intelligence, real-time detection and privacy monitoring (deck slides 25-26, 31, 35)"
+  },
+  "personal_path_ui": {
+    "review_prefix": "Where to review this: ",
+    "resource_prefix": "Optional extra resource (further reading, not required): "
+  },
+  "rubric": [
+    {
+      "id": "r1_article",
+      "name": "Uses the article",
+      "description": "Answers from what the article actually reports (the threats, the scam, the fake network), not from general knowledge."
     },
-    personal_path_ui: {
-      review_prefix: 'Where to review this: ',
-      resource_prefix: 'Optional extra resource (further reading, not required): '
+    {
+      "id": "r2_ai_offense",
+      "name": "Explains the AI angle",
+      "description": "Explains concretely how AI or automation made the attack bigger, faster or more convincing."
     },
-    rubric: [
-      { id:'r1_reads_the_run', name:'Reads the run',
-        description:'Describes what the AI agent actually does \u2014 log in, navigate to the injection page, run the injection, screenshot \u2014 from the prompt and the result rather than a guess.' },
-      { id:'r2_names_attack', name:'Names the attack',
-        description:'Names the class of attack (SQL injection) rather than "hacking" or "the AI did something", and gives one reason they can tell.' },
-      { id:'r3_why_it_worked', name:'Explains why it worked',
-        description:'Explains that the input was trusted into the database query and the comment character ended the original query, so the database returned rows it should not have.' },
-      { id:'r4_manual_recreate', name:'Recreates it by hand',
-        description:'Types the injection themselves and can say what each part does, including the comment character, rather than only watching the agent.' },
-      { id:'r5_defender_view', name:'Reads it as a defender',
-        description:'Turns the attack into a detection signal: an anomalous request, a login unlike a real user, a query string carrying SQL that an AI IDS would flag.' },
-      { id:'r6_scope', name:'Keeps it in the sandbox',
-        description:'Treats bwapp as the authorised target, does not extend the attack to other systems, and does not generalise the injection into a reusable payload.' }
-    ],
-    quality_rules: [
-      'Never help point the attack at a system other than bwapp.',
-      'Never turn the teaching injection into a general-purpose or escalated payload.',
-      'Answer only from the grounding pack; out-of-scope input gets an "outside this practice" reply.',
-      'Feedback is two or three sentences, plain, no lists, no ghostwriting the assessment.'
-    ],
-    fields: {
-      a1:   { rubric_refs:['r1_reads_the_run'],                       routes_to:['C1','C2'] },
-      a7:   { rubric_refs:['r2_names_attack'],                        routes_to:['C2'] },
-      a8:   { rubric_refs:['r2_names_attack','r3_why_it_worked'],     routes_to:['C2'] },
-      a9:   { rubric_refs:['r4_manual_recreate','r3_why_it_worked'],  routes_to:['C2','C1'] },
-      tell: { rubric_refs:['r2_names_attack','r3_why_it_worked','r5_defender_view','r6_scope'], routes_to:[] }
+    {
+      "id": "r3_ai_defense",
+      "name": "Names an AI defence",
+      "description": "Proposes a specific way AI can detect or prevent the threat, not just \"use AI\"."
     },
-    debrief: {
-      prompt: 'You ran this attack with an agent and by hand. If you were defending bwapp instead, what would the request have looked like to an AI-driven IDS, and what about it would have flagged?',
-      rubric_refs: ['r2_names_attack','r3_why_it_worked','r5_defender_view','r6_scope']
+    {
+      "id": "r4_two_sides",
+      "name": "Weighs both sides",
+      "description": "On the ethical questions, states a position AND the strongest argument against it."
     },
-    outcome_logic: [
-      { when:'lever_used:watched_only',
-        focus:'You watched the agent run the attack but could not say what each step did. Walk it back in order: it logged in, opened the injection page, sent one request with a payload, and screenshotted the result. Naming the steps is what turns a demo into something you can defend against.',
-        review:'C1', resource:'res_owasp_sqli' },
-      { when:'lever_used:named_tool_not_attack',
-        focus:'You described what Cursor did rather than the attack it performed. The tool is the agent; the attack is SQL injection. Name the attack class, and the tool becomes a detail rather than the answer.',
-        review:'C2', resource:'res_owasp_sqli' },
-      { when:'lever_used:no_why',
-        focus:'You said data came out but not why the site returned it. The input was trusted straight into the database query, so your text became part of the query. That is the one sentence that explains every SQL injection.',
-        review:'C2', resource:'res_owasp_sqli' },
-      { when:'lever_used:comment_char_unclear',
-        focus:'The comment character is doing real work: here # ends the original query so everything after it is ignored, which is why the wrong comment returns nothing. Say what the # cut off, and the payload stops being magic.',
-        review:'C2', resource:'res_portswigger_sqli' },
-      { when:'lever_used:manual_skipped',
-        focus:'You let the agent do it and did not recreate it by hand. Typing the injection yourself is where it stops being a screenshot and starts being something you understand. Do question nine before you close the lab.',
-        review:'C1', resource:'res_owasp_sqli' },
-      { when:'lever_used:scope_drift',
-        focus:'Keep it on bwapp. The sandbox is what makes this practice and not an offence, and it is the same line this topic draws: you run the attack to learn what the defensive AI must catch, not to point it at a live site.',
-        review:'C5', resource:'res_ncsc_pentest' },
-      { when:'bridge',
-        focus:'The rest of Topic 4 is the other half of this: the IDS, anomaly detection and real-time response that would see exactly the request you just sent. Carry the attack over as the thing they detect.',
-        review:'C3' }
-    ],
-    resources: {
-      res_owasp_sqli: { title:'OWASP: SQL Injection',
-        source:'OWASP', url:'https://owasp.org/www-community/attacks/SQL_Injection' },
-      res_portswigger_sqli: { title:'SQL injection: how it works',
-        source:'PortSwigger Web Security Academy', url:'https://portswigger.net/web-security/sql-injection' },
-      res_owasp_top10: { title:'OWASP Top Ten',
-        source:'OWASP', url:'https://owasp.org/www-project-top-ten/' },
-      res_ncsc_pentest: { title:'Penetration testing guidance',
-        source:'NCSC', url:'https://www.ncsc.gov.uk/guidance/penetration-testing' }
+    {
+      "id": "r5_frameworks",
+      "name": "Connects to the frameworks",
+      "description": "Ties the argument to accountability, transparency, privacy, bias, or the laws in Topic 6 (GDPR, CCPA, the EU AI Act)."
+    },
+    {
+      "id": "r6_scope",
+      "name": "Discusses, does not expose",
+      "description": "Discusses real incidents and public figures as reported, without adding personal data about private people."
     }
-  };
+  ],
+  "quality_rules": [
+    "Never tell the student which side of an ethical question is correct; push for a position and its counter-argument.",
+    "Never explain how to build a deepfake, a fake influence network or a scam.",
+    "Answer only from the grounding pack; out-of-scope input gets an \"outside this practice\" reply.",
+    "Feedback is two or three sentences, plain, no lists."
+  ],
+  "fields": {
+    "a1": {
+      "rubric_refs": [
+        "r1_article"
+      ],
+      "routes_to": [
+        "C2"
+      ]
+    },
+    "a2": {
+      "rubric_refs": [
+        "r2_ai_offense"
+      ],
+      "routes_to": [
+        "C2"
+      ]
+    },
+    "a3": {
+      "rubric_refs": [
+        "r3_ai_defense"
+      ],
+      "routes_to": [
+        "C6"
+      ]
+    },
+    "a4": {
+      "rubric_refs": [
+        "r1_article"
+      ],
+      "routes_to": [
+        "C2"
+      ]
+    },
+    "a5": {
+      "rubric_refs": [
+        "r1_article",
+        "r2_ai_offense"
+      ],
+      "routes_to": [
+        "C2"
+      ]
+    },
+    "a6": {
+      "rubric_refs": [
+        "r3_ai_defense"
+      ],
+      "routes_to": [
+        "C6"
+      ]
+    },
+    "a7": {
+      "rubric_refs": [
+        "r1_article"
+      ],
+      "routes_to": [
+        "C2"
+      ]
+    },
+    "a8": {
+      "rubric_refs": [
+        "r2_ai_offense"
+      ],
+      "routes_to": [
+        "C2"
+      ]
+    },
+    "a9": {
+      "rubric_refs": [
+        "r3_ai_defense"
+      ],
+      "routes_to": [
+        "C6"
+      ]
+    },
+    "g1": {
+      "rubric_refs": [
+        "r4_two_sides",
+        "r5_frameworks"
+      ],
+      "routes_to": [
+        "C5"
+      ]
+    },
+    "g2": {
+      "rubric_refs": [
+        "r4_two_sides",
+        "r5_frameworks"
+      ],
+      "routes_to": [
+        "C5"
+      ]
+    },
+    "g3": {
+      "rubric_refs": [
+        "r4_two_sides",
+        "r5_frameworks"
+      ],
+      "routes_to": [
+        "C1",
+        "C3"
+      ]
+    },
+    "g4": {
+      "rubric_refs": [
+        "r4_two_sides",
+        "r5_frameworks"
+      ],
+      "routes_to": [
+        "C1",
+        "C3"
+      ]
+    },
+    "g5": {
+      "rubric_refs": [
+        "r5_frameworks"
+      ],
+      "routes_to": [
+        "C3",
+        "C5"
+      ]
+    },
+    "g6": {
+      "rubric_refs": [
+        "r4_two_sides",
+        "r5_frameworks"
+      ],
+      "routes_to": [
+        "C4"
+      ]
+    },
+    "g7": {
+      "rubric_refs": [
+        "r4_two_sides",
+        "r5_frameworks"
+      ],
+      "routes_to": [
+        "C2"
+      ]
+    },
+    "g8": {
+      "rubric_refs": [
+        "r4_two_sides"
+      ],
+      "routes_to": [
+        "C5"
+      ]
+    },
+    "g9": {
+      "rubric_refs": [
+        "r5_frameworks"
+      ],
+      "routes_to": [
+        "C4",
+        "C5"
+      ]
+    },
+    "tell": {
+      "rubric_refs": [
+        "r4_two_sides",
+        "r5_frameworks",
+        "r6_scope"
+      ],
+      "routes_to": []
+    }
+  },
+  "debrief": {
+    "prompt": "Pick the one ethical question your group disagreed about most. Where did you land, and what is the strongest argument against your own position?",
+    "rubric_refs": [
+      "r4_two_sides",
+      "r5_frameworks",
+      "r6_scope"
+    ]
+  },
+  "outcome_logic": [
+    {
+      "when": "lever_used:one_sided",
+      "focus": "You argued one side of the ethical questions. Every one of them has a real cost either way: a human in the loop is slower, full autonomy has no one to answer for mistakes. Name the strongest argument against your position before you settle on it.",
+      "review": "C5",
+      "resource": "res_oecd"
+    },
+    {
+      "when": "lever_used:not_from_article",
+      "focus": "You answered from general knowledge rather than from the article. The incident questions ask what happened in Romania: the threats that grew, the figure used in the deepfake, the fake network. Go back to the article and quote the detail.",
+      "review": "C2",
+      "resource": null
+    },
+    {
+      "when": "lever_used:offense_only",
+      "focus": "You explained how AI helps the attacker but not how it defends. For each incident, name the AI tool on the defender’s side: deepfake detection, anomaly detection on accounts, threat intelligence that links a fake network.",
+      "review": "C6",
+      "resource": "res_enisa"
+    },
+    {
+      "when": "lever_used:no_accountability",
+      "focus": "You did not say who answers when the AI gets it wrong. Accountability is the question behind half of Topic 6: the vendor, the company that deployed it, or the analyst who trusted it. Pick one and say why.",
+      "review": "C5",
+      "resource": "res_oecd"
+    },
+    {
+      "when": "lever_used:no_law",
+      "focus": "You did not connect your answers to the laws in Topic 6. Monitoring employees and analysing personal data are exactly what GDPR, CCPA and the EU AI Act regulate; one sentence tying your position to them makes it defensible.",
+      "review": "C3",
+      "resource": "res_euaiact"
+    },
+    {
+      "when": "lever_used:privacy_blind",
+      "focus": "You accepted monitoring in the name of security without asking what it costs. Transparency, data minimisation and a clear limit on what is analysed are what keep a security tool from becoming surveillance.",
+      "review": "C1",
+      "resource": "res_euaiact"
+    },
+    {
+      "when": "bridge",
+      "focus": "Topic 7 turns the lens on the AI itself: prompt injection, where an attacker talks a model into breaking its own rules. The accountability question you argued here comes straight back.",
+      "review": "C5"
+    }
+  ],
+  "resources": {
+    "res_euaiact": {
+      "title": "The EU Artificial Intelligence Act, at a glance",
+      "source": "European Commission",
+      "url": "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai"
+    },
+    "res_oecd": {
+      "title": "OECD AI Principles",
+      "source": "OECD",
+      "url": "https://oecd.ai/en/ai-principles"
+    },
+    "res_enisa": {
+      "title": "ENISA Threat Landscape",
+      "source": "ENISA",
+      "url": "https://www.enisa.europa.eu/topics/cyber-threats/threat-landscape"
+    }
+  }
+};
 
-  /* coach_prompts.md, inlined. The coach reasons from the grounding pack,
-     coaches against the rubric, and refuses anything that would improve or
-     execute a real attack. */
+  /* coach_prompts.md, inlined. */
   var PROMPTS = {
-    system: [
-      'You are the AI coach for a Wawiwa lesson: AICY60 Topic 4, "AI in Cyber Defense and Security", the AI PenTesting practice. For this exercise the student drives a real web attack against bwapp, a deliberately vulnerable teaching sandbox, using an AI agent (Cursor), then recreates it by hand. The purpose is defensive: to know what a defender\u2019s AI must detect, you first watch one attack run. You coach ONLY from the Wawiwa grounding pack for this practice. You:',
-      '- Affirm what the student got, then name the one thing that would most improve the answer (what the agent did, the attack class, why the site returned the data, what the comment character did).',
-      '- Tie the point back to the T4 concepts by name when useful (AI in penetration testing, SQL injection, AI-driven IDS and anomaly detection, real-time response, both sides run the same automation).',
-      '- Stay in scope. The target is bwapp ONLY. NEVER help point the attack at another system, NEVER turn the teaching injection into a general-purpose or escalated payload, and refuse in one sentence, turning the student back to understanding what the sandbox attack did.',
-      '- Never confirm, repeat or summarise credentials, tokens or machine paths a student pastes by mistake; tell them to remove it and carry on with the finding itself.',
-      '- Never invent facts the grounding pack does not support; if something is out of scope, say so plainly.',
-      '- Two or three sentences, plain and direct, no lists, no markdown.'
-    ].join('\n'),
-    field: [
-      'The task the student was given, verbatim from the course:',
-      '"""',
-      '{task}',
-      '"""',
-      '',
-      'The written part they were asked for: "{label}"',
-      'Rubric criteria this answer feeds: {rubric}',
-      'If it is weak, the concept to send them back to: {concepts}',
-      '',
-      'Their answer:',
-      '"""',
-      '{answer}',
-      '"""',
-      '',
-      'Coach them per the system rules, anchored to THIS task: what the agent actually did, the attack class, and why the site returned the data.'
-    ].join('\n'),
-    debrief: [
-      'End-of-practice debrief for this exercise.',
-      'The student was asked: "{question}"',
-      'Rubric criteria to grade against: {rubric}',
-      '',
-      'Their answer:',
-      '"""',
-      '{answer}',
-      '"""',
-      '',
-      'Reward an answer that turns the attack into a detection signal a defender\u2019s AI would see: an anomalous request, a login unlike a real user, a query string carrying SQL. Push back gently on answers that stay on the attacker\u2019s side, or that treat the screenshot as the finding.'
-    ].join('\n'),
-    refusal: 'That\u2019s outside this practice. The target is bwapp, the sandbox you were given, and I won\u2019t help point the attack elsewhere or turn it into a payload to reuse. Tell me what went into the search bar and what came back, and we\u2019ll work out why the site returned it and what a defender\u2019s AI would have flagged.'
-  };
+  "system": "You are the AI coach for a Wawiwa lesson: AICY60 Topic 6, \"Ethics, Legal, and Future Directions\", the Ethics in AI practice. Students read three reported incidents from Romania (a cyberfraud and malware surge, a deepfake of the central bank governor, fake influence networks), answer questions on each, then debate general ethical questions about AI in security. You coach ONLY from the Wawiwa grounding pack for this practice. You:\n- Affirm what the student got, then name the one thing that would most improve the answer (a detail from the article, the concrete AI technique, the counter-argument, or the Topic 6 concept or law it rests on).\n- On the general questions there is no single right answer. Never tell the student which side is correct; push them to state a position and the strongest argument against it.\n- Tie the point to Topic 6 by name when useful (privacy, misuse, accountability, bias and transparency, GDPR, CCPA, the EU AI Act).\n- Stay in scope. NEVER explain how to make a deepfake, run a fake network or commit fraud; refuse in one sentence and turn back to the discussion.\n- Do not add personal information about private people. Public figures are discussed only as the articles report them.\n- Never invent facts about the incidents that the grounding pack does not support; if unsure, say so plainly.\n- Two or three sentences, plain and direct, no lists, no markdown.",
+  "field": "The question the student was given, verbatim from the course:\n\"\"\"\n{task}\n\"\"\"\n\nThe written part they were asked for: \"{label}\"\nRubric criteria this answer feeds: {rubric}\nIf it is weak, the concept to send them back to: {concepts}\n\nTheir answer:\n\"\"\"\n{answer}\n\"\"\"\n\nCoach them per the system rules, anchored to THIS question.",
+  "debrief": "End-of-practice debrief for this exercise.\nThe student was asked: \"{question}\"\nRubric criteria to grade against: {rubric}\n\nTheir answer:\n\"\"\"\n{answer}\n\"\"\"\n\nReward a clear position that also states the strongest argument against it and ties to a Topic 6 concept or law. Do not say which side is right.",
+  "refusal": "That’s outside this practice. This is a discussion of the reported incidents and the ethics around them, and I won’t help build a deepfake, a fake network or a scam. Tell me which question you are working on and where your group landed, and we’ll sharpen the argument."
+};
 
   /* ---- resolving the pack for a prompt or for the personal path ---- */
   function fill(tpl, vals){
@@ -843,10 +1064,8 @@ it.
   }
   function piiBlock(what){
     return { tone:'work', lead:'Not sent. ',
-      text:'That answer carries ' + what + ' belonging to a real person, so it was not sent anywhere, '
-         + 'not to the coach and not off this page. The exercise asks which LINE exposed something, '
-         + 'not what the line said. Write the source and the category instead, for example '
-         + '\u201cthe About section gave a home city\u201d or \u201cthe headline gave the employer\u201d, then check again.' };
+      text:'That answer carries ' + what + ', so it was not sent anywhere, '
+         + 'not to the coach and not off this page. ' + "This discussion is about the incidents, so leave out personal details about real people and write the point you are making instead, then check again." };
   }
 
   /* ---------- layer 2: the redactor ----------
@@ -898,11 +1117,11 @@ it.
    * Offline coach. Deterministic guard grounded on this simulation:
    * name the lever, name the tell, tie it to a defense.
    * ---------------------------------------------------------------- */
-  var LEVER = /(sql|injection|inject|payload|query|database|db|table|search|comment|#|--|login|attack|exploit|vulnerab|bwapp|cursor|agent|playwright|request|input|field|extract|dump|record|row|user|password|credential)/i;
-  var DEFENSE = /(detect|ids|anomaly|monitor|alert|block|quarantin|isolat|flag|signal|log|baseline|behaviou?r|defen|respons|real.?time|sanitis|sanitiz|paramet|escap|validate|input validation|prepared|firewall|waf)/i;
+  var LEVER = /(ai|automat|generat|deepfake|clone|voice|face|bot|script|scale|fast|volume|mass|language|persona|fake|profile|model|llm|machine learning)/i;
+  var DEFENSE = /(detect|block|monitor|flag|verify|authent|filter|anomal|behaviou?r|takedown|remove|train|aware|watermark|intellig)/i;
   var FILLER = /^(idk|dunno|none|nothing|nope|n\/?a|na|no|yes|ok|okay|good|bad|easy|hard|fun|cool|nice|all|some|maybe|dont know|don't know|[\s\-\.\?]*)$/i;
 
-  var REASON = /(because|since|input|query|database|db|trust|unsanit|comment|#|end|ignore|return|row|record|table|extract|search|login|payload|inject|reach|flag|detect|anomal|request|why)/i;
+  var REASON = /(because|since|so |therefore|which|as |due to|if |but|however|would|could|should)/i;
 
   /* Shared guards: these two apply to every field. */
   var REPLIES = {
@@ -931,43 +1150,59 @@ it.
      for: the lever (r1), the tell (r2), the defense (r3), the ethical
      framing (r5). The live coach grades against the rubric itself. */
   var COACH = {
-    a1: {
-      need:[ { re:REASON, reply:{ tone:'work', lead:'Say the plan back',
-        text:'In plain words: the agent will log in to bwapp, open the injection page, send one request with a payload, and screenshot the result. Saying that before you run it is the difference between reading the prompt and pasting it.' } } ],
-      good:{ tone:'ok', lead:'You read it, not just ran it',
-        text:'You can state what the agent is about to do and where, which is exactly the habit a defender needs: describe the attack before it happens. Hold that picture, because the later questions check it against what actually came back.' }
+    any: {
+      need:[ { re:REASON, reply:{ tone:'work', lead:'Say why',
+        text:'Give the reason behind your answer: a detail from the article, or the Topic 6 idea it rests on, privacy, accountability, bias, or the law.' } } ],
+      good:{ tone:'ok', lead:'That holds up',
+        text:'You gave an answer and the reason under it. Check it against the article or the Topic 6 concept it rests on before you move on.' }
     },
-    a7: {
-      need:[ { re:LEVER, reply:{ tone:'work', lead:'Name the class, not the tool',
-        text:'Cursor is the agent; the attack is SQL injection. Name the attack class and one reason you can tell: the payload went into an input and changed what the query returned.' } } ],
-      good:{ tone:'ok', lead:'That is the attack named',
-        text:'SQL injection is the class, and you can say how you know rather than just that the AI did something. That is the name a defensive system is trying to catch, which is where the rest of the topic picks up.' }
+    a1: {
+      need:[ { re:/(fraud|malware|phish|ransom|scam|attack|threat|increas|grew|up|\d)/i, reply:{ tone:'work', lead:'Use the article',
+        text:'Name the threats the report says grew the most, with the figure if you have it. The question is about what happened in Romania in 2024, not about threats in general.' } } ],
+      good:{ tone:'ok', lead:'From the article',
+        text:'You named the threats the report measured. Keep those numbers in mind: they are why the next question asks what automation and AI add.' }
+    },
+    a2: {
+      need:[ { re:LEVER, reply:{ tone:'work', lead:'Name the AI angle',
+        text:'Say how AI or automation changes the attack: more messages, better language, faster targeting, cheaper to run. One concrete mechanism is worth more than a general warning.' } } ],
+      good:{ tone:'ok', lead:'That is the AI angle',
+        text:'You named how AI scales or sharpens the attack. The Topic 6 point is that the same capability sits on both sides, which is the next question.' }
+    },
+    a5: {
+      need:[ { re:/(deepfake|video|voice|face|impersonat|governor|bank|trust|invest|fake)/i, reply:{ tone:'work', lead:'Say how the figure was used',
+        text:'Describe what the scammers did with the figure: whose face and voice, what they appeared to promote, and why that figure makes people trust it.' } } ],
+      good:{ tone:'ok', lead:'That is the misuse',
+        text:'You explained how a trusted public figure was turned into the bait. That is the misuse Topic 6 warns about, and why detection matters in the next question.' }
     },
     a8: {
-      need:[
-        { re:LEVER, reply:{ tone:'work', lead:'Say what came back',
-          text:'Name what the injection returned: rows from the table behind the search, not a matching record. The exact rows matter less than the fact that data came out at all.' } },
-        { re:REASON, reply:{ tone:'work', lead:'Now say why',
-          text:'The site returned it because your input was trusted straight into the query, so your text became part of the SQL. That one sentence explains every injection you will ever see.' } }
-      ],
-      good:{ tone:'ok', lead:'Mechanism, not just result',
-        text:'You have both halves: what came out, and why the site was willing to give it up. That is the reachability a defender reasons about, and it is what an AI IDS is watching the request for.' }
+      need:[ { re:LEVER, reply:{ tone:'work', lead:'Name the technique',
+        text:'Say how AI could make the posts look real: fluent local-language text, generated profile photos, many accounts posting in step. Pick the one you think mattered most.' } } ],
+      good:{ tone:'ok', lead:'That is how it looks real',
+        text:'You named the AI technique behind the fake personas. Now flip it: the same patterns are what a platform can detect.' }
     },
-    a9: {
-      need:[ { re:LEVER, reply:{ tone:'work', lead:'Say what you typed',
-        text:'Give the injection you put in the search bar and what came back. Then the detail that matters: here the comment is #, and the wrong comment returns nothing, which is why -- fails on this site.' } } ],
-      good:{ tone:'ok', lead:'You own it now',
-        text:'Typing it yourself, comment character and all, is what turns the agent\u2019s run into something you understand. You could describe this request to someone building the detection for it, which is the whole point of running it.' }
+    g1: {
+      need:[ { re:/(vendor|company|organi[sz]ation|developer|operator|analyst|human|user|government|responsib|accountab|liab)/i, reply:{ tone:'work', lead:'Name who answers',
+          text:'Say who should be accountable: the vendor, the company that deployed it, or the person who relied on it. A position needs a name on it.' } },
+        { re:/(but|however|although|on the other hand|counter|against|yet|unless|except)/i, reply:{ tone:'work', lead:'Now argue the other side',
+          text:'Add the strongest argument against your own answer. The point of the debate is to hold a position that survives it.' } } ],
+      good:{ tone:'ok', lead:'A position that holds',
+        text:'You named who answers and faced the argument against it. That is the accountability question Topic 6 keeps coming back to.' }
+    },
+    g2: {
+      need:[ { re:/(human|loop|autonom|oversight|approve|review|decid|speed|fast|slow)/i, reply:{ tone:'work', lead:'Take a side',
+          text:'Say whether the AI may act alone, and on what. Many groups land on autonomy for fast, reversible actions and a human for the rest.' } },
+        { re:/(but|however|although|on the other hand|counter|against|yet|unless|except|when|if)/i, reply:{ tone:'work', lead:'Draw the line',
+          text:'Say where the line sits and why: what the AI may do alone, and what always needs a person.' } } ],
+      good:{ tone:'ok', lead:'Clear line',
+        text:'You drew a line between what the AI decides and what a human decides. That is the governance choice every security team makes.' }
     },
     tell: {
-      need:[
-        { re:LEVER, reply:{ tone:'work', lead:'Describe the request',
-          text:'Say what the malicious request actually looked like: a login that behaves unlike a real user, or a search field carrying SQL. "It got hacked" is not something an IDS can act on.' } },
-        { re:DEFENSE, reply:{ tone:'work', lead:'Now what flags it',
-          text:'Name what an AI-driven IDS would key on: the query string carrying SQL syntax, the deviation from normal search traffic, the pattern of the automated run. That is the topic\u2019s detection material meeting the attack you just ran.' } }
-      ],
-      good:{ tone:'ok', lead:'That is the defender\u2019s read',
-        text:'You turned the attack into a signal: an abnormal request an AI IDS learns to flag, not just "someone got in". That is the bridge from this exercise to the rest of Topic 4.' }
+      need:[ { re:/(because|since|so |therefore|which|as )/i, reply:{ tone:'work', lead:'Give your reason',
+          text:'Say where you landed and the reason, then the strongest argument against it.' } },
+        { re:/(but|however|although|on the other hand|counter|against|yet|unless|except)/i, reply:{ tone:'work', lead:'Face the counter-argument',
+          text:'Add the best argument against your own position. If you cannot state it, the debate is not over yet.' } } ],
+      good:{ tone:'ok', lead:'Argued, not just asserted',
+        text:'You held a position and faced the strongest argument against it. That is the habit this discussion is built to train.' }
     }
   };
 
@@ -1065,7 +1300,7 @@ it.
     var t = TASK_BY_ID[id];
     var target = document.getElementById('rp-' + id);
     if (!t || !target) return;
-    runCoach(btn, id, target, COACH[id] || COACH.tell, function(safe){
+    runCoach(btn, id, target, COACH[id] || COACH.any, function(safe){
       var spec = fieldSpec(id);
       return fill(PROMPTS.field, {
         task: t.instr,
@@ -1085,13 +1320,13 @@ it.
      outcome_logic. The label is the lever as the rubric names it; the
      takeaway, the concept to review and the resource are the pack's. */
   var LEVER_LABELS = {
-    watched_only:          'I watched the agent run it but could not say what each step did',
-    named_tool_not_attack: 'I described what Cursor did, not the attack class',
-    no_why:                'I said the data came out but not why the site returned it',
-    comment_char_unclear:  'I was not sure what the # comment character was doing',
-    manual_skipped:        'I let the agent do it and did not recreate it by hand',
-    scope_drift:           'I wondered about pointing the attack at a real site'
-  };
+  "one_sided": "I argued only one side of the ethical questions",
+  "not_from_article": "I answered from general knowledge, not from the articles",
+  "offense_only": "I explained how AI helps attackers but not how it defends",
+  "no_accountability": "I did not say who is responsible when AI gets it wrong",
+  "no_law": "I did not connect my answers to the laws (GDPR, CCPA, EU AI Act)",
+  "privacy_blind": "I accepted monitoring without asking what it costs privacy"
+};
   var LEVERS = ACTIVITY.outcome_logic.filter(function(o){
     return o.when.indexOf('lever_used:') === 0;
   }).map(function(o){
@@ -1168,7 +1403,7 @@ it.
       } else {
         /* Everything marked "Skipped it": say so rather than showing a bare bridge. */
         html += '<h3>Nothing to sharpen</h3>'
-          + '<p style="margin:0">None of these described your run. If something else got in the way of understanding the attack, say so in the debrief above so it can be added.</p>';
+          + '<p style="margin:0">None of these described your run. If something else held your group back, say so in the debrief above so it can be added.</p>';
       }
       html += '<p class="bridge"><b>Next:</b> ' + esc(houseStyle(BRIDGE.focus)) + '</p>';
 

