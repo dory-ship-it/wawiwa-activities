@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Is the System Being Asked to Do?</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  /* Unchanged from the Session 1 and Session 2 activities, so all three sit
+     together in the same course environment. Teal is the activity identity,
+     green marks a correct call, red a wrong one, blue is the request being
+     shown, purple is reserved for anything a model produces. */
+  --bg:#F5F7FA;--surface:#fff;
+  --ink:#22304A;--text:#22304A;--text-dim:#4A566B;--text-light:#778396;
+  --blue:#4E7FC1;--blue-bg:#EEF4FB;
+  --teal:#3FA8B8;--teal-bg:#EBF6F8;--teal-dark:#33909E;
+  --green:#5CAB88;--green-bg:#EEF7F2;--green-dark:#4A9473;
+  --purple:#8A73C7;--purple-bg:#F4F1FC;
+  --amber:#C98B45;--amber-bg:#FBF3E9;
+  --red:#C75A55;--red-bg:#FBEEED;--red-dark:#A8443F;
+  --line:#DDE4ED;
+  --radius:14px;--shadow:0 2px 12px rgba(34,48,74,.08);--shadow-lg:0 8px 30px rgba(34,48,74,.13);
+}
+body{font-family:'Heebo','Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.screen{display:none;min-height:100vh;padding:2.5rem;}
+.screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+h1,h2{font-family:inherit;}
+.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--teal);}
+
+.btn{
+  padding:1rem 3rem;border-radius:10px;border:none;cursor:pointer;
+  font-family:inherit;font-size:1.1rem;font-weight:800;
+  background:var(--teal);color:#fff;transition:all .2s;
+}
+.btn:hover{background:var(--teal-dark);transform:translateY(-2px);box-shadow:0 8px 22px rgba(63,168,184,.32);}
+.btn.next{background:var(--ink);}
+.btn.next:hover{background:#33456A;box-shadow:0 8px 22px rgba(34,48,74,.25);}
+.btn:focus-visible,.opt:focus-visible{outline:3px solid var(--teal);outline-offset:3px;}
+
+/* WELCOME */
+#welcome{text-align:center;gap:1.8rem;}
+#welcome .divider-line{width:44px;height:4px;background:var(--teal);border-radius:2px;}
+#welcome h1{font-size:3.6rem;line-height:1.1;font-weight:900;color:var(--ink);letter-spacing:-.02em;max-width:16em;}
+#welcome h1 em{font-style:normal;color:var(--teal);}
+#welcome p{font-size:1.35rem;color:var(--text-dim);max-width:24em;line-height:1.55;}
+
+/* QUESTION */
+#round-screen{gap:1.2rem;padding:2rem 2.2rem;max-width:1040px;margin:0 auto;width:100%;justify-content:flex-start;}
+.round-header{text-align:center;width:100%;}
+.round-counter{font-size:.73rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:2.5px;}
+.progress-bar{display:flex;gap:.5rem;justify-content:center;margin-top:.6rem;}
+.progress-dot{width:10px;height:10px;border-radius:50%;background:#dde1ec;transition:all .3s;}
+.progress-dot.active{background:var(--teal);transform:scale(1.35);}
+/* Seen, not scored. The dot records where the class has been, and nothing
+   about whether they were right. */
+.progress-dot.done{background:var(--teal);opacity:.45;}
+
+.situation{
+  width:100%;background:var(--surface);border-radius:var(--radius);
+  padding:1.5rem 1.9rem;box-shadow:var(--shadow);border-left:6px solid var(--teal);
+}
+.situation .stitle{
+  font-size:.72rem;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--teal);margin-bottom:.9rem;
+}
+/* The request itself. It is quoted, not described, because deciding what a
+   request is actually asking for is the whole exercise. */
+.request{background:var(--blue-bg);border-left:4px solid var(--blue);border-radius:8px;
+      padding:1.1rem 1.4rem;}
+.request .rlabel{font-size:.68rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+      color:var(--blue);margin-bottom:.45rem;}
+.request .rtext{font-size:1.55rem;line-height:1.45;color:var(--ink);font-weight:600;}
+.context{margin-top:.9rem;font-size:1.02rem;color:var(--text-dim);line-height:1.55;}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;width:100%;}
+.opt{
+  display:flex;align-items:center;gap:1rem;width:100%;text-align:left;cursor:pointer;
+  background:var(--surface);border:2px solid var(--line);border-radius:10px;
+  padding:.85rem 1.3rem;font-family:inherit;font-size:1.12rem;
+  color:var(--ink);font-weight:600;transition:all .18s;
+}
+.opt.wide{grid-column:1 / -1;}
+.opt:hover:not(:disabled){border-color:var(--teal);background:var(--teal-bg);transform:translateX(3px);}
+.opt:disabled{cursor:default;transform:none;}
+.opt .k{
+  flex-shrink:0;width:32px;height:32px;border-radius:9px;background:var(--bg);
+  color:var(--text-light);display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;font-weight:800;transition:all .18s;
+}
+/* Colour and shape together, so the signal survives a projector and a
+   learner who does not separate red from green. */
+.opt.right{border-color:var(--green);background:var(--green-bg);}
+.opt.right .k{background:var(--green);color:#fff;border-radius:50%;}
+.opt.wrong{border-color:var(--red);background:var(--red-bg);}
+.opt.wrong .k{background:var(--red);color:#fff;border-radius:50%;}
+.opt.dim{opacity:.4;}
+
+/* REVEAL */
+#reveal{width:100%;display:flex;flex-direction:column;gap:1rem;}
+.reveal-card{
+  width:100%;background:var(--surface);border-radius:var(--radius);
+  padding:1.3rem 1.7rem;box-shadow:var(--shadow-lg);border-left:6px solid var(--green);
+}
+.reveal-card .label{
+  font-size:.7rem;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--green);margin-bottom:.5rem;
+}
+.reveal-card .head{display:flex;align-items:center;gap:.7rem;margin-bottom:.6rem;}
+.reveal-card .badge{
+  width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;flex-shrink:0;
+}
+.reveal-card .headline{font-size:1.3rem;font-weight:800;color:var(--ink);line-height:1.3;}
+.reveal-card p{font-size:1.08rem;line-height:1.65;color:var(--text-dim);}
+.reveal-actions{display:flex;justify-content:center;}
+
+/* CLOSE */
+#final{text-align:center;gap:1.3rem;}
+#final h2{font-size:2.5rem;font-weight:900;color:var(--ink);line-height:1.15;max-width:17em;}
+.recap{
+  max-width:700px;width:100%;background:var(--surface);border-radius:var(--radius);
+  padding:1.4rem 1.8rem;box-shadow:var(--shadow);text-align:left;
+}
+.recap-point{display:flex;gap:.8rem;padding:.6rem 0;font-size:1.02rem;line-height:1.6;color:var(--text-dim);}
+.recap-point+.recap-point{border-top:1px solid var(--line);}
+.recap-point .num{font-weight:900;color:var(--teal);flex-shrink:0;}
+.recap-point strong{color:var(--ink);}
+.hint{font-size:.82rem;color:var(--text-light);}
+
+@media(max-width:860px){
+  .opts{grid-template-columns:1fr;}
+}
+@media(max-width:768px){
+  .screen{padding:1.4rem;}
+  #welcome h1{font-size:2.2rem;}
+  #welcome p{font-size:1.1rem;}
+  .request .rtext{font-size:1.18rem;}
+  .opt{font-size:1rem;}
+  #final h2{font-size:1.8rem;}
+}
+</style>
+</head>
+<body>
+
+<div id="welcome" class="screen active">
+  <div class="eyebrow">AI for Smarter Data Work &middot; Session 3</div>
+  <div class="divider-line"></div>
+  <h1>What Is the System <em>Being Asked to Do?</em></h1>
+  <p>Five requests about the same receipt. Decide what kind of task each one really is.</p>
+  <button class="btn" onclick="startActivity()">Start</button>
+</div>
+
+<div id="round-screen" class="screen">
+  <div class="round-header">
+    <div class="round-counter" id="roundCounter">1 / 5</div>
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="situation" id="situation"></div>
+  <div class="opts" id="opts"></div>
+  <div id="reveal"></div>
+  <p class="hint" id="hint">Press 1 to 5 to choose.</p>
+</div>
+
+<div id="final" class="screen">
+  <div class="eyebrow">All five requests</div>
+  <h2>Name the task before you choose the tool.</h2>
+  <div class="recap">
+    <div class="recap-point"><span class="num">1</span><span><strong>Recognition reads.</strong> Turning marks into characters is one job, and it has finished before any field is filled.</span></div>
+    <div class="recap-point"><span class="num">2</span><span><strong>Extraction places values into a structure you defined.</strong> The structure has to exist first, or the system chooses it for you.</span></div>
+    <div class="recap-point"><span class="num">3</span><span><strong>Interpretation decides meaning.</strong> If the answer is not in the document, capturing it was never the question.</span></div>
+    <div class="recap-point"><span class="num">4</span><span><strong>A deterministic check settles what is exact.</strong> Same inputs, same answer, every time. A spreadsheet should own it.</span></div>
+    <div class="recap-point"><span class="num">5</span><span><strong>Need more information is a professional result.</strong> When the source does not hold the answer, saying so is the finding.</span></div>
+  </div>
+  <button class="btn" onclick="startActivity()">Play again</button>
+</div>
+
+<script>
+/* The same five options appear on every request, in the same order. Nothing is
+   filtered out for being irrelevant: choosing from the whole framework each
+   time is part of what is being practised. */
+const OPTIONS = [
+  "Recognition",
+  "Extraction",
+  "Interpretation",
+  "Deterministic Check",
+  "Need More Information"
+];
+
+/* One receipt, five requests. The option list never changes order, so the
+   cases are ordered instead. Running them in the order they are listed in the
+   lesson specification would have made the correct answer the first option,
+   then the second, then the third, and the class would have stopped reading
+   the request by the fourth case. The correct answers here fall at 2, 1, 4, 3
+   and 5. The two clean cases come first and the two that need judgment come
+   last, which is the order the course uses everywhere else. */
+const CASES = [
+  {
+    request: "Put the visible date and total into defined columns.",
+    context: "Document_Date_As_Shown and Total_As_Shown are already in the approved schema.",
+    answer: 1,
+    why: "The structure already exists and the values are copied into it. This is the task Session 03 is about, and it is only possible because the columns were defined first."
+  },
+  {
+    request: "Read the faded merchant name at the top of the receipt.",
+    context: "The name is printed. The thermal paper has aged and parts of the line are pale.",
+    answer: 0,
+    why: "Turning marks on paper into characters is text recognition. Nothing has been placed into a field yet, and no structure has been decided."
+  },
+  {
+    request: "Check whether subtotal plus tax equals the total.",
+    context: "All three amounts have already been captured as numbers.",
+    answer: 3,
+    why: "The rule is exact and the same inputs always produce the same answer. A spreadsheet should settle it, not a model."
+  },
+  {
+    request: "Decide whether the meal complies with company policy.",
+    context: "The receipt shows a restaurant, a date and an amount.",
+    answer: 2,
+    why: "The document does not contain the policy. This is a judgment about meaning, it needs information the source never had, and it belongs to a later step."
+  },
+  {
+    request: "Determine the employee from a receipt that contains no employee information.",
+    context: "The receipt shows a card ending 4417 and a server name. Neither identifies who submitted the claim.",
+    answer: 4,
+    why: "The answer is not in the source. Employee identity comes from the submission metadata, and a card number is not an employee."
+  }
+];
+
+let current = 0;
+let seen = [];
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startActivity(){
+  current = 0;
+  seen = [];
+  showCase();
+  showScreen('round-screen');
+}
+
+function dots(){
+  return CASES.map((_, i) => {
+    const cls = i === current ? 'active' : (seen.includes(i) ? 'done' : '');
+    return `<div class="progress-dot ${cls}"></div>`;
+  }).join('');
+}
+
+function situationHTML(c){
+  return `<div class="stitle">The request</div>
+    <div class="request">
+      <div class="rlabel">What someone asked for</div>
+      <div class="rtext">${c.request}</div>
+    </div>
+    <div class="context">${c.context}</div>`;
+}
+
+function showCase(){
+  const c = CASES[current];
+  document.getElementById('roundCounter').textContent = `${current + 1} / ${CASES.length}`;
+  document.getElementById('progressBar').innerHTML = dots();
+  document.getElementById('situation').innerHTML = situationHTML(c);
+  document.getElementById('reveal').innerHTML = '';
+  document.getElementById('hint').style.visibility = 'visible';
+  document.getElementById('opts').innerHTML = OPTIONS.map((o, i) =>
+    `<button class="opt${i === OPTIONS.length - 1 ? ' wide' : ''}" onclick="choose(${i})">
+       <span class="k">${i + 1}</span><span>${o}</span></button>`).join('');
+}
+
+function choose(n){
+  const c = CASES[current];
+  const buttons = document.querySelectorAll('#opts .opt');
+  if (buttons[0].disabled) return;
+  buttons.forEach((b, i) => {
+    b.disabled = true;
+    if (i === c.answer){ b.classList.add('right'); b.querySelector('.k').textContent = '✓'; }
+    else if (i === n){ b.classList.add('wrong'); b.querySelector('.k').textContent = '✕'; }
+    else { b.classList.add('dim'); }
+  });
+  if (!seen.includes(current)) seen.push(current);
+  document.getElementById('hint').style.visibility = 'hidden';
+  const last = current >= CASES.length - 1;
+  document.getElementById('reveal').innerHTML =
+    `<div class="reveal-card">
+       <div class="label">The answer</div>
+       <div class="head">
+         <div class="badge">${c.answer + 1}</div>
+         <div class="headline">${OPTIONS[c.answer]}</div>
+       </div>
+       <p>${c.why}</p>
+     </div>
+     <div class="reveal-actions">
+       <button class="btn next" id="nextBtn" onclick="nextCase()">${last ? 'Close' : 'Next request'}</button>
+     </div>`;
+  document.getElementById('nextBtn').focus();
+}
+
+function nextCase(){
+  if (current >= CASES.length - 1){ showScreen('final'); return; }
+  current += 1;
+  showCase();
+}
+
+document.addEventListener('keydown', e => {
+  const round = document.getElementById('round-screen').classList.contains('active');
+  if (!round) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const active = document.querySelector('.screen.active .btn');
+      if (active) { active.click(); e.preventDefault(); }
+    }
+    return;
+  }
+  if (e.key >= '1' && e.key <= String(OPTIONS.length)) {
+    choose(parseInt(e.key, 10) - 1);
+  } else if (e.key === 'Enter' || e.key === ' ') {
+    const nb = document.getElementById('nextBtn');
+    if (nb) { nb.click(); e.preventDefault(); }
+  }
+});
+</script>
+</body>
+</html>
