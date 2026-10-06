@@ -341,6 +341,26 @@ function applyOverrides(n, layout, content) {
   if (n === 28) {
     // label 4 maps to SEO Specialist: the deck's wording
     const t = content.text['6PENKDN5Dre']; if (t) t[0].runs = [{ t: 'AEO + Do faster, more' }];
+    // the feedback layers carry no panel in the published data and were unreadable over the slide:
+    // dim the slide and put the title, message and buttons on a white card (Dor, 6 Oct 2026)
+    const fb = layout.dragdrop?.feedback || {};
+    for (const [kind, lid] of Object.entries(fb)) {
+      const L = layout.layers[lid]; if (!L) continue;
+      L.objects.unshift(
+        { id: lid + '_dim', kind: 'shape', svg: null, x: 0, y: 0, w: 960, h: 540, box: { fill: 'rgba(0,0,0,0.30)' } },
+        { id: lid + '_panel', kind: 'shape', svg: null, x: 193, y: 206, w: 574, h: 200, box: { fill: '#FFFFFF', stroke: '#BFBFBF', strokeWidth: 1, radius: 6, shadow: true } },
+      );
+      if (kind === 'incorrect') {
+        const cont = L.objects.find(o => o.text && content.text[o.id]?.[0]?.runs?.[0]?.t === 'Continue');
+        if (cont) {
+          cont.x = 490;
+          const again = { id: lid + '_again', kind: 'shape', svg: null, x: 303, y: cont.y, w: cont.w, h: cont.h, button: true, box: { fill: '#FFFFFF', stroke: '#A6A6A6', strokeWidth: 1, radius: 4 },
+            text: { ...cont.text, paragraphs: cont.text.paragraphs.map(p => ({ ...p })) }, on: { click: [{ reset: 'dragdrop' }, { hideLayer: 'self' }] } };
+          L.objects.push(again);
+          content.text[again.id] = [{ runs: [{ t: 'Try Again' }] }];
+        }
+      }
+    }
   }
   if (n === 13) {
     // The Storyline shows the deck's "What can LLMs do nowadays?" list as a picture (teal card).

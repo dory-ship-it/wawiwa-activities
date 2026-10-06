@@ -127,6 +127,7 @@ class ScreenInstance {
       wrap.style.border = b.stroke ? `${b.strokeWidth || 1}px solid ${b.stroke}` : '';
       wrap.style.borderRadius = (b.radius || 0) + 'px';
       wrap.style.boxSizing = 'border-box';
+      if (b.shadow) wrap.classList.add('box-shadow');
     }
     if (pr != null) {
       const cs = ctx.paths.Lib['commandset-' + pr];
@@ -171,7 +172,7 @@ class ScreenInstance {
     const fire = (e) => {
       if (e.target.closest && e.target.closest('input, a, iframe')) return;
       if (obj.visitable) node.visited = true;
-      this.run(obj.on?.click || [], node);
+      this.run(obj.on?.click || [], node, { userClick: true });
       repaint();
     };
     wrap.addEventListener('click', fire);
@@ -179,14 +180,15 @@ class ScreenInstance {
   }
 
   /* ---------- actions ---------- */
-  run(actions, from) {
+  run(actions, from, opts = {}) {
     for (let i = 0; i < actions.length; i++) {
       const a = actions[i];
       if (a.show) this.show(a.show, a.anim);
+      else if (a.reset === 'dragdrop') { this.dragdrop?.reset(); }
       else if (a.hide) this.hide(a.hide, a.anim);
       else if (a.showLayer) this.showLayer(a.showLayer === 'self' ? from?.layer : a.showLayer, a.hideOthers);
       else if (a.hideLayer) this.hideLayer(a.hideLayer === 'self' ? from?.layer : a.hideLayer);
-      else if (a.play) this.play(a.play);
+      else if (a.play) { const m = this.media.get(a.play); if (opts.userClick && m && !m.paused) m.pause(); else this.play(a.play); }
       else if (a.pause) this.pause(a.pause === '_this' ? from?.obj.id : a.pause);
       else if (a.seek) { const m = this.media.get(a.seek); if (m) m.currentTime = 0; }
       else if (a.toggle) { const m = this.media.get(a.toggle); if (m) { m.paused ? this.play(a.toggle) : m.pause(); } }

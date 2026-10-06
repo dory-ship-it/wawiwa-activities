@@ -22,6 +22,23 @@ export function makeDragDrop(S, dd) {
       w.addEventListener('keydown', (e) => onKey(it.id, e));
     }
     for (const t of targets) { const n = S.node(t); if (n) n.wrap.classList.add('drop-target'); }
+    shuffle();
+  }
+
+  // the labels start in a random vertical order, never the answer order
+  function shuffle() {
+    const ids = [...items.keys()];
+    const homes = ids.map(id => items.get(id).home);
+    let order;
+    do { order = homes.map((_, i) => i); for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; } }
+    while (order.every((v, i) => v === i));
+    ids.forEach((id, i) => { const it = items.get(id); it.home = { x: homes[order[i]].x, y: homes[order[i]].y }; moveTo(id, it.home.x, it.home.y); });
+  }
+
+  function reset() {
+    answered = false; dragged = false; picked = null; clearHighlight();
+    for (const [id, it] of items) { if (it.target) { occupied.delete(it.target); unlight(it); it.target = null; } S.setState(id, '_default'); it.node.wrap.classList.remove('locked'); moveTo(id, it.home.x, it.home.y); }
+    ctx.setSubmit(submit); ctx.setNavHidden(true);
   }
 
   function moveTo(itemId, x, y) { const it = items.get(itemId); it.node.wrap.style.left = x + 'px'; it.node.wrap.style.top = y + 'px'; }
@@ -101,6 +118,7 @@ export function makeDragDrop(S, dd) {
 
   return {
     mount() { init(); ctx.setSubmit(submit); ctx.setNavHidden(true); },
+    reset,
     dispose() { ctx.setSubmit(null); },
   };
 }
