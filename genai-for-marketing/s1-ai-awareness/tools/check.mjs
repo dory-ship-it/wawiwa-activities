@@ -18,6 +18,7 @@ content.screens.forEach((s, i) => {
   if (!KNOWN_TYPES.has(s.type)) problems.push(`screen ${s.n}: unknown type "${s.type}"`);
   if (!s.title) problems.push(`screen ${s.n}: missing title`);
   if (!('deckSlideId' in s)) problems.push(`screen ${s.n}: missing deckSlideId`);
+  else if (!(s.deckSlideId === null || typeof s.deckSlideId === 'string' || (Array.isArray(s.deckSlideId) && s.deckSlideId.every(x => typeof x === 'string')))) problems.push(`screen ${s.n}: deckSlideId must be null, a string or a list of strings`);
 });
 
 // every referenced file must exist
@@ -28,6 +29,8 @@ const walk = (v, path) => {
 };
 walk(content, 'content');
 const layout = JSON.parse(readFileSync(join(root, 'src/screens/layout.json'), 'utf8'));
+try { const snap = JSON.parse(readFileSync(join(root, 'content/last-sync.json'), 'utf8')); if (typeof snap.slides !== 'object') problems.push('content/last-sync.json: missing "slides"'); } catch (e) { problems.push('content/last-sync.json: ' + e.message); }
+try { const map = JSON.parse(readFileSync(join(root, 'sync/deck-mapping.json'), 'utf8')); if (!Array.isArray(map.screens) || map.screens.length !== 33) problems.push('sync/deck-mapping.json: expected 33 screens'); } catch (e) { problems.push('sync/deck-mapping.json: ' + e.message); }
 walk(layout, 'layout');
 for (let n = 2; n <= 33; n++) if (!layout.screens[n]) problems.push(`layout missing for screen ${n}`);
 

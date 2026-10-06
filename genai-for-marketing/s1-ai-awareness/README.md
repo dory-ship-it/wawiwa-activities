@@ -25,6 +25,10 @@ Awareness (Storyline to code).md` in this folder.
 | `tools/check.mjs` | build check: content schema, referenced files exist, no year in footers, "Confidential" |
 | `tools/extract-screens.mjs` | reads the Storyline slide data and writes `src/screens/layout.json` + the texts/images/media into `content/s1.json`; also applies the work-order's "newer wins" decisions for screens 13, 22 and 28 |
 | `tools/dump-screen.mjs` | human-readable dump of one original slide (`node tools/dump-screen.mjs 7`) |
+| `sync/apps-script/` | the Google Slides menu **Wawiwa → Send to interactive** (`Code.gs`, `appsscript.json`); setup and use in `sync/README.md` |
+| `sync/deck-mapping.json` | which deck slide title(s) feed which screen; `selfStudy` flags screens 12 and 33 |
+| `content/last-sync.json` | what the deck said at the last sync (per slide and text box), written by the sync |
+| `../../.github/workflows/s1-check.yml` | build check on every PR and push touching this folder (runs `tools/check.mjs`) |
 | `tools/storyline.mjs` | loads a Storyline `globalProvideData` file as JSON (used by the tools) |
 
 ## Preview locally
@@ -40,7 +44,8 @@ then open `http://localhost:8124/` (add `?screen=12` to jump to a screen).
 - P0 assets: done.
 - P1 engine and frame: done.
 - P2 screens: done. All 33 screens are rebuilt from the original's data: same positions, shapes, fonts, photos, videos, audio, links, timed builds and interactions (sliders, reveals, carousel, audio hotspots, YouTube, drag-and-drop with the original answer logic, table, agenda, finale with the learner's name).
-- P3 sync, P4 Rise, P5 acceptance: not started.
+- P3 one-click sync: done (script, mapping, snapshot, build check, setup guide). Needs Dor to install the script in the deck and paste the GitHub token; the first run creates the baseline PR. See `sync/README.md`.
+- P4 Rise, P5 acceptance: not started.
 
 ## Decisions recorded while building
 

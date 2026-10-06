@@ -1,0 +1,21 @@
+name: S1 AI Awareness build check
+
+on:
+  pull_request:
+    paths:
+      - 'genai-for-marketing/s1-ai-awareness/**'
+  push:
+    branches: [main]
+    paths:
+      - 'genai-for-marketing/s1-ai-awareness/**'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate content and referenced files
+        run: node genai-for-marketing/s1-ai-awareness/tools/check.mjs

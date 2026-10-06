@@ -26,6 +26,7 @@ export function renderText(style, paragraphs, ctx) {
       const span = document.createElement('span');
       let css = '';
       if (r.font) css += `font-family:var(--font-${r.font});`;
+      else if (r.b) css += `font-family:var(--font-${String(ps.font || 'calibri').replace(/-bold$/, '')}-bold);`;
       if (r.size) css += `font-size:${r.size}px;`;
       if (r.color) css += `color:${r.color};`;
       if (r.i) css += 'font-style:italic;';

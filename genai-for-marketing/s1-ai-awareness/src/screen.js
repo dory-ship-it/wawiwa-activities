@@ -95,7 +95,7 @@ class ScreenInstance {
       }
       case 'web': {
         const yt = screen.links?.[obj.id]?.youtube;
-        if (yt) wrap.appendChild(ctx.h('iframe', { src: `https://www.youtube-nocookie.com/embed/${yt}`, title: 'YouTube video', allow: 'accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share', referrerpolicy: 'strict-origin-when-cross-origin', allowfullscreen: true, loading: 'lazy' }));
+        if (yt) wrap.appendChild(ctx.h('iframe', { src: `https://www.youtube-nocookie.com/embed/${yt}`, title: 'YouTube video', allow: 'accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture', referrerpolicy: 'strict-origin-when-cross-origin', allowfullscreen: true, loading: 'lazy' }));
         break;
       }
       case 'input': {
@@ -139,7 +139,8 @@ class ScreenInstance {
     if (obj.text) {
       const alt = node.state && obj.textStates?.[node.state];
       const style = alt || obj.text;
-      const paras = alt ? screen.text?.[obj.id + '@' + node.state] : screen.text?.[obj.id];
+      let paras = alt ? screen.text?.[obj.id + '@' + node.state] : screen.text?.[obj.id];
+      if (!alt && obj.textRef) { const full = screen.text?.[obj.textRef.key] || []; paras = full.slice(obj.textRef.from, obj.textRef.from + obj.textRef.count); }
       node.textBox = renderText(style, paras || [], ctx);
       wrap.appendChild(node.textBox);
     }

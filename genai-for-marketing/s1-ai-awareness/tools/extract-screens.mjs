@@ -319,7 +319,19 @@ function convertSlide(n) {
     const container = g.find(o => o.text.y === 0 && g.some(f => f !== o && (f.text.y > 0 || f.text.paragraphs.length <= o.text.paragraphs.length)));
     const biggest = g.reduce((a, b) => (ctx.content.text[b.id]?.length || 0) > (ctx.content.text[a.id]?.length || 0) ? b : a);
     const c = container && (ctx.content.text[container.id]?.length || 0) >= (ctx.content.text[biggest.id]?.length || 0) ? container : biggest;
-    if (g.some(f => f !== c)) c.container = true;
+    if (g.some(f => f !== c)) {
+      c.container = true;
+      const full = ctx.content.text[c.id] || [];
+      const plain = (p) => (p.runs || []).map(r => r.t).join('').trim();
+      for (const f of g) {
+        if (f === c) continue;
+        const own = ctx.content.text[f.id] || [];
+        const firstText = own.map(plain).find(Boolean);
+        const from = full.findIndex(p => plain(p) === firstText);
+        const count = own.filter(p => plain(p)).length || 1;
+        if (firstText && from >= 0) { f.textRef = { key: c.id, from, count }; delete ctx.content.text[f.id]; }
+      }
+    }
   }
   // drag & drop interaction (screen 28)
   const dragItems = out.objects.filter(o => o.drag);
