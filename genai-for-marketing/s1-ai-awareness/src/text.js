@@ -19,8 +19,8 @@ export function renderText(style, paragraphs, ctx) {
       p.appendChild(b);
     }
     let any = false;
-    for (const r of para.runs || []) {
-      const text = ctx.withName(r.t || '');
+    for (const r of ctx.withNameRuns(para.runs || [])) {
+      const text = r.t || '';
       if (!text) continue;
       any = true;
       const span = document.createElement('span');

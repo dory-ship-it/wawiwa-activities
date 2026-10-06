@@ -284,7 +284,11 @@ function timelineOf(L) {
   }
   return out;
 }
-const shownAtZero = (L) => new Set((L.timeline?.events || []).filter(e => e.time === 0).flatMap(e => e.actions.filter(a => a.kind === 'show').map(a => stripRef(a.objRef.value))));
+// Object refs in show/hide actions may be dotted paths into groups ("group.subgroup.shape"); the
+// renderer addresses every object by its own id, so visibility is tracked by the last segment too
+// (P5.1 fix 4: screen 8's arrow lives two groups deep and must start hidden, as on screen 7).
+const leaf = (ref) => String(ref || '').split('.').pop();
+const shownAtZero = (L) => new Set((L.timeline?.events || []).filter(e => e.time === 0).flatMap(e => e.actions.filter(a => a.kind === 'show').map(a => leaf(stripRef(a.objRef.value)))));
 
 function convertSlide(n) {
   const slide = slides[n - 1];
@@ -299,7 +303,7 @@ function convertSlide(n) {
   // initial visibility: anything shown later (timeline, layer open, trigger) but not at t=0 starts hidden
   const at0 = shownAtZero(base);
   const shownLater = new Set();
-  const collectShows = (acts) => { for (const a of acts || []) { if (a.show) shownLater.add(a.show); } };
+  const collectShows = (acts) => { for (const a of acts || []) { if (a.show) shownLater.add(leaf(a.show)); } };
   for (const t of out.timeline) if (t.t > 0) collectShows(t.actions);
   for (const L of s.slideLayers.slice(1)) {
     const layer = { id: L.id, objects: [], onOpen: [], timeline: [] };
@@ -312,8 +316,8 @@ function convertSlide(n) {
     out.layers[L.id] = layer;
   }
   const walkObjs = (objs, fn) => { for (const o of objs) { fn(o); if (o.children) walkObjs(o.children, fn); } };
-  walkObjs(out.objects, (o) => { for (const a of o.on?.click || []) if (a.show) shownLater.add(a.show); });
-  for (const L of Object.values(out.layers)) walkObjs(L.objects, (o) => { for (const a of o.on?.click || []) if (a.show) shownLater.add(a.show); });
+  walkObjs(out.objects, (o) => { for (const a of o.on?.click || []) if (a.show) shownLater.add(leaf(a.show)); });
+  for (const L of Object.values(out.layers)) walkObjs(L.objects, (o) => { for (const a of o.on?.click || []) if (a.show) shownLater.add(leaf(a.show)); });
   walkObjs(out.objects, (o) => { if (shownLater.has(o.id) && !at0.has(o.id)) o.hidden = true; });
   // narration (P4.1 fix 3), read from the slide data: the avatar videos that autoplay with captions,
   // then the audio the timeline plays or that carries captions (a voice; slide 14's poem is click-started).

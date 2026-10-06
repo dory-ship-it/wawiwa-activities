@@ -6,8 +6,12 @@ let counter = 0;
 export function svgFromCommandset(cs, { w, h, image }) {
   const prefix = 'v' + (++counter) + '_';
   const svg = document.createElementNS(NS, 'svg');
-  svg.setAttribute('width', w); svg.setAttribute('height', h);
-  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  // A line object has no width (or no height): the original's divider on screens 2, 4, 23 and 32 is a
+  // 0x161 shape holding one <line>. A zero-sized viewBox disables rendering, so the svg keeps at least
+  // 1px each way and the stroke paints through overflow:visible (P5.1 fix 5).
+  const vw = Math.max(w, 1), vh = Math.max(h, 1);
+  svg.setAttribute('width', vw); svg.setAttribute('height', vh);
+  svg.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
   svg.setAttribute('overflow', 'visible'); svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('focusable', 'false');
   svg.setAttribute('class', 'obj-svg');
   for (const child of cs?.children || []) { const n = node(child, prefix, image); if (n) svg.appendChild(n); }

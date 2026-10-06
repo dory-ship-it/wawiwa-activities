@@ -26,7 +26,8 @@ jobs:
         run: npm ci
       - name: Validate content and referenced files
         run: npm run check
-      # P4.1: every screen, layer and state at desktop and phone size — no clipped or covered text,
+      # P4.1/P5.1: every screen, layer and state at desktop and phone size — no clipped or covered text,
+      # nothing under the speaker control or the caption strip, captions off at load, no ", ?" title,
       # the speaker control on every narrated screen, Prev/Next on every screen
-      - name: Text fit, narration control and navigation
+      - name: Text fit, captions, speaker control and navigation
         run: npm run test:fit -- --narration --nav

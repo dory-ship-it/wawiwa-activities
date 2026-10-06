@@ -2,11 +2,12 @@
 // keyboard arrows, swipe, per-screen entrance transitions, learner name.
 // Content (text, images, links) comes from content/s1.json; design never does.
 import { components } from './components/index.js';
-import { nameStore, withName } from './store.js';
+import { nameStore, withName, withNameRuns } from './store.js';
 import { fitScreen } from './fit.js';
 
 const SLIDE_W = 960, SLIDE_H = 540;
 const NARR_BTN = { size: 36, pad: 10 }; // speaker control: top right of the slide, inside the frame
+const CAPTIONS = { h: 56, compactH: 76, gap: 4 }; // caption strip under the slide while captions are on (P5.1 fix 1), player px
 const DESKTOP = { barH: 65, topPad: 15, sidePad: 10 };
 const COMPACT = { barH: 48, topPad: 8, sidePad: 6 };
 const COMPACT_BELOW = 600; // player narrower than this: compact chrome
@@ -64,7 +65,8 @@ class Player {
     this.content = content;
     this.layoutData = layout;
     this.paths = paths;
-    this.cc = true;                 // captions on (the avatar videos are captioned)
+    this.cc = false;                // captions off until the CC button turns them on (the original's displayCaptions = false)
+    this.captionsAvailable = false; // the current screen has captioned media (the CC button shows)
     this.ccListeners = new Set();
     this.submitHandler = null;
     this.screens = content.screens;
@@ -82,11 +84,13 @@ class Player {
       asset: (p) => new URL('../' + p, import.meta.url).href,
       name: nameStore,
       withName: (t) => withName(t, nameStore.get()),
+      withNameRuns: (runs) => withNameRuns(runs, nameStore.get()),
       hideNav: (hidden) => this.setNavHidden(hidden),
       setNavHidden: (hidden) => this.setNavHidden(hidden),
       setSubmit: (fn) => this.setSubmit(fn),
-      setCaptionsAvailable: (on) => { this.ccBtn.style.display = on ? '' : 'none'; },
+      setCaptionsAvailable: (on) => { this.captionsAvailable = on; this.ccBtn.style.display = on ? '' : 'none'; this.layout(); },
       cc: { get: () => this.cc, on: (cb) => { this.ccListeners.add(cb); return () => this.ccListeners.delete(cb); } },
+      caption: { set: (text) => { this.capStrip.textContent = text || ''; } },
       narration: { set: (list, opts) => this.setNarration(list, opts), clear: () => this.clearNarration() },
       refit: () => this.scheduleFit(),
       layout,
@@ -107,6 +111,10 @@ class Player {
     this.stageWrap.appendChild(this.stage);
     r.appendChild(this.stageWrap);
 
+    // caption strip (P5.1 fix 1): under the slide, never over it; shown while captions are on and the screen has them
+    this.capStrip = h('div', { class: 'caption-strip', 'aria-live': 'polite', hidden: true });
+    r.appendChild(this.capStrip);
+
     // speaker control (P4.1 fix 3): shown only on narrated screens, placed over the slide's top right corner
     this.narrBtn = h('button', { class: 'narration-btn', type: 'button', 'aria-label': 'Play narration', 'data-state': 'paused', style: 'display:none' }, ICON.speaker);
     this.narrBtn.addEventListener('click', () => this.toggleNarration());
@@ -124,7 +132,7 @@ class Player {
     this.bar.appendChild(left);
 
     const right = h('div', { class: 'nav-controls' });
-    this.ccBtn = h('button', { class: 'cs-button icon-only', type: 'button', 'aria-label': 'Hide captions', 'aria-pressed': 'true', style: 'display:none' }, ICON.cc);
+    this.ccBtn = h('button', { class: 'cs-button icon-only off', type: 'button', 'aria-label': 'Show captions', 'aria-pressed': 'false', style: 'display:none' }, ICON.cc);
     right.appendChild(this.ccBtn);
     this.submitBtn = h('button', { class: 'cs-button', type: 'button', 'aria-label': 'Submit', style: 'display:none' }, '<span class="label">Submit</span>' + ICON.submit);
     this.fsBtn = h('button', { class: 'cs-button icon-only', type: 'button', 'aria-label': 'Enter full-screen' }, ICON.fsOpen);
@@ -174,29 +182,42 @@ class Player {
     this.go(start, { initial: true });
   }
 
-  /* ---- layout: Storyline's rule — fixed bottom bar, slide fits the rest, 15px above, ≥10px at the sides ---- */
+  /* ---- layout: Storyline's rule — fixed bottom bar, slide fits the rest, 15px above, ≥10px at the sides.
+     With captions on (and available on this screen) a caption strip under the slide takes CAPTIONS.h
+     first and the slide fits what is left, so a caption never covers the slide (P5.1 fix 1). ---- */
   layout() {
     const W = this.root.clientWidth, H = this.root.clientHeight;
     if (!W || !H) return;
     const compact = W < COMPACT_BELOW;
     this.root.classList.toggle('compact', compact);
     const m = compact ? COMPACT : DESKTOP;
-    const availW = W - 2 * m.sidePad, availH = H - m.barH - m.topPad;
+    const capOn = this.cc && this.captionsAvailable;
+    const capH = capOn ? (compact ? CAPTIONS.compactH : CAPTIONS.h) : 0;
+    const availW = W - 2 * m.sidePad, availH = H - m.barH - m.topPad - capH;
     const scale = Math.max(0.05, Math.min(availW / SLIDE_W, availH / SLIDE_H));
     const sw = SLIDE_W * scale, sh = SLIDE_H * scale;
     const left = (W - sw) / 2;
     const heightLimited = availH / SLIDE_H <= availW / SLIDE_W;
     const top = heightLimited ? m.topPad : m.topPad + (availH - sh) / 2;
     this.stageWrap.style.transform = `translate(${left}px, ${top}px) scale(${scale})`;
+    const rescaled = this.scale !== scale;
     this.scale = scale;
     // progress line sits right under the slide, as wide as the slide
     this.progress.style.left = left + 'px';
     this.progress.style.width = sw + 'px';
-    // speaker control: same spot on every screen, not scaled with the slide so it stays tappable on phones
+    // speaker control: same spot on every screen, not scaled with the slide so it stays tappable on phones.
+    // Its footprint in slide units is the text-fit pass's obstacle: slide objects move or shrink away
+    // from it (P5.1 fix 2), so the footprint grows as the slide gets smaller and the fit follows.
     const bs = compact ? NARR_BTN.size - 4 : NARR_BTN.size, bp = compact ? NARR_BTN.pad - 4 : NARR_BTN.pad;
-    this.narrBtn.style.left = (left + sw - bs - bp) + 'px';
-    this.narrBtn.style.top = (top + bp) + 'px';
+    const bx = left + sw - bs - bp, by = top + bp;
+    this.narrBtn.style.left = bx + 'px';
+    this.narrBtn.style.top = by + 'px';
     this.narrBtn.style.width = this.narrBtn.style.height = bs + 'px';
+    this.speakerRect = { x: (bx - left) / scale, y: (by - top) / scale, w: bs / scale, h: bs / scale };
+    // caption strip: right under the slide, as wide as the slide
+    this.capStrip.hidden = !capOn;
+    if (capOn) Object.assign(this.capStrip.style, { left: left + 'px', top: (top + sh + CAPTIONS.gap) + 'px', width: sw + 'px', height: (capH - CAPTIONS.gap) + 'px' });
+    if (rescaled) this.scheduleFit();
   }
 
   /* ---- navigation ---- */
@@ -260,7 +281,7 @@ class Player {
     if (this.fitRaf) return;
     this.fitRaf = requestAnimationFrame(() => { this.fitRaf = 0; this.fitNow(); });
   }
-  fitNow() { if (this.current && this.current.el && this.current.el.isConnected) fitScreen(this.current.el); }
+  fitNow() { if (this.current && this.current.el && this.current.el.isConnected) fitScreen(this.current.el, { obstacles: this.narr ? [this.speakerRect] : [] }); }
 
   /* ---- narration control (fix 3) ----
      A screen registers its narration media (avatar video and/or voice track, read from the original slide
@@ -322,6 +343,7 @@ class Player {
     this.ccBtn.setAttribute('aria-label', this.cc ? 'Hide captions' : 'Show captions');
     this.ccBtn.classList.toggle('off', !this.cc);
     for (const cb of this.ccListeners) cb(this.cc);
+    this.layout(); // the caption strip under the slide comes and goes with the captions
   }
 
   /* ---- menu ---- */

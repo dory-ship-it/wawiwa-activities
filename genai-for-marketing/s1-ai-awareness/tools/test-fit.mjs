@@ -1,8 +1,15 @@
-// Text-fit test (work-order P4.1, fix 2). Opens every screen, every layer, every timeline stop and
-// every object state, at 980x620 (desktop) and 375 wide (phone), and fails when any text element is
+// Text-fit test (work-order P4.1, fix 2; P5.1 fix 6 extends it). Opens every screen, every layer,
+// every timeline stop and every object state, at 980x620 (desktop) and 375 wide (phone), and fails
+// when any text element is
 //   (a) clipped: scrollWidth > clientWidth or scrollHeight > clientHeight, or it extends past the stage
 //       (or into the footer strip), or
-//   (b) covered: an image, video or iframe box that paints on top of it overlaps its text.
+//   (b) covered: an image, video or iframe box that paints on top of it overlaps its text, or
+//   (c) under the speaker control, or under the caption strip while captions are on (P5.1);
+// and when the speaker or the caption strip covers any painted slide object (a picture, a filled
+// shape, a button, a video, an input), other than a full-stage background or side panel. With
+// captions on, the strip must also sit below the slide and above the player bar. Captions must be off
+// when the page loads. With no learner name, no text and no title may read ", ?" (or ", !", ", ."),
+// hold a doubled space or a leftover {name}; with the name "Dana", screen 33 must read ", Dana?".
 // Text drawn on top of a picture by design (a title over a photo, the table cells over the table art)
 // is not a failure; pass --strict to list those too. Two further rules match the engine's fit pass:
 // media in a layer is an overlay and does not count against the base slide's text, and media the
@@ -10,7 +17,9 @@
 //
 //   node tools/test-fit.mjs                      all screens, both sizes; exit 1 on any failure
 //   node tools/test-fit.mjs --screens 17,31      a few screens
-//   node tools/test-fit.mjs --shots 17,31 --out review/p4.1 --tag before    screenshots only
+//   node tools/test-fit.mjs --shots 2,4,33 --out review/p5.1 --tag before    screenshots only
+//   node tools/test-fit.mjs --shots 8 --at 1500 ...     screenshots with the timeline run only up to 1.5 s
+//   node tools/test-fit.mjs --shots 28 --cc on ...      screenshots with captions on and a real cue showing (file name gets "-cc")
 //   node tools/test-fit.mjs --json out.json      also write the full result
 //   node tools/test-fit.mjs --narration          also check the speaker control (fix 3) on every screen
 //   node tools/test-fit.mjs --nav                also check fix 1: no slide arrows, Prev/Next from every screen
@@ -36,6 +45,8 @@ const JSON_OUT = opt('json', null);
 const NARRATION = !!opt('narration', false);
 const CHANGES = !!opt('changes', false);   // also print what the fit pass changed (font sizes, grown boxes, moved pictures)
 const NAV = !!opt('nav', false);           // fix 1: no turquoise slide arrows anywhere; Prev/Next work from every screen
+const AT = opt('at', null) === null ? null : Number(opt('at'));   // --shots: run the timeline only up to this time (ms)
+const CC = opt('cc', null);                // --shots: 'on' (captions on, a real cue showing) or 'off'
 const VIEWPORTS = [{ name: 'desktop', width: 980, height: 620 }, { name: 'phone', width: 375, height: 667 }];
 
 /* ---------- a tiny static server for the folder (no python needed, works in CI) ---------- */
@@ -63,6 +74,16 @@ function chromePath() {
   return found;
 }
 
+// --shots --cc on: a real cue of the screen's own captions (its first cue of 30+ characters)
+function sampleCue(n) {
+  const lay = JSON.parse(readFileSync(join(root, 'src/screens/layout.json'), 'utf8')).screens[n];
+  const files = [];
+  const walk = (objs) => { for (const o of objs || []) { if (o.video && o.video.captions) files.push(o.video.captions); walk(o.children); } };
+  if (lay) { walk(lay.objects); for (const a of Object.values(lay.audio || {})) if (a.captions) files.push(a.captions); }
+  for (const f of files) { const m = /-->[^\n]*\n([^\n]{30,})/.exec(readFileSync(join(root, f), 'utf8')); if (m) return m[1]; }
+  return 'Sample caption';
+}
+
 /* ---------- in-page audit (runs inside the browser; keep it self-contained) ---------- */
 const AUDIT = `(function (STRICT) {
   const STAGE_W = 960, STAGE_H = 540, TOL = 1.5;
@@ -76,6 +97,7 @@ const AUDIT = `(function (STRICT) {
   const fmt = (r) => '[' + [r.x, r.y, r.w, r.h].map(v => Math.round(v)).join(',') + ']';
   const rotated = (el) => { for (let e = el; e && e !== screen; e = e.parentElement) { const t = getComputedStyle(e).transform; if (t && t !== 'none') { const m = /matrix\\(([^)]+)\\)/.exec(t); if (m) { const [a, b] = m[1].split(',').map(Number); if (Math.abs(b) > 0.001 || Math.abs(a - 1) > 0.2) return true; } } } return false; };
   const scopeOf = (el) => el.closest('.layer') || screen;
+  const union = (a, b) => { const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y); return { x, y, w: Math.max(a.x + a.w, b.x + b.w) - x, h: Math.max(a.y + a.h, b.y + b.h) - y }; };
   const media = [];
   for (const el of screen.querySelectorAll('.obj')) {
     if (!vis(el) || el.dataset.transient || el.closest('.footer, .small-logo')) continue;
@@ -84,6 +106,29 @@ const AUDIT = `(function (STRICT) {
     if (!kind) continue;
     media.push({ el, kind, id: el.dataset.id || el.className, rect: rectOf(el), scope: scopeOf(el) });
   }
+  // P5.1 fix 6: player chrome that may sit over the slide, in slide units: the speaker control and, with
+  // captions on, the caption strip. Neither may cover a text or a painted slide object.
+  const sr = document.querySelector('.stage').getBoundingClientRect(); const k = STAGE_W / sr.width;
+  const stageRect = (el) => { const b = el.getBoundingClientRect(); return { x: (b.left - sr.left) * k, y: (b.top - sr.top) * k, w: b.width * k, h: b.height * k }; };
+  const chrome = [];
+  const spk = document.querySelector('.narration-btn'); if (spk && vis(spk) && getComputedStyle(spk).display !== 'none') chrome.push({ kind: 'speaker', rect: stageRect(spk) });
+  const cap = document.querySelector('.caption-strip'); if (cap && !cap.hidden && vis(cap)) chrome.push({ kind: 'captions', rect: stageRect(cap) });
+  // painted slide objects (top level of the base slide and of open layers): pictures, media, inputs,
+  // filled or stroked vector art, box fills. Backgrounds and side panels (95% of the stage's width or height) are design.
+  const objects = [];
+  for (const el of screen.querySelectorAll(':scope > .obj, :scope > .layer > .obj')) {
+    if (!vis(el) || el.closest('.footer, .small-logo') || el.dataset.transient) continue;
+    const r = rectOf(el); if (r.w >= 0.95 * STAGE_W || r.h >= 0.95 * STAGE_H) continue;
+    let u = null;
+    for (const o of [el, ...el.querySelectorAll('.obj')]) {
+      if (!vis(o)) continue;
+      const kids = Array.from(o.children);
+      const paints = kids.some(c => /^(IMG|VIDEO|IFRAME|INPUT)$/.test(c.tagName) || (c.tagName === 'svg' && c.querySelector('image, [fill]:not([fill="none"]), [stroke]:not([stroke="none"])'))) || (o.style.background && o.style.background !== 'transparent') || o.style.border;
+      if (paints) { const q = rectOf(o); u = u ? union(u, q) : q; }
+    }
+    if (u) objects.push({ id: el.dataset.id || el.className, rect: u });
+  }
+  for (const c of chrome) for (const ob of objects) if (inter(ob.rect, c.rect)) fails.push({ id: ob.id, kind: c.kind + '-over-object', text: '', detail: c.kind + ' ' + fmt(c.rect) + ' covers ' + ob.id + ' ' + fmt(ob.rect) });
   const footer = screen.querySelector('.footer');
   const footerRect = footer && vis(footer) ? rectOf(footer) : null;
   const boxes = Array.from(screen.querySelectorAll('.txtbox, .txt')).filter(el => vis(el) && !el.closest('.footer'));
@@ -114,10 +159,15 @@ const AUDIT = `(function (STRICT) {
     }
     const id = (box.closest('.obj[data-id]') || {}).dataset ? box.closest('.obj[data-id]').dataset.id : box.className;
     const fail = (kind, detail) => fails.push({ id, kind, text: text.slice(0, 40), detail });
+    // P5.1 fix 3/6: with no learner name, nothing may read ", ?" or carry a doubled space or a leftover placeholder
+    if (/,\s*[?!.]/.test(text)) fail('name-punctuation', 'reads "' + text.slice(0, 60) + '"');
+    if (/\S {2,}\S/.test(text)) fail('doubled-space', 'reads "' + text.slice(0, 60) + '"');
+    if (text.includes('{name}')) fail('name-placeholder', 'the {name} placeholder is still in the text');
     if (box.scrollWidth > box.clientWidth + 1) fail('clipped-width', 'scrollWidth ' + box.scrollWidth + ' > clientWidth ' + box.clientWidth);
     if (box.scrollHeight > box.clientHeight + 1) fail('clipped-height', 'scrollHeight ' + box.scrollHeight + ' > clientHeight ' + box.clientHeight);
     if (R.x < -0.5 || R.y < -0.5 || R.x + R.w > STAGE_W + 0.5 || R.y + R.h > STAGE_H + 0.5) fail('past-stage', 'text ' + fmt(R));
     if (footerRect && inter(R, footerRect)) fail('over-footer', 'text ' + fmt(R) + ' reaches the footer at y=' + Math.round(footerRect.y));
+    for (const c of chrome) if (inter(R, c.rect)) fail('covered-by-' + c.kind, c.kind + ' ' + fmt(c.rect) + ' sits over text ' + fmt(R));
     for (const m of media) {
       if (m.el.contains(box) || box.contains(m.el) || m.scope !== scopeOf(box)) continue;
       if (!inter(R, m.rect)) continue;
@@ -126,7 +176,7 @@ const AUDIT = `(function (STRICT) {
       else if (STRICT) fail('text-over-' + m.kind, 'text ' + fmt(R) + ' is drawn over ' + m.id + ' ' + fmt(m.rect));
     }
   }
-  return { fails, checked, media: media.length };
+  return { fails, checked, media: media.length, objects: objects.length };
 })`;
 
 // What the engine's fit pass changed on the current screen (from its own change registry).
@@ -144,7 +194,8 @@ const FIT_CHANGES = `(function () {
     if (box.style.height !== val(o.css, 'height')) bits.push('height ' + val(o.css, 'height') + '→' + box.style.height);
     if (bits.length) out.push({ id: idOf(box), what: bits.join(', '), text: box.textContent.replace(/\\u200b/g, '').trim().slice(0, 28) });
   }
-  for (const [el, o] of reg.media) if (el.isConnected && el.style.cssText !== o.css) out.push({ id: idOf(el), what: 'picture moved: top ' + val(o.css, 'top') + '→' + el.style.top + (el.style.width !== val(o.css, 'width') ? ', size ' + val(o.css, 'width') + '×' + val(o.css, 'height') + '→' + el.style.width + '×' + el.style.height : ''), text: '' });
+  for (const [el, o] of reg.pos || []) if (el.isConnected && (el.style.left !== o.left || el.style.top !== o.top)) out.push({ id: idOf(el), what: 'object moved ' + o.left + ',' + o.top + ' → ' + el.style.left + ',' + el.style.top, text: '' });
+  for (const [el, o] of reg.size || []) if (el.isConnected && (el.style.width !== o.width || el.style.height !== o.height)) out.push({ id: idOf(el), what: 'picture resized ' + o.width + '×' + o.height + ' → ' + el.style.width + '×' + el.style.height, text: '' });
   return out;
 })`;
 
@@ -159,6 +210,28 @@ const ENUMERATE = `(async function (STRICT) {
   const settle = async () => { document.getAnimations().forEach(a => { try { a.finish(); } catch (e) {} }); await frame(); if (P && P.fitNow) P.fitNow(); await frame(); };
   const check = async (state) => { await settle(); results.push(Object.assign({ state }, audit(STRICT), { changes: fitChanges() })); };
   await check('base');
+  // P5.1: captions start off; no title reads ", ?" or holds a doubled space or a leftover {name}
+  if (P && P.cc) results[0].fails.push({ id: 'captions', kind: 'captions-default-on', text: '', detail: 'captions are on when the page loads (the original starts with them off)' });
+  for (const t of [document.title, ...Array.from(document.querySelectorAll('.menu-item[aria-current="true"] .t')).map(e => e.textContent)]) {
+    if (/,\s*[?!.]/.test(t) || /\S {2,}\S/.test(t) || t.includes('{name}')) results[0].fails.push({ id: 'title', kind: 'title-name', text: t.slice(0, 40), detail: 'title reads "' + t + '"' });
+  }
+  // P5.1 fix 1/6: captions on. The strip must show under the slide, above the player bar, and cover nothing
+  if (P && inst && P.ccBtn && getComputedStyle(P.ccBtn).display !== 'none') {
+    if (!P.cc) P.toggleCaptions();
+    P.ctx.caption.set('Sample caption: with captions on, this strip sits under the slide and covers nothing on it.');
+    await settle();
+    const r = audit(STRICT);
+    const strip = document.querySelector('.caption-strip'); const sr = document.querySelector('.stage').getBoundingClientRect();
+    const cr = strip ? strip.getBoundingClientRect() : null; const bar = document.querySelector('.bottom-bar').getBoundingClientRect();
+    if (!strip || strip.hidden || !strip.textContent || !cr.height) r.fails.push({ id: 'captions', kind: 'captions-not-shown', text: '', detail: 'captions are on but the caption strip is hidden or empty' });
+    else {
+      if (cr.top < sr.bottom - 0.5) r.fails.push({ id: 'captions', kind: 'captions-over-stage', text: '', detail: 'strip top ' + Math.round(cr.top) + ' is above the slide bottom ' + Math.round(sr.bottom) });
+      if (cr.bottom > bar.top + 0.5) r.fails.push({ id: 'captions', kind: 'captions-over-bar', text: '', detail: 'strip bottom ' + Math.round(cr.bottom) + ' reaches the player bar at ' + Math.round(bar.top) });
+      if (strip.scrollHeight > strip.clientHeight + 1) r.fails.push({ id: 'captions', kind: 'captions-clipped', text: '', detail: 'the sample cue does not fit the strip' });
+    }
+    results.push(Object.assign({ state: 'captions-on' }, r, { changes: fitChanges() }));
+    P.ctx.caption.set(''); P.toggleCaptions(); await settle();
+  }
   if (!inst) {
     const start = document.querySelector('.start-btn');
     if (start) { start.click(); await new Promise(r => setTimeout(r, 150)); await check('after-start'); }
@@ -245,15 +318,19 @@ async function main() {
 
   const all = []; let failures = 0, states = 0;
   try {
+    // the learner name lives in this Chrome profile's storage: start every run without one
+    await page.goto(`${base}/index.html?screen=1`, { waitUntil: 'load' }); await ready(page);
+    await page.evaluate(() => { try { localStorage.clear(); } catch (e) { /* storage blocked: the page runs without it */ } });
     if (SHOTS) {
       mkdirSync(OUT, { recursive: true });
       for (const vp of VIEWPORTS) for (const n of SHOTS) {
         await page.setViewport({ width: vp.width, height: vp.height, deviceScaleFactor: 2 });
         await page.goto(`${base}/index.html?screen=${n}`, { waitUntil: 'load' });
         await ready(page);
-        await page.evaluate(() => { const P = window.__s1Player; const inst = P && P.current && P.current.inst; if (inst) { for (const t of inst.timers) clearTimeout(t && t.id !== undefined ? t.id : t); inst.timers = []; for (const e of inst.lay.timeline || []) inst.run(e.actions, null); } document.getAnimations().forEach(a => { try { a.finish(); } catch (e) {} }); if (P && P.fitNow) P.fitNow(); });
+        await page.evaluate((at) => { const P = window.__s1Player; const inst = P && P.current && P.current.inst; if (inst) { for (const t of inst.timers) clearTimeout(t && t.id !== undefined ? t.id : t); inst.timers = []; for (const e of inst.lay.timeline || []) if (at === null || e.t <= at) inst.run(e.actions, null); } document.getAnimations().forEach(a => { try { a.finish(); } catch (e) {} }); if (P && P.fitNow) P.fitNow(); }, AT);
+        if (CC) await page.evaluate((cc, cue) => { const P = window.__s1Player; if ((cc === 'on') !== P.cc) P.toggleCaptions(); if (cc === 'on') P.ctx.caption.set(cue); P.fitNow(); }, CC, sampleCue(n));
         await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-        const file = join(OUT, `${TAG}-screen-${n}-${vp.name}.png`);
+        const file = join(OUT, `${TAG}-screen-${n}${CC === 'on' ? '-cc' : ''}-${vp.name}.png`);
         await page.screenshot({ path: file });
         console.log('wrote', file);
       }
@@ -273,6 +350,16 @@ async function main() {
         if (VERBOSE) for (const r of results) console.log(`    ${r.state}: ${r.checked} boxes, ${r.media} media`);
         for (const f of bad) console.log(`    ✗ [${f.state}] ${f.id} ${f.kind}: "${f.text}" — ${f.detail}`);
         if (CHANGES) { const seen = new Set(); for (const r of results) for (const c of r.changes || []) { const k = c.id + '|' + c.what; if (seen.has(k)) continue; seen.add(k); console.log(`    · [${r.state}] ${c.id} ${c.what}${c.text ? ' "' + c.text + '"' : ''}`); } }
+        if (n === 33) {
+          // P5.1 fix 3: with a name, the finale greets by name; the no-name wording was checked above
+          await page.evaluate(() => window.__s1Player.ctx.name.set('Dana'));
+          await page.goto(`${base}/index.html?screen=${n}`, { waitUntil: 'load' }); await ready(page);
+          const named = await page.evaluate(() => ({ title: document.title, onStage: Array.from(document.querySelectorAll('.stage .screen .txtbox')).map(e => e.textContent).join(' | ') }));
+          await page.evaluate(() => window.__s1Player.ctx.name.set(''));
+          const okNamed = named.title.includes('session, Dana?') && named.onStage.includes('session, Dana?');
+          if (!okNamed) failures++;
+          console.log(`    name: without a name the title drops the comma; with "Dana" it reads ", Dana?" ${okNamed ? '✓' : '✗ ' + JSON.stringify(named)}`);
+        }
         if (NARRATION) {
           const nr = await page.evaluate(`${NARRATION_CHECK}()`);
           if (nr.shown && !nr.error) await keyboardCheck(page, nr);

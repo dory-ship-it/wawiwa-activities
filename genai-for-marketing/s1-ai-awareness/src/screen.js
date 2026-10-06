@@ -3,7 +3,7 @@
 import { svgFromCommandset } from './svg.js';
 import { renderText } from './text.js';
 import { playAnim } from './anim.js';
-import { createCaptionBar } from './captions.js';
+import { createCaptions } from './captions.js';
 import { footer, smallLogo } from './components/footer.js';
 import { nameField } from './components/name-field.js';
 import { makeSlider } from './slider.js';
@@ -62,8 +62,8 @@ class ScreenInstance {
   }
 
   captionsFor(mediaEl, url) {
-    if (!this.captionBar) { this.captionBar = createCaptionBar(this.el, this.ctx); this.hasCaptions = true; }
-    this.captionBar.bind(mediaEl, this.ctx.asset(url));
+    if (!this.captions) { this.captions = createCaptions(this.ctx); this.hasCaptions = true; }
+    this.captions.bind(mediaEl, this.ctx.asset(url));
   }
 
   renderObject(obj, parent, layerId) {
@@ -319,7 +319,7 @@ class ScreenInstance {
     for (const L of this.layers.values()) for (const t of L.timers || []) clearTimeout(t);
     for (const a of this.anims) { try { a.cancel(); } catch { /* finished */ } }
     for (const m of this.media.values()) { try { m.pause(); m.removeAttribute('src'); m.load(); } catch { /* ignore */ } }
-    if (this.captionBar) this.captionBar.dispose();
+    if (this.captions) this.captions.dispose();
     if (this.dragdrop) this.dragdrop.dispose();
     this.ctx.narration.clear();
     this.ctx.setCaptionsAvailable(false);
