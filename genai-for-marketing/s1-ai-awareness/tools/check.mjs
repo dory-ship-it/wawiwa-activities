@@ -34,6 +34,15 @@ try { const map = JSON.parse(readFileSync(join(root, 'sync/deck-mapping.json'), 
 walk(layout, 'layout');
 for (let n = 2; n <= 33; n++) if (!layout.screens[n]) problems.push(`layout missing for screen ${n}`);
 
+// P4.1: no slide arrows (a textless shape whose click only navigates), and every narration id is real media
+const eachObj = (objs, fn) => { for (const o of objs || []) { fn(o); if (o.children) eachObj(o.children, fn); } };
+for (const [n, s] of Object.entries(layout.screens)) {
+  const all = [...s.objects, ...Object.values(s.layers).flatMap(L => L.objects)];
+  eachObj(all, (o) => { const acts = o.on?.click || []; if (o.kind === 'shape' && !o.text && acts.length && acts.every(a => a.goto !== undefined)) problems.push(`screen ${n}: slide arrow ${o.id} is still in the layout (P4.1 removes them)`); });
+  const media = content.screens[n - 1]?.media || {};
+  for (const id of s.narration || []) if (!media[id]?.src) problems.push(`screen ${n}: narration ${id} has no media in content/s1.json`);
+}
+
 // Dor's two rules
 const all = JSON.stringify(content);
 if (/\b(19|20)\d\d\s*©/.test(all) || /©\s*(19|20)\d\d\b/.test(all)) problems.push('a footer still carries a year');
@@ -41,7 +50,7 @@ if (/Confidencial/i.test(all)) problems.push('"Confidencial" must be "Confidenti
 if (!content.footer?.text?.includes('© Oded Israeli, Wawiwa Tech')) problems.push('footer text must be "© Oded Israeli, Wawiwa Tech"');
 
 // the page must reference only files that exist
-for (const f of ['index.html', 'src/engine.js', 'src/main.js', 'src/frame.css', 'src/fonts.css', 'src/components/index.js', 'src/screen.js', 'src/screens/layout.json', 'source/storyline-published/html5/data/js/paths.js']) if (!existsSync(join(root, f))) problems.push(`missing ${f}`);
+for (const f of ['index.html', 'src/engine.js', 'src/main.js', 'src/fit.js', 'src/frame.css', 'src/fonts.css', 'src/components/index.js', 'src/screen.js', 'src/screens/layout.json', 'source/storyline-published/html5/data/js/paths.js', 'tools/test-fit.mjs', 'package.json']) if (!existsSync(join(root, f))) problems.push(`missing ${f}`);
 const fontsCss = readFileSync(join(root, 'src/fonts.css'), 'utf8');
 for (const m of fontsCss.matchAll(/url\(([^)]+)\)/g)) { const p = join(root, 'src', m[1]); if (!existsSync(p)) problems.push(`fonts.css: file not found ${m[1]}`); }
 

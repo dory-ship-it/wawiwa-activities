@@ -17,7 +17,7 @@ export const genericScreen = {
     if (!lay) { el.textContent = `Screen ${screen.n}: no layout`; return {}; }
     const S = new ScreenInstance(screen, lay, ctx, el);
     S.build();
-    return { mount: () => S.mount(), dispose: () => S.dispose() };
+    return { mount: () => S.mount(), dispose: () => S.dispose(), inst: S };
   },
 };
 
@@ -27,9 +27,10 @@ class ScreenInstance {
     this.nodes = new Map();   // id → { obj, wrap, visual, textBox, state, visited, layer }
     this.layers = new Map();  // id → { el, def, open }
     this.media = new Map();   // id → HTMLMediaElement
-    this.timers = [];
+    this.timers = [];         // base timeline: { id, fn, remaining, started }, pausable with the narration
     this.anims = [];
     this.disposed = false;
+    this.paused = false;
   }
 
   /* ---------- build ---------- */
@@ -54,6 +55,9 @@ class ScreenInstance {
       this.media.set(aid, audio);
       if (a.captions) this.captionsFor(audio, a.captions);
     }
+    // media the base timeline hides later (screen 28's demo video plays over the labels, then goes):
+    // marked so the text-fit pass leaves it alone while it shows
+    for (const t of lay.timeline || []) for (const a of t.actions) if (a.hide) { const n = this.node(a.hide); if (n && ['video', 'image', 'web'].includes(n.obj.kind)) n.wrap.dataset.transient = '1'; }
     if (lay.dragdrop) this.dragdrop = makeDragDrop(this, lay.dragdrop);
   }
 
@@ -212,24 +216,27 @@ class ScreenInstance {
     const a = animName && n.obj.anims?.[animName];
     if (a) {
       const an = playAnim(n.wrap, a, { x: n.obj.x, y: n.obj.y });
-      if (an) { this.anims.push(an); if (n.obj.on?.animEnd) an.onfinish = () => this.run(n.obj.on.animEnd, n); }
+      if (an) { this.anims.push(an); an.addEventListener('finish', () => this.ctx.refit()); if (n.obj.on?.animEnd) an.onfinish = () => this.run(n.obj.on.animEnd, n); }
     }
     if (n.obj.on?.shown) this.run(n.obj.on.shown, n);
+    this.ctx.refit();
   }
   hide(id, animName) {
     const n = this.node(id); if (!n) return;
     const a = animName && n.obj.anims?.[animName];
     if (a) {
       const an = playAnim(n.wrap, a, { x: n.obj.x, y: n.obj.y }, a.type !== 'alpha');
-      if (an) { this.anims.push(an); an.onfinish = () => { n.wrap.style.display = 'none'; an.cancel(); }; return; }
+      if (an) { this.anims.push(an); an.onfinish = () => { n.wrap.style.display = 'none'; an.cancel(); this.ctx.refit(); }; return; }
     }
     n.wrap.style.display = 'none';
+    this.ctx.refit();
   }
   setState(id, state) {
     const n = this.node(id); if (!n) return;
     n.state = state === '_default' ? null : state;
     if (n.obj.kind === 'shape') this.paintShape(n);
     n.wrap.dataset.state = n.state || '';
+    this.ctx.refit();
   }
   toggleState(id, state) {
     const n = this.node(id); if (!n) return;
@@ -242,12 +249,14 @@ class ScreenInstance {
     this.run(L.def.onOpen || [], null);
     this.schedule(L.def.timeline || [], L);
     const first = L.el.querySelector('.hot'); if (first) first.focus({ preventScroll: true });
+    this.ctx.refit();
   }
   hideLayer(id) {
     const L = this.layers.get(id); if (!L) return;
     L.el.style.display = 'none'; L.open = false;
     for (const t of L.timers || []) clearTimeout(t);
     L.timers = [];
+    this.ctx.refit();
   }
   play(id) {
     const m = this.media.get(id); if (!m) return;
@@ -257,17 +266,47 @@ class ScreenInstance {
   pause(id) { const m = this.media.get(id); if (m) m.pause(); }
 
   schedule(timeline, layer) {
-    const bucket = layer ? (layer.timers = layer.timers || []) : this.timers;
     for (const entry of timeline) {
       if (entry.t <= 0) { this.run(entry.actions, null); continue; }
-      bucket.push(setTimeout(() => { if (!this.disposed) this.run(entry.actions, null); }, entry.t));
+      const fn = () => { if (!this.disposed) this.run(entry.actions, null); };
+      if (layer) (layer.timers = layer.timers || []).push(setTimeout(fn, entry.t));
+      else { const p = { fn, remaining: entry.t, id: 0, started: 0 }; this.timers.push(p); if (!this.paused) this.arm(p); }
     }
+  }
+  arm(p) { p.started = performance.now(); p.id = setTimeout(() => { this.timers = this.timers.filter(x => x !== p); p.fn(); }, p.remaining); }
+  // the base timeline holds while the narration is paused, so bullets keep step with the voice
+  pauseTimeline() {
+    if (this.paused) return;
+    this.paused = true;
+    for (const p of this.timers) { clearTimeout(p.id); p.remaining = Math.max(0, p.remaining - (performance.now() - p.started)); }
+  }
+  resumeTimeline() {
+    if (!this.paused) return;
+    this.paused = false;
+    for (const p of this.timers) this.arm(p);
+  }
+  // the speaker's "play" when nothing has started: the original's own starter (slide 14's "Generate with AI"
+  // button shows the poem and reads it), else the first narration track that is on screen
+  startNarration(ids) {
+    for (const id of ids) {
+      const starter = [...this.nodes.values()].find(n => n.obj.on?.click?.some(a => a.play === id));
+      if (starter) { this.run(starter.obj.on.click, starter, {}); return; }
+    }
+    const onStage = ids.filter(id => { const m = this.media.get(id); return m && (m.tagName === 'AUDIO' || m.getClientRects().length > 0); });
+    const id = onStage[0] || ids[ids.length - 1];
+    const m = this.media.get(id); if (!m) return;
+    m.currentTime = 0;
+    this.play(id);
   }
 
   /* ---------- lifecycle ---------- */
   mount() {
     const { ctx, lay } = this;
     ctx.setCaptionsAvailable(!!this.hasCaptions);
+    // narration control (fix 3): the screen's narrated media, listed from the original slide data
+    const ids = lay.narration || [];
+    const list = ids.map(id => this.media.get(id)).filter(Boolean);
+    if (list.length) ctx.narration.set(list, { start: () => this.startNarration(ids), pauseTimeline: () => this.pauseTimeline(), resumeTimeline: () => this.resumeTimeline() });
     // autoplaying videos start with the screen
     for (const [id, n] of this.nodes) if (n.obj.kind === 'video' && n.obj.video?.autoplay && !n.obj.hidden) this.play(id);
     this.schedule(lay.timeline || [], null);
@@ -275,12 +314,14 @@ class ScreenInstance {
   }
   dispose() {
     this.disposed = true;
-    for (const t of this.timers) clearTimeout(t);
+    for (const p of this.timers) clearTimeout(p.id);
+    this.timers = [];
     for (const L of this.layers.values()) for (const t of L.timers || []) clearTimeout(t);
     for (const a of this.anims) { try { a.cancel(); } catch { /* finished */ } }
     for (const m of this.media.values()) { try { m.pause(); m.removeAttribute('src'); m.load(); } catch { /* ignore */ } }
     if (this.captionBar) this.captionBar.dispose();
     if (this.dragdrop) this.dragdrop.dispose();
+    this.ctx.narration.clear();
     this.ctx.setCaptionsAvailable(false);
     this.ctx.setSubmit(null);
   }

@@ -22,6 +22,9 @@ const px = (pt) => Math.round(pt * 4 / 3 * 100) / 100;
 const MASTER_IDS = new Set(['5cyH4t6JCxt', '6nfcoSKLifG', '5ntBxrdGw5E', '5WqhO9hryMY']);
 const isFooterGroup = (o) => o.kind === 'objgroup' && o.yPos === 513 && o.width === 960 && (o.objects || []).every(c => c.imagelib && [5, 6].includes(c.imagelib[0]?.assetId));
 const isYearLine = (o) => o.textLib && JSON.stringify(o.textLib).includes('2024 © Oded Israeli');
+// the turquoise prev/next arrows some slides carry (slide 11): a plain shape whose click only navigates.
+// The player bar has PREV/NEXT, so they are left out (P4.1 fix 1, Dor 6 Oct 2026).
+const isSlideArrow = (o) => o.kind === 'vectorshape' && !(o.textLib && o.textLib.length) && (o.events || []).some(e => (e.actions || []).some(a => a.kind === 'history_prev' || a.kind === 'gotoplay'));
 const hasCaptions = (id) => existsSync(join(SC, id + '_captions.js')) ? `assets/captions/${id}.vtt` : null;
 const YOUTUBE = {}; // webobject html → youtube id
 for (const f of ['67naOSTSqsB', '6NyRGHrifzK', '6T2Z6vKZjpW']) {
@@ -173,7 +176,7 @@ function animOf(an) {
 function convertObject(o, ctx) {
   if (MASTER_IDS.has(o.id)) { ctx.hasMaster = true; return null; }
   if (isFooterGroup(o)) return { kind: 'footer', id: o.id };
-  if (isYearLine(o)) return null;
+  if (isYearLine(o) || isSlideArrow(o)) return null;
   const obj = { id: o.id, x: o.xPos, y: o.yPos, w: o.width, h: o.height };
   if (o.rotation) obj.rot = o.rotation;
   if (o.alpha != null && o.alpha !== 100) obj.alpha = o.alpha / 100;
@@ -312,6 +315,14 @@ function convertSlide(n) {
   walkObjs(out.objects, (o) => { for (const a of o.on?.click || []) if (a.show) shownLater.add(a.show); });
   for (const L of Object.values(out.layers)) walkObjs(L.objects, (o) => { for (const a of o.on?.click || []) if (a.show) shownLater.add(a.show); });
   walkObjs(out.objects, (o) => { if (shownLater.has(o.id) && !at0.has(o.id)) o.hidden = true; });
+  // narration (P4.1 fix 3), read from the slide data: the avatar videos that autoplay with captions,
+  // then the audio the timeline plays or that carries captions (a voice; slide 14's poem is click-started).
+  // Slide 21's songs have neither, so they are not narration.
+  const timelinePlays = new Set(out.timeline.flatMap(t => t.actions.filter(a => a.play).map(a => a.play)));
+  const narration = [];
+  walkObjs(out.objects, (o) => { if (o.kind === 'video' && o.video.autoplay && o.video.captions) narration.push(o.id); });
+  for (const [aid, a] of Object.entries(out.audio)) if (a.captions || timelinePlays.has(aid)) narration.push(aid);
+  if (narration.length) out.narration = narration;
   // text boxes animated "by paragraph": the full box is an invisible container, its fragments carry the visuals
   const groups = new Map();
   for (const o of out.objects) if (o.kind === 'shape' && o.text) { const k = `${o.x},${o.y},${o.w},${o.h}`; (groups.get(k) || groups.set(k, []).get(k)).push(o); }

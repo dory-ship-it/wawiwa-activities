@@ -170,3 +170,20 @@ button { font: inherit; color: inherit; }
 .prompt-ok:hover { background: #f0f0f0; }
 .cs-button.off { opacity: 0.55; }
 .obj.box-shadow { box-shadow: 0 3px 14px rgba(0, 0, 0, 0.35); }
+
+/* ---- narration control (P4.1 fix 3): a speaker over the slide's top right corner, placed by the engine.
+   Playing: sound waves pulse. Paused: two bars where the waves were. ---- */
+.narration-btn {
+  position: absolute; z-index: 15; padding: 0; border: 0; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+  background: rgba(40, 40, 40, 0.78); color: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+.narration-btn:hover, .narration-btn:focus-visible { background: rgba(40, 40, 40, 0.95); outline: none; }
+.narration-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.narration-btn svg { display: block; width: 62%; height: 62%; fill: currentColor; }
+.narration-btn[data-state="playing"] .pause-bars { display: none; }
+.narration-btn[data-state="playing"] .wave { animation: narr-wave 1.2s ease-in-out infinite; }
+.narration-btn[data-state="playing"] .wave2 { animation-delay: 0.3s; }
+.narration-btn[data-state="paused"] .wave { display: none; }
+@keyframes narr-wave { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .narration-btn[data-state="playing"] .wave { animation: none; opacity: 1; } }

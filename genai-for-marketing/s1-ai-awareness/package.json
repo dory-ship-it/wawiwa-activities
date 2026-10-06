@@ -1,0 +1,17 @@
+{
+  "name": "gfm-s1-ai-awareness",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GenAI for Marketing · Session 1 AI Awareness: the Storyline block rebuilt as code, with its build check and text-fit test",
+  "type": "module",
+  "scripts": {
+    "check": "node tools/check.mjs",
+    "test:fit": "node tools/test-fit.mjs",
+    "test": "npm run check && node tools/test-fit.mjs --narration --nav",
+    "shots": "node tools/test-fit.mjs --shots 17,31 --out review/p4.1 --tag after",
+    "serve": "python3 -m http.server 8124 --directory ."
+  },
+  "devDependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}

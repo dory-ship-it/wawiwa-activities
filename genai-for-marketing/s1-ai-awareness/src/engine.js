@@ -3,8 +3,10 @@
 // Content (text, images, links) comes from content/s1.json; design never does.
 import { components } from './components/index.js';
 import { nameStore, withName } from './store.js';
+import { fitScreen } from './fit.js';
 
 const SLIDE_W = 960, SLIDE_H = 540;
+const NARR_BTN = { size: 36, pad: 10 }; // speaker control: top right of the slide, inside the frame
 const DESKTOP = { barH: 65, topPad: 15, sidePad: 10 };
 const COMPACT = { barH: 48, topPad: 8, sidePad: 6 };
 const COMPACT_BELOW = 600; // player narrower than this: compact chrome
@@ -17,6 +19,8 @@ const ICON = {
   cc: '<svg width="19" height="16" viewBox="0 0 19 16" aria-hidden="true" focusable="false"><rect x="0.5" y="0.5" width="18" height="15" rx="2" fill="none" stroke="currentColor"/><path d="M8.2 5.3Q7.6 4.6 6.6 4.6 5.2 4.6 4.6 5.4 4 6.2 4 8 4 9.8 4.6 10.6 5.2 11.4 6.6 11.4 7.7 11.4 8.3 10.6L7.4 9.8Q7.1 10.2 6.6 10.2 6 10.2 5.7 9.7 5.4 9.2 5.4 8 5.4 6.8 5.7 6.3 6 5.8 6.6 5.8 7.1 5.8 7.4 6.2Z"/><path d="M14.7 5.3Q14.1 4.6 13.1 4.6 11.7 4.6 11.1 5.4 10.5 6.2 10.5 8 10.5 9.8 11.1 10.6 11.7 11.4 13.1 11.4 14.2 11.4 14.8 10.6L13.9 9.8Q13.6 10.2 13.1 10.2 12.5 10.2 12.2 9.7 11.9 9.2 11.9 8 11.9 6.8 12.2 6.3 12.5 5.8 13.1 5.8 13.6 5.8 13.9 6.2Z"/></svg>',
   submit: '<svg width="12" height="18" viewBox="0 0 12 18" aria-hidden="true" focusable="false"><path d="M1 9.5l3.2 3.2L11 5.5l-1.4-1.4-5.4 5.4-1.8-1.8z"/></svg>',
   fsClose: '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false"><path d="M3.3 0.4H5.1V5.2H0.1V3.4H3.3Z"/><path d="M0.1 8.9H5.1V13.6H3.3V10.7H0.1Z"/><path d="M8.4 8.9H13.3V10.7H10.2V13.6H8.4Z"/><path d="M8.4 0.4H10.2V3.4H13.3V5.2H8.4Z"/></svg>',
+  // speaker: the body, two sound waves (animated while narration plays) and two pause bars (shown while paused)
+  speaker: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 9v6h4l5 4V5L7 9H3z"/><path class="wave wave1" d="M14.5 8.6a4.2 4.2 0 0 1 0 6.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="wave wave2" d="M17.6 5.6a8.6 8.6 0 0 1 0 12.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><g class="pause-bars"><rect x="14.6" y="7.5" width="2.4" height="9" rx=".6"/><rect x="18.8" y="7.5" width="2.4" height="9" rx=".6"/></g></svg>',
 };
 
 const h = (tag, attrs = {}, html = '') => {
@@ -38,6 +42,7 @@ export async function boot(root) {
   ]);
   const player = new Player(root, content, layout, paths);
   player.mount();
+  window.__s1Player = player; // test hook (tools/test-fit.mjs walks layers and states through it)
   return player;
 }
 
@@ -82,6 +87,8 @@ class Player {
       setSubmit: (fn) => this.setSubmit(fn),
       setCaptionsAvailable: (on) => { this.ccBtn.style.display = on ? '' : 'none'; },
       cc: { get: () => this.cc, on: (cb) => { this.ccListeners.add(cb); return () => this.ccListeners.delete(cb); } },
+      narration: { set: (list, opts) => this.setNarration(list, opts), clear: () => this.clearNarration() },
+      refit: () => this.scheduleFit(),
       layout,
       paths,
       h,
@@ -99,6 +106,12 @@ class Player {
     this.stage = h('div', { class: 'stage', role: 'region', 'aria-live': 'polite', 'aria-label': 'Slide', tabindex: '-1' });
     this.stageWrap.appendChild(this.stage);
     r.appendChild(this.stageWrap);
+
+    // speaker control (P4.1 fix 3): shown only on narrated screens, placed over the slide's top right corner
+    this.narrBtn = h('button', { class: 'narration-btn', type: 'button', 'aria-label': 'Play narration', 'data-state': 'paused', style: 'display:none' }, ICON.speaker);
+    this.narrBtn.addEventListener('click', () => this.toggleNarration());
+    r.appendChild(this.narrBtn);
+    this.narr = null;
 
     // bottom bar
     this.bar = h('section', { class: 'bottom-bar', 'aria-label': 'Navigation' });
@@ -179,6 +192,11 @@ class Player {
     // progress line sits right under the slide, as wide as the slide
     this.progress.style.left = left + 'px';
     this.progress.style.width = sw + 'px';
+    // speaker control: same spot on every screen, not scaled with the slide so it stays tappable on phones
+    const bs = compact ? NARR_BTN.size - 4 : NARR_BTN.size, bp = compact ? NARR_BTN.pad - 4 : NARR_BTN.pad;
+    this.narrBtn.style.left = (left + sw - bs - bp) + 'px';
+    this.narrBtn.style.top = (top + bp) + 'px';
+    this.narrBtn.style.width = this.narrBtn.style.height = bs + 'px';
   }
 
   /* ---- navigation ---- */
@@ -190,6 +208,7 @@ class Player {
     this.viewed.add(i);
 
     this.setSubmit(null);
+    this.clearNarration(); // leaving a screen stops its narration (the old screen's media is unloaded below)
     const def = components[screen.type] || components.placeholder;
     const el = h('div', { class: 'screen', 'data-n': screen.n, 'data-type': screen.type });
     const inst = def.render(screen, this.ctx, el) || {};
@@ -205,8 +224,11 @@ class Player {
       prevCurrent.el.remove();
     }
     this.stage.appendChild(el);
-    this.current = { screen, el, dispose: inst.dispose };
+    this.current = { screen, el, dispose: inst.dispose, inst: inst.inst };
     if (inst.mount) inst.mount();
+    // text-fit pass: now, and again once the slide fonts have loaded (metrics change with them)
+    this.scheduleFit();
+    requestAnimationFrame(() => document.fonts.ready.then(() => { if (this.current && this.current.el === el) this.scheduleFit(); }));
 
     this.updateChrome();
     if (!opts.initial) {
@@ -231,6 +253,58 @@ class Player {
       b.querySelector('.t').textContent = withName(this.screens[i].title, nameStore.get());
     });
     document.title = `${withName(this.screens[this.index].title, nameStore.get())} · ${this.content.course.shortTitle}`;
+  }
+
+  /* ---- text fit (fix 2): one pass per frame at most; fitNow() is synchronous for the tests ---- */
+  scheduleFit() {
+    if (this.fitRaf) return;
+    this.fitRaf = requestAnimationFrame(() => { this.fitRaf = 0; this.fitNow(); });
+  }
+  fitNow() { if (this.current && this.current.el && this.current.el.isConnected) fitScreen(this.current.el); }
+
+  /* ---- narration control (fix 3) ----
+     A screen registers its narration media (avatar video and/or voice track, read from the original slide
+     data). The speaker shows "playing" with animated waves while any of them plays, "paused" otherwise.
+     Click, Space or Enter: pause everything that plays, or continue from the same point; when nothing has
+     started yet, start the narration the way the original does. Pausing also holds the slide's timeline, so
+     bullets keep step with the voice. */
+  setNarration(list, opts = {}) {
+    this.clearNarration();
+    if (!list.length) return;
+    const n = { list, opts, paused: [] };
+    n.sync = () => {
+      const playing = n.list.some(m => !m.paused && !m.ended);
+      if (playing && opts.resumeTimeline) opts.resumeTimeline();
+      this.narrBtn.dataset.state = playing ? 'playing' : 'paused';
+      this.narrBtn.setAttribute('aria-label', playing ? 'Pause narration' : 'Play narration');
+    };
+    for (const m of list) for (const ev of ['play', 'pause', 'ended']) m.addEventListener(ev, n.sync);
+    this.narr = n;
+    this.narrBtn.style.display = '';
+    n.sync();
+  }
+  clearNarration() {
+    const n = this.narr;
+    if (n) for (const m of n.list) for (const ev of ['play', 'pause', 'ended']) m.removeEventListener(ev, n.sync);
+    this.narr = null;
+    this.narrBtn.style.display = 'none';
+    this.narrBtn.dataset.state = 'paused';
+    this.narrBtn.setAttribute('aria-label', 'Play narration');
+  }
+  toggleNarration() {
+    const n = this.narr; if (!n) return;
+    const playing = n.list.filter(m => !m.paused && !m.ended);
+    if (playing.length) {
+      n.paused = playing;
+      for (const m of playing) m.pause();
+      if (n.opts.pauseTimeline) n.opts.pauseTimeline();
+      return;
+    }
+    const resume = n.paused.filter(m => m.paused && !m.ended && m.currentTime > 0);
+    n.paused = [];
+    const again = resume.length ? resume : n.list.filter(m => m.paused && !m.ended && m.currentTime > 0).slice(0, 1);
+    if (again.length) { for (const m of again) m.play().catch(() => { /* blocked: the icon stays paused */ }); return; }
+    if (n.opts.start) n.opts.start(); else n.list[0].play().catch(() => { /* blocked */ });
   }
 
   setNavHidden(hidden) {
