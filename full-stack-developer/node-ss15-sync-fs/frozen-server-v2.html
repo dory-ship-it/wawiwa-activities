@@ -8,7 +8,7 @@
   Wawiwa · AI Full-Stack Developer · Node module · Self-study 15 (Synchronous File System Operations)
   Frozen Server (Lesson 3 embed). Covers Word section 9: "Sync operations: Block the entire Node process.
   Freeze server handling. Acceptable for: Scripts, Setup tasks, Learning."
-  Wawiwa house style, one screen at a time, sized to the iframe so nothing scrolls inside Rise. Embed height: 820.
+  Wawiwa house style, one screen at a time, sized to the iframe so nothing scrolls inside Rise. Embed height: 740.
   A simulation: rates and durations are illustrative, not measurements, and the page says so. No coach, no network.
 -->
 <style>
@@ -151,12 +151,26 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:21px;line-height:
   .fb{font-size:13.5px}
 }
 @media (max-width:660px){.main{padding:16px 14px 12px}.hd,.ft{padding:0 14px}}
+/* ===== 5-screen flow: Watch the server, Guess what happens, What it means ===== */
+.ey{margin-bottom:0}
+h1.ins{max-width:none}
+.g2.watch{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}
+.act .btn + .restart{margin-left:4px}
+.take{margin:4px 0 0;padding:0 0 0 22px;display:grid;gap:12px;color:var(--tx2);font-size:17px;max-width:72ch}
+.take b{color:var(--tx);font-family:Roboto,sans-serif}
+.take li::marker{color:var(--teal)}
+.score{margin:16px 0 0;color:var(--tx2);font-size:15.5px}
+.score b{font-family:Roboto,sans-serif;color:var(--tx)}
+.restart{background:none;border:0;padding:0;color:var(--tx2);font:inherit;font-size:14.5px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.restart:hover{color:var(--tx)}
+.back{margin-top:18px}
+@media (max-width:860px){.take{gap:9px;font-size:16px}.key{gap:8px}.sub{margin-bottom:10px}.q{margin-bottom:8px}.choices{gap:7px}.act{margin-top:10px}.fbs{margin-top:8px}}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="hd"><svg viewBox="0 0 120 48" width="100" height="40" role="img" aria-label="wawiwa"><rect x="0" y="0" width="120" height="34" rx="2" fill="#EE3124"/><path d="M26 33 L46 33 L26 47 Z" fill="#EE3124"/><text x="60" y="25" text-anchor="middle" font-family="Roboto, sans-serif" font-weight="800" font-size="23" fill="#fff" letter-spacing="0">wawiwa</text></svg>
-    <div class="nm">Frozen Server<span class="lead">See what sync file calls do to waiting requests.</span></div>
+    <div class="nm">Frozen Server<span class="lead">Watch a normal server, guess what sync file calls do to it, then see why.</span></div>
     <nav class="steps" id="steps" aria-label="Steps"></nav></header>
   <main class="main" id="main" tabindex="-1"></main>
   <footer class="ft"><span class="pg" id="pg"></span><div class="bar" aria-hidden="true"><i id="barI"></i></div></footer>
@@ -170,30 +184,29 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:21px;line-height:
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var ARRIVE = 0.1, SERVE = 0.04;
 
+  var NORMAL = {duration:6, events:[]};
   var EXPERIMENTS = [
-    {title:'Send normal requests', step:'Normal', setup:'Requests arrive all the time. Each one is quick for Node to answer.',
-     q:'Node answers one request at a time. With quick requests, how long do users wait?',
-     opts:[{t:'Almost no time. Each answer is done before the next request arrives.', ok:true},{t:'A few seconds each, because Node can only do one thing at a time.'},{t:'It depends on how many CPUs the server has.'}],
-     run:{duration:6, events:[]},
-     why:'Node finishes each quick request before the next one arrives, so the line stays empty.'},
-    {title:'Trigger one sync read', step:'One read', setup:'Mid-traffic, one request runs <code>fs.readFileSync</code> on a big file. The read takes 3 seconds.',
+    {h1:'One request reads a big file with sync code. Pick your guess, then click Run to watch.',
+     setup:'Mid-traffic, one request runs <code>fs.readFileSync</code> on a big file. The read takes 3 seconds.',
      q:'While Node reads the file, what happens to the requests that keep arriving?',
      opts:[{t:'Another part of Node answers them in the meantime.'},{t:'They wait in line until the read is finished.', ok:true},{t:'Node rejects them with an error.'}],
      run:{duration:9, events:[{at:2, label:'readFileSync("big-report.csv")', dur:3}]},
      why:'The sync read froze the whole Node process, so nobody was answered until the read ended.'},
-    {title:'Log with sync on every request', step:'Every request', setup:'Every request now writes a log line with <code>fs.appendFileSync</code>. Each write takes a little longer than the gap between requests.',
+    {h1:'Every request writes a log line with sync code. Pick your guess, then click Run to watch.',
+     setup:'Every request now writes a log line with <code>fs.appendFileSync</code>. Each write takes a little longer than the gap between requests.',
      q:'Each write is short. What happens to the line over time?',
      opts:[{t:'Nothing much. Short writes cannot hurt.'},{t:'The line settles at a few requests and stays there.'},{t:'The line keeps growing, and waits get longer and longer.', ok:true}],
      run:{duration:9, perRequestSync:0.12},
      why:'Each write freezes Node for longer than the gap between requests, so the line keeps growing.'},
-    {title:'Run sync before the server opens', step:'Startup', setup:'Before the server opens, the startup script runs <code>fs.mkdirSync("logs")</code> once.',
+    {h1:'Sync code runs once, before the server opens. Pick your guess, then click Run to watch.',
+     setup:'Before the server opens, the startup script runs <code>fs.mkdirSync("logs")</code> once.',
      q:'Does this sync call make any user wait?',
      opts:[{t:'Yes, everyone waits for the folder to be created.'},{t:'No. It runs before the server takes its first request.', ok:true},{t:'Only the first user waits.'}],
      run:{duration:7, startup:1.5},
      why:'The sync call finished before the server opened, so no request had to wait.'}
   ];
-  var STEPS = EXPERIMENTS.map(function(e){ return e.step; }).concat(['Review']);
-  var PAGES = STEPS.length + 1;
+  var STEPS = ['Watch the server','Guess what happens','What it means'];
+  var PAGES = EXPERIMENTS.length + 2;
   var screen, correct, sim, raf;
 
   /* ---------- simulation (illustrative) ---------- */
@@ -238,49 +251,57 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:21px;line-height:
     function frame(ts){ if (last===null) last=ts; var dt=Math.min(0.05,(ts-last)/1000); last=ts; stepSim(sim,dt); draw(sim); if (sim.t<cfg.duration) raf=requestAnimationFrame(frame); else done(); }
     raf=requestAnimationFrame(frame);
   }
+  function stage(){
+    return '<div class="stage" aria-label="Simulated CampusHub server">'+
+      '<div class="lanes" aria-hidden="true"><div class="lane"><h3>Waiting</h3><div class="chips" id="queue"></div></div>'+
+      '<div class="core"><div class="node" id="node"><svg class="frost" viewBox="0 0 110 110" aria-hidden="true"><g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M55 3v14M55 93v14M3 55h14M93 55h14M18 18l10 10M82 82l10 10M92 18L82 28M28 82L18 92"/></g></svg><div><b id="nodeState">Node</b><span id="nodeSub">idle</span></div></div></div>'+
+      '<div class="lane"><h3>Answered</h3><div class="chips" id="done"></div></div></div>'+
+      '<div class="stats"><div class="stat" id="stWait"><div class="v" id="vWait">0</div><div class="l">waiting now</div></div><div class="stat" id="stLong"><div class="v" id="vLong">0.0 sec</div><div class="l">longest wait</div></div></div>'+
+    '</div>';
+  }
 
-  /* ---------- screens: 0 intro, 1-4 experiments, 5 review ---------- */
+  /* ---------- screens: 0 watch, 1-3 guess and run, 4 what it means ---------- */
+  function stepOf(n){ return n===0 ? 0 : (n<=EXPERIMENTS.length ? 1 : 2); }
   function chrome(){
-    var h=''; STEPS.forEach(function(lbl,k){
-      var n=k+1, cls='sp'+(n===screen?' on':(n<screen?' done':''));
+    var cur=stepOf(screen), h='';
+    STEPS.forEach(function(lbl,k){
+      var cls='sp'+(k===cur?' on':(k<cur?' done':''));
       if (k) h+='<span class="ar" aria-hidden="true">&rarr;</span>';
-      h+='<span class="'+cls+'"'+(n===screen?' aria-current="step"':'')+'><b>'+n+'</b>'+lbl+'</span>';
+      h+='<span class="'+cls+'"'+(k===cur?' aria-current="step"':'')+'><b>'+(k+1)+'</b>'+lbl+'</span>';
     }); $('steps').innerHTML=h;
     $('pg').textContent=(screen+1)+' / '+PAGES;
     $('barI').style.width=Math.round(100*screen/(PAGES-1))+'%';
   }
-  function show(n, focus){ screen=n; cancelAnimationFrame(raf); $('main').scrollTop=0; chrome(); if (n===0) intro(); else if (n<=EXPERIMENTS.length) experiment(n-1); else finish(); if (focus) $('main').focus(); }
+  function show(n, focus){ screen=n; cancelAnimationFrame(raf); $('main').scrollTop=0; chrome(); if (n===0) watch(); else if (n<=EXPERIMENTS.length) experiment(n-1); else finish(); if (focus) $('main').focus(); }
   function head(label, title){ return '<p class="ey">'+label+'</p><h1 class="ins">'+title+'</h1>'; }
 
-  function intro(){
-    $('main').innerHTML=head('Before you start','Friday’s load test')+
-      '<p class="sub">1,000 users hit CampusHub at once. Node handles one thing at a time. In four short experiments, you predict what happens to the requests waiting in line.</p>'+
-      '<p class="sub"><b>Sync</b> (synchronous) means Node waits for a file task to finish before it does anything else.</p>'+
+  function watch(){
+    $('main').innerHTML=head('Step 1 &middot; Watch the server','This is CampusHub on a normal day. Watch Node answer each request, then click Next.')+
+      '<div class="g2 watch"><div>'+
+      '<p class="sub">On Friday, 1,000 users hit CampusHub at once. Node handles one thing at a time. Next, you guess what <b>sync</b> (synchronous) file calls do to it: Node waits for the file task to finish before it does anything else.</p>'+
       '<ul class="key">'+
         '<li><span class="chip"></span>A request waiting for an answer. Orange and red ones have waited too long.</li>'+
         '<li><span class="dot" style="background:#3E9148"></span>Green: Node is answering.</li>'+
         '<li><span class="dot" style="background:#8FC6EA;box-shadow:0 0 0 4px rgba(143,198,234,.22)"></span>Ice blue: a sync call froze Node, so it answers no one.</li>'+
       '</ul>'+
-      '<p class="simnote">Simulation. Speeds and numbers are illustrative, not measurements.</p>'+
-      '<div class="act"><button class="btn" id="primary" type="button">Start</button></div>';
+      '<div class="act"><button class="btn" id="primary" type="button">Next</button><button class="restart" id="again" type="button">Watch again</button></div>'+
+      '</div><div>'+stage()+'<p class="simnote" style="margin-top:8px">Simulation. Speeds and numbers are illustrative, not measurements.</p></div></div>';
     $('primary').onclick=function(){ show(1, true); };
+    $('again').onclick=function(){ runSim(NORMAL, function(){}); };
+    runSim(NORMAL, function(){ $('announce').textContent='Normal day: '+sim.done+' answered, longest wait '+sim.longest.toFixed(1)+' seconds.'; });
   }
 
   function experiment(i){
     var e=EXPERIMENTS[i];
-    $('main').innerHTML='<div class="g2"><div>'+head('Step '+(i+1)+' of '+STEPS.length, e.title)+
+    $('main').innerHTML=head('Step 2 &middot; Guess what happens &middot; '+(i+1)+' of '+EXPERIMENTS.length, e.h1)+
+      '<div class="g2"><div>'+
       '<p class="sub">'+e.setup+'</p>'+
       '<p class="q" id="q'+i+'">'+e.q+'</p><div class="choices" role="radiogroup" aria-labelledby="q'+i+'" id="options"></div>'+
-      '<div class="act"><button class="btn" id="primary" type="button" disabled>Run the experiment</button></div>'+
+      '<div class="act"><button class="btn" id="primary" type="button" disabled>Pick a guess to run</button></div>'+
       '<div class="fbs" id="feedback" role="status" aria-live="polite" tabindex="-1"></div>'+
-      '</div><div class="stage" aria-label="Simulated CampusHub server">'+
-        '<div class="lanes" aria-hidden="true"><div class="lane"><h3>Waiting</h3><div class="chips" id="queue"></div></div>'+
-        '<div class="core"><div class="node" id="node"><svg class="frost" viewBox="0 0 110 110" aria-hidden="true"><g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M55 3v14M55 93v14M3 55h14M93 55h14M18 18l10 10M82 82l10 10M92 18L82 28M28 82L18 92"/></g></svg><div><b id="nodeState">Node</b><span id="nodeSub">idle</span></div></div></div>'+
-        '<div class="lane"><h3>Answered</h3><div class="chips" id="done"></div></div></div>'+
-        '<div class="stats"><div class="stat" id="stWait"><div class="v" id="vWait">0</div><div class="l">waiting now</div></div><div class="stat" id="stLong"><div class="v" id="vLong">0.0 sec</div><div class="l">longest wait</div></div></div>'+
-      '</div></div>';
+      '</div>'+stage()+'</div>';
     $('options').innerHTML=e.opts.map(function(o,k){ return '<label class="choice"><input type="radio" name="pred" value="'+k+'"><span class="rd" aria-hidden="true"></span><span><b>'+o.t+'</b></span></label>'; }).join('');
-    Array.prototype.forEach.call(document.querySelectorAll('input[name="pred"]'), function(x){ x.addEventListener('change', function(){ $('primary').disabled=false; }); });
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="pred"]'), function(x){ x.addEventListener('change', function(){ var p=$('primary'); p.disabled=false; p.textContent='Run'; }); });
     sim=newSim(e.run); draw(sim);
     $('primary').onclick=function(){ run(i); };
   }
@@ -298,24 +319,27 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:21px;line-height:
         if (o.ok){ labels[k].classList.add('is-right'); labels[k].insertAdjacentHTML('beforeend','<span class="mark">Correct</span>'); }
         else if (k===choice){ labels[k].classList.add('is-wrong'); labels[k].insertAdjacentHTML('beforeend','<span class="mark">Your pick</span>'); }
       });
-      var fb=$('feedback');
-      fb.innerHTML='<div class="fb '+(right?'ok':'no')+'"><b class="v">'+(right?'Correct.':'Incorrect.')+'</b>'+e.why+'</div>';
-      $('announce').textContent='Result: '+sim.done+' answered, '+sim.queue.length+' still waiting, longest wait '+sim.longest.toFixed(1)+' seconds.';
+      $('feedback').innerHTML='<div class="fb '+(right?'ok':'no')+'"><b class="v">'+(right?'Correct.':'Incorrect.')+'</b>'+e.why+'</div>';
+      $('announce').textContent=(right?'Correct. ':'Incorrect. ')+'Result: '+sim.done+' answered, '+sim.queue.length+' still waiting, longest wait '+sim.longest.toFixed(1)+' seconds.';
       var last=i===EXPERIMENTS.length-1, p=$('primary');
-      p.disabled=false; p.textContent=last?'See the review':'Next step';
+      p.disabled=false; p.textContent=last?'See what it means':'Next';
       p.onclick=function(){ show(screen+1, true); };
       p.focus();
     });
   }
 
   function finish(){
-    $('main').innerHTML=head('Step '+STEPS.length+' of '+STEPS.length,'What the load test showed')+
-      '<p class="statrow"><b>'+correct+' / '+EXPERIMENTS.length+'</b> predictions right</p>'+
-      '<p class="quote"><b>From the lesson:</b> Sync operations block the entire Node process. Acceptable for scripts, setup tasks, and learning.</p>'+
+    $('main').innerHTML=head('Step 3 &middot; What it means','Sync file calls freeze the whole server, so use them only where no user is waiting.')+
+      '<ul class="take">'+
+        '<li><b>Sync operations block the entire Node process.</b> During the one sync read, no request was answered until the read ended.</li>'+
+        '<li><b>Short sync calls still freeze server handling.</b> One on every request made the line keep growing.</li>'+
+        '<li><b>Sync is acceptable for scripts, setup tasks, and learning.</b> The startup call ran before the server opened, so no one waited.</li>'+
+      '</ul>'+
+      '<p class="score">You guessed <b>'+correct+' of '+EXPERIMENTS.length+'</b> right.</p>'+
       '<p class="back">Back to the lesson: answer Check yourself below, then go to Practice.</p>'+
-      '<div class="act"><button class="btn gh" id="secondary" type="button">Start over</button></div>';
+      '<p style="margin:14px 0 0"><button class="restart" id="secondary" type="button">Start over</button></p>';
     $('secondary').onclick=function(){ correct=0; show(0, true); };
-    $('announce').textContent='Frozen Server complete. You predicted '+correct+' of '+EXPERIMENTS.length+' right.';
+    $('announce').textContent='Frozen Server complete. You guessed '+correct+' of '+EXPERIMENTS.length+' right. Back to the lesson: answer Check yourself below, then go to Practice.';
   }
 
   correct=0; show(0);

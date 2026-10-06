@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Who Prints First? · Async fs</title>
 <!--
-  Wawiwa · AI Full-Stack Developer · Node module · Self-study 16. Who Prints First? (Part 1 embed). Embed height 820.
+  Wawiwa · AI Full-Stack Developer · Node module · Self-study 16. Who Prints First? (Part 1 embed). Embed height 720.
   One task per screen. No network calls. Verified on Node 22 (200 runs x2): "script end" always first; 5 different
   orders of the other three; whenever writeFile finished before mkdir, writeFile had failed with ENOENT, silently.
 -->
@@ -183,16 +183,29 @@ body{padding:10px 14px 14px}
 /* ===== Tuned for the Rise block colour #0D1626: card floats one shade lighter ===== */
 :root{--bg:#111D32;--s1:#172741;--s2:#1F3252;--line:#2B4166}
 .app{border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 44px rgba(0,0,0,.35)}
+/* ===== 5-screen flow: Guess, Try it in Cursor, What it means ===== */
+.pills{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pills .choice{padding:10px 14px}
+.pills .choice b{font-family:var(--mono);font-size:13.5px;white-space:nowrap}
+.main:focus,.main:focus-visible{outline:none}
+.q{font-family:Roboto,sans-serif;font-weight:700;font-size:16px;color:var(--tx);margin:0 0 8px}
+.q + .choices, .q + .pills{margin-bottom:16px}
+.how{list-style:none;margin:0;padding:0;display:grid;gap:12px;counter-reset:s}
+.how li{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start;color:var(--tx2);font-size:16px}
+.how li::before{counter-increment:s;content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--s2);color:var(--tx);font-family:Roboto,sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+.how b{color:var(--tx)}
+.restart{background:none;border:0;padding:0;margin-left:6px;color:var(--tx2);font:inherit;font-size:14.5px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.restart:hover{color:var(--tx)}
+@media (max-width:720px){.pills{grid-template-columns:1fr}.how li{font-size:15px}}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="hd"><svg viewBox="0 0 120 48" width="100" height="40" role="img" aria-label="wawiwa"><rect x="0" y="0" width="120" height="34" rx="2" fill="#EE3124"/><path d="M26 33 L46 33 L26 47 Z" fill="#EE3124"/><text x="60" y="25" text-anchor="middle" font-family="Roboto, sans-serif" font-weight="800" font-size="23" fill="#fff" letter-spacing="0">wawiwa</text></svg>
-    <div class="nm">Who Prints First?<span class="lead">Predict the print order, run the file 5 times, compare.</span></div>
-    <nav class="steps" aria-label="Steps"><span class="sp" id="st0"><b>1</b>Predict</span><span class="ar" aria-hidden="true">&rarr;</span><span class="sp" id="st1"><b>2</b>Run &times;5</span><span class="ar" aria-hidden="true">&rarr;</span><span class="sp" id="st2"><b>3</b>Compare</span></nav></header>
+    <div class="nm">Who Prints First?<span class="lead">Guess what the code prints, try it in Cursor, then see why.</span></div>
+    <nav class="steps" aria-label="Steps"><span class="sp" id="st0"><b>1</b>Guess</span><span class="ar" aria-hidden="true">&rarr;</span><span class="sp" id="st1"><b>2</b>Try it in Cursor</span><span class="ar" aria-hidden="true">&rarr;</span><span class="sp" id="st2"><b>3</b>What it means</span></nav></header>
   <main class="main" id="main" tabindex="-1"></main>
-  <footer class="ft"><span class="pg" id="pg"></span><div class="bar" aria-hidden="true"><i id="barI"></i></div>
-    <button class="btn" id="next" type="button"></button></footer>
+  <footer class="ft"><span class="pg" id="pg"></span><div class="bar" aria-hidden="true"><i id="barI"></i></div></footer>
 </div>
 <p class="sr" id="live" aria-live="polite"></p>
 <script>
@@ -200,26 +213,20 @@ body{padding:10px 14px 14px}
 "use strict";
 var $=function(id){return document.getElementById(id);};
 var qsa=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
-var RUNS=5;
 var LINES=['script end','mkdir finished','writeFile finished','unlink finished'];
-var ORD=['1st','2nd','3rd','4th'];
 var CODE='const fs = require("fs");\n\nfs.mkdir("data", (err) => {\n  console.log("mkdir finished");\n  if (err) return;\n});\n\nfs.writeFile("data/info.txt", "Hello Async", (err) => {\n  console.log("writeFile finished");\n  if (err) return;\n});\n\nfs.unlink("data/info.txt", (err) => {\n  console.log("unlink finished");\n  if (err) return;\n});\n\nconsole.log("script end");';
 function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function hl(l){var h=esc(l);h=h.replace(/"([^"]*)"/g,'<span class="s">"$1"</span>');h=h.replace(/\b(const|return|if)\b/g,'<span class="k">$1</span>');h=h.replace(/\b(require|mkdir|writeFile|unlink|log)\(/g,'<span class="f">$1</span>(');return h||' ';}
 function codeBox(mode,copy){
   var leg='';
-  if(mode==='err') leg='<span><i class="sw w"></i>What each callback does when its job fails.</span>';
+  if(mode==='log') leg='<span><i class="sw t"></i>Highlighted: the 4 lines that print to the terminal.</span>';
+  if(mode==='err') leg='<span><i class="sw w"></i>Highlighted: what each job does if it fails.</span>';
   return '<div class="codebox"><div class="ttl">'+(copy?'<span>The code for index.js</span><button class="copy" type="button" data-copy>Copy</button>':'<span>The code (read only)</span>')+'</div><ol aria-label="index.js, line by line">'+CODE.split('\n').map(function(l){
     var c=''; if(mode==='log' && /console\.log/.test(l)) c='hl'; if(mode==='err' && /if \(err\)/.test(l)) c='hw';
     return '<li class="'+c+'"><span class="t">'+hl(l)+'</span></li>';}).join('')+'</ol>'+(leg?'<div class="legend">'+leg+'</div>':'')+'</div>';
 }
-function short(l){return l.replace(' finished','');}
-function key(o){return o.join('|');}
-function full(o){return o.every(function(x){return !!x;});}
-function wbm(o){return o.indexOf('writeFile finished')<o.indexOf('mkdir finished');}
 function say(t){$('live').textContent='';setTimeout(function(){$('live').textContent=t;},40);}
-function fb(kind,verdict,why){return '<div class="fb '+kind+'"><b class="v">'+verdict+'</b>'+why+'</div>';}
-function empty4(){return [null,null,null,null];}
+function fb(kind,verdict,why){return '<div class="fbs" role="status"><div class="fb '+kind+'"><b class="v">'+verdict+'</b>'+why+'</div></div>';}
 
 /* copy, with fallbacks for iframes that block the clipboard */
 function copied(b){b.textContent='Copied';say('Code copied');setTimeout(function(){b.textContent='Copy';},1800);}
@@ -234,153 +241,92 @@ function bindCopy(){qsa('[data-copy]').forEach(function(b){b.onclick=function(){
   try{ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(CODE).then(function(){copied(b);},function(){selectFallback(b);});} else selectFallback(b);}
   catch(e){selectFallback(b);} };});}
 
-/* ordering widget: 4 slots + pool */
-function picker(arr,locked,label){
-  var h='<p class="lab">'+(label||'Your order')+'</p><div class="slots">';
-  arr.forEach(function(l,i){
-    if(l) h+='<button type="button" class="slot" data-i="'+i+'"'+(locked?' disabled':'')+' aria-label="'+ORD[i]+': '+l+(locked?'':'. Click to send it back to the lines')+'"><span class="ord">'+ORD[i]+'</span><span class="ln">'+l+'</span>'+(locked?'':'<span class="bk">click to remove</span>')+'</button>';
-    else h+='<div class="slot" aria-label="'+ORD[i]+', empty"><span class="ord">'+ORD[i]+'</span></div>';
-  });
-  h+='</div>';
-  if(!locked){
-    var pool=LINES.filter(function(l){return arr.indexOf(l)<0;});
-    h+='<div class="poolhd"><p class="lab">Lines</p><button type="button" class="reset" id="reset"'+(pool.length===4?' disabled':'')+'>Reset</button></div><div class="pool">'+
-      (pool.length?pool.map(function(l){return '<button type="button" class="pick" data-l="'+l+'">'+l+'</button>';}).join('')
-        :'<p class="pooldone">All 4 lines placed. Click a slot to take a line back.</p>')+'</div>';
-  }
-  return h;
+function choices(name,opts,sel,locked,cls){
+  return '<div class="'+(cls||'choices')+(locked?' choices lock':'')+'" role="radiogroup">'+opts.map(function(o){return '<label class="choice"><input type="radio" name="'+name+'" value="'+o.k+'"'+(sel===o.k?' checked':'')+(locked?' disabled':'')+'><span class="rd" aria-hidden="true"></span><span><b>'+o.t+'</b></span></label>';}).join('')+'</div>';
 }
-function bindPicker(arr,onch){
-  qsa('.pick').forEach(function(b){b.onclick=function(){var k=arr.indexOf(null);if(k<0)return;arr[k]=b.getAttribute('data-l');say(arr[k]+', placed '+ORD[k]);onch();
-    var nx=document.querySelector('.pick');(nx||$('next')).focus();};});
-  qsa('button.slot').forEach(function(b){b.onclick=function(){if(b.disabled)return;var k=+b.getAttribute('data-i');var l=arr[k];arr[k]=null;say(l+', back in the lines');onch();
-    var nx=document.querySelector('.pick');if(nx)nx.focus();};});
-  var rs=$('reset'); if(rs) rs.onclick=function(){for(var k=0;k<4;k++)arr[k]=null;say('Order cleared');onch();var nx=document.querySelector('.pick');if(nx)nx.focus();};
-}
-function choiceList(name,opts,sel,locked){
-  return '<div class="choices'+(locked?' lock':'')+'" role="radiogroup">'+opts.map(function(o){return '<label class="choice"><input type="radio" name="'+name+'" value="'+o.k+'"'+(sel===o.k?' checked':'')+(locked?' disabled':'')+'><span class="rd" aria-hidden="true"></span><span><b>'+o.t+'</b></span></label>';}).join('')+'</div>';
-}
+function btn(label,disabled,id){return '<div class="act"><button class="btn" type="button" id="'+(id||'go')+'"'+(disabled?' disabled':'')+'>'+label+'</button></div>';}
 
 /* screens */
-var SC=['order','error','setup'];for(var r=0;r<RUNS;r++)SC.push('run'+r);SC.push('compare','finish');
+var SC=['guess1','guess2','run','saw','done'], STEP={guess1:0,guess2:0,run:1,saw:1,done:2};
+var LINE_OPTS=LINES.map(function(l){return {k:l,t:l};});
 var ERR_OPTS=[{k:'yes',t:'Yes, an error is printed'},{k:'no',t:'No, nothing extra is printed'},{k:'crash',t:'The script crashes'}];
-var cur=0, pred, runs, temp;
-function resetAll(){pred={order:empty4(),err:null,okO:false,okE:false};runs=[];temp={order:empty4(),state:null,checked:false};}
+var SAME_OPTS=[{k:'changed',t:'No, the order changed'},{k:'same',t:'Yes, the same order every time'}];
+var cur=0, a;
+function resetAll(){a={first:null,c1:false,err:null,c2:false,seenFirst:null,seenOrder:null,c3:false};}
 resetAll();
-function foot(label,disabled){
-  $('pg').textContent=(cur+1)+' / '+SC.length;
-  $('barI').style.width=Math.round(100*cur/(SC.length-1))+'%';
-  var n=$('next');n.textContent=label;n.disabled=!!disabled;
-}
 function stepNav(i){[0,1,2].forEach(function(k){var e=$('st'+k);e.className='sp'+(k===i?' on':(k<i?' done':''));if(k===i)e.setAttribute('aria-current','step');else e.removeAttribute('aria-current');});}
 function go(i){cur=i;$('main').scrollTop=0;render();$('main').focus();}
-var handlers={};
-$('next').onclick=function(){handlers.next();};
+function onPick(name,fn){qsa('input[name='+name+']').forEach(function(x){x.onchange=function(){fn(x.value);};});}
 
 function render(){
   var s=SC[cur], m=$('main');
-  if(s==='order'){stepNav(0);
-    var lk=pred.okO, o=pred.order, f=o[0]==='script end';
-    m.innerHTML='<p class="ey">Question 1 of 2</p><h1 class="ins">In what order will the 4 highlighted lines print? Click them in order.</h1>'+
-      '<div class="g2">'+codeBox('log')+'<div>'+picker(o,lk)+'<div class="act" data-act></div>'+
-      (lk?'<div class="fbs" role="status">'+(f?fb('ok','Correct.','script end prints first: Node hands off the three jobs and moves on. The other three can come in any order.')
-        :fb('no','Incorrect.','script end prints first: Node does not wait for the three jobs. The other three can come in any order.'))+'</div>':'')+'</div></div>';
-    bindCopy();
-    if(!lk){bindPicker(o,render);var c=full(o);foot(c?'Check my prediction':'Place all 4 lines to check',!c);
-      handlers.next=function(){pred.okO=true;render();say(o[0]==='script end'?'Correct.':'Incorrect.');$('next').focus();};}
-    else{foot('Next question');handlers.next=function(){go(cur+1);};}
+  stepNav(STEP[s]);
+  $('pg').textContent=(cur+1)+' / '+SC.length;
+  $('barI').style.width=Math.round(100*cur/(SC.length-1))+'%';
+
+  if(s==='guess1'){
+    var ok1=a.first==='script end';
+    m.innerHTML='<p class="ey">Step 1 &middot; Guess &middot; 1 of 2</p><h1 class="ins">This code starts 3 file jobs, then prints script end. Which line do you think prints first?</h1>'+
+      '<div class="g2">'+codeBox('log')+'<div>'+choices('first',LINE_OPTS,a.first,a.c1)+
+      (a.c1?btn('Next question')+(ok1?fb('ok','Correct.','script end prints first, even though it is the last line. Node hands the 3 jobs off and does not wait for them.')
+                               :fb('no','Incorrect.','script end prints first, even though it is the last line. Node hands the 3 jobs off and runs the last line right away.'))
+           :btn(a.first?'Check my guess':'Choose a line to check',!a.first))+'</div></div>';
+    if(!a.c1){onPick('first',function(v){a.first=v;render();});$('go').onclick=function(){a.c1=true;render();say(ok1?'Correct.':'Incorrect.');};}
+    else $('go').onclick=function(){go(1);};
   }
-  else if(s==='error'){stepNav(0);
-    var lk2=pred.okE, ok=pred.err==='no';
-    m.innerHTML='<p class="ey">Question 2 of 2</p><h1 class="ins">Imagine one of the three jobs fails. Will an error be printed?</h1>'+
-      '<div class="g2">'+codeBox('err')+'<div>'+
-      choiceList('err',ERR_OPTS,pred.err,lk2)+'<div class="act" data-act></div>'+
-      (lk2?'<div class="fbs" role="status">'+(ok?fb('ok','Correct.','<code>if (err) return;</code> leaves the callback quietly. Nothing extra is printed.')
-        :fb('no','Incorrect.','<code>if (err) return;</code> leaves the callback quietly. Nothing is printed and the script does not crash.'))+'</div>':'')+'</div></div>';
-    bindCopy();
-    if(!lk2){
-      qsa('input[name=err]').forEach(function(x){x.onchange=function(){pred.err=x.value;foot('Check my answer',false);};});
-      foot(pred.err?'Check my answer':'Choose an answer to check',!pred.err);
-      handlers.next=function(){pred.okE=true;render();say(pred.err==='no'?'Correct.':'Incorrect.');$('next').focus();};}
-    else{foot('Go to step 2: Run');handlers.next=function(){go(cur+1);};}
+  else if(s==='guess2'){
+    var ok2=a.err==='no';
+    m.innerHTML='<p class="ey">Step 1 &middot; Guess &middot; 2 of 2</p><h1 class="ins">Imagine one of the 3 jobs fails. Will an error be printed?</h1>'+
+      '<div class="g2">'+codeBox('err')+'<div>'+choices('err',ERR_OPTS,a.err,a.c2)+
+      (a.c2?btn('Now try it in Cursor')+(ok2?fb('ok','Correct.','<code>if (err) return;</code> leaves quietly when a job fails. Nothing is printed and the script keeps going.')
+                                      :fb('no','Incorrect.','Nothing extra is printed. <code>if (err) return;</code> leaves quietly when a job fails, and the script does not crash.'))
+           :btn(a.err?'Check my guess':'Choose an answer to check',!a.err))+'</div></div>';
+    if(!a.c2){onPick('err',function(v){a.err=v;render();});$('go').onclick=function(){a.c2=true;render();say(ok2?'Correct.':'Incorrect.');};}
+    else $('go').onclick=function(){go(2);};
   }
-  else if(s==='setup'){stepNav(1);
-    m.innerHTML='<p class="ey">Setup</p><h1 class="ins">Set up the file in Cursor.</h1><div class="g2 even"><div>'+
-      '<ol class="stepsl"><li><span>Create an empty folder named <b class="m">async-lab</b> and open it (File, Open Folder).</span></li>'+
-      '<li><span>Create <b class="m">index.js</b>. Click <b>Copy</b>, paste the code and save.</span></li>'+
-      '<li><span>Open the terminal (Terminal, New Terminal).</span></li></ol>'+
-      '<p class="note"><b>Before every run, delete the data folder</b> (right-click it in the Explorer, Delete).</p><div class="act" data-act></div></div>'+
-      codeBox('',true)+'</div>';
-    bindCopy();
-    foot('Record run 1');handlers.next=function(){temp={order:empty4(),state:null,checked:false};go(cur+1);};
+  else if(s==='run'){
+    m.innerHTML='<p class="ey">Step 2 &middot; Try it in Cursor</p><h1 class="ins">Open Cursor and run the real code 3 times. Then come back and tell us what you saw.</h1>'+
+      '<div class="g2 even"><div><ol class="how">'+
+      '<li><span>Open Cursor. Create a folder named <b class="m">async-lab</b> and open it.</span></li>'+
+      '<li><span>Create a file named <b class="m">index.js</b>. Click <b>Copy</b> and paste the code into it.</span></li>'+
+      '<li><span>In the terminal, run <b class="m">node index.js</b> and look at the 4 lines it prints.</span></li>'+
+      '<li><span>Delete the <b class="m">data</b> folder and run it again. Do this 3 times in total.</span></li></ol>'+
+      btn('I ran it 3 times')+'</div>'+codeBox('',true)+'</div>';
+    bindCopy(); $('go').onclick=function(){go(3);};
   }
-  else if(s.indexOf('run')===0){stepNav(1);
-    var i=+s.slice(3);
-    var o2=temp.order, st=temp.state, ch=temp.checked;
-    var okO=o2[0]==='script end', okS=st&&st!=='none', done=ch&&okO&&okS;
-    var rfb='';
-    if(ch){
-      if(done){
-        var d={}; runs.forEach(function(x){d[key(x.order)]=1;}); var n=Object.keys(d).length;
-        rfb=fb('ok','Correct.','Run '+(i+1)+' recorded.'+(i?' '+n+' different order'+(n>1?'s':'')+' so far.':'')+
-          (wbm(o2)?'<span class="fbx">writeFile finished before mkdir: in our tests it had failed then, with no error printed.</span>':''));
-      } else {
-        rfb=fb('no','Incorrect.',(!okO?'script end always prints first: check the top line of the terminal. ':'')+(!okS?'mkdir always creates data: check you ran it inside async-lab.':''));
-      }
+  else if(s==='saw'){
+    var okF=a.seenFirst==='script end', both=a.seenFirst&&a.seenOrder;
+    var fbs='';
+    if(a.c3){
+      fbs=(okF?fb('ok','Correct.','script end is always first. Node starts the 3 jobs and moves on without waiting.')
+              :fb('no','Incorrect.','script end is always first. Look at the top line in your terminal and choose again.'))+
+          (a.seenOrder==='changed'?fb('ok','Correct.','The other 3 lines come in a different order. Each job finishes when it is done, not in the order you wrote it.')
+              :fb('info','Possible, but not promised.','Your runs matched this time. Node does not promise an order, so run it a few more times and it will likely change.'));
     }
-    m.innerHTML='<p class="ey">Run '+(i+1)+' of '+RUNS+'</p><h1 class="ins">'+
-      (i===0?'Run <code>node index.js</code> and record what you see.'
-            :'Delete the data folder, run <code>node index.js</code> again and record what you see.')+'</h1>'+
-      '<div class="g2 even"><div>'+picker(o2,done,'Terminal order, top to bottom')+'</div>'+
-      '<div><p class="lab">Folder now (in the Explorer)</p>'+
-      choiceList('st',[{k:'file',t:'data, with info.txt inside'},{k:'empty',t:'data, empty'},{k:'none',t:'No data folder'}],st,done)+
-      '<div class="act" data-act></div>'+(rfb?'<div class="fbs" role="status">'+rfb+'</div>':'')+'</div></div>';
-    var upd=function(){
-      var c=full(temp.order);
-      if(!c) foot('Place all 4 lines to check',true);
-      else if(!temp.state) foot('Choose the folder state to check',true);
-      else foot('Check run '+(i+1),false);
-    };
-    if(!done){
-      bindPicker(o2,function(){temp.checked=false;render();});
-      qsa('input[name=st]').forEach(function(x){x.onchange=function(){temp.state=x.value;if(temp.checked){temp.checked=false;render();}else upd();};});
-      upd();
-      handlers.next=function(){temp.checked=true;
-        if(temp.order[0]==='script end'&&temp.state!=='none'){runs[i]={order:temp.order.slice(),state:temp.state};}
-        render();say(temp.order[0]==='script end'&&temp.state!=='none'?'Correct. Run '+(i+1)+' recorded.':'Incorrect. Check your answers.');$('next').focus();};
-    } else {
-      foot(i<RUNS-1?'Record run '+(i+2):'Go to step 3: Compare');
-      handlers.next=function(){temp={order:empty4(),state:null,checked:false};go(cur+1);};
-    }
+    m.innerHTML='<p class="ey">Step 2 &middot; Try it in Cursor</p><h1 class="ins">What did you see in your 3 runs? Answer both questions, then check.</h1>'+
+      '<div class="g2 even"><div><p class="q">Which line printed first every time?</p>'+choices('sf',LINE_OPTS,a.seenFirst,a.c3&&okF,'pills')+
+      '<p class="q">Did the other 3 lines always print in the same order?</p>'+choices('so',SAME_OPTS,a.seenOrder,a.c3&&okF)+'</div><div>'+
+      (a.c3&&okF?btn('See what it means'):btn(both?'Check my answers':'Answer both questions to check',!both))+fbs+'</div></div>';
+    if(!(a.c3&&okF)){
+      onPick('sf',function(v){a.seenFirst=v;a.c3=false;render();});
+      onPick('so',function(v){a.seenOrder=v;a.c3=false;render();});
+      $('go').onclick=function(){a.c3=true;render();say(a.seenFirst==='script end'?'Correct.':'Incorrect.');};
+    } else $('go').onclick=function(){go(4);};
   }
-  else if(s==='compare'){stepNav(2);
-    var dd={},sil=0; runs.forEach(function(r){dd[key(r.order)]=1;if(wbm(r.order))sil++;}); var nn=Object.keys(dd).length;
-    var row=function(lb,o,cls,mark){var wi=o.indexOf('writeFile finished'),mi=o.indexOf('mkdir finished');
-      return '<tr class="'+(cls||'')+'"><th scope="row">'+lb+'</th>'+o.map(function(l,k){return '<td'+(mark&&k===wi&&wi<mi?' class="wb"':'')+'>'+short(l)+'</td>';}).join('')+'</tr>';};
-    m.innerHTML='<p class="ey">Compare</p><h1 class="ins">Compare your prediction with your five runs.</h1>'+
-      '<p class="statrow"><span><b>5 / 5</b> script end first</span><span><b>'+nn+'</b> different order'+(nn>1?'s':'')+'</span><span><b>0</b> errors printed</span></p>'+
-      '<table class="tl"><caption class="sr">Print order, first to last, for your prediction and each run</caption><thead><tr><th scope="col">&nbsp;</th><th scope="col">1st</th><th scope="col">2nd</th><th scope="col">3rd</th><th scope="col">4th</th></tr></thead><tbody>'+
-      row('Your prediction',pred.order,'you',false)+runs.map(function(r,k){return row('Run '+(k+1),r.order,'',true);}).join('')+'</tbody></table>'+
-      (sil?'<p class="tlkey"><i class="sw a"></i>writeFile before mkdir: in our tests it had failed then, silently.</p>':'')+
-      '<p class="errline">'+(nn===1?'All five matched this time. That is luck: in our tests the same file gave 5 different orders.':'Same file, different orders. The written order is not a promise.')+'</p>';
-    foot('What this means');handlers.next=function(){go(cur+1);};
-  }
-  else if(s==='finish'){stepNav(3);
-    m.innerHTML='<p class="ey">Done</p><h1 class="ins">Async means Node starts a job and moves on without waiting for it.</h1>'+
-      '<ul class="take"><li><b>Async code does not block.</b> script end printed before any job reported back.</li>'+
-      '<li><b>Node continues handling other work.</b> It runs each callback later.</li>'+
-      '<li><b>fs operations are delegated to the OS.</b> Each job finishes when it is done, not in written order.</li></ul>'+
-      '<p class="back">Back to the lesson: watch the video below.</p>';
-    foot('Start over');handlers.next=function(){resetAll();go(0);};
+  else if(s==='done'){
+    m.innerHTML='<p class="ey">Step 3 &middot; What it means</p><h1 class="ins">Async means Node starts a job and moves on without waiting for it.</h1>'+
+      '<ul class="take">'+
+      '<li><b>Async code does not block.</b> script end printed before any job was done.</li>'+
+      '<li><b>Node continues handling other work.</b> It does not wait at fs.mkdir. It runs each callback later.</li>'+
+      '<li><b>fs operations are delegated to the OS.</b> The operating system does each job, and each job finishes when it is done. So if writeFile must wait for mkdir, your code has to say so.</li></ul>'+
+      '<p class="back">Back to the lesson: watch the video below.</p>'+
+      '<p style="margin:14px 0 0"><button class="restart" type="button" id="again">Start over</button></p>';
+    $('again').onclick=function(){resetAll();go(0);};
     say('Activity complete. Back to the lesson: watch the video below.');
   }
 }
-/* the action button sits right under the answers, not in the footer */
-var _render=render;
-render=function(){var n=$('next');document.querySelector('.ft').appendChild(n);_render();
-  var t=document.querySelector('[data-act]');if(!t){t=document.createElement('div');t.className='act';$('main').appendChild(t);}t.appendChild(n);};
 render();
-function fit(){document.body.style.zoom='';var w=innerWidth,h=innerHeight;var z=Math.min(1,w/660,h/700);
+function fit(){document.body.style.zoom='';var w=innerWidth,h=innerHeight;var z=Math.min(1,w/660,h/600);
   document.body.style.zoom=z<1?z.toFixed(3):'';}
 addEventListener('resize',fit);fit();
 })();
