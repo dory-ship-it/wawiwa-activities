@@ -14,6 +14,8 @@ const ICON = {
   next: '<svg width="10" height="18" viewBox="0 -1 10 18" aria-hidden="true" focusable="false"><path transform="rotate(180,5,8)" d="M2.81685219,7.60265083 L9.00528946,1.41421356 L7.5910759,0 L0,7.5910759 L0.0115749356,7.60265083 L0,7.61422577 L7.5910759,15.2053017 L9.00528946,13.7910881 L2.81685219,7.60265083 Z"/></svg>',
   menu: '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false"><rect y="1" width="14" height="2"/><rect y="6" width="14" height="2"/><rect y="11" width="14" height="2"/></svg>',
   fsOpen: '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false"><path d="M1.99 2.3H5.1V0.4H0.1V5.2H1.9L1.9 2.3Z"/><path d="M5.1 11.8H1.9V8.9H0.1V13.6H5.1L5.1 11.8Z"/><path d="M11.5 11.8H8.4V13.6H13.3V8.9H11.5L11.5 11.8Z"/><path d="M8.4 2.3H11.5V5.2H13.3V0.4H8.4L8.4 2.3Z"/></svg>',
+  cc: '<svg width="19" height="16" viewBox="0 0 19 16" aria-hidden="true" focusable="false"><rect x="0.5" y="0.5" width="18" height="15" rx="2" fill="none" stroke="currentColor"/><path d="M8.2 5.3Q7.6 4.6 6.6 4.6 5.2 4.6 4.6 5.4 4 6.2 4 8 4 9.8 4.6 10.6 5.2 11.4 6.6 11.4 7.7 11.4 8.3 10.6L7.4 9.8Q7.1 10.2 6.6 10.2 6 10.2 5.7 9.7 5.4 9.2 5.4 8 5.4 6.8 5.7 6.3 6 5.8 6.6 5.8 7.1 5.8 7.4 6.2Z"/><path d="M14.7 5.3Q14.1 4.6 13.1 4.6 11.7 4.6 11.1 5.4 10.5 6.2 10.5 8 10.5 9.8 11.1 10.6 11.7 11.4 13.1 11.4 14.2 11.4 14.8 10.6L13.9 9.8Q13.6 10.2 13.1 10.2 12.5 10.2 12.2 9.7 11.9 9.2 11.9 8 11.9 6.8 12.2 6.3 12.5 5.8 13.1 5.8 13.6 5.8 13.9 6.2Z"/></svg>',
+  submit: '<svg width="12" height="18" viewBox="0 0 12 18" aria-hidden="true" focusable="false"><path d="M1 9.5l3.2 3.2L11 5.5l-1.4-1.4-5.4 5.4-1.8-1.8z"/></svg>',
   fsClose: '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false"><path d="M3.3 0.4H5.1V5.2H0.1V3.4H3.3Z"/><path d="M0.1 8.9H5.1V13.6H3.3V10.7H0.1Z"/><path d="M8.4 8.9H13.3V10.7H10.2V13.6H8.4Z"/><path d="M8.4 0.4H10.2V3.4H13.3V5.2H8.4Z"/></svg>',
 };
 
@@ -29,18 +31,37 @@ const h = (tag, attrs = {}, html = '') => {
 };
 
 export async function boot(root) {
-  const res = await fetch(new URL('../content/s1.json', import.meta.url));
-  if (!res.ok) throw new Error('content/s1.json not found (' + res.status + ')');
-  const content = await res.json();
-  const player = new Player(root, content);
+  const [content, layout, paths] = await Promise.all([
+    fetch(new URL('../content/s1.json', import.meta.url)).then(r => { if (!r.ok) throw new Error('content/s1.json not found (' + r.status + ')'); return r.json(); }),
+    fetch(new URL('./screens/layout.json', import.meta.url)).then(r => { if (!r.ok) throw new Error('layout.json not found'); return r.json(); }),
+    loadPaths(),
+  ]);
+  const player = new Player(root, content, layout, paths);
   player.mount();
   return player;
 }
 
+// The original's vector art lives in paths.js, which calls window.globalProvideData('paths', json).
+// Load it as a plain script (allowed by the page's CSP) and parse the JSON it hands over.
+function loadPaths() {
+  return new Promise((resolve, reject) => {
+    window.globalProvideData = (key, json) => { if (key === 'paths') resolve(JSON.parse(json)); };
+    const s = document.createElement('script');
+    s.src = new URL('../source/storyline-published/html5/data/js/paths.js', import.meta.url).href;
+    s.onerror = () => reject(new Error('paths.js failed to load'));
+    document.head.appendChild(s);
+  });
+}
+
 class Player {
-  constructor(root, content) {
+  constructor(root, content, layout, paths) {
     this.root = root;
     this.content = content;
+    this.layoutData = layout;
+    this.paths = paths;
+    this.cc = true;                 // captions on (the avatar videos are captioned)
+    this.ccListeners = new Set();
+    this.submitHandler = null;
     this.screens = content.screens;
     this.total = this.screens.length;
     this.index = 0;
@@ -57,6 +78,12 @@ class Player {
       name: nameStore,
       withName: (t) => withName(t, nameStore.get()),
       hideNav: (hidden) => this.setNavHidden(hidden),
+      setNavHidden: (hidden) => this.setNavHidden(hidden),
+      setSubmit: (fn) => this.setSubmit(fn),
+      setCaptionsAvailable: (on) => { this.ccBtn.style.display = on ? '' : 'none'; },
+      cc: { get: () => this.cc, on: (cb) => { this.ccListeners.add(cb); return () => this.ccListeners.delete(cb); } },
+      layout,
+      paths,
       h,
     };
   }
@@ -84,12 +111,16 @@ class Player {
     this.bar.appendChild(left);
 
     const right = h('div', { class: 'nav-controls' });
+    this.ccBtn = h('button', { class: 'cs-button icon-only', type: 'button', 'aria-label': 'Hide captions', 'aria-pressed': 'true', style: 'display:none' }, ICON.cc);
+    right.appendChild(this.ccBtn);
+    this.submitBtn = h('button', { class: 'cs-button', type: 'button', 'aria-label': 'Submit', style: 'display:none' }, '<span class="label">Submit</span>' + ICON.submit);
     this.fsBtn = h('button', { class: 'cs-button icon-only', type: 'button', 'aria-label': 'Enter full-screen' }, ICON.fsOpen);
     this.prevBtn = h('button', { class: 'cs-button', type: 'button', 'aria-label': 'Previous' }, ICON.prev + '<span class="label">Prev</span>');
     this.nextBtn = h('button', { class: 'cs-button', type: 'button', 'aria-label': 'Next' }, '<span class="label">Next</span>' + ICON.next);
     if (document.fullscreenEnabled) right.appendChild(this.fsBtn);
     right.appendChild(this.prevBtn);
     right.appendChild(this.nextBtn);
+    right.appendChild(this.submitBtn);
     this.bar.appendChild(right);
     r.appendChild(this.bar);
 
@@ -114,6 +145,8 @@ class Player {
     this.nextBtn.addEventListener('click', () => this.next());
     this.menuBtn.addEventListener('click', () => this.toggleMenu());
     this.fsBtn.addEventListener('click', () => this.toggleFullscreen());
+    this.ccBtn.addEventListener('click', () => this.toggleCaptions());
+    this.submitBtn.addEventListener('click', () => { if (this.submitHandler) this.submitHandler(); });
     document.addEventListener('fullscreenchange', () => this.syncFullscreenIcon());
     document.addEventListener('keydown', (e) => this.onKey(e));
     r.addEventListener('pointerdown', (e) => { if (this.menu.dataset.open === 'true' && !this.menu.contains(e.target) && e.target !== this.menuBtn && !this.menuBtn.contains(e.target)) this.closeMenu(); });
@@ -156,6 +189,7 @@ class Player {
     this.index = i;
     this.viewed.add(i);
 
+    this.setSubmit(null);
     const def = components[screen.type] || components.placeholder;
     const el = h('div', { class: 'screen', 'data-n': screen.n, 'data-type': screen.type });
     const inst = def.render(screen, this.ctx, el) || {};
@@ -204,6 +238,17 @@ class Player {
     this.prevBtn.style.display = hidden ? 'none' : '';
     this.nextBtn.style.display = hidden ? 'none' : '';
   }
+  setSubmit(fn) {
+    this.submitHandler = fn;
+    this.submitBtn.style.display = fn ? '' : 'none';
+  }
+  toggleCaptions() {
+    this.cc = !this.cc;
+    this.ccBtn.setAttribute('aria-pressed', String(this.cc));
+    this.ccBtn.setAttribute('aria-label', this.cc ? 'Hide captions' : 'Show captions');
+    this.ccBtn.classList.toggle('off', !this.cc);
+    for (const cb of this.ccListeners) cb(this.cc);
+  }
 
   /* ---- menu ---- */
   toggleMenu() { this.menu.dataset.open === 'true' ? this.closeMenu() : this.openMenu(); }
@@ -223,7 +268,7 @@ class Player {
   /* ---- fullscreen ---- */
   toggleFullscreen() {
     if (document.fullscreenElement) document.exitFullscreen?.();
-    else this.root.requestFullscreen?.().catch(() => {});
+    else this.root.requestFullscreen?.().catch(() => { this.fsBtn.style.display = 'none'; }); // not allowed here (e.g. an embed without allowfullscreen)
   }
   syncFullscreenIcon() {
     const on = !!document.fullscreenElement;
@@ -247,7 +292,7 @@ class Player {
     let start = null;
     this.stageWrap.addEventListener('pointerdown', (e) => {
       if (e.pointerType !== 'touch') return;
-      if (e.target.closest('[data-no-swipe], input, textarea, button, a, video, audio')) { start = null; return; }
+      if (e.target.closest('[data-no-swipe], input, textarea, button, a, video, audio, [role=button], [role=slider], .drag-item')) { start = null; return; }
       start = { x: e.clientX, y: e.clientY, t: Date.now() };
     });
     this.stageWrap.addEventListener('pointerup', (e) => {

@@ -132,3 +132,40 @@ button { font: inherit; color: inherit; }
 .name-field::placeholder { color: #fff; opacity: 1; }
 .name-field:focus { border-color: #fff; }
 .stage:focus { outline: none; }
+
+/* ---- generic screen objects (positions are the original's, in a 960x540 space) ---- */
+.obj-svg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+/* decoration never catches the pointer; only interactive things do */
+.screen .obj { pointer-events: none; }
+.screen .obj.hot, .screen .obj.slider-thumb, .screen .obj.slider-track, .screen .obj.drag-item, .screen .obj > video, .screen .obj > iframe, .screen .obj > input { pointer-events: auto; }
+.obj > img { display: block; width: 100%; height: 100%; pointer-events: none; }
+.obj > video { display: block; width: 100%; height: 100%; object-fit: cover; background: #000; }
+.obj > iframe { display: block; width: 100%; height: 100%; border: 0; }
+.txtbox { position: absolute; display: flex; flex-direction: column; overflow: visible; pointer-events: none; }
+.txtbox p { position: relative; margin: 0; white-space: pre-wrap; overflow-wrap: break-word; }
+.txtbox .bullet { position: absolute; top: 0; }
+.txt-shadow p { text-shadow: 0.8px 0.8px #969696; }
+.hot { cursor: pointer; outline: none; }
+.hot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.layer { position: absolute; inset: 0; }
+.slider .slider-thumb { cursor: grab; outline: none; touch-action: none; }
+.slider .slider-thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 50%; }
+.slider .slider-track { cursor: pointer; }
+.drag-item { cursor: grab; touch-action: none; transition: left 160ms ease-out, top 160ms ease-out; }
+.drag-item.dragging { cursor: grabbing; transition: none; }
+.drag-item.locked { cursor: default; }
+.drag-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.drop-target.target-focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+.caption-bar {
+  position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); max-width: 80%;
+  padding: 4px 12px; background: rgba(0, 0, 0, 0.8); color: #fff;
+  font-family: var(--chrome-font); font-size: 18px; line-height: 1.3; text-align: center; white-space: pre-line;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.9); pointer-events: none; z-index: 30;
+}
+.prompt { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, 0.35); z-index: 40; }
+.prompt-win { width: 420px; background: #fff; color: #333; border: 1px solid #E7E7E7; border-radius: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35); padding: 18px 22px; font-family: var(--chrome-font); text-align: center; }
+.prompt-win h2 { margin: 0 0 10px; font-size: 18px; font-weight: 700; }
+.prompt-win p { margin: 0 0 16px; font-size: 14px; }
+.prompt-ok { font: 13px var(--chrome-font); padding: 6px 22px; border: 1px solid #A6A6A6; border-radius: 3px; background: #fff; cursor: pointer; color: #333; }
+.prompt-ok:hover { background: #f0f0f0; }
+.cs-button.off { opacity: 0.55; }

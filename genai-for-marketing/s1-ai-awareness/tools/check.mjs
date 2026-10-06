@@ -27,6 +27,9 @@ const walk = (v, path) => {
   } else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) walk(x, `${path}.${k}`);
 };
 walk(content, 'content');
+const layout = JSON.parse(readFileSync(join(root, 'src/screens/layout.json'), 'utf8'));
+walk(layout, 'layout');
+for (let n = 2; n <= 33; n++) if (!layout.screens[n]) problems.push(`layout missing for screen ${n}`);
 
 // Dor's two rules
 const all = JSON.stringify(content);
@@ -35,7 +38,7 @@ if (/Confidencial/i.test(all)) problems.push('"Confidencial" must be "Confidenti
 if (!content.footer?.text?.includes('© Oded Israeli, Wawiwa Tech')) problems.push('footer text must be "© Oded Israeli, Wawiwa Tech"');
 
 // the page must reference only files that exist
-for (const f of ['index.html', 'src/engine.js', 'src/main.js', 'src/frame.css', 'src/fonts.css', 'src/components/index.js']) if (!existsSync(join(root, f))) problems.push(`missing ${f}`);
+for (const f of ['index.html', 'src/engine.js', 'src/main.js', 'src/frame.css', 'src/fonts.css', 'src/components/index.js', 'src/screen.js', 'src/screens/layout.json', 'source/storyline-published/html5/data/js/paths.js']) if (!existsSync(join(root, f))) problems.push(`missing ${f}`);
 const fontsCss = readFileSync(join(root, 'src/fonts.css'), 'utf8');
 for (const m of fontsCss.matchAll(/url\(([^)]+)\)/g)) { const p = join(root, 'src', m[1]); if (!existsSync(p)) problems.push(`fonts.css: file not found ${m[1]}`); }
 
