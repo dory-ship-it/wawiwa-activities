@@ -1,0 +1,5 @@
+
+(function() {
+    const data = {"transcripts":[{"name":"captions","cues":[{"start":610,"text":"Hey there,"},{"start":1330,"text":"I'm Tanya,"},{"start":2410,"text":"your AI guide and co-pilot today."},{"start":5570,"text":"We'll break down AI and generative AI,"},{"start":8770,"text":"how they've evolved,"},{"start":10010,"text":"and how AI is reshaping marketing,"},{"start":12609,"text":"making tasks easier and changing how marketers work."},{"start":16690,"text":"By the end,"},{"start":17530,"text":"you'll know what Gen AI can do and how to start."},{"start":21569,"text":"Mark,"},{"start":22090,"text":"our AI narrator,"},{"start":23250,"text":"will summarize key points and sometimes say what's on the screen."},{"start":27850,"text":"Sound good?"},{"start":28770,"text":"Let's get rolling."}]}]};
+    window.globalLoadJsAsset('story_content/5mRgIKmoFbB_transcripts.js', JSON.stringify(data));
+})();

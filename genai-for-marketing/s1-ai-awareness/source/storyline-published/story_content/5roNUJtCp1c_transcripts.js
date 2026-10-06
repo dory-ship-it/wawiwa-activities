@@ -1,0 +1,5 @@
+
+(function() {
+    const data = {"transcripts":[{"name":"captions","cues":[{"start":9,"text":"So why all the drama around AI?"},{"start":2730,"text":"Let's take a look."},{"start":3960,"text":"78% of companies now use AI in operations."},{"start":7840,"text":"77%"},{"start":9399,"text":"prioritize reskilling as their number one AI workforce strategy."},{"start":14609,"text":"59% of workers will need training by 2030,"},{"start":18690,"text":"yet 11% risk being left behind."},{"start":22200,"text":"For marketing professionals,"},{"start":24040,"text":"AI adoption is no longer optional,"},{"start":26799,"text":"and your upskilling with AI will determine your competitive edge."},{"start":30969,"text":"So yeah,"},{"start":31719,"text":"the hype is real and the workforce has to keep up."}]}]};
+    window.globalLoadJsAsset('story_content/5roNUJtCp1c_transcripts.js', JSON.stringify(data));
+})();
