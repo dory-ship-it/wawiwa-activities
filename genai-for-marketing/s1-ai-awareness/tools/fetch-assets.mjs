@@ -29,7 +29,7 @@ async function get(path, asText) {
 }
 
 // Every asset path the player references
-const PATH_RE = /(?:story_content|mobile|html5\/data\/js)\/[A-Za-z0-9_\-. %()]+?\.(?:png|jpe?g|gif|svg|mp4|mp3|m4a|webm|js|html|vtt|json|woff2?)/g;
+const PATH_RE = /(?:story_content|mobile|html5\/data\/js|html5\/data\/css)\/[A-Za-z0-9_\-. %()]+?\.(?:png|jpe?g|gif|svg|mp4|mp3|m4a|webm|js|html|vtt|json|css|woff2?)/g;
 
 function pathsIn(text) {
   const clean = text.replace(/\\\//g, '/');
@@ -37,12 +37,13 @@ function pathsIn(text) {
 }
 
 async function crawl(path) {
-  const isText = /\.(js|html|json|vtt)$/i.test(path);
+  const isText = /\.(js|html|json|vtt|css)$/i.test(path);
   const txt = await get(path, isText);
   if (txt) for (const p of pathsIn(txt)) await crawl(p);
 }
 
-for (const p of ['story.html', 'html5/data/js/data.js', 'html5/data/js/frame.js', 'html5/data/js/paths.js', 'mobile/fonts.json']) {
+// output.min.css holds the slide fonts (Calibri, Open Sans, Arial subsets) as base64 @font-face rules.
+for (const p of ['story.html', 'html5/data/js/data.js', 'html5/data/js/frame.js', 'html5/data/js/paths.js', 'html5/data/css/output.min.css', 'mobile/fonts.json']) {
   await crawl(p);
 }
 

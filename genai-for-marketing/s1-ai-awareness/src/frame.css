@@ -1,0 +1,134 @@
+/* Player chrome for "GenAI for Marketing, S1 AI Awareness".
+   Values are read from the published Storyline block (data.js colorGroups, frame.js, and
+   measurements of the live player), not invented:
+     player background #282828, window #212121, border #454545, text #BABBBA (active #F8F8F8),
+     accent #4FBDF4, chrome font Lato 13px, bottom bar 65px, slide 960x540 scaled to fit with
+     15px above it and at least 10px at the sides.
+   Design never comes from content/s1.json. */
+
+:root {
+  --player-bg: #282828;
+  --window-bg: #212121;
+  --window-border: #454545;
+  --window-active-border: #BABBBA;
+  --window-shadow: rgba(0, 0, 0, 0.85);
+  --divider: #7A7A7A;
+  --text: #BABBBA;
+  --text-active: #F8F8F8;
+  --accent: #4FBDF4;
+  --select-bg: rgba(255, 255, 255, 0.06);
+  --chrome-font: 'Lato', 'Helvetica Neue', Arial, sans-serif;
+
+  /* fonts used on the slides (exact Storyline subsets first, then system fallbacks) */
+  --font-calibri: 'Calibri Charset0_v2mWipD31519F7', 'Calibri Charset1_ 5YmIq0522914F', Calibri, Carlito, 'Segoe UI', sans-serif;
+  --font-calibri-bold: 'CalibriBold CharsetBold507D4E76', 'CalibriBold CharsetBoldFF769339', Calibri, Carlito, 'Segoe UI', sans-serif;
+  --font-open-sans: 'Open Sans Charset0_v9TY33EDE6F2', 'Open Sans Charset1_ 6PeA9E0E79A', 'Open Sans', sans-serif;
+  --font-open-sans-bold: 'Open SansBold CharsBoldE47A47C6', 'Open SansBold CharsBold1738DFFB', 'Open Sans', sans-serif;
+  --font-arial: 'Arial Charset0_v8wz5YMo9EE9FF07', 'Arial Charset1_ 5wJhf7O7F20687F', Arial, sans-serif;
+  --font-arial-bold: 'ArialBold Charset0_Bold3D70FAD3', 'ArialBold Charset1_BoldC96177A9', Arial, sans-serif;
+
+  --bar-h: 65px;
+}
+
+html, body { height: 100%; margin: 0; padding: 0; background: var(--player-bg); }
+body { font-family: var(--chrome-font); color: var(--text); -webkit-font-smoothing: antialiased; overflow: hidden; }
+* { box-sizing: border-box; }
+button { font: inherit; color: inherit; }
+
+#player {
+  position: fixed; inset: 0;
+  background: var(--player-bg);
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+  touch-action: pan-y;
+}
+#player:focus { outline: none; }
+
+/* ---- stage: the 960x540 slide, scaled by the engine ---- */
+.stage-wrap { position: absolute; left: 0; top: 0; width: 960px; height: 540px; transform-origin: 0 0; }
+.stage {
+  position: absolute; left: 0; top: 0; width: 960px; height: 540px;
+  overflow: hidden; background: #fff;
+}
+.screen { position: absolute; inset: 0; width: 960px; height: 540px; overflow: hidden; }
+.screen.enter-fade { animation: screen-fade linear both; }
+@keyframes screen-fade { from { opacity: 0; } to { opacity: 1; } }
+.screen.leaving { pointer-events: none; }
+
+/* every positioned slide object uses the original Storyline coordinates (px in 960x540) */
+.obj { position: absolute; margin: 0; }
+.obj img { display: block; width: 100%; height: 100%; }
+.txt { position: absolute; margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+
+/* ---- bottom bar (unified theme, measured from the live player) ---- */
+.bottom-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: var(--bar-h);
+  background: transparent;
+}
+.progress {
+  position: absolute; top: 0; height: 3px; left: 0; width: 100%;
+  background: rgba(255, 255, 255, 0.10);
+}
+.progress > span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 240ms ease-out; }
+
+.nav-controls { position: absolute; right: 9px; top: 18px; height: 30px; display: flex; align-items: center; gap: 10px; }
+.nav-left { position: absolute; left: 10px; top: 18px; height: 30px; display: flex; align-items: center; gap: 10px; }
+
+.cs-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  height: 30px; min-width: 30px; padding: 0 14px;
+  background: transparent; border: 0; border-radius: 0; cursor: pointer;
+  font-family: var(--chrome-font); font-size: 13px; line-height: 1; font-weight: 400;
+  color: var(--text); text-transform: uppercase; letter-spacing: 0;
+}
+.cs-button.icon-only { padding: 0; width: 30px; }
+.cs-button svg { display: block; fill: currentColor; flex: none; }
+.cs-button:hover, .cs-button:focus-visible { color: var(--text-active); }
+.cs-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.cs-button[aria-disabled="true"] { opacity: 0.35; cursor: default; pointer-events: none; }
+.cs-button .label { display: inline-block; padding-top: 1px; letter-spacing: 1px; }
+.cs-button[aria-expanded="true"] { color: var(--text-active); }
+
+/* ---- slide menu (Storyline-style dark window) ---- */
+.menu-panel {
+  position: absolute; left: 10px; bottom: calc(var(--bar-h) + 4px);
+  width: 340px; max-width: calc(100% - 20px); max-height: calc(100% - var(--bar-h) - 24px);
+  display: none; flex-direction: column;
+  background: var(--window-bg); border: 1px solid var(--window-border);
+  box-shadow: 0 2px 14px var(--window-shadow);
+  z-index: 20;
+}
+.menu-panel[data-open="true"] { display: flex; }
+.menu-head {
+  padding: 10px 14px; font-size: 13px; text-transform: uppercase; color: var(--text-active);
+  border-bottom: 1px solid var(--window-border); display: flex; justify-content: space-between; align-items: center;
+}
+.menu-head .count { color: var(--text); text-transform: none; }
+.menu-list { list-style: none; margin: 0; padding: 4px 0; overflow-y: auto; scrollbar-color: var(--text) transparent; }
+.menu-item {
+  display: flex; gap: 10px; width: 100%; text-align: left; padding: 7px 14px 7px 11px;
+  background: transparent; border: 0; border-left: 3px solid transparent; cursor: pointer;
+  font-family: var(--chrome-font); font-size: 13px; line-height: 1.3; color: var(--text);
+}
+.menu-item .num { flex: none; width: 22px; text-align: right; color: var(--divider); font-variant-numeric: tabular-nums; }
+.menu-item:hover, .menu-item:focus-visible { background: var(--select-bg); color: var(--text-active); outline: none; }
+.menu-item[aria-current="true"] { color: var(--text-active); border-left-color: var(--accent); }
+.menu-item[aria-current="true"] .num { color: var(--accent); }
+.menu-item.viewed .num::after { content: ''; }
+
+/* ---- compact chrome for narrow embeds (phones) ---- */
+#player.compact { --bar-h: 48px; }
+#player.compact .nav-controls, #player.compact .nav-left { top: 9px; }
+#player.compact .cs-button { font-size: 12px; padding: 0 8px; }
+#player.compact .menu-panel { width: calc(100% - 20px); }
+
+/* ---- shared slide pieces ---- */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.name-field {
+  position: absolute; margin: 0; padding: 0 10px;
+  background: transparent; border: 1px solid #50C49F; border-radius: 0;
+  font-family: var(--font-calibri-bold); color: #fff; outline: none;
+}
+.name-field::placeholder { color: #fff; opacity: 1; }
+.name-field:focus { border-color: #fff; }
+.stage:focus { outline: none; }
