@@ -80,5 +80,6 @@ link the repository root; it only shows a neutral notice.
 | Digital Marketing Specialist | M2 / L2 | Home practice: finish the plan | `digital-marketing/dm-m2l2-home/` |
 | AI & Cybersecurity (AICY60) | T0 / E1 | AICY.T0.E1 - Media Literacy: coach debrief + personal path add-on (sits under Dor's native Rise task boxes), verbatim SME wording | `ai-and-cybersecurity/aicy-t0-media-literacy/` |
 | AI & Cybersecurity (AICY60) | T1 / E1 | AICY.T1.E1 - DeepPhishing: 6-card workbook, verbatim SME wording, AI coach + personal path, on-device autosave | `ai-and-cybersecurity/aicy-t1-deepphishing/` |
+| Generative AI for Marketing Professionals | Session 1 | AI Awareness: the Storyline block rebuilt as code (33 screens, same look; embedded inline as an iframe at the player's 980:620 ratio, not a new-tab link; content synced from the SME's Google Slides) | `genai-for-marketing/s1-ai-awareness/` |
 
 _© Wawiwa Tech | Confidential_

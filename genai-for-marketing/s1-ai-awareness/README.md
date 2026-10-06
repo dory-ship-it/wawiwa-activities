@@ -45,7 +45,8 @@ then open `http://localhost:8124/` (add `?screen=12` to jump to a screen).
 - P1 engine and frame: done.
 - P2 screens: done. All 33 screens are rebuilt from the original's data: same positions, shapes, fonts, photos, videos, audio, links, timed builds and interactions (sliders, reveals, carousel, audio hotspots, YouTube, drag-and-drop with the original answer logic, table, agenda, finale with the learner's name).
 - P3 one-click sync: done (script, mapping, snapshot, build check, setup guide). Needs Dor to install the script in the deck and paste the GitHub token; the first run creates the baseline PR. See `sync/README.md`.
-- P4 Rise, P5 acceptance: not started.
+- P4 Rise: done on the repo side (6 Oct 2026). Live at `https://dory-ship-it.github.io/wawiwa-activities/genai-for-marketing/s1-ai-awareness/` (GitHub Pages, served from `main`). Registered as `s1-ai-awareness` (code `GFM-S1`, section "Generative AI for Marketing Professionals (GFM)") in `practices[]` of `wawiwa-video/deliverables.json`; `npm run pages` writes its embed code to the generated sheet. The row carries `embedRatio: "980:620"` (the player's own width:height, 960×540 stage + 10 px sides + 15 px top + 65 px bar), so the sheet emits a fixed-ratio padding box instead of a fixed height, and Rise shows it at the same visual size as the Storyline block at any column width. The paste into Rise (new Embed block in place of the Storyline block, Storyline block hidden, not deleted, until P5 passes) is Dor's click.
+- P5 acceptance: not started.
 
 ## Decisions recorded while building
 
