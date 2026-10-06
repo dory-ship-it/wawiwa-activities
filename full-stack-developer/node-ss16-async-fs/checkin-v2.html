@@ -2574,102 +2574,290 @@ body.mission-active #activity-root { padding: 0; }
 }
 .m-path .btn-row { margin-top: 12px; }
 
-/* ============ stepped workbook: header line, step bar, end screen ============ */
+/* ============ steps workbook: copied verbatim from the SS15 check-in so every check-in looks the same ============ */
+/* ============ steps workbook (check-in v2) ============ */
 .m-brand-s {
-  font-size: 0.82rem;
-  color: var(--r-ink);
-  line-height: 1.35;
-  margin-top: 2px;
+  font-size: 0.84rem;
+  color: var(--r-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.m-steps { flex: 0 0 auto; padding: 10px 0 0; }
-.m-steps-list {
+/* the step bar: display only, never a button */
+.m-steps {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 16px 40px 0;
   display: flex;
-  gap: 6px;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  flex: 0 0 auto;
+  cursor: default;
 }
-.m-step { flex: 1 1 0; min-width: 0; }
-.m-step-btn {
-  width: 100%;
-  display: flex;
+.m-step {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 10px;
-  border: 1px solid var(--r-line);
-  border-bottom: 3px solid var(--r-line);
-  border-radius: 8px;
-  background: var(--r-bg);
-  color: var(--r-ink);
   font-family: 'Roboto', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.86rem;
   font-weight: 600;
-  text-align: left;
-  cursor: pointer;
+  color: var(--r-muted);
 }
-.m-step-btn:hover { background: var(--r-tint); }
-.m-step-num {
-  flex: 0 0 22px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
+.m-step + .m-step::before {
+  content: '\2192';
+  color: var(--r-edge);
+  margin-right: 2px;
+  font-weight: 400;
+}
+.m-step-n {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--r-line);
-  color: var(--r-navy);
-  font-size: 0.72rem;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--r-border);
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.78rem;
   font-weight: 700;
-}
-.m-step-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.m-step-done .m-step-num { background: var(--r-teal-text); color: #fff; }
-.m-step-current { border-color: var(--r-navy); border-bottom-color: var(--r-navy); background: var(--r-teal-tint); }
-.m-step-current .m-step-num { background: var(--r-navy); color: #fff; }
-.mission-active .m-steps + .m-main { margin-top: 6px; }
-.m-step-instr { font-weight: 600; margin-bottom: 18px; }
-.mission-active .btn-coach.btn-coach-2 {
+  color: var(--r-muted);
   background: var(--r-bg);
-  color: var(--r-navy);
-  border: 1px solid var(--r-border);
-  box-shadow: none;
 }
-.mission-active .btn-coach.btn-coach-2:hover { background: var(--r-tint); box-shadow: none; }
-.m-endlist { display: flex; flex-direction: column; gap: 8px; margin: 0 0 16px; }
+.m-step-now { color: var(--r-navy); font-weight: 700; }
+.m-step-now .m-step-n { background: var(--r-navy); border-color: var(--r-navy); color: #fff; }
+.m-step-past .m-step-n { background: var(--r-teal-tint); border-color: var(--r-teal); color: var(--r-teal-text); }
+.m-steps + .m-scene-head { padding-top: 12px; }
+.m-steps { padding-top: 12px; }
+.m-steps ~ .m-scene-body { padding-top: 18px; padding-bottom: 16px; }
+.m-steps ~ .m-scene-body .m-notecard { padding: 14px 20px 8px; margin: 14px 0 16px; }
+.m-steps ~ .m-scene-body .m-notecard-body { font-weight: 700; color: var(--r-navy); margin-bottom: 8px; }
+/* one field per step: no repeated "1" chip on every screen */
+.m-console-steps .m-fieldblock-title::before { display: none; }
+.m-console-steps .m-scenario { margin-bottom: 12px; }
+.m-console-steps .m-fieldblock { padding: 18px 24px 16px; }
+.m-console-steps .m-terms { margin-bottom: 10px; }
+.m-console-steps .m-term { font-size: 0.9rem; margin-bottom: 2px; }
+.m-console-steps .m-instructions { margin-bottom: 14px; padding: 10px 16px; }
+.m-console-steps .m-instructions-k { display: none; }
+.m-console-steps .m-instructions-p { font-size: 0.95rem; line-height: 1.55; }
+.m-console-steps .m-scenario { padding: 10px 16px; }
+.m-console-steps .answer-input { min-height: 80px; height: 80px; }
+.m-console-steps .feedback.has-feedback { padding: 10px 16px; margin-top: 10px; }
+.m-console-steps .feedback-head { margin-bottom: 2px; }
+.m-console-steps .routing-line { margin-top: 4px; padding-top: 0; }
+/* one-line term meanings */
+.m-terms { margin: 0 0 14px; padding: 0; }
+.m-term { display: flex; gap: 6px; flex-wrap: wrap; font-size: 0.93rem; line-height: 1.5; margin: 0 0 4px; }
+.m-term dt { font-weight: 700; color: var(--r-navy); }
+.m-term dd { margin: 0; color: var(--r-ink); }
+/* choice answers: right / wrong after a pick */
+.m-choice-card { margin-top: 4px; }
+.m-console-steps .m-choices { gap: 8px; }
+.m-console-steps .m-choice { padding: 10px 14px; }
+.m-choice-card .feedback.has-feedback { margin-top: 12px; }
+.m-choice.m-choice-right { border-color: var(--w-ready); background: #EFF8F1; }
+.m-choice.m-choice-right .m-choice-key { background: var(--w-ready); }
+.m-choice.m-choice-wrong { border-color: var(--w-revise); background: #FCF1F0; }
+.m-choice.m-choice-wrong .m-choice-key { background: var(--w-revise); }
+/* verdict feedback boxes */
+.feedback.verdict-correct { border-left-color: var(--w-ready); }
+.feedback.verdict-incorrect { border-left-color: var(--w-revise); }
+/* the end screen */
+.m-endlist { display: flex; flex-direction: column; gap: 10px; margin: 14px 0 6px; }
 .m-endrow {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
   border: 1px solid var(--r-line);
   border-radius: 10px;
+  padding: 12px 16px;
   background: var(--r-bg);
 }
-.m-endrow .tag-pill { flex: 0 0 auto; min-width: 104px; justify-content: center; text-align: center; }
-.mission-active .m-endrow-btn { white-space: nowrap; }
-.m-endrow-name { flex: 1; font-weight: 600; color: var(--r-navy); }
-.mission-active .m-endrow-btn { padding: 6px 14px; font-size: 0.85rem; }
-.m-endback {
-  margin: 0 0 18px;
-  padding: 14px 18px;
-  border-left: 4px solid var(--r-teal);
-  background: var(--r-teal-tint);
-  border-radius: 8px;
+.m-endrow .m-step-n { background: var(--r-navy); border-color: var(--r-navy); color: #fff; }
+.m-endrow-txt { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.m-endrow-txt b { font-family: 'Roboto', sans-serif; color: var(--r-navy); font-size: 0.95rem; }
+.m-endrow-why { font-size: 0.88rem; color: var(--r-muted); line-height: 1.45; }
+.m-endrow .tag-pill { flex: 0 0 auto; }
+.m-endrow-fix { flex: 0 0 auto; padding: 6px 14px; }
+.m-end-coach { margin-top: 12px; }
+.m-handoff {
+  margin: 18px 0 0;
   font-family: 'Roboto', sans-serif;
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   color: var(--r-navy);
 }
-@media (max-width: 640px) {
-  .m-brand-t { white-space: normal; }
-  .m-steps-list { flex-wrap: nowrap; }
-  .m-endrow { flex-wrap: wrap; gap: 8px 12px; }
-  .m-endrow .tag-pill { min-width: 0; }
-  .m-step-btn { padding: 6px 7px; }
-  .m-step-name { display: none; }
-  .m-step-current .m-step-name { display: inline; }
-  .m-step { flex: 0 0 auto; }
-  .m-step:has(.m-step-current) { flex: 1 1 auto; }
+@media (max-width: 600px) {
+  .m-steps { padding: 12px 16px 0; }
+  .m-endrow { flex-wrap: wrap; }
+}
+
+/* ============ simplified steps screens (one screen = one task) ============ */
+/* header: logo + title + one sentence; the uppercase program line goes */
+.m-brand-k { display: none; }
+.m-app { padding: 12px 24px 16px; }
+.m-topbar { padding: 4px 0 12px; gap: 14px; }
+.m-brand-t { font-size: 1.02rem; }
+.m-brand-s { font-size: 0.88rem; }
+.m-main { margin-top: 0; }
+
+/* one calm column, short lines, left-aligned with the header */
+.m-simple.m-scene { width: 100%; max-width: 720px; margin: 0; }
+.m-stagewrap:has(.m-simple) { justify-content: flex-start; }
+.m-simple .m-steps { padding: 18px 0 0; gap: 4px 8px; }
+.m-simple .m-step { font-size: 0.8rem; gap: 6px; font-weight: 500; }
+.m-simple .m-step-n { flex-basis: 20px; width: 20px; height: 20px; border-width: 1.5px; font-size: 0.7rem; }
+.m-simple .m-step-now { font-weight: 700; }
+.m-simple .m-scene-head { padding: 22px 0 0; }
+.m-simple .m-scene-title,
+.m-simple .m-scene-title-big {
+  font-size: 1.3rem;
+  line-height: 1.4;
+  color: var(--r-navy);
+  margin: 0;
+}
+.m-simple .m-scene-title::after { display: none; }
+.m-simple .m-scene-body { padding: 14px 0 24px; }
+
+/* the work itself: no cards inside cards, no boxes around the instruction */
+.m-simple .m-console-steps .m-fieldblock {
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  background: none;
+}
+.s-sr {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.s-tip { margin: 0 0 12px; font-size: 0.92rem; line-height: 1.5; color: var(--r-muted); }
+.m-simple .m-console-steps .answer-input { min-height: 96px; height: 96px; font-size: 1rem; margin: 0; display: block; }
+.m-simple .m-console-steps .btn-row { margin-top: 12px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.m-simple .m-console-steps .m-terms { margin: 0 0 14px; }
+.m-simple .m-console-steps .m-term { font-size: 0.9rem; color: var(--r-muted); }
+.m-simple .m-term dt { font-weight: 700; color: var(--r-ink); }
+.m-simple .m-term dd { color: var(--r-muted); }
+.m-simple .m-choice-card { margin-top: 0; }
+.m-simple .m-choices { gap: 10px; }
+.m-simple .m-choice { padding: 12px 16px; }
+.m-simple .m-choice-label { font-weight: 500; font-size: 1rem; }
+
+/* feedback: one bold verdict word, then one line why */
+.m-simple .feedback.has-feedback {
+  margin-top: 14px;
+  padding: 2px 0 2px 14px;
+  background: none;
+  border: none;
+  border-left: 3px solid var(--r-border);
+  border-radius: 0;
+}
+.m-simple .feedback.verdict-correct { border-left-color: var(--w-ready); }
+.m-simple .feedback.verdict-incorrect { border-left-color: var(--w-revise); }
+.m-simple .feedback-head { margin: 0; }
+.m-simple .feedback-head::before { display: none; }
+.m-simple .feedback .tag-pill {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.m-simple .feedback .tag-ready { color: var(--w-ready); }
+.m-simple .feedback .tag-revise { color: var(--w-revise); }
+.m-simple .feedback-line { margin: 2px 0 0; font-size: 0.95rem; line-height: 1.5; color: var(--r-ink); font-weight: 400; }
+.m-simple .feedback.coach-box { border-left-color: var(--r-teal); background: none; }
+/* the "review the page" pointer joins the why line instead of a second box row */
+.m-simple .local-box .feedback-line { display: inline; }
+.m-simple .local-box .routing-line { border: none; padding: 0; margin: 0; font-weight: 400; color: var(--r-ink); }
+.m-simple .local-box .routing-line::before { content: ' '; }
+
+/* quiet extras: text links, never big buttons */
+.s-link,
+.mission-active .m-simple .btn-coach {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  font: 600 0.9rem 'Assistant', 'Roboto', sans-serif;
+  color: var(--r-navy);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  border-radius: 0;
+}
+.mission-active .m-simple .btn-coach:hover,
+.s-link:hover { color: var(--r-navy-dark); background: none; box-shadow: none; }
+.s-link:disabled, .mission-active .m-simple .btn-coach:disabled { color: var(--r-muted); cursor: default; }
+.m-simple .btn-coach .btn-icon, .s-link .btn-icon { display: none; }
+.s-link-danger { color: var(--r-muted); }
+
+/* Back / Next sit right under the work, never pinned to the bottom */
+.s-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 1px solid var(--r-line);
+}
+.mission-active .m-simple .s-next { padding: 8px 22px; font-size: 0.92rem; }
+
+/* intro */
+.s-list { margin: 0 0 16px; padding-left: 22px; font-size: 1rem; line-height: 1.7; color: var(--r-ink); }
+.s-note { margin: 0 0 4px; font-size: 0.95rem; line-height: 1.5; color: var(--r-ink); }
+.s-actions { margin: 20px 0 0; }
+.s-fine { margin: 22px 0 0; font-size: 0.8rem; line-height: 1.5; color: var(--r-muted); max-width: 62ch; }
+
+/* end screen */
+.s-results { list-style: none; margin: 0; padding: 0; }
+.s-result {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--r-line);
+  font-size: 1rem;
+}
+.s-result-name { flex: 1; color: var(--r-ink); }
+.s-verdict { font-weight: 700; }
+.s-v-ok { color: var(--w-ready); }
+.s-v-no { color: var(--w-revise); }
+.s-v-none { color: var(--r-muted); }
+.m-simple .m-handoff { margin: 22px 0 0; font-size: 1.1rem; }
+.s-extras { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 22px; }
+
+@media (max-width: 760px) {
+  .m-app { padding: 10px 16px 12px; }
+  .m-topbar .m-brand-t, .m-topbar .m-brand-s { max-width: none; white-space: normal; }
+  .m-simple .m-scene-title, .m-simple .m-scene-title-big { font-size: 1.15rem; }
+}
+
+/* SS16 only: no weak/strong examples on a check-in screen, and the ex3.js
+   box is taller and monospaced because it holds a whole script */
+.m-console-steps .examples { display: none; }
+/* the SS16 header sentence is longer: let it wrap beside the logo (as on
+   SS15) instead of pushing the title under the logo at 700px */
+.m-topbar { flex-wrap: nowrap; }
+.m-brandline { flex: 1 1 0; min-width: 0; }
+.m-simple .m-console-steps #input-f_code {
+  height: 220px;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
 }
 
 </style>
@@ -4226,8 +4414,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var head = el('div', 'feedback-head');
     // immediate verdict: correct or not yet, then one line of why
     var ok = result.tag === 'Ready';
+    // a steps check-in (the .m-simple screens) says Correct / Incorrect, the
+    // same words and left-border colors as the SS15 check-in
+    var simple = !!(container.closest && container.closest('.m-simple'));
+    container.classList.toggle('verdict-correct', simple && ok);
+    container.classList.toggle('verdict-incorrect', simple && !ok);
     head.appendChild(el('span', 'tag-pill ' + (ok ? 'tag-ready' : 'tag-revise'),
-      ok ? 'Correct' : (result.empty ? 'No answer yet' : 'Not yet')));
+      ok ? 'Correct' : (result.empty ? 'No answer yet' : (simple ? 'Incorrect' : 'Not yet'))));
     container.appendChild(head);
     (result.piiWarnings || []).forEach(function (w) {
       container.appendChild(el('div', 'feedback-line pii-line', w));
@@ -5489,18 +5682,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return {
       node: wrap,
       swap: function (sceneNode) {
-        var old = wrap.firstElementChild;
-        if (reducedMotion()) {
-          wrap.textContent = '';
-          wrap.appendChild(sceneNode);
-          return;
-        }
-        sceneNode.classList.add('m-enter');
+        // Exactly one scene on the stage, always. The old version removed only
+        // wrap.firstElementChild after a delay, so a second click inside that
+        // delay grabbed the SAME first child again and the scene in between
+        // was never removed: several steps then sat side by side in the flex
+        // row. Every previous scene is now removed at once, before the new one
+        // goes in (the entrance fade stays; there is no exit overlap).
+        while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+        if (!reducedMotion()) sceneNode.classList.add('m-enter');
         wrap.appendChild(sceneNode);
-        if (old) {
-          old.classList.add('m-exit');
-          window.setTimeout(function () { if (old.parentNode) old.remove(); }, SWAP_MS);
-        }
+        wrap.scrollTop = 0;
       }
     };
   }
@@ -7027,7 +7218,136 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   /* ---------- the intro scene ---------- */
 
+  /* ---------- stepped workbook: the SS15 check-in pattern ---------- */
+  /* Identical chrome to the SS15 check-in: an intro screen and an end screen
+     outside the numbered bar, and one screen per work step. Each screen has a
+     display-only step bar, the instruction as the heading, a grey tip, the
+     input, the dark Check my answer pill with an Ask the AI coach text link,
+     the verdict, then a Back text link and an outlined Next button. */
+
+  function stepLabel(stop, activity) {
+    if (stop.kind === 'intro') return (activity.intro || {}).step_label || 'Start';
+    if (stop.kind === 'review') return (activity.end || {}).step_label || 'Finish';
+    return (stop.section && (stop.section.step_label || shortTitle(stop.section))) || '';
+  }
+
+  /* the step bar: "1 Paste the error  >  2 Paste ex3.js  >  3 Explain".
+     Display only (not buttons): it shows where you are, Back / Next move. */
+  function stepBar(state, currentIdx, activity) {
+    var work = workStops(state.stops);
+    var bar = el('ol', 'm-steps');
+    bar.setAttribute('aria-label', 'Steps');
+    work.forEach(function (stop, i) {
+      var li = el('li', 'm-step' + (i === currentIdx ? ' m-step-now'
+        : (currentIdx > i || currentIdx === -2 ? ' m-step-past' : '')));
+      if (i === currentIdx) li.setAttribute('aria-current', 'step');
+      li.appendChild(el('span', 'm-step-n', String(i + 1)));
+      li.appendChild(el('span', 'm-step-t', stepLabel(stop, activity)));
+      bar.appendChild(li);
+    });
+    return bar;
+  }
+
+  function sLink(label, onClick, extra) {
+    var b = el('button', 's-link' + (extra ? ' ' + extra : ''), label);
+    b.type = 'button';
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function buildStepStartScene(activity, state, openStop) {
+    var work = workStops(state.stops);
+    var intro = activity.intro || {};
+    var scene = M.buildScene({
+      title: (intro.bullets_title || 'Have these ready').replace(/:\s*$/, '')
+    });
+    scene.node.classList.add('m-simple');
+    scene.node.insertBefore(stepBar(state, -1, activity), scene.node.firstChild);
+    if ((intro.bullets || []).length) {
+      var list = el('ul', 's-list');
+      intro.bullets.forEach(function (line) { list.appendChild(el('li', null, line)); });
+      scene.body.appendChild(list);
+    }
+    if (intro.footer) scene.body.appendChild(el('p', 's-note', intro.footer));
+    var safety = (activity.safety || {}).student_notice;
+    if (safety) scene.body.appendChild(el('p', 's-note', safety));
+    var started = state.items.some(function (entry) {
+      return (state.answers[entry.id] || '').trim();
+    });
+    var row = el('div', 's-actions');
+    var start = el('button', 'btn btn-primary', started ? C.LABELS.resume : C.LABELS.start);
+    start.type = 'button';
+    start.addEventListener('click', function () {
+      var next = work.filter(function (s) {
+        return s.items.some(function (entry) { return !(state.answers[entry.id] || '').trim(); });
+      })[0] || work[0];
+      openStop(next.id);
+    });
+    row.appendChild(start);
+    scene.body.appendChild(row);
+    scene.body.appendChild(el('p', 's-fine', C.liveOn()
+      ? 'Your work is saved only in this browser. When you ask the live coach, your answer text is scrubbed of emails, phone numbers, long numbers, and keys, then sent anonymously through Wawiwa’s proxy. Your identity is never sent because it is never collected.'
+      : 'Everything you write stays in this browser on this device. This page sends nothing anywhere.'));
+    return scene.node;
+  }
+
+  function buildStepWorkScene(activity, state, stop, openStop) {
+    var work = workStops(state.stops);
+    var idx = work.indexOf(stop);
+    var only = stop.items.length === 1 ? stop.items[0] : null;
+    // the heading is the one instruction sentence: the field's own label
+    var title = only ? only.item.label : shortTitle(stop.section);
+    var scene = M.buildScene({ title: title, className: 'm-scene-wide' });
+    scene.node.classList.add('m-simple');
+    scene.node.insertBefore(stepBar(state, idx, activity), scene.node.firstChild);
+
+    var console_ = el('div', 'm-console m-console-steps');
+    stop.items.forEach(function (entry) {
+      var block = el('div', 'm-fieldblock');
+      block.id = 'block-' + entry.id;
+      // the heading already says what to do: the label stays only as the
+      // input's accessible name
+      var blockTitle = el('h3', 'm-fieldblock-title s-sr', entry.item.label);
+      blockTitle.id = 'block-title-' + entry.id;
+      block.appendChild(blockTitle);
+      if (entry.item.help) block.appendChild(el('p', 's-tip', entry.item.help));
+      var editor = state.editors[entry.id];
+      if (!editor) {
+        editor = C.fieldEditor(state, activity, entry.item, {
+          placeholder: entry.item.placeholder,
+          onResult: function () { refreshProgress(activity, state); }
+        });
+        editor.textarea.addEventListener('input', function () {
+          refreshProgress(activity, state);
+        });
+        state.editors[entry.id] = editor;
+      }
+      editor.textarea.setAttribute('aria-labelledby', blockTitle.id);
+      block.appendChild(editor.card);
+      console_.appendChild(block);
+    });
+    scene.body.appendChild(console_);
+
+    var nav = el('div', 's-nav');
+    nav.appendChild(sLink('Back', function () {
+      openStop(idx > 0 ? work[idx - 1].id : INTRO_ID);
+    }));
+    var next = el('button', 'btn btn-ghost s-next',
+      idx + 1 < work.length ? C.LABELS.next : C.LABELS.finish);
+    next.type = 'button';
+    next.addEventListener('click', function () {
+      if (idx + 1 < work.length) openStop(work[idx + 1].id);
+      else openStop(REVIEW_ID);
+    });
+    nav.appendChild(next);
+    scene.body.appendChild(nav);
+    // refreshProgress still expects these; they stay off screen
+    state.barFill = el('i');
+    state.barCount = el('span');
+    return scene.node;
+  }
   function buildIntroScene(activity, state, openStop) {
+    if (state.stepped) return buildStepStartScene(activity, state, openStop);
     var scene = M.buildScene({
       eyebrow: [activity.meta.program, activity.meta.module, activity.meta.lesson]
         .filter(Boolean).join('  ·  '),
@@ -7284,6 +7604,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   /* ---------- one SECTION, as a scene (one screen per case) ---------- */
 
   function buildSectionScene(activity, state, stop, openStop) {
+    if (state.stepped) return buildStepWorkScene(activity, state, stop, openStop);
     var work = workStops(state.stops);
     var idx = work.indexOf(stop);
     var scene = M.buildScene({
@@ -7389,137 +7710,68 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return scene.node;
   }
 
-  /* ---------- the end screen of a stepped workbook ---------- */
-  /* One look at every answer (correct / not yet / not answered, with a way
-     back to fix it), the personal path, the optional AI review, the PDF,
-     and the one way back to the lesson. */
+  /* ---------- the end screen of a stepped workbook (SS15 pattern) ---------- */
+  /* One row per step with its Correct / Incorrect result and a way back to
+     fix it, the hand-off line back to the lesson, then the quiet extras:
+     the optional live-coach review, the PDF, Back, Clear. */
 
   function buildEndScene(activity, state, openStop) {
-    var end = activity.end || {};
-    var scene = M.buildScene({
-      title: end.title || 'Finish',
-      className: 'm-scene-wide'
-    });
-    if (end.instruction) {
-      scene.body.appendChild(el('p', 'm-console-hint m-scenario m-step-instr', end.instruction));
-    }
+    var work = workStops(state.stops);
+    var scene = M.buildScene({ title: 'Check-in done', className: 'm-scene-wide' });
+    scene.node.insertBefore(stepBar(state, -2, activity), scene.node.firstChild);
+    scene.node.classList.add('m-simple');
 
-    var list = el('div', 'm-endlist');
-    workStops(state.stops).forEach(function (stop) {
+    // the level and rubric still feed the PDF, computed quietly
+    state.lastEval = FB.evaluateActivity(activity, state.checks, state.answers);
+
+    var list = el('ul', 's-results');
+    work.forEach(function (stop) {
       stop.items.forEach(function (entry) {
         var text = (state.answers[entry.id] || '').trim();
-        var tag = itemTag(entry, activity, state);
-        var row = el('div', 'm-endrow');
-        var pill = !text ? el('span', 'tag-pill tag-none', 'Not answered')
-          : tag === 'Ready' ? el('span', 'tag-pill tag-ready', 'Correct')
-          : el('span', 'tag-pill tag-revise', 'Not yet');
-        row.appendChild(pill);
-        row.appendChild(el('span', 'm-endrow-name', stepLabel(stop, activity)));
-        if (tag !== 'Ready' || !text) {
-          var fix = el('button', 'btn btn-ghost m-endrow-btn', text ? 'Fix this step' : 'Answer this step');
-          fix.type = 'button';
-          fix.addEventListener('click', function () { openStop(stop.id); });
-          row.appendChild(fix);
+        var ok = !!text && itemTag(entry, activity, state) === 'Ready';
+        var row = el('li', 's-result');
+        row.appendChild(el('span', 's-result-name', stepLabel(stop, activity)));
+        var v = !text ? ['Not answered', 's-v-none']
+          : (ok ? ['Correct', 's-v-ok'] : ['Incorrect', 's-v-no']);
+        row.appendChild(el('b', 's-verdict ' + v[1], v[0]));
+        if (!ok) {
+          row.appendChild(sLink(text ? 'Try again' : 'Answer it', function () { openStop(stop.id); }));
         }
         list.appendChild(row);
       });
     });
     scene.body.appendChild(list);
 
-    scene.body.appendChild(el('p', 'm-endback', end.back || 'Back to the lesson: open Wrap-up.'));
+    scene.body.appendChild(el('p', 'm-handoff', (activity.end || {}).back || 'Back to the lesson: open Wrap-up.'));
 
-    var pathHost = el('div', 'm-path-host');
-    var cfg = state.missionPoints;
-    var block = window.PracticeOutcome.buildPathBlock(activity, state, {
-      points: tallyPoints(activity, state, cfg),
-      max: maxPoints(state, cfg)
-    });
-    if (block) pathHost.appendChild(block);
-
+    var extras = el('div', 's-extras');
+    var coachOut = null;
     if (C.liveOn()) {
-      var coachOut = C.liveRegion();
-      var btnRow = el('div', 'btn-row');
-      btnRow.appendChild(C.coachButton(state, 'Ask the AI coach to review all three answers', function (b) {
+      coachOut = C.liveRegion();
+      var coachLink = C.coachButton(state, 'Ask the AI coach to review all three', function (b) {
         b.disabled = true;
         C.coachThinking(coachOut);
         window.PracticeLive.coachCanvas(activity, state.answers)
           .then(function (r) { b.disabled = false; C.coachBlock(coachOut, r.text, null, activity); })
           .catch(function (err) { b.disabled = false; C.coachFallback(state, coachOut, err, null); });
-      }));
-      scene.body.appendChild(btnRow);
-      scene.body.appendChild(coachOut);
+      });
+      coachLink.className = 's-link btn-coach';
+      extras.appendChild(coachLink);
     }
-    scene.body.appendChild(pathHost);
-
-    var foot = scene.foot();
-    var backBtn = el('button', 'btn btn-ghost', 'Back');
-    backBtn.type = 'button';
-    backBtn.addEventListener('click', function () {
-      var work = workStops(state.stops);
-      openStop(work[work.length - 1].id);
-    });
-    foot.appendChild(backBtn);
-    var clearBtn = el('button', 'btn btn-ghost-danger', 'Clear my answers');
-    clearBtn.type = 'button';
-    clearBtn.addEventListener('click', function () {
+    extras.appendChild(sLink(C.LABELS.savePdf, function () {
+      window.PracticeExport.saveReport(activity, reportData(activity, state));
+    }));
+    extras.appendChild(sLink('Back', function () { openStop(work[work.length - 1].id); }));
+    extras.appendChild(sLink('Clear my answers', function () {
       if (window.confirm('Delete everything you wrote on this device? This cannot be undone.')) {
         C.clearAnswers(activity);
         window.location.reload();
       }
-    });
-    foot.appendChild(clearBtn);
-    foot.appendChild(el('span', 'm-spacer'));
-    var printBtn = el('button', 'btn btn-primary');
-    printBtn.type = 'button';
-    printBtn.appendChild(C.svgEl(C.SVG.download, 'btn-icon'));
-    printBtn.appendChild(el('span', null, 'Save my answers as PDF'));
-    printBtn.addEventListener('click', function () {
-      window.PracticeExport.saveReport(activity, reportData(activity, state));
-    });
-    foot.appendChild(printBtn);
+    }, 's-link-danger'));
+    scene.body.appendChild(extras);
+    if (coachOut) scene.body.appendChild(coachOut);
     return scene.node;
   }
-
-  /* ---------- the step bar of a stepped workbook ---------- */
-
-  function stepLabel(stop, activity) {
-    if (stop.kind === 'intro') return (activity.intro || {}).step_label || 'Start';
-    if (stop.kind === 'review') return (activity.end || {}).step_label || 'Finish';
-    return (stop.section && (stop.section.step_label || shortTitle(stop.section))) || '';
-  }
-
-  function buildStepBar(activity, state, openStop) {
-    var nav = el('nav', 'm-steps');
-    nav.setAttribute('aria-label', 'Steps');
-    var ol = el('ol', 'm-steps-list');
-    var buttons = [];
-    state.stops.forEach(function (stop, i) {
-      var li = el('li', 'm-step');
-      var b = el('button', 'm-step-btn');
-      b.type = 'button';
-      b.appendChild(el('span', 'm-step-num', String(i + 1)));
-      b.appendChild(el('span', 'm-step-name', stepLabel(stop, activity)));
-      b.addEventListener('click', function () { openStop(stop.id); });
-      li.appendChild(b);
-      ol.appendChild(li);
-      buttons.push({ stop: stop, btn: b });
-    });
-    nav.appendChild(ol);
-    return {
-      node: nav,
-      refresh: function () {
-        buttons.forEach(function (x) {
-          var current = state.currentId === x.stop.id;
-          var done = x.stop.kind === 'section' && x.stop.items.length
-            && x.stop.items.every(function (entry) { return itemTag(entry, activity, state) === 'Ready'; });
-          x.btn.className = 'm-step-btn' + (current ? ' m-step-current' : '') + (done ? ' m-step-done' : '');
-          if (current) x.btn.setAttribute('aria-current', 'step');
-          else x.btn.removeAttribute('aria-current');
-        });
-      }
-    };
-  }
-
   /* ---------- the review scene (mechanics unchanged, passback intact) ---------- */
 
   function buildReviewScene(activity, state, openStop) {
@@ -7790,9 +8042,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     state.openTile = openStop;
 
     if (state.stepped) {
-      // the step bar replaces the contents rail: one row of steps at the top
-      state.stepBar = buildStepBar(activity, state, openStop);
-      state.shell.app.insertBefore(state.stepBar.node, state.shell.main);
+      // no contents rail: each screen carries its own display-only step bar
       state.shell.main.classList.remove('m-main-rail');
     } else {
       var rail = buildRail(activity, state, openStop);

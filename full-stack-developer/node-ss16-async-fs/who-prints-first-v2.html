@@ -69,8 +69,6 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:21px;line-height:
 .copy{background:var(--teal);color:#0D1626;border:0;border-radius:999px;padding:5px 14px;font-family:Roboto,sans-serif;font-weight:700;font-size:13px;cursor:pointer}
 .copy:hover{background:var(--teal2)}
 /* questions */
-.qt{font-family:Roboto,sans-serif;font-weight:700;font-size:16.5px;margin:0 0 2px}
-.qh{color:var(--mut);font-size:14.5px;margin:0 0 10px}
 .lab{font-family:Roboto,sans-serif;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:0 0 6px}
 /* ordering: slots + pool */
 .slots{display:grid;gap:6px}
@@ -120,17 +118,7 @@ button.slot[disabled]:hover{border-color:var(--teal);background:rgba(90,179,170,
 .stepsl li::before{counter-increment:s;content:counter(s);width:30px;height:30px;border-radius:50%;background:var(--s2);color:var(--tx);font-family:Roboto,sans-serif;font-weight:700;display:flex;align-items:center;justify-content:center}
 .stepsl b{color:var(--tx)}
 .note{margin-top:18px;padding:12px 16px;border-radius:12px;background:rgba(240,180,76,.10);color:var(--tx);border:1px solid rgba(240,180,76,.35);font-size:15.5px}
-/* runs tracker (display only) */
-.tracker{display:flex;gap:8px;margin:0 0 16px}
-.tracker span{flex:1;height:6px;border-radius:3px;background:var(--s2)}
-.tracker span.done{background:var(--teal)}
-.tracker span.now{background:linear-gradient(90deg,var(--teal) 50%,var(--s2) 50%)}
-/* compare */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
-.stat{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
-.stat b{display:block;font-family:Roboto,sans-serif;font-size:32px;font-weight:700;line-height:1.05;color:var(--tx)}
-.stat span{color:var(--tx2);font-size:14.5px}
-.tlwrap{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+/* compare: one stat row + table */
 table.tl{width:100%;border-collapse:separate;border-spacing:6px 5px;table-layout:fixed}
 table.tl th{font-family:Roboto,sans-serif;font-size:12.5px;font-weight:700;color:var(--mut);text-align:left;padding:0 4px}
 table.tl thead th{letter-spacing:.06em;text-transform:uppercase;font-size:11.5px}
@@ -144,13 +132,16 @@ table.tl td.wb{background:rgba(240,180,76,.18);color:var(--warn);box-shadow:inse
 .errline{margin:14px 0 0;color:var(--tx2);font-size:15.5px}
 .errline b{color:var(--tx)}
 /* end */
-.take{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.vc{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
-.vc h2{font-family:Roboto,sans-serif;font-size:17px;margin:0 0 6px}
-.vc p{margin:0;color:var(--tx2);font-size:15.5px}
-.back{margin-top:18px;padding:14px 18px;border-radius:12px;border:1px solid var(--teal);background:rgba(90,179,170,.12);font-family:Roboto,sans-serif;font-weight:700;font-size:18px;color:var(--tx)}
+.take{margin:8px 0 0;padding:0 0 0 22px;display:grid;gap:14px;color:var(--tx2);font-size:17px;max-width:70ch}
+.take b{color:var(--tx);font-family:Roboto,sans-serif}
+.take li::marker{color:var(--teal)}
+.statrow{display:flex;flex-wrap:wrap;gap:8px 28px;margin:0 0 14px;color:var(--tx2);font-size:15.5px}
+.statrow b{font-family:Roboto,sans-serif;font-size:20px;color:var(--tx);margin-right:4px}
+.fbx{display:block;margin-top:4px;color:var(--warn)}
+.back{margin-top:28px;padding:14px 18px;border-radius:12px;border:1px solid var(--teal);background:rgba(90,179,170,.12);font-family:Roboto,sans-serif;font-weight:700;font-size:18px;color:var(--tx)}
 /* footer */
-.ft{flex:0 0 72px;display:flex;align-items:center;gap:18px;padding:0 32px;border-top:1px solid var(--line)}
+.act{margin-top:12px;display:flex;align-items:center;gap:12px}
+.ft{flex:0 0 40px;display:flex;align-items:center;gap:18px;padding:0 32px;border-top:1px solid var(--line)}
 .ft .pg{color:var(--mut);font-size:14px;font-family:Roboto,sans-serif;white-space:nowrap}
 .ft .bar{flex:1;height:4px;border-radius:2px;background:var(--s2);overflow:hidden}
 .ft .bar i{display:block;height:100%;background:var(--teal);transition:width .3s}
@@ -164,21 +155,21 @@ table.tl td.wb{background:rgba(240,180,76,.18);color:var(--warn);box-shadow:inse
 @media (max-width:1010px){.codebox li{padding:0 4px 0 6px}.codebox ol{font-size:11.2px}.codebox li::before{width:18px;margin-right:8px}}
 @media (max-width:860px){
   body{font-size:16px}
-  .hd{padding:0 20px;gap:12px}.ft{padding:0 20px;flex-basis:66px}.main{padding:18px 20px 14px}
+  .hd{padding:0 20px;gap:12px}.ft{padding:0 20px;flex-basis:38px}.main{padding:18px 20px 14px}
   .hd .nm{font-size:16px}.hd .nm .lead{font-size:12.5px}
   .steps{font-size:13px;gap:4px}.steps .sp{padding:4px 7px}
   h1.ins{font-size:19px;margin-bottom:14px}.g2{gap:18px}
   .codebox ol{font-size:10.4px;line-height:1.66}.codebox li{padding:0 4px 0 6px}.codebox li::before{width:16px;margin-right:7px}
   .slot,.pick{font-size:13px;min-height:36px;padding:0 10px}.slot .ln{font-size:13px}.slot .bk{display:none}
-  .stat b{font-size:28px}.btn{padding:11px 20px;font-size:15px}
+  .btn{padding:11px 20px;font-size:15px}
   table.tl tbody th,table.tl thead th:first-child{width:96px}
   table.tl td{font-size:12px;padding:5px 6px}
-  .take{gap:10px}.vc{padding:14px}.vc h2{font-size:16px}.vc p{font-size:14.5px}
+  .take{gap:10px;font-size:16px}
 }
 @media (max-width:720px){
   .codebox ol{font-size:9.4px}.g2{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px}
   .hd svg{width:56px}.steps .ar{display:none}
-  .stat span{font-size:13px}.fb{font-size:13.5px}
+  .fb{font-size:13.5px}
 }
 @media (max-width:660px){.main{padding:16px 14px 12px}.hd,.ft{padding:0 14px}}
 
@@ -197,7 +188,7 @@ body{padding:10px 14px 14px}
 <body>
 <div class="app">
   <header class="hd"><svg viewBox="0 0 120 48" width="100" height="40" role="img" aria-label="wawiwa"><rect x="0" y="0" width="120" height="34" rx="2" fill="#EE3124"/><path d="M26 33 L46 33 L26 47 Z" fill="#EE3124"/><text x="60" y="25" text-anchor="middle" font-family="Roboto, sans-serif" font-weight="800" font-size="23" fill="#fff" letter-spacing="0">wawiwa</text></svg>
-    <div class="nm">Who Prints First?<span class="lead">You predict the order 4 lines print in, run the file 5 times in Cursor, then compare.</span></div>
+    <div class="nm">Who Prints First?<span class="lead">Predict the print order, run the file 5 times, compare.</span></div>
     <nav class="steps" aria-label="Steps"><span class="sp" id="st0"><b>1</b>Predict</span><span class="ar" aria-hidden="true">&rarr;</span><span class="sp" id="st1"><b>2</b>Run &times;5</span><span class="ar" aria-hidden="true">&rarr;</span><span class="sp" id="st2"><b>3</b>Compare</span></nav></header>
   <main class="main" id="main" tabindex="-1"></main>
   <footer class="ft"><span class="pg" id="pg"></span><div class="bar" aria-hidden="true"><i id="barI"></i></div>
@@ -215,14 +206,12 @@ var ORD=['1st','2nd','3rd','4th'];
 var CODE='const fs = require("fs");\n\nfs.mkdir("data", (err) => {\n  console.log("mkdir finished");\n  if (err) return;\n});\n\nfs.writeFile("data/info.txt", "Hello Async", (err) => {\n  console.log("writeFile finished");\n  if (err) return;\n});\n\nfs.unlink("data/info.txt", (err) => {\n  console.log("unlink finished");\n  if (err) return;\n});\n\nconsole.log("script end");';
 function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function hl(l){var h=esc(l);h=h.replace(/"([^"]*)"/g,'<span class="s">"$1"</span>');h=h.replace(/\b(const|return|if)\b/g,'<span class="k">$1</span>');h=h.replace(/\b(require|mkdir|writeFile|unlink|log)\(/g,'<span class="f">$1</span>(');return h||' ';}
-function codeBox(mode){
+function codeBox(mode,copy){
   var leg='';
-  if(mode==='log') leg='<span><i class="sw t"></i>Highlighted: the 4 lines that print to the terminal.</span>';
-  if(mode==='err') leg='<span><i class="sw w"></i>Highlighted: what each callback does when its job fails.</span>';
-  leg+='<span>mkdir creates a folder. writeFile writes a file. unlink deletes a file.</span>';
-  return '<div class="codebox"><div class="ttl"><span>The code (read only)</span><button class="copy" type="button" data-copy>Copy</button></div><ol aria-label="index.js, line by line">'+CODE.split('\n').map(function(l){
+  if(mode==='err') leg='<span><i class="sw w"></i>What each callback does when its job fails.</span>';
+  return '<div class="codebox"><div class="ttl">'+(copy?'<span>The code for index.js</span><button class="copy" type="button" data-copy>Copy</button>':'<span>The code (read only)</span>')+'</div><ol aria-label="index.js, line by line">'+CODE.split('\n').map(function(l){
     var c=''; if(mode==='log' && /console\.log/.test(l)) c='hl'; if(mode==='err' && /if \(err\)/.test(l)) c='hw';
-    return '<li class="'+c+'"><span class="t">'+hl(l)+'</span></li>';}).join('')+'</ol><div class="legend">'+leg+'</div></div>';
+    return '<li class="'+c+'"><span class="t">'+hl(l)+'</span></li>';}).join('')+'</ol>'+(leg?'<div class="legend">'+leg+'</div>':'')+'</div>';
 }
 function short(l){return l.replace(' finished','');}
 function key(o){return o.join('|');}
@@ -246,8 +235,8 @@ function bindCopy(){qsa('[data-copy]').forEach(function(b){b.onclick=function(){
   catch(e){selectFallback(b);} };});}
 
 /* ordering widget: 4 slots + pool */
-function picker(arr,locked){
-  var h='<p class="lab">Your order</p><div class="slots">';
+function picker(arr,locked,label){
+  var h='<p class="lab">'+(label||'Your order')+'</p><div class="slots">';
   arr.forEach(function(l,i){
     if(l) h+='<button type="button" class="slot" data-i="'+i+'"'+(locked?' disabled':'')+' aria-label="'+ORD[i]+': '+l+(locked?'':'. Click to send it back to the lines')+'"><span class="ord">'+ORD[i]+'</span><span class="ln">'+l+'</span>'+(locked?'':'<span class="bk">click to remove</span>')+'</button>';
     else h+='<div class="slot" aria-label="'+ORD[i]+', empty"><span class="ord">'+ORD[i]+'</span></div>';
@@ -292,11 +281,10 @@ function render(){
   var s=SC[cur], m=$('main');
   if(s==='order'){stepNav(0);
     var lk=pred.okO, o=pred.order, f=o[0]==='script end';
-    var written=key(o.filter(function(l){return l!=='script end';}))===key(['mkdir finished','writeFile finished','unlink finished']);
-    m.innerHTML='<p class="ey">Step 1 &middot; Predict &middot; Question 1 of 2</p><h1 class="ins">Read the code. In what order will the 4 lines print? Click them below in the order you expect.</h1>'+
-      '<div class="g2">'+codeBox('log')+'<div>'+picker(o,lk)+
-      (lk?'<div class="fbs" role="status">'+(f?fb('ok','Correct.','script end prints first. Node hands off the three jobs and runs the last line right away.'+(written?' The other three will not always come in the written order.':' The other three can come in any order.'))
-        :fb('no','Incorrect.','script end prints first, even though it is the last line. Node hands off the three jobs and does not wait for them. The other three can come in any order.'))+'</div>':'')+'</div></div>';
+    m.innerHTML='<p class="ey">Question 1 of 2</p><h1 class="ins">In what order will the 4 highlighted lines print? Click them in order.</h1>'+
+      '<div class="g2">'+codeBox('log')+'<div>'+picker(o,lk)+'<div class="act" data-act></div>'+
+      (lk?'<div class="fbs" role="status">'+(f?fb('ok','Correct.','script end prints first: Node hands off the three jobs and moves on. The other three can come in any order.')
+        :fb('no','Incorrect.','script end prints first: Node does not wait for the three jobs. The other three can come in any order.'))+'</div>':'')+'</div></div>';
     bindCopy();
     if(!lk){bindPicker(o,render);var c=full(o);foot(c?'Check my prediction':'Place all 4 lines to check',!c);
       handlers.next=function(){pred.okO=true;render();say(o[0]==='script end'?'Correct.':'Incorrect.');$('next').focus();};}
@@ -304,11 +292,11 @@ function render(){
   }
   else if(s==='error'){stepNav(0);
     var lk2=pred.okE, ok=pred.err==='no';
-    m.innerHTML='<p class="ey">Step 1 &middot; Predict &middot; Question 2 of 2</p><h1 class="ins">Read the highlighted lines. Will an error be printed? Choose one answer, then check it.</h1>'+
-      '<div class="g2">'+codeBox('err')+'<div><p class="qt">Will an error be printed?</p><p class="qh">Imagine one of the three jobs fails. A callback is the function Node runs when a job is done.</p>'+
-      choiceList('err',ERR_OPTS,pred.err,lk2)+
-      (lk2?'<div class="fbs" role="status">'+(ok?fb('ok','Correct.','When a job fails, <code>if (err) return;</code> leaves the callback quietly. Nothing extra is printed.')
-        :fb('no','Incorrect. No, nothing extra is printed.','<code>if (err) return;</code> leaves the callback quietly when a job fails. No error is printed and the script does not crash.'))+'</div>':'')+'</div></div>';
+    m.innerHTML='<p class="ey">Question 2 of 2</p><h1 class="ins">Imagine one of the three jobs fails. Will an error be printed?</h1>'+
+      '<div class="g2">'+codeBox('err')+'<div>'+
+      choiceList('err',ERR_OPTS,pred.err,lk2)+'<div class="act" data-act></div>'+
+      (lk2?'<div class="fbs" role="status">'+(ok?fb('ok','Correct.','<code>if (err) return;</code> leaves the callback quietly. Nothing extra is printed.')
+        :fb('no','Incorrect.','<code>if (err) return;</code> leaves the callback quietly. Nothing is printed and the script does not crash.'))+'</div>':'')+'</div></div>';
     bindCopy();
     if(!lk2){
       qsa('input[name=err]').forEach(function(x){x.onchange=function(){pred.err=x.value;foot('Check my answer',false);};});
@@ -317,41 +305,36 @@ function render(){
     else{foot('Go to step 2: Run');handlers.next=function(){go(cur+1);};}
   }
   else if(s==='setup'){stepNav(1);
-    m.innerHTML='<p class="ey">Step 2 &middot; Run &times;5 &middot; Setup</p><h1 class="ins">Open Cursor and set up the file. Do the three steps below, then click Record run 1.</h1><div class="g2 even"><div>'+
-      '<ol class="stepsl"><li><span>Open Cursor. Create an empty folder named <b class="m">async-lab</b> and open it (File, then Open Folder).</span></li>'+
-      '<li><span>Create a file named <b class="m">index.js</b>. Click <b>Copy</b> on the code, paste it into the file and save.</span></li>'+
-      '<li><span>Open the terminal (Terminal, then New Terminal) and run <b class="m">node index.js</b></span></li></ol>'+
-      '<div class="note"><b>Before every run, delete the data folder.</b> Right-click <b class="m">data</b> in the Explorer (the file list on the left) and choose Delete. Each run must start without it.</div></div>'+
-      codeBox('')+'</div>';
+    m.innerHTML='<p class="ey">Setup</p><h1 class="ins">Set up the file in Cursor.</h1><div class="g2 even"><div>'+
+      '<ol class="stepsl"><li><span>Create an empty folder named <b class="m">async-lab</b> and open it (File, Open Folder).</span></li>'+
+      '<li><span>Create <b class="m">index.js</b>. Click <b>Copy</b>, paste the code and save.</span></li>'+
+      '<li><span>Open the terminal (Terminal, New Terminal).</span></li></ol>'+
+      '<p class="note"><b>Before every run, delete the data folder</b> (right-click it in the Explorer, Delete).</p><div class="act" data-act></div></div>'+
+      codeBox('',true)+'</div>';
     bindCopy();
     foot('Record run 1');handlers.next=function(){temp={order:empty4(),state:null,checked:false};go(cur+1);};
   }
   else if(s.indexOf('run')===0){stepNav(1);
     var i=+s.slice(3);
-    var tr='<div class="tracker" aria-hidden="true">'+Array.apply(null,{length:RUNS}).map(function(_,k){return '<span class="'+(k<i?'done':(k===i?'now':''))+'"></span>';}).join('')+'</div>';
     var o2=temp.order, st=temp.state, ch=temp.checked;
     var okO=o2[0]==='script end', okS=st&&st!=='none', done=ch&&okO&&okS;
-    var lfb='', rfb='';
+    var rfb='';
     if(ch){
-      lfb=okO?fb('ok','Correct: script end is at the top.','It prints first in every run. Node does not wait for the three jobs.')
-             :fb('no','Incorrect: check the terminal again.','script end always prints first. Look at the top line of the terminal output, then fix your order.');
-      rfb=okS?fb('ok','Correct: the data folder is there.','mkdir creates it again in every run.')
-             :fb('no','Incorrect: a data folder should be there.','mkdir always creates it. Check that you ran the command inside async-lab, then choose again.');
       if(done){
-        var same=[]; for(var k=0;k<i;k++) if(key(runs[k].order)===key(o2)) same.push(k+1);
         var d={}; runs.forEach(function(x){d[key(x.order)]=1;}); var n=Object.keys(d).length;
-        rfb+=fb('info','Run '+(i+1)+' recorded.',i===0?'Keep this order in mind for the next runs.':(same.length?'Same order as run '+same.join(', ')+'. ':'A new order. ')+n+' different order'+(n>1?'s':'')+' so far.');
-        if(wbm(o2)) lfb+=fb('warn','Look closer: writeFile finished before mkdir.','In our test runs, every time that happened, writeFile had failed because data did not exist yet. Your terminal printed no error.');
+        rfb=fb('ok','Correct.','Run '+(i+1)+' recorded.'+(i?' '+n+' different order'+(n>1?'s':'')+' so far.':'')+
+          (wbm(o2)?'<span class="fbx">writeFile finished before mkdir: in our tests it had failed then, with no error printed.</span>':''));
+      } else {
+        rfb=fb('no','Incorrect.',(!okO?'script end always prints first: check the top line of the terminal. ':'')+(!okS?'mkdir always creates data: check you ran it inside async-lab.':''));
       }
     }
-    m.innerHTML='<p class="ey">Step 2 &middot; Run &times;5 &middot; Run '+(i+1)+' of '+RUNS+'</p><h1 class="ins">'+
-      (i===0?'Open Cursor and run <code>node index.js</code>. Record the terminal output order and the folder state below, then check.'
-            :'Open Cursor, delete the data folder, and run <code>node index.js</code> again. Record what you see below, then check.')+'</h1>'+tr+
-      '<div class="g2 even"><div><p class="qt">In what order did the lines print?</p><p class="qh">Click the lines in the order the terminal output shows them, top to bottom.</p>'+picker(o2,done)+
-      (lfb?'<div class="fbs" role="status">'+lfb+'</div>':'')+'</div>'+
-      '<div><p class="qt">What is in the project folder now?</p><p class="qh">Look in the Explorer, the file list on the left in Cursor.</p>'+
+    m.innerHTML='<p class="ey">Run '+(i+1)+' of '+RUNS+'</p><h1 class="ins">'+
+      (i===0?'Run <code>node index.js</code> and record what you see.'
+            :'Delete the data folder, run <code>node index.js</code> again and record what you see.')+'</h1>'+
+      '<div class="g2 even"><div>'+picker(o2,done,'Terminal order, top to bottom')+'</div>'+
+      '<div><p class="lab">Folder now (in the Explorer)</p>'+
       choiceList('st',[{k:'file',t:'data, with info.txt inside'},{k:'empty',t:'data, empty'},{k:'none',t:'No data folder'}],st,done)+
-      (rfb?'<div class="fbs" role="status">'+rfb+'</div>':'')+'</div></div>';
+      '<div class="act" data-act></div>'+(rfb?'<div class="fbs" role="status">'+rfb+'</div>':'')+'</div></div>';
     var upd=function(){
       var c=full(temp.order);
       if(!c) foot('Place all 4 lines to check',true);
@@ -374,29 +357,28 @@ function render(){
     var dd={},sil=0; runs.forEach(function(r){dd[key(r.order)]=1;if(wbm(r.order))sil++;}); var nn=Object.keys(dd).length;
     var row=function(lb,o,cls,mark){var wi=o.indexOf('writeFile finished'),mi=o.indexOf('mkdir finished');
       return '<tr class="'+(cls||'')+'"><th scope="row">'+lb+'</th>'+o.map(function(l,k){return '<td'+(mark&&k===wi&&wi<mi?' class="wb"':'')+'>'+short(l)+'</td>';}).join('')+'</tr>';};
-    var errT={yes:'Yes, an error is printed',no:'No, nothing extra is printed',crash:'The script crashes'};
-    m.innerHTML='<p class="ey">Step 3 &middot; Compare</p><h1 class="ins">Compare your prediction with your five runs. Read each row from first to last, then click What this means.</h1>'+
-      '<div class="stats"><div class="stat"><b>5 / 5</b><span>runs printed script end first</span></div>'+
-      '<div class="stat"><b>'+nn+'</b><span>different order'+(nn>1?'s':'')+' from the same file</span></div>'+
-      '<div class="stat"><b>'+sil+'</b><span>run'+(sil===1?'':'s')+' where writeFile finished before mkdir, silently</span></div></div>'+
-      '<div class="tlwrap"><table class="tl"><caption class="sr">Print order, first to last, for your prediction and each run</caption><thead><tr><th scope="col">&nbsp;</th><th scope="col">1st (first)</th><th scope="col">2nd</th><th scope="col">3rd</th><th scope="col">4th (last)</th></tr></thead><tbody>'+
+    m.innerHTML='<p class="ey">Compare</p><h1 class="ins">Compare your prediction with your five runs.</h1>'+
+      '<p class="statrow"><span><b>5 / 5</b> script end first</span><span><b>'+nn+'</b> different order'+(nn>1?'s':'')+'</span><span><b>0</b> errors printed</span></p>'+
+      '<table class="tl"><caption class="sr">Print order, first to last, for your prediction and each run</caption><thead><tr><th scope="col">&nbsp;</th><th scope="col">1st</th><th scope="col">2nd</th><th scope="col">3rd</th><th scope="col">4th</th></tr></thead><tbody>'+
       row('Your prediction',pred.order,'you',false)+runs.map(function(r,k){return row('Run '+(k+1),r.order,'',true);}).join('')+'</tbody></table>'+
-      '<p class="tlkey"><i class="sw a"></i>Amber: writeFile finished before mkdir. In our tests, writeFile had failed then, with no error printed.</p></div>'+
-      '<p class="errline">Will an error be printed? You predicted: <b>'+errT[pred.err]+'</b>. In every run: <b>No, nothing extra is printed.</b></p>'+
-      (nn===1?'<p class="errline">All five matched this time. That is luck, not a rule: on our test machine the same file gave 5 different orders in 200 runs.</p>':'');
+      (sil?'<p class="tlkey"><i class="sw a"></i>writeFile before mkdir: in our tests it had failed then, silently.</p>':'')+
+      '<p class="errline">'+(nn===1?'All five matched this time. That is luck: in our tests the same file gave 5 different orders.':'Same file, different orders. The written order is not a promise.')+'</p>';
     foot('What this means');handlers.next=function(){go(cur+1);};
   }
   else if(s==='finish'){stepNav(3);
-    m.innerHTML='<p class="ey">Done &middot; The async mental model</p><h1 class="ins">Read the three takeaways. Async means Node starts a job and moves on without waiting for it.</h1>'+
-      '<div class="take"><div class="vc"><h2>Async code does not block</h2><p>Node does not stop and wait. script end printed before any job reported back.</p></div>'+
-      '<div class="vc"><h2>Node continues handling other work</h2><p>It does not wait at fs.mkdir. It moves on and runs the callback later.</p></div>'+
-      '<div class="vc"><h2>fs operations are delegated to OS</h2><p>fs is Node\'s file system module. The operating system (OS) does each job, and each job finishes when it is done. The written order is not a promise.</p></div></div>'+
-      '<p class="sub" style="margin-top:18px;color:var(--tx)">So if writeFile must wait for mkdir, your code has to say so. That is the next step in the lesson.</p>'+
+    m.innerHTML='<p class="ey">Done</p><h1 class="ins">Async means Node starts a job and moves on without waiting for it.</h1>'+
+      '<ul class="take"><li><b>Async code does not block.</b> script end printed before any job reported back.</li>'+
+      '<li><b>Node continues handling other work.</b> It runs each callback later.</li>'+
+      '<li><b>fs operations are delegated to the OS.</b> Each job finishes when it is done, not in written order.</li></ul>'+
       '<p class="back">Back to the lesson: watch the video below.</p>';
     foot('Start over');handlers.next=function(){resetAll();go(0);};
     say('Activity complete. Back to the lesson: watch the video below.');
   }
 }
+/* the action button sits right under the answers, not in the footer */
+var _render=render;
+render=function(){var n=$('next');document.querySelector('.ft').appendChild(n);_render();
+  var t=document.querySelector('[data-act]');if(!t){t=document.createElement('div');t.className='act';$('main').appendChild(t);}t.appendChild(n);};
 render();
 function fit(){document.body.style.zoom='';var w=innerWidth,h=innerHeight;var z=Math.min(1,w/660,h/700);
   document.body.style.zoom=z<1?z.toFixed(3):'';}
