@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es-MX" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Misión Wawiwa · La llamada de diagnóstico (prototipo de juego de escenarios)</title>
+<style>
+:root{
+  --red:#EE3124;--navy:#255777;--turquoise:#5AB3AA;--teal:#3E868F;
+  --ink:#0e1c24;--white:#fff;--grey:#E6E6E8;--gold:#F4B41A;--panel:rgba(255,255,255,.94);
+  --good:#16a34a;--bad:#d1442f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:'Assistant','Roboto',system-ui,sans-serif;color:var(--ink);background:var(--navy);overflow:hidden}
+.stage-bg{position:fixed;inset:0;z-index:0;transition:background .8s ease}
+.stage-bg .blob{position:absolute;border-radius:46% 54% 60% 40%/50% 42% 58% 50%;opacity:.95}
+.icons{position:fixed;inset:0;z-index:1;opacity:.13;pointer-events:none}
+.scrim{position:fixed;inset:0;z-index:2;background:linear-gradient(180deg,rgba(14,28,36,.34),rgba(14,28,36,.62));pointer-events:none}
+.app{position:relative;z-index:3;height:100vh;display:flex;flex-direction:column;padding:16px 22px}
+.topbar{display:flex;align-items:center;gap:16px;color:#fff}
+.logo{background:var(--red);color:#fff;font-family:'Roboto';font-weight:900;font-size:19px;letter-spacing:.5px;padding:6px 12px 9px;border-radius:5px;position:relative;line-height:1}
+.logo::after{content:"";position:absolute;left:15px;bottom:-7px;border-width:8px 8px 0 0;border-style:solid;border-color:var(--red) transparent transparent transparent}
+.brandline{display:flex;flex-direction:column;line-height:1.15}
+.brandline .k{font-size:10.5px;letter-spacing:3px;text-transform:uppercase;color:var(--turquoise);font-weight:700}
+.brandline .t{font-family:'Roboto';font-weight:700;font-size:16px}
+.hud{margin-left:auto;display:flex;align-items:center;gap:16px}
+.chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:6px 14px;border-radius:40px;color:#fff}
+.chip .ic{color:var(--gold);font-size:15px}
+.chip b{font-family:'Roboto';font-size:16px}.chip span{font-size:11px;opacity:.82;text-transform:uppercase;letter-spacing:1px}
+.journey{display:flex;gap:6px;align-items:center}
+.node{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.25);transition:.3s}
+.node.done{background:var(--gold)}.node.active{background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.28)}
+
+.stagewrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;padding:14px 0}
+.card{background:var(--panel);border-radius:20px;box-shadow:0 26px 70px rgba(0,0,0,.4);width:min(980px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden;opacity:0;transform:translateY(16px) scale(.99);animation:pop .5s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes pop{to{opacity:1;transform:none}}
+.card-body{overflow:auto;padding:30px 40px}
+.eyebrow{font-family:'Roboto';font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:11px;color:var(--teal)}
+h1{font-family:'Roboto';font-weight:900;color:var(--navy);margin:6px 0 0;line-height:1.08}
+.big{font-size:34px}.mid{font-size:25px}
+.lead{font-size:16px;line-height:1.6;color:#243239;margin-top:14px;max-width:70ch}
+.foot{border-top:1px solid var(--grey);padding:16px 40px;display:flex;align-items:center;gap:12px;background:#fff}
+.spacer{flex:1}
+.btn{font-family:'Roboto';font-weight:700;border:none;border-radius:40px;padding:12px 24px;cursor:pointer;font-size:15px;transition:.15s;display:inline-flex;align-items:center;gap:8px}
+.btn.primary{background:var(--red);color:#fff;box-shadow:0 8px 18px rgba(238,49,36,.32)}
+.btn.primary:hover{transform:translateY(-1px)}
+.btn.ghost{background:#eef3f3;color:var(--navy)}.btn.ghost:hover{background:#e2ecec}
+.btn.teal{background:var(--teal);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* persona */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.pick{border:2px solid var(--grey);border-radius:16px;padding:20px;cursor:pointer;transition:.2s;background:#fff;text-align:center}
+.pick:hover{border-color:var(--turquoise);transform:translateY(-3px)}
+.pick.sel{border-color:var(--red);box-shadow:0 10px 24px rgba(238,49,36,.16)}
+.pick .av{width:66px;height:66px;margin:0 auto 12px}
+.pick h3{font-family:'Roboto';margin:0 0 4px;color:var(--navy);font-size:17px}
+.pick p{margin:0;font-size:13px;color:#5b6b73;line-height:1.45}
+
+/* briefing / mentor */
+.mentor{display:flex;gap:16px;align-items:flex-start;background:linear-gradient(160deg,var(--navy),#1a3f56);color:#eaf6f5;border-radius:16px;padding:18px 20px;margin-top:20px}
+.mentor .bot{width:54px;height:54px;flex:0 0 54px}
+.mentor b{color:#fff;font-family:'Roboto'}
+.mentor .say{font-size:14.5px;line-height:1.55;margin-top:4px}
+.framework{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:20px}
+.fitem{background:#f4f9f9;border:1px solid #dcebe9;border-left:4px solid var(--turquoise);border-radius:0 12px 12px 0;padding:12px 14px}
+.fitem .l{font-family:'Roboto';font-weight:900;color:var(--red);font-size:13px}
+.fitem .d{font-size:13px;color:#243239;margin-top:3px;line-height:1.4}
+.rule{margin-top:18px;background:#fff5ec;border:1px dashed var(--gold);border-radius:12px;padding:12px 16px;font-size:14px;color:#8a5a12}
+.rule b{color:#8a5a12}
+
+/* scene */
+.scene-top{display:flex;align-items:flex-start;gap:16px}
+.badge{font-family:'Roboto';font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#fff;background:var(--teal);padding:5px 12px;border-radius:30px;white-space:nowrap}
+.section-label{font-family:'Roboto';font-weight:700;color:var(--navy);font-size:15px;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.section-label .n{font-size:12px;color:#fff;background:var(--navy);width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+.hotspots{display:flex;flex-wrap:wrap;gap:10px}
+.hot{border:1.5px solid var(--turquoise);color:var(--navy);background:#fff;border-radius:40px;padding:9px 16px;cursor:pointer;font-weight:600;font-size:13.5px;transition:.15s;display:inline-flex;align-items:center;gap:7px}
+.hot:hover{background:#eefafa}
+.hot.opened{background:var(--turquoise);color:#fff;border-color:var(--turquoise)}
+.clue{margin-top:10px;background:#eefafa;border-radius:12px;padding:12px 15px;font-size:14px;color:#1c3b34;display:none}
+.clue.show{display:block;animation:pop .35s ease}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{border:1.5px solid var(--grey);border-radius:12px;padding:14px 16px;cursor:pointer;transition:.15s;font-size:14.5px;background:#fff;display:flex;gap:10px;align-items:flex-start}
+.choice:hover{border-color:var(--navy);background:#f7fafb}
+.choice.lock{cursor:default;opacity:.55}
+.choice.good{border-color:var(--good);background:#effaf1}
+.choice.bad{border-color:var(--bad);background:#fdf0ee}
+.choice .tag{font-size:18px;line-height:1.2}
+.feedback{margin-top:14px;border-radius:14px;padding:14px 18px;font-size:14.5px;line-height:1.5;display:none}
+.feedback.show{display:block;animation:pop .4s ease}
+.feedback.good{background:#effaf1;border:1px solid #b7e6c2}
+.feedback.bad{background:#fdf0ee;border:1px solid #f3c4bb}
+.feedback .who{font-family:'Roboto';font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.feedback .pts{font-weight:800;color:var(--red);margin-top:6px}
+
+/* toast */
+.toast{position:fixed;left:50%;top:20%;transform:translate(-50%,-16px);z-index:40;background:#fff;border-radius:18px;padding:20px 28px;text-align:center;box-shadow:0 30px 70px rgba(0,0,0,.42);opacity:0;pointer-events:none;transition:.4s;border-top:6px solid var(--gold)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast .m{font-size:40px}.toast .b{font-family:'Roboto';font-weight:900;color:var(--navy);font-size:20px}.toast .p{color:var(--red);font-weight:800}
+
+/* report */
+.rcard{border:1px solid var(--grey);border-radius:12px;padding:14px 16px;margin-top:12px}
+.rcard h3{margin:0 0 6px;font-family:'Roboto';color:var(--navy);font-size:15px}
+.rcard .row{font-size:13.5px;margin:4px 0;color:#243239}
+.rcard .row b{color:var(--teal)}
+.scoreline{display:flex;align-items:baseline;gap:10px;margin-top:6px}
+.scoreline .n{font-family:'Roboto';font-weight:900;font-size:40px;color:var(--red)}
+.rank{font-family:'Roboto';font-weight:700;color:var(--navy)}
+
+.audio-toggle{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:#fff;cursor:pointer;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:6px 12px;border-radius:40px}
+@media (max-width:820px){.grid3{grid-template-columns:1fr}.card-body{padding:22px}.foot{padding:14px 22px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{body>*:not(#printcatch){display:none!important}}
+</style>
+<style id="wawiwa-print-fix">@media print{@page{margin:0 !important}body{padding:12mm !important;box-sizing:border-box}}</style>
+</head>
+<body>
+<div class="stage-bg" id="bg"></div>
+<svg class="icons" id="iconlayer" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"></svg>
+<div class="scrim"></div>
+
+<div class="app">
+  <div class="topbar">
+    <div class="logo">wawiwa</div>
+    <div class="brandline"><span class="k">IA empresarial · M1 · L1</span><span class="t">Misión: La llamada de diagnóstico</span></div>
+    <div class="hud">
+      <label class="audio-toggle"><input type="checkbox" id="narr" style="accent-color:#F4B41A"> Narración</label>
+      <div class="chip"><span class="ic">★</span><b id="pts">0</b><span>Puntos</span></div>
+      <div class="journey" id="journey"></div>
+    </div>
+  </div>
+  <div class="stagewrap"><div class="card" id="card"></div></div>
+</div>
+
+<div class="toast" id="toast"><div class="m">🏅</div><div class="b" id="tb">Buena decisión</div><div class="p" id="tp">+40 puntos</div></div>
+<div id="printcatch"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="robot" viewBox="0 0 64 64">
+  <rect x="14" y="18" width="36" height="30" rx="9" fill="#fff" stroke="#255777" stroke-width="2.5"/>
+  <rect x="20" y="25" width="24" height="14" rx="5" fill="#255777"/>
+  <circle cx="27" cy="32" r="3" fill="#5AB3AA"/><circle cx="37" cy="32" r="3" fill="#EE3124"/>
+  <line x1="32" y1="10" x2="32" y2="18" stroke="#255777" stroke-width="2.5"/><circle cx="32" cy="9" r="3.2" fill="#EE3124"/>
+  <rect x="9" y="30" width="5" height="10" rx="2.5" fill="#3E868F"/><rect x="50" y="30" width="5" height="10" rx="2.5" fill="#3E868F"/>
+  <rect x="22" y="48" width="20" height="6" rx="3" fill="#255777"/>
+</symbol>
+</svg>
+
+<script>
+const PERSONAS=[
+ {id:"analyst",name:"Analista",d:"Confías en los datos. Mapeas antes de moverte.",av:"#255777"},
+ {id:"facilitator",name:"Facilitador",d:"Haces la pregunta incisiva que todos evitan.",av:"#3E868F"},
+ {id:"builder",name:"Constructor",d:"Te encanta entregar rápido, pero aprenderás a diagnosticar primero.",av:"#EE3124"}
+];
+const FRAMEWORK=[
+ {l:"A",d:"¿Uso personal de la IA o implementación en la organización?"},
+ {l:"B",d:"¿Cuál es el problema real?"},
+ {l:"C",d:"¿Quién es el usuario final?"},
+ {l:"D",d:"¿Cuál es el proceso?"},
+ {l:"E",d:"¿Qué sigue sin estar claro?"}
+];
+const CASES=[
+ {t:"Preguntas repetidas a RH",client:"Una empresa de servicios de 400 personas",
+  scene:"Te sientas con la líder de RH. “Recibimos unas 90 solicitudes al mes”, dice, “y la verdad, la mayoría son las mismas cuatro cosas. Nos consume entre 30 y 40% de nuestro tiempo.” Las solicitudes llegan por WhatsApp, por correo y en persona. No se registra nada.",
+  hots:[
+   {l:"Revisa el registro de solicitudes",c:"Cerca del 70% son las mismas cinco preguntas: días de vacaciones, pensión, gastos, horas extra."},
+   {l:"Habla con el equipo de RH",c:"Les preocupa dar una respuesta equivocada sobre una política, y ese miedo los hace más lentos."},
+   {l:"Revisa los canales",c:"WhatsApp, correo, en persona. No hay sistema ni registro de qué se preguntó ni qué se respondió."}],
+  q1:{q:"¿Cuál es tu primera acción?",opts:[
+    {t:"Proponer un chatbot de RH en ese momento.",q:"bad",fb:"Diagnostica antes de resolver. Todavía no sabes qué solicitudes vale la pena automatizar, ni dónde una respuesta equivocada haría daño.",p:0},
+    {t:"Mapear qué solicitudes se repiten y cómo llegan.",q:"good",fb:"Exacto. Clasificas el volumen y los canales antes de proponer nada. Eso es el diagnóstico.",p:40},
+    {t:"Decirle a RH que responda más rápido.",q:"bad",fb:"Eso trata un síntoma, no la causa. La carga es estructural, no un tema de esfuerzo.",p:0}]},
+  q2:{q:"¿Cómo lo clasificas?",opts:[
+    {t:"Implementación en la organización.",q:"good",fb:"Correcto: es un proceso de todo el equipo, no el hábito personal de IA de una sola persona.",p:20},
+    {t:"Uso personal de la IA.",q:"bad",fb:"No exactamente. Es un proceso compartido de RH en toda la empresa.",p:0}]},
+  real:"Solicitudes repetitivas, que requieren poco criterio, sin un sistema de registro."},
+
+ {t:"Clasificación de solicitudes de servicio",client:"Una empresa de comercio electrónico",
+  scene:"Una gerente de servicio al cliente está rebasada. “Unas 500 solicitudes al día entre correo, chat y redes sociales. Mis ejecutivos abren cada una, deciden si es una queja, una pregunta o un reembolso, y la canalizan. Cerca del 40% llega al área equivocada.”",
+  hots:[
+   {l:"Observa a un ejecutivo trabajar",c:"La mayor parte de su tiempo se va en leer y ordenar, no en resolver nada."},
+   {l:"Saca los datos de canalización",c:"40% mal canalizado. En ningún lado se etiqueta qué es simple y qué es complejo."},
+   {l:"Pregunta qué significa 'complejo'",c:"Nadie sabe decir qué proporción de verdad necesita todo el historial del cliente y cuál solo una respuesta rápida con datos."}],
+  q1:{q:"¿Cuál es el problema real aquí?",opts:[
+    {t:"Los ejecutivos son demasiado lentos.",q:"bad",fb:"Cuidado: eso culpa a las personas de una falla de diseño. El cuello de botella está antes.",p:0},
+    {t:"Las solicitudes no se clasifican antes de canalizarlas.",q:"good",fb:"Sí. La falla está en la clasificación inicial: sin clasificar, canalizar es adivinar.",p:40},
+    {t:"Necesitan más personal.",q:"bad",fb:"Quizá más adelante, pero todavía no diagnosticas la causa. No recetes más plantilla.",p:0}]},
+  q2:{q:"¿Qué sigue sin estar claro? (nombra la brecha)",opts:[
+    {t:"La proporción de solicitudes simples frente a las que requieren mucho criterio.",q:"good",fb:"Correcto. Esa incógnita define qué se puede automatizar con seguridad: señálala antes de diseñar.",p:20},
+    {t:"Nada: construye el enrutador.",q:"bad",fb:"“No está claro” es una respuesta de diagnóstico legítima. Saltártela es justo como fracasan los proyectos.",p:0}]},
+  real:"Una brecha de clasificación inicial, no un problema de carga de trabajo ni de esfuerzo."},
+
+ {t:"Resumir llamadas de ventas",client:"Un equipo de ventas de 12 personas",
+  scene:"El gerente de ventas no puede ver su embudo de ventas. “Los ejecutivos hacen de 8 a 12 llamadas al día. Se supone que actualizan el CRM después de cada una: resumen, siguientes pasos, etapa. En la práctica, cerca del 60% nunca se registra a tiempo.”",
+  hots:[
+   {l:"Acompaña las llamadas",c:"Los ejecutivos van de una llamada a otra; no hay ni un minuto entre llamadas para escribir nada."},
+   {l:"Lee algunas notas del CRM",c:"Las que existen son escuetas e inconsistentes: escribir no es su fuerte."},
+   {l:"Pregunta directamente a los ejecutivos",c:"Respuestas mixtas: algunos están saturados, a otros el formulario del CRM les parece engorroso y otros simplemente lo evitan."}],
+  q1:{q:"¿Dónde se rompió realmente el proceso?",opts:[
+    {t:"En la captura: justo después de la llamada, sin tiempo ni una herramienta fácil.",q:"good",fb:"Sí. Ubicaste el punto de quiebre en lugar de adivinar la motivación.",p:40},
+    {t:"Los ejecutivos son flojos.",q:"bad",fb:"Eso es un juicio, no un diagnóstico. La evidencia apunta al tiempo y a las herramientas.",p:0},
+    {t:"El CRM es malo.",q:"bad",fb:"En parte, pero es un factor entre tres. No reduzcas el diagnóstico a una sola causa.",p:0}]},
+  q2:{q:"¿Quién es el verdadero usuario final de una solución?",opts:[
+    {t:"El ejecutivo, en los 60 segundos después de una llamada.",q:"good",fb:"Exacto: diseña para ese momento o nadie la va a adoptar.",p:20},
+    {t:"El tablero del director general.",q:"bad",fb:"El director general se beneficia, pero quien tiene que adoptarla es el ejecutivo.",p:0}]},
+  real:"Una falla en el momento de la captura (tiempo + herramienta + fricción), no flojera."}
+];
+const MAXP = CASES.reduce((s,c)=>s+c.q1.opts.reduce((m,o)=>Math.max(m,o.p),0)+c.q2.opts.reduce((m,o)=>Math.max(m,o.p),0),0);
+
+let persona=null, pts=0, idx=0;
+const results=CASES.map(()=>({q1:null,q2:null,opened:0}));
+
+(function(){let s="";for(let i=0;i<64;i++){const x=Math.random()*100,y=Math.random()*100,sz=1.4+Math.random()*3,r=Math.random()*360,sh=i%4;let g="";
+ if(sh===0)g='<circle r="'+(sz/2)+'" fill="none" stroke="#fff" stroke-width=".5"/><circle r="'+(sz/7)+'" fill="#fff"/>';
+ else if(sh===1)g='<rect x="'+(-sz/2)+'" y="'+(-sz/2)+'" width="'+sz+'" height="'+sz+'" rx=".6" fill="none" stroke="#fff" stroke-width=".5"/>';
+ else if(sh===2)g='<path d="M'+(-sz/2)+' 0 A '+(sz/2)+' '+(sz/2)+' 0 0 1 '+(sz/2)+' 0" fill="none" stroke="#fff" stroke-width=".5"/><circle r=".4" fill="#fff"/>';
+ else g='<line x1="'+(-sz/2)+'" y1="0" x2="'+(sz/2)+'" y2="0" stroke="#fff" stroke-width=".5"/><line x1="0" y1="'+(-sz/2)+'" x2="0" y2="'+(sz/2)+'" stroke="#fff" stroke-width=".5"/>';
+ s+='<g transform="translate('+x+' '+y+') rotate('+r+')">'+g+'</g>';}
+ document.getElementById('iconlayer').innerHTML=s;})();
+
+const PAL=[["#5AB3AA","#255777","#EE3124"],["#3E868F","#EE3124","#255777"],["#255777","#5AB3AA","#F4B41A"],["#EE3124","#3E868F","#255777"]];
+function setBG(i){const p=PAL[i%PAL.length];const b=document.getElementById('bg');
+ b.style.background="linear-gradient(135deg,"+p[1]+" 0%,"+p[0]+" 100%)";
+ b.innerHTML='<div class="blob" style="width:46vw;height:46vw;left:-8vw;top:-10vw;background:'+p[2]+'"></div><div class="blob" style="width:38vw;height:38vw;right:-6vw;bottom:-12vw;background:'+p[0]+';opacity:.85"></div><div class="blob" style="width:26vw;height:26vw;right:24vw;top:-8vw;background:'+p[1]+';opacity:.7"></div>';}
+
+function say(text){const on=document.getElementById('narr').checked;if(!on||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="es-MX";u.rate=1;u.pitch=1;speechSynthesis.speak(u);}catch(e){}}
+function hud(){document.getElementById('pts').textContent=pts;
+ const j=document.getElementById('journey');j.innerHTML="";
+ const steps=CASES.length+1;for(let i=0;i<steps;i++){const n=document.createElement('div');
+  n.className='node'+(i<idxStage()?' done':(i===idxStage()?' active':''));j.appendChild(n);}}
+let stage="intro";
+function idxStage(){if(stage==="intro"||stage==="persona"||stage==="briefing")return 0;if(stage==="case")return idx+ (results[idx].q2!==null?1:0);if(stage==="report")return CASES.length+1;return 0;}
+function anim(){const c=document.getElementById('card');c.style.animation='none';void c.offsetWidth;c.style.animation='';}
+function botSVG(s){return '<svg class="bot" style="width:'+s+'px;height:'+s+'px" viewBox="0 0 64 64"><use href="#robot"/></svg>';}
+
+function render(){hud();const c=document.getElementById('card');
+ if(stage==="intro"){setBG(0);c.innerHTML=
+  '<div class="card-body"><div class="eyebrow">Enterprise AI Implementation Specialist</div>'+
+  '<h1 class="big">La llamada de diagnóstico</h1>'+
+  '<p class="lead">Eres especialista en implementación de IA. Hoy visitas tres organizaciones, y cada una está convencida de que necesita "algo de IA". Tu trabajo no es construir. Tu trabajo es <b>diagnosticar</b>. Lee el ambiente, reúne pistas y toma las decisiones que tomaría un consultor de verdad.</p>'+
+  '<div class="mentor">'+botSVG(54)+'<div><b>Coach de IA de Wawiwa</b><div class="say">Te acompaño en el recorrido. Investiga antes de decidir y recuerda nuestra regla: diagnostica antes de resolver. ¿Empezamos?</div></div></div>'+
+  '</div><div class="foot"><span class="spacer"></span><button class="btn primary" onclick="go(\'persona\')">Comenzar el día →</button></div>';
+  say("La llamada de diagnóstico. Tu trabajo no es construir. Tu trabajo es diagnosticar.");}
+ else if(stage==="persona"){setBG(1);c.innerHTML=
+  '<div class="card-body"><div class="eyebrow">Elige tu estilo</div><h1 class="mid">¿Cómo trabajas tú?</h1>'+
+  '<p class="lead">Elige un perfil de consultor. Le da su toque a la voz de tu coach; la habilidad de diagnóstico es la misma para los tres.</p>'+
+  '<div class="grid3">'+PERSONAS.map(function(p){return '<div class="pick" data-id="'+p.id+'" onclick="pickP(\''+p.id+'\')"><div class="av">'+botSVG(66)+'</div><h3>'+p.name+'</h3><p>'+p.d+'</p></div>';}).join('')+'</div>'+
+  '</div><div class="foot"><span class="spacer"></span><button class="btn primary" id="pgo" disabled onclick="go(\'briefing\')">Continuar →</button></div>';}
+ else if(stage==="briefing"){setBG(2);c.innerHTML=
+  '<div class="card-body"><div class="eyebrow">Instrucciones · tu lente de diagnóstico</div><h1 class="mid">Cinco preguntas, siempre</h1>'+
+  '<div class="mentor">'+botSVG(54)+'<div><b>Coach de IA de Wawiwa</b><div class="say">Antes de tocar una sola herramienta, pasa cada situación por estas cinco. Si te saltas una, construirás muy bien algo equivocado.</div></div></div>'+
+  '<div class="framework">'+FRAMEWORK.map(function(f){return '<div class="fitem"><div class="l">'+f.l+'</div><div class="d">'+f.d+'</div></div>';}).join('')+'</div>'+
+  '<div class="rule">🔑 <b>La regla:</b> diagnostica antes de resolver. Nunca saltes directo a "hagamos un chatbot".</div>'+
+  '</div><div class="foot"><span class="spacer"></span><button class="btn ghost" onclick="go(\'persona\')">← Atrás</button><button class="btn primary" onclick="startCase(0)">Entrar al caso 1 →</button></div>';
+  say("Cinco preguntas, siempre. Diagnostica antes de resolver.");}
+ else if(stage==="case"){renderCase();}
+ else if(stage==="report"){renderReport();}
+ anim();
+}
+
+function renderCase(){const c=document.getElementById('card');const k=CASES[idx];const r=results[idx];setBG(idx%4);
+ c.innerHTML=
+  '<div class="card-body">'+
+   '<div class="scene-top"><span class="badge">Caso '+(idx+1)+' / '+CASES.length+'</span><div><div class="eyebrow">'+k.client+'</div><h1 class="mid">'+k.t+'</h1></div></div>'+
+   '<p class="lead">'+k.scene+'</p>'+
+   '<div class="section-label"><span class="n">1</span> Investiga la escena</div>'+
+   '<div class="hotspots">'+k.hots.map(function(h,i){return '<button class="hot'+(r["h"+i]?' opened':'')+'" onclick="openHot('+i+')">🔍 '+h.l+'</button>';}).join('')+'</div>'+
+   '<div id="clues">'+k.hots.map(function(h,i){return '<div class="clue'+(r["h"+i]?' show':'')+'" id="clue'+i+'">'+h.c+'</div>';}).join('')+'</div>'+
+   '<div class="section-label"><span class="n">2</span> Toma la decisión</div>'+
+   choiceBlock("q1",k.q1,r.q1)+
+   '<div id="q2wrap" style="'+(r.q1!==null?'':'display:none')+'">'+
+     '<div class="section-label"><span class="n">3</span> Afina el diagnóstico</div>'+
+     choiceBlock("q2",k.q2,r.q2)+
+   '</div>'+
+  '</div>'+
+  '<div class="foot">'+
+    '<button class="btn ghost" onclick="prevCase()" '+(idx===0?'disabled':'')+'>← Anterior</button>'+
+    '<span class="spacer"></span>'+
+    '<span style="font-size:13px;color:#5b6b73">Pistas encontradas: '+k.hots.filter(function(h,i){return r["h"+i];}).length+'/'+k.hots.length+'</span>'+
+    '<button class="btn primary" id="next" onclick="nextCase()" '+(r.q2!==null?'':'disabled')+'>'+(idx===CASES.length-1?'Ver reporte de la misión →':'Siguiente caso →')+'</button>'+
+  '</div>';
+ if(r.q1===null) say(k.scene);
+}
+function choiceBlock(key,block,chosen){
+ return '<div class="q"><p style="font-weight:700;color:#243239;margin:0 0 8px">'+block.q+'</p>'+
+  '<div class="choices">'+block.opts.map(function(o,i){
+    var cls="choice";if(chosen!==null){cls+=" lock";if(i===chosen)cls+=" "+(o.q==="good"?"good":o.q==="bad"?"bad":"");}
+    var tag=chosen!==null&&i===chosen?'<span class="tag">'+(o.q==="good"?"✅":"⚠️")+'</span>':'<span class="tag">▷</span>';
+    return '<div class="'+cls+'" onclick="'+(chosen===null?'choose(\''+key+'\','+i+')':'')+'">'+tag+'<span>'+o.t+'</span></div>';}).join('')+'</div>'+
+  '<div class="feedback'+(chosen!==null?' show '+(block.opts[chosen].q==="good"?"good":"bad"):'')+'" id="fb_'+key+'">'+
+    (chosen!==null?feedbackHTML(block.opts[chosen]):'')+'</div></div>';
+}
+function feedbackHTML(o){return '<div class="who">'+botSVG(24)+' Coach de IA de Wawiwa</div>'+o.fb+(o.p>0?'<div class="pts">+'+o.p+' puntos</div>':'<div class="pts" style="color:#8a5a12">Sin puntos, pero ahora ya lo sabes.</div>');}
+
+function openHot(i){const r=results[idx];if(r["h"+i])return;r["h"+i]=true;
+ document.getElementById('clue'+i).classList.add('show');
+ document.querySelectorAll('.hot')[i].classList.add('opened');
+ say(CASES[idx].hots[i].c);}
+function choose(key,i){const r=results[idx];if(r[key]!==null)return;const block=CASES[idx][key];r[key]=i;const o=block.opts[i];
+ pts+=o.p;hud();
+ const fb=document.getElementById('fb_'+key);fb.innerHTML=feedbackHTML(o);fb.classList.add('show',o.q==="good"?"good":"bad");
+ document.querySelectorAll('#card .q').forEach(function(q){});
+ renderCase();
+ if(o.p>0)toast(o.q==="good"?"Diagnóstico certero":"Registrado",o.p);
+ say(o.fb);
+}
+function toast(msg,p){const t=document.getElementById('toast');document.getElementById('tb').textContent=msg;document.getElementById('tp').textContent="+"+p+" puntos";t.classList.add('show');setTimeout(function(){t.classList.remove('show');},1500);}
+
+function renderReport(){const c=document.getElementById('card');setBG(3);
+ var pct=Math.round(pts/MAXP*100);var rank=pct>=85?"Maestro del diagnóstico":pct>=60?"Consultor certero":pct>=35?"Vas por buen camino":"Constructor impaciente";
+ c.innerHTML='<div class="card-body"><div class="eyebrow">Fin del día · Reporte de la misión</div><h1 class="mid">Bitácora de diagnóstico'+(persona?': '+PERSONAS.find(function(p){return p.id===persona;}).name:"")+'</h1>'+
+  '<div class="scoreline"><span class="n">'+pts+'</span><span>de '+MAXP+' puntos · <span class="rank">'+rank+'</span></span></div>'+
+  CASES.map(function(k,i){var r=results[i];return '<div class="rcard"><h3>Caso '+(i+1)+': '+k.t+'</h3>'+
+    '<div class="row"><b>Tu primera acción:</b> '+(r.q1!==null?k.q1.opts[r.q1].t:'(sin respuesta)')+'</div>'+
+    '<div class="row"><b>Tu diagnóstico:</b> '+(r.q2!==null?k.q2.opts[r.q2].t:'(sin respuesta)')+'</div>'+
+    '<div class="row"><b>El problema real:</b> '+k.real+'</div></div>';}).join('')+
+  '</div><div class="foot"><button class="btn ghost" onclick="restart()">↺ Jugar de nuevo</button><span class="spacer"></span>'+
+  '<button class="btn teal" onclick="buildPrint()">⬇ Guardar reporte de la misión (PDF)</button></div>';
+ say("Fin del día. Obtuviste "+pts+" puntos. Rango: "+rank+".");
+}
+function buildPrint(){var html='<div style="font-family:Assistant,sans-serif;padding:30px;color:#0e1c24">'+
+ '<div style="background:#EE3124;color:#fff;display:inline-block;font-family:Roboto;font-weight:900;padding:6px 12px;border-radius:5px">wawiwa</div>'+
+ '<h1 style="color:#255777;font-family:Roboto">Reporte de la misión · La llamada de diagnóstico</h1>'+
+ '<p>Puntuación: <b>'+pts+' / '+MAXP+'</b></p>'+
+ CASES.map(function(k,i){var r=results[i];return '<div style="border:1px solid #E6E6E8;border-radius:10px;padding:12px 16px;margin:10px 0"><h3 style="color:#255777;font-family:Roboto;margin:0 0 6px">Caso '+(i+1)+': '+k.t+'</h3>'+
+  '<p style="margin:4px 0"><b style="color:#3E868F">Primera acción:</b> '+(r.q1!==null?k.q1.opts[r.q1].t:'(sin respuesta)')+'</p>'+
+  '<p style="margin:4px 0"><b style="color:#3E868F">Diagnóstico:</b> '+(r.q2!==null?k.q2.opts[r.q2].t:'(sin respuesta)')+'</p>'+
+  '<p style="margin:4px 0"><b style="color:#3E868F">Problema real:</b> '+k.real+'</p></div>';}).join('')+'</div>';
+ document.getElementById('printcatch').innerHTML=html;window.print();}
+
+function go(s){stage=s;render();}
+function pickP(id){persona=id;render();document.querySelectorAll('.pick').forEach(function(e){e.classList.toggle('sel',e.dataset.id===id);});document.getElementById('pgo').disabled=false;}
+function startCase(i){idx=i;stage="case";render();}
+function nextCase(){if(results[idx].q2===null)return;if(idx<CASES.length-1){idx++;render();}else{stage="report";render();}}
+function prevCase(){if(idx>0){idx--;render();}}
+function restart(){pts=0;idx=0;results.forEach(function(r){r.q1=null;r.q2=null;Object.keys(r).forEach(function(k){if(k[0]==='h')delete r[k];});});stage="intro";render();}
+render();
+</script>
+</body>
+</html>
