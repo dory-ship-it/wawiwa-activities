@@ -20,6 +20,7 @@
 - **בדיקת ה-build ב-GitHub חייבת להיות ירוקה.** אם היא אדומה, כנראה טקסט ארוך מדי, ולא מבצעים Merge.
 
 ## דברים לדעת
+- **רק המצגת "Wawiwa AI for Marketing Training Session 1" מחוברת לכפתור.** אם עודד עדכן מצגת אחרת, מעתיקים את השקפים שהשתנו למצגת הזו ורק אחר כך לוחצים Send to interactive.
 - התפריט Wawiwa מופיע רק בחלון רחב של Chrome. בפעם הראשונה Google מבקש אישור, ובחשבון wiwawatech@gmail.com לוחצים Advanced ← Allow.
 - **מפתח הגישה ל-GitHub (token) פג ב-6 באוקטובר 2027.** לפני התאריך הזה דור מחדש אותו, אחרת הכפתור מפסיק לעבוד.
 - **הקוד והתוכן:** `/Volumes/WawiwaPRO-G40/Wawiwa/GitHub/wawiwa-activities/genai-for-marketing/s1-ai-awareness/`
@@ -42,4 +43,4 @@
 - New deck slides are never added automatically.
 - Do not merge if the build check is red.
 
-**Note:** the GitHub token expires on 6 Oct 2027. The new plugin skill `wawiwa-storyline-to-code` (v0.13.0) documents how to convert the next Storyline block.
+**Only the deck "Wawiwa AI for Marketing Training Session 1" is wired to the button.** If Oded edits another deck, copy his changed slides into this one first. **Note:** the GitHub token expires on 6 Oct 2027. The new plugin skill `wawiwa-storyline-to-code` (v0.13.0) documents how to convert the next Storyline block.
