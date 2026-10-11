@@ -2886,6 +2886,104 @@ body { padding: 8px 12px 12px; }
   .m-simple .m-scene-title, .m-simple .m-scene-title-big { font-size: 1.08rem; }
 }
 
+
+/* ===== Short embed (SS15, SS16 and SS17 check-ins share this block): every
+   screen, with its verdict and the AI coach reply, fits a ~400px Rise embed.
+   Slim header, Back / Next on the step-bar row, a 3-row answer box, and the
+   coach reply capped with its own scroll. ===== */
+/* the card sits at the top of the frame (body.mission-active has no padding);
+   8px stay free under it for its shadow */
+.m-app {
+  height: calc(100vh - 8px); height: calc(100dvh - 8px);
+  padding: 8px 20px 10px;
+  border-radius: 18px;
+}
+.m-topbar { padding: 0 0 6px; gap: 10px; flex-wrap: nowrap; }
+.m-topbar .m-logo { width: 66px; height: 26px; }
+.m-brandline { flex: 1 1 0; min-width: 0; line-height: 1.2; }
+.m-topbar .m-brand-t { font-size: 0.95rem; white-space: normal; max-width: none; }
+.m-topbar .m-brand-s { font-size: 0.8rem; line-height: 1.25; white-space: normal; max-width: none; }
+.m-main { row-gap: 0; }
+
+/* the step bar shares its row with Back / Next */
+.m-simple.m-scene { position: relative; }
+.m-simple .m-steps { padding: 4px 0 0; min-height: 28px; gap: 2px 8px; }
+.m-simple:has(.s-nav) .m-steps { padding-right: 150px; }
+.m-simple .s-nav {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  gap: 16px;
+  justify-content: flex-end;
+}
+.m-simple .s-nav-gap { display: none; }
+.mission-active .m-simple .s-next { padding: 3px 16px; font-size: 0.85rem; min-height: 0; }
+
+/* heading, tip, answer box, actions */
+.m-simple .m-scene-head { padding: 4px 0 0; }
+.m-simple .m-scene-title,
+.m-simple .m-scene-title-big { font-size: 1.05rem; line-height: 1.3; }
+.m-simple .m-scene-body { padding: 4px 0 4px; }
+.m-simple .s-tip { margin: 0 0 6px; font-size: 0.85rem; line-height: 1.35; }
+.m-simple .m-console-steps .answer-input,
+.m-simple .m-console-steps textarea.answer-input {
+  height: 68px;
+  min-height: 0;
+  padding: 6px 10px;
+  font-size: 0.88rem;
+  line-height: 1.3;
+}
+/* SS16's whole-script box: five rows, then it scrolls */
+.m-simple .m-console-steps #input-f_code { height: 96px; font-size: 0.84rem; line-height: 1.4; }
+.m-simple .m-console-steps .btn-row { margin-top: 4px; gap: 16px; }
+.mission-active .m-simple .m-console-steps .btn-row .btn-primary { padding: 5px 16px; font-size: 0.86rem; min-height: 0; }
+
+/* feedback: the verdict word and its why on one line */
+.m-simple .feedback.has-feedback { margin-top: 4px; padding: 0 0 0 10px; font-size: 0.86rem; line-height: 1.4; }
+.m-simple .feedback-head { display: inline; margin: 0 6px 0 0; }
+.m-simple .feedback-head > * { display: inline; }
+.m-simple .feedback .tag-pill { font-size: 0.92rem; }
+.m-simple .feedback-head + .feedback-line { display: inline; }
+.m-simple .feedback-line,
+.m-simple .local-box .routing-line,
+.m-simple .local-box .routing-line * { font-size: 0.86rem; line-height: 1.4; }
+.m-simple .feedback .s-reveal { display: block; margin-top: 0; }
+/* the AI coach reply: "LIVE COACH" leads the text, long replies scroll inside */
+.m-simple .feedback.coach-box {
+  max-height: 5.6em; /* four lines */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.m-simple .coach-box .feedback-title { font-size: 0.72rem; }
+.m-simple .coach-thinking { font-size: 0.86rem; }
+
+/* step 1 small print */
+.m-simple .s-fine { margin: 5px 0 0; font-size: 0.72rem; line-height: 1.35; }
+
+/* the code question */
+.m-simple .s-code { padding: 3px 0; font-size: 0.84rem; }
+.m-simple .s-code-line, .mission-active .m-simple .s-code-line { padding: 1px 12px 1px 0; line-height: 1.4; }
+.m-simple .s-code-n { flex-basis: 32px; padding-right: 12px; }
+
+/* the end screen */
+.m-simple .s-result { padding: 3px 0; font-size: 0.92rem; line-height: 1.45; }
+.m-simple .m-handoff { margin: 8px 0 0; font-size: 0.98rem; }
+.m-simple .s-extras { margin-top: 8px; gap: 4px 18px; }
+.m-simple .s-extras ~ .feedback.coach-box { max-height: 7em; /* five lines */ }
+
+@media (max-width: 760px) {
+  .m-app { padding: 8px 14px 10px; }
+  .m-simple .m-scene-title, .m-simple .m-scene-title-big { font-size: 1rem; }
+}
+/* narrow embeds: the current step keeps its label, the others show the number */
+@media (max-width: 640px) {
+  .m-simple .m-step:not(.m-step-now) .m-step-t { display: none; }
+  .m-simple:has(.s-nav) .m-steps { padding-right: 140px; }
+}
+@media print { .m-app { height: auto; } }
 </style>
 </head>
 <body>
