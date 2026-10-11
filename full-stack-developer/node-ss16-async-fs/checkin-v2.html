@@ -7354,8 +7354,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     var p = el('p', 's-fine');
     var safety = (activity.safety || {}).student_notice;
     if (safety) p.appendChild(el('b', null, safety + ' '));
+    // the short privacy note (same words as the SS17 check-in): one line less
     p.appendChild(document.createTextNode(C.liveOn()
-      ? 'Your work is saved only in this browser. When you ask the live coach, your answer text is scrubbed of emails, phone numbers, long numbers, and keys, then sent anonymously through Wawiwa’s proxy. Your identity is never sent because it is never collected.'
+      ? 'Your work is saved only in this browser. If you ask the AI coach, your text is scrubbed and sent anonymously.'
       : 'Everything you write stays in this browser on this device. This page sends nothing anywhere.'));
     return p;
   }
