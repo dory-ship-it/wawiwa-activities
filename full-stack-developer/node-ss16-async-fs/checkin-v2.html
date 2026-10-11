@@ -3091,6 +3091,11 @@ button.s-code-line.s-code-reveal { outline: 1.5px dashed var(--w-ready); outline
   .m-simple .m-scene-title, .m-simple .m-scene-title-big { font-size: 1.05rem; }
 }
 @media print { .m-app { max-height: none; } }
+/* the card sits in the vertical middle of the Rise frame, never glued to its top */
+body.mission-active { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; padding: 12px 14px; box-sizing: border-box; }
+body.mission-active .container { width: 100%; }
+.m-app { max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); }
+@media print { body.mission-active { display: block; min-height: 0; } .m-app { max-height: none; } }
 </style>
 </head>
 <body>
