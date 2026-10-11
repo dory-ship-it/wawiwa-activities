@@ -6,8 +6,8 @@
 <title>Where Does the Value Come From? · Environment &amp; Configuration</title>
 <!--
   Wawiwa · AI Full-Stack Developer · Node module · Self-study 19. Where does the value come from? (embed in
-  "Load them with dotenv"). Embed height 400. Two rounds: the terminal wins over .env, and reading before
-  .config(). The answer drops into a blank in the terminal. No network calls. Outputs verified on Node 24 with dotenv 18.0.7 (prints
+  "Load them with dotenv"). Two rounds: the terminal wins over .env, and reading before .config(). The card is
+  drawn at 960px and scaled to the frame (Rise keeps the embed ratio); a phone-sized frame shows an Open button. No network calls. Outputs verified on Node 24 with dotenv 18.0.7 (prints
   "injected env (N) from .env"): a variable already set in the terminal is not overwritten, so N drops to 0.
 -->
 <style>
@@ -26,30 +26,32 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:transparent}
-body{color:var(--tx);font-family:'Assistant',sans-serif;font-size:16px;line-height:1.45;overflow:hidden;padding:8px 12px 12px}
+body{color:var(--tx);font-family:'Assistant',sans-serif;font-size:16px;line-height:1.45;overflow:hidden;display:flex;align-items:center;justify-content:center}
 :focus-visible{outline:3px solid var(--teal2);outline-offset:2px;border-radius:8px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
-.app{height:calc(100vh - 20px);max-width:1000px;margin:0 auto;background:var(--bg);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.08);box-shadow:0 14px 36px rgba(0,0,0,.35)}
-.hd{flex:0 0 54px;display:flex;align-items:center;gap:14px;padding:0 24px;border-bottom:1px solid var(--line)}
-.hd svg{width:58px;height:auto}
-.hd .nm{font-family:Roboto,sans-serif;font-weight:700;font-size:16px}
-.dots{margin-left:auto;display:flex;gap:8px}
-.dots i{width:10px;height:10px;border-radius:50%;background:var(--s2);border:1.5px solid #3A5379}
-.dots i.on{background:var(--teal);border-color:var(--teal)}
-.dots i.done{background:var(--teal2);border-color:var(--teal2);opacity:.55}
-.main{flex:1;min-height:0;padding:16px 24px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:22px;align-items:start}
-.main.end{display:block}
+/* the card is drawn at one design size and scaled to whatever frame Rise gives it (fit) */
+.app{width:960px;flex:0 0 auto;background:var(--bg);border-radius:22px;border:1px solid rgba(255,255,255,.08);box-shadow:0 14px 36px rgba(0,0,0,.35);padding:22px 32px 26px;transform-origin:center center;display:flex;flex-direction:column}
+#main{flex:1;display:flex;flex-direction:column;justify-content:center}
+.top{display:flex;align-items:center;gap:12px;color:var(--tx2);font-family:Roboto,sans-serif;font-size:14px}
+.top svg{width:52px;height:auto}
+.top .nm{font-weight:500}
+.prog{margin-left:auto;display:flex;align-items:center;gap:10px;font-weight:500}
+.prog .bars{display:flex;gap:5px}
+.prog .bars i{width:26px;height:5px;border-radius:3px;background:var(--s2)}
+.prog .bars i.on{background:var(--teal2)}
+h2{margin:18px 0 18px;font-family:Roboto,sans-serif;font-weight:700;font-size:28px;line-height:1.2;letter-spacing:-.01em}
+.grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:24px;align-items:start}
 /* panels */
-.pn{background:var(--s1);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:10px;transition:box-shadow .3s,border-color .3s}
-.pn .tt{display:flex;align-items:center;gap:8px;height:30px;padding:0 14px;border-bottom:1px solid var(--line);font-family:Roboto,sans-serif;font-size:12.5px;color:var(--tx2)}
-.pn .tt i{width:8px;height:8px;border-radius:50%;background:#2B4166}
-.pn ol{list-style:none;margin:0;padding:6px 0;font-family:var(--mono);font-size:13px;line-height:1.7;counter-reset:n}
+.pn{background:var(--s1);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:10px}
+.pn .tt{display:flex;align-items:center;gap:7px;height:30px;padding:0 14px;border-bottom:1px solid var(--line);font-family:Roboto,sans-serif;font-size:12.5px;color:var(--tx2)}
+.pn .tt i{width:9px;height:9px;border-radius:50%;background:#2B4166}
+.pn ol{list-style:none;margin:0;padding:6px 0;font-family:var(--mono);font-size:13.5px;line-height:1.75;counter-reset:n}
 .pn li{display:flex;padding:0 12px 0 8px;border-left:3px solid transparent;white-space:pre;transition:background .3s,border-color .3s}
 .pn li::before{counter-increment:n;content:counter(n);width:18px;margin-right:10px;text-align:right;color:#5B7090;flex:0 0 auto}
 .pn li.glow,.tl.glow{background:rgba(127,220,134,.14);border-left-color:var(--ok)}
 .s{color:var(--amber)}.f{color:#8FC6FF}.k{color:#C8A2FF}.n{color:#9be39f}
 .term{background:#0A121F}
-.term .bd{padding:8px 0 10px;font-family:var(--mono);font-size:14px;line-height:1.9}
+.term .bd{padding:8px 0 10px;font-family:var(--mono);font-size:14.5px;line-height:1.95}
 .tl{display:flex;align-items:center;gap:8px;padding:0 16px;border-left:3px solid transparent;white-space:pre;transition:background .3s}
 .tl .p{color:var(--mut)}
 .tl.dim{color:#7d8fa8}
@@ -60,45 +62,70 @@ body{color:var(--tx);font-family:'Assistant',sans-serif;font-size:16px;line-heig
 .blank.ok{border:2px solid var(--ok);background:rgba(127,220,134,.16);color:var(--ok);animation:none}
 .blank.no{border-color:var(--bad);color:var(--bad);animation:none}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(126,211,201,.0)}50%{box-shadow:0 0 0 5px rgba(126,211,201,.18)}}
-/* answer chips */
-.pick{display:flex;align-items:center;gap:10px;margin-top:12px}
-.pick .up{color:var(--teal2);font-size:20px;line-height:1}
-.chips{display:flex;flex-wrap:wrap;gap:10px}
-.chip{min-width:96px;height:44px;padding:0 18px;border:0;border-radius:12px;background:var(--teal);color:#0D1626;font-family:var(--mono);font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 #3d8c84;transition:transform .12s,box-shadow .12s,background .2s}
+/* answer chips, straight under the terminal */
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.chip{min-width:104px;height:46px;padding:0 18px;border:0;border-radius:12px;background:var(--teal);color:#0D1626;font-family:var(--mono);font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 #3d8c84;transition:transform .12s,box-shadow .12s,background .2s,opacity .2s}
 .chip:hover{transform:translateY(-2px);box-shadow:0 6px 0 #3d8c84;background:var(--teal2)}
 .chip:active{transform:translateY(2px);box-shadow:0 1px 0 #3d8c84}
 .chip.no{background:#5a2a2a;color:var(--bad);box-shadow:0 4px 0 #3a1a1a;cursor:default;animation:shake .35s}
-.chip.no::after{content:' ✕'}
 .chip[disabled]{cursor:default}
 .chips.solved .chip:not(.win){opacity:.25}
 .chip.win{background:var(--ok);box-shadow:0 4px 0 #4f9a55}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.why{margin-top:12px;font-size:15.5px;color:var(--tx2);min-height:24px}
+/* verdict and the one next action share a row; the row keeps its height so nothing jumps */
+.fb{display:flex;align-items:center;gap:18px;margin-top:16px;min-height:44px}
+.why{margin:0;flex:1;font-size:16px;color:var(--tx2)}
 .why b{color:var(--tx)}
 .why.no b{color:var(--bad)}.why.ok b{color:var(--ok)}
-.next{margin-top:12px;border:0;border-radius:999px;padding:10px 26px;font-family:Roboto,sans-serif;font-weight:700;font-size:15px;cursor:pointer;background:var(--red);color:#fff}
-.next:hover{background:#EE3124}
+.btn{flex:0 0 auto;border:0;border-radius:999px;padding:11px 28px;font-family:Roboto,sans-serif;font-weight:700;font-size:15px;cursor:pointer;background:var(--red);color:#fff}
+.btn:hover{background:#EE3124}
+.btn.ghost{background:transparent;color:var(--tx);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn.ghost:hover{background:var(--s1)}
 /* end screen: the order */
-.ladder{display:flex;align-items:stretch;gap:10px;margin-top:6px}
-.rung{flex:1;background:var(--s1);border:1.5px solid var(--line);border-radius:14px;padding:14px 14px 16px;text-align:center}
-.rung .no{display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--teal);color:#0D1626;font-weight:700;align-items:center;justify-content:center;font-family:Roboto,sans-serif}
-.rung b{display:block;margin-top:8px;font-family:Roboto,sans-serif;font-size:17px}
-.rung code{display:block;margin-top:6px;font-family:var(--mono);font-size:12.5px;color:var(--amber)}
-.rung.last{border-style:dashed;opacity:.8}.rung.last .no{background:var(--s2);color:var(--tx2)}
-.arr{align-self:center;color:var(--teal2);font-size:22px}
-.endh{font-family:Roboto,sans-serif;font-weight:700;font-size:19px;margin:4px 0 14px}
-.restart{margin-top:16px;background:none;border:0;padding:0;color:var(--tx2);font:inherit;font-size:14px;text-decoration:underline;cursor:pointer}
+.ladder{display:flex;align-items:stretch;gap:12px}
+.rung{flex:1;background:var(--s1);border:1.5px solid var(--line);border-radius:14px;padding:16px 14px 18px;text-align:center}
+.rung .no{display:inline-flex;width:30px;height:30px;border-radius:50%;background:var(--teal);color:#0D1626;font-weight:700;align-items:center;justify-content:center;font-family:Roboto,sans-serif}
+.rung b{display:block;margin-top:10px;font-family:Roboto,sans-serif;font-size:18px}
+.rung code{display:block;margin-top:6px;font-family:var(--mono);font-size:13px;color:var(--amber)}
+.arr{align-self:center;color:var(--teal2);font-size:24px}
+.none{margin:14px 0 0;color:var(--tx2);font-size:15.5px}
+.none code{font-family:var(--mono);color:var(--tx)}
+.endrow{display:flex;align-items:center;gap:16px;margin-top:22px}
+.endrow .go{margin-left:auto;font-family:Roboto,sans-serif;font-weight:700;font-size:16px;color:var(--teal2)}
+/* a phone-sized frame is too small to work in: show one button that opens the workbook full screen */
+.launch{display:none;width:100%;height:100%;align-items:center;justify-content:center;padding:12px}
+.launch .card{width:100%;max-width:420px;background:var(--bg);border-radius:18px;border:1px solid rgba(255,255,255,.08);padding:16px 18px;display:flex;align-items:center;gap:14px}
+.launch .t{flex:1;min-width:0}
+.launch b{display:block;font-family:Roboto,sans-serif;font-size:16px;line-height:1.25}
+.launch span{display:block;color:var(--tx2);font-size:13.5px;margin-top:2px}
+.launch a{flex:0 0 auto;text-decoration:none;font-size:14px;padding:10px 18px}
+/* opened full screen on a phone: one column */
+body.stack .app{width:400px;padding:18px 20px 22px}
+body.stack h2{font-size:23px;margin:14px 0}
+body.stack .top .nm{display:none}
+body.stack .grid{grid-template-columns:1fr;gap:6px}
+body.stack .chip{min-width:0;flex:1}
+body.stack .fb{flex-wrap:wrap;gap:12px}
+body.stack .ladder{flex-direction:column;gap:8px}
+body.stack .arr{display:none}
+body.stack .rung{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 14px}
+body.stack .rung b{margin:0;flex:1}
+body.stack .rung code{margin:0}
+body.stack .endrow{flex-direction:column-reverse;align-items:flex-start}
+body.stack .endrow .go{margin-left:0}
+body.small .app{display:none}
+body.small .launch{display:flex}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-@media (max-width:720px){.main{grid-template-columns:1fr}.hd .nm{font-size:15px}.ladder{flex-wrap:wrap}.arr{display:none}}
 </style>
 </head>
 <body>
-<div class="app">
-  <header class="hd"><svg viewBox="0 0 120 48" width="100" height="40" role="img" aria-label="wawiwa"><rect x="0" y="0" width="120" height="34" rx="2" fill="#EE3124"/><path d="M26 33 L46 33 L26 47 Z" fill="#EE3124"/><text x="60" y="25" text-anchor="middle" font-family="Roboto, sans-serif" font-weight="800" font-size="23" fill="#fff" letter-spacing="0">wawiwa</text></svg>
-    <div class="nm">Where does the value come from?</div>
-    <div class="dots" id="dots" aria-hidden="true"><i></i><i></i><i></i></div></header>
-  <main class="main" id="main" tabindex="-1"></main>
+<div class="app" id="app">
+  <div class="top"><svg viewBox="0 0 120 48" width="100" height="40" role="img" aria-label="wawiwa"><rect x="0" y="0" width="120" height="34" rx="2" fill="#EE3124"/><path d="M26 33 L46 33 L26 47 Z" fill="#EE3124"/><text x="60" y="25" text-anchor="middle" font-family="Roboto, sans-serif" font-weight="800" font-size="23" fill="#fff" letter-spacing="0">wawiwa</text></svg>
+    <span class="nm">Where does the value come from?</span>
+    <span class="prog" id="prog"></span></div>
+  <main id="main" tabindex="-1"></main>
 </div>
+<div class="launch"><div class="card"><div class="t"><b>Where does the value come from?</b><span>Two quick rounds</span></div><a class="btn" href="" target="_blank" rel="noopener" id="open">Open</a></div></div>
 <p class="sr" id="live" aria-live="polite"></p>
 <script>
 (function(){
@@ -112,40 +139,42 @@ function hl(l){var h=esc(l);
   h=h.replace(/\b(3000)\b/g,'<span class="n">$1</span>');
   return h;}
 /* Two rounds, real output (Node 24, dotenv 18.0.7).
-   term: terminal lines before the run; out: output lines, "?" marks the blank; glow: what lights up when solved */
+   q: the one-line task; term: terminal lines before the run; out: output lines, "?" marks the blank; glow: what lights up when solved */
 var R=[
- {env:'PORT=5000', code:['require("dotenv").config();','const port = process.env.PORT || 3000;','console.log("Port:", port);'],
-  term:[['$env:PORT=4000','earlier']], out:[['dotenv','◇ injected env (0) from .env'],['ans','Port: ','?']],
+ {q:'Which port does it print?', env:'PORT=5000', code:['require("dotenv").config();','const port = process.env.PORT || 3000;','console.log("Port:", port);'],
+  term:[['$env:PORT=4000','set earlier']], out:[['dotenv','◇ injected env (0) from .env'],['ans','Port: ','?']],
   chips:['5000','4000','3000'], ans:'4000', glow:{term:0},
-  ok:'<b>Right.</b> PORT was already set in the terminal, so dotenv left it alone: <b>injected env (0)</b>.',
+  ok:'<b>Right.</b> PORT was already set in the terminal, so dotenv left it alone.',
   no:'<b>Not this one.</b> Look at what the terminal set before the run.'},
- {env:'PORT=5000', code:['console.log(process.env.PORT);','require("dotenv").config();','console.log(process.env.PORT);'],
+ {q:'What does line 1 print?', env:'PORT=5000', code:['console.log(process.env.PORT);','require("dotenv").config();','console.log(process.env.PORT);'],
   term:[], out:[['ans','','?','line 1'],['dotenv','◇ injected env (1) from .env'],['plain','5000','','line 3']],
   chips:['5000','undefined','3000'], ans:'undefined', glow:{code:0},
-  ok:'<b>Right.</b> Line 1 runs before <b>.config()</b>, so process.env has no PORT yet.',
+  ok:'<b>Right.</b> Line 1 runs before <b>.config()</b>, so there is no PORT yet.',
   no:'<b>Not this one.</b> Line 1 runs before line 2 loads .env.'}
 ];
 var cur=0, solved=false, wrong={};
 function say(t){$('live').textContent='';setTimeout(function(){$('live').textContent=t.replace(/<[^>]+>/g,'');},40);}
-function dots(){var d=$('dots').children;for(var i=0;i<d.length;i++)d[i].className=i===cur?'on':(i<cur?'done':'');}
+function prog(){
+  if(cur>=R.length){$('prog').innerHTML='';return;}
+  var b='';for(var i=0;i<R.length;i++)b+='<i'+(i<=cur?' class="on"':'')+'></i>';
+  $('prog').innerHTML='<span class="bars" aria-hidden="true">'+b+'</span>'+(cur+1)+' of '+R.length;
+}
 function render(){
-  dots(); var m=$('main');
+  prog(); var m=$('main');
   if(cur>=R.length){
-    m.className='main end';
-    m.innerHTML='<p class="endh">The first place that has PORT wins:</p><div class="ladder">'+
+    m.innerHTML='<h2>The first place that has PORT wins.</h2><div class="ladder">'+
       '<div class="rung"><span class="no">1</span><b>The terminal</b><code>$env:PORT=4000</code></div><span class="arr">&rsaquo;</span>'+
       '<div class="rung"><span class="no">2</span><b>.env</b><code>after .config()</code></div><span class="arr">&rsaquo;</span>'+
-      '<div class="rung"><span class="no">3</span><b>Your fallback</b><code>|| 3000</code></div><span class="arr">&rsaquo;</span>'+
-      '<div class="rung last"><span class="no">&ndash;</span><b>undefined</b><code>nothing set</code></div></div>'+
-      '<button class="restart" type="button" id="again">Start over</button>';
-    $('again').onclick=function(){cur=0;solved=false;wrong={};render();};
-    say('Done. The first place that has PORT wins: the terminal, then .env after config, then your fallback.');
-    return;
+      '<div class="rung"><span class="no">3</span><b>Your fallback</b><code>|| 3000</code></div></div>'+
+      '<p class="none">None of them? Then it is <code>undefined</code>.</p>'+
+      '<div class="endrow"><button class="btn ghost" type="button" id="again">Start over</button><span class="go">'+(window.top===window?'Done. Close this tab to go back to the lesson.':'Done. Continue the lesson below &darr;')+'</span></div>';
+    $('again').onclick=function(){cur=0;solved=false;wrong={};render();$('main').focus();};
+    say('Done. The first place that has PORT wins: the terminal, then .env after config, then your fallback. Continue the lesson below.');
+    fit(); return;
   }
-  m.className='main';
   var r=R[cur];
-  var files='<div class="pn"><div class="tt"><i></i>.env</div><ol><li><span>'+esc(r.env)+'</span></li></ol></div>'+
-    '<div class="pn"><div class="tt"><i></i>index.js</div><ol>'+r.code.map(function(l,i){return '<li class="'+(solved&&r.glow.code===i?'glow':'')+'"><span>'+hl(l)+'</span></li>';}).join('')+'</ol></div>';
+  var files='<div class="pn"><div class="tt">.env</div><ol><li><span>'+esc(r.env)+'</span></li></ol></div>'+
+    '<div class="pn"><div class="tt">index.js</div><ol>'+r.code.map(function(l,i){return '<li class="'+(solved&&r.glow.code===i?'glow':'')+'"><span>'+hl(l)+'</span></li>';}).join('')+'</ol></div>';
   var t='';
   r.term.forEach(function(x,i){t+='<div class="tl'+(solved&&r.glow.term===i?' glow':'')+'"><span class="p">PS&gt;</span> '+esc(x[0])+(x[1]?'<span class="tag">'+x[1]+'</span>':'')+'</div>';});
   t+='<div class="tl"><span class="p">PS&gt;</span> node index.js</div>';
@@ -155,21 +184,35 @@ function render(){
     var b=solved?'<span class="blank ok">'+esc(r.ans)+'</span>':'<span class="blank'+(wrong.last?' no':'')+'" aria-label="blank">?</span>';
     t+='<div class="tl">'+esc(o[1])+b+(o[3]?'<span class="tag ok">'+o[3]+'</span>':'')+'</div>';
   });
-  var chips='<div class="pick"><span class="up" aria-hidden="true">&uarr;</span><div class="chips'+(solved?' solved':'')+'" role="group" aria-label="Pick the value that prints">'+
-    r.chips.map(function(c){var cls=solved&&c===r.ans?' win':(wrong[c]?' no':'');return '<button class="chip'+cls+'" type="button" data-v="'+c+'"'+(solved||wrong[c]?' disabled':'')+'>'+esc(c)+'</button>';}).join('')+'</div></div>';
-  var why=solved?'<p class="why ok">'+r.ok+'</p><button class="next" type="button" id="go">'+(cur<R.length-1?'Next':'See the rule')+'</button>':
+  var chips='<div class="chips'+(solved?' solved':'')+'" role="group" aria-label="'+esc(r.q)+'">'+
+    r.chips.map(function(c){var cls=solved&&c===r.ans?' win':(wrong[c]?' no':'');return '<button class="chip'+cls+'" type="button" data-v="'+c+'"'+(solved||wrong[c]?' disabled':'')+'>'+esc(c)+'</button>';}).join('')+'</div>';
+  var fb=solved?'<p class="why ok">'+r.ok+'</p><button class="btn" type="button" id="go">'+(cur<R.length-1?'Next':'See the rule')+'</button>':
     (wrong.last?'<p class="why no">'+r.no+'</p>':'');
-  m.innerHTML='<div>'+files+'</div><div><div class="pn term"><div class="tt"><i></i><i></i><i></i>Terminal</div><div class="bd">'+t+'</div></div>'+chips+why+'</div>';
+  m.innerHTML='<h2>'+r.q+'</h2><div class="grid"><div>'+files+'</div><div><div class="pn term"><div class="tt"><i></i><i></i><i></i>&nbsp;Terminal</div><div class="bd">'+t+'</div></div>'+chips+'<div class="fb">'+fb+'</div></div></div>';
   Array.prototype.forEach.call(m.querySelectorAll('.chip:not([disabled])'),function(b){b.onclick=function(){
     var v=b.getAttribute('data-v');
     if(v===r.ans){solved=true;wrong={};render();say(r.ok);$('go').focus();}
     else{wrong[v]=1;wrong.last=v;render();say(r.no);var n=m.querySelector('.chip:not([disabled])');if(n)n.focus();}
   };});
   if(solved) $('go').onclick=function(){cur++;solved=false;wrong={};render();$('main').focus();};
+  fit();
 }
+/* scale the card to the frame: Rise keeps the embed's aspect ratio, so the frame grows and shrinks with the column.
+   The card keeps the height of its tallest screen so it never jumps between screens. */
+var tallest=0;
+function fit(){
+  var a=$('app'), bc=document.body.classList, stack=innerWidth<700&&innerHeight>innerWidth;
+  bc.toggle('small',!stack&&(innerWidth<560||innerHeight<260));
+  if(bc.contains('small')) return;
+  if(stack!==bc.contains('stack')){bc.toggle('stack',stack);tallest=0;}
+  a.style.transform=''; a.style.minHeight='';
+  tallest=Math.max(tallest,a.offsetHeight); a.style.minHeight=tallest+'px';
+  var s=Math.min(1.25,(innerWidth-24)/a.offsetWidth,(innerHeight-20)/tallest);
+  a.style.transform='scale('+s.toFixed(3)+')';
+}
+$('open').href=location.href;
 render();
-function fit(){document.body.style.zoom='';var z=Math.min(1,innerWidth/640,innerHeight/400);document.body.style.zoom=z<1?z.toFixed(3):'';}
-addEventListener('resize',fit);fit();
+addEventListener('resize',fit);
 })();
 </script>
 </body>
