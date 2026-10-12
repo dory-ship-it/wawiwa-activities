@@ -120,13 +120,13 @@ var $=function(id){return document.getElementById(id);};
 function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 /* The seed data from the lesson (seed.js). Results match a real run on MongoDB 8.2.6, 2026-10-12. */
 var DATA=[
- {name:'Daniela',age:21,city:'Santiago',isActive:true,score:87},
- {name:'Omar',age:17,city:'Santiago',isActive:true,score:72},
- {name:'Mariana',age:22,city:'Santiago',isActive:false,score:78},
- {name:'Natalia',age:24,city:'Bogotá',isActive:true,score:91},
- {name:'Pablo',age:19,city:'Bogotá',isActive:false,score:65},
- {name:'Luis',age:16,city:'Lima',isActive:true,score:84}];
-var CLS={'Santiago':'ta','Bogotá':'hf','Lima':'je'};
+ {name:'Anna',age:21,city:'London',isActive:true,score:87},
+ {name:'Ben',age:17,city:'London',isActive:true,score:72},
+ {name:'Clara',age:22,city:'London',isActive:false,score:78},
+ {name:'Daniel',age:24,city:'Paris',isActive:true,score:91},
+ {name:'Emma',age:19,city:'Paris',isActive:false,score:65},
+ {name:'Leo',age:16,city:'Berlin',isActive:true,score:84}];
+var CLS={'London':'ta','Paris':'hf','Berlin':'je'};
 /* stages: label (shown), run (a tiny aggregation engine: just what these stages need) */
 var S={
  active:{label:'<b>$match</b> { isActive: true }', run:function(d){return d.filter(function(x){return x.isActive===true;});}},
@@ -137,16 +137,16 @@ var S={
 };
 var R=[
  {goal:'Estudiantes activos por ciudad', hint:'Cuenta solo los estudiantes activos, un resultado por ciudad.', stages:['group','active'],
-  ok:function(o){return same(o,[['Santiago',2],['Bogotá',1],['Lima',1]],false);},
+  ok:function(o){return same(o,[['London',2],['Paris',1],['Berlin',1]],false);},
   why:function(p){return p[0]==='group'?'<b>Todavía no.</b> Después de $group, los documents son ciudades. No tienen el campo isActive, así que $match no encuentra nada. Filtra primero.':'<b>Todavía no.</b> Usa los dos stages: filtra y luego agrupa.';},
   yes:'<b>Correcto.</b> $match conserva los 4 estudiantes activos y luego $group los cuenta por ciudad.', short:'$match, luego $group'},
  {goal:'Solo ciudades con 2 o más estudiantes', hint:'Cuenta todos los estudiantes por ciudad y luego conserva las ciudades grandes.', stages:['count2','group'],
-  ok:function(o){return same(o,[['Santiago',3],['Bogotá',2]],false);},
+  ok:function(o){return same(o,[['London',3],['Paris',2]],false);},
   why:function(p){return p[0]==='count2'?'<b>Vacío.</b> Antes de $group no existe el campo count, así que $match no conserva nada y $group no recibe nada.':'<b>Todavía no.</b> Usa los dos stages: cuenta por ciudad y luego filtra los conteos.';},
   yes:'<b>Correcto.</b> $group crea el conteo, y solo entonces $match puede filtrar por él.', short:'$group, luego $match sobre count'},
  {goal:'Las 3 ciudades con más estudiantes', hint:'La ciudad más grande primero. Tres ciudades como máximo.', stages:['limit','sort','group'],
-  ok:function(o){return same(o,[['Santiago',3],['Bogotá',2],['Lima',1]],true);},
-  why:function(p,o){ if(p[0]==='limit') return '<b>Todavía no.</b> Si $limit va primero, conserva solo los 3 primeros estudiantes, todos de Santiago. Cuenta primero y luego recorta.';
+  ok:function(o){return same(o,[['London',3],['Paris',2],['Berlin',1]],true);},
+  why:function(p,o){ if(p[0]==='limit') return '<b>Todavía no.</b> Si $limit va primero, conserva solo los 3 primeros estudiantes, todos de London. Cuenta primero y luego recorta.';
     if(p.indexOf('sort')<p.indexOf('group')) return '<b>Todavía no.</b> $sort se ejecutó antes de que existiera un conteo para ordenar. Ordena las ciudades después de $group.';
     return '<b>Todavía no.</b> Usa los tres: cuenta, ordena y luego limita.';},
   yes:'<b>Correcto.</b> Cuenta por ciudad, ordena los conteos de mayor a menor y luego conserva las 3 primeras.', short:'$group, $sort, luego $limit'}
@@ -160,7 +160,7 @@ function prog(){ if(cur>=R.length){$('prog').innerHTML='';return;}
   var b='';for(var i=0;i<R.length;i++)b+='<i'+(i<=cur?' class="on"':'')+'></i>';
   $('prog').innerHTML='<span class="bars" aria-hidden="true">'+b+'</span>'+(cur+1)+' de '+R.length; }
 function output(){ var d=DATA.slice(); pipe.forEach(function(k){d=S[k].run(d);}); return d; }
-function docHtml(x){ if('name' in x) return '<div class="doc '+(CLS[x.city]||'')+'"><b>'+esc(x.name)+'</b> '+esc(x.city)+(x.isActive?'':' · inactivo')+'</div>';
+function docHtml(x){ if('name' in x) return '<div class="doc '+(CLS[x.city]||'')+'"><b>'+esc(x.name)+'</b> '+esc(x.city)+(x.isActive?'':' · inactiva')+'</div>';
   return '<div class="doc '+(CLS[x._id]||'')+'">{ _id: <b>"'+esc(x._id)+'"</b>, count: <b>'+x.count+'</b> }</div>'; }
 function render(){
   prog(); var m=$('main');
