@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Frozen Server · Synchronous fs</title>
+<title>Servidor congelado · fs síncrono</title>
 <!--
   Wawiwa · AI Full-Stack Developer · Node module · Self-study 15 (Synchronous File System Operations)
   Frozen Server (Lesson 3 embed). Covers Word section 9: "Sync operations: Block the entire Node process.
@@ -193,8 +193,8 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:19px;line-height:
 <body>
 <div class="app">
   <header class="hd"><svg viewBox="0 0 120 48" width="100" height="40" role="img" aria-label="wawiwa"><rect x="0" y="0" width="120" height="34" rx="2" fill="#EE3124"/><path d="M26 33 L46 33 L26 47 Z" fill="#EE3124"/><text x="60" y="25" text-anchor="middle" font-family="Roboto, sans-serif" font-weight="800" font-size="23" fill="#fff" letter-spacing="0">wawiwa</text></svg>
-    <div class="nm">Frozen Server<span class="lead">Guess what sync file calls do to a busy server.</span></div>
-    <nav class="steps" id="steps" aria-label="Steps"></nav></header>
+    <div class="nm">Servidor congelado<span class="lead">Adivina qué hacen las llamadas sync a un servidor ocupado.</span></div>
+    <nav class="steps" id="steps" aria-label="Pasos"></nav></header>
   <main class="main" id="main" tabindex="-1"></main>
   <footer class="ft"><span class="pg" id="pg"></span><div class="bar" aria-hidden="true"><i id="barI"></i></div></footer>
 </div>
@@ -210,28 +210,28 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:19px;line-height:
   var NORMAL = {duration:6, events:[]};
   /* kind 'marker': drag a marker to the longest wait. kind 'sketch': pick one of three line sketches [time, waiting]. */
   var EXPERIMENTS = [
-    {h1:'One sync file read, mid-traffic. Guess, then click Run.',
-     setup:'One request runs <code>fs.readFileSync</code> on a big file. The read takes 3 seconds.',
-     q:'Drag the marker to guess the longest wait.',
+    {h1:'Una lectura síncrona de archivo en pleno tráfico. Adivina y luego haz clic en Ejecutar.',
+     setup:'Una request ejecuta <code>fs.readFileSync</code> sobre un archivo grande. La lectura tarda 3 segundos.',
+     q:'Arrastra el marcador para adivinar la espera más larga.',
      kind:'marker', max:6,
-     run:{duration:9, events:[{at:2, label:'readFileSync(...)', dur:3}]}, zone:{from:2, to:5, cls:'ice', label:'sync read'},
-     why:'The read froze all of Node for 3 seconds, so no request was answered until it ended.'},
-    {h1:'A sync write on every request. Guess, then click Run.',
-     setup:'Every request writes a log line with <code>fs.appendFileSync</code>. Each write takes a little longer than the gap between requests.',
-     q:'Pick the waiting line you expect.',
+     run:{duration:9, events:[{at:2, label:'readFileSync(...)', dur:3}]}, zone:{from:2, to:5, cls:'ice', label:'lectura síncrona'},
+     why:'La lectura congeló todo Node durante 3 segundos, así que no se respondió ninguna request hasta que terminó.'},
+    {h1:'Una escritura síncrona en cada request. Adivina y luego haz clic en Ejecutar.',
+     setup:'Cada request escribe una línea de log con <code>fs.appendFileSync</code>. Cada escritura tarda un poco más que el intervalo entre requests.',
+     q:'Elige cómo crees que se verá la cola.',
      kind:'sketch',
-     opts:[{c:'Stays flat', p:[[0,1],[9,1]]},{c:'Settles', p:[[0,0],[1.5,7],[3,9],[9,9]]},{c:'Keeps growing', p:[[0,0],[9,34]], ok:true}],
+     opts:[{c:'Se mantiene plana', p:[[0,1],[9,1]]},{c:'Se estabiliza', p:[[0,0],[1.5,7],[3,9],[9,9]]},{c:'Sigue creciendo', p:[[0,0],[9,34]], ok:true}],
      run:{duration:9, perRequestSync:0.12},
-     why:'Each write freezes Node for longer than the gap between requests, so the line keeps growing.'},
-    {h1:'One sync call at startup. Guess, then click Run.',
-     setup:'Before the server opens, the startup script runs <code>fs.mkdirSync("logs")</code> once.',
-     q:'Pick the waiting line you expect.',
+     why:'Cada escritura congela Node por más tiempo que el intervalo entre requests, así que la cola sigue creciendo.'},
+    {h1:'Una llamada síncrona al arrancar. Adivina y luego haz clic en Ejecutar.',
+     setup:'Antes de que el servidor abra, el script de arranque ejecuta <code>fs.mkdirSync("logs")</code> una vez.',
+     q:'Elige cómo crees que se verá la cola.',
      kind:'sketch',
-     opts:[{c:'Stays low', p:[[1.5,1],[7,1]], ok:true},{c:'First users wait', p:[[1.5,0],[1.7,16],[3.6,1],[7,1]]},{c:'Keeps growing', p:[[1.5,0],[7,30]]}],
-     run:{duration:7, startup:1.5}, zone:{from:0, to:1.5, cls:'gray', label:'startup'},
-     why:'The sync call finished before the server opened, so no request had to wait.'}
+     opts:[{c:'Se mantiene baja', p:[[1.5,1],[7,1]], ok:true},{c:'Los primeros usuarios esperan', p:[[1.5,0],[1.7,16],[3.6,1],[7,1]]},{c:'Sigue creciendo', p:[[1.5,0],[7,30]]}],
+     run:{duration:7, startup:1.5}, zone:{from:0, to:1.5, cls:'gray', label:'arranque'},
+     why:'La llamada síncrona terminó antes de que el servidor abriera, así que ninguna request tuvo que esperar.'}
   ];
-  var STEPS = ['Watch the server','Guess what happens','What it means'];
+  var STEPS = ['Observa el servidor','Adivina qué pasa','Qué significa'];
   var PAGES = EXPERIMENTS.length + 2;
   var screen, correct, sim, raf, results = [];
 
@@ -276,15 +276,15 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:19px;line-height:
     if (!$('node')) return;
     var busy = s.t < s.busyUntil && (s.busyKind || (s.cfg.perRequestSync && s.current!==null));
     $('node').className = 'node'+(!s.open?' off':'')+(busy?' busy':'');
-    $('nodeState').textContent = busy ? 'Frozen' : (s.open ? (s.current!==null ? 'Working' : 'Node') : 'Starting');
-    $('nodeSub').textContent = busy ? (s.busyKind || 'appendFileSync') : (s.open ? (s.current!==null ? 'answering' : 'idle') : 'not open yet');
+    $('nodeState').textContent = busy ? 'Congelado' : (s.open ? (s.current!==null ? 'Trabajando' : 'Node') : 'Arrancando');
+    $('nodeSub').textContent = busy ? (s.busyKind || 'appendFileSync') : (s.open ? (s.current!==null ? 'respondiendo' : 'inactivo') : 'aún no abre');
     var chip = innerWidth<=860 ? 10 : 12;
     var waits = s.queue.map(function(a){ return s.t-a; });
     $('queue').innerHTML = chipsHtml(s.queue.length, '', chipsFit($('queue'),chip), waits);
     $('done').innerHTML = chipsHtml(s.done, ' out', chipsFit($('done'),chip));
     var q=s.queue.length;
     $('vWait').textContent=q; $('vWait').className=q>20?'bad':(q>5?'warn':'');
-    $('vLong').textContent=s.longest.toFixed(1)+' sec'; $('vLong').className=s.longest>2?'bad':(s.longest>0.8?'warn':'');
+    $('vLong').textContent=s.longest.toFixed(1)+' seg'; $('vLong').className=s.longest>2?'bad':(s.longest>0.8?'warn':'');
     $('actual').setAttribute('points', pts(s.samples, s.cfg.duration));
   }
   function runSim(cfg, done){
@@ -296,13 +296,13 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:19px;line-height:
   }
   function stage(cfg, zone, guessLeg){
     var z = zone ? '<div class="zone '+zone.cls+'" style="left:'+(100*zone.from/cfg.duration)+'%;width:'+(100*(zone.to-zone.from)/cfg.duration)+'%">'+zone.label+'</div>' : '';
-    return '<div class="stage" aria-label="Simulated CampusHub server">'+
-      '<div class="lanes" aria-hidden="true"><div class="lane"><h3>Waiting</h3><div class="chips" id="queue"></div></div>'+
-      '<div class="core"><div class="node" id="node"><svg class="frost" viewBox="0 0 110 110" aria-hidden="true"><g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M55 3v14M55 93v14M3 55h14M93 55h14M18 18l10 10M82 82l10 10M92 18L82 28M28 82L18 92"/></g></svg><div><b id="nodeState">Node</b><span id="nodeSub">idle</span></div></div></div>'+
-      '<div class="lane"><h3>Answered</h3><div class="chips" id="done"></div></div></div>'+
-      '<div class="gr"><div class="gh"><span class="t">Waiting line<span class="ot"> over time</span></span><span class="nums">Waiting <b id="vWait">0</b> &middot; Longest wait <b id="vLong">0.0 sec</b></span></div>'+
+    return '<div class="stage" aria-label="Servidor de CampusHub simulado">'+
+      '<div class="lanes" aria-hidden="true"><div class="lane"><h3>En espera</h3><div class="chips" id="queue"></div></div>'+
+      '<div class="core"><div class="node" id="node"><svg class="frost" viewBox="0 0 110 110" aria-hidden="true"><g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"><path d="M55 3v14M55 93v14M3 55h14M93 55h14M18 18l10 10M82 82l10 10M92 18L82 28M28 82L18 92"/></g></svg><div><b id="nodeState">Node</b><span id="nodeSub">inactivo</span></div></div></div>'+
+      '<div class="lane"><h3>Respondidas</h3><div class="chips" id="done"></div></div></div>'+
+      '<div class="gr"><div class="gh"><span class="t">Cola<span class="ot"> en el tiempo</span></span><span class="nums">En espera <b id="vWait">0</b> &middot; Espera máx. <b id="vLong">0.0 seg</b></span></div>'+
         '<div class="plot" aria-hidden="true">'+z+'<svg viewBox="0 0 100 40" preserveAspectRatio="none"><polyline id="guess" points="" fill="none" stroke="#C9D6E4" stroke-width="2" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/><polyline id="actual" points="" fill="none" stroke="#7ED3C9" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg></div>'+
-        '<div class="leg" aria-hidden="true"><span><i></i>What happened</span>'+(guessLeg?'<span><i class="gs"></i>Your guess</span>':'')+'</div>'+
+        '<div class="leg" aria-hidden="true"><span><i></i>Lo que pasó</span>'+(guessLeg?'<span><i class="gs"></i>Tu predicción</span>':'')+'</div>'+
       '</div>'+
     '</div>';
   }
@@ -323,25 +323,25 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:19px;line-height:
   function head(label, title){ return '<p class="ey">'+label+'</p><h1 class="ins">'+title+'</h1>'; }
 
   function watch(){
-    $('main').innerHTML=head('Step 1 &middot; Watch the server','CampusHub on a normal day. Watch, then click Next.')+
+    $('main').innerHTML=head('Paso 1 &middot; Observa el servidor','CampusHub en un día normal. Observa y luego haz clic en Siguiente.')+
       '<div class="g2"><div>'+
-      '<p class="sub">Node handles one thing at a time. Each request is quick, so the line stays short. Next, you guess what <b>sync</b> (synchronous) file calls do. A sync call makes Node wait for the file task before it does anything else.</p>'+
+      '<p class="sub">Node atiende una cosa a la vez. Cada request es rápida, así que la cola se mantiene corta. Después, vas a adivinar qué hacen las llamadas <b>sync</b> (síncronas) de archivos. Una llamada síncrona hace que Node espere a que termine la tarea del archivo antes de hacer cualquier otra cosa.</p>'+
       '<ul class="key">'+
-        '<li><span class="chip"></span>A waiting request. Orange and red: waiting too long.</li>'+
-        '<li><span class="dot" style="background:#3E9148"></span>Green: Node is answering.</li>'+
-        '<li><span class="dot" style="background:#8FC6EA;box-shadow:0 0 0 3px rgba(143,198,234,.22)"></span>Ice blue: a sync call froze Node.</li>'+
+        '<li><span class="chip"></span>Una request en espera. Naranja y rojo: lleva demasiado tiempo esperando.</li>'+
+        '<li><span class="dot" style="background:#3E9148"></span>Verde: Node está respondiendo.</li>'+
+        '<li><span class="dot" style="background:#8FC6EA;box-shadow:0 0 0 3px rgba(143,198,234,.22)"></span>Azul hielo: una llamada síncrona congeló Node.</li>'+
       '</ul>'+
-      '<div class="act"><button class="btn" id="primary" type="button">Next</button><button class="restart" id="again" type="button">Watch again</button></div>'+
-      '</div><div>'+stage(NORMAL, null, false)+'<p class="simnote">Simulation. Speeds and numbers are illustrative.</p></div></div>';
+      '<div class="act"><button class="btn" id="primary" type="button">Siguiente</button><button class="restart" id="again" type="button">Ver de nuevo</button></div>'+
+      '</div><div>'+stage(NORMAL, null, false)+'<p class="simnote">Simulación. Las velocidades y los números son ilustrativos.</p></div></div>';
     $('primary').onclick=function(){ show(1, true); };
     $('again').onclick=function(){ runSim(NORMAL, function(){}); };
-    runSim(NORMAL, function(){ $('announce').textContent='Normal day: '+sim.done+' answered, longest wait '+sim.longest.toFixed(1)+' seconds.'; });
+    runSim(NORMAL, function(){ $('announce').textContent='Día normal: '+sim.done+' respondidas, espera más larga '+sim.longest.toFixed(1)+' segundos.'; });
   }
 
   function markerHtml(e){
     var ticks=''; for (var v=0; v<=e.max; v++) ticks+='<span class="tk" style="left:'+(100*v/e.max)+'%">'+v+'</span>';
-    return '<div class="mk"><div class="lbl"><span>Your guess: <b id="gv">drag the marker</b></span><span class="res" id="rv"></span></div>'+
-      '<div class="trk unset" id="trk">'+ticks+'<input type="range" id="guessIn" min="0" max="'+e.max+'" step="0.5" value="0" aria-label="Your guess for the longest wait, in seconds" aria-valuetext="0 seconds"></div></div>';
+    return '<div class="mk"><div class="lbl"><span>Tu predicción: <b id="gv">arrastra el marcador</b></span><span class="res" id="rv"></span></div>'+
+      '<div class="trk unset" id="trk">'+ticks+'<input type="range" id="guessIn" min="0" max="'+e.max+'" step="0.5" value="0" aria-label="Tu predicción de la espera más larga, en segundos" aria-valuetext="0 segundos"></div></div>';
   }
   function sketchHtml(e){
     return '<div class="sk" role="radiogroup" aria-labelledby="qx" id="options">'+e.opts.map(function(o,k){
@@ -351,17 +351,17 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:19px;line-height:
 
   function experiment(i){
     var e=EXPERIMENTS[i];
-    $('main').innerHTML=head('Step 2 &middot; Guess what happens &middot; '+(i+1)+' of '+EXPERIMENTS.length, e.h1)+
+    $('main').innerHTML=head('Paso 2 &middot; Adivina qué pasa &middot; '+(i+1)+' de '+EXPERIMENTS.length, e.h1)+
       '<div class="g2"><div>'+
       '<p class="sub">'+e.setup+'</p>'+
       '<p class="q" id="qx">'+e.q+'</p>'+(e.kind==='marker'?markerHtml(e):sketchHtml(e))+
-      '<div class="act"><button class="btn" id="primary" type="button" disabled>'+(e.kind==='marker'?'Drag the marker to run':'Pick a line to run')+'</button></div>'+
+      '<div class="act"><button class="btn" id="primary" type="button" disabled>'+(e.kind==='marker'?'Arrastra el marcador para ejecutar':'Elige una línea para ejecutar')+'</button></div>'+
       '<div class="fbs" id="feedback" role="status" aria-live="polite" tabindex="-1"></div>'+
       '</div>'+stage(e.run, e.zone, e.kind==='sketch')+'</div>';
-    function ready(){ var p=$('primary'); p.disabled=false; p.textContent='Run'; }
+    function ready(){ var p=$('primary'); p.disabled=false; p.textContent='Ejecutar'; }
     if (e.kind==='marker'){
       var inp=$('guessIn');
-      var upd=function(){ $('trk').classList.remove('unset'); $('gv').textContent=(+inp.value).toFixed(1)+' sec'; inp.setAttribute('aria-valuetext', inp.value+' seconds'); ready(); };
+      var upd=function(){ $('trk').classList.remove('unset'); $('gv').textContent=(+inp.value).toFixed(1)+' seg'; inp.setAttribute('aria-valuetext', inp.value+' segundos'); ready(); };
       inp.addEventListener('input', upd); inp.addEventListener('change', upd);
     } else {
       Array.prototype.forEach.call(document.querySelectorAll('input[name="pred"]'), function(x){ x.addEventListener('change', function(){ $('guess').setAttribute('points', pts(e.opts[+x.value].p, e.run.duration)); ready(); }); });
@@ -375,27 +375,27 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:19px;line-height:
     if (e.kind==='marker'){ if ($('trk').classList.contains('unset')) return; guessVal=+$('guessIn').value; $('guessIn').disabled=true; }
     else { var picked=document.querySelector('input[name="pred"]:checked'); if (!picked) return; choice=+picked.value;
       Array.prototype.forEach.call(document.querySelectorAll('input[name="pred"]'), function(x){ x.disabled=true; }); $('options').classList.add('lock'); }
-    $('primary').disabled=true; $('primary').textContent='Running...';
+    $('primary').disabled=true; $('primary').textContent='Ejecutando...';
     runSim(e.run, function(){
       var right;
       if (e.kind==='marker'){
         var actual=sim.longest; right=Math.abs(guessVal-actual)<=0.6;
         $('trk').insertAdjacentHTML('beforeend','<span class="pin'+(right?'':' no')+'" style="left:'+(100*Math.min(actual,e.max)/e.max)+'%" aria-hidden="true"></span>');
-        $('rv').className='res'+(right?'':' no'); $('rv').innerHTML='Result: <b>'+actual.toFixed(1)+' sec</b>';
+        $('rv').className='res'+(right?'':' no'); $('rv').innerHTML='Resultado: <b>'+actual.toFixed(1)+' seg</b>';
       } else {
         right=!!e.opts[choice].ok;
         var labels=document.querySelectorAll('#options label');
         e.opts.forEach(function(o,k){
-          if (o.ok){ labels[k].classList.add('is-right'); labels[k].insertAdjacentHTML('beforeend','<span class="mark">Correct</span>'); }
-          else if (k===choice){ labels[k].classList.add('is-wrong'); labels[k].insertAdjacentHTML('beforeend','<span class="mark">Your pick</span>'); }
+          if (o.ok){ labels[k].classList.add('is-right'); labels[k].insertAdjacentHTML('beforeend','<span class="mark">Correcta</span>'); }
+          else if (k===choice){ labels[k].classList.add('is-wrong'); labels[k].insertAdjacentHTML('beforeend','<span class="mark">Tu elección</span>'); }
         });
       }
       if (right) correct++;
       results[i]=sim.samples.slice();
-      $('feedback').innerHTML='<div class="fb '+(right?'ok':'no')+'"><b class="v">'+(right?'Correct.':'Incorrect.')+'</b>'+e.why+'</div>';
-      $('announce').textContent=(right?'Correct. ':'Incorrect. ')+'Result: '+sim.done+' answered, '+sim.queue.length+' still waiting, longest wait '+sim.longest.toFixed(1)+' seconds.';
+      $('feedback').innerHTML='<div class="fb '+(right?'ok':'no')+'"><b class="v">'+(right?'Correcto.':'Incorrecto.')+'</b>'+e.why+'</div>';
+      $('announce').textContent=(right?'Correcto. ':'Incorrecto. ')+'Resultado: '+sim.done+' respondidas, '+sim.queue.length+' todavía en espera, espera más larga '+sim.longest.toFixed(1)+' segundos.';
       var last=i===EXPERIMENTS.length-1, p=$('primary');
-      p.disabled=false; p.textContent=last?'See what it means':'Next';
+      p.disabled=false; p.textContent=last?'Ver qué significa':'Siguiente';
       p.onclick=function(){ show(screen+1, true); };
       p.focus();
     });
@@ -407,16 +407,16 @@ h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:19px;line-height:
     return lineSvg(r, e.run.duration, '#7ED3C9', e.zone);
   }
   function finish(){
-    $('main').innerHTML=head('Step 3 &middot; What it means','Sync file calls freeze the whole server, so use them only where no user is waiting.')+
+    $('main').innerHTML=head('Paso 3 &middot; Qué significa','Las llamadas síncronas de archivos congelan todo el servidor, así que úsalas solo donde ningún usuario esté esperando.')+
       '<ul class="take">'+
-        '<li>'+mini(0)+'<span><b>Sync operations block the entire Node process.</b> During the one sync read, no request was answered.</span></li>'+
-        '<li>'+mini(1)+'<span><b>Short sync calls still freeze server handling.</b> One on every request made the line keep growing.</span></li>'+
-        '<li>'+mini(2)+'<span><b>Sync is acceptable for scripts, setup tasks, and learning.</b> The startup call ran before the server opened.</span></li>'+
+        '<li>'+mini(0)+'<span><b>Las operaciones síncronas bloquean todo el proceso de Node.</b> Durante la única lectura síncrona, no se respondió ninguna request.</span></li>'+
+        '<li>'+mini(1)+'<span><b>Incluso las llamadas síncronas cortas congelan la atención del servidor.</b> Una en cada request hizo que la cola siguiera creciendo.</span></li>'+
+        '<li>'+mini(2)+'<span><b>Lo síncrono es aceptable para scripts, tareas de configuración inicial y aprendizaje.</b> La llamada de arranque se ejecutó antes de que el servidor abriera.</span></li>'+
       '</ul>'+
-      '<p class="score">You guessed <b>'+correct+' of '+EXPERIMENTS.length+'</b> right. <button class="restart" id="secondary" type="button">Start over</button></p>'+
-      '<p class="back">Back to the lesson: answer Check yourself below, then go to Practice.</p>';
+      '<p class="score">Acertaste <b>'+correct+' de '+EXPERIMENTS.length+'</b>. <button class="restart" id="secondary" type="button">Empezar de nuevo</button></p>'+
+      '<p class="back">Vuelve a la lección: responde Ponte a prueba abajo y luego ve a Práctica.</p>';
     $('secondary').onclick=function(){ correct=0; results=[]; show(0, true); };
-    $('announce').textContent='Frozen Server complete. You guessed '+correct+' of '+EXPERIMENTS.length+' right. Back to the lesson: answer Check yourself below, then go to Practice.';
+    $('announce').textContent='Servidor congelado completado. Acertaste '+correct+' de '+EXPERIMENTS.length+'. Vuelve a la lección: responde Ponte a prueba abajo y luego ve a Práctica.';
   }
 
   correct=0; show(0);

@@ -136,7 +136,7 @@ function hl(l){var h=esc(l);
 var ID='6acc90a27a9df3a903b6b34d';
 var R=[
  {q:'What comes back?', m:'post', url:'localhost:3000/students',
-  panel:'Body', lines:['{','  "name": "Dana",','  "age": 21,','  "email": "dana@mail.com",','  "isActive": true','}'], hot:-1,
+  panel:'Body', lines:['{','  "name": "Anna",','  "age": 21,','  "email": "anna@mail.com",','  "isActive": true','}'], hot:-1,
   opts:[['201','the full student document'],['201','{ "acknowledged": true, "insertedId": "…" }'],['200','"Student created"']], ans:1,
   st:'201 Created', cls:'c2', body:'{\n  "acknowledged": true,\n  "insertedId": "'+ID+'"\n}',
   ok:'<b>Right.</b> insertOne reports what it did. It does not send the document back.',
@@ -144,7 +144,7 @@ var R=[
   short:'insertedId, not the document'},
  {q:'A teammate wrote this route. What comes back?', m:'get', url:'localhost:3000/students/'+ID,
   panel:'Their route', lines:['app.get("/students/:id", async (req, res) => {','  const student = await studentsCollection','    .findOne({ _id: req.params.id });','  if (!student) return res.status(404)','    .json({ error: "Student not found" });','  res.json(student);','});'], hot:2,
-  opts:[['200','Dana'],['404','{ "error": "Student not found" }'],['400','{ "error": "Invalid ID" }']], ans:1,
+  opts:[['200','Anna'],['404','{ "error": "Student not found" }'],['400','{ "error": "Invalid ID" }']], ans:1,
   st:'404 Not Found', cls:'c4', body:'{\n  "error": "Student not found"\n}',
   ok:'<b>Right.</b> The id arrives as text. In MongoDB it is an ObjectId, so nothing matches.',
   no:'<b>Not quite.</b> The id arrives as text. In MongoDB it is an ObjectId, so nothing matches.',

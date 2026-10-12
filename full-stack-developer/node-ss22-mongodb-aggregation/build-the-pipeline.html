@@ -120,13 +120,13 @@ var $=function(id){return document.getElementById(id);};
 function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 /* The seed data from the lesson (seed.js). Results match a real run on MongoDB 8.2.6, 2026-10-12. */
 var DATA=[
- {name:'Dana',age:21,city:'Tel Aviv',isActive:true,score:87},
- {name:'Omer',age:17,city:'Tel Aviv',isActive:true,score:72},
- {name:'Maya',age:22,city:'Tel Aviv',isActive:false,score:78},
- {name:'Noa',age:24,city:'Haifa',isActive:true,score:91},
- {name:'Yossi',age:19,city:'Haifa',isActive:false,score:65},
- {name:'Lior',age:16,city:'Jerusalem',isActive:true,score:84}];
-var CLS={'Tel Aviv':'ta','Haifa':'hf','Jerusalem':'je'};
+ {name:'Anna',age:21,city:'London',isActive:true,score:87},
+ {name:'Ben',age:17,city:'London',isActive:true,score:72},
+ {name:'Clara',age:22,city:'London',isActive:false,score:78},
+ {name:'Daniel',age:24,city:'Paris',isActive:true,score:91},
+ {name:'Emma',age:19,city:'Paris',isActive:false,score:65},
+ {name:'Leo',age:16,city:'Berlin',isActive:true,score:84}];
+var CLS={'London':'ta','Paris':'hf','Berlin':'je'};
 /* stages: label (shown), run (a tiny aggregation engine: just what these stages need) */
 var S={
  active:{label:'<b>$match</b> { isActive: true }', run:function(d){return d.filter(function(x){return x.isActive===true;});}},
@@ -137,16 +137,16 @@ var S={
 };
 var R=[
  {goal:'Active students per city', hint:'Count only active students, one result per city.', stages:['group','active'],
-  ok:function(o){return same(o,[['Tel Aviv',2],['Haifa',1],['Jerusalem',1]],false);},
+  ok:function(o){return same(o,[['London',2],['Paris',1],['Berlin',1]],false);},
   why:function(p){return p[0]==='group'?'<b>Not yet.</b> After $group, the documents are cities. They have no isActive field, so $match finds nothing. Filter first.':'<b>Not yet.</b> Use both stages: filter, then group.';},
   yes:'<b>Right.</b> $match keeps the 4 active students, then $group counts them per city.', short:'$match, then $group'},
  {goal:'Only cities with 2 or more students', hint:'Count every student per city, then keep the big cities.', stages:['count2','group'],
-  ok:function(o){return same(o,[['Tel Aviv',3],['Haifa',2]],false);},
+  ok:function(o){return same(o,[['London',3],['Paris',2]],false);},
   why:function(p){return p[0]==='count2'?'<b>Empty.</b> Before $group there is no count field, so $match keeps nothing and $group gets nothing.':'<b>Not yet.</b> Use both stages: count per city, then filter the counts.';},
   yes:'<b>Right.</b> $group makes the count, and only then can $match filter on it.', short:'$group, then $match on count'},
  {goal:'The top 3 cities by number of students', hint:'Biggest city first. Three cities at most.', stages:['limit','sort','group'],
-  ok:function(o){return same(o,[['Tel Aviv',3],['Haifa',2],['Jerusalem',1]],true);},
-  why:function(p,o){ if(p[0]==='limit') return '<b>Not yet.</b> $limit first keeps only the first 3 students, all from Tel Aviv. Count first, then cut.';
+  ok:function(o){return same(o,[['London',3],['Paris',2],['Berlin',1]],true);},
+  why:function(p,o){ if(p[0]==='limit') return '<b>Not yet.</b> $limit first keeps only the first 3 students, all from London. Count first, then cut.';
     if(p.indexOf('sort')<p.indexOf('group')) return '<b>Not yet.</b> $sort ran before there was a count to sort by. Sort the cities after $group.';
     return '<b>Not yet.</b> Use all three: count, sort, then limit.';},
   yes:'<b>Right.</b> Count per city, sort the counts high to low, then keep the top 3.', short:'$group, $sort, then $limit'}

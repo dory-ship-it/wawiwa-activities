@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Send It and See · MongoDB with Express (Without Mongoose)</title>
+<title>Envíalo y mira · MongoDB con Express (sin Mongoose)</title>
 <!--
   Wawiwa · AI Full-Stack Developer · Node module · Self-study 21. Send it and see (embed in "Run, test, compare").
   A mini Postman: guess the response, select Send, see the real one. Two rounds: what insertOne returns, and a route
@@ -115,11 +115,11 @@ body.small .launch{display:flex}
 <body>
 <div class="app" id="app">
   <div class="top"><svg viewBox="0 0 120 48" width="100" height="40" role="img" aria-label="wawiwa"><rect x="0" y="0" width="120" height="34" rx="2" fill="#EE3124"/><path d="M26 33 L46 33 L26 47 Z" fill="#EE3124"/><text x="60" y="25" text-anchor="middle" font-family="Roboto, sans-serif" font-weight="800" font-size="23" fill="#fff" letter-spacing="0">wawiwa</text></svg>
-    <span class="nm">Send it and see</span>
+    <span class="nm">Envíalo y mira</span>
     <span class="prog" id="prog"></span></div>
   <main id="main" tabindex="-1"></main>
 </div>
-<div class="launch"><div class="card"><div class="t"><b>Send it and see</b><span>Two requests in a mini Postman</span></div><a class="btn" href="" target="_blank" rel="noopener" id="open">Open</a></div></div>
+<div class="launch"><div class="card"><div class="t"><b>Envíalo y mira</b><span>Dos requests en un mini Postman</span></div><a class="btn" href="" target="_blank" rel="noopener" id="open">Abrir</a></div></div>
 <p class="sr" id="live" aria-live="polite"></p>
 <script>
 (function(){
@@ -135,49 +135,49 @@ function hl(l){var h=esc(l);
 /* Two rounds. Every response is the real one (Node 24, mongodb 7.7.0, Express 5.3.0, MongoDB 8.2.6, 2026-10-12). */
 var ID='6acc90a27a9df3a903b6b34d';
 var R=[
- {q:'What comes back?', m:'post', url:'localhost:3000/students',
-  panel:'Body', lines:['{','  "name": "Dana",','  "age": 21,','  "email": "dana@mail.com",','  "isActive": true','}'], hot:-1,
-  opts:[['201','the full student document'],['201','{ "acknowledged": true, "insertedId": "…" }'],['200','"Student created"']], ans:1,
+ {q:'¿Qué vuelve?', m:'post', url:'localhost:3000/students',
+  panel:'Body', lines:['{','  "name": "Daniela",','  "age": 21,','  "email": "daniela@mail.com",','  "isActive": true','}'], hot:-1,
+  opts:[['201','el document completo del estudiante'],['201','{ "acknowledged": true, "insertedId": "…" }'],['200','"Student created"']], ans:1,
   st:'201 Created', cls:'c2', body:'{\n  "acknowledged": true,\n  "insertedId": "'+ID+'"\n}',
-  ok:'<b>Right.</b> insertOne reports what it did. It does not send the document back.',
-  no:'<b>Not quite.</b> insertOne reports what it did. It does not send the document back.',
-  short:'insertedId, not the document'},
- {q:'A teammate wrote this route. What comes back?', m:'get', url:'localhost:3000/students/'+ID,
-  panel:'Their route', lines:['app.get("/students/:id", async (req, res) => {','  const student = await studentsCollection','    .findOne({ _id: req.params.id });','  if (!student) return res.status(404)','    .json({ error: "Student not found" });','  res.json(student);','});'], hot:2,
-  opts:[['200','Dana'],['404','{ "error": "Student not found" }'],['400','{ "error": "Invalid ID" }']], ans:1,
+  ok:'<b>Correcto.</b> insertOne informa lo que hizo. No te devuelve el document.',
+  no:'<b>No exactamente.</b> insertOne informa lo que hizo. No te devuelve el document.',
+  short:'insertedId, no el document'},
+ {q:'Un compañero de equipo escribió esta ruta. ¿Qué vuelve?', m:'get', url:'localhost:3000/students/'+ID,
+  panel:'Su ruta', lines:['app.get("/students/:id", async (req, res) => {','  const student = await studentsCollection','    .findOne({ _id: req.params.id });','  if (!student) return res.status(404)','    .json({ error: "Student not found" });','  res.json(student);','});'], hot:2,
+  opts:[['200','Daniela'],['404','{ "error": "Student not found" }'],['400','{ "error": "Invalid ID" }']], ans:1,
   st:'404 Not Found', cls:'c4', body:'{\n  "error": "Student not found"\n}',
-  ok:'<b>Right.</b> The id arrives as text. In MongoDB it is an ObjectId, so nothing matches.',
-  no:'<b>Not quite.</b> The id arrives as text. In MongoDB it is an ObjectId, so nothing matches.',
-  short:'text is not an ObjectId'}
+  ok:'<b>Correcto.</b> El id llega como texto. En MongoDB es un ObjectId, así que nada coincide.',
+  no:'<b>No exactamente.</b> El id llega como texto. En MongoDB es un ObjectId, así que nada coincide.',
+  short:'texto no es un ObjectId'}
 ];
 var cur=0, pick=-1, sent=false, got=[];
 function say(t){$('live').textContent='';setTimeout(function(){$('live').textContent=t.replace(/<[^>]+>/g,'');},40);}
 function prog(){
   if(cur>=R.length){$('prog').innerHTML='';return;}
   var b='';for(var i=0;i<R.length;i++)b+='<i'+(i<=cur?' class="on"':'')+'></i>';
-  $('prog').innerHTML='<span class="bars" aria-hidden="true">'+b+'</span>'+(cur+1)+' of '+R.length;
+  $('prog').innerHTML='<span class="bars" aria-hidden="true">'+b+'</span>'+(cur+1)+' de '+R.length;
 }
 function render(){
   prog(); var m=$('main');
   if(cur>=R.length){
-    m.innerHTML='<h2>The driver gives you exactly what MongoDB gives back.</h2><div class="rows">'+
+    m.innerHTML='<h2>El driver te da exactamente lo que MongoDB devuelve.</h2><div class="rows">'+
       R.map(function(r,i){return '<div class="row"><span class="code '+r.cls+'">'+r.st.split(' ')[0]+'</span><span class="q">'+r.m.toUpperCase()+' /students'+(i?'/:id':'')+'</span><span class="a">'+esc(r.short)+'</span></div>';}).join('')+
-      '</div><p class="rule">Nothing is converted for you: wrap every id in <code>new ObjectId(...)</code>.</p>'+
-      '<div class="endrow"><button class="btn ghost" type="button" id="again">Start over</button><span class="go">'+(window.top===window?'Done. Close this tab to go back to the lesson.':'Done. Continue the lesson below &darr;')+'</span></div>';
+      '</div><p class="rule">Nada se convierte por ti: envuelve cada id en <code>new ObjectId(...)</code>.</p>'+
+      '<div class="endrow"><button class="btn ghost" type="button" id="again">Empezar de nuevo</button><span class="go">'+(window.top===window?'Listo. Cierra esta pestaña para volver a la lección.':'Listo. Continúa la lección abajo.')+'</span></div>';
     $('again').onclick=function(){cur=0;pick=-1;sent=false;render();$('main').focus();};
-    say('Done. The driver gives you exactly what MongoDB gives back. Continue the lesson below.');
+    say('Listo. El driver te da exactamente lo que MongoDB devuelve. Continúa la lección abajo.');
     fit(); return;
   }
   var r=R[cur];
   var req='<div class="req"><div class="url"><span class="meth '+r.m+'">'+r.m.toUpperCase()+'</span><span class="addr">'+esc(r.url)+'</span>'+
-    '<button class="send" type="button" id="send"'+(pick<0||sent?' disabled':'')+'>Send</button></div>'+
+    '<button class="send" type="button" id="send"'+(pick<0||sent?' disabled':'')+'>Enviar</button></div>'+
     '<div class="lab">'+r.panel+'</div><pre>'+r.lines.map(function(l,i){return i===r.hot&&sent?'<span class="hot">'+hl(l)+'</span>':hl(l);}).join('\n')+'</pre></div>';
   var res='<div class="res"><div class="head">Response'+(sent?' <span class="code '+r.cls+'">'+r.st+'</span>':'')+'</div>'+
-    (sent?'<pre>'+hl(r.body)+'</pre>':'<div class="wait">Pick your guess below, then select Send.</div>')+'</div>';
-  var opts='<div class="ask">Your guess</div><div class="opts" role="group" aria-label="Your guess">'+r.opts.map(function(o,i){
+    (sent?'<pre>'+hl(r.body)+'</pre>':'<div class="wait">Elige tu predicción abajo y luego selecciona Enviar.</div>')+'</div>';
+  var opts='<div class="ask">Tu predicción</div><div class="opts" role="group" aria-label="Tu predicción">'+r.opts.map(function(o,i){
     var cls=sent?(i===r.ans?' win':(i===pick?' lose':'')):(i===pick?' sel':'');
     return '<button class="opt'+cls+'" type="button" data-i="'+i+'"'+(sent?' disabled':'')+' aria-pressed="'+(i===pick)+'"><span class="st">'+o[0]+'</span><span class="bd">'+esc(o[1])+'</span></button>';}).join('')+'</div>';
-  var fb=sent?'<p class="why '+(pick===r.ans?'ok':'no')+'">'+(pick===r.ans?r.ok:r.no)+'</p><button class="btn" type="button" id="go">'+(cur<R.length-1?'Next':'See the rule')+'</button>':'';
+  var fb=sent?'<p class="why '+(pick===r.ans?'ok':'no')+'">'+(pick===r.ans?r.ok:r.no)+'</p><button class="btn" type="button" id="go">'+(cur<R.length-1?'Siguiente':'Ver la regla')+'</button>':'';
   m.innerHTML='<h2>'+r.q+'</h2><div class="grid"><div>'+req+'</div><div>'+res+opts+'<div class="fb">'+fb+'</div></div></div>';
   Array.prototype.forEach.call(m.querySelectorAll('.opt:not([disabled])'),function(b){b.onclick=function(){pick=+b.getAttribute('data-i');render();$('send').focus();};});
   if(!sent) $('send').onclick=function(){ if(pick<0) return; sent=true; got[cur]=pick===r.ans; render(); say(r.st+'. '+(pick===r.ans?r.ok:r.no)); $('go').focus(); };
