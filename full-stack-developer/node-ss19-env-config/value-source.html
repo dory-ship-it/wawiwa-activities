@@ -147,7 +147,7 @@ var R=[
   ok:'<b>Right.</b> PORT was already set in the terminal, so dotenv left it alone.',
   no:'<b>Not this one.</b> Look at what the terminal set before the run.'},
  {q:'What does line 1 print?', env:'PORT=5000', code:['console.log(process.env.PORT);','require("dotenv").config();','console.log(process.env.PORT);'],
-  term:[], out:[['ans','','?','line 1'],['dotenv','◇ injected env (1) from .env'],['plain','5000','','line 3']],
+  term:[], fresh:true, out:[['ans','','?','line 1'],['dotenv','◇ injected env (1) from .env'],['plain','5000','','line 3']],
   chips:['5000','undefined','3000'], ans:'undefined', glow:{code:0},
   ok:'<b>Right.</b> Line 1 runs before <b>.config()</b>, so there is no PORT yet.',
   no:'<b>Not this one.</b> Line 1 runs before line 2 loads .env.'}
@@ -188,7 +188,7 @@ function render(){
     r.chips.map(function(c){var cls=solved&&c===r.ans?' win':(wrong[c]?' no':'');return '<button class="chip'+cls+'" type="button" data-v="'+c+'"'+(solved||wrong[c]?' disabled':'')+'>'+esc(c)+'</button>';}).join('')+'</div>';
   var fb=solved?'<p class="why ok">'+r.ok+'</p><button class="btn" type="button" id="go">'+(cur<R.length-1?'Next':'See the rule')+'</button>':
     (wrong.last?'<p class="why no">'+r.no+'</p>':'');
-  m.innerHTML='<h2>'+r.q+'</h2><div class="grid"><div>'+files+'</div><div><div class="pn term"><div class="tt"><i></i><i></i><i></i>&nbsp;Terminal</div><div class="bd">'+t+'</div></div>'+chips+'<div class="fb">'+fb+'</div></div></div>';
+  m.innerHTML='<h2>'+r.q+'</h2><div class="grid"><div>'+files+'</div><div><div class="pn term"><div class="tt"><i></i><i></i><i></i>&nbsp;'+(r.fresh?'New terminal':'Terminal')+'</div><div class="bd">'+t+'</div></div>'+chips+'<div class="fb">'+fb+'</div></div></div>';
   Array.prototype.forEach.call(m.querySelectorAll('.chip:not([disabled])'),function(b){b.onclick=function(){
     var v=b.getAttribute('data-v');
     if(v===r.ans){solved=true;wrong={};render();say(r.ok);$('go').focus();}
