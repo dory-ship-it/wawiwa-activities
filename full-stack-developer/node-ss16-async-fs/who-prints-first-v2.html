@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Who Prints First? · Async fs</title>
 <!--
-  Wawiwa · AI Full-Stack Developer · Node module · Self-study 16. Who Prints First? (Part 1 embed). Embed height 720.
-  One task per screen. No network calls. Verified on Node 22 (200 runs x2): "script end" always first; 5 different
+  Wawiwa · AI Full-Stack Developer · Node module · Self-study 16. Who Prints First? (Part 1 embed). Embed height 560.
+  Predict by printing lines into a mock terminal, click the line that handles a failed job, run it in Cursor, paste the
+  real output to compare. No network calls. Verified on Node 22 (200 runs x2): "script end" always first; 5 different
   orders of the other three; whenever writeFile finished before mkdir, writeFile had failed with ENOENT, silently.
 -->
 <style>
@@ -22,188 +23,167 @@
   --tx:#EEF3F9; --tx2:#B4C4D6; --mut:#8EA2B9;
   --teal:#5AB3AA; --teal2:#7ED3C9; --red:#D62A1E; --ok:#7FDC86; --warn:#F0B44C; --bad:#FF9C92;
   --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  --c0:#7ED3C9; --c1:#8FC6FF; --c2:#F1C27D; --c3:#C8A2FF;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;height:100%}
-body{background:var(--bg);color:var(--tx);font-family:'Assistant',sans-serif;font-size:17px;line-height:1.5;overflow:hidden}
-:focus-visible{outline:3px solid var(--teal2);outline-offset:3px;border-radius:8px}
+body{background:var(--bg);color:var(--tx);font-family:'Assistant',sans-serif;font-size:16px;line-height:1.45;overflow:hidden}
+:focus-visible{outline:3px solid var(--teal2);outline-offset:2px;border-radius:8px}
 .sr{position:absolute;top:0;left:0;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 code,.m{font-family:var(--mono);font-variant-ligatures:none}
 code{font-size:.86em;color:#F1C27D}
 .app{height:100vh;display:flex;flex-direction:column}
 /* header */
-.hd{flex:0 0 74px;display:flex;align-items:center;gap:16px;padding:0 32px;border-bottom:1px solid var(--line)}
-.hd svg{width:70px;height:auto;flex:0 0 auto}
-.hd .nm{font-family:Roboto,sans-serif;font-weight:700;font-size:17px;color:var(--tx);line-height:1.25;min-width:0}
-.hd .nm .lead{display:block;font-weight:400;font-size:13px;color:var(--tx2);margin-top:2px}
-.steps{margin-left:auto;display:flex;align-items:center;gap:8px;font-family:Roboto,sans-serif;font-size:14px;color:var(--mut);white-space:nowrap;flex:0 0 auto}
-.steps .sp{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;border:1.5px solid transparent}
-.steps .sp b{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--s2);color:var(--tx2);font-size:12px}
+.hd{flex:0 0 56px;display:flex;align-items:center;gap:14px;padding:0 26px;border-bottom:1px solid var(--line)}
+.hd svg{width:60px;height:auto;flex:0 0 auto}
+.hd .nm{font-family:Roboto,sans-serif;font-weight:700;font-size:16px;color:var(--tx);line-height:1.2;min-width:0}
+.hd .nm .lead{display:block;font-weight:400;font-size:12.5px;color:var(--tx2);margin-top:2px}
+.steps{margin-left:auto;display:flex;align-items:center;gap:6px;font-family:Roboto,sans-serif;font-size:13px;color:var(--mut);white-space:nowrap;flex:0 0 auto}
+.steps .sp{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1.5px solid transparent}
+.steps .sp b{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:var(--s2);color:var(--tx2);font-size:11.5px}
 .steps .sp.on{color:var(--tx);border-color:var(--teal);background:rgba(90,179,170,.12)}
 .steps .sp.on b{background:var(--teal);color:#0D1626}
 .steps .sp.done{color:var(--teal2)}
 .steps .ar{color:#4A6285}
 /* main */
-.main{flex:1;min-height:0;overflow:auto;padding:22px 32px 16px}
-.ey{font-family:Roboto,sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal2);margin:0}
-h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:21px;line-height:1.3;margin:6px 0 18px;color:var(--tx);max-width:70ch}
-.sub{color:var(--tx2);margin:0 0 16px;max-width:66ch}
-.g2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:26px;align-items:start}
-.g2.even{grid-template-columns:1fr 1fr}
-/* code (read only display) */
-.codebox{background:var(--s1);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.codebox .ttl{display:flex;align-items:center;justify-content:space-between;padding:8px 12px 8px 16px;border-bottom:1px solid var(--line);font-family:Roboto,sans-serif;font-size:13px;color:var(--tx2)}
-.codebox ol{list-style:none;margin:0;padding:8px 0;font-family:var(--mono);font-size:12.5px;line-height:1.66;font-variant-ligatures:none;counter-reset:n;cursor:default}
-.codebox li{display:flex;padding:0 14px 0 10px;border-left:3px solid transparent;white-space:pre}
-.codebox li::before{counter-increment:n;content:counter(n);width:24px;margin-right:12px;text-align:right;color:#5B7090;user-select:none}
+.main{flex:1;min-height:0;overflow:auto;padding:14px 26px 12px}
+.main:focus,.main:focus-visible{outline:none}
+.ey{font-family:Roboto,sans-serif;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal2);margin:0}
+h1.ins{font-family:Roboto,sans-serif;font-weight:700;font-size:18.5px;line-height:1.3;margin:4px 0 12px;color:var(--tx);max-width:72ch}
+.g2{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:start}
+.g2.cmpg{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
+.lab{font-family:Roboto,sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:0 0 6px}
+/* code panel */
+.codebox{background:var(--s1);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.codebox .ttl{display:flex;align-items:center;justify-content:space-between;min-height:32px;padding:4px 10px 4px 14px;border-bottom:1px solid var(--line);font-family:Roboto,sans-serif;font-size:12.5px;color:var(--tx2)}
+.codebox ol{list-style:none;margin:0;padding:6px 0;font-family:var(--mono);font-size:12px;line-height:1.45;font-variant-ligatures:none;counter-reset:n;cursor:default}
+.codebox li{display:flex;padding:0 12px 0 8px;border-left:3px solid transparent;white-space:pre}
+.codebox li::before{counter-increment:n;content:counter(n);width:22px;margin-right:10px;text-align:right;color:#5B7090;user-select:none;flex:0 0 auto}
+.codebox li.bl{height:6px}
+.codebox li.bl::before{content:''}
 .codebox li .t{white-space:pre;overflow:hidden}
 .codebox li.hl{background:rgba(90,179,170,.12);border-left-color:var(--teal)}
-.codebox li.hw{background:rgba(240,180,76,.13);border-left-color:var(--warn)}
-.codebox .legend{border-top:1px solid var(--line);padding:7px 16px;font-family:Roboto,sans-serif;font-size:12.5px;color:var(--tx2);display:grid;gap:3px;cursor:default}
-.codebox .legend span{display:flex;align-items:center;gap:8px}
-.sw{display:inline-block;width:14px;height:12px;border-radius:2px;flex:0 0 auto}
-.sw.t{background:rgba(90,179,170,.35);border-left:3px solid var(--teal)}
-.sw.w{background:rgba(240,180,76,.35);border-left:3px solid var(--warn)}
+.codebox li.pok{background:rgba(127,220,134,.13);border-left-color:var(--ok)}
+.codebox li.pno{background:rgba(214,42,30,.16);border-left-color:var(--bad)}
+.cl{flex:1;min-width:0;background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;text-align:left;white-space:pre;overflow:hidden;cursor:pointer;border-radius:4px}
+.cl:focus-visible{outline:2px solid var(--teal2);outline-offset:-1px;border-radius:3px}
+.codebox.pickable li:not(.bl):hover{background:rgba(90,179,170,.10)}
+.codebox.pickable li.pok:hover{background:rgba(127,220,134,.13)}
+.codebox.locked .cl{cursor:default}
+.codebox.locked li:not(.pok):hover{background:none}
 .s{color:#F1C27D}.f{color:#8FC6FF}.k{color:#C8A2FF}
-.copy{background:var(--teal);color:#0D1626;border:0;border-radius:999px;padding:5px 14px;font-family:Roboto,sans-serif;font-weight:700;font-size:13px;cursor:pointer}
+.copy{background:var(--teal);color:#0D1626;border:0;border-radius:999px;padding:4px 14px;font-family:Roboto,sans-serif;font-weight:700;font-size:13px;cursor:pointer}
 .copy:hover{background:var(--teal2)}
-/* questions */
-.lab{font-family:Roboto,sans-serif;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:0 0 6px}
-/* ordering: slots + pool */
-.slots{display:grid;gap:6px}
-.slot{display:flex;align-items:center;gap:12px;min-height:38px;padding:0 14px;border-radius:10px;border:1.5px solid var(--line);background:rgba(0,0,0,.18);color:var(--mut);font-family:Roboto,sans-serif;font-size:14px;width:100%;text-align:left;cursor:default}
-.slot .ord{font-weight:700;width:30px;flex:0 0 auto}
-.slot .ln{font-family:var(--mono);font-size:14px;color:var(--tx)}
-.slot .bk{margin-left:auto;font-size:12px;color:var(--mut)}
-button.slot{cursor:pointer;border-color:var(--teal);background:rgba(90,179,170,.12);color:var(--teal2)}
-button.slot:hover{border-color:var(--teal2);background:rgba(90,179,170,.2)}
-button.slot[disabled]{cursor:default;color:var(--teal2)}
-button.slot[disabled]:hover{border-color:var(--teal);background:rgba(90,179,170,.12)}
-.poolhd{display:flex;align-items:center;justify-content:space-between;margin:10px 0 6px}
-.poolhd .lab{margin:0}
-.pool{display:grid;gap:6px}
-.pick{min-height:38px;border-radius:10px;border:1.5px solid #3A5379;background:var(--s2);color:var(--tx);font-family:var(--mono);font-size:14px;cursor:pointer;text-align:left;padding:0 14px;width:100%}
-.pick:hover{border-color:var(--teal);background:#24395C}
-.pooldone{color:var(--mut);font-size:14.5px;margin:0;padding:6px 0}
-.reset{background:transparent;border:1.5px solid var(--line);color:var(--tx2);font-family:Roboto,sans-serif;font-weight:700;font-size:13px;border-radius:999px;padding:4px 14px;cursor:pointer}
-.reset:hover{border-color:var(--teal);color:var(--tx)}
-.reset[disabled]{opacity:.45;cursor:default}
-.reset[disabled]:hover{border-color:var(--line);color:var(--tx2)}
-/* choice cards */
-.choices{display:grid;gap:9px}
-.choice{display:flex;gap:14px;align-items:center;padding:12px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--s1);cursor:pointer}
-.choice:hover{border-color:var(--teal)}
-.choice input{position:absolute;opacity:0;width:1px;height:1px}
-.choice .rd{width:20px;height:20px;border-radius:50%;border:2px solid #5B7090;flex:0 0 auto}
-.choice b{display:block;font-family:Roboto,sans-serif;font-size:15.5px;font-weight:500}
-.choice:has(input:checked){border-color:var(--teal);background:rgba(90,179,170,.10)}
-.choice:has(input:checked) .rd{border-color:var(--teal);background:radial-gradient(var(--teal) 45%,transparent 50%)}
-.choice:has(input:focus-visible){outline:3px solid var(--teal2);outline-offset:3px}
-.choices.lock .choice{cursor:default}
-.choices.lock .choice:hover{border-color:var(--line)}
-.choices.lock .choice:has(input:checked):hover{border-color:var(--teal)}
-.choices.lock .choice:not(:has(input:checked)){opacity:.55}
+/* mock terminal */
+.term{background:#0A121F;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.term .tb{display:flex;align-items:center;gap:6px;min-height:30px;padding:0 12px;border-bottom:1px solid var(--line);font-family:Roboto,sans-serif;font-size:12.5px;color:var(--tx2)}
+.term .tb i{width:9px;height:9px;border-radius:50%;background:#2B4166}
+.term .tb span{margin-left:6px}
+.term .bd{padding:6px 8px 8px;display:grid;gap:4px;font-family:var(--mono);font-size:13px;font-variant-ligatures:none}
+.term .pr{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--mut)}
+.term .pr b{color:var(--teal);font-weight:400}
+.tl{display:flex;align-items:center;gap:8px;height:28px;padding:0 10px;border-radius:7px;font-family:var(--mono);font-size:13px;width:100%;text-align:left}
+.tl.em{border:1px dashed #2E4468;color:#4F6688}
+button.tl{border:0;border-left:3px solid;cursor:pointer;background:rgba(255,255,255,.04)}
+button.tl .x{margin-left:auto;font-family:Roboto,sans-serif;font-size:11.5px;color:var(--mut)}
+button.tl:hover{background:rgba(255,255,255,.09)}
+button.tl:hover .x{color:var(--tx)}
+button.tl.wrong{box-shadow:inset 0 0 0 1.5px rgba(255,156,146,.75)}
+.c0{color:var(--c0);border-color:var(--c0)!important}.c1{color:var(--c1);border-color:var(--c1)!important}
+.c2{color:var(--c2);border-color:var(--c2)!important}.c3{color:var(--c3);border-color:var(--c3)!important}
+.pool{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pk{min-height:32px;border-radius:9px;border:1.5px solid #3A5379;background:var(--s2);color:var(--tx);font-family:var(--mono);font-size:12.5px;cursor:pointer;text-align:left;padding:0 10px;display:flex;align-items:center;gap:8px;font-variant-ligatures:none}
+.pk:hover{border-color:var(--teal);background:#24395C}
+.pk i{width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:currentColor}
+.pk span{color:var(--tx)}
+.mt{margin-top:8px}
+.errbox .bd{display:block;color:var(--bad);font-size:12px;line-height:1.5;white-space:normal;word-break:break-word}
+.errbox .bd span{color:var(--mut)}
+.hint{color:var(--tx2);font-size:14.5px;margin:10px 0 0}
+.reveal{margin:8px 0 0;font-size:14.5px;color:var(--tx2)}
+.reveal b{color:var(--tx);font-family:Roboto,sans-serif}
 /* feedback */
-.fbs{display:grid;gap:8px;margin-top:12px}
-.fb{padding:9px 14px;border-radius:10px;border:1px solid;font-size:14.5px;line-height:1.45;color:var(--tx2)}
-.fb b.v{display:block;font-family:Roboto,sans-serif;font-size:15px;margin-bottom:1px}
+.fbs{display:grid;gap:6px;margin-top:10px}
+.fb{padding:7px 12px;border-radius:10px;border:1px solid;font-size:14px;line-height:1.4;color:var(--tx2)}
+.fb b.v{display:block;font-family:Roboto,sans-serif;font-size:14.5px;margin-bottom:1px}
 .fb.ok{border-color:rgba(127,220,134,.45);background:rgba(127,220,134,.07)}.fb.ok b.v{color:var(--ok)}
 .fb.no{border-color:rgba(255,156,146,.5);background:rgba(214,42,30,.10)}.fb.no b.v{color:var(--bad)}
 .fb.info{border-color:var(--line);background:var(--s1)}.fb.info b.v{color:var(--tx)}
 .fb.warn{border-color:rgba(240,180,76,.45);background:rgba(240,180,76,.08)}.fb.warn b.v{color:var(--warn)}
-/* setup */
-.stepsl{list-style:none;margin:0;padding:0;display:grid;gap:14px;counter-reset:s}
-.stepsl li{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start;color:var(--tx2);font-size:16px}
-.stepsl li::before{counter-increment:s;content:counter(s);width:30px;height:30px;border-radius:50%;background:var(--s2);color:var(--tx);font-family:Roboto,sans-serif;font-weight:700;display:flex;align-items:center;justify-content:center}
-.stepsl b{color:var(--tx)}
-.note{margin-top:18px;padding:12px 16px;border-radius:12px;background:rgba(240,180,76,.10);color:var(--tx);border:1px solid rgba(240,180,76,.35);font-size:15.5px}
-/* compare: one stat row + table */
-table.tl{width:100%;border-collapse:separate;border-spacing:6px 5px;table-layout:fixed}
-table.tl th{font-family:Roboto,sans-serif;font-size:12.5px;font-weight:700;color:var(--mut);text-align:left;padding:0 4px}
-table.tl thead th{letter-spacing:.06em;text-transform:uppercase;font-size:11.5px}
-table.tl tbody th{color:var(--tx2);font-size:13.5px;width:128px}
-table.tl thead th:first-child{width:128px}
-table.tl td{background:var(--s2);border-radius:8px;padding:5px 9px;font-family:var(--mono);font-size:13px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-table.tl tr.you td{background:rgba(90,179,170,.14);color:var(--teal2)}
-table.tl td.wb{background:rgba(240,180,76,.18);color:var(--warn);box-shadow:inset 0 0 0 1px rgba(240,180,76,.55)}
-.tlkey{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--tx2);margin:6px 4px 2px}
-.sw.a{background:rgba(240,180,76,.35);border:1px solid rgba(240,180,76,.7);border-left-width:1px}
-.errline{margin:14px 0 0;color:var(--tx2);font-size:15.5px}
-.errline b{color:var(--tx)}
+/* run steps */
+.how{list-style:none;margin:0;padding:0;display:grid;gap:10px;counter-reset:s}
+.how li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;color:var(--tx2);font-size:15.5px}
+.how li::before{counter-increment:s;content:counter(s);width:26px;height:26px;border-radius:50%;background:var(--s2);color:var(--tx);font-family:Roboto,sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+.how b{color:var(--tx)}
+/* compare */
+textarea.paste{display:block;width:100%;height:176px;resize:none;background:#0A121F;color:var(--tx);border:1.5px solid var(--line);border-radius:12px;padding:9px 12px;font-family:var(--mono);font-size:12.5px;line-height:1.45;font-variant-ligatures:none}
+textarea.paste:focus{border-color:var(--teal);outline:none}
+textarea.paste::placeholder{color:#4F6688}
+.small{color:var(--mut);font-size:13.5px;margin:6px 0 0}
+.cmp{display:grid;gap:5px}
+.row{display:grid;grid-template-columns:62px repeat(4,minmax(0,1fr));gap:5px;align-items:center}
+.row .rl{font-family:Roboto,sans-serif;font-size:12.5px;color:var(--tx2);white-space:nowrap}
+.row.hdr .rl,.row.hdr span{font-family:Roboto,sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.row.hdr span{padding-left:2px}
+.ch{height:27px;line-height:27px;border-radius:6px;padding:0 7px;font-family:var(--mono);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid;background:rgba(255,255,255,.05);font-variant-ligatures:none}
+.ch.e{border:1px dashed #2E4468;background:none}
+.ch.bad{box-shadow:inset 0 0 0 1.5px rgba(240,180,76,.7)}
+.row.you .rl{color:var(--teal2);font-weight:700}
 /* end */
-.take{margin:8px 0 0;padding:0 0 0 22px;display:grid;gap:14px;color:var(--tx2);font-size:17px;max-width:70ch}
+.take{margin:2px 0 0;padding:0 0 0 20px;display:grid;gap:8px;color:var(--tx2);font-size:16px;max-width:74ch}
 .take b{color:var(--tx);font-family:Roboto,sans-serif}
 .take li::marker{color:var(--teal)}
-.statrow{display:flex;flex-wrap:wrap;gap:8px 28px;margin:0 0 14px;color:var(--tx2);font-size:15.5px}
-.statrow b{font-family:Roboto,sans-serif;font-size:20px;color:var(--tx);margin-right:4px}
-.fbx{display:block;margin-top:4px;color:var(--warn)}
-.back{margin-top:28px;padding:14px 18px;border-radius:12px;border:1px solid var(--teal);background:rgba(90,179,170,.12);font-family:Roboto,sans-serif;font-weight:700;font-size:18px;color:var(--tx)}
-/* footer */
-.act{margin-top:12px;display:flex;align-items:center;gap:12px}
-.ft{flex:0 0 40px;display:flex;align-items:center;gap:18px;padding:0 32px;border-top:1px solid var(--line)}
-.ft .pg{color:var(--mut);font-size:14px;font-family:Roboto,sans-serif;white-space:nowrap}
+.back{margin:18px 0 0;padding:12px 16px;border-radius:12px;border:1px solid var(--teal);background:rgba(90,179,170,.12);font-family:Roboto,sans-serif;font-weight:700;font-size:17px;color:var(--tx)}
+.restart{background:none;border:0;padding:0;color:var(--tx2);font:inherit;font-size:14px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.restart:hover{color:var(--tx)}
+/* action + footer */
+.act{margin-top:10px;display:flex;align-items:center;gap:12px}
+.ft{flex:0 0 32px;display:flex;align-items:center;gap:16px;padding:0 26px;border-top:1px solid var(--line)}
+.ft .pg{color:var(--mut);font-size:13px;font-family:Roboto,sans-serif;white-space:nowrap}
 .ft .bar{flex:1;height:4px;border-radius:2px;background:var(--s2);overflow:hidden}
 .ft .bar i{display:block;height:100%;background:var(--teal);transition:width .3s}
-.btn{border:0;border-radius:999px;padding:12px 26px;font-family:Roboto,sans-serif;font-weight:700;font-size:16px;cursor:pointer;background:var(--red);color:#fff;white-space:nowrap}
+.btn{border:0;border-radius:999px;padding:10px 24px;font-family:Roboto,sans-serif;font-weight:700;font-size:15px;cursor:pointer;background:var(--red);color:#fff;white-space:nowrap}
 .btn:hover{background:#EE3124}
 .btn[disabled]{background:#2A3B57;color:#A9B9CC;cursor:not-allowed}
-.btn.gh{background:transparent;color:var(--tx2);border:1.5px solid var(--line)}
-.btn.gh:hover{border-color:var(--teal);background:transparent}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-@media (max-width:1010px){.codebox li{padding:0 4px 0 6px}.codebox ol{font-size:11.2px}.codebox li::before{width:18px;margin-right:8px}}
+@media (max-width:1010px){.codebox ol{font-size:11.2px}.codebox li{padding:0 6px 0 6px}.codebox li::before{width:18px;margin-right:8px}}
 @media (max-width:860px){
-  body{font-size:16px}
-  .hd{padding:0 20px;gap:12px}.ft{padding:0 20px;flex-basis:38px}.main{padding:18px 20px 14px}
-  .hd .nm{font-size:16px}.hd .nm .lead{font-size:12.5px}
-  .steps{font-size:13px;gap:4px}.steps .sp{padding:4px 7px}
-  h1.ins{font-size:19px;margin-bottom:14px}.g2{gap:18px}
-  .codebox ol{font-size:10.4px;line-height:1.66}.codebox li{padding:0 4px 0 6px}.codebox li::before{width:16px;margin-right:7px}
-  .slot,.pick{font-size:13px;min-height:36px;padding:0 10px}.slot .ln{font-size:13px}.slot .bk{display:none}
-  .btn{padding:11px 20px;font-size:15px}
-  table.tl tbody th,table.tl thead th:first-child{width:96px}
-  table.tl td{font-size:12px;padding:5px 6px}
-  .take{gap:10px;font-size:16px}
+  body{font-size:15px}
+  .hd{padding:0 18px;gap:10px}.ft{padding:0 18px}.main{padding:12px 18px 10px}
+  .hd .nm{font-size:15px}.hd .nm .lead{font-size:12px}
+  .steps{font-size:12.5px;gap:3px}.steps .sp{padding:3px 7px}
+  h1.ins{font-size:17px;margin-bottom:10px}.g2{gap:16px}
+  .codebox ol{font-size:10.2px}.codebox li::before{width:16px;margin-right:7px}
+  .how li{font-size:14.5px}.fb{font-size:13.5px}
+  .tl,.term .bd{font-size:12.5px}
+  .row{grid-template-columns:44px repeat(4,minmax(0,1fr));gap:4px}.row .rl{font-size:12px}.ch{font-size:10.5px;padding:0 4px}
+  .g2.cmpg{grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr)}textarea.paste{font-size:11.5px;padding:8px 10px}
+  .pk{font-size:11px;padding:0 6px;white-space:nowrap}.pk i{display:none}
+  .codebox li .t,.cl{white-space:pre-wrap;word-break:break-word}
+  .take{font-size:15px}
 }
 @media (max-width:720px){
-  .codebox ol{font-size:9.4px}.g2{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px}
-  .hd svg{width:56px}.steps .ar{display:none}
-  .fb{font-size:13.5px}
+  .hd svg{width:50px}.steps .ar{display:none}.hd .nm .lead{display:none}
+  .codebox ol{font-size:9.6px}
 }
-@media (max-width:660px){.main{padding:16px 14px 12px}.hd,.ft{padding:0 14px}}
 
 /* ===== Floating dark card on a transparent page (blends into Rise) ===== */
 html,body{background:transparent!important}
-body{padding:10px 14px 14px}
-.app{height:calc(100vh - 24px);max-width:1060px;margin:0 auto;background:var(--bg);border-radius:22px;overflow:hidden;
-  box-shadow:0 2px 4px rgba(13,22,38,.10),0 18px 44px rgba(13,22,38,.22)}
+body{padding:8px 12px 12px}
+.app{height:calc(100vh - 20px);max-width:1060px;margin:0 auto;background:var(--bg);border-radius:20px;overflow:hidden}
 .sr{position:absolute;top:0;left:0}
-
 /* ===== Tuned for the Rise block colour #0D1626: card floats one shade lighter ===== */
 :root{--bg:#111D32;--s1:#172741;--s2:#1F3252;--line:#2B4166}
-.app{border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 44px rgba(0,0,0,.35)}
-/* ===== 5-screen flow: Guess, Try it in Cursor, What it means ===== */
-.pills{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.pills .choice{padding:10px 14px}
-.pills .choice b{font-family:var(--mono);font-size:13.5px;white-space:nowrap}
-.main:focus,.main:focus-visible{outline:none}
-.q{font-family:Roboto,sans-serif;font-weight:700;font-size:16px;color:var(--tx);margin:0 0 8px}
-.q + .choices, .q + .pills{margin-bottom:16px}
-.how{list-style:none;margin:0;padding:0;display:grid;gap:12px;counter-reset:s}
-.how li{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start;color:var(--tx2);font-size:16px}
-.how li::before{counter-increment:s;content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--s2);color:var(--tx);font-family:Roboto,sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
-.how b{color:var(--tx)}
-.restart{background:none;border:0;padding:0;margin-left:6px;color:var(--tx2);font:inherit;font-size:14.5px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.restart:hover{color:var(--tx)}
-@media (max-width:720px){.pills{grid-template-columns:1fr}.how li{font-size:15px}}
+.app{border:1px solid rgba(255,255,255,.08);box-shadow:0 14px 36px rgba(0,0,0,.35)}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="hd"><svg viewBox="0 0 120 48" width="100" height="40" role="img" aria-label="wawiwa"><rect x="0" y="0" width="120" height="34" rx="2" fill="#EE3124"/><path d="M26 33 L46 33 L26 47 Z" fill="#EE3124"/><text x="60" y="25" text-anchor="middle" font-family="Roboto, sans-serif" font-weight="800" font-size="23" fill="#fff" letter-spacing="0">wawiwa</text></svg>
-    <div class="nm">Who Prints First?<span class="lead">Guess what the code prints, try it in Cursor, then see why.</span></div>
-    <nav class="steps" aria-label="Steps"><span class="sp" id="st0"><b>1</b>Guess</span><span class="ar" aria-hidden="true">&rarr;</span><span class="sp" id="st1"><b>2</b>Try it in Cursor</span><span class="ar" aria-hidden="true">&rarr;</span><span class="sp" id="st2"><b>3</b>What it means</span></nav></header>
+    <div class="nm">Who Prints First?<span class="lead">Predict the output, run it in Cursor, then compare.</span></div>
+    <nav class="steps" aria-label="Steps"><span class="sp" id="st0"><b>1</b>Predict</span><span class="ar" aria-hidden="true">&rarr;</span><span class="sp" id="st1"><b>2</b>Run in Cursor</span><span class="ar" aria-hidden="true">&rarr;</span><span class="sp" id="st2"><b>3</b>What it means</span></nav></header>
   <main class="main" id="main" tabindex="-1"></main>
   <footer class="ft"><span class="pg" id="pg"></span><div class="bar" aria-hidden="true"><i id="barI"></i></div></footer>
 </div>
@@ -214,19 +194,27 @@ body{padding:10px 14px 14px}
 var $=function(id){return document.getElementById(id);};
 var qsa=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
 var LINES=['script end','mkdir finished','writeFile finished','unlink finished'];
+var SHORT={'script end':'script end','mkdir finished':'mkdir','writeFile finished':'writeFile','unlink finished':'unlink'};
 var CODE='const fs = require("fs");\n\nfs.mkdir("data", (err) => {\n  console.log("mkdir finished");\n  if (err) return;\n});\n\nfs.writeFile("data/info.txt", "Hello Async", (err) => {\n  console.log("writeFile finished");\n  if (err) return;\n});\n\nfs.unlink("data/info.txt", (err) => {\n  console.log("unlink finished");\n  if (err) return;\n});\n\nconsole.log("script end");';
+var ERR_LINE=10;
 function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function hl(l){var h=esc(l);h=h.replace(/"([^"]*)"/g,'<span class="s">"$1"</span>');h=h.replace(/\b(const|return|if)\b/g,'<span class="k">$1</span>');h=h.replace(/\b(require|mkdir|writeFile|unlink|log)\(/g,'<span class="f">$1</span>(');return h||' ';}
-function codeBox(mode,copy){
-  var leg='';
-  if(mode==='log') leg='<span><i class="sw t"></i>Highlighted: the 4 lines that print to the terminal.</span>';
-  if(mode==='err') leg='<span><i class="sw w"></i>Highlighted: what each job does if it fails.</span>';
-  return '<div class="codebox"><div class="ttl">'+(copy?'<span>The code for index.js</span><button class="copy" type="button" data-copy>Copy</button>':'<span>The code (read only)</span>')+'</div><ol aria-label="index.js, line by line">'+CODE.split('\n').map(function(l){
-    var c=''; if(mode==='log' && /console\.log/.test(l)) c='hl'; if(mode==='err' && /if \(err\)/.test(l)) c='hw';
-    return '<li class="'+c+'"><span class="t">'+hl(l)+'</span></li>';}).join('')+'</ol>'+(leg?'<div class="legend">'+leg+'</div>':'')+'</div>';
+function cc(line){return 'c'+LINES.indexOf(line);}
+/* mode: 'log' highlights the 4 print lines, 'pick' makes each line clickable, 'copy' adds the Copy button */
+function codeBox(mode){
+  var copy=mode==='copy', pick=mode==='pick', locked=pick&&a.errOk;
+  return '<div class="codebox'+(pick?' pickable':'')+(locked?' locked':'')+'"><div class="ttl">'+(copy?'<span>The code for index.js</span><button class="copy" type="button" data-copy>Copy</button>':'<span>'+(pick?'index.js (click a line)':'index.js (read only)')+'</span>')+'</div><ol aria-label="index.js, line by line">'+CODE.split('\n').map(function(l,i){
+    var n=i+1, c='';
+    if(!l) return '<li class="bl" aria-hidden="true"></li>';
+    if(mode==='log' && /console\.log/.test(l)) c='hl';
+    if(pick && a.errPick===n) c=(n===ERR_LINE?'pok':'pno');
+    var inner=pick?'<button class="cl" type="button" data-n="'+n+'" aria-label="Line '+n+': '+esc(l.trim())+'"'+(locked?' disabled':'')+'>'+hl(l)+'</button>':'<span class="t">'+hl(l)+'</span>';
+    return '<li class="'+c+'">'+inner+'</li>';}).join('')+'</ol></div>';
 }
 function say(t){$('live').textContent='';setTimeout(function(){$('live').textContent=t;},40);}
-function fb(kind,verdict,why){return '<div class="fbs" role="status"><div class="fb '+kind+'"><b class="v">'+verdict+'</b>'+why+'</div></div>';}
+function fb(kind,verdict,why){return '<div class="fb '+kind+'"><b class="v">'+verdict+'</b>'+why+'</div>';}
+function fbs(inner){return inner?'<div class="fbs" role="status">'+inner+'</div>':'';}
+function btn(label,disabled,id){return '<div class="act"><button class="btn" type="button" id="'+(id||'go')+'"'+(disabled?' disabled':'')+'>'+label+'</button></div>';}
 
 /* copy, with fallbacks for iframes that block the clipboard */
 function copied(b){b.textContent='Copied';say('Code copied');setTimeout(function(){b.textContent='Copy';},1800);}
@@ -241,22 +229,28 @@ function bindCopy(){qsa('[data-copy]').forEach(function(b){b.onclick=function(){
   try{ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(CODE).then(function(){copied(b);},function(){selectFallback(b);});} else selectFallback(b);}
   catch(e){selectFallback(b);} };});}
 
-function choices(name,opts,sel,locked,cls){
-  return '<div class="'+(cls||'choices')+(locked?' choices lock':'')+'" role="radiogroup">'+opts.map(function(o){return '<label class="choice"><input type="radio" name="'+name+'" value="'+o.k+'"'+(sel===o.k?' checked':'')+(locked?' disabled':'')+'><span class="rd" aria-hidden="true"></span><span><b>'+o.t+'</b></span></label>';}).join('')+'</div>';
+/* parse pasted terminal output: keep only the 4 known lines, split into runs */
+function norm(s){return s.toLowerCase().replace(/[^a-z ]+/g,' ').replace(/\s+/g,' ').trim();}
+var KEY={}; LINES.forEach(function(l){KEY[norm(l)]=l;});
+function parseRuns(text){
+  var runs=[], cur=[];
+  text.split(/\r?\n/).forEach(function(raw){
+    var l=KEY[norm(raw)]; if(!l) return;
+    if(cur.indexOf(l)>-1||cur.length===4){runs.push(cur);cur=[];}
+    cur.push(l);
+  });
+  if(cur.length) runs.push(cur);
+  return runs;
 }
-function btn(label,disabled,id){return '<div class="act"><button class="btn" type="button" id="'+(id||'go')+'"'+(disabled?' disabled':'')+'>'+label+'</button></div>';}
 
 /* screens */
-var SC=['guess1','guess2','run','saw','done'], STEP={guess1:0,guess2:0,run:1,saw:1,done:2};
-var LINE_OPTS=LINES.map(function(l){return {k:l,t:l};});
-var ERR_OPTS=[{k:'yes',t:'Yes, an error is printed'},{k:'no',t:'No, nothing extra is printed'},{k:'crash',t:'The script crashes'}];
-var SAME_OPTS=[{k:'changed',t:'No, the order changed'},{k:'same',t:'Yes, the same order every time'}];
+var SC=['predict','error','run','compare','done'], STEP={predict:0,error:0,run:1,compare:1,done:2};
 var cur=0, a;
-function resetAll(){a={first:null,c1:false,err:null,c2:false,seenFirst:null,seenOrder:null,c3:false};}
+function resetAll(){a={order:[],errPick:null,errOk:false,paste:'',runs:null};}
 resetAll();
 function stepNav(i){[0,1,2].forEach(function(k){var e=$('st'+k);e.className='sp'+(k===i?' on':(k<i?' done':''));if(k===i)e.setAttribute('aria-current','step');else e.removeAttribute('aria-current');});}
 function go(i){cur=i;$('main').scrollTop=0;render();$('main').focus();}
-function onPick(name,fn){qsa('input[name='+name+']').forEach(function(x){x.onchange=function(){fn(x.value);};});}
+function ord(i){return ['1st','2nd','3rd','4th'][i];}
 
 function render(){
   var s=SC[cur], m=$('main');
@@ -264,69 +258,121 @@ function render(){
   $('pg').textContent=(cur+1)+' / '+SC.length;
   $('barI').style.width=Math.round(100*cur/(SC.length-1))+'%';
 
-  if(s==='guess1'){
-    var ok1=a.first==='script end';
-    m.innerHTML='<p class="ey">Step 1 &middot; Guess &middot; 1 of 2</p><h1 class="ins">This code starts 3 file jobs, then prints script end. Which line do you think prints first?</h1>'+
-      '<div class="g2">'+codeBox('log')+'<div>'+choices('first',LINE_OPTS,a.first,a.c1)+
-      (a.c1?btn('Next question')+(ok1?fb('ok','Correct.','script end prints first, even though it is the last line. Node hands the 3 jobs off and does not wait for them.')
-                               :fb('no','Incorrect.','script end prints first, even though it is the last line. Node hands the 3 jobs off and runs the last line right away.'))
-           :btn(a.first?'Check my guess':'Choose a line to check',!a.first))+'</div></div>';
-    if(!a.c1){onPick('first',function(v){a.first=v;render();});$('go').onclick=function(){a.c1=true;render();say(ok1?'Correct.':'Incorrect.');};}
-    else $('go').onclick=function(){go(1);};
+  if(s==='predict'){
+    var o=a.order, ok1=o[0]==='script end', full=o.length===4;
+    var slots='';
+    for(var i=0;i<4;i++){
+      slots+=o[i]?'<button class="tl '+cc(o[i])+(i===0&&!ok1?' wrong':'')+'" type="button" data-rm="'+i+'" aria-label="Printed '+ord(i)+': '+o[i]+'. Click to remove.">'+o[i]+'<span class="x">remove</span></button>'
+                 :'<div class="tl em" aria-hidden="true">&nbsp;</div>';
+    }
+    var left=LINES.filter(function(l){return o.indexOf(l)<0;});
+    var why='';
+    if(o.length) why=ok1?fb('ok','Correct.','script end prints first, even though it is the last line. Node does not wait for the 3 jobs.'+(full?' You will test the other 3 in Cursor.':' Now add the other 3, in any order.'))
+                        :fb('no','Incorrect.','script end prints first, even though it is the last line. Remove your first line and try again.');
+    m.innerHTML='<p class="ey">Step 1 &middot; Predict &middot; 1 of 2</p><h1 class="ins">This code starts 3 file jobs, then prints script end. Click the 4 lines below to print them in the order you expect.</h1>'+
+      '<div class="g2">'+codeBox('log')+'<div><div class="term"><div class="tb"><i></i><i></i><i></i><span>Terminal</span><span class="pr"><b>$</b> node index.js</span></div><div class="bd">'+slots+'</div></div>'+
+      (full?btn('Next question'):'<div class="pool mt">'+left.map(function(l){return '<button class="pk '+cc(l)+'" type="button" data-add="'+l+'"><i></i><span>'+l+'</span></button>';}).join('')+'</div>')+
+      fbs(why)+'</div></div>';
+    qsa('[data-add]').forEach(function(b){b.onclick=function(){a.order.push(b.getAttribute('data-add'));render();
+      var n=document.querySelector('[data-add]')||$('go'); if(n) n.focus();
+      say('Printed '+b.getAttribute('data-add')+(a.order.length===1?(a.order[0]==='script end'?'. Correct.':'. Incorrect.'):''));};});
+    qsa('[data-rm]').forEach(function(b){b.onclick=function(){var k=+b.getAttribute('data-rm');var l=a.order.splice(k,1)[0];render();
+      var n=document.querySelector('[data-add]'); if(n) n.focus(); say('Removed '+l);};});
+    if(full) $('go').onclick=function(){go(1);};
   }
-  else if(s==='guess2'){
-    var ok2=a.err==='no';
-    m.innerHTML='<p class="ey">Step 1 &middot; Guess &middot; 2 of 2</p><h1 class="ins">Imagine one of the 3 jobs fails. Will an error be printed?</h1>'+
-      '<div class="g2">'+codeBox('err')+'<div>'+choices('err',ERR_OPTS,a.err,a.c2)+
-      (a.c2?btn('Now try it in Cursor')+(ok2?fb('ok','Correct.','<code>if (err) return;</code> leaves quietly when a job fails. Nothing is printed and the script keeps going.')
-                                      :fb('no','Incorrect.','Nothing extra is printed. <code>if (err) return;</code> leaves quietly when a job fails, and the script does not crash.'))
-           :btn(a.err?'Check my guess':'Choose an answer to check',!a.err))+'</div></div>';
-    if(!a.c2){onPick('err',function(v){a.err=v;render();});$('go').onclick=function(){a.c2=true;render();say(ok2?'Correct.':'Incorrect.');};}
+  else if(s==='error'){
+    var p=a.errPick, msg='';
+    if(p!==null){
+      if(p===ERR_LINE) msg=fb('ok','Correct.','<code>if (err) return;</code> leaves quietly. No error prints and the script keeps going.')+'<p class="reveal"><b>What prints:</b> writeFile finished, because that line runs first. Nothing extra.</p>';
+      else if(p===5||p===15) msg=fb('no','Incorrect.','That line handles the '+(p===5?'mkdir':'unlink')+' error. Find the same check inside the writeFile callback.');
+      else if(p===9) msg=fb('no','Incorrect.','That line prints writeFile finished, error or not. Look one line down.');
+      else if(p===8) msg=fb('no','Incorrect.','That line starts the job. The error is handled inside the callback, below it.');
+      else msg=fb('no','Incorrect.','That line does not touch the writeFile error. Look inside the writeFile callback.');
+    }
+    m.innerHTML='<p class="ey">Step 1 &middot; Predict &middot; 2 of 2</p><h1 class="ins">writeFile can fail if the data folder is not there yet. Click the line that decides what happens to that error.</h1>'+
+      '<div class="g2">'+codeBox('pick')+'<div><div class="term errbox"><div class="tb"><i></i><i></i><i></i><span>What writeFile gets when it fails</span></div><div class="bd"><span>err =</span> Error: ENOENT: no such file or directory, open \'data/info.txt\'</div></div>'+
+      (a.errOk?btn('Now run it in Cursor'):'<p class="hint">Click a line in the code. Will this error be printed?</p>')+fbs(msg)+'</div></div>';
+    if(!a.errOk) qsa('.cl').forEach(function(b){b.onclick=function(){a.errPick=+b.getAttribute('data-n');a.errOk=a.errPick===ERR_LINE;render();
+      say(a.errOk?'Correct.':'Incorrect.'); if(a.errOk) $('go').focus(); else {var x=document.querySelector('.cl[data-n="'+a.errPick+'"]'); if(x) x.focus();}};});
     else $('go').onclick=function(){go(2);};
   }
   else if(s==='run'){
-    m.innerHTML='<p class="ey">Step 2 &middot; Try it in Cursor</p><h1 class="ins">Open Cursor and run the real code 3 times. Then come back and tell us what you saw.</h1>'+
-      '<div class="g2 even"><div><ol class="how">'+
-      '<li><span>Open Cursor. Create a folder named <b class="m">async-lab</b> and open it.</span></li>'+
-      '<li><span>Create a file named <b class="m">index.js</b>. Click <b>Copy</b> and paste the code into it.</span></li>'+
-      '<li><span>In the terminal, run <b class="m">node index.js</b> and look at the 4 lines it prints.</span></li>'+
-      '<li><span>Delete the <b class="m">data</b> folder and run it again. Do this 3 times in total.</span></li></ol>'+
-      btn('I ran it 3 times')+'</div>'+codeBox('',true)+'</div>';
+    m.innerHTML='<p class="ey">Step 2 &middot; Run in Cursor &middot; 1 of 2</p><h1 class="ins">Run the real code 3 times in Cursor. Keep the terminal output: you paste it next.</h1>'+
+      '<div class="g2"><div><ol class="how">'+
+      '<li><span>In Cursor, open a new folder named <b class="m">async-lab</b>.</span></li>'+
+      '<li><span>Create <b class="m">index.js</b>. Click <b>Copy</b> and paste the code into it.</span></li>'+
+      '<li><span>In the terminal, run <b class="m">node index.js</b>.</span></li>'+
+      '<li><span>Delete the <b class="m">data</b> folder and run it again. Do this until you have 3 runs.</span></li></ol>'+
+      btn('I ran it 3 times')+'</div>'+codeBox('copy')+'</div>';
     bindCopy(); $('go').onclick=function(){go(3);};
   }
-  else if(s==='saw'){
-    var okF=a.seenFirst==='script end', both=a.seenFirst&&a.seenOrder;
-    var fbs='';
-    if(a.c3){
-      fbs=(okF?fb('ok','Correct.','script end is always first. Node starts the 3 jobs and moves on without waiting.')
-              :fb('no','Incorrect.','script end is always first. Look at the top line in your terminal and choose again.'))+
-          (a.seenOrder==='changed'?fb('ok','Correct.','The other 3 lines come in a different order. Each job finishes when it is done, not in the order you wrote it.')
-              :fb('info','Possible, but not promised.','Your runs matched this time. Node does not promise an order, so run it a few more times and it will likely change.'));
-    }
-    m.innerHTML='<p class="ey">Step 2 &middot; Try it in Cursor</p><h1 class="ins">What did you see in your 3 runs? Answer both questions, then check.</h1>'+
-      '<div class="g2 even"><div><p class="q">Which line printed first every time?</p>'+choices('sf',LINE_OPTS,a.seenFirst,a.c3&&okF,'pills')+
-      '<p class="q">Did the other 3 lines always print in the same order?</p>'+choices('so',SAME_OPTS,a.seenOrder,a.c3&&okF)+'</div><div>'+
-      (a.c3&&okF?btn('See what it means'):btn(both?'Check my answers':'Answer both questions to check',!both))+fbs+'</div></div>';
-    if(!(a.c3&&okF)){
-      onPick('sf',function(v){a.seenFirst=v;a.c3=false;render();});
-      onPick('so',function(v){a.seenOrder=v;a.c3=false;render();});
-      $('go').onclick=function(){a.c3=true;render();say(a.seenFirst==='script end'?'Correct.':'Incorrect.');};
-    } else $('go').onclick=function(){go(4);};
+  else if(s==='compare'){
+    m.innerHTML='<p class="ey">Step 2 &middot; Run in Cursor &middot; 2 of 2</p><h1 class="ins">Paste your terminal output from the 3 runs. See it next to your guess.</h1>'+
+      '<div class="g2 cmpg"><div><label class="lab" for="paste" style="display:block">Your terminal output</label>'+
+      '<textarea class="paste" id="paste" spellcheck="false" placeholder="$ node index.js&#10;script end&#10;mkdir finished&#10;...&#10;&#10;Paste all 3 runs. Extra lines are fine."></textarea>'+
+      '<div id="actw"></div></div><div id="cmpw"></div></div>';
+    var ta=$('paste'); ta.value=a.paste;
+    ta.oninput=function(){a.paste=ta.value; if(a.runs){a.runs=null;drawCompare();} else drawAct();};
+    drawCompare();
   }
   else if(s==='done'){
     m.innerHTML='<p class="ey">Step 3 &middot; What it means</p><h1 class="ins">Async means Node starts a job and moves on without waiting for it.</h1>'+
       '<ul class="take">'+
       '<li><b>Async code does not block.</b> script end printed before any job was done.</li>'+
-      '<li><b>Node continues handling other work.</b> It does not wait at fs.mkdir. It runs each callback later.</li>'+
-      '<li><b>fs operations are delegated to the OS.</b> The operating system does each job, and each job finishes when it is done. So if writeFile must wait for mkdir, your code has to say so.</li></ul>'+
+      '<li><b>Node keeps going.</b> It does not wait at fs.mkdir. It runs each callback later.</li>'+
+      '<li><b>The OS does the fs jobs.</b> Each job finishes when it is done. If writeFile needs mkdir first, your code has to say so.</li></ul>'+
       '<p class="back">Back to the lesson: watch the video below.</p>'+
-      '<p style="margin:14px 0 0"><button class="restart" type="button" id="again">Start over</button></p>';
+      '<p style="margin:10px 0 0"><button class="restart" type="button" id="again">Start over</button></p>';
     $('again').onclick=function(){resetAll();go(0);};
     say('Activity complete. Back to the lesson: watch the video below.');
   }
 }
+
+function drawAct(){
+  var w=$('actw'); if(!w) return;
+  var done=a.runs&&a.runs.length;
+  w.innerHTML=done?btn('See what it means'):btn(a.paste.trim()?'Compare':'Paste your output to compare',!a.paste.trim());
+  $('go').onclick=done?function(){go(4);}:function(){a.runs=parseRuns(a.paste);drawCompare();
+    var r=a.runs; say(!r.length?'No output found.':(r.every(function(x){return x[0]==='script end';})?(a.order[0]==='script end'?'Correct.':'Incorrect.'):'Check your paste.')); $('go').focus();};
+}
+function chipRow(label,list,cls,flagFirst){
+  var h='<div class="row'+(cls?' '+cls:'')+'"><span class="rl">'+label+'</span>';
+  for(var i=0;i<4;i++){var l=list&&list[i];
+    h+=l?'<span class="ch '+cc(l)+(flagFirst&&i===0&&l!=='script end'?' bad':'')+'" title="'+l+'">'+SHORT[l]+'</span>':'<span class="ch e"></span>';}
+  return h+'</div>';
+}
+function drawCompare(){
+  var w=$('cmpw'); if(!w) return;
+  var r=a.runs||[], shown=r.slice(0,3), rows='';
+  rows+='<div class="row hdr"><span class="rl">&nbsp;</span><span>1st</span><span>2nd</span><span>3rd</span><span>4th</span></div>';
+  rows+=chipRow('Guess',a.order,'you',false);
+  for(var i=0;i<3;i++) rows+=chipRow('Run '+(i+1),shown[i],'',true);
+  var msg='';
+  if(a.runs){
+    if(!r.length) msg=fb('warn','No output found.','Paste the lines that node index.js printed, for example script end.');
+    else{
+      var allFirst=shown.every(function(x){return x[0]==='script end';}), g=a.order[0];
+      if(!allFirst) msg+=fb('warn','Check your paste.','script end should be the first line of each run. Paste the full output, top to bottom.');
+      else if(g==='script end') msg+=fb('ok','Correct.','Your guess put script end first, and so did every run.');
+      else msg+=fb('no','Incorrect.','Your guess put '+g+' first. Every run printed script end first.');
+      var part=-1; shown.forEach(function(x,k){if(part<0&&x.length<4) part=k;});
+      var keys={}; shown.forEach(function(x){if(x.length===4) keys[x.join('|')]=1;}); var nd=Object.keys(keys).length;
+      var early=-1; shown.forEach(function(x,k){if(early<0&&x.indexOf('writeFile finished')>-1&&x.indexOf('mkdir finished')>-1&&x.indexOf('writeFile finished')<x.indexOf('mkdir finished')) early=k;});
+      var note;
+      if(part>-1) note='Run '+(part+1)+' has '+shown[part].length+' of the 4 lines. Paste whole runs to compare them.';
+      else if(shown.length===1) note='You pasted 1 run. Paste all 3 to see if the order changes.';
+      else if(nd>1) note='Your '+shown.length+' runs came out in '+nd+' different orders. Each job finishes when the OS is done with it.';
+      else note='Your runs matched this time. Node does not promise the order, so it can change on another run.';
+      if(early>-1&&part<0) note+=' In run '+(early+1)+', writeFile finished before mkdir, so it failed quietly.';
+      msg+=fb('info','Your runs.',note+(r.length>3?' Showing your first 3 runs.':''));
+    }
+  }
+  w.innerHTML='<p class="lab">Your guess vs your runs</p><div class="cmp">'+rows+'</div>'+fbs(msg);
+  drawAct();
+}
+
 render();
-function fit(){document.body.style.zoom='';var w=innerWidth,h=innerHeight;var z=Math.min(1,w/660,h/600);
+function fit(){document.body.style.zoom='';var w=innerWidth,h=innerHeight;var z=Math.min(1,w/660,h/560);
   document.body.style.zoom=z<1?z.toFixed(3):'';}
 addEventListener('resize',fit);fit();
 })();
