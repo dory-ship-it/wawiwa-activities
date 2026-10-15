@@ -1,11 +1,13 @@
-// Lesson state. P0 STUB: keeps place and done screens in localStorage only, in the PRD's
-// compact shape ({ v, s, d, a }). P4 replaces this with the full codec and the SCORM
+// Lesson state. P0/P1 STUB: keeps the state in localStorage only, in the PRD's compact shape:
+//   s place, d done screens, a first answers by interaction id ("b|c", "b,d|w", "|n"),
+//   r fast-track route (skip | full), f stored free text by store key, x retry counts.
+// P4 replaces this with the full codec and the SCORM
 // suspend_data path (store.js pattern from genai-for-marketing/s1-ai-awareness: every storage
 // access in try/catch, so private windows and blocked storage never break the page).
 const KEY = 'wawiwa.eai.l4.slice';
 
 export function emptyState() {
-  return { v: 1, s: null, d: [], a: {} };
+  return { v: 1, s: null, d: [], a: {}, r: null, f: {}, x: {} };
 }
 
 // Returns { state, ok }: ok is false when storage could not be read.

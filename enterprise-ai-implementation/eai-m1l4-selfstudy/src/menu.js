@@ -87,7 +87,7 @@ export function createMenu(stage, content, { zones, getMap, onGoScreen, onStartO
       return h('li', { class: 'w-chapter', dataset: { status: c.status } },
         h('div', { class: 'w-chapter-head' },
           h('span', { class: 'w-chapter-icon' }, icon(STATUS_ICON[c.status] || 'lock', { size: 18 })),
-          h('span', { class: 'w-chapter-name' }, h('span', { class: 'w-chapter-n' }, fmt(ui.chapterLabel, { n: c.n })), ' ', h('strong', {}, c.title)),
+          h('span', { class: 'w-chapter-name' }, c.start ? null : [h('span', { class: 'w-chapter-n' }, fmt(ui.chapterLabel, { n: c.n })), ' '], h('strong', {}, c.title)),
           h('span', { class: 'w-chapter-min' }, fmt(m.minutes, { m: c.minutes })),
           h('span', { class: 'w-chapter-status' }, statusWord[c.status])),
         screens);

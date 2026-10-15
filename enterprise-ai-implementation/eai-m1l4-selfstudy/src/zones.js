@@ -8,7 +8,8 @@ import { h, fmt } from './util.js';
 import { icon } from './icons.js';
 import { attachTip, hide as hideTip } from './tooltip.js';
 
-const FEEDBACK_ICON = { hint: 'info', correct: 'check', wrong: 'x', neutral: 'check', pause: 'pause' };
+// notice = a neutral-tone message that is not an answer result (S02 empty Save): no state word.
+const FEEDBACK_ICON = { hint: 'info', correct: 'check', wrong: 'x', neutral: 'check', notice: 'info', pause: 'pause' };
 
 export function createZones(stage, content, { onMenu, onSegment }) {
   const ui = content.ui;
@@ -29,7 +30,7 @@ export function createZones(stage, content, { onMenu, onSegment }) {
   const topbar = h('header', { class: 'w-topbar' }, logo, centre, h('div', { class: 'w-topbar-right' }, saved, menuBtn));
 
   /* ---- instruction, stage card, feedback row ---- */
-  const instruction = h('h1', { class: 'w-instruction', tabindex: '-1' });
+  const instruction = h('h1', { class: 'w-instruction', id: 'w-instruction', tabindex: '-1' });
   const slots = { top: h('div', { class: 'w-slot w-slot-top' }), middle: h('div', { class: 'w-slot w-slot-middle' }), bottom: h('div', { class: 'w-slot w-slot-bottom' }) };
   const card = h('section', { class: 'w-card' }, slots.top, slots.middle, slots.bottom);
 
@@ -54,6 +55,7 @@ export function createZones(stage, content, { onMenu, onSegment }) {
     const p = pages[page];
     feedbackRow.dataset.state = p.state;
     fbIcon.replaceChildren(icon(FEEDBACK_ICON[p.state] || 'info', { size: 26 }));
+    fbIcon.hidden = !p.text; // a screen with no hint shows an empty row, no icon
     const prefix = p.state === 'correct' ? ui.feedback.correctPrefix : p.state === 'wrong' ? ui.feedback.wrongPrefix : '';
     const sr = p.state === 'correct' ? ui.feedback.srCorrect : p.state === 'wrong' ? ui.feedback.srWrong : p.state === 'neutral' ? ui.feedback.srNeutral : '';
     fbSr.textContent = sr ? sr + ' ' : '';
@@ -64,8 +66,10 @@ export function createZones(stage, content, { onMenu, onSegment }) {
     prevBtn.disabled = page === 0;
     nextBtn.disabled = page === pages.length - 1;
   }
-  prevBtn.addEventListener('click', () => { if (page > 0) { page--; showPage(); } });
-  nextBtn.addEventListener('click', () => { if (page < pages.length - 1) { page++; showPage(); } });
+  // A pager button that becomes disabled would drop keyboard focus: hand it to the other one.
+  const turn = (d, from, to) => { page += d; showPage(); if (from.disabled && document.activeElement !== to) to.focus(); };
+  prevBtn.addEventListener('click', () => { if (page > 0) turn(-1, prevBtn, nextBtn); });
+  nextBtn.addEventListener('click', () => { if (page < pages.length - 1) turn(1, nextBtn, prevBtn); });
 
   // setFeedback({ state, text }) or setFeedback({ pages: [{ state, text }, ...] }), plus
   // actions: [{ label, primary, onClick }] for the Continue slot (one primary per screen).
@@ -114,7 +118,7 @@ export function createZones(stage, content, { onMenu, onSegment }) {
   }
 
   function clearScreen() {
-    for (const s of Object.values(slots)) s.replaceChildren();
+    for (const s of Object.values(slots)) { s.replaceChildren(); s.hidden = false; }
     card.className = 'w-card';
     setFeedback({ state: 'hint', text: '' });
   }

@@ -8,6 +8,10 @@
 //  6. contrast of every text/background pair in the token table (4.5:1 text, 3:1 large text and UI)
 //  7. no learner-facing sentences in src/*.js string literals; no italics in src/*.css
 //  8. the boot fallback copy in index.html equals ui.boot in the content file
+//  9. word counts (storyboard rule): on-screen words per screen view at most 45, every hint,
+//     feedback line and pause marker at most 25; instruction line and action buttons excluded
+// 10. every interaction has full tracking metadata, ids are unique, graded keys match the options
+// 11. no arrow glyph (U+2192) in ui strings or src: the font subset has none, use the arrow icon
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,7 +42,7 @@ const dashFiles = [contentPath, join(ROOT, 'index.html'), ...srcFiles];
 let dashHits = 0;
 for (const f of dashFiles) {
   read(f).split('\n').forEach((line, i) => {
-    if (/[–—]/.test(line)) { dashHits++; fail(`dash (U+2013/U+2014) in ${relative(ROOT, f)}:${i + 1}`); }
+    if (/[\u2013\u2014]/.test(line)) { dashHits++; fail(`dash (U+2013/U+2014) in ${relative(ROOT, f)}:${i + 1}`); }
   });
 }
 if (!dashHits) ok(`no em or en dash in content, index.html and ${srcFiles.length} src files`);
@@ -127,6 +131,79 @@ const html = read(join(ROOT, 'index.html'));
 const fb = Object.fromEntries([...html.matchAll(/data-key="(\w+)">([^<]*)</g)].map((m) => [m[1], m[2]]));
 const bootOk = Object.entries(content.ui.boot).every(([k, v]) => fb[k] === v) && Object.keys(fb).length === Object.keys(content.ui.boot).length;
 bootOk ? ok('index.html boot fallback equals ui.boot') : fail('index.html boot fallback differs from ui.boot');
+
+/* 9. word counts */
+const MAX_SCREEN_WORDS = 45, MAX_FEEDBACK_WORDS = 25;
+const words = (s) => String(s ?? '').split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
+// on-screen text of one stage (top / middle / bottom), whatever the kind
+const stageText = (stage = {}) => Object.values(stage).flatMap((p) => [p.text, p.label, p.chip?.text, ...(p.bubbles || []), ...(p.items || []).map((x) => x.text)]);
+const fieldText = (fields = []) => fields.flatMap((f) => [f.label, f.placeholder]);
+// one entry per view the learner sees at once: [name, strings on screen]
+const views = content.screens.flatMap((s) => {
+  if (s.template === 'video') return [[s.id, [s.title, s.guidingQuestion]], ...(s.stops || []).map((st) => [`${s.id} ${st.id}`, [st.question, ...st.options.map((o) => o.label)]])];
+  if (s.template === 'handoff') return Object.entries(s.states).map(([k, st]) => [`${s.id} ${k}`, [...stageText(st.stage), ...fieldText(st.fields)]]);
+  if (s.variant === 'selfcheck') return s.steps.map((st) => [`${s.id} ${st.id}`, [...(st.rows || []).map((r) => r.text), ...(st.chips || []).map((c) => c.label), st.strip]]);
+  return [[s.id, [...stageText(s.stage), ...(s.options || []).map((o) => o.label), ...fieldText(s.fields)]]];
+});
+let wordFails = 0;
+for (const [name, list] of views) {
+  const n = list.reduce((sum, t) => sum + words(t), 0);
+  if (n > MAX_SCREEN_WORDS) { wordFails++; fail(`${name}: ${n} on-screen words (max ${MAX_SCREEN_WORDS})`); }
+}
+if (!wordFails) ok(`on-screen words at most ${MAX_SCREEN_WORDS} in all ${views.length} screen views (${views.map(([n, l]) => n + ' ' + l.reduce((s, t) => s + words(t), 0)).join(', ')})`);
+const feedbackLines = [
+  ...content.chapters.filter((c) => c.pauseMarker).map((c) => [`${c.id} pauseMarker`, c.pauseMarker]),
+  ...content.screens.flatMap((s) => [
+    [`${s.id} hint`, s.hint],
+    ...(s.options || []).map((o) => [`${s.id} option ${o.id}`, o.feedback]),
+    ...Object.entries(s.feedback || {}).map(([k, v]) => [`${s.id} feedback.${k}`, v]),
+    ...(s.stops || []).flatMap((st) => st.options.map((o) => [`${s.id} ${st.id} option ${o.id}`, o.feedback])),
+    ...Object.entries(s.states || {}).flatMap(([k, st]) => Object.entries(st).filter(([f, v]) => /Feedback$/.test(f) && typeof v === 'string').map(([f, v]) => [`${s.id} ${k}.${f}`, v])),
+    ...(s.steps || []).flatMap((st) => [...(st.rows || []).flatMap((r) => Object.entries(r.feedback).map(([k, v]) => [`${s.id} ${r.id} ${k}`, v])),
+      ...(st.chips || []).map((c) => [`${s.id} chip ${c.id}`, c.feedback])]),
+  ]),
+].filter(([, v]) => v);
+const longFb = feedbackLines.filter(([, v]) => words(v) > MAX_FEEDBACK_WORDS);
+longFb.forEach(([k, v]) => fail(`${k}: ${words(v)} words (max ${MAX_FEEDBACK_WORDS})`));
+if (!longFb.length) ok(`all ${feedbackLines.length} hints, feedback lines and pause markers at most ${MAX_FEEDBACK_WORDS} words`);
+
+/* 10. tracking metadata */
+const TYPES = ['choice', 'matching', 'fill-in'], RESULTS = ['graded', 'neutral'];
+const BLOOM = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
+const interactions = content.screens.flatMap((s) => [...(s.tracking || []).map((t) => [s, t]), ...(s.stops || []).map((st) => [s, st.tracking, st])]);
+const seen = new Set();
+let metaFails = 0;
+const metaFail = (m) => { metaFails++; fail(m); };
+for (const [s, t, stop] of interactions) {
+  const where = `${s.id} ${t?.id || '(no id)'}`;
+  if (!t || !/^L4_[A-Z0-9]+_\d+$/.test(t.id)) { metaFail(`${where}: missing or malformed id`); continue; }
+  if (seen.has(t.id)) metaFail(`${where}: duplicate interaction id`);
+  seen.add(t.id);
+  if (!TYPES.includes(t.type)) metaFail(`${where}: type "${t.type}" not one of ${TYPES.join(', ')}`);
+  if (!('correctResponse' in t)) metaFail(`${where}: correctResponse missing (null when there is none)`);
+  if (typeof t.scored !== 'boolean') metaFail(`${where}: scored must be true or false`);
+  if (!BLOOM.includes(t.bloom)) metaFail(`${where}: bloom "${t.bloom}" not a Bloom level`);
+  if (!RESULTS.includes(t.result)) metaFail(`${where}: result "${t.result}" not one of ${RESULTS.join(', ')}`);
+  if (t.result === 'neutral' && t.correctResponse !== null) metaFail(`${where}: neutral interaction with a correctResponse`);
+  if (t.result === 'graded') {
+    const opts = (stop || s).options || [];
+    const key = opts.map((o, i) => (o.correct ? String.fromCharCode(97 + i) : null)).filter(Boolean).join(',');
+    if (t.correctResponse !== key) metaFail(`${where}: correctResponse "${t.correctResponse}" but the correct options are "${key}" (letters in on-screen order)`);
+    if (key.includes(',') && t.multiple !== true) metaFail(`${where}: several correct options but multiple is not true`);
+  }
+}
+// interaction ids referenced by fields, rows and chips must be declared in tracking[]
+const refs = content.screens.flatMap((s) => [
+  ...(s.fields || []).map((f) => [s.id, f.trackingId]),
+  ...Object.values(s.states || {}).flatMap((st) => (st.fields || []).map((f) => [s.id, f.trackingId])),
+  ...(s.steps || []).flatMap((st) => [...(st.rows || []).map((r) => [s.id, r.trackingId]), ...(st.trackingId ? [[s.id, st.trackingId]] : [])]),
+]);
+for (const [sid, id] of refs) if (!seen.has(id)) metaFail(`${sid}: ${id} is used on screen but has no tracking entry`);
+if (!metaFails) ok(`all ${seen.size} interactions have full tracking metadata (${[...seen].join(', ')})`);
+
+/* 11. arrow glyph */
+const arrowIn = [...JSON.stringify(content.ui).matchAll(/\u2192/g)].length + srcFiles.filter((f) => /\u2192/.test(read(f))).length;
+arrowIn ? fail('arrow glyph (U+2192) in ui strings or src: use icon("arrow-right")') : ok('no arrow glyph in ui strings or src (icon arrow-right exists)');
 
 finish();
 function finish() {

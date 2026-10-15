@@ -4,10 +4,13 @@
 // Usage: npm run test:fit                 checks only
 //        npm run test:fit -- --shots      checks + screenshots into review/p0/
 // Chrome: set CHROME_PATH, or a stock Google Chrome / Chromium install is found on its own.
+// P1 adds section 5: the real slice screens fit, nothing overlaps the feedback row, and no empty
+// band inside the stage card is taller than 25% of the card (Noy's space-distribution rule).
 import puppeteer from 'puppeteer-core';
-import { existsSync, mkdirSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { startServer, ROOT } from './serve.mjs';
+import { chromePath, measureLayout, MAX_GAP_RATIO } from './lib.mjs';
 
 const SHOTS = process.argv.includes('--shots');
 const OUT = join(ROOT, 'review', 'p0');
@@ -16,15 +19,6 @@ const fails = [];
 const ok = (m) => console.log('  ok   ' + m);
 const fail = (m) => { fails.push(m); console.log('  FAIL ' + m); };
 const expect = (cond, m) => (cond ? ok(m) : fail(m));
-
-function chromePath() {
-  const cands = [process.env.CHROME_PATH, process.env.PUPPETEER_EXECUTABLE_PATH,
-    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/chromium'].filter(Boolean);
-  const found = cands.find((p) => existsSync(p));
-  if (!found) throw new Error('Chrome not found. Set CHROME_PATH to the browser executable.');
-  return found;
-}
 
 const server = await startServer(0);
 const BASE = `http://127.0.0.1:${server.address().port}/index.html`;
@@ -157,12 +151,20 @@ console.log('\n4. progress bar and lesson navigation');
   }));
   let p = await prog();
   expect(p.screen === 'S01' && p.segs.length === 7, `fresh start at S01, ${p.segs.length} segments: "${p.readout}"`);
+  expect(/^Start/.test(p.readout) && !/Chapter 0/.test(p.readout + p.segs[0].label), `entry chapter shows as Start, no number: "${p.readout}" / "${p.segs[0].label}"`);
   expect(p.segs[0].current === 'step' && p.segs[0].status === 'current' && p.segs[5].disabled === 'true' && p.segs[2].status === 'notInPilot',
     `segment states: ch0 ${p.segs[0].status}, ch1 ${p.segs[1].status}, ch2 ${p.segs[2].status}, ch5 ${p.segs[5].status}`);
   await shot(page, 'progress-ch0.png');
-  for (let i = 0; i < 3; i++) await page.click('.w-fb-actions [data-action="continue"]');
+  // S01 right answer, S02 saved, FT1 skipped (the walk script covers every path in detail)
+  await page.click('.w-opt[data-id="b"]');
+  await page.click('.w-fb-actions [data-action="continue"]');
+  await page.type('.w-input[data-store="L4_CASE_TITLE"]', 'Sales call summaries');
+  await page.type('.w-input[data-store="L4_CASE_PROBLEM"]', 'Today summaries take hours.');
+  await page.click('[data-action="save"]');
+  await page.click('.w-fb-actions [data-action="continue"]');
+  await page.click('[data-action="skipChallenge"]');
   p = await prog();
-  expect(p.screen === 'V1' && p.segs[0].status === 'done' && p.segs[1].status === 'current', `after three Continue: at V1, "${p.readout}"`);
+  expect(p.screen === 'V1' && p.segs[0].status === 'done' && p.segs[1].status === 'current', `after S01, S02 and the FT1 skip: at V1, "${p.readout}"`);
   expect(p.segs[0].label && /completed/.test(p.segs[0].label), `screen reader label: "${p.segs[0].label}"`);
   // keyboard on the segment buttons
   await page.focus('.w-seg[data-chapter="5"]');
@@ -197,6 +199,21 @@ console.log('\n4. progress bar and lesson navigation');
   expect((await prog()).screen === 'S01', 'a completed screen in the map is clickable (revisit)');
   expect(!page.errors.length, 'no console errors during the navigation run' + (page.errors.length ? ': ' + page.errors.join(' | ') : ''));
   await page.close();
+}
+
+/* ---- 5. slice screens: fit and space distribution (P1) ---- */
+console.log('\n5. slice screens: fit and space distribution');
+for (const id of ['S01', 'S02', 'FT1', 'S03']) {
+  for (const size of SIZES) {
+    const page = await open(BASE + `?reset=1&screen=${id}`, size);
+    const m = await page.evaluate(measureLayout);
+    const [w, h] = size;
+    expect(m.gapRatio <= MAX_GAP_RATIO, `${id} ${w}x${h}: largest empty band in the card ${m.maxGap}px = ${Math.round(m.gapRatio * 100)}% (max ${MAX_GAP_RATIO * 100}%)`);
+    expect(!m.overlaps.length && !m.outside.length && !m.fbOverflow, `${id} ${w}x${h}: card content inside the card, nothing over the feedback row${m.overlaps.concat(m.outside).length ? ' (' + m.overlaps.concat(m.outside).join(', ') + ')' : ''}`);
+    expect(!m.clipped.length, `${id} ${w}x${h}: no clipped text${m.clipped.length ? ' (' + m.clipped.join(', ') + ')' : ''}`);
+    expect(!page.errors.length, `${id} ${w}x${h}: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);
+    await page.close();
+  }
 }
 
 await browser.close();

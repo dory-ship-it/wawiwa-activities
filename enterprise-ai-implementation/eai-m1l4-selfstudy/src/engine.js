@@ -9,15 +9,20 @@ import { createMenu, openDialog } from './menu.js';
 import { initTooltips, applyTerms } from './tooltip.js';
 import { loadState, saveState, clearState, emptyState } from './state.js';
 import { placeholder } from './templates/placeholder.js';
+import { decision } from './templates/decision.js';
+import { input } from './templates/input.js';
+import { createTracking } from './tracking/index.js';
 import { demo } from './demo.js';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const NARROW_BELOW = 900; // window narrower than this: show the "best on a computer" note above the stage
 const NOTE_H = 40;
 const NOT_IN_PILOT_WEIGHT = 0.6; // progress segment width for a chapter with no screens in the slice
+const START_CHAPTER = 0;         // the entry chapter shows as "Start" (ui.startLabel), never "Chapter 0"
+const MAX_TEXT = 250;            // fill-in responses are trimmed and capped (SCORM 1.2 safe)
 
-// Templates arrive in P1 to P3; until then every slice screen mounts the placeholder.
-const TEMPLATES = {};
+// Video and handoff arrive in P2 and P3; until then those screens mount the placeholder.
+const TEMPLATES = { decision, input };
 
 export async function boot(root) {
   const res = await fetch(new URL('../content/l4-slice.json', import.meta.url));
@@ -49,6 +54,8 @@ class Lesson {
     this.current = null;
     this.mounted = null;
     this.demoMode = false;
+    this.shownAt = 0;
+    this.tracking = createTracking({ debug: new URLSearchParams(location.search).get('debug') === '1' });
 
     this.note = h('p', { class: 'w-small-note', hidden: true }, this.ui.smallScreenNote);
     this.stage = h('div', { class: 'w-stage' });
@@ -123,16 +130,78 @@ class Lesson {
     this.zones.instruction.textContent = screen.instruction;
     const tpl = TEMPLATES[screen.template] || placeholder;
     const done = this.doneSet();
+    this.shownAt = performance.now();
     this.mounted = tpl.mount({
       screen, content: this.content, ui: this.ui, zones: this.zones,
       revisit: done.has(id),            // revisiting a completed screen: show the earlier answer, read-only
-      answer: this.state.a[id] ?? null, // first answer stored for this screen (P1 templates read it)
-      complete: (answer) => this.complete(id, answer),
+      complete: () => this.complete(id),
       next: () => this.next(),
+      goTo: (to) => this.go(to),
+      finish: () => this.finish(id),    // chapter-end pause marker when the screen ends a chapter, else next
+      answer: (a) => this.answer(id, a),
+      firstAnswer: (trackingId) => this.firstAnswer(trackingId),
+      store: { get: (key) => this.state.f[key] ?? '', set: (key, value) => { this.state.f[key] = value; } },
+      route: () => this.state.r,
+      setRoute: (route) => this.setRoute(id, route),
     });
     applyTerms(this.zones.card, screen.terms, this.content.tooltips);
     this.renderProgress();
     if (focus) this.zones.instruction.focus({ preventScroll: true });
+  }
+
+  // After the last screen of a chapter: the feedback row shows the chapter's pause marker with
+  // Continue (to the next slice screen). Other screens go straight on.
+  finish(id) {
+    const screen = this.screens[id];
+    const chapter = this.chapters.find((c) => c.id === screen.chapter);
+    if (!screen.endOfChapter || !chapter || !chapter.pauseMarker) { this.next(); return; }
+    const btn = this.zones.setFeedback({
+      state: 'pause', text: chapter.pauseMarker,
+      actions: [{ id: 'continue', label: this.ui.buttons.continue, primary: true, onClick: () => this.next() }],
+    });
+    btn?.focus();
+  }
+
+  /* ---- answers and the tracking bus ---- */
+  // a = { trackingId, response, result }. The first attempt per interaction id emits 'answer' (and
+  // is kept in state.a); every later attempt emits 'retry' (count in state.x). Returns the kind.
+  answer(screenId, { trackingId, response, result }) {
+    const meta = this.trackingMeta(screenId, trackingId);
+    const type = meta?.type || 'choice';
+    if (type === 'fill-in') response = String(response ?? '').trim().slice(0, MAX_TEXT);
+    const latencyMs = Math.round(performance.now() - this.shownAt);
+    if (this.demoMode) return 'answer';
+    if (!(trackingId in this.state.a)) {
+      this.state.a[trackingId] = (type === 'fill-in' ? '' : response) + '|' + result.charAt(0);
+      this.tracking.emit({ kind: 'answer', trackingId, type, response, result, latencyMs });
+      this.persist();
+      return 'answer';
+    }
+    const attempt = (this.state.x[trackingId] || 1) + 1;
+    this.state.x[trackingId] = attempt;
+    this.tracking.emit({ kind: 'retry', trackingId, type, response, result, attempt, latencyMs });
+    this.persist();
+    return 'retry';
+  }
+
+  firstAnswer(trackingId) {
+    const v = this.state.a[trackingId];
+    if (typeof v !== 'string') return null;
+    const [response, r] = v.split('|');
+    return { response, result: r === 'c' ? 'correct' : r === 'w' ? 'wrong' : 'neutral' };
+  }
+
+  trackingMeta(screenId, trackingId) {
+    const s = this.screens[screenId];
+    const all = [...(s.tracking || []), ...(s.stops || []).map((x) => x.tracking)];
+    return all.find((t) => t && t.id === trackingId) || null;
+  }
+
+  setRoute(screenId, route) {
+    if (this.demoMode) return;
+    this.state.r = route;
+    this.tracking.emit({ kind: 'route', screen: screenId, route });
+    this.persist();
   }
 
   unmount() {
@@ -147,11 +216,11 @@ class Lesson {
     else this.zones.setFeedback({ state: 'pause', text: this.ui.sliceEnd });
   }
 
-  // Mark a screen done. The first answer is kept; a revisit never overwrites it (and, from P4,
-  // never re-reports to SCORM).
-  complete(id, answer) {
+  // Mark a screen done. First answers are kept by answer() and never overwritten (and, from P4,
+  // never re-reported to SCORM).
+  complete(id) {
+    if (this.demoMode) return;
     if (!this.state.d.includes(id)) this.state.d.push(id);
-    if (answer !== undefined && answer !== null && !(id in this.state.a)) this.state.a[id] = answer;
     this.persist();
     this.renderProgress();
   }
@@ -173,7 +242,21 @@ class Lesson {
   }
 
   /* ---- progress model (top bar segments and menu chapter map) ---- */
-  doneSet() { return new Set(this.state.d); }
+  // Done screens, plus the screens a fast-track jump skipped (route "skip"): they count as done,
+  // so the bar never shows a hole and the chapter completes with its landing screen.
+  doneSet() { return new Set([...this.state.d, ...this.skippedScreens()]); }
+
+  skippedScreens() {
+    if (this.state.r !== 'skip') return [];
+    return this.chapters.flatMap((c) => {
+      if (!c.fastTrack) return [];
+      const from = c.screens.indexOf(c.fastTrack.card), to = c.screens.indexOf(c.fastTrack.landing);
+      return from >= 0 && to > from ? c.screens.slice(from + 1, to) : [];
+    });
+  }
+
+  // The entry chapter is shown as "Start" with no number; the others keep "Chapter n".
+  chapterName(c) { return c.n === START_CHAPTER ? this.ui.startLabel : c.title; }
 
   frontierIndex() {
     const done = this.doneSet();
@@ -198,7 +281,9 @@ class Lesson {
       const status = this.chapterStatus(c, done, frontierChapter);
       const total = c.inSlice ? c.screens.length : 0;
       const clickable = status === 'done' || status === 'current';
-      const label = fmt(pb.segmentLabel, { n: c.n, title: c.title, status: pb.status[status] });
+      const label = c.n === START_CHAPTER
+        ? fmt(pb.segmentLabelStart, { title: this.chapterName(c), status: pb.status[status] })
+        : fmt(pb.segmentLabel, { n: c.n, title: c.title, status: pb.status[status] });
       return {
         n: c.n, total, status, clickable, label,
         done: c.screens.filter((id) => done.has(id)).length,
@@ -210,9 +295,10 @@ class Lesson {
     });
     const vc = this.chapters.find((c) => c.id === viewChapter);
     const minutesLeft = this.slice.filter((id) => !done.has(id)).reduce((sum, id) => sum + (this.screens[id].minutes || 0), 0);
+    const pos = { n: vc ? vc.n : 0, max: this.maxChapter, i: this.slice.indexOf(this.current) + 1, total: this.slice.length };
     return {
-      title: vc ? vc.title : '',
-      readout: fmt(pb.readout, { n: vc ? vc.n : 0, max: this.maxChapter, i: this.slice.indexOf(this.current) + 1, total: this.slice.length }),
+      title: vc ? this.chapterName(vc) : '',
+      readout: fmt(vc && vc.n === START_CHAPTER ? pb.readoutStart : pb.readout, pos),
       minutesLeft: fmt(pb.minutesLeft, { m: minutesLeft }),
       chapters,
     };
@@ -225,7 +311,7 @@ class Lesson {
     const fi = this.frontierIndex();
     const frontierChapter = fi < this.slice.length ? this.screens[this.slice[fi]].chapter : null;
     return this.chapters.map((c) => ({
-      n: c.n, title: c.title, minutes: c.minutes,
+      n: c.n, title: this.chapterName(c), start: c.n === START_CHAPTER, minutes: c.minutes,
       status: this.chapterStatus(c, done, frontierChapter),
       screens: (c.inSlice ? c.screens : []).map((id) => {
         const s = this.screens[id];
