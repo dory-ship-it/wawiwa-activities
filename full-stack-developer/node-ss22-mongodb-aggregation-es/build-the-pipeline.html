@@ -138,7 +138,7 @@ var S={
 var R=[
  {goal:'Estudiantes activos por ciudad', hint:'Cuenta solo los estudiantes activos, un resultado por ciudad.', stages:['group','active'],
   ok:function(o){return same(o,[['London',2],['Paris',1],['Berlin',1]],false);},
-  why:function(p){return p[0]==='group'?'<b>Todavía no.</b> Después de $group, los documents son ciudades. No tienen el campo isActive, así que $match no encuentra nada. Filtra primero.':'<b>Todavía no.</b> Usa los dos stages: filtra y luego agrupa.';},
+  why:function(p){return p[0]==='group'?'<b>Todavía no.</b> Después de $group, los documentos son ciudades. No tienen el campo isActive, así que $match no encuentra nada. Filtra primero.':'<b>Todavía no.</b> Usa los dos stages: filtra y luego agrupa.';},
   yes:'<b>Correcto.</b> $match conserva los 4 estudiantes activos y luego $group los cuenta por ciudad.', short:'$match, luego $group'},
  {goal:'Solo ciudades con 2 o más estudiantes', hint:'Cuenta todos los estudiantes por ciudad y luego conserva las ciudades grandes.', stages:['count2','group'],
   ok:function(o){return same(o,[['London',3],['Paris',2]],false);},
@@ -184,7 +184,7 @@ function render(){
   m.innerHTML='<h2>'+r.goal+'</h2><div class="cols">'+
     '<div class="col"><div class="lab"><span>Stages</span></div><div class="box">'+tray+'</div></div>'+
     '<div class="col"><div class="lab"><span>Tu pipeline</span></div><div class="box pipe" id="pipe"><div class="flowin">Entran 6 estudiantes</div>'+pl+'</div></div>'+
-    '<div class="col"><div class="lab"><span>Salida</span><span>'+out.length+' document'+(out.length===1?'':'s')+'</span></div><div class="box">'+res+'</div></div>'+
+    '<div class="col"><div class="lab"><span>Salida</span><span>'+out.length+' documento'+(out.length===1?'':'s')+'</span></div><div class="box">'+res+'</div></div>'+
     '</div><div class="fb">'+fb+'</div>';
   wire(); fit();
 }

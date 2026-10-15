@@ -137,11 +137,11 @@ var ID='6acc90a27a9df3a903b6b34d';
 var R=[
  {q:'¿Qué vuelve?', m:'post', url:'localhost:3000/students',
   panel:'Body', lines:['{','  "name": "Anna",','  "age": 21,','  "email": "anna@mail.com",','  "isActive": true','}'], hot:-1,
-  opts:[['201','el document completo del estudiante'],['201','{ "acknowledged": true, "insertedId": "…" }'],['200','"Student created"']], ans:1,
+  opts:[['201','el documento completo del estudiante'],['201','{ "acknowledged": true, "insertedId": "…" }'],['200','"Student created"']], ans:1,
   st:'201 Created', cls:'c2', body:'{\n  "acknowledged": true,\n  "insertedId": "'+ID+'"\n}',
   ok:'<b>Correcto.</b> insertOne informa lo que hizo. No te devuelve el document.',
   no:'<b>No exactamente.</b> insertOne informa lo que hizo. No te devuelve el document.',
-  short:'insertedId, no el document'},
+  short:'insertedId, no el documento'},
  {q:'Un compañero de equipo escribió esta ruta. ¿Qué vuelve?', m:'get', url:'localhost:3000/students/'+ID,
   panel:'Su ruta', lines:['app.get("/students/:id", async (req, res) => {','  const student = await studentsCollection','    .findOne({ _id: req.params.id });','  if (!student) return res.status(404)','    .json({ error: "Student not found" });','  res.json(student);','});'], hot:2,
   opts:[['200','Anna'],['404','{ "error": "Student not found" }'],['400','{ "error": "Invalid ID" }']], ans:1,
