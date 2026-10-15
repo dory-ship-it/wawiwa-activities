@@ -70,3 +70,7 @@ This replaces the plain 4 px progress line in step 8 and extends the menu in ste
 4. Revisiting a completed screen shows the learner's earlier answer and feedback (read-only for scored items); it never re-reports to SCORM.
 5. Progress and position survive reload (local mode) and LMS resume (suspend_data), within the 4,096-character limit.
 Add to Definition of done: screenshots `progress-ch0.png`, `progress-ch1-mid.png`, `menu-chapter-map.png`; keyboard check of the segment buttons.
+
+
+## Report file (required)
+Also save the final report as `review/p0/REPORT.md` (same text you print), together with the screenshots, before you commit. The planning model reads it from there.

@@ -57,3 +57,7 @@ Written 15 Oct 2026 (planning side). Opus 5.5, high effort. One session. Needs P
 - `dist/eai-m1l4-selfstudy-scorm12.zip` path and size.
 - Screenshots in `review/p4/`: `resume-prompt.png`, `debug-panel.png`, `startover-lms-note.png`.
 - Report (max 15 lines): test results, max suspend length, manifest summary, whether schema files were included, and "Next: P5 and the SCORM Cloud upload".
+
+
+## Report file (required)
+Also save the final report as `review/p4/REPORT.md` (same text you print), together with the screenshots, before you commit. The planning model reads it from there.

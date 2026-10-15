@@ -56,3 +56,15 @@ Written 15 Oct 2026 (planning side). Opus 5.5, high effort. One session. Needs P
 ## 6. Hand back to Noy
 - Screenshots in `review/p1/`: `s01-hint.png`, `s01-wrong-a.png`, `s01-correct.png`, `s02-empty.png`, `s02-saved.png`, `ft1-hint.png`, `ft1-correct.png`, `ft1-wrong.png`, `s03-selected.png`, `s03-feedback-1of2.png`, `s03-pause-marker.png`, `s01-avatar-test-image.png` (taken with the temporary image).
 - Report (max 15 lines): what was built, walk-script results, any layout compromise and why, new UI copy you needed (should be none beyond `ui`), "Next".
+
+
+## Report file (required)
+Also save the final report as `review/p1/REPORT.md` (same text you print), together with the screenshots, before you commit. The planning model reads it from there.
+
+
+## P0 follow-ups (from the planning review, do these first)
+1. Chapter numbering: Chapter 0 is confusing for learners. Show the entry chapter as "Start" (no number) and number the rest 1 to 6, so the readout says "Chapter 1 of 6" only inside "Why map". Update menu, progress readout and tooltips; keep internal ids unchanged.
+2. Fast track: when FT1 is used to skip, mark the skipped screens' segments as done (filled) so the bar never shows holes; the chapter counts as done.
+3. Replace the "→" glyph anywhere in UI with the arrow icon from icons.js (the font subset has no arrow).
+4. Hide the feedback-row icon when a screen has no hint text.
+5. Space distribution (most important, Noy's main design rule): in every template the stage card content must be distributed by role across the card height (top / middle / bottom or left / right). No large empty band in the card (see review/p0/demo-wrong.png: options sit mid-card with a big empty top area). Add a test-fit check that flags any vertical gap inside the stage card larger than 25% of the card height.

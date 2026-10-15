@@ -49,3 +49,13 @@ Written 15 Oct 2026 (planning side). Opus 5.5, normal effort. One session. Needs
 - `review/review.html` (open it with `npm run serve`, then `http://localhost:8124/review/review.html`).
 - `dist/eai-m1l4-selfstudy-scorm12.zip`, `planning/SCORM-CLOUD-CHECKLIST.md`, `planning/DIY-WCAG-RESULTS.md`.
 - Report (max 20 lines): test totals, defects fixed, defects open, pilotCopy strings to approve, and the push reminder (Noy pushes after her review).
+
+
+## Report file (required)
+Also save the final report as `review/p5/REPORT.md` (same text you print), together with the screenshots, before you commit. The planning model reads it from there.
+
+
+## Copy and UI notes from the P1 planning review (apply in P5, show Noy before/after)
+1. S01: the character label says "Dana, HR director (fictional)" and also shows a "Fictional character" badge. Keep only the badge; label becomes "Dana, HR director".
+2. S03 wrong-answer feedback for "Unclear problem" reads awkwardly. Proposed: "Not this one. You named the problem in Homework 1. Today picks up after that." (check <=25 words, no answer reveal).
+3. The "Saved" indicator shows on S01 before the learner has saved anything. Show it only after the first save or answer.

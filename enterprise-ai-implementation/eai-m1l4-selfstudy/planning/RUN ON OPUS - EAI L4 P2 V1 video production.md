@@ -48,3 +48,7 @@ Written 15 Oct 2026 (planning side). Opus 5.5, high effort. **Two sessions:** Pa
 ## 5. Hand back to Noy
 - Part A: `review/p2/concept-1.png`, `concept-2.png`; report with the caption count, planned duration, and the question "Which direction?"
 - Part B: `review/p2/` previews and stop frames; the MP4 path; a report with duration, file size, stop times, and the request: **listen to the whole video for pronunciation** (Claude cannot hear it) and list any word to fix; reminder that storyboard SME items 4 (fintech "conversations") and 5 (HBR title) must be cleared before release.
+
+
+## Report file (required)
+Also save the final report as `review/p2/REPORT.md` (same text you print), together with the screenshots, before you commit. The planning model reads it from there.

@@ -62,3 +62,7 @@ Written 15 Oct 2026 (planning side). Opus 5.5, high effort. One session. Needs P
 ## 6. Hand back to Noy
 - Screenshots in `review/p3/`: `v1-before-play.png`, `v1-playing-captions.png`, `v1-stop1.png`, `v1-stop1-wrong.png`, `v1-stop2-correct.png`, `v1-transcript.png`, `s19-brief.png`, `s19-opened.png`, `s19-return.png`, `s19-saved.png`, `s20-step1.png`, `s20-step1-notyet.png`, `s20-step2.png`, `s20-pause-marker.png`, `slice-end.png`.
 - Report (max 15 lines): results, stop accuracy measured, anything that behaves differently in Chrome's popup blocker, "Next".
+
+
+## Report file (required)
+Also save the final report as `review/p3/REPORT.md` (same text you print), together with the screenshots, before you commit. The planning model reads it from there.
