@@ -1,0 +1,496 @@
+{
+  "$comment": "EAI M1 L4 self-study, pilot slice content. ALL learner-facing text lives here (localization = swap this file). Design lives in src/. Screen text is verbatim from L4_Storyboard_v2.md (2026-10-15). Strings under ui.* marked pilotCopy:true are new UI copy not in the storyboard; Noy reviews them in P5. Schema: see planning/PRD.md section 5.",
+  "schemaVersion": "1.0",
+  "lesson": {
+    "id": "eai-m1l4-selfstudy",
+    "code": "L4",
+    "program": "Enterprise AI Implementation Specialist",
+    "module": "Module 1",
+    "title": "Process Modeling and Workflow Mapping",
+    "lang": "en",
+    "dir": "ltr",
+    "contentVersion": "slice-0.1 (storyboard v2)",
+    "pilot": true,
+    "slice": ["S01", "S02", "FT1", "V1", "S03", "S19", "S20"],
+    "completion": { "rule": "slice-end", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": [] }
+  },
+
+  "ui": {
+    "pilotCopy": true,
+    "buttons": {
+      "check": "Check",
+      "continue": "Continue",
+      "save": "Save",
+      "open": "Open workbook",
+      "back": "I'm back",
+      "play": "Play video",
+      "replay": "Replay segment",
+      "skipChallenge": "Skip challenge",
+      "jumpToTask": "Jump to the last task",
+      "watchVideo": "Watch the video",
+      "reopenWorkbook": "Reopen workbook",
+      "finish": "Finish",
+      "menu": "Menu",
+      "close": "Close",
+      "resume": "Resume",
+      "startOver": "Start over",
+      "cancel": "Cancel",
+      "captionsOn": "Captions on",
+      "captionsOff": "Captions off",
+      "transcript": "Transcript",
+      "yes": "Yes",
+      "notYet": "Not yet"
+    },
+    "feedback": {
+      "pagedLabel": "{i} of {n}",
+      "nextFeedback": "Next",
+      "prevFeedback": "Previous",
+      "correctPrefix": "Correct.",
+      "wrongPrefix": "Not this one.",
+      "srCorrect": "Correct answer.",
+      "srWrong": "Incorrect answer. Try again.",
+      "srNeutral": "Answer recorded."
+    },
+    "counter": "{n}/{max}",
+    "saved": "Saved",
+    "notSaved": "Not saved",
+    "progress": "Screen {i} of {n}",
+    "chapterLabel": "Chapter {n}",
+    "resumePrompt": "Welcome back. Pick up where you left off?",
+    "startOverConfirm": "Start over? This clears your answers and your place in this lesson.",
+    "startOverLmsNote": "Answers already sent to your course record stay there.",
+    "videoGuidingLabel": "Watch for this",
+    "videoStopLabel": "Question {i} of {n}",
+    "videoResumeNote": "The video continues after the right answer.",
+    "sliceEnd": "End of the pilot slice. Thank you for testing.",
+    "fictionalBadge": "Fictional character",
+    "newTabNote": "Opens in a new tab",
+    "smallScreenNote": "This lesson works best on a computer.",
+    "logoAlt": "Wawiwa",
+    "progressBar": {
+      "label": "Lesson progress by chapter",
+      "readout": "Chapter {n} of {max} · Screen {i} of {total}",
+      "minutesLeft": "About {m} min left",
+      "segmentLabel": "Chapter {n}, {title}, {status}",
+      "lockedTip": "Finish the current chapter first",
+      "status": { "done": "completed", "current": "in progress", "locked": "locked", "notInPilot": "not in this pilot" }
+    },
+    "boot": {
+      "error": "The lesson could not load.",
+      "fileProtocol": "Open it through a web server (GitHub Pages, the LMS, or a local server), not as a file."
+    },
+    "menu": {
+      "title": "Menu",
+      "chapterMap": "Chapter map",
+      "resources": "Resources",
+      "help": "Help",
+      "startOver": "Start over",
+      "notInPilot": "Not in this pilot",
+      "current": "You are here",
+      "done": "Done",
+      "locked": "Locked",
+      "minutes": "{m} min",
+      "screenDone": "Completed",
+      "screensOf": "Screens in {title}"
+    },
+    "help": [
+      "Read the line at the top: it tells you what to do on each screen.",
+      "Feedback appears in the row at the bottom. Continue appears there after a right answer.",
+      "Use Tab and Enter or Space to work without a mouse. Escape closes the menu.",
+      "Videos stop for questions. Captions and a transcript are under the video.",
+      "Your place is saved. You can leave and come back."
+    ],
+    "resources": [
+      { "id": "workbook", "label": "AS-IS Process Mapping for Your Own Use Case (workbook)", "href": "@links.workbook", "newTab": true },
+      { "id": "refcard", "label": "Reference card: the worked HR map", "href": null, "note": "Not in this pilot" }
+    ]
+  },
+
+  "links": {
+    "workbook": "https://dory-ship-it.github.io/wawiwa-activities/enterprise-ai-implementation/eai-m1l4-class/",
+    "homework": "https://dory-ship-it.github.io/wawiwa-activities/enterprise-ai-implementation/eai-m1l4-home/"
+  },
+
+  "tooltips": {
+    "Success metric": "Something measurable before and after: a number, percentage, time, or frequency.",
+    "AS-IS": "As it happens now, in practice, on a normal day.",
+    "Ideal, not actual": "Mapping how the process should work instead of how it works."
+  },
+
+  "characters": {
+    "dana": {
+      "name": "Dana",
+      "role": "HR director",
+      "fictional": true,
+      "label": "Dana, HR director (fictional)",
+      "avatar": {
+        "src": null,
+        "alt": "Dana, HR director. A fictional character, not a real person.",
+        "placeholder": { "kind": "initials", "text": "D" },
+        "source": "pending: realistic AI avatar still (VEED.io) or a synthetic photo supplied by Noy. Never a real person's likeness.",
+        "credit": "AI-generated image of a fictional character"
+      }
+    }
+  },
+
+  "chapters": [
+    { "id": "ch0", "n": 0, "title": "Entry", "minutes": 7, "screens": ["S01", "S02"], "inSlice": true, "pauseMarker": null },
+    { "id": "ch1", "n": 1, "title": "Why map", "minutes": 9, "screens": ["FT1", "V1", "S03"], "inSlice": true,
+      "fastTrack": { "card": "FT1", "landing": "S03" },
+      "pauseMarker": "Good place to pause. Your place is saved." },
+    { "id": "ch2", "n": 2, "title": "Toolkit", "minutes": 22, "screens": [], "inSlice": false, "pauseMarker": "Good place to pause. Your place is saved." },
+    { "id": "ch3", "n": 3, "title": "HR demo", "minutes": 19, "screens": [], "inSlice": false, "pauseMarker": "Good place to pause. Your place is saved." },
+    { "id": "ch4", "n": 4, "title": "Critical eye", "minutes": 26, "screens": [], "inSlice": false, "pauseMarker": "Good place to pause. Chapter 5 takes about 80 minutes. Start it fresh." },
+    { "id": "ch5", "n": 5, "title": "Build yours", "minutes": 82, "screens": ["S19", "S20"], "inSlice": true,
+      "sliceNote": "S18A and S18 come later; the slice enters Chapter 5 at S19.",
+      "pauseMarker": "Good place to pause. Your map and place are saved." },
+    { "id": "ch6", "n": 6, "title": "Close", "minutes": 15, "screens": [], "inSlice": false, "pauseMarker": null }
+  ],
+
+  "screens": [
+    {
+      "id": "S01",
+      "chapter": "ch0",
+      "template": "decision",
+      "variant": "single",
+      "minutes": 2,
+      "instruction": "Choose your first move.",
+      "hint": "Pick one. You can change your mind.",
+      "stage": {
+        "top": { "kind": "character", "character": "dana", "label": "Dana, HR director (fictional)",
+          "bubbles": [
+            "We get about 90 requests a month, most of them repeat questions.",
+            "Put a chatbot on the HR inbox. Live next month?"
+          ] },
+        "bottom": { "kind": "options", "arrange": "row" }
+      },
+      "options": [
+        { "id": "a", "label": "Shortlist three chatbot vendors", "icon": "list", "correct": false,
+          "feedback": "Vendors will ask who answers what, through which channel, and what counts as a wrong answer. Today nobody can tell them." },
+        { "id": "b", "label": "Map how a request flows today", "icon": "route", "correct": true,
+          "feedback": "Requests arrive by WhatsApp, email and in person, with no organized system. A chatbot would only speed up that disorder." },
+        { "id": "c", "label": "Survey employees on what they want", "icon": "forms", "correct": false,
+          "feedback": "Employees can tell you what they want. A wish list is not a description of today's work." }
+      ],
+      "advance": "after-correct",
+      "tracking": [
+        { "id": "L4_S01_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Evaluate", "result": "graded" }
+      ],
+      "sources": ["s6", "s7", "s15", "L1 booklet Case 1", "HW1 check item"]
+    },
+
+    {
+      "id": "S02",
+      "chapter": "ch0",
+      "template": "input",
+      "minutes": 5,
+      "instruction": "Bring your case from Homework 1.",
+      "hint": "Describe what happens today, not the solution you want.",
+      "stage": {
+        "top": { "kind": "line", "icon": "folder", "text": "This is the case you map in Chapter 5." },
+        "middle": { "kind": "fields", "arrange": "stack" },
+        "bottom": { "kind": "privacy", "icon": "shield", "text": "Leave out names and identifying details.", "action": "save" }
+      },
+      "fields": [
+        { "id": "caseTitle", "label": "Case title", "placeholder": "3 to 6 words, e.g. Sales call summaries", "maxLength": 250, "multiline": false,
+          "store": "L4_CASE_TITLE", "trackingId": "L4_S02_1" },
+        { "id": "problem", "label": "The problem today", "placeholder": "Today X happens, and it hurts because Y.", "maxLength": 250, "multiline": true,
+          "store": "L4_CASE_PROBLEM", "trackingId": "L4_S02_2" }
+      ],
+      "saveAlwaysEnabled": true,
+      "feedback": {
+        "saved": "Saved. Your case comes back in Chapter 5, where you map it in eight fields.",
+        "empty": "Add a few words to both fields. A rough version is enough; you can edit it later."
+      },
+      "advance": "after-save",
+      "tracking": [
+        { "id": "L4_S02_1", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Remember", "result": "neutral" },
+        { "id": "L4_S02_2", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Understand", "result": "neutral" }
+      ],
+      "sources": ["HW1 sections 1, 3", "s40", "s44"]
+    },
+
+    {
+      "id": "FT1",
+      "chapter": "ch1",
+      "template": "decision",
+      "variant": "challenge",
+      "minutes": 1,
+      "instruction": "Answer one question, or skip the challenge.",
+      "hint": "Answer if you already know this topic. Skipping costs nothing.",
+      "stage": {
+        "top": { "kind": "line", "icon": "lightning", "text": "Optional challenge. Right on the first try? Skip to this chapter's last task." },
+        "middle": { "kind": "question", "text": "HBR, 1990: new technology runs on a broken process. What happens?" },
+        "bottom": { "kind": "options", "arrange": "row", "link": "skipChallenge" }
+      },
+      "options": [
+        { "id": "a", "label": "It removes the steps nobody needs", "icon": "scissors", "correct": false,
+          "feedback": "Technology runs the steps it is given. Nothing gets removed unless someone takes the process apart first." },
+        { "id": "b", "label": "It speeds up the inefficiency already there", "icon": "gauge", "correct": true,
+          "feedback": "Right on the first try: you can jump to the last task of this chapter, or watch the video." },
+        { "id": "c", "label": "It shows the broken steps by itself", "icon": "eye", "correct": false,
+          "feedback": "The broken steps stay hidden and now run faster. Only mapping shows them. The full chapter starts now." }
+      ],
+      "attempts": 1,
+      "routing": {
+        "correctFirstTry": { "choices": [ { "button": "jumpToTask", "to": "S03", "route": "skip" }, { "button": "watchVideo", "to": "V1", "route": "full" } ] },
+        "wrong": { "button": "continue", "to": "V1", "route": "full" },
+        "skipped": { "to": "V1", "route": "full" }
+      },
+      "tracking": [
+        { "id": "L4_FT1_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Understand", "result": "graded" }
+      ],
+      "suspend": ["route"],
+      "sources": ["s7"]
+    },
+
+    {
+      "id": "V1",
+      "chapter": "ch1",
+      "template": "video",
+      "minutes": 5,
+      "instruction": "Watch the video. Answer the two questions when it stops.",
+      "instructionPilotCopy": true,
+      "title": "Two cases, same lesson",
+      "guidingQuestion": "What separates a technology change that works from one that has to be fixed later?",
+      "media": {
+        "src": "assets/video/v1.mp4",
+        "poster": "assets/video/v1-poster.jpg",
+        "captions": [ { "lang": "en", "label": "English", "src": "assets/video/v1.en.vtt" } ],
+        "cues": "assets/video/v1.cues.json",
+        "transcript": "from-captions"
+      },
+      "stopLayout": { "still": "left-40", "panel": "right-60", "feedbackIn": "feedback-row" },
+      "stops": [
+        {
+          "id": "stop1",
+          "cueId": "stop1",
+          "storyboardTime": "0:58",
+          "question": "The US company wants to close a five-times gap. What should it look at first?",
+          "options": [
+            { "id": "a", "label": "A faster system for its current payment checks", "correct": false,
+              "feedback": "Faster checks keep every existing step in place. If the work sits in the wrong place, it only moves faster." },
+            { "id": "b", "label": "Where the 500 people's working time goes today", "correct": true,
+              "feedback": "That is the question mapping answers. Watch what it found." },
+            { "id": "c", "label": "The official payment procedure, as written", "correct": false,
+              "feedback": "A written procedure shows how work should flow. The gap lives in how it really flows on a normal day." }
+          ],
+          "tracking": { "id": "L4_V1_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Apply", "result": "graded" }
+        },
+        {
+          "id": "stop2",
+          "cueId": "stop2",
+          "storyboardTime": "2:06",
+          "question": "Quality dropped on complex requests. What was the root problem?",
+          "options": [
+            { "id": "a", "label": "Routine and judgment cases got the same path", "correct": true,
+              "feedback": "Speeding everything up without telling decision types apart sent complex cases where judgment was missing." },
+            { "id": "b", "label": "Complex cases needed a faster AI, not a different path", "correct": false,
+              "feedback": "Speed was already there, per reports. Look at which kinds of request lost quality." },
+            { "id": "c", "label": "Simple requests should have stayed with people", "correct": false,
+              "feedback": "Per reports, simple requests went about as well as with people. Look at where quality dropped." }
+          ],
+          "tracking": { "id": "L4_V1_2", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Analyze", "result": "graded" }
+        }
+      ],
+      "advance": "after-video-end",
+      "production": {
+        "lengthTarget": "2:40 narration plus title card and brand end",
+        "words": 400,
+        "voice": "Kokoro-82M af_heart, speed 1.0",
+        "rules": [
+          "code-animated flat shapes, icons, counters",
+          "no music, no photos, no robot heads: plain AI chip, person icon for humans",
+          "nothing swaps: elements draw on and grey out",
+          "on-screen text = keywords and numbers only",
+          "per reports stays on screen with every hedged figure",
+          "Wawiwa brand colors and logo unchanged"
+        ],
+        "segments": [
+          { "n": 1, "time": "0:00",
+            "narration": "A team has a slow, painful process. A faster technology arrives, and they put it on top of the process as it is. The problem doesn't go away. It gets locked in, faster and at a larger scale.",
+            "onScreen": ["faster tech", "same mess, faster"],
+            "build": "Messy chain; bolt 'faster tech' lands: 'same mess, faster'" },
+          { "n": 2, "time": "0:15",
+            "narration": "In 1990, Harvard Business Review published an article called Reengineering Work: Don't Automate, Obliterate. Obliterate means wipe out. The principle: if you run new technology on a broken process without taking it apart first, you only speed up the inefficiency you already have. It was written about ordinary computing. It applies to AI just as well.",
+            "onScreen": ["HBR, 1990", "Don't automate, obliterate"],
+            "build": "Title chips; boxes pull apart" },
+          { "n": 3, "time": "0:38",
+            "narration": "Case one. The early 1980s, the accounts payable department of a US car company. 500 people work there. A Japanese company runs the same department with about 100. Five times fewer. The US company wants to close that gap. Before you see what they found, make the first call yourself.",
+            "onScreen": ["early 1980s", "500", "~100", "5x"],
+            "build": "500 vs ~100 counters, 5x; STOP 1 at segment end",
+            "stopAfter": "stop1" },
+          { "n": 4, "time": "0:58",
+            "narration": "Mapping revealed the real reason. Most of the work went into manually reconciling three separate documents. The gap was not closed by faster systems for the existing process. Instead, the process itself was rewritten: payment is now triggered directly from the receipt record, with no separate invoice. Per reports, the headcount needed fell by about 75 percent.",
+            "onScreen": ["3 documents, manual reconciliation", "receipt record → payment", "~75% fewer (per reports)"],
+            "build": "Three documents; bolt bounces off; receipt record arrow to payment; ~75% counter with per reports" },
+          { "n": 5, "time": "1:20",
+            "narration": "Case two. A Swedish fintech, per public reports, 2024 to 2025. An AI agent starts handling its customer conversations: about 2.3 million a month. Per reports, the drop in service load is on the scale of about 700 service reps. Handling time falls from about 11 minutes to under two.",
+            "onScreen": ["2024 to 2025", "2.3M conversations / month", "~700 reps: load reduction", "~11 min → under 2", "per reports"],
+            "build": "Counters build one by one, per reports chip stays" },
+          { "n": 6, "time": "1:40",
+            "narration": "These figures come from company publications and media reports. They're here for learning, not as proof that people should be replaced. Then, by early 2025, the company starts rehiring human service reps. On simple requests, the AI performed about as well as people. On complex ones, like disputes or personally difficult cases, quality dropped noticeably. So what went wrong? Decide before you hear it.",
+            "onScreen": ["for learning, not proof people should be replaced", "early 2025: rehiring", "simple: similar", "complex: quality drops"],
+            "build": "Disclaimer line; rehiring; split simple / complex; STOP 2 at segment end",
+            "stopAfter": "stop2" },
+          { "n": 7, "time": "2:06",
+            "narration": "Management admitted that focusing too much on efficiency hurt service quality. The fix was a hybrid model: AI for the routine, a person when empathy and judgment are needed.",
+            "onScreen": ["routine", "empathy + judgment", "hybrid model"],
+            "build": "Split: AI chip 'routine' / person icon 'empathy + judgment'; 'hybrid model'" },
+          { "n": 8, "time": "2:18",
+            "narration": "Two cases, decades apart, with completely different technology. The same lesson. Process mapping is not a bureaucratic step. It's what separates a change that works from a change that has to be fixed after the fact. And notice: both stories are told in numbers. Headcount, handling time, quality. Without a number, nobody can check a change.",
+            "onScreen": ["1980s = 2024 to 2025", "map first", "headcount, time, quality", "Next: 4 causes, pick 2"],
+            "build": "Both cases side by side; 'map first'; three numbers; next-step chip" }
+        ],
+        "sayOverrides": {
+          "HBR": "Harvard Business Review",
+          "2.3M": "2.3 million",
+          "~": "about"
+        }
+      },
+      "sources": ["s7", "s25", "s26", "storyboard v2 section 4"]
+    },
+
+    {
+      "id": "S03",
+      "chapter": "ch1",
+      "template": "decision",
+      "variant": "multi",
+      "select": 2,
+      "minutes": 3,
+      "instruction": "Select the two causes both cases point to.",
+      "hint": "Pick two cards, then press Check.",
+      "terms": ["Success metric"],
+      "stage": {
+        "top": { "kind": "line", "icon": "history", "text": "Four causes of AI project failure, from Lesson 1. Which two do both video cases point to?" },
+        "middle": { "kind": "options", "arrange": "grid-2x2" },
+        "bottom": { "kind": "action", "action": "check" }
+      },
+      "options": [
+        { "id": "a", "label": "Unclear problem", "icon": "help-circle", "correct": false,
+          "feedback": "Your Homework 1 problem statement already worked on this one. Today starts after the problem is named." },
+        { "id": "b", "label": "Unmapped process", "icon": "route", "correct": true,
+          "feedback": "Both cases changed only after someone saw how the work really flowed. Today you map it in eight fields." },
+        { "id": "c", "label": "Unidentified end user", "icon": "user-question", "correct": false,
+          "feedback": "Homework 1 asked you to name the specific role. That answer feeds your map; it is not built today." },
+        { "id": "d", "label": "No success metric", "icon": "ruler", "correct": true, "term": "Success metric",
+          "feedback": "Both stories were judged by numbers. Today you set a baseline and a target: a number, not a feeling." }
+      ],
+      "feedbackPaging": true,
+      "advance": "after-correct",
+      "endOfChapter": true,
+      "tracking": [
+        { "id": "L4_S03_1", "type": "choice", "multiple": true, "correctResponse": "b,d", "scored": false, "bloom": "Understand", "result": "graded" }
+      ],
+      "sources": ["s5", "s40", "V1 segment 8", "HW1 sections 3, 4"]
+    },
+
+    {
+      "id": "S19",
+      "chapter": "ch5",
+      "template": "handoff",
+      "minutes": 64,
+      "instruction": "Open the workbook and map your own case.",
+      "hint": "Unknown? Write 'unclear'. The coach treats it as a valid answer.",
+      "terms": ["AS-IS", "Success metric"],
+      "states": {
+        "brief": {
+          "stage": {
+            "top": { "kind": "title", "icon": "workbook", "text": "AS-IS Process Mapping for Your Own Use Case", "chip": { "icon": "clock", "text": "~60 min" } },
+            "middle": { "kind": "steps", "items": [
+              { "n": 1, "text": "Open Homework 1 and 2" },
+              { "n": 2, "text": "Fill eight fields as the process runs today" },
+              { "n": 3, "text": "Leave your Homework 2 AI step off the map" },
+              { "n": 4, "text": "Export your PDF" }
+            ] },
+            "bottom": { "kind": "privacy", "icon": "shield", "text": "Coach on: roles, no names.", "action": "open" }
+          },
+          "openFeedback": "The workbook is open in a new tab. This module keeps your place.",
+          "showBackAfterOpen": true
+        },
+        "return": {
+          "stage": {
+            "top": { "kind": "title", "icon": "workbook", "text": "Back from the workbook? Export your PDF, then check your map." },
+            "middle": { "kind": "fields", "arrange": "stack" },
+            "bottom": { "kind": "privacy", "icon": "shield", "text": "Leave out names and identifying details.", "action": "save" }
+          },
+          "backFeedback": "Next: three questions to check your map against.",
+          "fields": [
+            { "id": "metric", "label": "Your success metric: baseline and target", "term": "Success metric", "placeholder": "", "maxLength": 250, "multiline": true,
+              "store": "L4_METRIC", "trackingId": "L4_S19_1" }
+          ],
+          "savedFeedback": "Saved to your lesson record.",
+          "emptyFeedback": null
+        }
+      },
+      "handoff": {
+        "activity": "eai-m1l4-class",
+        "href": "@links.workbook",
+        "newTab": true,
+        "rel": "noopener noreferrer",
+        "liveCoach": "on (approved for EAI under Dor's DPA exception)"
+      },
+      "advance": "after-save",
+      "tracking": [
+        { "id": "L4_S19_1", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Create", "result": "neutral" }
+      ],
+      "suspend": ["opened", "returned"],
+      "sources": ["s35", "s14", "s19", "s37", "s43 items 1 and 4", "s44"]
+    },
+
+    {
+      "id": "S20",
+      "chapter": "ch5",
+      "template": "decision",
+      "variant": "selfcheck",
+      "minutes": 8,
+      "instruction": "Check your map against three questions. Then pick your biggest risk.",
+      "hint": "Answer honestly. 'Not yet' sends you back with one fix.",
+      "terms": ["Ideal, not actual"],
+      "steps": [
+        {
+          "id": "step1",
+          "kind": "rows",
+          "choices": ["yes", "notYet"],
+          "rows": [
+            { "id": "q1", "icon": "person", "text": "Does every step name who exactly does it?", "trackingId": "L4_S20_1",
+              "feedback": { "yes": "Every step has an owner. Lesson 5 can place AI or a person next to each one.",
+                            "notYet": "A step without a role cannot be improved or monitored. Name the role, or write 'unclear' in Field 7." } },
+            { "id": "q2", "icon": "clock", "text": "Does Field 4 say what happens if the receiver is unavailable?", "trackingId": "L4_S20_2",
+              "feedback": { "yes": "Your handoffs cover the unavailable case. Delays now show up on the map, not in daily work.",
+                            "notYet": "A handoff with no plan stalls. Add what happens, or record it as a gap." } },
+            { "id": "q3", "icon": "ruler", "text": "Can a number show that the metric improved?", "trackingId": "L4_S20_3",
+              "feedback": { "yes": "You can check your change later: baseline now, target to check against.",
+                            "notYet": "Without a number, nobody can tell whether anything improved. Add a baseline, even estimated, and a target." } }
+          ],
+          "advance": "after-all-answered",
+          "link": "reopenWorkbook"
+        },
+        {
+          "id": "step2",
+          "kind": "chips",
+          "chips": [
+            { "id": "ideal", "label": "Ideal, not actual", "term": "Ideal, not actual", "feedback": "Reread Field 3 against a normal day, not the written procedure." },
+            { "id": "goal", "label": "No clear goal", "feedback": "Write one sentence on what this map must help decide." },
+            { "id": "rushed", "label": "Rushed mapping", "feedback": "Reopen Fields 6 and 7. Those are the ones skipped first." },
+            { "id": "updated", "label": "Not updated", "feedback": "Note the date on your map and what would trigger an update." },
+            { "id": "automating", "label": "Automating a broken process", "feedback": "Before Lesson 5, list which steps need fixing, not speeding up." }
+          ],
+          "strip": "Before Lesson 5: every field filled, metric measurable, no invented answers.",
+          "trackingId": "L4_S20_4",
+          "advance": "after-any",
+          "link": "reopenWorkbook"
+        }
+      ],
+      "endOfChapter": true,
+      "endOfSlice": true,
+      "tracking": [
+        { "id": "L4_S20_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" },
+        { "id": "L4_S20_2", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" },
+        { "id": "L4_S20_3", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" },
+        { "id": "L4_S20_4", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" }
+      ],
+      "sources": ["s36", "s43 item 4", "s34", "s37", "s38"]
+    }
+  ]
+}

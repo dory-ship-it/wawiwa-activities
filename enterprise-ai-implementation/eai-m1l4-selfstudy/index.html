@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; media-src 'self'; font-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="robots" content="noindex, nofollow">
+<title>Process Modeling and Workflow Mapping</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="src/tokens.css">
+<link rel="stylesheet" href="src/fonts.css">
+<link rel="stylesheet" href="src/frame.css">
+</head>
+<body>
+<div id="app"></div>
+<div id="boot-error" role="alert" hidden></div>
+<!-- Fallback for when content/l4-slice.json itself cannot load (file:// or network). Must equal ui.boot in the content file (tools/check.mjs asserts it). -->
+<template id="boot-fallback"><span data-key="error">The lesson could not load.</span><span data-key="fileProtocol">Open it through a web server (GitHub Pages, the LMS, or a local server), not as a file.</span></template>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
