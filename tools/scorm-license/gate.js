@@ -1,4 +1,6 @@
-/* Wawiwa licence gate for Rise SCORM (inserted by secure_rise_scorm.py). */
+/* Wawiwa licence gate for Rise SCORM (inserted by secure_rise_scorm.py).
+   __wwGate(cfg, onText): fetches the licence, decrypts cfg.ct and passes the plain course text to onText.
+   Works with both Rise export formats (old: deserialize() in index.html; new 2026: __jsonp in runtime-data.js). */
 (function () {
   function block(msg) {
     var s = 'font-family:system-ui,Arial,sans-serif;max-width:560px;margin:15vh auto;padding:32px;text-align:center;color:#1f2937';
@@ -8,7 +10,7 @@
     return new Promise(function () {});
   }
   function b64(s) { return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); }
-  window.__wwGate = async function (cfg, deserialize) {
+  window.__wwGate = async function (cfg, onText) {
     var d;
     try {
       var r = await fetch(cfg.db + '/licenses/' + encodeURIComponent(cfg.id) + '.json', { cache: 'no-store' });
@@ -38,6 +40,6 @@
         method: 'POST', body: JSON.stringify({ t: { '.sv': 'timestamp' }, h: location.hostname })
       }).catch(function () {});
     } catch (e) {}
-    return deserialize(text);
+    return onText(text);
   };
 })();

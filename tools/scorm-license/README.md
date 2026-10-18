@@ -19,3 +19,19 @@ domain allowlist: remove the client's domain there when the licence ends.
 ## בעברית
 כלי שנועל חבילת SCORM מ-Rise לרישיון ב-Firebase. הטקסט של הקורס מוצפן בתוך החבילה, והמפתח
 נמסר מ-Firebase רק כל עוד הרישיון בתוקף ולא פג. כיבוי רישיון: valid = false.
+
+## Rise export formats (added 18 Oct 2026)
+Rise changed its SCORM export in Oct 2026: the course text now sits in `scormcontent/runtime-data.js`
+as `__jsonp("runtime-data.js","<base64>")`, not inside `index.html`. The script detects the format and
+encrypts whichever one it finds. In the new format the gate code lives inside runtime-data.js itself.
+Rise's loader waits up to 10 seconds for that file, which is enough for the Firebase check.
+Tested with a mock LMS + mock Firebase: valid -> course opens; expired (401), wrong host, wrong key,
+no network -> "This course is not available" screen.
+
+**Importing licence records safely:** in the Firebase console open `/licenses`, add a child with the
+licence id as key, then import the record file **at that child path** (`/licenses/<id>`).
+Never import at `/licenses` itself: an import replaces the whole node and would delete the other clients' keys.
+
+### פורמט ייצוא חדש של Rise (18.10.2026)
+מאוקטובר 2026 Rise שומר את תוכן הקורס בקובץ `scormcontent/runtime-data.js`. הסקריפט מזהה את הפורמט לבד ומצפין אותו.
+ייבוא רשומת רישיון: רק בנתיב `/licenses/<id>` – אף פעם לא על `/licenses` עצמו (זה מוחק את המפתחות של שאר הלקוחות).
