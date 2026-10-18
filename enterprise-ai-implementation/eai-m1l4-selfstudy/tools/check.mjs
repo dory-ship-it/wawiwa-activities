@@ -150,7 +150,17 @@ const views = content.screens.flatMap((s) => {
   if (s.template === 'handoff') return Object.entries(s.states).map(([k, st]) => [`${s.id} ${k}`, [...stageText(st.stage), ...fieldText(st.fields)]]);
   if (s.variant === 'selfcheck') return s.steps.map((st) => [`${s.id} ${st.id}`, [...(st.rows || []).map((r) => r.text), ...(st.chips || []).map((c) => c.label), st.strip]]);
   // R1 templates, each in its fullest state
-  if (s.template === 'sort') return [[s.id, [...s.columns.map((c) => c.label), ...s.cards.map((c) => c.text)]]];
+  // sort: placed cards stay on screen as chips, so every card counts, unless the chips are markers
+  // without text (S17: one case on screen at a time); then the longest case counts
+  if (s.template === 'sort') {
+    const cardText = s.chipStyle === 'marker' ? [s.cards.map((c) => c.text).sort((a, b) => words(b) - words(a))[0]] : s.cards.map((c) => c.text);
+    return [[s.id, [s.header, ...s.columns.map((c) => c.label), ...cardText]]];
+  }
+  // R2 templates
+  if (s.variant === 'fill') return [[s.id, [s.situation.text, ...s.fieldRows.flatMap((f) => [f.label, f.value]), ...s.options.map((o) => o.label)]]];
+  if (s.variant === 'metric') return [[s.id, [s.field.label, ...s.options.map((o) => o.label), s.slotsTitle, ...s.slots.map((x) => x.label)]]];
+  if (s.variant === 'bounds') return [[s.id, [s.strip, ...s.options.flatMap((o) => [s.startLabel, o.start, s.endLabel, o.end])]]];
+  if (s.variant === 'pick') return s.tiles.map((t) => [`${s.id} tile ${t.n} open`, [...s.tiles.flatMap((x) => [String(x.n), x.title]), s.question, t.text]]);
   if (s.variant === 'diagram') return [[s.id, [s.diagram.tag, ...s.diagram.lanes.map((l) => l.label), ...s.diagram.nodes.map((n) => n.label), ...s.legend.map((g) => g.label)]]];
   if (s.variant === 'tiles') {
     const nums = s.tiles.map((t) => String(t.n));
@@ -177,7 +187,8 @@ const feedbackLines = [
     ...Object.entries(s.states || {}).flatMap(([k, st]) => Object.entries(st).filter(([f, v]) => /Feedback$/.test(f) && typeof v === 'string').map(([f, v]) => [`${s.id} ${k}.${f}`, v])),
     ...(s.steps || []).flatMap((st) => [...(st.rows || []).flatMap((r) => Object.entries(r.feedback).map(([k, v]) => [`${s.id} ${r.id} ${k}`, v])),
       ...(st.chips || []).map((c) => [`${s.id} chip ${c.id}`, c.feedback])]),
-    ...(s.cards || []).flatMap((c) => Object.entries(c.feedback).map(([k, v]) => [`${s.id} card ${c.n} ${k}`, v])),
+    [`${s.id} questionHint`, s.questionHint],
+    ...(s.cards || []).flatMap((c) => Object.entries(c.feedback).map(([k, v]) => [`${s.id} card ${c.id ?? c.n} ${k}`, v])),
     ...(s.hotspots || []).map((x) => [`${s.id} hotspot ${x.id}`, x.feedback]),
     ...(s.legend || []).map((g) => [`${s.id} legend ${g.id}`, g.text]),
     ...(s.tiles || []).map((t) => [`${s.id} tile ${t.n}`, t.feedback]),
@@ -217,9 +228,9 @@ for (const [s, t, stop] of interactions) {
 // option letters in on-screen order; sort = "card.column" pairs; diagram = hotspot ids; tiles = numbers.
 function keyOf(s, t, stop) {
   const letters = (opts) => opts.map((o, i) => (o.correct ? String.fromCharCode(97 + i) : null)).filter(Boolean).join(',');
-  if (s.template === 'sort') return s.cards.map((c) => `${c.n}.${c.column}`).join(',');
+  if (s.template === 'sort') return s.cards.map((c) => `${c.id ?? c.n}.${c.column}`).join(',');
   if (s.variant === 'diagram') return s.hotspots.filter((x) => x.correct).map((x) => x.id).join(',');
-  if (s.variant === 'tiles') return s.tiles.filter((x) => x.correct).map((x) => String(x.n)).join(',');
+  if (s.variant === 'tiles' || s.variant === 'pick') return s.tiles.filter((x) => x.correct).map((x) => String(x.n)).join(',');
   if (s.variant === 'pair') return letters(s.situations.find((x) => x.trackingId === t.id)?.options || []);
   if (s.variant === 'rounds') {
     const r = s.rounds.find((x) => x.trackingId === t.id);
@@ -261,6 +272,25 @@ for (const f of srcFiles.filter((p) => /\.(css|js)$/.test(p))) {
   });
 }
 if (!hexHits) ok(`every hex colour in src/ is an approved token (${ALLOWED.length} allowed)`);
+
+/* 12b. video media (R2): the files the player reads exist, stops sit in order inside the video */
+const videos = content.screens.filter((s) => s.template === 'video');
+const tempMedia = [];
+let mediaFails = 0;
+for (const s of videos) {
+  const m = s.media || {};
+  const files = [m.src, ...(m.captions || []).map((c) => c.src)];
+  files.filter((p) => !p || !existsSync(join(ROOT, p))).forEach((p) => { mediaFails++; fail(`${s.id}: media file missing ${p}`); });
+  if (!(m.duration > 0) || !/^\d+:\d\d$/.test(m.length || '')) { mediaFails++; fail(`${s.id}: media.duration (seconds) and media.length (m:ss) are required`); }
+  const ts = (s.stops || []).map((x) => x.t);
+  if (ts.some((t, i) => !(t > 0) || t >= m.duration || (i && t <= ts[i - 1]))) { mediaFails++; fail(`${s.id}: stop times ${ts.join(', ')} must rise and sit inside ${m.duration}s`); }
+  if (m.temp) tempMedia.push(...files.map((p) => `${s.id}: ${p}`));
+}
+if (!mediaFails) ok(`${videos.length} videos: media and captions exist, stop times in order (${videos.map((s) => s.id + ' ' + s.stops.map((x) => x.t + 's').join('/')).join(', ')})`);
+if (tempMedia.length) {
+  console.log(`  WARNING ${tempMedia.length} temp video files in use (silent placeholders from tools/make-placeholder-video.mjs, replace with the films):`);
+  tempMedia.forEach((t) => console.log('          ' + t));
+}
 
 /* 13. image slots */
 const slots = content.screens.flatMap((s) => [

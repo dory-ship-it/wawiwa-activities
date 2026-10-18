@@ -18,7 +18,19 @@ export function startServer(port = 0) {
     if (p.endsWith('/')) p += 'index.html';
     const file = normalize(join(ROOT, p));
     if (!file.startsWith(ROOT) || !existsSync(file) || !statSync(file).isFile()) { res.writeHead(404); res.end('not found'); return; }
-    res.writeHead(200, { 'Content-Type': TYPES[extname(file).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-store' });
+    const type = TYPES[extname(file).toLowerCase()] || 'application/octet-stream';
+    const size = statSync(file).size;
+    // byte ranges (the video player seeks with Range requests, as on any real web server or LMS)
+    const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (range) {
+      const start = range[1] ? Number(range[1]) : Math.max(0, size - Number(range[2]));
+      const end = range[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
+      if (start >= size || start > end) { res.writeHead(416, { 'Content-Range': `bytes */${size}` }); res.end(); return; }
+      res.writeHead(206, { 'Content-Type': type, 'Cache-Control': 'no-store', 'Accept-Ranges': 'bytes', 'Content-Range': `bytes ${start}-${end}/${size}`, 'Content-Length': end - start + 1 });
+      createReadStream(file, { start, end }).pipe(res);
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-store', 'Accept-Ranges': 'bytes', 'Content-Length': size });
     createReadStream(file).pipe(res);
   });
   return new Promise((resolve) => server.listen(port, '127.0.0.1', () => resolve(server)));

@@ -32,6 +32,17 @@ export function measureLayout() {
     return cs.display !== 'none' && cs.visibility !== 'hidden' && parseFloat(cs.opacity) > 0;
   };
   const name = (el) => (el.getAttribute('class') || el.tagName.toLowerCase()).split(' ')[0];
+  // inside a scroll container (the video transcript), a box scrolled out of its view is not painted
+  const scrolledAway = (el, r) => {
+    for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) {
+      const oy = getComputedStyle(e).overflowY;
+      if (oy === 'auto' || oy === 'scroll') {
+        const v = e.getBoundingClientRect();
+        return r.bottom <= v.top + 0.5 || r.top >= v.bottom - 0.5;
+      }
+    }
+    return false;
+  };
   const main = document.querySelector('.w-main'), band = document.querySelector('.w-band');
   const overlay = document.querySelector('.w-menu-overlay:not([hidden]), .w-dialog-overlay');
   const M = box(main.getBoundingClientRect());
@@ -46,7 +57,7 @@ export function measureLayout() {
     if (bandOn && band.contains(el)) continue;
     if (!visible(el)) continue;
     const r = el.getBoundingClientRect();
-    if (r.width < 1 || r.height < 1) continue;
+    if (r.width < 1 || r.height < 1 || scrolledAway(el, r)) continue;
     const cs = getComputedStyle(el);
     const painted = tag === 'svg' || ['img', 'input', 'textarea', 'button'].includes(tag) || cs.backgroundColor !== 'rgba(0, 0, 0, 0)'
       || ['Top', 'Right', 'Bottom', 'Left'].some((side) => parseFloat(cs['border' + side + 'Width']) > 0);
@@ -59,7 +70,7 @@ export function measureLayout() {
       if (!n.nodeValue.trim() || !visible(n.parentElement) || (skip && skip(n))) continue;
       const range = document.createRange();
       range.selectNodeContents(n);
-      for (const r of range.getClientRects()) if (r.width && r.height) out.push({ node: n, what: 'text:' + n.nodeValue.trim().slice(0, 24), ...box(r) });
+      for (const r of range.getClientRects()) if (r.width && r.height && !scrolledAway(n.parentElement, r)) out.push({ node: n, what: 'text:' + n.nodeValue.trim().slice(0, 24), ...box(r) });
     }
     return out;
   };

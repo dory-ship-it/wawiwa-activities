@@ -92,7 +92,9 @@ const STATES = [
   ['S03', 'one of two', async (p) => { await click(p, '.w-opt[data-id="a"]'); await click(p, '.w-opt[data-id="b"]'); await click(p, '[data-action="check"]'); }],
   ['S03', 'correct', async (p) => { await click(p, '.w-opt[data-id="b"]'); await click(p, '.w-opt[data-id="d"]'); await click(p, '[data-action="check"]'); }],
   ['S03', 'pause marker', async (p) => { await click(p, '.w-opt[data-id="b"]'); await click(p, '.w-opt[data-id="d"]'); await click(p, '[data-action="check"]'); await click(p, '.w-next'); }],
-  ['V1', 'placeholder', async () => {}],
+  ['V1', 'play view', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); }],
+  ['V1', 'stop, wrong', async (p) => { await toStop(p); await click(p, '.w-opt-stack[data-id="a"]'); }],
+  ['V1', 'stop, right', async (p) => { await toStop(p); await click(p, '.w-opt-stack[data-id="b"]'); }],
   // R1: Chapter 2
   ['FT2', 'idle', async () => {}],
   ['FT2', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
@@ -123,7 +125,53 @@ const STATES = [
     await click(p, '.w-opt[data-id="a"]');
     await click(p, '.w-next');
   }],
+  // R2: Chapters 3 and 4
+  ['FT3', 'idle', async () => {}],
+  ['FT3', 'correct + routes', async (p) => click(p, '.w-opt[data-id="c"]')],
+  ['V2', 'play view', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); }],
+  ['V2', 'stop 3, wrong', async (p) => {
+    for (const k of ['b', 'a']) { await toStop(p); await click(p, `.w-opt-stack[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }
+    await toStop(p); await click(p, '.w-opt-stack[data-id="a"]');
+  }],
+  ['V2', 'ended', async (p) => {
+    for (const k of ['b', 'a', 'b']) { await toStop(p); await click(p, `.w-opt-stack[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }
+    await p.focus('.w-seek'); await p.keyboard.press('End');
+    await p.waitForFunction(() => document.querySelector('.w-next').dataset.locked === 'false');
+  }],
+  ['S09', 'start', async () => {}],
+  ['S09', 'wrong', async (p) => { await click(p, '.w-tray-card[data-card="4"]'); await click(p, '.w-sort-target[data-column="a"]'); }],
+  ['S09', 'done', async (p) => { for (const [c, col] of [['1', 'a'], ['2', 'a'], ['3', 'b'], ['4', 'c'], ['5', 'd'], ['6', 'd']]) { await click(p, `.w-tray-card[data-card="${c}"]`); await click(p, `.w-sort-target[data-column="${col}"]`); } }],
+  ['S10', 'wrong', async (p) => click(p, '.w-opt[data-id="d"]')],
+  ['S10', 'right', async (p) => click(p, '.w-opt[data-id="c"]')],
+  ['S11', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['S11', 'right', async (p) => click(p, '.w-opt[data-id="d"]')],
+  ['S12', 'one of two', async (p) => { await click(p, '.w-pick-tile[data-n="4"]'); await click(p, '.w-pick-tile[data-n="3"]'); await click(p, '[data-action="check"]'); }],
+  ['S12', 'correct', async (p) => { await click(p, '.w-pick-tile[data-n="4"]'); await click(p, '.w-pick-tile[data-n="7"]'); await click(p, '[data-action="check"]'); }],
+  ['S12', 'pause marker', async (p) => { await click(p, '.w-pick-tile[data-n="4"]'); await click(p, '.w-pick-tile[data-n="7"]'); await click(p, '[data-action="check"]'); await click(p, '.w-next'); }],
+  ['FT4', 'idle', async () => {}],
+  ['FT4', 'wrong', async (p) => click(p, '.w-opt[data-id="c"]')],
+  ['S13', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['S13', 'right', async (p) => click(p, '.w-opt[data-id="c"]')],
+  ['S14', 'wrong', async (p) => click(p, '.w-opt[data-id="d"]')],
+  ['S14', 'right', async (p) => click(p, '.w-opt[data-id="b"]')],
+  ['S15', 'wrong', async (p) => click(p, '.w-opt[data-id="b"]')],
+  ['S15', 'right', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['S16', 'wrong', async (p) => { await click(p, '.w-tray-card[data-card="2"]'); await click(p, '.w-sort-target[data-column="b"]'); }],
+  ['S16', 'done', async (p) => { for (const [c, col] of [['1', 'a'], ['2', 'd'], ['3', 'b'], ['4', 'd'], ['5', 'd'], ['6', 'c']]) { await click(p, `.w-tray-card[data-card="${c}"]`); await click(p, `.w-sort-target[data-column="${col}"]`); } }],
+  ['S17', 'start', async () => {}],
+  ['S17', 'wrong', async (p) => { await click(p, '[data-action="card"]'); await click(p, '.w-sort-target[data-column="5"]'); }],
+  ['S17', 'pause marker', async (p) => {
+    for (const col of ['3', '1', '5', '4', '2']) { await click(p, '[data-action="card"]'); await click(p, `.w-sort-target[data-column="${col}"]`); }
+    await click(p, '.w-next');
+  }],
 ];
+// the video player: seek to the next stop (End is clamped there) and wait for the stop view
+async function toStop(p) {
+  await p.waitForFunction(() => document.querySelector('.w-video').readyState >= 1);
+  await p.focus('.w-seek');
+  await p.keyboard.press('End');
+  await p.waitForSelector('.w-stop-view:not([hidden])');
+}
 for (const size of SIZES) {
   for (const [id, state, act] of STATES) {
     const page = await open(`?reset=1&screen=${id}`, size);

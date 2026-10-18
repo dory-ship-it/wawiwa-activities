@@ -13,6 +13,12 @@
 //   rounds     (S08)  layout "wide": AS-IS strip, template row (field badge + map line), round dots,
 //                     three rule rows, band under them; "Next round" in the band after a right answer,
 //                     Next after round 3.
+//   fill       (S10)  layout "wide": situation line, the field rows (a pre-filled grey row, the active
+//                     row whose slot takes the chosen line), 2x2 option cards, band under them.
+//   metric     (S11)  layout "wide": the field row, four stacked option rows, then "Checkable later?"
+//                     with three slots (Baseline, Target, Date) that light up for the chosen option.
+//   bounds     (S13)  layout "wide": a strip of the process steps, three Start / End cards in a row.
+//   S14 and S15 use single in the editorial layout with a statement line instead of the quotes.
 //   selfcheck  (S20)  P3 STUB: mounts the dev placeholder so the slice stays walkable.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the band.
 import { h, fmt } from '../util.js';
@@ -26,7 +32,7 @@ export const decision = {
   mount(ctx) {
     const variant = ctx.screen.variant;
     if (variant === 'selfcheck') return placeholder.mount(ctx); // P3 STUB
-    const run = { single, challenge, multi, pair, rounds }[variant];
+    const run = { single, challenge, multi, pair, rounds, fill, metric, bounds }[variant];
     if (!run) throw new Error('decision: unknown variant ' + variant);
     return run(ctx) || { unmount() {} };
   },
@@ -35,14 +41,14 @@ export const decision = {
 /* ---------- option buttons ---------- */
 // kind: 'row' (numbered hairline row, S01), 'card' (numbered card with a radio ring, FT1),
 // 'check' (text card with a checkbox mark, S03). list: the options (default screen.options);
-// lead: 'num' (1, 2, 3) or 'icon' (the option's icon, S06 and S08 rows); interaction: false when the
+// lead: 'num' (1, 2, 3), 'icon' (the option's icon, S06 and S08 rows) or 'none'; interaction: false when the
 // group sits inside a larger interaction area.
 function options(ctx, kind, { list = ctx.screen.options, lead = 'num', labelledby = 'w-instruction', interaction = true } = {}) {
   const { content } = ctx;
   const group = h('div', { class: 'w-options w-options-' + kind, role: 'group', 'aria-labelledby': labelledby, dataset: interaction ? { interaction: '' } : {} });
   const btns = list.map((o, i) => {
     const label = h('span', { class: 'w-opt-label' }, labelWithTerm(o, content.tooltips));
-    const num = kind === 'check' ? null : lead === 'icon'
+    const num = kind === 'check' || lead === 'none' ? null : lead === 'icon'
       ? h('span', { class: 'w-opt-num w-opt-lead' }, icon(o.icon, { size: 24 }))
       : h('span', { class: 'w-opt-num', 'aria-hidden': 'true' }, String(i + 1));
     const tail = kind === 'row' ? icon('chevron-right', { size: 20, className: 'w-opt-chev' }) : null;
@@ -83,10 +89,21 @@ const lock = (btns) => btns.forEach((b) => b.setAttribute('aria-disabled', 'true
 function single(ctx) {
   const { screen, ui, zones, content } = ctx;
   const top = screen.stage.top;
-  const ch = content.characters[top.character];
   const { group, btns } = options(ctx, 'row');
-  const bubbles = top.bubbles || [];
-  const attribution = [top.label || ch.label, ch.fictional ? ui.fictionalBadge : null].filter(Boolean).join(' · ');
+  // top: a character's two quotes with the attribution (S01), or one statement line (S14, S15) whose
+  // optional highlight (the hours in S15) is set as a large number inside the sentence
+  let statement;
+  if (top.kind === 'character') {
+    const ch = content.characters[top.character];
+    const attribution = [top.label || ch.label, ch.fictional ? ui.fictionalBadge : null].filter(Boolean).join(' · ');
+    statement = [
+      h('blockquote', { class: 'w-quote' }, (top.bubbles || []).map((b, i) => h('p', { class: i === 0 ? 'w-quote-1' : 'w-quote-2' }, '“' + b + '”'))),
+      h('p', { class: 'w-attrib' }, h('span', { class: 'w-rule', 'aria-hidden': 'true' }), h('span', {}, attribution))];
+  } else {
+    const k = top.highlight ? top.text.indexOf(top.highlight) : -1;
+    statement = h('p', { class: 'w-statement' + (k >= 0 ? ' w-statement-figure' : '') },
+      k < 0 ? top.text : [top.text.slice(0, k), h('span', { class: 'w-figure' }, top.highlight), top.text.slice(k + top.highlight.length)]);
+  }
 
   layout(ctx, 'editorial',
     h('header', { class: 'w-header' }, zones.logo),
@@ -94,8 +111,7 @@ function single(ctx) {
       picture(screen.image, 'w-photo-column'),
       h('section', { class: 'w-col' },
         top.eyebrow ? h('p', { class: 'w-eyebrow' }, top.eyebrow) : null,
-        h('blockquote', { class: 'w-quote' }, bubbles.map((b, i) => h('p', { class: i === 0 ? 'w-quote-1' : 'w-quote-2' }, '“' + b + '”'))),
-        h('p', { class: 'w-attrib' }, h('span', { class: 'w-rule', 'aria-hidden': 'true' }), h('span', {}, attribution)),
+        statement,
         zones.instruction,
         group,
         zones.band)));
@@ -128,7 +144,7 @@ function single(ctx) {
 /* ---------- challenge (FT1), layout memo ---------- */
 function challenge(ctx) {
   const { screen, ui, zones } = ctx;
-  const { group, btns } = options(ctx, 'card');
+  const { group, btns } = options(ctx, 'card', { lead: 'none' }); // no numerals: FT labels carry their own field numbers
   const trackingId = screen.tracking[0].id;
   const routing = screen.routing;
   const header = fmt(ui.memo.header, { n: ctx.chapter?.n ?? '' });
@@ -269,15 +285,16 @@ function multi(ctx) {
 /* ---------- one single-choice question on hairline rows (S06 situations, S08 rounds) ---------- */
 // Wrong = the calm wrong mark on the row, retry; right = rows locked, onRight(focus). The same wrong
 // row again is not a new attempt. feedbackOf / isRight read the option (or the round) as needed.
-function rowQuestion(ctx, btns, list, { trackingId, isRight, feedbackOf, onRight }) {
+function rowQuestion(ctx, btns, list, { trackingId, isRight, feedbackOf, onRight, onChoose = () => {} }) {
   const { ui, zones } = ctx;
   let solved = false, chosen = -1;
   const show = (i) => btns.forEach((b, j) => paint(b, j === i ? (isRight(list[i]) ? 'correct' : 'wrong') : '', ui));
-  const solve = (i, focus) => { solved = true; chosen = i; show(i); lock(btns); onRight(i, focus); };
+  const solve = (i, focus) => { solved = true; chosen = i; show(i); lock(btns); onChoose(i, true); onRight(i, focus); };
   btns.forEach((btn, i) => btn.addEventListener('click', () => {
     if (solved || i === chosen) return;
     chosen = i;
     const right = isRight(list[i]);
+    if (!right) onChoose(i, false);
     ctx.answer({ trackingId: trackingId(), response: letter(i), result: right ? 'correct' : 'wrong' });
     if (right) { solve(i, true); return; }
     show(i);
@@ -375,4 +392,83 @@ function rounds(ctx) {
 
   show(0);
   if (ctx.revisit) { show(list.length - 1); q.solve(screen.options.findIndex((o) => o.id === list[r].correct), false); }
+}
+
+// One right answer on screen.options, Next after it (fill, metric, bounds).
+function oneQuestion(ctx, btns, { onChoose } = {}) {
+  const { screen, zones } = ctx;
+  const q = rowQuestion(ctx, btns, screen.options, {
+    trackingId: () => screen.tracking[0].id,
+    isRight: (o) => o.correct,
+    feedbackOf: (o) => o.feedback,
+    onChoose,
+    onRight: (i, focus) => { zones.setFeedback({ state: 'correct', text: screen.options[i].feedback }); ctx.complete(); ctx.unlockNext({ focus }); },
+  });
+  if (ctx.revisit) q.solve(screen.options.findIndex((o) => o.correct), false);
+}
+
+/* ---------- fill (S10), layout wide ---------- */
+function fill(ctx) {
+  const { screen, zones } = ctx;
+  const { group, btns } = options(ctx, 'card', { lead: 'none', interaction: false });
+  group.classList.add('w-options-grid2');
+  const slot = h('span', { class: 'w-field-slot', 'aria-live': 'polite' });
+  const rows = screen.fieldRows.map((f) => h('div', { class: 'w-field-row', dataset: { state: f.prefilled ? 'prefilled' : 'active' } },
+    h('span', { class: 'w-field-name' }, f.label), f.prefilled ? h('span', { class: 'w-field-value' }, f.value) : slot));
+  layout(ctx, 'wide', zones.logo,
+    h('div', { class: 'w-wide' },
+      zones.instruction,
+      h('div', { class: 'w-fill', dataset: { interaction: '' } },
+        h('p', { class: 'w-situation-line' }, icon(screen.situation.icon, { size: 24 }), h('span', {}, screen.situation.text)),
+        h('div', { class: 'w-field-rows' }, rows),
+        group),
+      zones.band));
+  zones.setFeedback({ state: 'hint', text: screen.hint });
+  oneQuestion(ctx, btns, { onChoose: (i, right) => { slot.textContent = screen.options[i].label; slot.dataset.result = right ? 'correct' : 'wrong'; } });
+}
+
+/* ---------- metric (S11), layout wide ---------- */
+function metric(ctx) {
+  const { screen, ui, zones } = ctx;
+  const { group, btns } = options(ctx, 'row', { interaction: false });
+  const slots = screen.slots.map((s) => {
+    const state = h('span', { class: 'w-sr-only' });
+    const el = h('li', { class: 'w-slot', dataset: { slot: s.id } }, h('span', { class: 'w-slot-mark', 'aria-hidden': 'true' }), h('span', { class: 'w-slot-label' }, s.label), state);
+    return { s, el, state };
+  });
+  const setSlots = (o) => slots.forEach((x) => {
+    const on = !!o.checks[x.s.id];
+    x.el.dataset.on = String(on);
+    x.el.querySelector('.w-slot-mark').replaceChildren(icon(on ? 'check' : 'x', { size: 16 }));
+    x.state.textContent = ' ' + (on ? ui.slot.on : ui.slot.off);
+  });
+  layout(ctx, 'wide', zones.logo,
+    h('div', { class: 'w-wide' },
+      zones.instruction,
+      h('div', { class: 'w-metric', dataset: { interaction: '' } },
+        h('p', { class: 'w-field-row w-field-head' }, icon(screen.field.icon, { size: 22 }), h('span', { class: 'w-field-name' }, screen.field.label)),
+        group,
+        h('div', { class: 'w-slots', 'aria-live': 'polite' }, h('p', { class: 'w-slots-title' }, screen.slotsTitle), h('ul', {}, slots.map((x) => x.el)))),
+      zones.band));
+  zones.setFeedback({ state: 'hint', text: screen.hint });
+  oneQuestion(ctx, btns, { onChoose: (i) => setSlots(screen.options[i]) });
+}
+
+/* ---------- bounds (S13), layout wide ---------- */
+function bounds(ctx) {
+  const { screen, zones } = ctx;
+  const steps = screen.strip.split(', ');
+  const strip = h('p', { class: 'w-steps-strip' }, steps.map((s, i) => [
+    i ? [h('span', { class: 'w-sr-only' }, ', '), icon('arrow-right', { size: 18, className: 'w-steps-arrow' })] : null,
+    h('span', { class: 'w-step-chip' }, s)]));
+  const btns = screen.options.map((o, i) => h('button', { class: 'w-opt w-opt-bounds', type: 'button', dataset: { id: o.id, letter: letter(i) } },
+    h('span', { class: 'w-bound' }, icon('flag', { size: 22, className: 'w-bound-icon' }), h('span', {}, h('b', {}, screen.startLabel), ' ', o.start)),
+    h('span', { class: 'w-bound w-bound-end' }, icon('finish', { size: 22, className: 'w-bound-icon' }), h('span', {}, h('b', {}, screen.endLabel), ' ', o.end)),
+    h('span', { class: 'w-opt-mark' })));
+  const group = h('div', { class: 'w-options w-options-bounds', role: 'group', 'aria-labelledby': 'w-instruction' }, btns);
+  arrowNav(group);
+  layout(ctx, 'wide', zones.logo,
+    h('div', { class: 'w-wide' }, zones.instruction, h('div', { class: 'w-bounds', dataset: { interaction: '' } }, strip, group), zones.band));
+  zones.setFeedback({ state: 'hint', text: screen.hint });
+  oneQuestion(ctx, btns);
 }

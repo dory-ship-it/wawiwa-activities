@@ -14,6 +14,7 @@ import { decision } from './templates/decision.js';
 import { input } from './templates/input.js';
 import { sort } from './templates/sort.js';
 import { explorer } from './templates/explorer.js';
+import { video } from './templates/video.js';
 import { createTracking } from './tracking/index.js';
 
 const STAGE_W = 1280, STAGE_H = 720;
@@ -21,8 +22,8 @@ const NARROW_BELOW = 900; // window narrower than this: show the "best on a comp
 const NOTE_H = 40;
 const MAX_TEXT = 250;     // fill-in responses are trimmed and capped (SCORM 1.2 safe)
 
-// Video and handoff arrive in P2 and P3; until then those screens mount the placeholder.
-const TEMPLATES = { decision, input, sort, explorer };
+// Handoff arrives in P3; until then S19 (and the S20 self-check) mount the placeholder.
+const TEMPLATES = { decision, input, sort, explorer, video };
 
 export async function boot(root) {
   const res = await fetch(new URL('../content/l4-slice.json', import.meta.url));

@@ -8,6 +8,10 @@
 //                  eight were opened the question appears and the tiles become answer buttons (one
 //                  question, wrong = retry, right = Next). Before that the question row is a lock icon
 //                  with the content's aria-label.
+//   pick    (S12)  eight field tiles left (40%), the question and a reading panel right (60%). A tile
+//                  click opens its text in the panel (check mark once read) and selects it (two at most);
+//                  Check in the band; one band per attempt: verdict + the first wrong tile's line, no
+//                  paging; right = both key lines, Next.
 // Tracking: diagram = the hotspot id of the first part chosen ("gateway", "lane", "event", "step");
 // tiles = the field number of the first answer. Retries as retry events.
 import { h, nextId } from '../util.js';
@@ -16,7 +20,7 @@ import { layout, ruleLabel, arrowNav } from './stage.js';
 
 export const explorer = {
   mount(ctx) {
-    const run = { diagram, tiles }[ctx.screen.variant];
+    const run = { diagram, tiles, pick }[ctx.screen.variant];
     if (!run) throw new Error('explorer: unknown variant ' + ctx.screen.variant);
     run(ctx);
     return { unmount() {} };
@@ -192,7 +196,7 @@ function tiles(ctx) {
   arrowNav(grid, { selector: '.w-tile', cols: 4 });
 
   const lock = h('span', { class: 'w-question-lock', role: 'img', 'aria-label': screen.lockedLabel }, icon('lock', { size: 22 }));
-  const question = h('p', { class: 'w-question-text', id: nextId('w-question'), hidden: true }, screen.question);
+  const question = h('h2', { class: 'w-question-text', id: nextId('w-question'), hidden: true }, screen.question);
   const qRow = h('div', { class: 'w-question-row', 'aria-live': 'polite' }, lock, question);
 
   layout(ctx, 'wide', zones.logo,
@@ -205,6 +209,7 @@ function tiles(ctx) {
     question.hidden = false;
     grid.setAttribute('aria-labelledby', question.id);
     list.forEach((x) => x.btn.removeAttribute('aria-expanded'));
+    zones.setFeedback({ state: 'hint', text: screen.questionHint || screen.hint }); // the band now hints at the question
   };
   const toFront = () => list.forEach((x) => flip(x, false));
 
@@ -247,4 +252,85 @@ function tiles(ctx) {
     zones.setFeedback({ state: 'correct', text: list[k].t.feedback });
     ctx.unlockNext({ focus: false });
   }
+}
+
+/* ---------- pick (S12) ---------- */
+function pick(ctx) {
+  const { screen, ui, zones } = ctx;
+  const need = screen.select;
+  const trackingId = screen.tracking[0].id;
+  const keys = screen.tiles.map((t, i) => (t.correct ? i : -1)).filter((i) => i >= 0);
+  const selected = new Set();
+  let solved = false, marked = false;
+
+  const question = h('h2', { class: 'w-question-text w-pick-q', id: nextId('w-pick-q') }, screen.question);
+  const panelText = h('p', { class: 'w-pick-text', 'aria-live': 'polite' });
+  const list = screen.tiles.map((t) => {
+    const seen = h('span', { class: 'w-tile-seen', 'aria-hidden': 'true' });
+    const btn = h('button', { class: 'w-opt w-pick-tile', type: 'button', 'aria-pressed': 'false', dataset: { n: String(t.n) } },
+      h('span', { class: 'w-tile-num', 'aria-hidden': 'true' }, String(t.n)), h('span', { class: 'w-opt-label' }, t.title), seen, h('span', { class: 'w-opt-mark' }));
+    return { t, btn, seen };
+  });
+  const grid = h('div', { class: 'w-pick-tiles', role: 'group', 'aria-labelledby': question.id }, list.map((x) => x.btn));
+  arrowNav(grid, { selector: '.w-pick-tile', cols: 2 });
+  const check = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'check' }, disabled: true, onclick: () => doCheck() }, ui.buttons.check);
+
+  layout(ctx, 'wide', zones.logo,
+    h('div', { class: 'w-wide' },
+      zones.instruction,
+      h('div', { class: 'w-pick', dataset: { interaction: '' } }, grid, h('div', { class: 'w-pick-side' }, question, h('div', { class: 'w-pick-panel' }, panelText))),
+      zones.band));
+  zones.setFeedback({ state: 'hint', text: screen.hint });
+  zones.setTool(check);
+
+  const open = (x) => {
+    list.forEach((y) => { y.btn.dataset.open = String(y === x); });
+    panelText.textContent = x.t.text;
+    x.btn.dataset.seen = 'true';
+    x.seen.replaceChildren(icon('check', { size: 16 }));
+  };
+  const paintOne = (x, result) => mark(x.btn, result, ui);
+  function update() {
+    list.forEach((x, i) => {
+      x.btn.setAttribute('aria-pressed', String(selected.has(i)));
+      if (!marked || !x.btn.dataset.result) paintOne(x, '');
+    });
+    check.disabled = selected.size !== need;
+  }
+  list.forEach((x, i) => x.btn.addEventListener('click', () => {
+    open(x);
+    if (solved) return;
+    if (marked) { marked = false; list.forEach((y) => paintOne(y, '')); }
+    if (selected.has(i)) selected.delete(i); else if (selected.size < need) selected.add(i);
+    update();
+  }));
+
+  function solve(focus) {
+    solved = true;
+    selected.clear();
+    keys.forEach((i) => selected.add(i));
+    list.forEach((x, i) => { x.btn.setAttribute('aria-pressed', String(keys.includes(i))); paintOne(x, keys.includes(i) ? 'correct' : ''); });
+    zones.setTool();
+    zones.setFeedback({ state: 'correct', text: keys.map((i) => screen.tiles[i].feedback).join(' ') });
+    ctx.unlockNext({ focus });
+  }
+  function doCheck() {
+    if (solved || selected.size !== need) return;
+    const chosen = [...selected].sort((a, b) => a - b);
+    const rightCount = chosen.filter((i) => keys.includes(i)).length;
+    const right = rightCount === keys.length;
+    ctx.answer({ trackingId, response: chosen.map((i) => String(screen.tiles[i].n)).join(','), result: right ? 'correct' : 'wrong' });
+    if (right) { ctx.complete(); solve(true); return; }
+    chosen.forEach((i) => paintOne(list[i], screen.tiles[i].correct ? 'correct' : 'wrong'));
+    const wrong = chosen.filter((i) => !screen.tiles[i].correct);
+    wrong.forEach((i) => selected.delete(i));
+    marked = true;
+    update();
+    zones.setFeedback({ state: 'wrong', verdict: rightCount === 1 && keys.length === 2 ? ui.feedback.oneOfTwo : ui.feedback.wrongPrefix, text: screen.tiles[wrong[0]].feedback });
+    list[wrong[0]].btn.focus();
+  }
+
+  const firstOpen = list.find((x) => x.t.n === screen.openFirst);
+  if (firstOpen) open(firstOpen);
+  if (ctx.revisit) solve(false);
 }

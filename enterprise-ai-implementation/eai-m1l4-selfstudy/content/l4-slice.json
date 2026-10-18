@@ -11,7 +11,7 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["S01", "S02", "FT1", "V1", "S03", "FT2", "S04", "S05", "S06", "S07", "S08", "S19", "S20"],
+    "slice": ["S01", "S02", "FT1", "V1", "S03", "FT2", "S04", "S05", "S06", "S07", "S08", "FT3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S19", "S20"],
     "completion": { "rule": "slice-end", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": [] }
   },
 
@@ -29,6 +29,8 @@
       "jumpToTask": "Jump to the last task",
       "fullChapter": "Take the full chapter",
       "nextRound": "Next round",
+      "jumpToMap": "Jump to the full HR map",
+      "watchDemo": "Watch the demo",
       "watchVideo": "Watch the video",
       "reopenWorkbook": "Reopen workbook",
       "finish": "Finish",
@@ -64,11 +66,35 @@
         "pair": "Next, locked until both situations have the right format",
         "tiles": "Next, locked until you open all eight fields and answer the question",
         "rounds": "Next, locked until all three rounds are right",
+        "video": "Next, locked until the video ends and every stop is answered",
+        "fill": "Next, locked until you choose the right line for Field 7",
+        "metric": "Next, locked until you choose the strongest metric",
+        "pick": "Next, locked until both answers are correct",
+        "bounds": "Next, locked until you choose the right start and end",
         "default": "Next, locked until you finish this screen"
       }
     },
     "memo": { "header": "Fast track · Chapter {n}" },
-    "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}" },
+    "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "case": "Case {i} of {n}" },
+    "slot": { "on": "present", "off": "missing" },
+    "video": {
+      "meta": "Video · {length} · {n} stops",
+      "guiding": "Guiding question:",
+      "play": "Play",
+      "pause": "Pause",
+      "controls": "Video controls",
+      "seek": "Seek",
+      "seekText": "{t} of {d}",
+      "stopMarker": "Stop {i} at {t}",
+      "captions": "Captions",
+      "mute": "Mute",
+      "transcript": "Transcript",
+      "stopLabel": "Stop {i} of {n} · {title}",
+      "pausedAt": "Paused at {t}",
+      "resume": "Resume video",
+      "resumeLocked": "Resume video, locked until the answer is correct",
+      "seekLimit": "Answer the stop first. The video continues after the right answer."
+    },
     "rail": {
       "label": "Chapters",
       "openMenu": "Open chapters menu",
@@ -83,8 +109,6 @@
     "resumePrompt": "Welcome back. Pick up where you left off?",
     "startOverConfirm": "Start over? This clears your answers and your place in this lesson.",
     "startOverLmsNote": "Answers already sent to your course record stay there.",
-    "videoGuidingLabel": "Watch for this",
-    "videoStopLabel": "Question {i} of {n}",
     "videoResumeNote": "The video continues after the right answer.",
     "sliceEnd": "End of the pilot slice. Thank you for testing.",
     "fictionalBadge": "Fictional character",
@@ -138,7 +162,17 @@
     "Output": "What comes out at the end, and to whom.",
     "Field template": "A fixed set of fields; fits when you know the process and need a fast decision.",
     "BPMN": "A standard for process diagrams, shared across tools and teams.",
-    "Eight fields": "Same spirit as the five-field template from Lesson 1, now for a whole process."
+    "Eight fields": "Same spirit as the five-field template from Lesson 1, now for a whole process.",
+    "Owner": "Keeps a policy or document current.",
+    "Sensitivity": "One of four levels: PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED. It decides what may go to an AI tool.",
+    "Existing controls": "Checks in place today; \"no formal control\" is valid.",
+    "Gaps": "What is missing or unclear; \"unclear\" is allowed.",
+    "Field 8": "Guardrail: answer accuracy stays at or above 95% in a QA sample.",
+    "Baseline": "The current state, even if estimated.",
+    "Target": "Specific, realistic, checkable later.",
+    "Handoff": "The moment responsibility passes from one role to another.",
+    "Bottleneck": "A step limited by the slowest resource.",
+    "good-fit kind": "Unstructured to structured · Low-risk decision points · Handoffs with delay or loss."
   },
 
   "characters": {
@@ -165,8 +199,12 @@
     { "id": "ch2", "n": 2, "title": "Toolkit", "minutes": 22, "screens": ["FT2", "S04", "S05", "S06", "S07", "S08"], "inSlice": true,
       "fastTrack": { "card": "FT2", "landing": "S08" },
       "pauseMarker": "Good place to pause. Your place is saved." },
-    { "id": "ch3", "n": 3, "title": "HR demo", "minutes": 19, "screens": [], "inSlice": false, "pauseMarker": "Good place to pause. Your place is saved." },
-    { "id": "ch4", "n": 4, "title": "Critical eye", "minutes": 26, "screens": [], "inSlice": false, "pauseMarker": "Good place to pause. Chapter 5 takes about 80 minutes. Start it fresh." },
+    { "id": "ch3", "n": 3, "title": "HR demo", "minutes": 19, "screens": ["FT3", "V2", "S09", "S10", "S11", "S12"], "inSlice": true,
+      "fastTrack": { "card": "FT3", "landing": "S12" },
+      "pauseMarker": "Good place to pause. Your place is saved." },
+    { "id": "ch4", "n": 4, "title": "Critical eye", "minutes": 26, "screens": ["FT4", "S13", "S14", "S15", "S16", "S17"], "inSlice": true,
+      "fastTrack": { "card": "FT4", "landing": "S17" },
+      "pauseMarker": "Good place to pause. Chapter 5 takes about 80 minutes. Start it fresh." },
     { "id": "ch5", "n": 5, "title": "Build yours", "minutes": 82, "screens": ["S19", "S20"], "inSlice": true,
       "sliceNote": "S18A and S18 come later; the slice enters Chapter 5 at S19.",
       "pauseMarker": "Good place to pause. Your map and place are saved." },
@@ -284,11 +322,13 @@
       "title": "Two cases, same lesson",
       "guidingQuestion": "What separates a technology change that works from one that has to be fixed later?",
       "media": {
-        "src": "assets/video/v1.mp4",
-        "poster": "assets/video/v1-poster.jpg",
-        "captions": [ { "lang": "en", "label": "English", "src": "assets/video/v1.en.vtt" } ],
-        "cues": "assets/video/v1.cues.json",
-        "transcript": "from-captions"
+        "$comment": "temp: silent placeholder until the real film exists. Swap src, captions[0].src, duration and stops[].t for the real ones (assets/video/v1.mp4, v1.en.vtt, v1.cues.json) and set temp to false.",
+        "src": "assets/video/temp/v1-placeholder.mp4",
+        "captions": [ { "lang": "en", "label": "English", "src": "assets/video/temp/v1-placeholder.en.vtt" } ],
+        "duration": 160,
+        "length": "2:40",
+        "transcript": "from-captions",
+        "temp": true
       },
       "stopLayout": { "still": "left-40", "panel": "right-60", "feedbackIn": "feedback-row" },
       "stops": [
@@ -296,6 +336,7 @@
           "id": "stop1",
           "cueId": "stop1",
           "storyboardTime": "0:58",
+          "t": 58,
           "question": "The US company wants to close a five-times gap. What should it look at first?",
           "options": [
             { "id": "a", "label": "A faster system for its current payment checks", "correct": false,
@@ -311,6 +352,7 @@
           "id": "stop2",
           "cueId": "stop2",
           "storyboardTime": "2:06",
+          "t": 126,
           "question": "Quality dropped on complex requests. What was the root problem?",
           "options": [
             { "id": "a", "label": "Routine and judgment cases got the same path", "correct": true,
@@ -466,6 +508,8 @@
       "instruction": "Sort each HR case card into its building block.",
       "hint": "Select a card, then choose its column.",
       "layout": "wide",
+      "mode": "deck",
+      "processLine": true,
       "columns": [
         { "id": "a", "label": "Trigger", "icon": "play", "term": "Trigger" },
         { "id": "b", "label": "Steps", "icon": "stairs", "term": "Steps" },
@@ -618,6 +662,8 @@
           "feedback": "A baseline now and a target later make the map checkable: a number, not a feeling." }
       ],
       "question": "Which field can you check later?",
+      "questionHint": "Pick the field you could measure again in three months.",
+      "questionHintPilotCopy": true,
       "lockedLabel": "Question unlocks after all eight fields",
       "advance": "after-correct",
       "tracking": [
@@ -667,6 +713,485 @@
         { "id": "L4_S08_3", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Analyze", "result": "graded" }
       ],
       "sources": ["s16", "s17", "s34 #1 and #5", "s19", "R2 'written procedure' is constructed"]
+    },
+
+    {
+      "id": "FT3",
+      "chapter": "ch3",
+      "template": "decision",
+      "variant": "challenge",
+      "minutes": 1,
+      "instruction": "Answer one question, or skip the challenge.",
+      "hint": "Answer if you can already map the HR case. Skipping costs nothing.",
+      "layout": "memo",
+      "image": { "src": "assets/img/ft3.jpg", "alt": "An HR team at work, a process map on a laptop and a sticky note for each step on the desk", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "40% 50%" },
+      "stage": {
+        "top": { "kind": "line", "icon": "lightning", "text": "Optional challenge. Right on the first try? Skip to this chapter's last task." },
+        "middle": { "kind": "question", "text": "Which line breaks the AS-IS rules on the HR map?" },
+        "bottom": { "kind": "options", "arrange": "row", "link": "skipChallenge" }
+      },
+      "options": [
+        { "id": "a", "label": "Field 7: unclear how many answers were wrong", "correct": false,
+          "feedback": "'Unclear' is a valid diagnostic result. It stays. The full chapter starts now." },
+        { "id": "b", "label": "Field 6: no formal control", "correct": false,
+          "feedback": "'No formal control' records what really happens. It stays. The full chapter starts now." },
+        { "id": "c", "label": "Field 3: a chatbot answers routine questions", "correct": true,
+          "feedback": "Right on the first try: you can jump to the full HR map, or watch the demo." }
+      ],
+      "attempts": 1,
+      "routing": {
+        "correctFirstTry": { "choices": [ { "button": "jumpToMap", "to": "S12", "route": "skip" }, { "button": "watchDemo", "to": "V2", "route": "full" } ] },
+        "wrong": { "to": "V2", "route": "full" },
+        "skipped": { "to": "V2", "route": "full" }
+      },
+      "tracking": [
+        { "id": "L4_FT3_1", "type": "choice", "correctResponse": "c", "scored": false, "bloom": "Evaluate", "result": "graded" }
+      ],
+      "suspend": ["route"],
+      "sources": ["s16", "s18", "s19"]
+    },
+
+    {
+      "id": "V2",
+      "chapter": "ch3",
+      "template": "video",
+      "minutes": 6,
+      "instruction": "Watch the video. Answer the three questions when it stops.",
+      "instructionPilotCopy": true,
+      "title": "Mapping the HR case",
+      "guidingQuestion": "How do you turn about 90 messy requests a month into a map you can check later?",
+      "media": {
+        "$comment": "temp: silent placeholder until the real film exists. Swap src, captions[0].src, duration and stops[].t for the real ones and set temp to false.",
+        "src": "assets/video/temp/v2-placeholder.mp4",
+        "captions": [ { "lang": "en", "label": "English", "src": "assets/video/temp/v2-placeholder.en.vtt" } ],
+        "duration": 219,
+        "length": "3:39",
+        "transcript": "from-captions",
+        "temp": true
+      },
+      "stops": [
+        {
+          "id": "stop1",
+          "storyboardTime": "0:59",
+          "t": 59,
+          "question": "Which line belongs in Field 2, as the process runs today?",
+          "options": [
+            { "id": "a", "label": "An employee emails HR, the most formal channel", "correct": false,
+              "feedback": "Email is only one of three real channels. WhatsApp and in-person questions vanish from the map." },
+            { "id": "b", "label": "An employee asks by WhatsApp, email, or in person", "correct": true,
+              "feedback": "It names the concrete event that starts the work, across all three channels that really exist." },
+            { "id": "c", "label": "A chatbot receives every employee question", "correct": false,
+              "feedback": "That describes a future tool. An AS-IS map records today, so AI has no place on it yet." }
+          ],
+          "tracking": { "id": "L4_V2_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Apply", "result": "graded" }
+        },
+        {
+          "id": "stop2",
+          "storyboardTime": "1:59",
+          "t": 119,
+          "question": "Where does responsibility pass from one role to another?",
+          "options": [
+            { "id": "a", "label": "HR staff to HR manager, when policy is exceeded", "correct": true,
+              "feedback": "From here on, the HR manager depends on what the staffer passes along." },
+            { "id": "b", "label": "HR staff check the topic of each request", "correct": false,
+              "feedback": "One role does this from start to finish. Nothing changes hands, so it stays a step in Field 3." },
+            { "id": "c", "label": "HR manager keeps the four policies current", "correct": false,
+              "feedback": "That is ownership of a knowledge source. It goes in Field 5, next to each policy." }
+          ],
+          "tracking": { "id": "L4_V2_2", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Analyze", "result": "graded" }
+        },
+        {
+          "id": "stop3",
+          "storyboardTime": "3:02",
+          "t": 182,
+          "question": "What goes in Field 6, existing controls?",
+          "options": [
+            { "id": "a", "label": "A manager review before answers go out", "correct": false,
+              "feedback": "That is a fix for later. Added now, the map shows a check that does not exist today." },
+            { "id": "b", "label": "No formal control: the staffer's own judgment", "correct": true,
+              "feedback": "It records what really happens. That missing check is exactly what the map is meant to reveal." },
+            { "id": "c", "label": "Nothing yet: leave Field 6 empty for now", "correct": false,
+              "feedback": "An empty field reads as not checked yet. The finding itself is the content this field needs." }
+          ],
+          "tracking": { "id": "L4_V2_3", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Apply", "result": "graded" }
+        }
+      ],
+      "advance": "after-video-end",
+      "production": {
+        "lengthTarget": "3:39 narration plus 3 stops; hard cap 4:00 on rendered audio",
+        "words": 548,
+        "canvas": "left 60% process map (lanes illustrative, from Fields 2 to 4); right 40% eight empty field slots that fill with keywords",
+        "segments": [
+          { "n": 1, "time": "0:00", "narration": "This is the HR case from Lesson 1. A services company with about 400 employees. HR receives about 90 requests a month, and most of them repeat: vacation days, pension terms, expense submissions, overtime policy. They come in by WhatsApp, by email, and in person, with no organized system. Nobody knows how many of them need human judgment." },
+          { "n": 2, "time": "0:23", "narration": "The tempting first move is a chatbot. Not yet. First we map. And we map AS-IS: how it actually happens on a normal day, not how it's supposed to work. No fixing, no AI. Just what's really there." },
+          { "n": 3, "time": "0:38", "narration": "Field 1 is the process name. Keep it plain and specific: answering employees' repeat questions to HR. Field 2 is the trigger, the thing that starts the process. A good trigger is concrete: a message, a form, a date. Something you can point to. Before I fill it in, you choose.", "stopAfter": "stop1" },
+          { "n": 4, "time": "0:59", "narration": "All three channels go on the map, because all three really happen. Notice that nothing here is fixed or improved. It's simply what happens. Where a process starts and ends is a decision, not a given. Without clear boundaries, a process swells until it includes almost the whole organization." },
+          { "n": 5, "time": "1:18", "narration": "Field 3 is the steps, each with a role owner. Three to seven steps are usually enough. This case needs three. Receiving the request. Checking the topic, done by HR staff. Then an answer or an escalation, by HR staff or the HR manager. Owners are written as roles, not names, so the map stays true when people change." },
+          { "n": 6, "time": "1:42", "narration": "Look at the lanes building on screen. Each role gets its own row, so at every moment you can see who is holding the work. Field 4 asks where responsibility passes from one role to another. Look at who owns each step.", "stopAfter": "stop2" },
+          { "n": 7, "time": "1:59", "narration": "From HR staff to the HR manager, when a question goes beyond known policy. That's the most dangerous moment in a process. The staffer assumes the manager knows what happened before, and that isn't always true. A good map marks each handoff: from whom, to whom, what exactly passes, and what happens if the receiver is unavailable. Here, there's no single channel for it. Keep that in mind for Field 7." },
+          { "n": 8, "time": "2:27", "narration": "Field 5 is knowledge sources: the vacation, pension, expense, and overtime policies. Each source gets an owner, the role that keeps it current. Here, the HR manager. And each gets a sensitivity tag on a four-level scale: public, internal, confidential, restricted. These policies are internal. An employee's own personal or financial details are confidential, and they don't go into a public AI tool." },
+          { "n": 9, "time": "2:52", "narration": "Field 6 is existing controls. Is anything checking the answers before they go out? You've seen the steps. What goes in the map?", "stopAfter": "stop3" },
+          { "n": 10, "time": "3:02", "narration": "No formal control: it depends on the staffer's own judgment. That's a valid answer, and exactly what mapping reveals." },
+          { "n": 11, "time": "3:09", "narration": "Field 7 is gaps. Here you're allowed, even encouraged, to write unclear. Nobody knows how many wrong answers were given before. There's no single organized handoff channel. That's a diagnostic result." },
+          { "n": 12, "time": "3:22", "narration": "Field 8 is the success metric. Baseline: about 35 percent of the HR team's time goes to repeat questions. Target: 20 percent within three months. Not a feeling. A number you can check later. Next, you take the mapper's seat, starting with Field 5." }
+        ]
+      },
+      "sources": ["storyboard v2 section 4"]
+    },
+
+    {
+      "id": "S09",
+      "chapter": "ch3",
+      "template": "sort",
+      "mode": "tray",
+      "minutes": 4,
+      "instruction": "Sort each card into its part of Field 5.",
+      "hint": "Select a card, then a column.",
+      "layout": "wide",
+      "header": "Field 5: sources, owners, sensitivity",
+      "columns": [
+        { "id": "a", "label": "Source", "icon": "document" },
+        { "id": "b", "label": "Owner", "icon": "person", "term": "Owner" },
+        { "id": "c", "label": "Sensitivity", "icon": "tag", "term": "Sensitivity" },
+        { "id": "d", "label": "Not Field 5", "icon": "x-square" }
+      ],
+      "cards": [
+        { "n": 1, "text": "Vacation policy", "column": "a",
+          "feedback": { "correct": "Placed. The map now shows which document an HR answer depends on.",
+            "wrong": "A policy is not a person or a label. What role does it play in the process?" } },
+        { "n": 2, "text": "Overtime policy", "column": "a",
+          "feedback": { "correct": "Placed. Overtime is one of the repeat topics in the Lesson 1 case.",
+            "wrong": "A policy is not a person or a label. What role does it play in the process?" } },
+        { "n": 3, "text": "HR manager", "column": "b",
+          "feedback": { "correct": "Placed. When a policy goes stale, the map now names who has to update it.",
+            "wrong": "This is a role, not a document or a label. What does this role do for the policies?" } },
+        { "n": 4, "text": "INTERNAL", "column": "c",
+          "feedback": { "correct": "Placed. The policies stay inside the company. An employee's own details would be CONFIDENTIAL and stay out of public AI tools.",
+            "wrong": "This is not a document and not a person. What does it tell you about the data?" } },
+        { "n": 5, "text": "No formal control", "column": "d",
+          "feedback": { "correct": "Kept out. It describes how answers get checked. That is Field 6.",
+            "wrong": "This card says nothing about where knowledge comes from, who keeps it, or how sensitive it is." } },
+        { "n": 6, "text": "Chatbot answers policy questions", "column": "d",
+          "feedback": { "correct": "Kept out. No chatbot runs today. Adding AI while mapping turns the AS-IS map into a plan.",
+            "wrong": "Ask whether this happens on a normal day in the HR case, as it runs now." } }
+      ],
+      "advance": "after-all-placed",
+      "tracking": [
+        { "id": "L4_S09_1", "type": "matching", "correctResponse": "1.a,2.a,3.b,4.c,5.d,6.d", "scored": false, "bloom": "Understand", "result": "graded" }
+      ],
+      "sources": ["s14", "s18", "s20", "s22", "s44", "s16"]
+    },
+
+    {
+      "id": "S10",
+      "chapter": "ch3",
+      "template": "decision",
+      "variant": "fill",
+      "minutes": 2,
+      "instruction": "Fill Field 7 for the HR case.",
+      "hint": "Write what is true on a normal day, even if it looks bad.",
+      "layout": "wide",
+      "terms": ["Existing controls", "Gaps"],
+      "situation": { "icon": "speech", "text": "HR keeps no record of answers given or corrected." },
+      "fieldRows": [
+        { "id": "f6", "label": "Field 6, Existing controls:", "value": "no formal control", "prefilled": true, "from": "V2 stop 3" },
+        { "id": "f7", "label": "Field 7, Gaps:", "value": null, "active": true }
+      ],
+      "options": [
+        { "id": "a", "label": "Staff think wrong answers are rare", "correct": false,
+          "feedback": "No one has counted. The map now holds a guess that nobody can verify." },
+        { "id": "b", "label": "AI will catch wrong answers later", "correct": false,
+          "feedback": "The map describes today. A checker that does not exist yet turns a gap into a plan." },
+        { "id": "c", "label": "Unclear how many answers were wrong", "correct": true,
+          "feedback": "Field 7 now tells you what to investigate before Lesson 5, and what not to build on yet." },
+        { "id": "d", "label": "Leave it empty until data exists", "correct": false,
+          "feedback": "The map now hides its biggest unknown. Lesson 5 would treat it as known and build on it." }
+      ],
+      "advance": "after-correct",
+      "tracking": [
+        { "id": "L4_S10_1", "type": "choice", "correctResponse": "c", "scored": false, "bloom": "Apply", "result": "graded" }
+      ],
+      "sources": ["s19", "s38", "s33", "s43 item 4"]
+    },
+
+    {
+      "id": "S11",
+      "chapter": "ch3",
+      "template": "decision",
+      "variant": "metric",
+      "minutes": 3,
+      "instruction": "Pick the strongest success metric.",
+      "hint": "Ask: three months from now, could someone check it?",
+      "layout": "wide",
+      "terms": ["Success metric", "Baseline", "Target", "Field 8"],
+      "field": { "label": "Field 8", "icon": "gauge" },
+      "options": [
+        { "id": "a", "label": "HR time on repeats: significant improvement within 3 months", "correct": false, "checks": { "baseline": false, "target": false, "date": true },
+          "feedback": "No number to check. In three months, nobody can say whether it worked." },
+        { "id": "b", "label": "Employees feel HR answers repeat questions faster", "correct": false, "checks": { "baseline": false, "target": false, "date": false },
+          "feedback": "A feeling shifts with mood and memory. You cannot compare it before and after." },
+        { "id": "c", "label": "HR time on repeats: down to 20% within 3 months", "correct": false, "checks": { "baseline": false, "target": true, "date": true },
+          "feedback": "Twenty percent, down from what? Without today's number, nobody can show a change happened." },
+        { "id": "d", "label": "HR time on repeats: ~35% now, 20% in 3 months", "correct": true, "checks": { "baseline": true, "target": true, "date": true },
+          "feedback": "Checkable: a start point, a target and a date. One primary number to watch." }
+      ],
+      "slotsTitle": "Checkable later?",
+      "slots": [ { "id": "baseline", "label": "Baseline" }, { "id": "target", "label": "Target" }, { "id": "date", "label": "Date" } ],
+      "advance": "after-correct",
+      "tracking": [
+        { "id": "L4_S11_1", "type": "choice", "correctResponse": "d", "scored": false, "bloom": "Evaluate", "result": "graded" }
+      ],
+      "sources": ["s4", "s19", "s20", "s37"]
+    },
+
+    {
+      "id": "S12",
+      "chapter": "ch3",
+      "template": "explorer",
+      "variant": "pick",
+      "minutes": 3,
+      "instruction": "Open any field, then answer the question.",
+      "hint": "Open any field to read it. Then select two and press Check.",
+      "layout": "wide",
+      "question": "Which two fields together show the risk at the HR handoff?",
+      "select": 2,
+      "openFirst": 3,
+      "tiles": [
+        { "n": 1, "title": "Name", "text": "Answering employees' repeat questions to HR", "correct": false,
+          "feedback": "This field does not follow the question once it leaves the first staffer." },
+        { "n": 2, "title": "Trigger", "text": "A question by WhatsApp, email, or in person", "correct": false,
+          "feedback": "This field does not follow the question once it leaves the first staffer." },
+        { "n": 3, "title": "Steps", "text": "Receiving the request (employee) to checking the topic (HR staff) to answer or escalation (HR staff / manager)", "correct": false,
+          "feedback": "Field 3 shows who does each step, not the moment between them or what can go wrong there." },
+        { "n": 4, "title": "Handoffs", "text": "From HR staff to HR manager when policy is exceeded", "correct": true,
+          "feedback": "Field 4 shows the question moving from HR staff to the HR manager." },
+        { "n": 5, "title": "Sources", "text": "Vacation, pension, expense, overtime policy. Owner: HR manager. Tag: INTERNAL", "correct": false,
+          "feedback": "This field does not follow the question once it leaves the first staffer." },
+        { "n": 6, "title": "Controls", "text": "No formal control: depends on the staffer's personal judgment", "correct": false,
+          "feedback": "Field 6 is about how answers get checked. It says nothing about the handoff." },
+        { "n": 7, "title": "Gaps", "text": "Unclear how many wrong answers were given; no single handoff channel", "correct": true,
+          "feedback": "Field 7 adds the risk: no single channel for that handoff." },
+        { "n": 8, "title": "Metric", "text": "Baseline ~35% of HR time on repeat questions. Target 20% within 3 months", "correct": false,
+          "feedback": "This field does not follow the question once it leaves the first staffer." }
+      ],
+      "advance": "after-correct",
+      "endOfChapter": true,
+      "tracking": [
+        { "id": "L4_S12_1", "type": "choice", "multiple": true, "correctResponse": "4,7", "scored": false, "bloom": "Analyze", "result": "graded" }
+      ],
+      "sources": ["s20", "s17 to s19", "s27", "s43 item 2"]
+    },
+
+    {
+      "id": "FT4",
+      "chapter": "ch4",
+      "template": "decision",
+      "variant": "challenge",
+      "minutes": 1,
+      "instruction": "Answer one question, or skip the challenge.",
+      "hint": "Answer if you can already judge where AI fits. Skipping costs nothing.",
+      "layout": "memo",
+      "image": { "src": "assets/img/ft4.jpg", "alt": "A staff member reading through a case file at a desk", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "45% 40%" },
+      "stage": {
+        "top": { "kind": "line", "icon": "lightning", "text": "Optional challenge. Right on the first try? Skip to this chapter's last task." },
+        "middle": { "kind": "question", "text": "Which decision needs clear human judgment, not AI?" },
+        "bottom": { "kind": "options", "arrange": "row", "link": "skipChallenge" }
+      },
+      "options": [
+        { "id": "a", "label": "Deciding whether a customer is eligible", "correct": true,
+          "feedback": "Right on the first try: you can jump to the last task of this chapter, or take the full chapter." },
+        { "id": "b", "label": "Summarizing a long request in three lines", "correct": false,
+          "feedback": "Free text into a short summary is a good fit, with a person checking. The full chapter starts now." },
+        { "id": "c", "label": "Tagging a request by its topic", "correct": false,
+          "feedback": "Tagging is a low-risk classification, a good fit. Look for rights or money at stake. The full chapter starts now." }
+      ],
+      "attempts": 1,
+      "routing": {
+        "correctFirstTry": { "choices": [ { "button": "jumpToTask", "to": "S17", "route": "skip" }, { "button": "fullChapter", "to": "S13", "route": "full" } ] },
+        "wrong": { "to": "S13", "route": "full" },
+        "skipped": { "to": "S13", "route": "full" }
+      },
+      "tracking": [
+        { "id": "L4_FT4_1", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Apply", "result": "graded" }
+      ],
+      "suspend": ["route"],
+      "sources": ["s24", "s32", "s33", "HW2 section 8 (eligibility)"]
+    },
+
+    {
+      "id": "S13",
+      "chapter": "ch4",
+      "template": "decision",
+      "variant": "bounds",
+      "minutes": 4,
+      "instruction": "Set where the HR process starts and ends.",
+      "hint": "Look for what starts it from outside, and who picks up the result.",
+      "layout": "wide",
+      "strip": "Receiving, checking, answer or escalation",
+      "startLabel": "Start:",
+      "endLabel": "End:",
+      "options": [
+        { "id": "a", "start": "HR staff open the inbox.", "end": "the topic is checked.", "correct": false,
+          "feedback": "WhatsApp and in-person questions never reach the inbox, and nobody receives anything at the end. Most of the process sits outside." },
+        { "id": "b", "start": "an employee sends a question.", "end": "the question reaches the HR manager.", "correct": false,
+          "feedback": "Escalation passes the work on. The employee is still waiting, so the process has not delivered its output yet." },
+        { "id": "c", "start": "an employee sends a question.", "end": "the employee gets an answer.", "correct": true,
+          "feedback": "The map opens at the external trigger and closes when the employee gets an answer, even after an escalation." }
+      ],
+      "advance": "after-correct",
+      "tracking": [
+        { "id": "L4_S13_1", "type": "choice", "correctResponse": "c", "scored": false, "bloom": "Apply", "result": "graded" }
+      ],
+      "sources": ["s21", "s10", "HR canon Fields 2, 3"]
+    },
+
+    {
+      "id": "S14",
+      "chapter": "ch4",
+      "template": "decision",
+      "variant": "single",
+      "minutes": 4,
+      "instruction": "Choose what the map must record at this handoff.",
+      "hint": "Think about the moment responsibility changes hands.",
+      "layout": "editorial",
+      "terms": ["Handoff"],
+      "image": { "src": "assets/img/s14.jpg", "alt": "An empty desk at the end of the day, a stack of papers waiting on it", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "50% 50%" },
+      "stage": {
+        "top": { "kind": "line", "text": "A question exceeds policy. It goes to the HR manager, who is away." },
+        "bottom": { "kind": "options", "arrange": "stack" }
+      },
+      "options": [
+        { "id": "a", "label": "A rule naming a backup manager", "correct": false,
+          "feedback": "Your AS-IS map now shows a rule nobody follows today. The real gap disappears before anyone has measured it." },
+        { "id": "b", "label": "From whom, to whom, what passes, if unavailable", "correct": true,
+          "feedback": "Field 4 now shows sender, receiver, what passes, and the unavailable case. Here nothing covers it, so Field 7 records it." },
+        { "id": "c", "label": "Nothing: the manager knows the history", "correct": false,
+          "feedback": "The map now assumes the receiver knows what happened before. When the manager is away, the question has no path." },
+        { "id": "d", "label": "An AI agent to reroute questions", "correct": false,
+          "feedback": "The map now describes a tool that does not exist. Lesson 5 would start from a plan, not from today." }
+      ],
+      "advance": "after-correct",
+      "tracking": [
+        { "id": "L4_S14_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Analyze", "result": "graded" }
+      ],
+      "sources": ["s27", "s16", "HR canon Fields 4, 7", "'Away' is constructed"]
+    },
+
+    {
+      "id": "S15",
+      "chapter": "ch4",
+      "template": "decision",
+      "variant": "single",
+      "minutes": 4,
+      "instruction": "Choose the first question to ask about this bottleneck.",
+      "hint": "A bottleneck is a step limited by the slowest resource. Before speed, ask why.",
+      "layout": "editorial",
+      "terms": ["Bottleneck"],
+      "image": { "src": "assets/img/s15.jpg", "alt": "A coordinator reading a tall stack of printed course feedback by hand", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "45% 50%" },
+      "stage": {
+        "top": { "kind": "line", "eyebrow": "Case 4: course feedback", "text": "One step: the coordinator prints and reads all feedback by hand, 3 to 4 hours per course.", "highlight": "3 to 4 hours" },
+        "bottom": { "kind": "options", "arrange": "stack" }
+      },
+      "options": [
+        { "id": "a", "label": "Why did this step form, and is it needed?", "correct": true,
+          "feedback": "The cause decides the fix. Sometimes the right fix is to remove the step, not speed it up, as in the car-company case." },
+        { "id": "b", "label": "Which AI tool summarizes feedback fastest?", "correct": false,
+          "feedback": "You would speed up a step without knowing why it formed. Faster technology on an unmapped process locks the problem in." },
+        { "id": "c", "label": "How many more coordinators can we hire?", "correct": false,
+          "feedback": "More people on the same step keep it in place. First ask whether the step should exist." }
+      ],
+      "advance": "after-correct",
+      "tracking": [
+        { "id": "L4_S15_1", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Apply", "result": "graded" }
+      ],
+      "sources": ["s28", "s29", "s30", "s6", "L1 booklet Case 4"]
+    },
+
+    {
+      "id": "S16",
+      "chapter": "ch4",
+      "template": "sort",
+      "mode": "tray",
+      "minutes": 6,
+      "instruction": "Sort each card: which good-fit kind, or poor fit?",
+      "hint": "Select a card, then a column.",
+      "layout": "wide",
+      "terms": ["good-fit kind"],
+      "columns": [
+        { "id": "a", "label": "Unstructured to structured", "icon": "check-circle" },
+        { "id": "b", "label": "Low-risk decision", "icon": "check-circle" },
+        { "id": "c", "label": "Handoff delay or loss", "icon": "check-circle" },
+        { "id": "d", "label": "Poor fit", "icon": "hand" }
+      ],
+      "cards": [
+        { "n": 1, "text": "Tag free-text questions by topic", "column": "a",
+          "feedback": { "correct": "Good fit, unstructured to structured: free text in, a structured topic out.",
+            "wrong": "Look at what goes in and what comes out. Is a judgment call at stake here?" } },
+        { "n": 2, "text": "Decide a financial refund", "column": "d",
+          "feedback": { "correct": "Poor fit: irreversible, money at stake. Per reports, the fintech's quality dropped on complex cases and it moved to a hybrid model.",
+            "wrong": "If this decision is wrong, who carries the loss, and can it be undone?" } },
+        { "n": 3, "text": "Label requests urgent or routine", "column": "b",
+          "feedback": { "correct": "Good fit, low-risk decision point: it can be accelerated, with a person watching where risk rises.",
+            "wrong": "Ask how much damage one wrong label would cause, and how fast it would be caught." } },
+        { "n": 4, "text": "Fix disorder in how requests arrive", "column": "d",
+          "feedback": { "correct": "Poor fit, a process problem: nothing is missing but order. AI on top keeps the disorder running faster.",
+            "wrong": "Is information missing here, or is the process itself disorganized?" } },
+        { "n": 5, "text": "Answer where the map says 'unclear'", "column": "d",
+          "feedback": { "correct": "Poor fit: you cannot build on unknown foundations. This needs diagnosis, not more technology.",
+            "wrong": "Check what the map actually knows before anything is built on it." } },
+        { "n": 6, "text": "Summarize a question before escalation", "column": "c",
+          "feedback": { "correct": "Good fit, handoff with delay or loss: AI documents it, so the HR manager gets the history.",
+            "wrong": "Think about what the HR manager receives today when a question is passed on." } }
+      ],
+      "advance": "after-all-placed",
+      "tracking": [
+        { "id": "L4_S16_1", "type": "matching", "correctResponse": "1.a,2.d,3.b,4.d,5.d,6.c", "scored": false, "bloom": "Analyze", "result": "graded" }
+      ],
+      "sources": ["s23", "s24", "s26", "s32", "s33", "HW2 section 8"]
+    },
+
+    {
+      "id": "S17",
+      "chapter": "ch4",
+      "template": "sort",
+      "mode": "deck",
+      "minutes": 7,
+      "instruction": "Sort each case into the mistake it shows.",
+      "hint": "Read the case, then choose the bin that names its mistake.",
+      "layout": "wide",
+      "deckIcon": "document",
+      "deckLabel": "case",
+      "chipStyle": "marker",
+      "columns": [
+        { "id": "1", "label": "Ideal, not actual", "icon": "cloud", "term": "Ideal, not actual" },
+        { "id": "2", "label": "No clear goal", "icon": "compass" },
+        { "id": "3", "label": "Rushed mapping", "icon": "hourglass" },
+        { "id": "4", "label": "Not updated", "icon": "calendar" },
+        { "id": "5", "label": "Automating a broken process", "icon": "gear-broken" }
+      ],
+      "cards": [
+        { "id": "A", "text": "Fields 6 and 7 were left blank to finish the map quickly.", "column": "3",
+          "feedback": { "correct": "Controls and gaps are where the findings live. Skipping them leaves Lesson 5 nothing to protect against.",
+            "wrong": "The map has a goal and matches today. Look at which fields were never filled." } },
+        { "id": "B", "text": "The map shows how HR intends requests to flow, not how they flow today.", "column": "1",
+          "feedback": { "correct": "The map now describes a wish. Every gap on a normal day stays hidden.",
+            "wrong": "Nothing was skipped or automated. Compare the map with a normal day in HR." } },
+        { "id": "C", "text": "A chatbot is planned for the three channels exactly as they run today.", "column": "5",
+          "feedback": { "correct": "The most critical mistake. Three channels with no organized system get faster, and the disorder grows with them.",
+            "wrong": "The map may be accurate. Look at what is about to be done with the process." } },
+        { "id": "D", "text": "HR moved to one request form. The map still shows three channels.", "column": "4",
+          "feedback": { "correct": "The map was right once. Lesson 5 would now build on a process that no longer exists.",
+            "wrong": "Something changed after the map was drawn. Which mistake follows a change?" } },
+        { "id": "E", "text": "Someone mapped every HR task 'to have it documented', with no question to answer.", "column": "2",
+          "feedback": { "correct": "Without a question, nobody can say which process or boundaries matter. The map grows and decides nothing.",
+            "wrong": "The map may be accurate and complete. Ask what it was drawn to decide." } }
+      ],
+      "advance": "after-all-placed",
+      "endOfChapter": true,
+      "tracking": [
+        { "id": "L4_S17_1", "type": "matching", "correctResponse": "A.3,B.1,C.5,D.4,E.2", "scored": false, "bloom": "Analyze", "result": "graded" }
+      ],
+      "sources": ["s34", "s16", "s17", "s21", "s6", "Cases constructed (FL12); D is a fictional later change"]
     },
 
     {
