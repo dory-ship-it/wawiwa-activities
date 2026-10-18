@@ -93,6 +93,36 @@ const STATES = [
   ['S03', 'correct', async (p) => { await click(p, '.w-opt[data-id="b"]'); await click(p, '.w-opt[data-id="d"]'); await click(p, '[data-action="check"]'); }],
   ['S03', 'pause marker', async (p) => { await click(p, '.w-opt[data-id="b"]'); await click(p, '.w-opt[data-id="d"]'); await click(p, '[data-action="check"]'); await click(p, '.w-next'); }],
   ['V1', 'placeholder', async () => {}],
+  // R1: Chapter 2
+  ['FT2', 'idle', async () => {}],
+  ['FT2', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['FT2', 'correct + routes', async (p) => click(p, '.w-opt[data-id="b"]')],
+  ['S04', 'start', async () => {}],
+  ['S04', 'card selected', async (p) => click(p, '[data-action="card"]')],
+  ['S04', 'wrong', async (p) => { await click(p, '[data-action="card"]'); await click(p, '.w-sort-target[data-column="c"]'); }],
+  ['S04', 'done', async (p) => { for (const col of ['a', 'b', 'a', 'b', 'c']) { await click(p, '[data-action="card"]'); await click(p, `.w-sort-target[data-column="${col}"]`); } }],
+  ['S05', 'hint', async () => {}],
+  ['S05', 'wrong (lane)', async (p) => click(p, '.w-lane-head')],
+  ['S05', 'wrong (event)', async (p) => click(p, '.w-node-event')],
+  ['S05', 'gateway + chips', async (p) => { await click(p, '.w-node-gateway'); for (const b of await p.$$('.w-legend-btn')) await b.click(); }],
+  ['S06', 'hint', async () => {}],
+  ['S06', 'left wrong', async (p) => click(p, '.w-situation .w-opt[data-id="b"]')],
+  ['S06', 'both right', async (p) => { await click(p, '.w-situation .w-opt[data-id="a"]'); await click(p, '.w-situation + .w-situation .w-opt[data-id="b"]'); }],
+  ['S07', 'tile 5 open', async (p) => click(p, '.w-tile[data-n="5"]')],
+  ['S07', 'question', async (p) => { for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); }],
+  ['S07', 'wrong', async (p) => { for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); await click(p, '.w-tile[data-n="7"]'); }],
+  ['S07', 'correct', async (p) => { for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); await click(p, '.w-tile[data-n="8"]'); }],
+  ['S08', 'round 1 wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['S08', 'round 1 right', async (p) => click(p, '.w-opt[data-id="b"]')],
+  ['S08', 'round 3 right', async (p) => {
+    for (const k of ['b', 'c']) { await click(p, `.w-opt[data-id="${k}"]`); await click(p, '[data-action="nextRound"]'); }
+    await click(p, '.w-opt[data-id="a"]');
+  }],
+  ['S08', 'pause marker', async (p) => {
+    for (const k of ['b', 'c']) { await click(p, `.w-opt[data-id="${k}"]`); await click(p, '[data-action="nextRound"]'); }
+    await click(p, '.w-opt[data-id="a"]');
+    await click(p, '.w-next');
+  }],
 ];
 for (const size of SIZES) {
   for (const [id, state, act] of STATES) {

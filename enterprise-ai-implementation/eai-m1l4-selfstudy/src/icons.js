@@ -31,6 +31,15 @@ const P = {
   'rail-menu': '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/>', // menu, short last line (approved look rail button)
   captions: '<rect width="18" height="14" x="3" y="5" rx="2" ry="2"/><path d="M7 15h4M15 15h2M7 11h2M13 11h4"/>', // captions
   transcript: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>', // file-text
+  flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>', // flag
+  stairs: '<path d="M3 20h5v-5h5v-5h5V5h3"/>', // steps (drawn for this set in the Lucide stroke style)
+  lanes: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M8 3v18"/>', // swimlanes (drawn in the Lucide stroke style)
+  diamond: '<path d="M12 2.5 21.5 12 12 21.5 2.5 12Z"/>', // diamond (gateway)
+  circle: '<circle cx="12" cy="12" r="9"/>', // circle (event)
+  diagram: '<rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>', // workflow
+  wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>', // wrench
+  spark: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 3v4"/><path d="M17 5h4"/>', // sparkles (simplified)
+  document: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>', // file-text
   // chrome icons (not used by the content JSON)
   'chevron-left': '<path d="m15 18-6-6 6-6"/>', // chevron-left
   'chevron-right': '<path d="m9 18 6-6-6-6"/>', // chevron-right

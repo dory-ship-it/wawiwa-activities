@@ -149,6 +149,16 @@ const views = content.screens.flatMap((s) => {
   if (s.template === 'video') return [[s.id, [s.title, s.guidingQuestion]], ...(s.stops || []).map((st) => [`${s.id} ${st.id}`, [st.question, ...st.options.map((o) => o.label)]])];
   if (s.template === 'handoff') return Object.entries(s.states).map(([k, st]) => [`${s.id} ${k}`, [...stageText(st.stage), ...fieldText(st.fields)]]);
   if (s.variant === 'selfcheck') return s.steps.map((st) => [`${s.id} ${st.id}`, [...(st.rows || []).map((r) => r.text), ...(st.chips || []).map((c) => c.label), st.strip]]);
+  // R1 templates, each in its fullest state
+  if (s.template === 'sort') return [[s.id, [...s.columns.map((c) => c.label), ...s.cards.map((c) => c.text)]]];
+  if (s.variant === 'diagram') return [[s.id, [s.diagram.tag, ...s.diagram.lanes.map((l) => l.label), ...s.diagram.nodes.map((n) => n.label), ...s.legend.map((g) => g.label)]]];
+  if (s.variant === 'tiles') {
+    const nums = s.tiles.map((t) => String(t.n));
+    return [...s.tiles.map((t) => [`${s.id} tile ${t.n} open`, [...nums, ...s.tiles.filter((x) => x !== t).map((x) => x.title), t.back]]),
+      [`${s.id} answering`, [...nums, ...s.tiles.map((t) => t.title), s.question]]];
+  }
+  if (s.variant === 'pair') return [[s.id, s.situations.flatMap((x) => [x.text, ...x.options.map((o) => o.label)])]];
+  if (s.variant === 'rounds') return s.rounds.map((r) => [`${s.id} ${r.id}`, [s.strip, r.badge, r.line, ...s.options.map((o) => o.label)]]);
   return [[s.id, [...stageText(s.stage), ...(s.options || []).map((o) => o.label), ...fieldText(s.fields), ...(s.cases || []).map((c) => c.label)]]];
 });
 let wordFails = 0;
@@ -167,6 +177,12 @@ const feedbackLines = [
     ...Object.entries(s.states || {}).flatMap(([k, st]) => Object.entries(st).filter(([f, v]) => /Feedback$/.test(f) && typeof v === 'string').map(([f, v]) => [`${s.id} ${k}.${f}`, v])),
     ...(s.steps || []).flatMap((st) => [...(st.rows || []).flatMap((r) => Object.entries(r.feedback).map(([k, v]) => [`${s.id} ${r.id} ${k}`, v])),
       ...(st.chips || []).map((c) => [`${s.id} chip ${c.id}`, c.feedback])]),
+    ...(s.cards || []).flatMap((c) => Object.entries(c.feedback).map(([k, v]) => [`${s.id} card ${c.n} ${k}`, v])),
+    ...(s.hotspots || []).map((x) => [`${s.id} hotspot ${x.id}`, x.feedback]),
+    ...(s.legend || []).map((g) => [`${s.id} legend ${g.id}`, g.text]),
+    ...(s.tiles || []).map((t) => [`${s.id} tile ${t.n}`, t.feedback]),
+    ...(s.situations || []).flatMap((x) => x.options.map((o) => [`${s.id} ${x.id} option ${o.id}`, o.feedback])),
+    ...(s.rounds || []).flatMap((r) => Object.entries(r.feedback).map(([k, v]) => [`${s.id} ${r.id} option ${k}`, v])),
   ]),
 ].filter(([, v]) => v);
 const longFb = feedbackLines.filter(([, v]) => words(v) > MAX_FEEDBACK_WORDS);
@@ -192,18 +208,41 @@ for (const [s, t, stop] of interactions) {
   if (!RESULTS.includes(t.result)) metaFail(`${where}: result "${t.result}" not one of ${RESULTS.join(', ')}`);
   if (t.result === 'neutral' && t.correctResponse !== null) metaFail(`${where}: neutral interaction with a correctResponse`);
   if (t.result === 'graded') {
-    const opts = (stop || s).options || [];
-    const key = opts.map((o, i) => (o.correct ? String.fromCharCode(97 + i) : null)).filter(Boolean).join(',');
-    if (t.correctResponse !== key) metaFail(`${where}: correctResponse "${t.correctResponse}" but the correct options are "${key}" (letters in on-screen order)`);
-    if (key.includes(',') && t.multiple !== true) metaFail(`${where}: several correct options but multiple is not true`);
+    const key = keyOf(s, t, stop);
+    if (t.correctResponse !== key) metaFail(`${where}: correctResponse "${t.correctResponse}" but the content's key is "${key}"`);
+    if (t.type === 'choice' && key.includes(',') && t.multiple !== true) metaFail(`${where}: several correct options but multiple is not true`);
   }
+}
+// The key the content itself defines for a graded interaction, in the response encoding:
+// option letters in on-screen order; sort = "card.column" pairs; diagram = hotspot ids; tiles = numbers.
+function keyOf(s, t, stop) {
+  const letters = (opts) => opts.map((o, i) => (o.correct ? String.fromCharCode(97 + i) : null)).filter(Boolean).join(',');
+  if (s.template === 'sort') return s.cards.map((c) => `${c.n}.${c.column}`).join(',');
+  if (s.variant === 'diagram') return s.hotspots.filter((x) => x.correct).map((x) => x.id).join(',');
+  if (s.variant === 'tiles') return s.tiles.filter((x) => x.correct).map((x) => String(x.n)).join(',');
+  if (s.variant === 'pair') return letters(s.situations.find((x) => x.trackingId === t.id)?.options || []);
+  if (s.variant === 'rounds') {
+    const r = s.rounds.find((x) => x.trackingId === t.id);
+    const i = r ? s.options.findIndex((o) => o.id === r.correct) : -1;
+    return i < 0 ? '' : String.fromCharCode(97 + i);
+  }
+  return letters((stop || s).options || []);
 }
 // interaction ids referenced by fields, rows and chips must be declared in tracking[]
 const refs = content.screens.flatMap((s) => [
   ...(s.fields || []).map((f) => [s.id, f.trackingId]),
   ...Object.values(s.states || {}).flatMap((st) => (st.fields || []).map((f) => [s.id, f.trackingId])),
   ...(s.steps || []).flatMap((st) => [...(st.rows || []).map((r) => [s.id, r.trackingId]), ...(st.trackingId ? [[s.id, st.trackingId]] : [])]),
+  ...(s.situations || []).map((x) => [s.id, x.trackingId]),
+  ...(s.rounds || []).map((r) => [s.id, r.trackingId]),
 ]);
+// fast-track cards: every route lands on a screen of the same chapter, the jump on its landing screen
+for (const c of content.chapters.filter((x) => x.fastTrack)) {
+  const card = content.screens.find((x) => x.id === c.fastTrack.card);
+  const routes = card ? [...card.routing.correctFirstTry.choices, card.routing.wrong, card.routing.skipped] : [];
+  if (!card || routes.some((r) => !c.screens.includes(r.to)) || !routes.some((r) => r.route === 'skip' && r.to === c.fastTrack.landing))
+    metaFail(`${c.id}: fast-track card ${c.fastTrack.card} must route inside the chapter and jump to ${c.fastTrack.landing}`);
+}
 for (const [sid, id] of refs) if (!seen.has(id)) metaFail(`${sid}: ${id} is used on screen but has no tracking entry`);
 if (!metaFails) ok(`all ${seen.size} interactions have full tracking metadata (${[...seen].join(', ')})`);
 

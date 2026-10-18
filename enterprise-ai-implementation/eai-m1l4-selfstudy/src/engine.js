@@ -12,6 +12,8 @@ import { loadState, saveState, clearState, emptyState } from './state.js';
 import { placeholder } from './templates/placeholder.js';
 import { decision } from './templates/decision.js';
 import { input } from './templates/input.js';
+import { sort } from './templates/sort.js';
+import { explorer } from './templates/explorer.js';
 import { createTracking } from './tracking/index.js';
 
 const STAGE_W = 1280, STAGE_H = 720;
@@ -20,7 +22,7 @@ const NOTE_H = 40;
 const MAX_TEXT = 250;     // fill-in responses are trimmed and capped (SCORM 1.2 safe)
 
 // Video and handoff arrive in P2 and P3; until then those screens mount the placeholder.
-const TEMPLATES = { decision, input };
+const TEMPLATES = { decision, input, sort, explorer };
 
 export async function boot(root) {
   const res = await fetch(new URL('../content/l4-slice.json', import.meta.url));
@@ -148,7 +150,7 @@ class Lesson {
       answer: (a) => this.answer(id, a),
       firstAnswer: (trackingId) => this.firstAnswer(trackingId),
       store: { get: (key) => this.state.f[key] ?? '', set: (key, value) => { this.state.f[key] = value; } },
-      route: () => this.state.r,
+      chapter: this.chapters.find((c) => c.id === screen.chapter),
       setRoute: (route) => this.setRoute(id, route),
     });
     applyTerms(this.zones.main, screen.terms, this.content.tooltips);
@@ -213,7 +215,7 @@ class Lesson {
   }
 
   setRoute(screenId, route) {
-    this.state.r = route;
+    this.state.r[screenId] = route;
     this.tracking.emit({ kind: 'route', screen: screenId, route });
     this.persist();
   }
@@ -268,9 +270,8 @@ class Lesson {
   doneSet() { return new Set([...this.state.d, ...this.skippedScreens()]); }
 
   skippedScreens() {
-    if (this.state.r !== 'skip') return [];
     return this.chapters.flatMap((c) => {
-      if (!c.fastTrack) return [];
+      if (!c.fastTrack || this.state.r[c.fastTrack.card] !== 'skip') return [];
       const from = c.screens.indexOf(c.fastTrack.card), to = c.screens.indexOf(c.fastTrack.landing);
       return from >= 0 && to > from ? c.screens.slice(from + 1, to) : [];
     });

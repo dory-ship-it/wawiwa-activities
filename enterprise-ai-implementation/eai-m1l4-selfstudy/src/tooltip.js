@@ -16,13 +16,15 @@ export function initTooltips(stage) {
 
 // Attach a tip to any element. The text is also kept in a hidden description node so
 // screen readers read it through aria-describedby even when the tip is not shown
-// (describe: false when the element's own label already says the same).
-export function attachTip(el, text, { describe = true } = {}) {
+// (describe: false when the element's own label already says the same). container: where the
+// hidden description goes (default: right after the element); a term inside a heading puts it
+// outside, so the heading's own text stays the heading.
+export function attachTip(el, text, { describe = true, container = null } = {}) {
   let desc = null;
   if (describe) {
     const id = nextId('w-desc');
     desc = h('span', { id, class: 'w-sr-only' }, text);
-    el.after(desc);
+    if (container) container.append(desc); else el.after(desc);
     const prev = el.getAttribute('aria-describedby');
     el.setAttribute('aria-describedby', prev ? prev + ' ' + id : id);
   }
@@ -75,7 +77,7 @@ export function applyTerms(root, terms = [], tooltips = {}) {
       after.splitText(term.length);
       const span = h('span', { class: 'w-term', tabindex: '0' }, after.nodeValue);
       after.replaceWith(span);
-      attachTip(span, def);
+      attachTip(span, def, { container: root });
       break;
     }
   }

@@ -11,7 +11,7 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["S01", "S02", "FT1", "V1", "S03", "S19", "S20"],
+    "slice": ["S01", "S02", "FT1", "V1", "S03", "FT2", "S04", "S05", "S06", "S07", "S08", "S19", "S20"],
     "completion": { "rule": "slice-end", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": [] }
   },
 
@@ -27,6 +27,8 @@
       "replay": "Replay segment",
       "skipChallenge": "Skip challenge",
       "jumpToTask": "Jump to the last task",
+      "fullChapter": "Take the full chapter",
+      "nextRound": "Next round",
       "watchVideo": "Watch the video",
       "reopenWorkbook": "Reopen workbook",
       "finish": "Finish",
@@ -57,9 +59,16 @@
         "route": "Next, locked until you pick one of the two options",
         "multi": "Next, locked until both answers are correct",
         "input": "Next, locked until you save",
+        "sort": "Next, locked until every card is in its column",
+        "diagram": "Next, locked until you find where the path splits and open all three parts",
+        "pair": "Next, locked until both situations have the right format",
+        "tiles": "Next, locked until you open all eight fields and answer the question",
+        "rounds": "Next, locked until all three rounds are right",
         "default": "Next, locked until you finish this screen"
       }
     },
+    "memo": { "header": "Fast track · Chapter {n}" },
+    "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}" },
     "rail": {
       "label": "Chapters",
       "openMenu": "Open chapters menu",
@@ -123,7 +132,13 @@
   "tooltips": {
     "Success metric": "Something measurable before and after: a number, percentage, time, or frequency.",
     "AS-IS": "As it happens now, in practice, on a normal day.",
-    "Ideal, not actual": "Mapping how the process should work instead of how it works."
+    "Ideal, not actual": "Mapping how the process should work instead of how it works.",
+    "Trigger": "What starts the process: a message, a form, a date.",
+    "Steps": "The path from trigger to result; three to seven are usually enough.",
+    "Output": "What comes out at the end, and to whom.",
+    "Field template": "A fixed set of fields; fits when you know the process and need a fast decision.",
+    "BPMN": "A standard for process diagrams, shared across tools and teams.",
+    "Eight fields": "Same spirit as the five-field template from Lesson 1, now for a whole process."
   },
 
   "characters": {
@@ -147,7 +162,9 @@
     { "id": "ch1", "n": 1, "title": "Why map", "minutes": 9, "screens": ["FT1", "V1", "S03"], "inSlice": true,
       "fastTrack": { "card": "FT1", "landing": "S03" },
       "pauseMarker": "Good place to pause. Your place is saved." },
-    { "id": "ch2", "n": 2, "title": "Toolkit", "minutes": 22, "screens": [], "inSlice": false, "pauseMarker": "Good place to pause. Your place is saved." },
+    { "id": "ch2", "n": 2, "title": "Toolkit", "minutes": 22, "screens": ["FT2", "S04", "S05", "S06", "S07", "S08"], "inSlice": true,
+      "fastTrack": { "card": "FT2", "landing": "S08" },
+      "pauseMarker": "Good place to pause. Your place is saved." },
     { "id": "ch3", "n": 3, "title": "HR demo", "minutes": 19, "screens": [], "inSlice": false, "pauseMarker": "Good place to pause. Your place is saved." },
     { "id": "ch4", "n": 4, "title": "Critical eye", "minutes": 26, "screens": [], "inSlice": false, "pauseMarker": "Good place to pause. Chapter 5 takes about 80 minutes. Start it fresh." },
     { "id": "ch5", "n": 5, "title": "Build yours", "minutes": 82, "screens": ["S19", "S20"], "inSlice": true,
@@ -231,7 +248,6 @@
       "hint": "Answer if you already know this topic. Skipping costs nothing.",
       "layout": "memo",
       "image": { "src": "assets/img/ft1.jpg", "alt": "An accounts office in the early 1980s: staff at desks covered in stacks of paper forms", "prompt": "assets/img/prompts/FT1-dana-team-table.md", "temp": false, "position": "50% 45%" },
-      "memo": { "label": "Optional challenge" },
       "stage": {
         "top": { "kind": "line", "icon": "lightning", "text": "Optional challenge. Right on the first try? Skip to this chapter's last task." },
         "middle": { "kind": "question", "text": "HBR, 1990: new technology runs on a broken process. What happens?" },
@@ -404,6 +420,253 @@
         { "id": "L4_S03_1", "type": "choice", "multiple": true, "correctResponse": "b,d", "scored": false, "bloom": "Understand", "result": "graded" }
       ],
       "sources": ["s5", "s40", "V1 segment 8", "HW1 sections 3, 4"]
+    },
+
+    {
+      "id": "FT2",
+      "chapter": "ch2",
+      "template": "decision",
+      "variant": "challenge",
+      "minutes": 1,
+      "instruction": "Answer one question, or skip the challenge.",
+      "hint": "Answer if you already know the eight fields. Skipping costs nothing.",
+      "layout": "memo",
+      "image": { "src": "assets/img/ft2.jpg", "alt": "A person sketching a process flow with boxes, arrows and decision diamonds on a whiteboard", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "45% 50%" },
+      "stage": {
+        "top": { "kind": "line", "icon": "lightning", "text": "Optional challenge. Right on the first try? Skip to this chapter's last task." },
+        "middle": { "kind": "question", "text": "Case 6: the admin team routes an inquiry to the right department. Which field records that moment?" },
+        "bottom": { "kind": "options", "arrange": "row", "link": "skipChallenge" }
+      },
+      "options": [
+        { "id": "a", "label": "Field 3: Steps and role owners", "correct": false,
+          "feedback": "Field 3 lists who does each step. The moment work moves between roles needs its own record." },
+        { "id": "b", "label": "Field 4: Handoffs", "correct": true,
+          "feedback": "Right on the first try: you can jump to the last task of this chapter, or take the full chapter." },
+        { "id": "c", "label": "Field 6: Existing controls", "correct": false,
+          "feedback": "Routing is not a check on quality. Ask what changes hands here. The full chapter starts now." }
+      ],
+      "attempts": 1,
+      "routing": {
+        "correctFirstTry": { "choices": [ { "button": "jumpToTask", "to": "S08", "route": "skip" }, { "button": "fullChapter", "to": "S04", "route": "full" } ] },
+        "wrong": { "to": "S04", "route": "full" },
+        "skipped": { "to": "S04", "route": "full" }
+      },
+      "tracking": [
+        { "id": "L4_FT2_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Apply", "result": "graded" }
+      ],
+      "suspend": ["route"],
+      "sources": ["s14", "s27", "L1 booklet Case 6"]
+    },
+
+    {
+      "id": "S04",
+      "chapter": "ch2",
+      "template": "sort",
+      "minutes": 4,
+      "instruction": "Sort each HR case card into its building block.",
+      "hint": "Select a card, then choose its column.",
+      "layout": "wide",
+      "columns": [
+        { "id": "a", "label": "Trigger", "icon": "play", "term": "Trigger" },
+        { "id": "b", "label": "Steps", "icon": "stairs", "term": "Steps" },
+        { "id": "c", "label": "Output", "icon": "flag", "term": "Output" }
+      ],
+      "cards": [
+        { "n": 1, "text": "An employee sends a question by email", "column": "a",
+          "feedback": { "correct": "Placed.",
+            "b": "This is how the work reaches HR. Ask whether anything happens before it.",
+            "c": "If this is the end, nothing happens to the question. Where does the work begin?" } },
+        { "n": 2, "text": "HR staff check the topic of the question", "column": "b",
+          "feedback": { "correct": "Placed.",
+            "a": "Checking needs a question to check. Something must arrive before this can happen.",
+            "c": "Nobody receives a topic check. The employee is still waiting at this point." } },
+        { "n": 3, "text": "A question arrives in person", "column": "a",
+          "feedback": { "correct": "Placed.",
+            "b": "Requests arrive three ways. Each way is a different start, not a middle step.",
+            "c": "The employee has nothing yet at this point. The work has not begun." } },
+        { "n": 4, "text": "HR staff answer or escalate to the manager", "column": "b",
+          "feedback": { "correct": "Placed.",
+            "a": "The question already arrived and was checked before this happens.",
+            "c": "Escalation passes work on, it does not end it. Someone still has to reply." } },
+        { "n": 5, "text": "The employee receives an answer", "column": "c",
+          "feedback": { "correct": "Placed. On the eight-field map, the output sits at the end of Field 3.",
+            "wrong": "If this is a middle step, the map never says what comes out, or to whom." } }
+      ],
+      "advance": "after-all-placed",
+      "tracking": [
+        { "id": "L4_S04_1", "type": "matching", "correctResponse": "1.a,2.b,3.a,4.b,5.c", "scored": false, "bloom": "Understand", "result": "graded" }
+      ],
+      "sources": ["s9", "s10", "s11", "HR canon Fields 2, 3"]
+    },
+
+    {
+      "id": "S05",
+      "chapter": "ch2",
+      "template": "explorer",
+      "variant": "diagram",
+      "minutes": 4,
+      "instruction": "Select where the path splits. Then open the other two parts.",
+      "hint": "You only need to recognize these parts, not draw them.",
+      "layout": "wide",
+      "diagram": {
+        "tag": "Illustrative, built from the HR case",
+        "lanes": [
+          { "id": "employee", "label": "Employee" },
+          { "id": "staff", "label": "HR staff" },
+          { "id": "manager", "label": "HR manager" }
+        ],
+        "nodes": [
+          { "id": "start", "kind": "start", "lane": "employee", "col": 0, "label": "Question sent" },
+          { "id": "check", "kind": "step", "lane": "staff", "col": 1, "label": "Check the topic" },
+          { "id": "split", "kind": "gateway", "lane": "staff", "col": 2, "label": "Exceeds known policy?" },
+          { "id": "answer", "kind": "step", "lane": "staff", "col": 3, "label": "Answer" },
+          { "id": "escalate", "kind": "step", "lane": "manager", "col": 3, "label": "Escalate" },
+          { "id": "end", "kind": "end", "lane": "employee", "col": 4, "label": "Answer received" }
+        ],
+        "edges": [
+          { "from": "start", "to": "check", "route": "vh" },
+          { "from": "check", "to": "split", "route": "h" },
+          { "from": "split", "to": "answer", "route": "h" },
+          { "from": "split", "to": "escalate", "route": "vh" },
+          { "from": "answer", "to": "end", "route": "vh" },
+          { "from": "escalate", "to": "end", "route": "hv" }
+        ]
+      },
+      "hotspots": [
+        { "id": "gateway", "correct": true,
+          "feedback": "The path splits here: within known policy, staff answer; beyond it, the question goes to the manager." },
+        { "id": "lane", "correct": false,
+          "feedback": "This band shows one role and its work. The split you are after sits on the path itself." },
+        { "id": "event", "correct": false,
+          "feedback": "This marks where the process begins or ends. Nothing splits here; one path passes through." },
+        { "id": "step", "correct": false,
+          "feedback": "This is a task with one way out. Follow the path to where it divides." }
+      ],
+      "legend": [
+        { "id": "swimlanes", "label": "Swimlanes", "icon": "lanes", "text": "Who does what, one lane per role." },
+        { "id": "gateway", "label": "Gateway", "icon": "diamond", "text": "A decision point; the path splits." },
+        { "id": "event", "label": "Event", "icon": "circle", "text": "Start, end, and intermediate points." }
+      ],
+      "advance": "after-key-and-all-chips",
+      "tracking": [
+        { "id": "L4_S05_1", "type": "choice", "correctResponse": "gateway", "scored": false, "bloom": "Remember", "result": "graded" }
+      ],
+      "suspend": ["chips"],
+      "sources": ["s12", "s13", "HR canon Fields 2 to 4", "End event 'Answer received' is illustrative (FL14)"]
+    },
+
+    {
+      "id": "S06",
+      "chapter": "ch2",
+      "template": "decision",
+      "variant": "pair",
+      "minutes": 3,
+      "instruction": "Pick the right format for each situation.",
+      "hint": "Answer the left card first.",
+      "layout": "wide",
+      "situations": [
+        { "id": "s1", "text": "You know your own process well and need a fast first diagnosis.", "trackingId": "L4_S06_1",
+          "options": [
+            { "id": "a", "label": "Field template", "icon": "forms", "term": "Field template", "correct": true,
+              "feedback": "Fast to fill alone, enough for a first diagnosis. This is the tool you use for your own case." },
+            { "id": "b", "label": "BPMN diagram", "icon": "diagram", "term": "BPMN", "correct": false,
+              "feedback": "You would spend your time on drawing rules, while the decision you need waits." }
+          ] },
+        { "id": "s2", "text": "The map must serve several systems and a professional process team.", "trackingId": "L4_S06_2",
+          "options": [
+            { "id": "a", "label": "Field template", "icon": "forms", "term": "Field template", "correct": false,
+              "feedback": "Your fields make sense to you. Other teams and tools need a shared standard form to read them." },
+            { "id": "b", "label": "BPMN diagram", "icon": "diagram", "term": "BPMN", "correct": true,
+              "feedback": "A shared standard lets other tools, systems and process teams read the same map." }
+          ] }
+      ],
+      "advance": "after-correct",
+      "tracking": [
+        { "id": "L4_S06_1", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Apply", "result": "graded" },
+        { "id": "L4_S06_2", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Apply", "result": "graded" }
+      ],
+      "sources": ["s13"]
+    },
+
+    {
+      "id": "S07",
+      "chapter": "ch2",
+      "template": "explorer",
+      "variant": "tiles",
+      "minutes": 6,
+      "instruction": "Open all eight fields, then find the one you can check later.",
+      "hint": "Open each tile. The question unlocks after all eight.",
+      "layout": "wide",
+      "terms": ["Eight fields"],
+      "tiles": [
+        { "n": 1, "title": "Process name", "back": "Name one process. Where it starts and ends is a decision, not a given.", "correct": false,
+          "feedback": "This field describes how the process runs now. Look for the one that sets a result to measure." },
+        { "n": 2, "title": "Trigger", "back": "What starts the process: a message, a form, a date.", "correct": false,
+          "feedback": "This field describes how the process runs now. Look for the one that sets a result to measure." },
+        { "n": 3, "title": "Steps and role owners", "back": "The path from trigger to result, and who exactly does each step.", "correct": false,
+          "feedback": "This field describes how the process runs now. Look for the one that sets a result to measure." },
+        { "n": 4, "title": "Handoffs", "back": "Each point where responsibility passes between roles: from whom, to whom, what passes.", "correct": false,
+          "feedback": "This field describes how the process runs now. Look for the one that sets a result to measure." },
+        { "n": 5, "title": "Knowledge/data sources, owners, sensitivity", "back": "Policies and data the process uses, who keeps each current, and a sensitivity tag.", "correct": false,
+          "feedback": "This field describes how the process runs now. Look for the one that sets a result to measure." },
+        { "n": 6, "title": "Existing controls", "back": "Checks already in place today. 'No formal control' is a valid answer.", "correct": false,
+          "feedback": "Controls describe checks that exist today. They do not state the result you will check later." },
+        { "n": 7, "title": "Gaps", "titleNote": "front title not in the storyboard; 'Gaps' from the Existing controls / Gaps tooltip (s18, s19)",
+          "back": "What is missing or unclear. Writing 'unclear' here is a result, not a weakness.", "correct": false,
+          "feedback": "Gaps tell you what to investigate first. 'Unclear' cannot be measured before and after." },
+        { "n": 8, "title": "Success metric: baseline and target", "back": "A number with a baseline and a target, not 'significant improvement'.", "correct": true,
+          "feedback": "A baseline now and a target later make the map checkable: a number, not a feeling." }
+      ],
+      "question": "Which field can you check later?",
+      "lockedLabel": "Question unlocks after all eight fields",
+      "advance": "after-correct",
+      "tracking": [
+        { "id": "L4_S07_1", "type": "choice", "correctResponse": "8", "scored": false, "bloom": "Understand", "result": "graded" }
+      ],
+      "sources": ["s14", "s10", "s18", "s19", "s21", "s22", "s27", "s37"]
+    },
+
+    {
+      "id": "S08",
+      "chapter": "ch2",
+      "template": "decision",
+      "variant": "rounds",
+      "minutes": 4,
+      "instruction": "Find which AS-IS rule this map line breaks.",
+      "hint": "Compare the line with what really happens on a normal day.",
+      "layout": "wide",
+      "terms": ["AS-IS"],
+      "strip": "AS-IS: as it happens now.",
+      "options": [
+        { "id": "a", "label": "Don't fix while mapping", "icon": "wrench" },
+        { "id": "b", "label": "Don't add AI while mapping", "icon": "spark" },
+        { "id": "c", "label": "Don't map the official process", "icon": "document" }
+      ],
+      "rounds": [
+        { "id": "r1", "badge": "Steps and role owners", "line": "checking the topic (HR staff), then an AI assistant drafts the answer.", "correct": "b", "trackingId": "L4_S08_1",
+          "feedback": {
+            "a": "Nothing here was repaired. Compare each step with what happens on a normal day.",
+            "b": "The map now shows a tool nobody uses today. The current state is lost, and Lesson 5 has nothing to build on.",
+            "c": "No written procedure is quoted here. The line describes a step that does not exist in practice." } },
+        { "id": "r2", "badge": "Trigger", "line": "questions arrive by email only, as the written HR procedure requires.", "correct": "c", "trackingId": "L4_S08_2",
+          "feedback": {
+            "a": "Nothing is being improved in this line. Compare it with how employees really send questions.",
+            "b": "No AI appears in this line. Look at the source the mapper relied on.",
+            "c": "WhatsApp and in-person questions vanish from the map, and so does most of the disorder you came to find." } },
+        { "id": "r3", "badge": "Handoffs", "line": "HR staff to HR manager, through a shared channel the mapper just added.", "correct": "a", "trackingId": "L4_S08_3",
+          "feedback": {
+            "a": "The real gap, no single handoff channel, disappears from Fields 4 and 7 before anyone has measured it.",
+            "b": "No AI is mentioned. Ask who created this channel, and when.",
+            "c": "No written procedure is cited. The mapper made this change during the mapping itself." } }
+      ],
+      "advance": "after-all-rounds",
+      "endOfChapter": true,
+      "tracking": [
+        { "id": "L4_S08_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Analyze", "result": "graded" },
+        { "id": "L4_S08_2", "type": "choice", "correctResponse": "c", "scored": false, "bloom": "Analyze", "result": "graded" },
+        { "id": "L4_S08_3", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Analyze", "result": "graded" }
+      ],
+      "sources": ["s16", "s17", "s34 #1 and #5", "s19", "R2 'written procedure' is constructed"]
     },
 
     {

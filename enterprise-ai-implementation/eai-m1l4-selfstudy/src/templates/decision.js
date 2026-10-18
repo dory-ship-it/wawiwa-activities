@@ -8,20 +8,25 @@
 //   multi      (S03)  layout "work" (R2D): label and instruction left, the video-case stills right,
 //                     the process line with one marker per option, four cards in a row, the band
 //                     under them with Check inside. One band per attempt, no paging.
+//   pair       (S06)  layout "wide": two situation cards side by side, the right one revealed after
+//                     the left is right; two option rows under each; one band under both.
+//   rounds     (S08)  layout "wide": AS-IS strip, template row (field badge + map line), round dots,
+//                     three rule rows, band under them; "Next round" in the band after a right answer,
+//                     Next after round 3.
 //   selfcheck  (S20)  P3 STUB: mounts the dev placeholder so the slice stays walkable.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the band.
-import { h } from '../util.js';
+import { h, fmt } from '../util.js';
 import { icon } from '../icons.js';
 import { attachTip } from '../tooltip.js';
 import { letter } from '../tracking/index.js';
-import { layout, picture, ruleLabel, arrowNav } from './stage.js';
+import { layout, picture, ruleLabel, arrowNav, progressDots } from './stage.js';
 import { placeholder } from './placeholder.js';
 
 export const decision = {
   mount(ctx) {
     const variant = ctx.screen.variant;
     if (variant === 'selfcheck') return placeholder.mount(ctx); // P3 STUB
-    const run = { single, challenge, multi }[variant];
+    const run = { single, challenge, multi, pair, rounds }[variant];
     if (!run) throw new Error('decision: unknown variant ' + variant);
     return run(ctx) || { unmount() {} };
   },
@@ -29,13 +34,17 @@ export const decision = {
 
 /* ---------- option buttons ---------- */
 // kind: 'row' (numbered hairline row, S01), 'card' (numbered card with a radio ring, FT1),
-// 'check' (text card with a checkbox mark, S03)
-function options(ctx, kind) {
-  const { screen, content } = ctx;
-  const group = h('div', { class: 'w-options w-options-' + kind, role: 'group', 'aria-labelledby': 'w-instruction', dataset: { interaction: '' } });
-  const btns = screen.options.map((o, i) => {
+// 'check' (text card with a checkbox mark, S03). list: the options (default screen.options);
+// lead: 'num' (1, 2, 3) or 'icon' (the option's icon, S06 and S08 rows); interaction: false when the
+// group sits inside a larger interaction area.
+function options(ctx, kind, { list = ctx.screen.options, lead = 'num', labelledby = 'w-instruction', interaction = true } = {}) {
+  const { content } = ctx;
+  const group = h('div', { class: 'w-options w-options-' + kind, role: 'group', 'aria-labelledby': labelledby, dataset: interaction ? { interaction: '' } : {} });
+  const btns = list.map((o, i) => {
     const label = h('span', { class: 'w-opt-label' }, labelWithTerm(o, content.tooltips));
-    const num = kind === 'check' ? null : h('span', { class: 'w-opt-num', 'aria-hidden': 'true' }, String(i + 1));
+    const num = kind === 'check' ? null : lead === 'icon'
+      ? h('span', { class: 'w-opt-num w-opt-lead' }, icon(o.icon, { size: 24 }))
+      : h('span', { class: 'w-opt-num', 'aria-hidden': 'true' }, String(i + 1));
     const tail = kind === 'row' ? icon('chevron-right', { size: 20, className: 'w-opt-chev' }) : null;
     const mark = h('span', { class: 'w-opt-mark' });
     const btn = kind === 'card'
@@ -122,7 +131,7 @@ function challenge(ctx) {
   const { group, btns } = options(ctx, 'card');
   const trackingId = screen.tracking[0].id;
   const routing = screen.routing;
-  const memo = screen.memo || {};
+  const header = fmt(ui.memo.header, { n: ctx.chapter?.n ?? '' });
   let answered = false;
 
   const skip = h('button', { class: 'w-link', type: 'button', dataset: { action: screen.stage.bottom.link }, onclick: () => go(routing.skipped) }, ui.buttons[screen.stage.bottom.link]);
@@ -130,8 +139,8 @@ function challenge(ctx) {
   layout(ctx, 'memo',
     picture(screen.image, 'w-photo-memo'),
     zones.logo,
-    h('article', { class: 'w-memo', 'aria-label': memo.label || null },
-      memo.label ? h('p', { class: 'w-memo-head' }, memo.label) : null,
+    h('article', { class: 'w-memo', 'aria-label': header },
+      h('p', { class: 'w-memo-head' }, header),
       h('p', { class: 'w-memo-line' }, screen.stage.top.text),
       h('p', { class: 'w-memo-q' }, screen.stage.middle.text),
       h('span', { class: 'w-memo-rule', 'aria-hidden': 'true' })),
@@ -255,4 +264,115 @@ function multi(ctx) {
   }
 
   if (ctx.revisit) solve(false);
+}
+
+/* ---------- one single-choice question on hairline rows (S06 situations, S08 rounds) ---------- */
+// Wrong = the calm wrong mark on the row, retry; right = rows locked, onRight(focus). The same wrong
+// row again is not a new attempt. feedbackOf / isRight read the option (or the round) as needed.
+function rowQuestion(ctx, btns, list, { trackingId, isRight, feedbackOf, onRight }) {
+  const { ui, zones } = ctx;
+  let solved = false, chosen = -1;
+  const show = (i) => btns.forEach((b, j) => paint(b, j === i ? (isRight(list[i]) ? 'correct' : 'wrong') : '', ui));
+  const solve = (i, focus) => { solved = true; chosen = i; show(i); lock(btns); onRight(i, focus); };
+  btns.forEach((btn, i) => btn.addEventListener('click', () => {
+    if (solved || i === chosen) return;
+    chosen = i;
+    const right = isRight(list[i]);
+    ctx.answer({ trackingId: trackingId(), response: letter(i), result: right ? 'correct' : 'wrong' });
+    if (right) { solve(i, true); return; }
+    show(i);
+    zones.setFeedback({ state: 'wrong', text: feedbackOf(list[i]) });
+  }));
+  return {
+    solve,
+    reset() { solved = false; chosen = -1; btns.forEach((b) => { paint(b, '', ui); b.removeAttribute('aria-disabled'); }); },
+  };
+}
+
+/* ---------- pair (S06), layout wide ---------- */
+function pair(ctx) {
+  const { screen, zones } = ctx;
+  const sides = screen.situations.map((s, k) => {
+    const textId = 'w-situation-' + s.id;
+    const { group, btns } = options(ctx, 'row', { list: s.options, lead: 'icon', labelledby: textId, interaction: false });
+    const col = h('section', { class: 'w-situation' },
+      h('div', { class: 'w-situation-card' },
+        h('span', { class: 'w-situation-num', 'aria-hidden': 'true' }, String(k + 1)),
+        h('p', { class: 'w-situation-text', id: textId }, s.text)),
+      group,
+      h('span', { class: 'w-situation-lock', 'aria-hidden': 'true' }, icon('lock', { size: 28 })));
+    return { s, col, btns };
+  });
+  const setOpen = (side, open) => { side.col.dataset.state = open ? 'open' : 'locked'; side.col.inert = !open; };
+  sides.forEach((side, k) => setOpen(side, k === 0));
+
+  layout(ctx, 'wide', zones.logo,
+    h('div', { class: 'w-wide' }, zones.instruction, h('div', { class: 'w-pair', dataset: { interaction: '' } }, sides.map((x) => x.col)), zones.band));
+  zones.setFeedback({ state: 'hint', text: screen.hint });
+
+  const questions = sides.map((side, k) => rowQuestion(ctx, side.btns, side.s.options, {
+    trackingId: () => side.s.trackingId,
+    isRight: (o) => o.correct,
+    feedbackOf: (o) => o.feedback,
+    onRight: (i, focus) => {
+      zones.setFeedback({ state: 'correct', text: side.s.options[i].feedback });
+      const next = sides[k + 1];
+      if (next) { setOpen(next, true); if (focus) next.btns[0].focus(); return; }
+      ctx.complete();
+      ctx.unlockNext({ focus });
+    },
+  }));
+
+  if (ctx.revisit) questions.forEach((q, k) => q.solve(sides[k].s.options.findIndex((o) => o.correct), false));
+}
+
+/* ---------- rounds (S08), layout wide ---------- */
+function rounds(ctx) {
+  const { screen, ui, zones } = ctx;
+  const list = screen.rounds;
+  const badge = h('span', { class: 'w-field-badge' });
+  const line = h('p', { class: 'w-round-line' });
+  const dots = progressDots(list.length, (i, n) => fmt(ui.progress.round, { i, n }));
+  const { group, btns } = options(ctx, 'row', { lead: 'icon', interaction: false });
+  let r = 0;
+
+  layout(ctx, 'wide', zones.logo,
+    h('div', { class: 'w-wide' },
+      zones.instruction,
+      h('div', { class: 'w-rounds', dataset: { interaction: '' } },
+        ruleLabel(screen.strip),
+        h('div', { class: 'w-template-row' }, badge, line),
+        dots.el,
+        group),
+      zones.band));
+
+  const q = rowQuestion(ctx, btns, screen.options, {
+    trackingId: () => list[r].trackingId,
+    isRight: (o) => o.id === list[r].correct,
+    feedbackOf: (o) => list[r].feedback[o.id],
+    onRight: (i, focus) => {
+      dots.set(r, r + 1);
+      const fb = list[r].feedback[screen.options[i].id];
+      if (r < list.length - 1) {
+        const go = zones.setFeedback({ state: 'correct', text: fb, actions: [{ id: 'nextRound', label: ui.buttons.nextRound, onClick: () => { show(r + 1); btns[0].focus(); } }] });
+        if (focus) go.focus();
+        return;
+      }
+      zones.setFeedback({ state: 'correct', text: fb });
+      ctx.complete();
+      ctx.unlockNext({ focus });
+    },
+  });
+
+  function show(k) {
+    r = k;
+    badge.textContent = list[k].badge;
+    line.textContent = list[k].line;
+    dots.set(k, k);
+    q.reset();
+    zones.setFeedback({ state: 'hint', text: screen.hint });
+  }
+
+  show(0);
+  if (ctx.revisit) { show(list.length - 1); q.solve(screen.options.findIndex((o) => o.id === list[r].correct), false); }
 }
