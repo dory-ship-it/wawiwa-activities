@@ -82,7 +82,7 @@ export function measureLayout() {
 
   let bandWidth = null;
   if (bandOn) {
-    const area = band.parentElement.querySelector(':scope > [data-interaction]') || band.closest('[data-interaction]');
+    const area = [...band.parentElement.querySelectorAll(':scope > [data-interaction]')].find((el) => visible(el)) || band.closest('[data-interaction]');
     if (area) {
       const A = box(area.getBoundingClientRect());
       bandWidth = { band: Math.round(B.w), area: Math.round(A.w), gap: Math.round(B.top - (area.contains(band) ? B.top : A.bottom)), left: Math.round(B.left - A.left) };

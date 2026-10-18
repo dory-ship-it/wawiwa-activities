@@ -12,10 +12,11 @@
 //                  click opens its text in the panel (check mark once read) and selects it (two at most);
 //                  Check in the band; one band per attempt: verdict + the first wrong tile's line, no
 //                  paging; right = both key lines, Next.
-// Tracking: diagram = the hotspot id of the first part chosen ("gateway", "lane", "event", "step");
+// Tracking: diagram = the letter of the first part chosen, in screen.hotspots order;
 // tiles = the field number of the first answer. Retries as retry events.
 import { h, nextId } from '../util.js';
 import { icon } from '../icons.js';
+import { letter } from '../tracking/index.js';
 import { layout, ruleLabel, arrowNav } from './stage.js';
 
 export const explorer = {
@@ -148,7 +149,8 @@ function diagram(ctx) {
   hotspots.forEach((btn) => btn.addEventListener('click', () => {
     if (found || btn === last) return; // the same wrong part again is not a new attempt
     const spot = spots[btn.dataset.hotspot];
-    ctx.answer({ trackingId, response: spot.id, result: spot.correct ? 'correct' : 'wrong' });
+    // response: the part's letter in content order (a = gateway, b = lane, c = event, d = step), SCORM 1.2 safe
+    ctx.answer({ trackingId, response: letter(screen.hotspots.indexOf(spot)), result: spot.correct ? 'correct' : 'wrong' });
     hotspots.forEach((x) => mark(x, '', ui));
     last = btn;
     if (!spot.correct) { mark(btn, 'wrong', ui); zones.setFeedback({ state: 'wrong', text: spot.feedback }); return; }

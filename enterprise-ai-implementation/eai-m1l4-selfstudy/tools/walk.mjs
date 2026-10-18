@@ -11,12 +11,17 @@
 //        npm run walk -- --shots      checks + screenshots into review/p1.5/ (and the artboard
 //                                     comparisons compare-s01.png, compare-s03.png)
 import puppeteer from 'puppeteer-core';
-import { mkdirSync, readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { startServer, ROOT } from './serve.mjs';
 import { chromePath, measureLayout, layoutVerdict } from './lib.mjs';
 
 const SHOTS = process.argv.includes('--shots');
+// --scorm (npm run test:scorm): the main path runs against the mock SCORM 1.2 API (tools/scorm-mock.js),
+// then the SCORM data is checked and a relaunch with entry=resume must land on the saved place
+const SCORM = process.argv.includes('--scorm');
+const MOCK = readFileSync(join(ROOT, 'tools', 'scorm-mock.js'), 'utf8');
 const OUT = join(ROOT, 'review', 'p1.5');
 const C = JSON.parse(readFileSync(join(ROOT, 'content', 'l4-slice.json'), 'utf8'));
 const UI = C.ui;
@@ -34,8 +39,9 @@ const BASE = ORIGIN + '/index.html';
 const browser = await puppeteer.launch({ executablePath: chromePath(), headless: true, args: ['--no-first-run', '--disable-extensions', '--hide-scrollbars'] });
 if (SHOTS) mkdirSync(OUT, { recursive: true });
 
-async function open(query) {
+async function open(query, { lms = null } = {}) {
   const page = await browser.newPage();
+  if (lms) await page.evaluateOnNewDocument(`${MOCK}\n;window.installScormMock(${JSON.stringify(lms)});`);
   page.errors = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warn') page.errors.push(m.type() + ': ' + m.text()); });
   page.on('pageerror', (e) => page.errors.push('pageerror: ' + e.message));
@@ -56,6 +62,24 @@ const OUT_R2 = join(ROOT, 'review', 'r2');
 if (SHOTS) mkdirSync(OUT_R2, { recursive: true });
 const shotR2 = async (page, name) => { if (SHOTS) { await page.mouse.move(5, 700); await page.screenshot({ path: join(OUT_R2, name) }); console.log('       shot r2/' + name); } };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+// R3 (Chapters 5 and 6) screenshots go to review/r3/
+const OUT_R3 = join(ROOT, 'review', 'r3');
+if (SHOTS) mkdirSync(OUT_R3, { recursive: true });
+const shotR3 = async (page, name) => { if (SHOTS) { await page.mouse.move(5, 700); await page.screenshot({ path: join(OUT_R3, name) }); console.log('       shot r3/' + name); } };
+
+// Press a key on a focused new-tab link: returns the URL the new tab opened at, closes the tab and
+// brings the lesson back to the front (the lesson itself must not move).
+async function newTabFrom(p, key = 'Enter') {
+  const created = new Promise((resolve) => browser.once('targetcreated', resolve));
+  await press(p, key);
+  const t = await Promise.race([created, wait(5000).then(() => null)]);
+  let url = t ? t.url() : '';
+  for (let i = 0; t && i < 20 && (!url || url === 'about:blank'); i++) { await wait(100); url = t.url(); }
+  const tp = t ? await t.page().catch(() => null) : null;
+  if (tp) await tp.close().catch(() => {});
+  await p.bringToFront();
+  return url;
+}
 
 // Sort, tray mode: select a tray card (Space), then a column (Enter), keyboard only.
 // reselect: false when the card is still selected after a wrong column.
@@ -181,8 +205,9 @@ async function expectNewScreen(page, id, what) {
 }
 
 /* ---------- main path ---------- */
-console.log('\nmain path (debug=1)');
-const page = await open('?reset=1&debug=1');
+console.log(SCORM ? '\nmain path in an LMS (mock SCORM 1.2 API)' : '\nmain path (debug=1)');
+const page = await open('?reset=1&debug=1', { lms: SCORM ? {} : null });
+if (SCORM) expect(await page.evaluate(() => window.__l4.tracking.mode) === 'scorm12', 'SCORM: the API is found, the scorm12 adapter runs');
 await expectNewScreen(page, 'S01', 'start');
 await expectBand(page, 'S01 before action', { state: 'hint', text: S.S01.hint, unlocked: false, lockedWhy: UI.footer.locked.single });
 expect(await page.evaluate(() => document.querySelector('.w-prev').getAttribute('aria-disabled') === 'true'), 'S01: Previous disabled on the first screen');
@@ -194,7 +219,7 @@ await shot(page, 's01-hint.png');
 
 // rail at the start
 let rl = await rail(page);
-expect(rl.dots.map((d) => d.status).join() === 'current,locked,locked,locked,locked,locked,notInPilot' && rl.pct === '0%' && rl.line === 0,
+expect(rl.dots.map((d) => d.status).join() === 'current,locked,locked,locked,locked,locked,locked' && rl.pct === '0%' && rl.line === 0,
   `rail at start: ${rl.dots.map((d) => d.status).join(' ')}, ${rl.pct}, teal line ${rl.line}px`);
 expect(rl.dots[0].label === `${CH.ch0.title}, ${UI.rail.status.current}` && rl.dots[0].current === 'step' && rl.dots[1].disabled === 'true' && rl.dots[1].label === `${CH.ch1.title}, ${UI.rail.status.locked}`,
   `rail labels: "${rl.dots[0].label}" (aria-current step), "${rl.dots[1].label}" (aria-disabled)`);
@@ -217,7 +242,7 @@ let menu = await page.evaluate(() => ({
 expect(menu.open && menu.inPanel && menu.focus === 'w-panel-close' && menu.role === 'dialog' && menu.modal === 'true' && menu.expanded === 'true',
   'Enter on the rail menu button opens the menu (dialog, aria-modal), focus on Close');
 expect(menu.kicker === UI.menu.kicker && menu.title === C.lesson.title && menu.pct === '0% complete' && menu.left === '3 h left'
-  && menu.list.join() === 'current:7 min left*,locked:9 min,locked:22 min,locked:19 min,locked:26 min,locked:1 h 22 min,notInPilot:15 min',
+  && menu.list.join() === 'current:7 min left*,locked:9 min,locked:22 min,locked:19 min,locked:26 min,locked:1 h 22 min,locked:15 min',
   `menu: "${menu.kicker}", "${menu.pct}", "${menu.left}", chapters ${menu.list.join(' | ')}`);
 let trapped = true;
 for (let i = 0; i < 30; i++) { await press(page, 'Tab'); trapped = trapped && await page.evaluate(() => document.querySelector('.w-panel').contains(document.activeElement)); }
@@ -672,49 +697,195 @@ await press(page, 'Enter');
 await expectNewScreen(page, 'S17', 'S16 Next');
 const caseState = () => page.evaluate(() => ({ text: document.querySelector('.w-sort-text').textContent, dots: document.querySelector('.w-deck .w-dots').getAttribute('aria-label') }));
 let cs = await caseState();
-expect(cs.text === card('S17', 'A').text && cs.dots === 'Case 1 of 5', `S17 start: case A, "${cs.dots}"`);
+expect(cs.text === card('S17', 'a').text && cs.dots === 'Case 1 of 5', `S17 start: case A, "${cs.dots}"`);
 await tabTo(page, '[data-action="card"]');
 await press(page, ' ');
 await press(page, 'Tab');
 await press(page, 'ArrowRight', 4);
 await press(page, 'Enter');
-await expectBand(page, 'S17 case A in Automating', { state: 'wrong', text: card('S17', 'A').feedback.wrong, unlocked: false });
+await expectBand(page, 'S17 case A in Automating', { state: 'wrong', text: card('S17', 'a').feedback.wrong, unlocked: false });
 await press(page, 'Escape');
 await expectLayout(page, 'S17 wrong');
 await shotR2(page, 's17-wrong.png');
 await press(page, 'ArrowLeft', 2);
 await press(page, 'Enter');
-await expectBand(page, 'S17 case A in Rushed', { state: 'correct', text: card('S17', 'A').feedback.correct, unlocked: false });
+await expectBand(page, 'S17 case A in Rushed', { state: 'correct', text: card('S17', 'a').feedback.correct, unlocked: false });
 const BIN = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 };
-for (const k of ['B', 'C', 'D', 'E']) {
+for (const k of ['b', 'c', 'd', 'e']) {
   await press(page, ' ');
   await press(page, 'Tab');
   if (BIN[card('S17', k).column]) await press(page, 'ArrowRight', BIN[card('S17', k).column]);
   await press(page, 'Enter');
 }
-await expectBand(page, 'S17 done', { state: 'correct', text: card('S17', 'E').feedback.correct, unlocked: true });
+await expectBand(page, 'S17 done', { state: 'correct', text: card('S17', 'e').feedback.correct, unlocked: true });
 expect(await page.evaluate(() => [...document.querySelectorAll('.w-sort-marker')].length) === 5, 'S17 done: a marker in each bin (case text for screen readers only)');
 await press(page, 'Enter');
 await expectBand(page, 'S17 Next: chapter 4 pause marker', { state: 'pause', text: CH.ch4.pauseMarker, unlocked: true });
 rl = await rail(page);
 expect(rl.dots.slice(0, 5).every((d) => d.status === 'done') && rl.dots[5].status === 'current', `rail after chapter 4: chapters 0 to 4 done, Build yours ${rl.dots[5].status}, ${rl.pct}`);
 await press(page, 'Enter');
-await expectNewScreen(page, 'S19', 'chapter 4 pause marker Next');
 
-// revisits of chapters 2 to 4: read-only, the right state shown, Next unlocked
-for (const id of ['S04', 'S05', 'S06', 'S07', 'S08', 'V2', 'S09', 'S10', 'S11', 'S12', 'S13', 'S14', 'S15', 'S16', 'S17']) {
+/* ---------- Chapters 5 and 6 (R3): handoff in a new tab and back, S21 first-attempt scoring, finish ---------- */
+console.log('\nchapters 5 and 6 (keyboard)');
+const METRIC = 'Share of HR time on repeat questions: about 35% now, 20% within three months.';
+await expectNewScreen(page, 'S18A', 'chapter 4 pause marker Next');
+await trayPlace(page, '1', 'b');
+await expectBand(page, 'S18A card 1 in Field 3', { state: 'wrong', text: card('S18A', 1).feedback.wrong, unlocked: false });
+await expectLayout(page, 'S18A wrong');
+await shotR3(page, 's18a.png');
+await trayPlace(page, '1', 'a', { reselect: false });
+for (const [c, col] of [['2', 'b'], ['3', 'c'], ['4', 'd']]) await trayPlace(page, c, col);
+await expectBand(page, 'S18A done', { state: 'correct', text: card('S18A', 4).feedback.correct, unlocked: true });
+await press(page, 'Enter');
+
+// S18: step 1 wrong then right, step 2 the pre-filled case title, Save without the box, then with it
+await expectNewScreen(page, 'S18', 'S18A Next');
+await tabTo(page, '.w-opt[data-id="a"]');
+await press(page, 'Enter');
+await expectBand(page, 'S18 a', { state: 'wrong', text: opt('S18', 'a').feedback, unlocked: false, lockedWhy: UI.footer.locked.safety });
+await press(page, 'ArrowDown');
+await press(page, 'Enter');
+await expectBand(page, 'S18 b', { state: 'correct', text: opt('S18', 'b').feedback, unlocked: false });
+const s18 = await page.evaluate(() => ({ focus: document.activeElement.classList.contains('w-input'), value: document.querySelector('.w-input').value, rows: !document.querySelector('.w-options-row').hidden }));
+expect(s18.focus && s18.value === TITLE && !s18.rows, `S18 step 2: the case title field, pre-filled from S02 ("${s18.value}"), takes the focus`);
+await tabTo(page, '[data-action="save"]');
+await press(page, 'Enter');
+await expectBand(page, 'S18 Save without the box', { state: 'notice', text: S.S18.step2.feedback.unticked, unlocked: false });
+await expectLayout(page, 'S18 step 2');
+await shotR3(page, 's18.png');
+await tabTo(page, '.w-checkbox', { back: true });
+await press(page, ' ');
+await tabTo(page, '[data-action="save"]');
+await press(page, 'Enter');
+await expectBand(page, 'S18 saved', { state: 'neutral', text: S.S18.step2.feedback.saved, unlocked: true });
+await press(page, 'Enter');
+
+// S19: Open workbook opens the existing workbook in a NEW TAB; "I'm back" shows the return state
+await expectNewScreen(page, 'S19', 'S18 Next');
+await expectBand(page, 'S19 brief', { state: 'hint', text: S.S19.hint, unlocked: false, lockedWhy: UI.footer.locked.handoff });
+const link = await page.evaluate(() => { const a = document.querySelector('[data-action="open"]'); return { href: a.href, target: a.target, rel: a.rel, back: document.querySelector('[data-action="back"]').hidden }; });
+expect(link.href === C.links.workbook && link.target === '_blank' && /noopener/.test(link.rel) && link.back,
+  `S19 Open workbook: a link to the existing workbook (${link.href}), target _blank, rel "${link.rel}"; I'm back hidden until opened`);
+await tabTo(page, '[data-action="open"]');
+const tabUrl = await newTabFrom(page);
+expect(tabUrl === C.links.workbook && await screen(page) === 'S19', `S19: Enter opened a new tab at ${tabUrl}; the module stays on S19`);
+await expectBand(page, 'S19 opened', { state: 'notice', text: S.S19.states.brief.openFeedback, unlocked: false });
+await expectLayout(page, 'S19 opened');
+await shotR3(page, 's19.png');
+await tabTo(page, '[data-action="back"]', { back: true });
+await press(page, 'Enter');
+await expectBand(page, "S19 I'm back", { state: 'notice', text: S.S19.states.return.backFeedback, unlocked: false });
+expect(await isActive(page, '.w-input') && await page.evaluate(() => window.__l4.state.g.S19?.o === 1 && window.__l4.state.g.S19?.b === 1), 'S19 return state: the metric field takes the focus, opened and back kept in suspend data');
+await tabTo(page, '[data-action="save"]');
+await press(page, 'Enter');
+await expectBand(page, 'S19 empty Save', { state: 'notice', text: S.S19.hint, unlocked: false });
+await tabTo(page, '.w-input', { back: true });
+await page.keyboard.type(METRIC);
+await tabTo(page, '[data-action="save"]');
+await press(page, 'Enter');
+await expectBand(page, 'S19 saved', { state: 'neutral', text: S.S19.states.return.savedFeedback, unlocked: true });
+await expectLayout(page, 'S19 saved');
+await press(page, 'Enter');
+
+// S20: three rows (one changed: a retry, still neutral), Next opens step 2, a chip, then the pause marker
+await expectNewScreen(page, 'S20', 'S19 Next');
+const row = (id) => S.S20.steps[0].rows.find((r) => r.id === id);
+for (const [q, c] of [['q1', 'notYet'], ['q1', 'yes'], ['q2', 'yes'], ['q3', 'notYet']]) {
+  await tabTo(page, `.w-check-row[data-row="${q}"] [data-choice="${c}"]`, { back: c === 'yes' && q === 'q1' });
+  await press(page, 'Enter');
+  await expectBand(page, `S20 ${q} ${c}`, { state: 'neutral', text: row(q).feedback[c], unlocked: q === 'q3' });
+  if (q === 'q1' && c === 'notYet') { await expectLayout(page, 'S20 step 1'); await shotR3(page, 's20.png'); }
+}
+expect(await isActive(page, '.w-next'), 'S20: after all three rows Next unlocks (it opens step 2)');
+await press(page, 'Enter');
+expect(await isActive(page, '.w-chip') && await page.evaluate(() => document.querySelector('.w-selfcheck').hidden), 'S20 step 2: the chips, focus on the first');
+await expectBand(page, 'S20 step 2', { state: 'hint', text: S.S20.hint, unlocked: false, lockedWhy: UI.footer.locked.chips });
+await press(page, 'ArrowRight', 2);
+await press(page, 'Enter');
+await expectBand(page, 'S20 chip rushed', { state: 'neutral', text: S.S20.steps[1].chips[2].feedback, unlocked: true });
+await expectLayout(page, 'S20 step 2');
+await press(page, 'Enter');
+await expectBand(page, 'S20 Next: chapter 5 pause marker', { state: 'pause', text: CH.ch5.pauseMarker, unlocked: true });
+await press(page, 'Enter');
+
+// S21: item 1 wrong then right (the wrong first answer counts), items 2 to 5 right first: 4 of 5
+await expectNewScreen(page, 'S21', 'chapter 5 pause marker Next');
+const item = (k) => S.S21.items[k];
+const iopt = (k, id) => item(k).options.find((o) => o.id === id);
+await tabTo(page, '.w-kc-opt[data-id="a"]');
+await press(page, 'Enter');
+await expectBand(page, 'S21 item 1 a', { state: 'wrong', text: iopt(0, 'a').feedback, unlocked: false, lockedWhy: UI.footer.locked.check });
+await expectLayout(page, 'S21 item 1 wrong');
+await shotR3(page, 's21.png');
+await press(page, 'ArrowRight', 2);
+await press(page, 'Enter');
+await expectBand(page, 'S21 item 1 c (retry)', { state: 'correct', text: iopt(0, 'c').feedback, unlocked: false, actions: ['nextQuestion'] });
+for (const [k, key] of [[1, 'b'], [2, 'a'], [3, 'd']]) {
+  await press(page, 'Enter'); // Next question
+  const dots = await page.evaluate(() => document.querySelector('.w-kc-head .w-dots').getAttribute('aria-label'));
+  expect(dots === `Question ${k + 1} of 5` && await isActive(page, '.w-kc-opt[data-id="a"]'), `S21 item ${k + 1}: "${dots}", focus on option A`);
+  const idx = { a: 0, b: 1, c: 2, d: 3 }[key];
+  if (idx) await press(page, 'ArrowRight', idx);
+  await press(page, 'Enter');
+  await expectBand(page, `S21 item ${k + 1} ${key}`, { state: 'correct', text: iopt(k, key).feedback, unlocked: false });
+}
+await press(page, 'Enter');
+expect(await page.evaluate(() => document.querySelector('#w-instruction').textContent) === item(4).instruction, `S21 item 5: the heading reads "${item(4).instruction}"`);
+for (const n of [5, 6]) { await tabTo(page, `.w-kc-tile[data-n="${n}"]`); await press(page, ' '); }
+await tabTo(page, '[data-action="check"]');
+await press(page, 'Enter');
+const resultLine = await page.evaluate(() => document.querySelector('.w-kc-result-line')?.textContent);
+expect(resultLine === '4 of 5 on first try. Pass mark: 4 of 5.' && await isActive(page, '.w-next'), `S21 result card: "${resultLine}" (item 1 counts as wrong although it was fixed), Next focused`);
+expect((await page.evaluate(() => window.__l4.score())).raw === 80, 'S21 score from first attempts only: 80 of 100');
+await expectLayout(page, 'S21 result');
+await shotR3(page, 's21-result.png');
+await press(page, 'Enter');
+
+// S22: a takeaway, step 2: homework in a new tab, the downloaded record, Finish = passed
+await expectNewScreen(page, 'S22', 'S21 Next');
+await tabTo(page, '.w-takeaway[data-id="a"]');
+await press(page, 'Enter');
+await expectBand(page, 'S22 takeaway a', { state: 'neutral', text: opt('S22', 'a').feedback, unlocked: true });
+await expectLayout(page, 'S22 step 1');
+await shotR3(page, 's22.png');
+await press(page, 'Enter');
+expect(await isActive(page, '[data-action="homework"]'), 'S22 step 2: focus on Open homework');
+await expectBand(page, 'S22 step 2', { state: 'hint', text: S.S22.hint, unlocked: false, lockedWhy: UI.footer.locked.last });
+const hwUrl = await newTabFrom(page);
+expect(hwUrl === C.links.homework, `S22 Open homework: a new tab at ${hwUrl}`);
+const dlDir = mkdtempSync(join(tmpdir(), 'l4-record-'));
+const cdp = await page.createCDPSession();
+await cdp.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: dlDir });
+await tabTo(page, '[data-action="download"]');
+await press(page, 'Enter');
+await expectBand(page, 'S22 download', { state: 'neutral', text: S.S22.step2.feedback.download, unlocked: false });
+let rec = '';
+for (let i = 0; i < 30 && !rec; i++) { await wait(200); try { rec = readFileSync(join(dlDir, UI.record.fileName), 'utf8'); } catch {} }
+expect(rec.includes(TITLE) && rec.includes(METRIC) && rec.includes('4 of 5 on first try (80 of 100)') && rec.includes(S.S20.steps[1].chips[2].label) && rec.includes(UI.buttons.notYet),
+  `S22 lesson record downloaded (${UI.record.fileName}, ${rec.length} bytes): case title, metric, self-check answers, score`);
+await tabTo(page, '[data-action="finish"]');
+await press(page, 'Enter');
+await expectBand(page, 'S22 finished', { state: 'neutral', text: UI.finished, unlocked: false, lockedWhy: UI.footer.locked.last });
+const fin = (await events(page)).filter((e) => e.kind === 'finish');
+expect(fin.length === 1 && fin[0].status === 'passed' && fin[0].score === 80, `S22 Finish (after the download, no confirm): lesson status ${fin[0]?.status}, score ${fin[0]?.score}`);
+await expectLayout(page, 'S22 finished');
+await shotR3(page, 's22-finish.png');
+
+// revisits: read-only, the right state shown, Next unlocked (S22: finished, the last screen)
+for (const id of ['S04', 'S05', 'S06', 'S07', 'S08', 'V2', 'S09', 'S10', 'S11', 'S12', 'S13', 'S14', 'S15', 'S16', 'S17', 'S18A', 'S18', 'S19', 'S20', 'S21', 'S22']) {
   await page.evaluate((x) => window.__l4.go(x), id);
   const b = S[id].template === 'video' ? null : await band(page), n = await nextState(page);
-  expect((!b || b.state === 'correct') && !n.locked, `${id} revisit: the right state comes back${b ? ' (band ' + b.state + ')' : ' (stops answered, seek free)'}, Next unlocked`);
+  const want = { S18: 'neutral', S19: 'neutral', S20: 'neutral', S21: 'idle', S22: 'neutral' }[id] || 'correct';
+  const nextOk = id === 'S22' ? n.locked && n.label === UI.footer.locked.last : !n.locked;
+  expect((!b || b.state === want) && nextOk, `${id} revisit: the earlier state comes back${b ? ' (band ' + b.state + ')' : ' (stops answered, seek free)'}, ${id === 'S22' ? 'finished, Next stays locked (last screen)' : 'Next unlocked'}`);
 }
 await page.evaluate(() => window.__l4.go('S19'));
 
-// menu navigation from S19
+// menu: every chapter done
 await tabTo(page, '.w-rail-menu', { back: true });
 await press(page, 'Enter');
-menu = await page.evaluate(() => ({ pct: document.querySelector('.w-panel-pct').textContent, list: [...document.querySelectorAll('.w-chapter')].map((c) => c.dataset.status + ':' + c.querySelector('.w-chapter-meta').textContent + (c.getAttribute('aria-current') ? '*' : '')) }));
-expect(menu.pct === '46% complete' && menu.list.join() === 'done:Done,done:Done,done:Done,done:Done,done:Done,current:1 h 22 min left*,notInPilot:15 min',
-  `menu at S19: "${menu.pct}", ${menu.list.join(' | ')}`);
+menu = await page.evaluate(() => ({ pct: document.querySelector('.w-panel-pct').textContent, left: document.querySelector('.w-panel-left').textContent, list: [...document.querySelectorAll('.w-chapter')].map((c) => c.dataset.status + ':' + c.querySelector('.w-chapter-meta').textContent + (c.getAttribute('aria-current') ? '*' : '')) }));
+expect(menu.pct === '100% complete' && menu.list.every((x) => x === 'done:Done') && menu.list.length === 7, `menu at the end: "${menu.pct}", "${menu.left}", all 7 chapters done`);
 await expectLayout(page, 'menu open');
 await shot(page, 'menu-open.png');
 await tabTo(page, '.w-chapter[data-chapter="0"]');
@@ -729,12 +900,13 @@ await press(page, 'Enter');
 await expectNewScreen(page, 'S01', 'Previous from S02');
 await tabTo(page, '.w-dot[data-chapter="5"]', { back: true });
 await press(page, 'Enter');
-await expectNewScreen(page, 'S19', 'rail: Enter on the chapter in progress opens where the learner is');
+await expectNewScreen(page, 'S18A', 'rail: Enter on the completed chapter 5 opens its first screen');
 
 const ev = await events(page);
 const first = (id) => ev.filter((e) => e.kind === 'answer' && e.trackingId === id);
 const IDS_CH34 = ['L4_FT3_1', 'L4_V2_1', 'L4_V2_2', 'L4_V2_3', 'L4_S09_1', 'L4_S10_1', 'L4_S11_1', 'L4_S12_1', 'L4_FT4_1', 'L4_S13_1', 'L4_S14_1', 'L4_S15_1', 'L4_S16_1', 'L4_S17_1'];
-const IDS = ['L4_S01_1', 'L4_S02_1', 'L4_S02_2', 'L4_FT1_1', 'L4_S03_1', 'L4_FT2_1', 'L4_S04_1', 'L4_S05_1', 'L4_S06_1', 'L4_S06_2', 'L4_S07_1', 'L4_S08_1', 'L4_S08_2', 'L4_S08_3', ...IDS_CH34];
+const IDS_CH56 = ['L4_S18A_1', 'L4_S18_1', 'L4_S18_2', 'L4_S19_1', 'L4_S20_1', 'L4_S20_2', 'L4_S20_3', 'L4_S20_4', 'L4_S21_1', 'L4_S21_2', 'L4_S21_3', 'L4_S21_4', 'L4_S21_5', 'L4_S22_1'];
+const IDS = ['L4_S01_1', 'L4_S02_1', 'L4_S02_2', 'L4_FT1_1', 'L4_S03_1', 'L4_FT2_1', 'L4_S04_1', 'L4_S05_1', 'L4_S06_1', 'L4_S06_2', 'L4_S07_1', 'L4_S08_1', 'L4_S08_2', 'L4_S08_3', ...IDS_CH34, ...IDS_CH56];
 expect(IDS.every((id) => first(id).length === 1) && ev.filter((e) => e.kind === 'answer').length === IDS.length,
   `bus: exactly one first-attempt event per id (${IDS.map((id) => id + ' ' + first(id).length).join(', ')})`);
 const f = Object.fromEntries(IDS.map((id) => [id, first(id)[0]]));
@@ -744,16 +916,63 @@ expect(f.L4_S01_1.response === 'a' && f.L4_S01_1.result === 'wrong' && f.L4_S02_
 const ch2 = IDS.slice(5, 14).map((id) => `${id}=${f[id].response}/${f[id].result}/${f[id].type}`).join(' ');
 const ch34 = IDS_CH34.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
 expect(ch34 === 'L4_FT3_1=a/wrong L4_V2_1=a/wrong L4_V2_2=b/wrong L4_V2_3=a/wrong L4_S09_1=1.b,2.a,3.b,4.c,5.d,6.d/wrong L4_S10_1=d/wrong L4_S11_1=a/wrong '
-  + 'L4_S12_1=3,4/wrong L4_FT4_1=c/wrong L4_S13_1=a/wrong L4_S14_1=d/wrong L4_S15_1=b/wrong L4_S16_1=1.a,2.b,3.b,4.d,5.d,6.c/wrong L4_S17_1=A.5,B.1,C.5,D.4,E.2/wrong',
+  + 'L4_S12_1=3,4/wrong L4_FT4_1=c/wrong L4_S13_1=a/wrong L4_S14_1=d/wrong L4_S15_1=b/wrong L4_S16_1=1.a,2.b,3.b,4.d,5.d,6.c/wrong L4_S17_1=a.5,b.1,c.5,d.4,e.2/wrong',
   `bus, chapters 3 and 4 first attempts: ${ch34}`);
-expect(ch2 === 'L4_FT2_1=a/wrong/choice L4_S04_1=1.b,2.b,3.a,4.b,5.c/wrong/matching L4_S05_1=lane/wrong/choice L4_S06_1=b/wrong/choice L4_S06_2=a/wrong/choice '
+const ch56 = IDS_CH56.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
+expect(ch56 === `L4_S18A_1=1.b,2.b,3.c,4.d/wrong L4_S18_1=a/wrong L4_S18_2=${TITLE}/neutral L4_S19_1=${METRIC}/neutral L4_S20_1=b/neutral L4_S20_2=a/neutral L4_S20_3=b/neutral `
+  + 'L4_S20_4=c/neutral L4_S21_1=a/wrong L4_S21_2=b/correct L4_S21_3=a/correct L4_S21_4=d/correct L4_S21_5=5,6/correct L4_S22_1=a/neutral', `bus, chapters 5 and 6 first attempts: ${ch56}`);
+expect(ch2 === 'L4_FT2_1=a/wrong/choice L4_S04_1=1.b,2.b,3.a,4.b,5.c/wrong/matching L4_S05_1=b/wrong/choice L4_S06_1=b/wrong/choice L4_S06_2=a/wrong/choice '
   + 'L4_S07_1=7/wrong/choice L4_S08_1=a/wrong/choice L4_S08_2=c/correct/choice L4_S08_3=a/correct/choice', `bus, chapter 2 first attempts: ${ch2}`);
 const retries = ev.filter((e) => e.kind === 'retry').map((e) => `${e.trackingId}=${e.response}/${e.result}`);
-expect(retries.join() === 'L4_S01_1=b/correct,L4_S03_1=b,d/correct,L4_S05_1=event/wrong,L4_S05_1=step/wrong,L4_S05_1=gateway/correct,L4_S06_1=a/correct,L4_S06_2=b/correct,L4_S07_1=8/correct,L4_S08_1=b/correct'
-  + ',L4_V2_1=b/correct,L4_V2_2=a/correct,L4_V2_3=b/correct,L4_S10_1=c/correct,L4_S11_1=d/correct,L4_S12_1=4,7/correct,L4_S13_1=c/correct,L4_S14_1=b/correct,L4_S15_1=a/correct',
+expect(retries.join() === 'L4_S01_1=b/correct,L4_S03_1=b,d/correct,L4_S05_1=c/wrong,L4_S05_1=d/wrong,L4_S05_1=a/correct,L4_S06_1=a/correct,L4_S06_2=b/correct,L4_S07_1=8/correct,L4_S08_1=b/correct'
+  + ',L4_V2_1=b/correct,L4_V2_2=a/correct,L4_V2_3=b/correct,L4_S10_1=c/correct,L4_S11_1=d/correct,L4_S12_1=4,7/correct,L4_S13_1=c/correct,L4_S14_1=b/correct,L4_S15_1=a/correct'
+  + ',L4_S18_1=b/correct,L4_S20_1=a/neutral,L4_S21_1=c/correct',
   `bus: retries as retry events (${retries.join(', ')})`);
 expect(!page.errors.length, 'main path: no console errors' + (page.errors.length ? ': ' + page.errors.join(' | ') : ''));
+if (SCORM) await scormChecks(page, IDS);
 await page.close();
+if (SCORM) { await browser.close(); server.close(); console.log(fails.length ? `\ntest:scorm FAILED (${fails.length})` : '\ntest:scorm passed'); process.exit(fails.length ? 1 : 0); }
+
+// The SCORM data after the whole lesson, then a relaunch (entry=resume with the saved suspend data).
+async function scormChecks(p, ids) {
+  console.log('\nSCORM 1.2 data');
+  const m = await p.evaluate(() => { window.__l4.tracking.terminate(); return window.__scormMock.report(); });
+  const d = m.data;
+  expect(!m.errors.length, `SCORM: every call valid for SCORM 1.2 (${m.calls.length} calls)` + (m.errors.length ? ': ' + m.errors.slice(0, 5).join(' | ') : ''));
+  expect(!m.identity.length, 'SCORM: no identity element read or written (student_id, student_name)' + (m.identity.length ? ': ' + m.identity.join(', ') : ''));
+  const rows = Array.from({ length: m.count }, (_, n) => {
+    const g = (f) => d[`cmi.interactions.${n}.${f}`];
+    return { id: g('id'), type: g('type'), response: g('student_response'), result: g('result'), latency: g('latency'), time: g('time'), weighting: g('weighting'), pattern: g('correct_responses.0.pattern') };
+  });
+  const metaOf = (id) => C.screens.flatMap((s) => [...(s.tracking || []), ...(s.stops || []).map((x) => x.tracking)]).find((t) => t.id === id);
+  const once = rows.length === ids.length && new Set(rows.map((r) => r.id)).size === ids.length && ids.every((id) => rows.some((r) => r.id === id));
+  expect(once, `SCORM: ${rows.length} interactions, each id written once (${ids.length} in the lesson)`);
+  const bad = rows.filter((r) => { const t = metaOf(r.id); return !t || r.type !== t.type || r.weighting !== (t.scored ? '1' : '0') || (t.correctResponse !== null && r.pattern !== String(t.correctResponse).toLowerCase())
+    || (t.correctResponse === null && r.pattern !== undefined) || !r.latency || !r.time || (t.result === 'neutral' && r.result !== 'neutral'); });
+  expect(!bad.length, 'SCORM: every interaction carries type, response, result, latency, time, weighting (1 for the 5 scored), correct pattern from the content' + (bad.length ? ': ' + bad.map((r) => r.id).join(', ') : ''));
+  const free = rows.filter((r) => r.type === 'fill-in');
+  expect(free.length === 4 && free.every((r) => r.response.length <= 250 && r.result === 'neutral'), `SCORM: ${free.length} fill-in responses (case title twice, problem, metric), at most 250 chars, neutral`);
+  expect(d['cmi.core.lesson_status'] === 'passed' && d['cmi.core.score.raw'] === '80' && d['cmi.core.score.min'] === '0' && d['cmi.core.score.max'] === '100' && d['cmi.core.exit'] === '',
+    `SCORM: lesson_status ${d['cmi.core.lesson_status']}, score.raw ${d['cmi.core.score.raw']} (0 to 100, from S21 first attempts), exit "${d['cmi.core.exit']}"`);
+  expect(/^\d{4}:\d{2}:\d{2}\.\d{2}$/.test(d['cmi.core.session_time'] || '') && m.finished, `SCORM: session_time ${d['cmi.core.session_time']}, LMSFinish once`);
+  const susp = d['cmi.suspend_data'] || '';
+  const { decode, encode } = await import('../src/state.js');
+  const full = decode(susp);
+  for (const k of Object.keys(full.f)) full.f[k] = 'x'.repeat(250);
+  const fullLen = encode(full).length;
+  expect(susp.length < 4096 && fullLen < 4096, `SCORM: suspend_data ${susp.length} chars after the whole lesson; ${fullLen} with every free-text field at 250 (limit 4096)`);
+  expect(d['cmi.core.lesson_location'] === full.s, `SCORM: lesson_location "${d['cmi.core.lesson_location']}" = the saved place`);
+
+  console.log('\nSCORM relaunch (entry=resume)');
+  const r = await open('', { lms: { 'cmi.core.entry': 'resume', 'cmi.suspend_data': susp, 'cmi.core.lesson_location': d['cmi.core.lesson_location'], 'cmi.core.lesson_status': d['cmi.core.lesson_status'] } });
+  const back = await r.evaluate(() => ({ at: window.__l4.current, dialog: !!document.querySelector('.w-dialog [data-action="resume"]'), title: window.__l4.state.f.L4_CASE_TITLE,
+    metric: window.__l4.state.f.L4_METRIC, done: window.__l4.state.d.length, mock: window.__scormMock.report() }));
+  expect(back.at === d['cmi.core.lesson_location'] && back.dialog && back.title === TITLE && back.metric && back.done === full.d.length,
+    `SCORM resume: lands on ${back.at} with the resume prompt, ${back.done} screens done, case title and metric back`);
+  expect(back.mock.data['cmi.core.lesson_status'] === 'passed' && !back.mock.errors.length && back.mock.count === 0,
+    'SCORM resume: lesson_status stays passed (never downgraded), no interaction written again');
+  await r.close();
+}
 
 /* ---------- S01 wrong row by mouse: calm mark, no focus ring ---------- */
 // The one mouse check in this walk: a click must not leave the keyboard focus ring on the row.
@@ -870,6 +1089,47 @@ for (const [card, key, jump, jumpTo, skipped, full, fullTo] of [
     await tabTo(p, '[data-action="skipChallenge"]');
     await press(p, 'Enter');
   }, { card, to: fullTo, route: 'full', answer: '' });
+}
+
+/* ---------- S21 all first answers wrong: retries never raise the score; S22 confirms once, failed ---------- */
+console.log('\nS21 first attempts wrong, S22 finish without download');
+{
+  const p = await open('?reset=1&screen=S21');
+  for (const [k, wrongId, rightId] of [[0, 'a', 'c'], [1, 'a', 'b'], [2, 'b', 'a'], [3, 'a', 'd']]) {
+    await tabTo(p, `.w-kc-opt[data-id="${wrongId}"]`);
+    await press(p, 'Enter');
+    await tabTo(p, `.w-kc-opt[data-id="${rightId}"]`, { back: rightId < wrongId });
+    await press(p, 'Enter');
+    await expectBand(p, `S21 item ${k + 1} retry right`, { state: 'correct', text: S.S21.items[k].options.find((o) => o.id === rightId).feedback, unlocked: false });
+    await tabTo(p, '[data-action="nextQuestion"]');
+    await press(p, 'Enter');
+  }
+  for (const n of [5, 7]) { await tabTo(p, `.w-kc-tile[data-n="${n}"]`); await press(p, ' '); }
+  await tabTo(p, '[data-action="check"]');
+  await press(p, 'Enter');
+  await expectBand(p, 'S21 item 5 tiles 5 + 7', { state: 'wrong', verdict: UI.feedback.oneOfTwo, text: S.S21.items[4].tiles[6].feedback, unlocked: false });
+  await expectLayout(p, 'S21 item 5 one of two');
+  await tabTo(p, '.w-kc-tile[data-n="6"]', { back: true });
+  await press(p, ' ');
+  await tabTo(p, '[data-action="check"]');
+  await press(p, 'Enter');
+  const line = await p.evaluate(() => document.querySelector('.w-kc-result-line')?.textContent);
+  const sc = await p.evaluate(() => window.__l4.score());
+  expect(line === '0 of 5 on first try. Pass mark: 4 of 5.' && sc.raw === 0, `S21: every item fixed on retry, result "${line}", score ${sc.raw}: only first attempts count`);
+  await p.evaluate(() => window.__l4.go('S22'));
+  await tabTo(p, '.w-takeaway[data-id="c"]');
+  await press(p, 'Enter');
+  await press(p, 'Enter'); // Next: step 2
+  await tabTo(p, '[data-action="finish"]');
+  await press(p, 'Enter');
+  await expectBand(p, 'S22 Finish without download', { state: 'notice', text: S.S22.step2.feedback.finishConfirm, unlocked: false });
+  expect(!(await p.evaluate(() => window.__l4.tracking.events.some((e) => e.kind === 'finish'))), 'S22: the first Finish without a download only asks to confirm');
+  await expectLayout(p, 'S22 finish confirm');
+  await press(p, 'Enter');
+  const fin = (await p.evaluate(() => window.__l4.tracking.events)).filter((e) => e.kind === 'finish');
+  expect(fin.length === 1 && fin[0].status === 'failed' && fin[0].score === 0, `S22 second Finish: lesson status ${fin[0]?.status}, score ${fin[0]?.score}`);
+  expect(!p.errors.length, 'S21 / S22 run: no console errors' + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
+  await p.close();
 }
 
 /* ---------- V1 in the player: stops, seek blocked, end ---------- */

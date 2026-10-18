@@ -50,7 +50,8 @@ export const input = {
   },
 };
 
-function field(f, ctx, privacyId, announcer) {
+// one labelled text field with its live counter (also used by S18 and S19): { el, input }
+export function field(f, ctx, privacyId, announcer) {
   const { ui } = ctx;
   const id = nextId('w-field'), counterId = nextId('w-counter');
   const max = f.maxLength;

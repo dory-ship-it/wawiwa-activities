@@ -11,8 +11,8 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["S01", "S02", "FT1", "V1", "S03", "FT2", "S04", "S05", "S06", "S07", "S08", "FT3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S19", "S20"],
-    "completion": { "rule": "slice-end", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": [] }
+    "slice": ["S01", "S02", "FT1", "V1", "S03", "FT2", "S04", "S05", "S06", "S07", "S08", "FT3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
+    "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] }
   },
 
   "ui": {
@@ -31,6 +31,10 @@
       "nextRound": "Next round",
       "jumpToMap": "Jump to the full HR map",
       "watchDemo": "Watch the demo",
+      "nextQuestion": "Next question",
+      "openHomework": "Open homework",
+      "downloadRecord": "Download my lesson record",
+      "finishLesson": "Finish lesson",
       "watchVideo": "Watch the video",
       "reopenWorkbook": "Reopen workbook",
       "finish": "Finish",
@@ -71,11 +75,31 @@
         "metric": "Next, locked until you choose the strongest metric",
         "pick": "Next, locked until both answers are correct",
         "bounds": "Next, locked until you choose the right start and end",
+        "safety": "Next, locked until you choose what to write and save your case title",
+        "handoff": "Next, locked until you are back from the workbook and your metric is saved",
+        "selfcheck": "Next, locked until you answer all three questions",
+        "chips": "Next, locked until you pick your biggest risk",
+        "check": "Next, locked until you finish the knowledge check",
+        "close": "Next, locked until you pick a takeaway",
+        "last": "Next, locked: this is the last screen of the lesson",
         "default": "Next, locked until you finish this screen"
       }
     },
     "memo": { "header": "Fast track · Chapter {n}" },
-    "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "case": "Case {i} of {n}" },
+    "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "case": "Case {i} of {n}", "question": "Question {i} of {n}" },
+    "finished": "Lesson finished. Your result is saved. You can close this window.",
+    "record": {
+      "fileName": "lesson-4-record.html",
+      "heading": "Lesson record",
+      "date": "Date",
+      "caseTitle": "Case title",
+      "metric": "Your success metric",
+      "selfCheck": "Self-check",
+      "risk": "Biggest risk",
+      "score": "Knowledge check",
+      "scoreLine": "{x} of {n} on first try ({p} of 100). Pass mark: {pass} of 100.",
+      "empty": "Not filled in"
+    },
     "slot": { "on": "present", "off": "missing" },
     "video": {
       "meta": "Video · {length} · {n} stops",
@@ -205,10 +229,10 @@
     { "id": "ch4", "n": 4, "title": "Critical eye", "minutes": 26, "screens": ["FT4", "S13", "S14", "S15", "S16", "S17"], "inSlice": true,
       "fastTrack": { "card": "FT4", "landing": "S17" },
       "pauseMarker": "Good place to pause. Chapter 5 takes about 80 minutes. Start it fresh." },
-    { "id": "ch5", "n": 5, "title": "Build yours", "minutes": 82, "screens": ["S19", "S20"], "inSlice": true,
+    { "id": "ch5", "n": 5, "title": "Build yours", "minutes": 82, "screens": ["S18A", "S18", "S19", "S20"], "inSlice": true,
       "sliceNote": "S18A and S18 come later; the slice enters Chapter 5 at S19.",
       "pauseMarker": "Good place to pause. Your map and place are saved." },
-    { "id": "ch6", "n": 6, "title": "Close", "minutes": 15, "screens": [], "inSlice": false, "pauseMarker": null }
+    { "id": "ch6", "n": 6, "title": "Close", "minutes": 15, "screens": ["S21", "S22"], "inSlice": true, "pauseMarker": null }
   ],
 
   "screens": [
@@ -593,7 +617,7 @@
       ],
       "advance": "after-key-and-all-chips",
       "tracking": [
-        { "id": "L4_S05_1", "type": "choice", "correctResponse": "gateway", "scored": false, "bloom": "Remember", "result": "graded" }
+        { "id": "L4_S05_1", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Remember", "result": "graded" }
       ],
       "suspend": ["chips"],
       "sources": ["s12", "s13", "HR canon Fields 2 to 4", "End event 'Answer received' is illustrative (FL14)"]
@@ -1170,28 +1194,107 @@
         { "id": "5", "label": "Automating a broken process", "icon": "gear-broken" }
       ],
       "cards": [
-        { "id": "A", "text": "Fields 6 and 7 were left blank to finish the map quickly.", "column": "3",
+        { "id": "a", "text": "Fields 6 and 7 were left blank to finish the map quickly.", "column": "3",
           "feedback": { "correct": "Controls and gaps are where the findings live. Skipping them leaves Lesson 5 nothing to protect against.",
             "wrong": "The map has a goal and matches today. Look at which fields were never filled." } },
-        { "id": "B", "text": "The map shows how HR intends requests to flow, not how they flow today.", "column": "1",
+        { "id": "b", "text": "The map shows how HR intends requests to flow, not how they flow today.", "column": "1",
           "feedback": { "correct": "The map now describes a wish. Every gap on a normal day stays hidden.",
             "wrong": "Nothing was skipped or automated. Compare the map with a normal day in HR." } },
-        { "id": "C", "text": "A chatbot is planned for the three channels exactly as they run today.", "column": "5",
+        { "id": "c", "text": "A chatbot is planned for the three channels exactly as they run today.", "column": "5",
           "feedback": { "correct": "The most critical mistake. Three channels with no organized system get faster, and the disorder grows with them.",
             "wrong": "The map may be accurate. Look at what is about to be done with the process." } },
-        { "id": "D", "text": "HR moved to one request form. The map still shows three channels.", "column": "4",
+        { "id": "d", "text": "HR moved to one request form. The map still shows three channels.", "column": "4",
           "feedback": { "correct": "The map was right once. Lesson 5 would now build on a process that no longer exists.",
             "wrong": "Something changed after the map was drawn. Which mistake follows a change?" } },
-        { "id": "E", "text": "Someone mapped every HR task 'to have it documented', with no question to answer.", "column": "2",
+        { "id": "e", "text": "Someone mapped every HR task 'to have it documented', with no question to answer.", "column": "2",
           "feedback": { "correct": "Without a question, nobody can say which process or boundaries matter. The map grows and decides nothing.",
             "wrong": "The map may be accurate and complete. Ask what it was drawn to decide." } }
       ],
       "advance": "after-all-placed",
       "endOfChapter": true,
       "tracking": [
-        { "id": "L4_S17_1", "type": "matching", "correctResponse": "A.3,B.1,C.5,D.4,E.2", "scored": false, "bloom": "Analyze", "result": "graded" }
+        { "id": "L4_S17_1", "type": "matching", "correctResponse": "a.3,b.1,c.5,d.4,e.2", "scored": false, "bloom": "Analyze", "result": "graded" }
       ],
       "sources": ["s34", "s16", "s17", "s21", "s6", "Cases constructed (FL12); D is a fictional later change"]
+    },
+
+    {
+      "id": "S18A",
+      "chapter": "ch5",
+      "template": "sort",
+      "mode": "tray",
+      "minutes": 6,
+      "instruction": "Map three fields of a case that is not HR.",
+      "hint": "Same eight fields, different case. Select a card, then a column.",
+      "layout": "wide",
+      "header": "Case 3: sales call summaries",
+      "columns": [
+        { "id": "a", "label": "Field 2: Trigger", "icon": "play", "term": "Trigger" },
+        { "id": "b", "label": "Field 3: Steps", "icon": "stairs", "term": "Steps" },
+        { "id": "c", "label": "Field 7: Gaps", "icon": "help-circle", "term": "Gaps" },
+        { "id": "d", "label": "Not AS-IS", "icon": "x-square" }
+      ],
+      "cards": [
+        { "n": 1, "text": "A sales call ends", "column": "a",
+          "feedback": { "correct": "Placed. A concrete event starts the work, as in HR, but here it repeats 8 to 12 times a day per rep.",
+            "wrong": "Ask what has to happen before any summary can be written." } },
+        { "n": 2, "text": "The rep updates the CRM, often late", "column": "b",
+          "feedback": { "correct": "Placed. The step and its owner, written as it really runs: often late, not as the rule says.",
+            "wrong": "This is work a role does. Where do steps and owners go?" } },
+        { "n": 3, "text": "Unclear whether reps see a problem", "column": "c",
+          "feedback": { "correct": "Placed. An honest unknown. It tells you what to ask before Lesson 5.",
+            "wrong": "Nobody knows this yet. Which field holds what is missing or unclear?" } },
+        { "n": 4, "text": "An AI tool drafts each call summary", "column": "d",
+          "feedback": { "correct": "Kept out. Your Homework 2 AI step is a future idea too. It stays off your AS-IS map.",
+            "wrong": "Does this happen on a normal day today, or is it an idea for later?" } }
+      ],
+      "advance": "after-all-placed",
+      "tracking": [
+        { "id": "L4_S18A_1", "type": "matching", "correctResponse": "1.a,2.b,3.c,4.d", "scored": false, "bloom": "Apply", "result": "graded" }
+      ],
+      "sources": ["L1 booklet Case 3", "s14", "s16", "s19", "HW2 (model step)"]
+    },
+
+    {
+      "id": "S18",
+      "chapter": "ch5",
+      "template": "decision",
+      "variant": "safety",
+      "minutes": 4,
+      "instruction": "Choose what you write in the workbook. Then check your case title.",
+      "hint": "Before you write anything, remove names and identifying details.",
+      "layout": "editorial",
+      "image": { "src": "assets/img/s18.jpg", "alt": "Someone writing up notes on a laptop and in a notebook", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "50% 50%" },
+      "stage": {
+        "top": { "kind": "line", "text": "The workbook has a live AI coach that reads what you type." },
+        "bottom": { "kind": "options", "arrange": "stack" }
+      },
+      "options": [
+        { "id": "a", "label": "Your real map, with names and policy titles", "correct": false,
+          "feedback": "Names and internal policy now sit in an AI tool. Personal, employee or financial details are CONFIDENTIAL: keep them out." },
+        { "id": "b", "label": "Roles instead of names, no identifying details", "correct": true,
+          "feedback": "Nothing identifying leaves your hands. If unsure whether something is allowed, the Lesson 3 rule applies: leave it out." },
+        { "id": "c", "label": "Your real map, with Field 5 left empty", "correct": false,
+          "feedback": "Names can sit in any field, not only Field 5. Steps and handoffs still identify people." }
+      ],
+      "step2": {
+        "field": { "id": "caseTitle", "label": "Case title, generalized", "placeholder": "", "maxLength": 250, "multiline": false, "store": "L4_CASE_TITLE", "trackingId": "L4_S18_2" },
+        "privacy": { "icon": "shield", "text": "Leave out names and identifying details." },
+        "checkbox": "I removed names and identifying details from my notes.",
+        "feedback": {
+          "unticked": "Tick the box once your notes have no names or identifying details.",
+          "saved": "Saved. This title goes on your workbook and your lesson record.",
+          "empty": "Add your case title before you save."
+        },
+        "emptyPilotCopy": true
+      },
+      "advance": "after-save",
+      "tracking": [
+        { "id": "L4_S18_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Apply", "result": "graded" },
+        { "id": "L4_S18_2", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" }
+      ],
+      "suspend": ["checkbox"],
+      "sources": ["s44 (generalized, de-identified version; Lesson 3 rule)", "s14", "decisions 1, 2"]
     },
 
     {
@@ -1202,6 +1305,8 @@
       "instruction": "Open the workbook and map your own case.",
       "hint": "Unknown? Write 'unclear'. The coach treats it as a valid answer.",
       "terms": ["AS-IS", "Success metric"],
+      "layout": "editorial",
+      "image": { "src": "assets/img/s19.jpg", "alt": "A learner working through a case at a laptop in an open office", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "65% 50%" },
       "states": {
         "brief": {
           "stage": {
@@ -1255,6 +1360,7 @@
       "minutes": 8,
       "instruction": "Check your map against three questions. Then pick your biggest risk.",
       "hint": "Answer honestly. 'Not yet' sends you back with one fix.",
+      "layout": "wide",
       "terms": ["Ideal, not actual"],
       "steps": [
         {
@@ -1292,7 +1398,6 @@
         }
       ],
       "endOfChapter": true,
-      "endOfSlice": true,
       "tracking": [
         { "id": "L4_S20_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" },
         { "id": "L4_S20_2", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" },
@@ -1300,6 +1405,126 @@
         { "id": "L4_S20_4", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" }
       ],
       "sources": ["s36", "s43 item 4", "s34", "s37", "s38"]
+    },
+
+    {
+      "id": "S21",
+      "chapter": "ch6",
+      "template": "check",
+      "minutes": 12,
+      "instruction": "Choose one. Your first answer counts.",
+      "hint": "Choose one. You can retry, but only the first answer counts.",
+      "layout": "wide",
+      "items": [
+        { "id": "i1", "icon": "speech", "trackingId": "L4_S21_1",
+          "stem": "Case 2: reps route requests to departments. Field 4 says 'Rep to department.' What is missing?",
+          "options": [
+            { "id": "a", "label": "A rule that reps must route correctly", "correct": false,
+              "feedback": "That adds a rule nobody follows today. The map becomes a redesign before the gaps are known." },
+            { "id": "b", "label": "The AI tool that will route requests", "correct": false,
+              "feedback": "The map now holds a future tool, and today's handoff stays as vague as before." },
+            { "id": "c", "label": "What passes, and what if nobody is available", "correct": true,
+              "feedback": "From and to are there. Without what passes and the unavailable case, a request stalls between teams." },
+            { "id": "d", "label": "Nothing more: the department sees the request", "correct": false,
+              "feedback": "The receiver may not know what happened before. The map hides the most dangerous moment in the process." }
+          ] },
+        { "id": "i2", "icon": "speech", "trackingId": "L4_S21_2",
+          "stem": "Case 6: student inquiries. Which step is the strongest first place for AI?",
+          "options": [
+            { "id": "a", "label": "Deciding on exceptional student requests", "correct": false,
+              "feedback": "Exceptional requests need human judgment. An error here can touch a student's rights." },
+            { "id": "b", "label": "Tagging each inquiry by topic for routing", "correct": true,
+              "feedback": "Unstructured text in, a structured label out, at low risk. Exceptions still go to a person." },
+            { "id": "c", "label": "Handling sensitive cases on its own", "correct": false,
+              "feedback": "Sensitive cases need judgment, and today nobody knows how they are handled. That is unclear, not ready." },
+            { "id": "d", "label": "Answering by category before categories are counted", "correct": false,
+              "feedback": "There is no breakdown of categories yet. A solution here stands on unknown foundations." }
+          ] },
+        { "id": "i3", "icon": "speech", "trackingId": "L4_S21_3",
+          "stem": "Case 5: the weekly report takes 4 to 6 hours. Nothing is logged. Baseline?",
+          "options": [
+            { "id": "a", "label": "About 5 hours, marked as estimated", "correct": true,
+              "feedback": "An estimated metric beats no metric. You now have a starting number to check the target against." },
+            { "id": "b", "label": "Nothing until a time log exists", "correct": false,
+              "feedback": "Field 8 stays empty. In three months, nobody can show whether anything changed." },
+            { "id": "c", "label": "The target time, once it is set", "correct": false,
+              "feedback": "Field 8 now shows where the team hopes to land and nothing about where it stands now." },
+            { "id": "d", "label": "'Much faster reports' for now", "correct": false,
+              "feedback": "That is a feeling, not a number. Nobody could check it later." }
+          ] },
+        { "id": "i4", "icon": "speech", "trackingId": "L4_S21_4",
+          "stem": "Case 2: nobody knows what share of requests are simple. Where does this go?",
+          "options": [
+            { "id": "a", "label": "Field 6: reps double-check each request", "correct": false,
+              "feedback": "That records a control nobody reported. Lesson 5 would rely on a check that may not exist." },
+            { "id": "b", "label": "Field 3: add a sorting step", "correct": false,
+              "feedback": "That adds a step while mapping. The unknown share stays off the map." },
+            { "id": "c", "label": "Field 8: target fewer complex requests", "correct": false,
+              "feedback": "A target with no baseline, while the real problem, that nobody knows the share, stays hidden." },
+            { "id": "d", "label": "Field 7: 'unclear', to investigate first", "correct": true,
+              "feedback": "A diagnostic result, not a weakness. It shows what to check before Lesson 5 and what not to build on yet." }
+          ] },
+        { "id": "i5", "kind": "tiles", "select": 2, "trackingId": "L4_S21_5",
+          "instruction": "Find the two errors in this AI-drafted HR map.",
+          "tiles": [
+            { "n": 1, "text": "Repeat HR questions", "correct": false, "feedback": "This line matches the HR map. Compare each line with what the map really says." },
+            { "n": 2, "text": "WhatsApp, email, in person", "correct": false, "feedback": "This line matches the HR map. Compare each line with what the map really says." },
+            { "n": 3, "text": "Receive, check, answer or escalate", "correct": false, "feedback": "This line matches the HR map. Compare each line with what the map really says." },
+            { "n": 4, "text": "Staff to HR manager", "correct": false, "feedback": "This line matches the HR map. Compare each line with what the map really says." },
+            { "n": 5, "text": "Policies, HR manager, PUBLIC", "correct": true,
+              "feedback": "Tagged PUBLIC, internal HR policy could be pasted anywhere. The HR map tags it INTERNAL; employee details are CONFIDENTIAL." },
+            { "n": 6, "text": "HR manager reviews each answer", "correct": true,
+              "feedback": "No one reviews answers today. The AI invented a control that sounds right, and Lesson 5 would rely on it." },
+            { "n": 7, "text": "Errors uncounted; no handoff channel", "correct": false, "feedback": "This line matches the HR map. Compare each line with what the map really says." },
+            { "n": 8, "text": "~35% to 20% in 3 months", "correct": false, "feedback": "This line matches the HR map. Compare each line with what the map really says." }
+          ] }
+      ],
+      "resultCard": "{x} of {n} on first try. Pass mark: {pass} of {n}.",
+      "passItems": 4,
+      "advance": "after-all-items",
+      "tracking": [
+        { "id": "L4_S21_1", "type": "choice", "correctResponse": "c", "scored": true, "bloom": "Analyze", "result": "graded" },
+        { "id": "L4_S21_2", "type": "choice", "correctResponse": "b", "scored": true, "bloom": "Apply", "result": "graded" },
+        { "id": "L4_S21_3", "type": "choice", "correctResponse": "a", "scored": true, "bloom": "Apply", "result": "graded" },
+        { "id": "L4_S21_4", "type": "choice", "correctResponse": "d", "scored": true, "bloom": "Analyze", "result": "graded" },
+        { "id": "L4_S21_5", "type": "choice", "multiple": true, "correctResponse": "5,6", "scored": true, "bloom": "Evaluate", "result": "graded" }
+      ],
+      "sources": ["s16", "s18", "s20", "s23", "s24", "s27", "s32", "s33", "s37", "s38", "s44", "L1 booklet Cases 2, 5, 6", "HW2 (fluent but wrong AI output)"]
+    },
+
+    {
+      "id": "S22",
+      "chapter": "ch6",
+      "template": "decision",
+      "variant": "close",
+      "minutes": 3,
+      "instruction": "Pick the takeaway your map proves most. Then save your record.",
+      "hint": "Without your full map, Lesson 5 cannot run for you.",
+      "layout": "editorial",
+      "image": { "src": "assets/img/s22.jpg", "alt": "A person closing a laptop at the end of the work, notes and a process sketch on the desk", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "50% 50%" },
+      "options": [
+        { "id": "a", "label": "Mapping is a condition, not bureaucracy", "icon": "key",
+          "feedback": "Process mapping is a condition for change that lasts. Your map is now the raw material for Lesson 5." },
+        { "id": "b", "label": "'Unclear' is a legitimate answer", "icon": "help-circle",
+          "feedback": "Not a failure of the mapper, a diagnostic result. Your Field 7 lists what to investigate first." },
+        { "id": "c", "label": "Not every bottleneck needs acceleration", "icon": "scissors",
+          "feedback": "Sometimes the right fix is to remove the step, not speed it up. Ask why it formed first." }
+      ],
+      "step2": {
+        "bridge": { "icon": "map", "text": "Lesson 5 marks on this exact map where AI enters, what it consumes, and where a person stays." },
+        "homework": { "icon": "calendar", "text": "Homework: complete your map and mark three AI points, using the three good-fit kinds.", "href": "@links.homework", "newTab": true },
+        "feedback": {
+          "download": "Your record holds your case title, metric, self-check answers and score. Your map stays in the workbook PDF.",
+          "finishConfirm": "Finish without downloading? Your workbook PDF is not affected. Press Finish again to confirm."
+        }
+      },
+      "advance": "after-finish",
+      "endOfSlice": true,
+      "tracking": [
+        { "id": "L4_S22_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" }
+      ],
+      "suspend": ["homework", "download"],
+      "sources": ["s45", "s41", "s46", "s42", "s32"]
     }
   ]
 }

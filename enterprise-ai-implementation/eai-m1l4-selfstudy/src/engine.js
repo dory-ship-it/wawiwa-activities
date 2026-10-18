@@ -8,13 +8,14 @@ import { h, fmt } from './util.js';
 import { createZones } from './zones.js';
 import { createMenu, openDialog } from './menu.js';
 import { initTooltips, applyTerms } from './tooltip.js';
-import { loadState, saveState, clearState, emptyState } from './state.js';
-import { placeholder } from './templates/placeholder.js';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js';
 import { decision } from './templates/decision.js';
 import { input } from './templates/input.js';
 import { sort } from './templates/sort.js';
 import { explorer } from './templates/explorer.js';
 import { video } from './templates/video.js';
+import { handoff } from './templates/handoff.js';
+import { check } from './templates/check.js';
 import { createTracking } from './tracking/index.js';
 
 const STAGE_W = 1280, STAGE_H = 720;
@@ -22,8 +23,7 @@ const NARROW_BELOW = 900; // window narrower than this: show the "best on a comp
 const NOTE_H = 40;
 const MAX_TEXT = 250;     // fill-in responses are trimmed and capped (SCORM 1.2 safe)
 
-// Handoff arrives in P3; until then S19 (and the S20 self-check) mount the placeholder.
-const TEMPLATES = { decision, input, sort, explorer, video };
+const TEMPLATES = { decision, input, sort, explorer, video, handoff, check };
 
 export async function boot(root) {
   const res = await fetch(new URL('../content/l4-slice.json', import.meta.url));
@@ -57,7 +57,8 @@ class Lesson {
     this.onNext = null;      // what the unlocked Next does on this screen (null = finish)
     this.pauseShown = false; // the chapter-end pause marker was shown on this screen
     this.shownAt = 0;
-    this.tracking = createTracking({ debug: new URLSearchParams(location.search).get('debug') === '1' });
+    const q = new URLSearchParams(location.search);
+    this.tracking = createTracking({ debug: q.get('debug') === '1', force: q.get('tracking') });
 
     this.note = h('p', { class: 'w-small-note', hidden: true }, this.ui.smallScreenNote);
     this.stage = h('div', { class: 'w-stage' });
@@ -77,9 +78,18 @@ class Lesson {
       onStartOver: () => this.startOver(),
     });
 
-    const { state, ok } = loadState();
-    this.state = state;
-    this.zones.setSaved(ok);
+    // SCORM 1.2: the LMS holds the state (suspend_data, lesson_location); local mode: localStorage
+    const lms = this.tracking.init();
+    this.lms = !!lms.ok;
+    if (this.lms) {
+      this.state = lms.suspend ? decode(lms.suspend) : emptyState();
+      if (!this.state.s && lms.location && this.screens[lms.location]) this.state.s = lms.location;
+      this.zones.setSaved(true);
+    } else {
+      const { state, ok } = loadState();
+      this.state = state;
+      this.zones.setSaved(ok);
+    }
 
     this.layout();
     new ResizeObserver(() => this.layout()).observe(root);
@@ -105,7 +115,7 @@ class Lesson {
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
     const jump = q.get('screen');
     if (jump && this.screens[jump] && this.slice.includes(jump)) { this.go(jump); return; }
-    // resume prompt hook: real state and suspend_data arrive in P4
+    // resume: the saved place (localStorage, or suspend_data / lesson_location from the LMS)
     const s = this.state.s;
     if (s && this.slice.includes(s) && (this.state.d.length || s !== this.slice[0])) {
       this.go(s);
@@ -136,7 +146,8 @@ class Lesson {
     this.zones.instruction.textContent = screen.instruction;
     this.zones.setNext(true, this.lockedWhy(screen));
     this.zones.setPrev(this.slice.indexOf(id) > 0);
-    const tpl = TEMPLATES[screen.template] || placeholder;
+    const tpl = TEMPLATES[screen.template];
+    if (!tpl) throw new Error('no template ' + screen.template + ' for ' + id);
     const done = this.doneSet();
     this.shownAt = performance.now();
     this.mounted = tpl.mount({
@@ -151,8 +162,14 @@ class Lesson {
       answer: (a) => this.answer(id, a),
       firstAnswer: (trackingId) => this.firstAnswer(trackingId),
       store: { get: (key) => this.state.f[key] ?? '', set: (key, value) => { this.state.f[key] = value; } },
+      // small per-screen flags kept in suspend data (handoff opened / back, checkbox, chosen chip, ...)
+      flags: { get: (key) => this.state.g[id]?.[key], set: (key, value) => { (this.state.g[id] ||= {})[key] = value; this.persist(); } },
+      flagsOf: (screenId) => this.state.g[screenId] || {},
       chapter: this.chapters.find((c) => c.id === screen.chapter),
       setRoute: (route) => this.setRoute(id, route),
+      score: () => this.score(),
+      finishLesson: () => this.finishLesson(),
+      finished: () => !!this.state.fin,
     });
     applyTerms(this.zones.main, screen.terms, this.content.tooltips);
     this.renderRail();
@@ -168,6 +185,26 @@ class Lesson {
   nextAction() {
     if (this.onNext) this.onNext();
     else this.finish(this.current);
+  }
+
+  /* ---- score (S21) and the end of the lesson ---- */
+  // First attempts of the scored interactions only (lesson.completion.scoredScreens): x right of n,
+  // raw 0 to 100.
+  score() {
+    const ids = this.content.lesson.completion.scoredScreens.flatMap((sid) => (this.screens[sid]?.tracking || []).filter((t) => t.scored).map((t) => t.id));
+    const x = ids.filter((tid) => this.firstAnswer(tid)?.result === 'correct').length;
+    return { x, n: ids.length, raw: ids.length ? Math.round((100 * x) / ids.length) : null };
+  }
+
+  // Finish (S22): passed / failed against the pass mark (completed when nothing is scored), once.
+  finishLesson() {
+    const c = this.content.lesson.completion;
+    const sc = this.score();
+    const status = sc.n ? (sc.raw >= c.passMark ? 'passed' : 'failed') : c.statusWhenNoScoredItems;
+    this.state.fin = status;
+    this.tracking.emit({ kind: 'finish', status, score: sc.raw, passMark: c.passMark });
+    this.persist();
+    return { status, ...sc };
   }
 
   // After the last screen of a chapter the first Next shows the chapter's pause marker in the band
@@ -191,7 +228,8 @@ class Lesson {
     const latencyMs = Math.round(performance.now() - this.shownAt);
     if (!(trackingId in this.state.a)) {
       this.state.a[trackingId] = (type === 'fill-in' ? '' : response) + '|' + result.charAt(0);
-      this.tracking.emit({ kind: 'answer', trackingId, type, response, result, latencyMs });
+      // the interaction's content metadata goes along for the SCORM adapter (correct response, weighting)
+      this.tracking.emit({ kind: 'answer', trackingId, type, response, result, latencyMs, correctResponse: meta?.correctResponse ?? null, scored: !!meta?.scored });
       this.persist();
       return 'answer';
     }
@@ -261,8 +299,11 @@ class Lesson {
     this.go(this.slice[0]);
   }
 
+  // every change: to the LMS (suspend_data, lesson_location) in SCORM mode, else to localStorage;
+  // the Saved indicator shows whether the last write was accepted
   persist() {
-    this.zones.setSaved(saveState(this.state));
+    const sent = this.tracking.persist(this.state);
+    this.zones.setSaved(this.lms ? sent : saveState(this.state));
   }
 
   /* ---- progress model (rail and menu) ---- */

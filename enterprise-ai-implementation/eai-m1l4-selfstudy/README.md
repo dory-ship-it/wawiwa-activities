@@ -16,15 +16,15 @@ The first Storyline-style self-study lesson built in code: a fixed 1280x720 stag
 | `src/menu.js` | chapters menu (380 px left panel: progress, chapter list, Resources, Help, Start over) and the in-page dialog |
 | `src/tooltip.js`, `src/icons.js` | glossary terms and tips; Lucide stroke icons (ISC), chapter status marks |
 | `src/templates/stage.js` | layout parts: image slot, rule label, privacy line, arrow-key option groups |
-| `src/templates/decision.js` | Decision template: `single` (S01, editorial), `challenge` (FT1, memo), `multi` (S03, work); `selfcheck` is a P3 stub |
-| `src/templates/input.js` | Input template (S02, form): fields, live counters, privacy line, Save |
-| `src/tracking/index.js` | tracking event bus (answer, retry, route); P4 plugs the SCORM adapter in |
-| `src/state.js` | local stub: place, done screens, first answers, route, stored text, retries (P4 adds the SCORM codec) |
-| `src/templates/placeholder.js` | dev-only: placeholder for V1, S19, S20 until P2/P3 |
+| `src/templates/decision.js` | Decision template: `single`, `challenge`, `multi`, `safety` (S18), `selfcheck` (S20), `close` (S22, lesson record download, Finish) |
+| `src/templates/input.js`, `sort.js`, `explorer.js`, `video.js` | Input (S02), Sort (S04, S09, S16, S17, S18A), Explorer (S05 and others), Video player with stops (V1, V2) |
+| `src/templates/handoff.js`, `check.js` | S19 handoff to the class workbook (new tab) and return metric; S21 knowledge check (first attempt scored) |
+| `src/tracking/index.js` | tracking event bus (answer, retry, route, finish) and adapter choice: `scorm12.js` when an API is found on the parent or opener chain, else `local.js` |
+| `src/state.js` | state and its codec: localStorage locally, `cmi.suspend_data` (under 4096) in the LMS |
 | `assets/logo/wawiwa-logo.png` | decoded unchanged from `../_wawiwa-logo.b64` |
 | `assets/img/` | image slots: `prompts/` (one generator prompt per slot), `temp/` (board reference images until the real ones exist), `refs/` (style reference) |
-| `tools/` | `serve.mjs` (local server), `check.mjs` (build check), `test-fit.mjs` (fit, band, clipping, contrast, targets per screen state), `walk.mjs` (keyboard-only walk: rail, menu, every slice path), `lib.mjs` (shared) |
-| `review/p0/`, `review/p1/`, `review/p1.5/` | screenshots and phase reports |
+| `tools/` | `serve.mjs` (local server), `check.mjs` (build check), `test-fit.mjs` (fit, band, clipping, contrast, targets per screen state), `walk.mjs` (keyboard-only walk: rail, menu, every slice path), `lib.mjs` (shared), `scorm-mock.js` / `scorm-mock.html` (mock SCORM 1.2 API, dev only), `package-scorm.mjs` (the zip) |
+| `review/p0/` to `review/r3/` | screenshots and phase reports |
 
 ## Preview
 
@@ -37,6 +37,8 @@ Then open `http://127.0.0.1:8125/`. URL options: `?screen=S03` (dev jump), `?res
 
 Checks: `npm run check` (content, dashes, icons, Next size and red on Next only, contrast table, hex allowlist, image slots with a WARNING for temp images, offline fonts, no text in `src/`, word counts, tracking metadata), `npm run test:fit` (three window sizes, the shell, every screen and band state at 1280x720 and 1024x576: band overlap and width, clipping, rendered contrast, 14 px text, 44 px targets) and `npm run walk` (keyboard-only walk of the rail, the menu, S01, S02, FT1 and S03 on every path; add `-- --shots` for `review/p1.5/` and the artboard comparisons). Chrome is found on its own, or set `CHROME_PATH`.
 
+SCORM 1.2: `npm run test:scorm` walks the lesson against the mock API (interactions, status, score, session time, suspend size, resume). `npm run package` writes `dist/eai-m1l4-selfstudy-scorm12.zip` (git-ignored) with `imsmanifest.xml` and only the files the page loads. For a manual LMS-like run: `npm run serve`, then `/tools/scorm-mock.html`.
+
 ## Phase status
 
 | Phase | Status |
@@ -44,7 +46,7 @@ Checks: `npm run check` (content, dashes, icons, Next size and red on Next only,
 | P0 scaffold, tokens, frame, menu, feedback row, progress bar | done (15 Oct 2026) |
 | P1 templates and slice screens (S01, S02, FT1, S03), event bus, P0 follow-ups | done (15 Oct 2026) |
 | P1.5 approved look (rail, footer, feedback band, S01 S02 FT1 S03), image slots | done (18 Oct 2026) |
-| P2 V1 video production | next |
-| P3 video player, handoff, return checkpoint | not started |
-| P4 SCORM 1.2 adapter and packaging | not started |
+| P2 V1 video production | in progress (separate session; the lesson plays placeholders from `assets/video/temp/`) |
+| R1 to R3 Chapters 2 to 6, video player, handoff, knowledge check, close | done (18 Oct 2026) |
+| P4 SCORM 1.2 adapter and packaging | done (18 Oct 2026) |
 | P5 tests and review page | not started |

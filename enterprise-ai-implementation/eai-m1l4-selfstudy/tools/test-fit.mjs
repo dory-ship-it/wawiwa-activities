@@ -164,7 +164,39 @@ const STATES = [
     for (const col of ['3', '1', '5', '4', '2']) { await click(p, '[data-action="card"]'); await click(p, `.w-sort-target[data-column="${col}"]`); }
     await click(p, '.w-next');
   }],
+  // R3: Chapters 5 and 6
+  ['S18A', 'wrong', async (p) => { await click(p, '.w-tray-card[data-card="4"]'); await click(p, '.w-sort-target[data-column="b"]'); }],
+  ['S18A', 'done', async (p) => { for (const [c, col] of [['1', 'a'], ['2', 'b'], ['3', 'c'], ['4', 'd']]) { await click(p, `.w-tray-card[data-card="${c}"]`); await click(p, `.w-sort-target[data-column="${col}"]`); } }],
+  ['S18', 'wrong', async (p) => click(p, '.w-opt[data-id="c"]')],
+  ['S18', 'step 2 unticked', async (p) => { await click(p, '.w-opt[data-id="b"]'); await p.type('.w-input', 'Sales call summaries'); await click(p, '[data-action="save"]'); }],
+  ['S18', 'saved', async (p) => { await click(p, '.w-opt[data-id="b"]'); await p.type('.w-input', 'Sales call summaries'); await click(p, '.w-checkbox'); await click(p, '[data-action="save"]'); }],
+  ['S19', 'brief', async () => {}],
+  ['S19', 'opened', async (p) => { await noNewTab(p, '[data-action="open"]'); await click(p, '[data-action="open"]'); }],
+  ['S19', 'return, saved', async (p) => {
+    await noNewTab(p, '[data-action="open"]'); await click(p, '[data-action="open"]'); await click(p, '[data-action="back"]');
+    await p.type('.w-input', 'Share of HR time on repeat questions: about 35% now, 20% within three months, checked against a weekly sample of requests.');
+    await click(p, '[data-action="save"]');
+  }],
+  ['S20', 'row answered', async (p) => click(p, '.w-check-row[data-row="q1"] [data-choice="notYet"]')],
+  ['S20', 'step 2 chip', async (p) => {
+    for (const q of ['q1', 'q2', 'q3']) await click(p, `.w-check-row[data-row="${q}"] [data-choice="yes"]`);
+    await click(p, '.w-next'); await click(p, '.w-chip[data-chip="automating"]');
+  }],
+  ['S21', 'item 1 wrong', async (p) => click(p, '.w-kc-opt[data-id="b"]')],
+  ['S21', 'item 5 one of two', async (p) => {
+    for (const k of ['c', 'b', 'a', 'd']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="1"]'); await click(p, '[data-action="check"]');
+  }],
+  ['S21', 'result', async (p) => {
+    for (const k of ['c', 'b', 'a', 'd']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="6"]'); await click(p, '[data-action="check"]');
+  }],
+  ['S22', 'takeaway', async (p) => click(p, '.w-takeaway[data-id="b"]')],
+  ['S22', 'finish confirm', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); }],
+  ['S22', 'finished', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); await click(p, '[data-action="finish"]'); }],
 ];
+// links that open a new tab: keep the test inside the module (the tab itself is checked in walk.mjs)
+async function noNewTab(p, sel) { await p.evaluate((s) => document.querySelector(s).addEventListener('click', (e) => e.preventDefault(), { capture: true }), sel); }
 // the video player: seek to the next stop (End is clamped there) and wait for the stop view
 async function toStop(p) {
   await p.waitForFunction(() => document.querySelector('.w-video').readyState >= 1);

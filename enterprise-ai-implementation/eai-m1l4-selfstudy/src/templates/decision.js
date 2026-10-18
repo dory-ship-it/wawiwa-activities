@@ -19,20 +19,24 @@
 //                     with three slots (Baseline, Target, Date) that light up for the chosen option.
 //   bounds     (S13)  layout "wide": a strip of the process steps, three Start / End cards in a row.
 //   S14 and S15 use single in the editorial layout with a statement line instead of the quotes.
-//   selfcheck  (S20)  P3 STUB: mounts the dev placeholder so the slice stays walkable.
+//   safety     (S18)  editorial: step 1 three option rows; once right, step 2 in the same column: the case
+//                     title (pre-filled from S02, 250 max), the privacy line, a checkbox and Save.
+//   selfcheck  (S20)  layout "wide", two steps, all neutral: three question rows with Yes / Not yet
+//                     toggles (Next opens step 2), then five chips, any one; "Reopen workbook" link.
+//   close      (S22)  editorial, two steps: three takeaway cards (any one), then the bridge and homework
+//                     lines with Open homework (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the band.
-import { h, fmt } from '../util.js';
+import { h, fmt, resolveLink } from '../util.js';
 import { icon } from '../icons.js';
 import { attachTip } from '../tooltip.js';
 import { letter } from '../tracking/index.js';
-import { layout, picture, ruleLabel, arrowNav, progressDots } from './stage.js';
-import { placeholder } from './placeholder.js';
+import { layout, picture, ruleLabel, arrowNav, progressDots, privacyLine } from './stage.js';
+import { field } from './input.js';
 
 export const decision = {
   mount(ctx) {
     const variant = ctx.screen.variant;
-    if (variant === 'selfcheck') return placeholder.mount(ctx); // P3 STUB
-    const run = { single, challenge, multi, pair, rounds, fill, metric, bounds }[variant];
+    const run = { single, challenge, multi, pair, rounds, fill, metric, bounds, safety, selfcheck, close }[variant];
     if (!run) throw new Error('decision: unknown variant ' + variant);
     return run(ctx) || { unmount() {} };
   },
@@ -471,4 +475,202 @@ function bounds(ctx) {
     h('div', { class: 'w-wide' }, zones.instruction, h('div', { class: 'w-bounds', dataset: { interaction: '' } }, strip, group), zones.band));
   zones.setFeedback({ state: 'hint', text: screen.hint });
   oneQuestion(ctx, btns);
+}
+
+// the editorial frame for the R3 screens: header logo, image column, the right column's parts
+function editorial(ctx, ...parts) {
+  layout(ctx, 'editorial',
+    h('header', { class: 'w-header' }, ctx.zones.logo),
+    h('div', { class: 'w-editorial' }, picture(ctx.screen.image, 'w-photo-column'), h('section', { class: 'w-col' }, ...parts)));
+}
+const newTabLink = (ctx, href, label, action, cls = 'w-btn w-btn-ghost') => h('a', { class: cls, href, target: '_blank', rel: 'noopener noreferrer', dataset: { action } },
+  h('span', {}, label), icon('external-link', { size: 16 }), h('span', { class: 'w-sr-only' }, ' (' + ctx.ui.newTabNote + ')'));
+
+/* ---------- safety (S18), editorial, two steps ---------- */
+function safety(ctx) {
+  const { screen, ui, zones } = ctx;
+  const s2 = screen.step2;
+  const { group, btns } = options(ctx, 'row');
+  const privacy = privacyLine(s2.privacy);
+  const announcer = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
+  const ctl = field(s2.field, ctx, privacy.id, announcer);
+  const box = h('input', { class: 'w-checkbox', type: 'checkbox', id: 'w-s18-box' });
+  const boxLabel = h('label', { class: 'w-checkline', for: box.id }, box, icon('shield', { size: 20 }), h('span', {}, s2.checkbox));
+  const save = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'save' } }, ui.buttons.save);
+  const step2 = h('div', { class: 'w-form-task w-safety-form', dataset: { interaction: '' }, hidden: true }, ctl.el, announcer, privacy.el, h('div', { class: 'w-actionbar' }, boxLabel, save));
+  editorial(ctx,
+    h('p', { class: 'w-statement w-statement-icon' }, icon(screen.stage.top.icon || 'lock', { size: 26 }), h('span', {}, screen.stage.top.text)),
+    zones.instruction, group, step2, zones.band);
+  zones.setFeedback({ state: 'hint', text: screen.hint });
+
+  const toStep2 = (focus) => { group.hidden = true; step2.hidden = false; if (focus) ctl.input.focus(); };
+  const saved = (focus) => { save.className = 'w-btn w-btn-ghost'; zones.setFeedback({ state: 'neutral', text: s2.feedback.saved }); ctx.unlockNext({ focus }); };
+  const q = rowQuestion(ctx, btns, screen.options, {
+    trackingId: () => screen.tracking[0].id,
+    isRight: (o) => o.correct,
+    feedbackOf: (o) => o.feedback,
+    onRight: (i, focus) => { zones.setFeedback({ state: 'correct', text: screen.options[i].feedback }); toStep2(focus); },
+  });
+  save.addEventListener('click', () => {
+    const v = ctl.input.value.trim();
+    if (!box.checked) { zones.setFeedback({ state: 'notice', text: s2.feedback.unticked }); return; }
+    if (!v) { zones.setFeedback({ state: 'notice', text: s2.feedback.empty }); return; }
+    ctl.input.value = v;
+    ctl.input.dispatchEvent(new Event('input'));
+    ctx.store.set(s2.field.store, v); // the one stored case title (S02 wrote it first)
+    ctx.flags.set('box', 1);
+    ctx.answer({ trackingId: s2.field.trackingId, response: v, result: 'neutral' });
+    ctx.complete();
+    saved(true);
+  });
+  if (ctx.revisit) { q.solve(screen.options.findIndex((o) => o.correct), false); box.checked = !!ctx.flags.get('box'); saved(false); }
+}
+
+/* ---------- selfcheck (S20), wide, two steps, neutral ---------- */
+function selfcheck(ctx) {
+  const { screen, ui, zones, content } = ctx;
+  const [s1, s2] = screen.steps;
+  const ans = { ...(ctx.flags.get('ans') || {}) };
+  const keep = () => ctx.flags.set('ans', { ...ans });
+  const reopen = newTabLink(ctx, resolveLink(content, '@links.workbook'), ui.buttons[s1.link], 'reopen', 'w-link w-reopen');
+
+  const rows = s1.rows.map((r) => {
+    const qid = 'w-sc-' + r.id;
+    const toggles = s1.choices.map((c) => h('button', { class: 'w-toggle', type: 'button', 'aria-pressed': 'false', dataset: { choice: c } }, ui.buttons[c]));
+    const el = h('div', { class: 'w-check-row', dataset: { row: r.id } }, icon(r.icon, { size: 24 }), h('p', { class: 'w-check-q', id: qid }, r.text),
+      h('div', { class: 'w-toggles', role: 'group', 'aria-labelledby': qid }, toggles));
+    return { r, el, toggles };
+  });
+  const step1 = h('div', { class: 'w-selfcheck', dataset: { interaction: '' } }, rows.map((x) => x.el));
+  const chips = s2.chips.map((c, i) => {
+    const btn = h('button', { class: 'w-chip', type: 'button', 'aria-pressed': 'false', dataset: { chip: c.id, letter: letter(i) } }, labelWithTerm(c, content.tooltips));
+    if (c.term && content.tooltips[c.term]) attachTip(btn, content.tooltips[c.term]);
+    return { c, btn };
+  });
+  const chipRow = h('div', { class: 'w-chips', role: 'group', 'aria-labelledby': 'w-instruction' }, chips.map((x) => x.btn));
+  arrowNav(chipRow, { selector: '.w-chip' });
+  const step2 = h('div', { class: 'w-selfcheck2', dataset: { interaction: '' }, hidden: true }, chipRow,
+    h('p', { class: 'w-strip' }, icon('check-circle', { size: 20 }), h('span', {}, s2.strip)));
+  layout(ctx, 'wide', zones.logo, h('div', { class: 'w-wide' }, zones.instruction, step1, step2, zones.band, h('div', { class: 'w-link-row' }, reopen)));
+  zones.setFeedback({ state: 'hint', text: screen.hint });
+
+  const press = (list, on) => list.forEach((b) => b.setAttribute('aria-pressed', String(b === on)));
+  function toStep2(focus) {
+    step1.hidden = true;
+    step2.hidden = false;
+    ctx.lockNext(ui.footer.locked.chips);
+    zones.setFeedback({ state: 'hint', text: screen.hint });
+    if (focus) chips[0].btn.focus();
+  }
+  const allAnswered = () => s1.rows.every((r) => ans[r.id]);
+  rows.forEach((x) => x.toggles.forEach((t, i) => t.addEventListener('click', () => {
+    const c = s1.choices[i];
+    press(x.toggles, t);
+    zones.setFeedback({ state: 'neutral', text: x.r.feedback[c] });
+    ctx.answer({ trackingId: x.r.trackingId, response: letter(i), result: 'neutral' });
+    const was = allAnswered();
+    ans[x.r.id] = c;
+    keep();
+    if (!was && allAnswered()) ctx.unlockNext({ focus: true, onNext: () => toStep2(true) });
+  })));
+  chips.forEach((x, i) => x.btn.addEventListener('click', () => {
+    press(chips.map((y) => y.btn), x.btn);
+    zones.setFeedback({ state: 'neutral', text: x.c.feedback });
+    ctx.answer({ trackingId: s2.trackingId, response: letter(i), result: 'neutral' });
+    const first = !ans.chip;
+    ans.chip = x.c.id;
+    keep();
+    if (first) { ctx.complete(); ctx.unlockNext({ focus: true }); }
+  }));
+
+  // coming back (revisit or resume): the earlier answers are shown again
+  rows.forEach((x) => { const k = s1.choices.indexOf(ans[x.r.id]); if (k >= 0) press(x.toggles, x.toggles[k]); });
+  if (ans.chip) press(chips.map((y) => y.btn), chips.find((y) => y.c.id === ans.chip)?.btn);
+  if (ctx.revisit || ans.chip) { toStep2(false); const c = chips.find((y) => y.c.id === ans.chip); if (c) zones.setFeedback({ state: 'neutral', text: c.c.feedback }); ctx.unlockNext({ focus: false }); }
+  else if (allAnswered()) ctx.unlockNext({ focus: false, onNext: () => toStep2(true) });
+}
+
+/* ---------- close (S22), editorial, two steps ---------- */
+function close(ctx) {
+  const { screen, ui, zones, content } = ctx;
+  const s2 = screen.step2;
+  const cards = screen.options.map((o, i) => h('button', { class: 'w-opt w-takeaway', type: 'button', 'aria-pressed': 'false', dataset: { id: o.id, letter: letter(i) } },
+    icon(o.icon, { size: 28, className: 'w-takeaway-icon' }), h('span', { class: 'w-opt-label' }, o.label)));
+  const step1 = h('div', { class: 'w-takeaways', role: 'group', 'aria-labelledby': 'w-instruction', dataset: { interaction: '' } }, cards);
+  arrowNav(step1);
+  const homework = newTabLink(ctx, resolveLink(content, s2.homework.href), ui.buttons.openHomework, 'homework');
+  const download = h('button', { class: 'w-btn w-btn-ghost', type: 'button', dataset: { action: 'download' } }, icon('document', { size: 18 }), h('span', {}, ui.buttons.downloadRecord));
+  const finish = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'finish' } }, ui.buttons.finishLesson);
+  const line = (part) => h('p', { class: 'w-close-line' }, icon(part.icon, { size: 22 }), h('span', {}, part.text));
+  const step2 = h('div', { class: 'w-close2', dataset: { interaction: '' }, hidden: true }, line(s2.bridge), line(s2.homework),
+    h('div', { class: 'w-close-actions' }, homework, download, finish));
+  editorial(ctx, zones.instruction, step1, step2, zones.band);
+  zones.setFeedback({ state: 'hint', text: screen.hint });
+
+  let confirm = false;
+  function toStep2(focus) {
+    step1.hidden = true;
+    step2.hidden = false;
+    ctx.lockNext(ui.footer.locked.last);
+    zones.setFeedback({ state: 'hint', text: screen.hint });
+    if (focus) homework.focus();
+  }
+  function done(focus) {
+    finish.setAttribute('aria-disabled', 'true');
+    zones.setFeedback({ state: 'neutral', text: ui.finished });
+    ctx.lockNext(ui.footer.locked.last);
+    if (focus) finish.focus();
+  }
+  cards.forEach((b, i) => b.addEventListener('click', () => {
+    cards.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    zones.setFeedback({ state: 'neutral', text: screen.options[i].feedback });
+    ctx.answer({ trackingId: screen.tracking[0].id, response: letter(i), result: 'neutral' });
+    ctx.flags.set('take', screen.options[i].id);
+    ctx.unlockNext({ focus: true, onNext: () => toStep2(true) });
+  }));
+  homework.addEventListener('click', () => ctx.flags.set('hw', 1));
+  download.addEventListener('click', () => {
+    const a = h('a', { href: URL.createObjectURL(new Blob([lessonRecord(ctx)], { type: 'text/html' })), download: ui.record.fileName, hidden: true });
+    document.body.append(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    ctx.flags.set('dl', 1);
+    zones.setFeedback({ state: 'neutral', text: s2.feedback.download });
+  });
+  finish.addEventListener('click', () => {
+    if (ctx.finished()) return;
+    if (!ctx.flags.get('dl') && !confirm) { confirm = true; zones.setFeedback({ state: 'notice', text: s2.feedback.finishConfirm }); return; }
+    ctx.finishLesson();
+    ctx.complete();
+    done(true);
+  });
+
+  const took = ctx.flags.get('take');
+  if (took) cards.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.id === took)));
+  if (ctx.finished()) { toStep2(false); done(false); }
+  else if (took) ctx.unlockNext({ focus: false, onNext: () => toStep2(true) });
+}
+
+// The downloadable lesson record (S22): a small self-contained HTML page with the case title, the
+// metric, the self-check answers and the knowledge check score. Every label comes from ui.record.
+function lessonRecord(ctx) {
+  const { ui, content } = ctx;
+  const r = ui.record;
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const s20 = content.screens.find((s) => s.id === 'S20');
+  const ans = ctx.flagsOf('S20').ans || {};
+  const sc = ctx.score();
+  const val = (v) => esc(v || r.empty);
+  const rows = s20.steps[0].rows.map((q) => `<tr><td>${esc(q.text)}</td><td>${val(ans[q.id] && ui.buttons[ans[q.id]])}</td></tr>`).join('');
+  const chip = s20.steps[1].chips.find((c) => c.id === ans.chip);
+  const score = sc.raw === null ? r.empty : fmt(r.scoreLine, { x: sc.x, n: sc.n, p: sc.raw, pass: content.lesson.completion.passMark });
+  return `<!DOCTYPE html><html lang="${esc(content.lesson.lang)}"><head><meta charset="UTF-8"><title>${esc(r.heading)}: ${esc(content.lesson.title)}</title>`
+    + '<style>body{font:16px/1.5 Assistant,Arial,sans-serif;color:#000000;max-width:720px;margin:40px auto;padding:0 20px}h1,h2{color:#255777}'
+    + 'td{padding:6px 12px 6px 0;vertical-align:top;border-bottom:1px solid #D8D8D8}table{border-collapse:collapse;width:100%}</style></head><body>'
+    + `<h1>${esc(r.heading)}</h1><p>${esc(content.lesson.program)} · ${esc(content.lesson.module)} · ${esc(content.lesson.title)}</p>`
+    + `<p>${esc(r.date)}: ${esc(new Date().toISOString().slice(0, 10))}</p>`
+    + `<h2>${esc(r.caseTitle)}</h2><p>${val(ctx.store.get('L4_CASE_TITLE'))}</p>`
+    + `<h2>${esc(r.metric)}</h2><p>${val(ctx.store.get('L4_METRIC'))}</p>`
+    + `<h2>${esc(r.selfCheck)}</h2><table>${rows}<tr><td>${esc(r.risk)}</td><td>${val(chip && chip.label)}</td></tr></table>`
+    + `<h2>${esc(r.score)}</h2><p>${esc(score)}</p></body></html>`;
 }

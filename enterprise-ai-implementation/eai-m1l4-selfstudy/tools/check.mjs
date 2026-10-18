@@ -160,6 +160,11 @@ const views = content.screens.flatMap((s) => {
   if (s.variant === 'fill') return [[s.id, [s.situation.text, ...s.fieldRows.flatMap((f) => [f.label, f.value]), ...s.options.map((o) => o.label)]]];
   if (s.variant === 'metric') return [[s.id, [s.field.label, ...s.options.map((o) => o.label), s.slotsTitle, ...s.slots.map((x) => x.label)]]];
   if (s.variant === 'bounds') return [[s.id, [s.strip, ...s.options.flatMap((o) => [s.startLabel, o.start, s.endLabel, o.end])]]];
+  // R3 templates
+  if (s.variant === 'safety') return [[`${s.id} step1`, [s.stage.top.text, ...s.options.map((o) => o.label)]],
+    [`${s.id} step2`, [s.stage.top.text, s.step2.field.label, s.step2.privacy.text, s.step2.checkbox]]];
+  if (s.template === 'check') return s.items.map((it) => [`${s.id} ${it.id}`, it.kind === 'tiles' ? it.tiles.flatMap((t) => [String(t.n), t.text]) : [it.stem, ...it.options.map((o) => o.label)]]);
+  if (s.variant === 'close') return [[`${s.id} step1`, s.options.map((o) => o.label)], [`${s.id} step2`, [s.step2.bridge.text, s.step2.homework.text]]];
   if (s.variant === 'pick') return s.tiles.map((t) => [`${s.id} tile ${t.n} open`, [...s.tiles.flatMap((x) => [String(x.n), x.title]), s.question, t.text]]);
   if (s.variant === 'diagram') return [[s.id, [s.diagram.tag, ...s.diagram.lanes.map((l) => l.label), ...s.diagram.nodes.map((n) => n.label), ...s.legend.map((g) => g.label)]]];
   if (s.variant === 'tiles') {
@@ -194,6 +199,8 @@ const feedbackLines = [
     ...(s.tiles || []).map((t) => [`${s.id} tile ${t.n}`, t.feedback]),
     ...(s.situations || []).flatMap((x) => x.options.map((o) => [`${s.id} ${x.id} option ${o.id}`, o.feedback])),
     ...(s.rounds || []).flatMap((r) => Object.entries(r.feedback).map(([k, v]) => [`${s.id} ${r.id} option ${k}`, v])),
+    ...Object.entries(s.step2?.feedback || {}).map(([k, v]) => [`${s.id} step2.${k}`, v]),
+    ...(s.items || []).flatMap((it) => [...(it.options || []).map((o) => [`${s.id} ${it.id} option ${o.id}`, o.feedback]), ...(it.tiles || []).map((t) => [`${s.id} ${it.id} tile ${t.n}`, t.feedback])]),
   ]),
 ].filter(([, v]) => v);
 const longFb = feedbackLines.filter(([, v]) => words(v) > MAX_FEEDBACK_WORDS);
@@ -225,13 +232,18 @@ for (const [s, t, stop] of interactions) {
   }
 }
 // The key the content itself defines for a graded interaction, in the response encoding:
-// option letters in on-screen order; sort = "card.column" pairs; diagram = hotspot ids; tiles = numbers.
+// option letters in on-screen order; sort = "card.column" pairs; diagram = hotspot letters; tiles = numbers.
 function keyOf(s, t, stop) {
   const letters = (opts) => opts.map((o, i) => (o.correct ? String.fromCharCode(97 + i) : null)).filter(Boolean).join(',');
   if (s.template === 'sort') return s.cards.map((c) => `${c.id ?? c.n}.${c.column}`).join(',');
-  if (s.variant === 'diagram') return s.hotspots.filter((x) => x.correct).map((x) => x.id).join(',');
+  if (s.variant === 'diagram') return letters(s.hotspots);
   if (s.variant === 'tiles' || s.variant === 'pick') return s.tiles.filter((x) => x.correct).map((x) => String(x.n)).join(',');
   if (s.variant === 'pair') return letters(s.situations.find((x) => x.trackingId === t.id)?.options || []);
+  if (s.template === 'check') {
+    const it = s.items.find((x) => x.trackingId === t.id);
+    if (!it) return '';
+    return it.kind === 'tiles' ? it.tiles.filter((x) => x.correct).map((x) => String(x.n)).join(',') : letters(it.options);
+  }
   if (s.variant === 'rounds') {
     const r = s.rounds.find((x) => x.trackingId === t.id);
     const i = r ? s.options.findIndex((o) => o.id === r.correct) : -1;
@@ -246,7 +258,15 @@ const refs = content.screens.flatMap((s) => [
   ...(s.steps || []).flatMap((st) => [...(st.rows || []).map((r) => [s.id, r.trackingId]), ...(st.trackingId ? [[s.id, st.trackingId]] : [])]),
   ...(s.situations || []).map((x) => [s.id, x.trackingId]),
   ...(s.rounds || []).map((r) => [s.id, r.trackingId]),
+  ...(s.items || []).map((it) => [s.id, it.trackingId]),
+  ...(s.step2?.field ? [[s.id, s.step2.field.trackingId]] : []),
 ]);
+// the scored screens and the pass mark (S21: 5 scored items, pass 80 = 4 of 5)
+const comp = content.lesson.completion;
+const scored = comp.scoredScreens.flatMap((sid) => (content.screens.find((x) => x.id === sid)?.tracking || []).filter((t) => t.scored));
+if (!scored.length || !(comp.passMark > 0 && comp.passMark <= 100) || interactions.some(([s, t]) => t?.scored && !comp.scoredScreens.includes(s.id)))
+  metaFail(`completion: scored interactions must sit on lesson.completion.scoredScreens (${comp.scoredScreens.join(', ')}) with a pass mark`);
+else ok(`scored: ${scored.length} interactions on ${comp.scoredScreens.join(', ')} (${scored.map((t) => t.id).join(', ')}), pass mark ${comp.passMark}`);
 // fast-track cards: every route lands on a screen of the same chapter, the jump on its landing screen
 for (const c of content.chapters.filter((x) => x.fastTrack)) {
   const card = content.screens.find((x) => x.id === c.fastTrack.card);
