@@ -101,7 +101,8 @@ await expectNewScreen(page, 'S01', 'start');
 await expectBand(page, 'S01 before action', { state: 'hint', text: S.S01.hint, unlocked: false, lockedWhy: UI.footer.locked.single });
 expect(await page.evaluate(() => document.querySelector('.w-prev').getAttribute('aria-disabled') === 'true'), 'S01: Previous disabled on the first screen');
 const img = await page.evaluate(() => { const i = document.querySelector('.w-photo-column'); return { alt: i?.alt, temp: i?.dataset.temp, loaded: i?.naturalWidth > 0 }; });
-expect(img.alt === S.S01.image.alt && img.temp === 'true' && img.loaded, `S01 image slot: alt from content, temp image loaded (${S.S01.image.src})`);
+expect(img.alt === S.S01.image.alt && img.temp === String(S.S01.image.temp) && img.loaded,
+  `S01 image slot: alt from content, ${S.S01.image.temp ? 'temp' : 'real'} image loaded (${S.S01.image.src})`);
 await expectLayout(page, 'S01 hint');
 await shot(page, 's01-hint.png');
 
