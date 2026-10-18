@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Greystone Canada trainer guides + participant guides (PDF) for the 5 Wawiwa units."""
+"""Build GC trainer guides + participant guides (PDF) for the 5 Wawiwa units."""
 import asyncio, base64, html, os
 from playwright.async_api import async_playwright
 
@@ -43,24 +43,24 @@ UNITS = [
                 "Describe how AI is changing marketing roles and processes.",
                 "Write a basic, structured prompt for a marketing task."],
       weeks=[
-        ("Week 1 - What is generative AI?", "Slides 4-17",
-         ["Icebreaker (slide 3): learners share a short intro and what they want to learn about AI.",
-          "Learning goals and what to expect (slides 4-5).",
-          "Definitions and the evolution of AI from the 1950s to today (slides 7-14).",
-          "Machine learning, generative AI, narrow vs general AI (slides 15-17).",
-          "Close with the question on slide 18: why is everyone talking about AI now?"]),
-        ("Week 2 - The generative AI tool landscape", "Slides 18-28 + the AI Awareness interactive",
-         ["Large language models and a live example (slides 19-21: a ChatGPT poem, a Perplexity market research).",
-          "Images, video, avatars, deepfakes, audio and songs (slides 22-27). Discuss the deepfake slide (24) and what it means for brand trust.",
-          "\"There's an AI tool for everything\" (slide 28).",
+        ("Week 1 - What is generative AI?", "Slides 3-16",
+         ["Icebreaker (slide 2): learners share a short intro and what they want to learn about AI.",
+          "Learning goals and what to expect (slides 3-4).",
+          "Definitions and the evolution of AI from the 1950s to today (slides 6-13).",
+          "Machine learning, generative AI, narrow vs general AI (slides 14-16).",
+          "Close with the question on slide 17: why is everyone talking about AI now?"]),
+        ("Week 2 - The generative AI tool landscape", "Slides 17-27 + the AI Awareness interactive",
+         ["Large language models and a live example (slides 18-20: a ChatGPT poem, a Perplexity market research).",
+          "Images, video, avatars, deepfakes, audio and songs (slides 21-26). Discuss the deepfake slide (23) and what it means for brand trust.",
+          "\"There's an AI tool for everything\" (slide 27).",
           "Run the AI Awareness interactive in the unit together, screen by screen."]),
-        ("Week 3 - How AI is changing marketing", "Slides 30-38 + review activities",
-         ["The role of marketing and the role of AI in marketing (slides 30-33).",
-          "How marketing roles and processes are shifting (slides 34-37).",
-          "A recommended AI stack for marketing (slide 38).",
+        ("Week 3 - How AI is changing marketing", "Slides 29-37 + review activities",
+         ["The role of marketing and the role of AI in marketing (slides 29-32).",
+          "How marketing roles and processes are shifting (slides 33-36).",
+          "A recommended AI stack for marketing (slide 37).",
           "Learners complete the review activities: the prompt-writing process, the roles flashcards and the knowledge check."]),
       ],
-      skip="Skip slide 2 (the original author's bio) and slide 39 (an agenda from the longer workshop).",
+      skip="Skip slide 38 (an agenda from the longer workshop).",
       home="Set up a ChatGPT account and try one marketing task from week 3 (for example, a short product description for a business you know). Note what worked and what didn't.",
       kc=[("Which of the following is a key benefit of using generative AI in marketing?", "It enables the creation of personalised content tailored to specific audiences.")]),
  dict(code="BUS-DM303", course="Writing for the Web", title="Writing for the Web with Generative AI", file="GC_BUS-DM303",
@@ -118,7 +118,7 @@ UNITS = [
           "AI video: image to video, Veo, avatars, Runway, video prompt tips (slides 40-49).",
           "Practice: create videos with one of the tools (slide 50)."]),
       ],
-      skip="In lesson 2 skip slide 51 (an agenda from the longer workshop). Slide 52 lists a home task that mentions the original author: replace \"send me\" with sharing in your class.",
+      skip="In lesson 2 skip slide 51 (an agenda from the longer workshop). Slide 52 lists a home task phrased as \"send me\": replace it with sharing in your class.",
       home="Create one brand visual and one 5-10 second video for an organisation, and write the prompt you used for each.",
       kc=[("Which of the following are benefits of using AI-powered content creation tools in marketing? (select all)",
            "Streamlining the content creation process for efficiency; ensuring consistent brand voice across platforms; improving content visibility through SEO optimisation.")]),
@@ -147,7 +147,7 @@ UNITS = [
           "Benefits and risks of LLMs at work: productivity, creativity, problem-solving, and the risks (lies, lame, legal) (slide 20).",
           "Learners complete the lesson 2 key terms and knowledge checks."]),
       ],
-      skip="If a slide introduces Wawiwa's course AI companion, skip it: it is not part of this unit. Week 3 slides come from Wawiwa's AI for Marketing workshop and keep the original author's name on the title slide.",
+      skip="If a slide introduces Wawiwa's course AI companion, skip it: it is not part of this unit.",
       home="Use ChatGPT (or another approved AI assistant) to draft a one-page brief for a real decision from work or study, using the four-part prompt. Remove any confidential details first, then note what you had to correct.",
       kc=[("Which is the correct order for making a data-driven decision?", "Decision → Question → Data."),
           ("You need help with a report that includes confidential customer data. What is the safest approach?", "Remove or anonymise the confidential details, and use data controls or a temporary chat."),
@@ -191,10 +191,10 @@ def trainer_html(u):
     w = "".join(f'<div class="week"><h3>{e(t)}</h3><div class="small">{e(sl)} · about 60 minutes</div><ul>' + "".join(f"<li>{e(x)}</li>" for x in items) + "</ul></div>" for t, sl, items in u["weeks"])
     kc = "".join(f"<tr><td>{e(q)}</td><td>{e(a)}</td></tr>" for q, a in u["kc"])
     return f"""<html><head><meta charset="utf-8"><style>{CSS}</style></head><body>
-{head('Greystone College Canada · Trainer Instructions')}
+{head('Trainer Instructions')}
 <h1>{e(u['title'])}</h1><p class="sub">Standalone unit for {e(u['code'])} {e(u['course'])}</p>
 <h2>Unit at a glance</h2><table>
-<tr><th>Greystone course</th><td>{e(u['code'])} {e(u['course'])}</td></tr>
+<tr><th>Course</th><td>{e(u['code'])} {e(u['course'])}</td></tr>
 <tr><th>Based on</th><td>{e(u['source'])}</td></tr>
 <tr><th>Length</th><td>Three classroom sessions of about one hour, one per week.</td></tr>
 <tr><th>In Moodle</th><td>One SCORM unit: an instructor-led presentation, then review activities and a short knowledge check.</td></tr>
@@ -204,14 +204,14 @@ def trainer_html(u):
 <h2>Notes for the instructor</h2><ul><li>{e(u['skip'])}</li>{''.join(f'<li>{e(x)}</li>' for x in COMMON_TRAINER_NOTES)}</ul>
 <h2>Home task</h2><p>{e(u['home'])}</p>
 <h2>Knowledge check answers</h2><table><tr><th>Question</th><th>Correct answer</th></tr>{kc}</table>
-<p class="small">© Wawiwa Tech. Licensed to Greystone College Canada for use in its programs during the licence period. Not for redistribution.</p>
+<p class="small">© Wawiwa Tech. Licensed for use during the licence period. Not for redistribution.</p>
 </body></html>"""
 
 def learner_html(u):
     e = html.escape
     weeks = "".join(f"<li><strong>{e(t.split(' - ')[0])}:</strong> {e(t.split(' - ',1)[1])}</li>" for t, _, _ in u["weeks"])
     return f"""<html><head><meta charset="utf-8"><style>{CSS}</style></head><body>
-{head('Greystone College Canada · Participant Guide')}
+{head('Participant Guide')}
 <h1>{e(u['title'])}</h1><p class="sub">A three-week unit in {e(u['code'])} {e(u['course'])}</p>
 <h2>What you will learn</h2><ul>{''.join(f'<li>{e(o)}</li>' for o in u['outcomes'])}</ul>
 <h2>The three weeks</h2><ul>{weeks}</ul>
@@ -221,7 +221,7 @@ def learner_html(u):
 <li>After each class, go through the review activities in the unit: they take a few minutes and end with a short knowledge check.</li>
 <li>If you see "This course is not available", reload the page. If it does not open, tell your instructor.</li></ul>
 <h2>Your home task</h2><div class="box">{e(u['home'])}</div>
-<p class="small">© Wawiwa Tech. For Greystone College learners only.</p>
+<p class="small">© Wawiwa Tech. For enrolled learners only.</p>
 </body></html>"""
 
 async def main():

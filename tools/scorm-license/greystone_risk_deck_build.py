@@ -25,7 +25,7 @@ for sh in cover.shapes:
             rs=p.runs
             if rs: rs[0].text=v
             for r in rs[1:]: r.text=""
-    if t.startswith("WAWIWA"): setp(["WAWIWA · GREYSTONE COLLEGE"])
+    if t.startswith("WAWIWA"): setp(["WAWIWA"])
     elif t.startswith("Data for Managers"):
         rs=sh.text_frame.paragraphs[0].runs; vals=["Risk Management: ","Introduction to the RMF"]
         for i,r in enumerate(rs): r.text=vals[i] if i<len(vals) else ""
