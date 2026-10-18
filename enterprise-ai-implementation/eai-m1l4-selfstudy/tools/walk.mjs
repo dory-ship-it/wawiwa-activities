@@ -1,5 +1,6 @@
 // Keyboard-only walk through the slice in the approved look (P1.5). Puppeteer drives Tab, Shift+Tab,
-// arrows, Enter, Space, Escape and typing only: no mouse events. Covers the rail, the menu (open,
+// arrows, Enter, Space, Escape and typing only (one separate mouse check: a clicked wrong row shows
+// no focus ring; its screenshot is s01-wrong.png). Covers the rail, the menu (open,
 // navigate, Escape), S01, S02, FT1 and its routes, S03 (wrong then right). Asserts on every state:
 //   the band equals the content JSON (state, verdict word, text, route buttons); Next locked (with
 //   the reason as its aria-label) before the right answer or the save, unlocked and focused after;
@@ -156,7 +157,7 @@ await expectBand(page, 'S01 wrong (a)', { state: 'wrong', text: opt('S01', 'a').
 let o = await opts(page);
 expect(o.a === 'wrong' && o.b === '' && o.c === '', `S01 wrong: the chosen row is marked wrong, the others stay plain (${JSON.stringify(o)})`);
 await expectLayout(page, 'S01 wrong');
-await shot(page, 's01-wrong.png');
+expect(await page.evaluate(() => getComputedStyle(document.activeElement).outlineStyle !== 'none'), 'S01 wrong by keyboard: the focus ring shows on the row');
 await press(page, 'ArrowDown');
 expect(await isActive(page, '.w-opt[data-id="b"]'), 'S01 ArrowDown moves focus to option b');
 await press(page, 'Enter');
@@ -200,8 +201,11 @@ await press(page, 'Enter');
 // FT1: memo, right first try, routes
 await expectNewScreen(page, 'FT1', 'S02 Next');
 await expectBand(page, 'FT1 before action', { state: 'idle', text: '', unlocked: false, lockedWhy: UI.footer.locked.challenge });
-const memo = await page.evaluate(() => ({ line: document.querySelector('.w-memo-line').textContent, q: document.querySelector('.w-memo-q').textContent, hint: document.querySelector('.w-hintline').textContent,
+const memo = await page.evaluate(() => ({ head: document.querySelector('.w-memo-head').textContent, label: document.querySelector('.w-memo').getAttribute('aria-label'),
+  heads: document.querySelectorAll('.w-memo-head').length, line: document.querySelector('.w-memo-line').textContent, q: document.querySelector('.w-memo-q').textContent, hint: document.querySelector('.w-hintline').textContent,
   tool: [...document.querySelectorAll('.w-band-tool button')].map((b) => b.dataset.action).join() }));
+expect(memo.head === S.FT1.memo.label && memo.label === S.FT1.memo.label && memo.heads === 1,
+  `FT1 memo header: the plain label "${memo.head}" from the content, no From / To line`);
 expect(memo.line === S.FT1.stage.top.text && memo.q === S.FT1.stage.middle.text && memo.hint === S.FT1.hint && memo.tool === 'skipChallenge',
   'FT1 memo: challenge text in the memo card, hint left under the instruction, Skip in the band');
 await expectLayout(page, 'FT1 memo');
@@ -306,6 +310,34 @@ const retries = ev.filter((e) => e.kind === 'retry').map((e) => `${e.trackingId}
 expect(retries.join() === 'L4_S01_1=b/correct,L4_S03_1=b,d/correct', `bus: retries as retry events (${retries.join(', ')})`);
 expect(!page.errors.length, 'main path: no console errors' + (page.errors.length ? ': ' + page.errors.join(' | ') : ''));
 await page.close();
+
+/* ---------- S01 wrong row by mouse: calm mark, no focus ring ---------- */
+// The one mouse check in this walk: a click must not leave the keyboard focus ring on the row.
+console.log('\nS01 wrong row (mouse click)');
+{
+  const p = await open('?reset=1&screen=S01');
+  await p.click('.w-opt[data-id="a"]');
+  await p.mouse.move(5, 700); // off the row: no hover state in the check or the screenshot
+  const r = await p.evaluate(() => {
+    const row = document.querySelector('.w-opt[data-id="a"]');
+    const cs = getComputedStyle(row);
+    const mark = row.querySelector('.w-opt-mark');
+    const ms = getComputedStyle(mark);
+    return { focused: document.activeElement === row, visible: row.matches(':focus-visible'), outline: cs.outlineStyle, bg: cs.backgroundColor, color: cs.color,
+      label: getComputedStyle(row.querySelector('.w-opt-label')).color, shadow: cs.boxShadow, markBg: ms.backgroundColor, markColor: ms.color,
+      x: mark.querySelector('svg')?.getAttribute('aria-label'), w: Math.round(mark.querySelector('svg')?.getBoundingClientRect().width || 0),
+      others: [...document.querySelectorAll('.w-opt:not([data-id="a"])')].map((b) => b.dataset.result || '-').join() };
+  });
+  expect(r.focused && !r.visible && r.outline === 'none', `S01 click: the row has focus but no focus ring (outline ${r.outline})`);
+  expect(r.bg === 'rgb(255, 255, 255)' && r.color === 'rgb(0, 0, 0)' && r.label === 'rgb(0, 0, 0)' && /rgb\(204, 0, 0\) 3px 0px 0px 0px inset/.test(r.shadow),
+    `S01 wrong row: black text on white, 3px #CC0000 line on the left edge (${r.shadow})`);
+  expect(r.markBg === 'rgba(0, 0, 0, 0)' && r.markColor === 'rgb(204, 0, 0)' && r.x === UI.feedback.wrongPrefix && r.w === 20 && r.others === '-,-',
+    `S01 wrong row: small red X on the right (${r.w}px, label "${r.x}"), the other rows plain`);
+  await expectBand(p, 'S01 wrong by mouse', { state: 'wrong', text: opt('S01', 'a').feedback, unlocked: false });
+  await expectLayout(p, 'S01 wrong by mouse');
+  await shot(p, 's01-wrong.png');
+  await p.close();
+}
 
 /* ---------- S03 both wrong: "Not quite." ---------- */
 console.log('\nS03 both wrong');

@@ -23,6 +23,7 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 
 .w-sr-only { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .w-stage :focus-visible { outline: var(--w-focus); outline-offset: var(--w-focus-offset); }
+.w-stage :focus:not(:focus-visible) { outline: none; } /* the ring is for keyboard users only, never after a mouse click */
 .w-instruction:focus { outline: none; } /* programmatic focus target, not an operable control */
 
 /* ---------- buttons ---------- */
@@ -137,8 +138,10 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-opt-chev { flex: none; color: var(--w-ink-2); }
 .w-opt-row:not([data-result="correct"]):not([data-result="wrong"]):not([aria-disabled="true"]):hover { background: var(--w-hint); }
 .w-opt-row[data-result="correct"] { background: var(--w-teal-tint); color: var(--w-teal-ink); }
-.w-opt-row[data-result="wrong"] { background: var(--w-error-tint); color: var(--w-error); }
-.w-opt-row[data-result="wrong"] .w-opt-num { color: var(--w-error); }
+/* wrong row, calm: black text on white, a 3px red line on the left edge and a small red X on the right */
+.w-opt-row[data-result="wrong"] { box-shadow: inset 3px 0 0 var(--w-error); }
+.w-opt-row[data-result="wrong"] .w-opt-mark { background: transparent; color: var(--w-error); }
+.w-opt-row[data-result="wrong"] .w-opt-mark .w-icon { width: 20px; height: 20px; stroke-width: 2.5; }
 .w-opt-row[data-result] .w-opt-mark:not(:empty) ~ .w-opt-chev, .w-opt-row[data-result="correct"] .w-opt-chev, .w-opt-row[data-result="wrong"] .w-opt-chev { display: none; }
 .w-main[data-layout="editorial"] .w-band { margin-top: 16px; height: 98px; }
 
@@ -148,8 +151,7 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-main[data-layout="memo"] > .w-logo { position: absolute; left: 24px; top: 18px; }
 .w-memo { position: absolute; left: 640px; top: 40px; width: 512px; min-height: 272px; display: flex; flex-direction: column; padding: 24px 34px 24px;
   background: var(--w-white); box-shadow: var(--w-shadow-memo); }
-.w-memo-head { display: flex; justify-content: space-between; gap: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--w-hairline); font: 400 14px/1.3 var(--w-meta); color: var(--w-ink-2); }
-.w-memo-head b { font-weight: 700; color: var(--w-ink); }
+.w-memo-head { margin: 0; padding-bottom: 12px; border-bottom: 1px solid var(--w-hairline); font: 400 14px/1.3 var(--w-meta); color: var(--w-ink-2); }
 .w-memo-line { margin: 16px 0 0; font: 600 19px/1.35 var(--w-head); color: var(--w-ink); }
 .w-memo-q { margin: 12px 0 0; font: 800 25px/1.3 var(--w-head); letter-spacing: -0.3px; color: var(--w-navy); }
 .w-memo-rule { margin-top: auto; padding-top: 0; display: block; width: 40px; height: 4px; background: var(--w-turquoise); }

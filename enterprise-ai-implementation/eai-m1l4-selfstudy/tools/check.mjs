@@ -10,7 +10,7 @@
 //  8. the boot fallback copy in index.html equals ui.boot in the content file
 //  9. word counts (storyboard rule): on-screen words per screen view at most 45, every hint,
 //     feedback line and pause marker at most 25; instruction line, buttons and the memo's
-//     From / To line excluded
+//     header label excluded
 // 10. every interaction has full tracking metadata, ids are unique, graded keys match the options
 // 11. no arrow glyph (U+2192) in ui strings or src: the font subset has none, use the arrow icon
 // 12. hex allowlist (P1.5): every hex colour in src/ is one of the approved tokens

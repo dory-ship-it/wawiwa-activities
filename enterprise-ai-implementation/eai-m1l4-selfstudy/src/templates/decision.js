@@ -118,7 +118,7 @@ function single(ctx) {
 
 /* ---------- challenge (FT1), layout memo ---------- */
 function challenge(ctx) {
-  const { screen, ui, zones, content } = ctx;
+  const { screen, ui, zones } = ctx;
   const { group, btns } = options(ctx, 'card');
   const trackingId = screen.tracking[0].id;
   const routing = screen.routing;
@@ -130,10 +130,8 @@ function challenge(ctx) {
   layout(ctx, 'memo',
     picture(screen.image, 'w-photo-memo'),
     zones.logo,
-    h('article', { class: 'w-memo', 'aria-label': [ui.memo.from, memo.from].join(' ') },
-      h('div', { class: 'w-memo-head' },
-        h('span', {}, h('b', {}, ui.memo.from), ' ', memo.from || content.characters[memo.character]?.label),
-        h('span', {}, ui.memo.to, ' ', memo.to)),
+    h('article', { class: 'w-memo', 'aria-label': memo.label || null },
+      memo.label ? h('p', { class: 'w-memo-head' }, memo.label) : null,
       h('p', { class: 'w-memo-line' }, screen.stage.top.text),
       h('p', { class: 'w-memo-q' }, screen.stage.middle.text),
       h('span', { class: 'w-memo-rule', 'aria-hidden': 'true' })),
