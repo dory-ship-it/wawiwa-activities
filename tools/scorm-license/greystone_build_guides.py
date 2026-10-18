@@ -162,7 +162,7 @@ UNITS = [
       weeks=[
         ("Week 1 - What is risk?", "Slides 1-17",
          ["Course goals and the framework overview (slides 2-3).",
-          "\"Eugene moments\" (slides 4-7): the icon marks a class discussion. Use the questions on the slides: what is a risk, why do businesses care, what are goals and assets.",
+          "\"Eugene Moment\" panels (slides 4-7) mark a class discussion. Use the questions on the slides: what is a risk, why do businesses care, what are goals and assets.",
           "Terms and definitions, the risk chain (slides 8-15).",
           "NIST and the risk management framework (slides 16-17)."]),
         ("Week 2 - The RMF lifecycle and assessing controls", "Slides 18-36",
@@ -177,7 +177,7 @@ UNITS = [
           "Decomposing the organisation and Business Impact Analysis (slides 54-59).",
           "Learners complete the review activities and the two knowledge-check questions."]),
       ],
-      skip="The \"Eugene\" icon (introduced on slide 4) marks a class discussion or a notable example; pause there and ask the class.",
+      skip="The navy \"EUGENE MOMENT\" panel (introduced on slide 4) marks a class discussion; pause there and ask the class the questions in the panel.",
       home="For a project you know, list three assets, one threat and one vulnerability for each, and rate each risk as low, medium or high on likelihood and impact.",
       kc=[("Which statement about risk is correct?", "Risk is a function of likelihood and impact."),
           ("In the RMF lifecycle, which step comes right after Categorize?", "Select.")]),
