@@ -1,30 +1,37 @@
-// Input template (S02; the S19 return state reuses the field builder in P3).
-// Labelled fields with maxlength, a live {n}/{max} counter (announced to screen readers only from
-// COUNTER_ANNOUNCE_AT characters on), a privacy line, and Save that is always enabled:
-//   any field empty on Save -> feedback.empty in the neutral notice tone (not an error colour)
+// Input template (S02; the S19 return state reuses the field builder in P3), layout "form": the
+// centred single column inside the shell. Label line, instruction, labelled fields with maxlength and
+// a live {n}/{max} counter (announced to screen readers only from COUNTER_ANNOUNCE_AT characters on),
+// the privacy line with Save, and the band under the form. Save is always enabled:
+//   any field empty on Save -> feedback.empty as a notice (hint look, not an error colour)
 //   all filled              -> values stored under each field's store key, one fill-in answer per
-//                              field on the tracking bus, feedback.saved, Continue appears
+//                              field on the tracking bus, feedback.saved, Next unlocks
 import { h, fmt, nextId } from '../util.js';
-import { renderStage } from './stage.js';
+import { layout, ruleLabel, privacyLine } from './stage.js';
 
 const COUNTER_ANNOUNCE_AT = 230;
 
 export const input = {
   mount(ctx) {
     const { screen, ui, zones } = ctx;
-    const refs = renderStage(ctx, { cardClass: 'w-tpl-input' });
+    const privacy = privacyLine(screen.stage.bottom);
     const announcer = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
-    const controls = screen.fields.map((f) => field(f, ctx, refs, announcer));
-    refs.fields.append(...controls.map((c) => c.el), announcer);
+    const controls = screen.fields.map((f) => field(f, ctx, privacy.id, announcer));
+    const save = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'save' }, onclick: () => doSave() }, ui.buttons.save);
 
-    const save = h('button', { class: 'w-btn w-btn-primary', type: 'button', dataset: { action: 'save' }, onclick: () => doSave() }, ui.buttons.save);
-    refs.action.append(save);
+    layout(ctx, 'form',
+      zones.logo,
+      h('div', { class: 'w-form' },
+        screen.stage.top?.text ? ruleLabel(screen.stage.top.text) : null,
+        zones.instruction,
+        h('div', { class: 'w-form-task', dataset: { interaction: '' } },
+          h('div', { class: 'w-fields' }, controls.map((c) => c.el), announcer),
+          h('div', { class: 'w-actionbar' }, privacy.el, save)),
+        zones.band));
 
     const showSaved = (focus) => {
-      save.className = 'w-btn w-btn-secondary'; // Continue is now the one primary action
-      const cont = zones.setFeedback({ state: 'neutral', text: screen.feedback.saved,
-        actions: [{ id: 'continue', label: ui.buttons.continue, primary: true, onClick: () => ctx.finish() }] });
-      if (focus) cont.focus();
+      save.className = 'w-btn w-btn-ghost'; // Next is now the one action that leads on
+      zones.setFeedback({ state: 'neutral', text: screen.feedback.saved });
+      ctx.unlockNext({ focus });
     };
 
     function doSave() {
@@ -43,12 +50,12 @@ export const input = {
   },
 };
 
-function field(f, ctx, refs, announcer) {
+function field(f, ctx, privacyId, announcer) {
   const { ui } = ctx;
   const id = nextId('w-field'), counterId = nextId('w-counter');
   const max = f.maxLength;
   const attrs = { class: 'w-input', id, maxlength: String(max), placeholder: f.placeholder || null, autocomplete: 'off',
-    'aria-describedby': [counterId, refs.privacyId].filter(Boolean).join(' '), dataset: { store: f.store } };
+    'aria-describedby': [counterId, privacyId].filter(Boolean).join(' '), dataset: { store: f.store } };
   const input = f.multiline ? h('textarea', { ...attrs, rows: '3' }) : h('input', { ...attrs, type: 'text' });
   input.value = ctx.store.get(f.store);
   const counter = h('span', { class: 'w-counter', id: counterId });

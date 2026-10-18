@@ -26,5 +26,5 @@ export function startServer(port = 0) {
 
 if (process.argv[1] && normalize(process.argv[1]) === normalize(fileURLToPath(import.meta.url))) {
   const server = await startServer(Number(process.env.PORT) || 8125);
-  console.log(`Serving ${ROOT} at http://127.0.0.1:${server.address().port}/  (demo: ?demo=1)`);
+  console.log(`Serving ${ROOT} at http://127.0.0.1:${server.address().port}/  (dev jump: ?screen=S03)`);
 }

@@ -28,6 +28,7 @@ const P = {
   pause: '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>', // pause
   play: '<path d="M6 3 20 12 6 21Z"/>', // play
   menu: '<path d="M4 12h16"/><path d="M4 6h16"/><path d="M4 18h16"/>', // menu
+  'rail-menu': '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/>', // menu, short last line (approved look rail button)
   captions: '<rect width="18" height="14" x="3" y="5" rx="2" ry="2"/><path d="M7 15h4M15 15h2M7 11h2M13 11h4"/>', // captions
   transcript: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>', // file-text
   // chrome icons (not used by the content JSON)
@@ -41,6 +42,22 @@ const P = {
 };
 
 export const ICON_NAMES = Object.keys(P);
+
+// 28 px chapter status mark (rail dots and the menu list): done = teal fill + white check,
+// current = teal ring 3 px, anything else = grey ring. Always decorative: the button label says it.
+export function statusMark(status) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 28 28');
+  svg.setAttribute('width', '28');
+  svg.setAttribute('height', '28');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  svg.setAttribute('class', 'w-dot-mark');
+  svg.innerHTML = status === 'done'
+    ? '<circle class="w-dot-fill" cx="14" cy="14" r="13"/><path class="w-dot-check" d="M8.5 14.5l3.5 3.5 7.5-8"/>'
+    : status === 'current' ? '<circle class="w-dot-ring-on" cx="14" cy="14" r="11.5"/>' : '<circle class="w-dot-ring" cx="14" cy="14" r="11"/>';
+  return svg;
+}
 
 // icon('check', { size: 24, label: 'Correct' }) -> <svg>. With a label the icon is meaningful
 // (role img + aria-label); without, it is decorative (aria-hidden).

@@ -1,53 +1,39 @@
 /*
- * Design tokens: EAI L4 self-study (PRD section 6).
- * Values are shared with Practice Studio engine/skins/selfstudy.css. Where a token has a
- * matching Practice Studio variable it is named on the line:
- *   --w-navy        = --ss-navy       #255777
- *   --w-navy-dark   = --ss-navy-dark  #1C455F
- *   --w-teal-text   = --ss-teal-text  #2E6E76
- *   --w-turquoise   = --ss-teal       #5AB3AA  (rules and borders only, never text)
- *   --w-ink         = --ss-ink        #1F2937
- *   --w-muted       = --ss-title      #595959
- *   --w-card-shadow = --ss-card-sh
- *   --w-radius      : 12px here, --ss-card-r is 16px (smaller stage, smaller radius)
- * The rest are new for this format (no Practice Studio match).
- * Contrast (measured by tools/check.mjs): navy on white 7.75:1, ink on grey 11.8:1,
- * muted on white 7:1, error on error tint 5.15:1, teal text on teal tint 5.82:1,
- * white on red 4.12:1 (large text only: buttons are 20px bold).
+ * Design tokens: EAI L4 self-study, approved look (Claude Design rounds 2 and 3, P1.5).
+ * Source of truth: planning/design-reference/ and the P1.5 work-order token table.
+ * These are the only hex values allowed anywhere in src/ (tools/check.mjs fails on any other).
+ * Contrast (measured by tools/check.mjs and, on the rendered page, by tools/test-fit.mjs):
+ *   navy on white 7.75:1, teal-ink on white 6.13:1 and on teal-tint 5.37:1, error on error-tint
+ *   5.06:1, ink-2 on hint grey 9.41:1, ink-2 on locked grey 8.45:1, white on red 4.12:1 (Next only,
+ *   19px bold = large text), teal numerals on white 4.19:1 (40px, large text).
  */
 :root {
-  --w-navy: #255777;          /* titles, instruction, nav, focus ring */
-  --w-navy-dark: #1C455F;     /* hover */
-  --w-red: #EE3124;           /* primary CTA and progress marker only; never an error */
-  --w-red-hover: #C8231A;     /* CTA hover */
-  --w-teal: #3E868F;          /* correct state: border, fill, icon */
-  --w-teal-text: #2E6E76;     /* teal-toned text on white or tint */
-  --w-teal-tint: #E8F3F2;     /* correct feedback background */
-  --w-turquoise: #5AB3AA;     /* lines, dividers, rules only */
-  --w-grey: #E6E6E8;          /* cards */
-  --w-ink: #1F2937;           /* body text */
-  --w-muted: #595959;         /* secondary text, counters */
-  --w-error: #CC0000;         /* wrong state text and border */
-  --w-error-tint: #FDECEC;    /* wrong feedback background */
-  --w-neutral-tint: #EEF2F6;  /* neutral (self-check) feedback background, navy text */
-  --w-white: #FFFFFF;         /* stage background, option cards */
-  --w-border: #D5D7DB;        /* option card border (decorative; state borders carry 3:1) */
-  --w-ui-border: #8C929B;     /* empty progress segment border, 3:1 on white */
-  --w-radius: 12px;
-  --w-card-shadow: 0 10px 30px rgba(37, 87, 119, .07);
-  --w-font: "Assistant", "Roboto", Arial, sans-serif;
+  --w-navy: #255777;        /* headings, big statements, links, menu icon, focus ring */
+  --w-teal: #3E868F;        /* correct fill/border, rail done/current, progress fill */
+  --w-teal-ink: #2F6A72;    /* teal text: labels, correct verdict, numerals */
+  --w-teal-tint: #E7F2F3;   /* correct band, current chapter in the menu, active toggles */
+  --w-turquoise: #5AB3AA;   /* short accent rules and the process line only; never text */
+  --w-red: #EE3124;         /* ONLY the unlocked Next button */
+  --w-error: #CC0000;       /* wrong verdict, wrong option */
+  --w-error-tint: #FBEAEA;  /* wrong band, wrong option ground */
+  --w-ink: #000000;         /* body text */
+  --w-ink-2: #3F3F3F;       /* secondary text */
+  --w-hint: #F2F2F2;        /* hint band */
+  --w-grey: #E6E6E8;        /* locked Next, rail line, memo-screen ground */
+  --w-hairline: #D8D8D8;    /* hairlines */
+  --w-idle: #BFBFBF;        /* not-started rings, idle borders */
+  --w-white: #FFFFFF;       /* ground */
 
-  /* type scale (stage px) */
-  --w-fs-instruction: 24px;
-  --w-fs-title: 28px;
-  --w-fs-body: 20px;
-  --w-fs-feedback: 19px;
-  --w-fs-button: 20px;        /* white on red: large text needs 18.66px bold or more */
-  --w-fw-button: 700;
-  --w-fs-small: 16px;         /* never below 16 */
-  --w-lh: 1.35;
+  --w-radius: 8px;          /* buttons and cards only; hairline lists have no radius */
+  --w-head: "Assistant", Arial, sans-serif;   /* headings, statements, answers */
+  --w-meta: "Roboto", Arial, sans-serif;      /* labels and meta */
 
-  /* focus ring */
+  --w-fs-next: 19px;        /* white on red: large text needs 18.66px bold or more */
+  --w-fw-next: 700;
+  --w-fs-min: 14px;         /* no text below this */
+
   --w-focus: 3px solid var(--w-navy);
   --w-focus-offset: 2px;
+  --w-shadow-memo: 0 10px 28px rgba(0, 0, 0, .14);
+  --w-shadow-menu: 4px 0 16px rgba(0, 0, 0, .08);
 }

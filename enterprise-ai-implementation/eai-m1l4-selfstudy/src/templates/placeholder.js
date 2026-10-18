@@ -1,23 +1,27 @@
 // DEV-ONLY stand-in for the slice screens whose templates come later (V1 in P2/P3, S19 and the
-// S20 self-check in P3). Shows the screen id, a dev note, the screen's top line (from the content
-// JSON), the hint in the feedback row and a Continue that marks the screen done, so routing and
-// progress can be walked end to end. P3 removes this file.
+// S20 self-check in P3), in the shell's plain layout. Shows the screen id, a dev note, the
+// instruction, the screen's top line (from the content JSON) and the hint in the band; Next is
+// unlocked and marks the screen done, so routing and progress can be walked end to end.
+// P3 removes this file.
 import { h } from '../util.js';
-import { icon } from '../icons.js';
+import { layout } from './stage.js';
 
 // DEV-ONLY note, not learner-facing, deliberately kept out of the content file. Remove in P3.
 const DEV_NOTE = 'Built in P2/P3';
 
 export const placeholder = {
-  mount({ screen, ui, zones, complete, next }) {
+  mount(ctx) {
+    const { screen, zones } = ctx;
     const top = screen.stage?.top || screen.states?.brief?.stage?.top || null;
-    zones.card.classList.add('w-card-placeholder');
-    zones.slots.top.append(h('p', { class: 'w-dev-badge' }, screen.id + ' · ' + DEV_NOTE));
-    if (top && top.text) zones.slots.middle.append(h('p', { class: 'w-line' }, top.icon ? icon(top.icon, { size: 28 }) : null, h('span', {}, top.text)));
-    zones.setFeedback({
-      state: 'hint', text: screen.hint,
-      actions: [{ id: 'continue', label: ui.buttons.continue, primary: true, onClick: () => { complete(); next(); } }],
-    });
+    layout(ctx, 'plain',
+      zones.logo,
+      h('div', { class: 'w-plain', dataset: { interaction: '' } },
+        h('p', { class: 'w-dev-badge' }, screen.id + ' · ' + DEV_NOTE),
+        zones.instruction,
+        top && top.text ? h('p', { class: 'w-plain-line' }, top.text) : null,
+        zones.band));
+    zones.setFeedback({ state: 'hint', text: screen.hint });
+    ctx.unlockNext({ onNext: () => { ctx.complete(); ctx.next(); } });
     return { unmount() {} };
   },
 };

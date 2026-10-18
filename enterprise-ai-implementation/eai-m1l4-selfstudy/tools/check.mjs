@@ -4,15 +4,20 @@
 //  2. every screen id in lesson.slice exists in screens[]
 //  3. no em dash (U+2014) or en dash (U+2013) in content or src (or index.html)
 //  4. every icon name used in content exists in src/icons.js
-//  5. the CTA (white on --w-red) font token is at least 18.66px and bold
+//  5. the Next button (white on --w-red) font token is at least 18.66px and bold
 //  6. contrast of every text/background pair in the token table (4.5:1 text, 3:1 large text and UI)
 //  7. no learner-facing sentences in src/*.js string literals; no italics in src/*.css
 //  8. the boot fallback copy in index.html equals ui.boot in the content file
 //  9. word counts (storyboard rule): on-screen words per screen view at most 45, every hint,
-//     feedback line and pause marker at most 25; instruction line and action buttons excluded
+//     feedback line and pause marker at most 25; instruction line, buttons and the memo's
+//     From / To line excluded
 // 10. every interaction has full tracking metadata, ids are unique, graded keys match the options
 // 11. no arrow glyph (U+2192) in ui strings or src: the font subset has none, use the arrow icon
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+// 12. hex allowlist (P1.5): every hex colour in src/ is one of the approved tokens
+// 13. image slots: src file exists, alt set, prompt file exists; a WARNING lists every temp image
+//     (not a failure)
+// 14. fonts load offline: no Google Fonts anywhere, every @font-face file exists (Roboto 700 too)
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -57,15 +62,19 @@ const used = new Set();
 const unknown = [...used].filter((n) => !ICON_NAMES.includes(n));
 unknown.length ? fail('icons used in content but missing in icons.js: ' + unknown.join(', ')) : ok(`all ${used.size} icon names used in content exist in icons.js`);
 
-/* 5. CTA font token */
+/* 5. Next font token (the only white-on-red text) */
 const tokensCss = read(join(ROOT, 'src', 'tokens.css'));
 const frameCss = read(join(ROOT, 'src', 'frame.css'));
 const tok = (name) => (tokensCss.match(new RegExp(`--${name}:\\s*([^;]+);`)) || [])[1]?.trim();
-const ctaSize = parseFloat(tok('w-fs-button'));
-const ctaWeight = parseInt(tok('w-fw-button'), 10);
-const primaryRule = (frameCss.match(/\.w-btn-primary\s*\{([^}]*)\}/) || [])[1] || '';
-if (ctaSize >= 18.66 && ctaWeight >= 700 && !/font(-size)?\s*:/.test(primaryRule)) ok(`CTA font token ${ctaSize}px weight ${ctaWeight} (large text, white on red allowed)`);
-else fail(`CTA font token too small or overridden: ${ctaSize}px weight ${ctaWeight}`);
+const ctaSize = parseFloat(tok('w-fs-next'));
+const ctaWeight = parseInt(tok('w-fw-next'), 10);
+const nextRule = (frameCss.match(/\.w-next\s*\{([^}]*)\}/) || [])[1] || '';
+const redRules = [...frameCss.matchAll(/([^{}]+)\{([^}]*var\(--w-red\)[^}]*)\}/g)].map((m) => m[1].trim());
+const nextOnly = redRules.length > 0 && redRules.every((sel) => /^\.w-next\[data-locked="false"\]$/.test(sel));
+const unlockedRule = (frameCss.match(/\.w-next\[data-locked="false"\]\s*\{([^}]*)\}/) || [])[1] || '';
+if (ctaSize >= 18.66 && ctaWeight >= 700 && /var\(--w-fs-next\)/.test(nextRule) && !/font(-size)?\s*:/.test(unlockedRule)) ok(`Next font token ${ctaSize}px weight ${ctaWeight} (large text, white on red allowed)`);
+else fail(`Next font token too small or overridden: ${ctaSize}px weight ${ctaWeight}`);
+nextOnly ? ok('--w-red is used by the unlocked Next button only') : fail('--w-red used outside .w-next[data-locked="false"]: ' + redRules.join(', '));
 
 /* 6. contrast */
 const hex = (name) => { const v = tok(name); if (!/^#[0-9a-f]{6}$/i.test(v || '')) throw new Error('token ' + name + ' is not a hex colour'); return v; };
@@ -74,38 +83,35 @@ const lum = (c) => {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 };
 const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
-const mix = (a, b, t) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * (1 - t) + parseInt(b.slice(i, i + 2), 16) * t).toString(16).padStart(2, '0')).join('');
-const dimmed = mix(hex('w-white'), hex('w-grey'), 0.6); // non-chosen option card: white under a 60% grey layer, text on top
 const PAIRS = [
-  ['w-navy', 'w-white', 4.5, 'instruction, titles, links'],
-  ['w-navy', 'w-grey', 4.5, 'titles on the card'],
-  ['w-navy', 'w-neutral-tint', 4.5, 'neutral feedback'],
-  ['w-ink', 'w-white', 4.5, 'body on option cards'],
-  ['w-ink', 'w-grey', 4.5, 'body on the card'],
-  ['w-ink', 'w-teal-tint', 4.5, 'label on a correct card'],
-  ['w-ink', 'w-error-tint', 4.5, 'label on a wrong card'],
-  ['w-ink', dimmed, 4.5, 'label on a dimmed card'],
-  ['w-muted', 'w-white', 4.5, 'hint, counters, readout'],
-  ['w-muted', 'w-grey', 4.5, 'secondary text on the card'],
-  ['w-teal-text', 'w-white', 4.5, 'teal text on white'],
-  ['w-teal-text', 'w-teal-tint', 4.5, 'correct feedback'],
-  ['w-error', 'w-white', 4.5, 'not saved, error text'],
-  ['w-error', 'w-error-tint', 4.5, 'wrong feedback'],
-  ['w-white', 'w-navy', 4.5, 'tooltip, selected chip'],
-  ['w-white', 'w-red', 3, 'CTA label (large text: 20px bold)'],
-  ['w-white', 'w-teal', 3, 'correct icon on teal (graphic)'],
-  ['w-white', 'w-error', 3, 'wrong icon on error (graphic)'],
-  ['w-navy', 'w-white', 3, 'focus ring, secondary button border (UI)'],
-  ['w-ui-border', 'w-white', 3, 'empty progress segment border (UI)'],
+  ['w-navy', 'w-white', 4.5, 'headings, statements, links, Previous'],
+  ['w-navy', 'w-grey', 4.5, 'instruction and Skip on the memo ground'],
+  ['w-navy', 'w-teal-tint', 4.5, 'current chapter in the menu'],
+  ['w-teal-ink', 'w-white', 4.5, 'teal labels, numerals, % complete'],
+  ['w-teal-ink', 'w-teal-tint', 4.5, 'correct verdict and option'],
+  ['w-ink', 'w-white', 4.5, 'body, answers'],
+  ['w-ink', 'w-hint', 4.5, 'pause band'],
+  ['w-ink', 'w-teal-tint', 4.5, 'band text, correct and saved'],
+  ['w-ink', 'w-error-tint', 4.5, 'band text, wrong'],
+  ['w-ink-2', 'w-white', 4.5, 'secondary text, counters, meta'],
+  ['w-ink-2', 'w-hint', 4.5, 'hint band'],
+  ['w-ink-2', 'w-grey', 4.5, 'locked Next, memo hint'],
+  ['w-error', 'w-error-tint', 4.5, 'wrong verdict and option'],
+  ['w-error', 'w-white', 4.5, 'not saved'],
+  ['w-white', 'w-navy', 4.5, 'Check, Save, tooltip'],
+  ['w-white', 'w-red', 3, 'Next label (large text: 19px bold)'],
+  ['w-teal', 'w-white', 3, 'FT1 numerals (large text: 40px)'],
+  ['w-white', 'w-teal', 3, 'check on teal (graphic)'],
+  ['w-white', 'w-error', 3, 'cross on red (graphic)'],
+  ['w-navy', 'w-white', 3, 'focus ring, ghost button border (UI)'],
+  ['w-ink-2', 'w-white', 3, 'input border, radio ring (UI)'],
   ['w-teal', 'w-teal-tint', 3, 'correct card border (UI)'],
   ['w-error', 'w-error-tint', 3, 'wrong card border (UI)'],
-  ['w-red', 'w-white', 3, 'progress marker (UI)'],
 ];
 console.log('\n  contrast (text / background, ratio, needed, use)');
 for (const [fg, bg, need, use] of PAIRS) {
-  const f = fg.startsWith('#') ? fg : hex(fg), b = bg.startsWith('#') ? bg : hex(bg);
-  const r = ratio(f, b);
-  const line = `${(fg.startsWith('#') ? fg : '--' + fg).padEnd(16)} on ${(bg.startsWith('#') ? bg + ' (dimmed card)' : '--' + bg).padEnd(26)} ${r.toFixed(2).padStart(5)}:1  >= ${need}  ${use}`;
+  const r = ratio(hex(fg), hex(bg));
+  const line = `${('--' + fg).padEnd(14)} on ${('--' + bg).padEnd(16)} ${r.toFixed(2).padStart(5)}:1  >= ${need}  ${use}`;
   r >= need ? ok(line) : fail(line);
 }
 const turquoiseText = /color:\s*var\(--w-turquoise\)/.test(frameCss);
@@ -136,14 +142,14 @@ bootOk ? ok('index.html boot fallback equals ui.boot') : fail('index.html boot f
 const MAX_SCREEN_WORDS = 45, MAX_FEEDBACK_WORDS = 25;
 const words = (s) => String(s ?? '').split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
 // on-screen text of one stage (top / middle / bottom), whatever the kind
-const stageText = (stage = {}) => Object.values(stage).flatMap((p) => [p.text, p.label, p.chip?.text, ...(p.bubbles || []), ...(p.items || []).map((x) => x.text)]);
+const stageText = (stage = {}) => Object.values(stage).flatMap((p) => [p.eyebrow, p.text, p.label, p.chip?.text, ...(p.bubbles || []), ...(p.items || []).map((x) => x.text)]);
 const fieldText = (fields = []) => fields.flatMap((f) => [f.label, f.placeholder]);
 // one entry per view the learner sees at once: [name, strings on screen]
 const views = content.screens.flatMap((s) => {
   if (s.template === 'video') return [[s.id, [s.title, s.guidingQuestion]], ...(s.stops || []).map((st) => [`${s.id} ${st.id}`, [st.question, ...st.options.map((o) => o.label)]])];
   if (s.template === 'handoff') return Object.entries(s.states).map(([k, st]) => [`${s.id} ${k}`, [...stageText(st.stage), ...fieldText(st.fields)]]);
   if (s.variant === 'selfcheck') return s.steps.map((st) => [`${s.id} ${st.id}`, [...(st.rows || []).map((r) => r.text), ...(st.chips || []).map((c) => c.label), st.strip]]);
-  return [[s.id, [...stageText(s.stage), ...(s.options || []).map((o) => o.label), ...fieldText(s.fields)]]];
+  return [[s.id, [...stageText(s.stage), ...(s.options || []).map((o) => o.label), ...fieldText(s.fields), ...(s.cases || []).map((c) => c.label)]]];
 });
 let wordFails = 0;
 for (const [name, list] of views) {
@@ -204,6 +210,50 @@ if (!metaFails) ok(`all ${seen.size} interactions have full tracking metadata ($
 /* 11. arrow glyph */
 const arrowIn = [...JSON.stringify(content.ui).matchAll(/\u2192/g)].length + srcFiles.filter((f) => /\u2192/.test(read(f))).length;
 arrowIn ? fail('arrow glyph (U+2192) in ui strings or src: use icon("arrow-right")') : ok('no arrow glyph in ui strings or src (icon arrow-right exists)');
+
+/* 12. hex allowlist: the approved tokens only */
+const ALLOWED = ['#255777', '#3E868F', '#2F6A72', '#E7F2F3', '#5AB3AA', '#EE3124', '#CC0000', '#FBEAEA', '#000000', '#3F3F3F', '#F2F2F2', '#E6E6E8', '#D8D8D8', '#BFBFBF', '#FFFFFF'];
+let hexHits = 0;
+for (const f of srcFiles.filter((p) => /\.(css|js)$/.test(p))) {
+  read(f).split('\n').forEach((line, i) => {
+    for (const m of line.matchAll(/#[0-9a-fA-F]{3,8}\b/g)) {
+      if (!ALLOWED.includes(m[0].toUpperCase())) { hexHits++; fail(`hex ${m[0]} not an approved token in ${relative(ROOT, f)}:${i + 1}`); }
+    }
+  });
+}
+if (!hexHits) ok(`every hex colour in src/ is an approved token (${ALLOWED.length} allowed)`);
+
+/* 13. image slots */
+const slots = content.screens.flatMap((s) => [
+  ...(s.image ? [[s.id, s.image]] : []),
+  ...(s.cases || []).map((c) => [`${s.id} ${c.id}`, c.image]),
+]);
+let imgFails = 0;
+const temps = [];
+for (const [where, img] of slots) {
+  if (!img || !('src' in img) || !('alt' in img) || !('prompt' in img) || typeof img.temp !== 'boolean') { imgFails++; fail(`${where}: image needs src, alt, prompt, temp`); continue; }
+  if (img.src && !existsSync(join(ROOT, img.src))) { imgFails++; fail(`${where}: image file missing ${img.src}`); }
+  if (!img.alt || !img.alt.trim()) { imgFails++; fail(`${where}: image has no alt text`); }
+  if (!img.prompt || !existsSync(join(ROOT, img.prompt))) { imgFails++; fail(`${where}: prompt file missing ${img.prompt}`); }
+  if (img.temp) temps.push(`${where}: ${img.src}`);
+}
+if (!imgFails) ok(`all ${slots.length} image slots have a file or null, alt text and a prompt file (${slots.map(([w]) => w).join(', ')})`);
+if (temps.length) {
+  console.log(`  WARNING ${temps.length} temp images in use (board references, replace before release):`);
+  temps.forEach((t) => console.log('          ' + t));
+}
+
+/* 14. fonts load offline */
+const fontsCss = read(join(ROOT, 'src', 'fonts.css'));
+const google = [join(ROOT, 'index.html'), ...srcFiles].filter((f) => /fonts\.googleapis|fonts\.gstatic/.test(read(f)));
+const faces = [...fontsCss.matchAll(/font-family:\s*"(\w+)";[^}]*font-weight:\s*(\d+);[^}]*url\(([^)]+)\)/g)].map((m) => ({ family: m[1], weight: m[2], file: join(ROOT, 'src', m[3]) }));
+const missingFace = faces.filter((x) => !existsSync(x.file));
+const need = ['Assistant 400', 'Assistant 600', 'Assistant 700', 'Assistant 800', 'Roboto 400', 'Roboto 500', 'Roboto 700'];
+const have = faces.map((x) => `${x.family} ${x.weight}`);
+const lacking = need.filter((n) => !have.includes(n));
+google.length || missingFace.length || lacking.length
+  ? fail(`fonts: ${google.length ? 'Google Fonts in ' + google.map((f) => relative(ROOT, f)).join(', ') + '; ' : ''}${missingFace.length ? 'missing files ' + missingFace.map((x) => relative(ROOT, x.file)).join(', ') + '; ' : ''}${lacking.length ? 'no @font-face for ' + lacking.join(', ') : ''}`)
+  : ok(`fonts self-hosted, no Google Fonts: ${have.join(', ')}`);
 
 finish();
 function finish() {

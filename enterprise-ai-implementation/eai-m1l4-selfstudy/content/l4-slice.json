@@ -30,7 +30,6 @@
       "watchVideo": "Watch the video",
       "reopenWorkbook": "Reopen workbook",
       "finish": "Finish",
-      "menu": "Menu",
       "close": "Close",
       "resume": "Resume",
       "startOver": "Start over",
@@ -42,21 +41,37 @@
       "notYet": "Not yet"
     },
     "feedback": {
-      "pagedLabel": "{i} of {n}",
-      "nextFeedback": "Next",
-      "prevFeedback": "Previous",
       "correctPrefix": "Correct.",
-      "wrongPrefix": "Not this one.",
+      "wrongPrefix": "Not quite.",
+      "oneOfTwo": "One of two.",
       "srCorrect": "Correct answer.",
       "srWrong": "Incorrect answer. Try again.",
       "srNeutral": "Answer recorded."
     },
+    "footer": {
+      "previous": "Previous",
+      "next": "Next",
+      "locked": {
+        "single": "Next, locked until you choose the right answer",
+        "challenge": "Next, locked until you answer or skip the challenge",
+        "route": "Next, locked until you pick one of the two options",
+        "multi": "Next, locked until both answers are correct",
+        "input": "Next, locked until you save",
+        "default": "Next, locked until you finish this screen"
+      }
+    },
+    "rail": {
+      "label": "Chapters",
+      "openMenu": "Open chapters menu",
+      "dot": "{title}, {status}",
+      "status": { "done": "complete", "current": "in progress", "locked": "not started", "notInPilot": "not in this pilot" },
+      "percent": "{p}%",
+      "done": "done"
+    },
+    "memo": { "from": "From:", "to": "To:" },
     "counter": "{n}/{max}",
     "saved": "Saved",
     "notSaved": "Not saved",
-    "progress": "Screen {i} of {n}",
-    "chapterLabel": "Chapter {n}",
-    "startLabel": "Start",
     "resumePrompt": "Welcome back. Pick up where you left off?",
     "startOverConfirm": "Start over? This clears your answers and your place in this lesson.",
     "startOverLmsNote": "Answers already sent to your course record stay there.",
@@ -68,37 +83,29 @@
     "newTabNote": "Opens in a new tab",
     "smallScreenNote": "This lesson works best on a computer.",
     "logoAlt": "Wawiwa",
-    "progressBar": {
-      "label": "Lesson progress by chapter",
-      "readout": "Chapter {n} of {max} · Screen {i} of {total}",
-      "readoutStart": "Screen {i} of {total}",
-      "minutesLeft": "About {m} min left",
-      "segmentLabel": "Chapter {n}, {title}, {status}",
-      "segmentLabelStart": "{title}, {status}",
-      "lockedTip": "Finish the current chapter first",
-      "status": { "done": "completed", "current": "in progress", "locked": "locked", "notInPilot": "not in this pilot" }
-    },
     "boot": {
       "error": "The lesson could not load.",
       "fileProtocol": "Open it through a web server (GitHub Pages, the LMS, or a local server), not as a file."
     },
     "menu": {
-      "title": "Menu",
-      "chapterMap": "Chapter map",
+      "title": "Chapters",
+      "close": "Close chapters menu",
+      "kicker": "Module 1 · Lesson 4",
+      "complete": "{p}% complete",
+      "progressLabel": "Lesson progress",
+      "timeLeft": "{t} left",
+      "hm": "{h} h {m} min",
+      "h": "{h} h",
+      "m": "{m} min",
+      "done": "Done",
+      "chapterLabel": "{title}, {status}",
       "resources": "Resources",
       "help": "Help",
-      "startOver": "Start over",
-      "notInPilot": "Not in this pilot",
-      "current": "You are here",
-      "done": "Done",
-      "locked": "Locked",
-      "minutes": "{m} min",
-      "screenDone": "Completed",
-      "screensOf": "Screens in {title}"
+      "startOver": "Start over"
     },
     "help": [
-      "Read the line at the top: it tells you what to do on each screen.",
-      "Feedback appears in the row at the bottom. Continue appears there after a right answer.",
+      "Read the heading on each screen: it tells you what to do.",
+      "Feedback appears in the band under each task. Next unlocks after a right answer.",
       "Use Tab and Enter or Space to work without a mouse. Escape closes the menu.",
       "Videos stop for questions. Captions and a transcript are under the video.",
       "Your place is saved. You can leave and come back."
@@ -159,8 +166,10 @@
       "minutes": 2,
       "instruction": "Choose your first move.",
       "hint": "Pick one. You can change your mind.",
+      "layout": "editorial",
+      "image": { "src": "assets/img/temp/ref-team-meeting.jpg", "alt": "Dana, HR director, in a planning meeting with her team", "prompt": "assets/img/prompts/S01-dana-team-meeting.md", "temp": true, "position": "36% 50%" },
       "stage": {
-        "top": { "kind": "character", "character": "dana", "label": "Dana, HR director (fictional)",
+        "top": { "kind": "character", "character": "dana", "eyebrow": "A message from Dana", "label": "Dana, HR director",
           "bubbles": [
             "We get about 90 requests a month, most of them repeat questions.",
             "Put a chatbot on the HR inbox. Live next month?"
@@ -221,6 +230,9 @@
       "minutes": 1,
       "instruction": "Answer one question, or skip the challenge.",
       "hint": "Answer if you already know this topic. Skipping costs nothing.",
+      "layout": "memo",
+      "image": { "src": "assets/img/temp/ref-team-meeting.jpg", "alt": "Dana's team around the meeting table", "prompt": "assets/img/prompts/FT1-dana-team-table.md", "temp": true, "position": "30% 50%" },
+      "memo": { "character": "dana", "from": "Dana, HR director", "to": "you" },
       "stage": {
         "top": { "kind": "line", "icon": "lightning", "text": "Optional challenge. Right on the first try? Skip to this chapter's last task." },
         "middle": { "kind": "question", "text": "HBR, 1990: new technology runs on a broken process. What happens?" },
@@ -237,7 +249,7 @@
       "attempts": 1,
       "routing": {
         "correctFirstTry": { "choices": [ { "button": "jumpToTask", "to": "S03", "route": "skip" }, { "button": "watchVideo", "to": "V1", "route": "full" } ] },
-        "wrong": { "button": "continue", "to": "V1", "route": "full" },
+        "wrong": { "to": "V1", "route": "full" },
         "skipped": { "to": "V1", "route": "full" }
       },
       "tracking": [
@@ -364,6 +376,13 @@
       "instruction": "Select the two causes both cases point to.",
       "hint": "Pick two cards, then press Check.",
       "terms": ["Success metric"],
+      "layout": "work",
+      "cases": [
+        { "id": "case1", "label": "Video case 1", "video": "V1", "segment": 3,
+          "image": { "src": "assets/img/temp/ref-video-case-1.jpg", "alt": "Still from video case 1", "prompt": "assets/img/prompts/S03-video-case-1.md", "temp": true, "position": "50% 30%" } },
+        { "id": "case2", "label": "Video case 2", "video": "V1", "segment": 5,
+          "image": { "src": "assets/img/temp/ref-team-meeting.jpg", "alt": "Still from video case 2", "prompt": "assets/img/prompts/S03-video-case-2.md", "temp": true, "position": "85% 50%" } }
+      ],
       "stage": {
         "top": { "kind": "line", "icon": "history", "text": "Four causes of AI project failure, from Lesson 1. Which two do both video cases point to?" },
         "middle": { "kind": "options", "arrange": "grid-2x2" },
@@ -379,7 +398,7 @@
         { "id": "d", "label": "No success metric", "icon": "ruler", "correct": true, "term": "Success metric",
           "feedback": "Both stories were judged by numbers. Today you set a baseline and a target: a number, not a feeling." }
       ],
-      "feedbackPaging": true,
+      "feedbackPaging": false,
       "advance": "after-correct",
       "endOfChapter": true,
       "tracking": [
