@@ -36,11 +36,17 @@ def main():
     ap.add_argument("--hosts", default="", help="comma list of allowed LMS host names; empty = any host")
     ap.add_argument("--out", default="")
     ap.add_argument("--licence-id", default="", help="reuse an existing licence id (re-export of same unit)")
+    ap.add_argument("--key-from", default="", help="licence record JSON to reuse its key (re-export after the record is already in Firebase)")
     a = ap.parse_args()
 
     exp = dt.datetime.strptime(a.expires, "%Y-%m-%d").replace(hour=23, minute=59, second=59, tzinfo=dt.timezone.utc)
     lic_id = a.licence_id or f"{a.client}-{re.sub(r'[^A-Za-z0-9]', '', a.unit)}-{secrets.token_urlsafe(12).replace('-', 'x').replace('_', 'y')}"
-    key = AESGCM.generate_key(bit_length=256)
+    if a.key_from:
+        rec = json.load(open(a.key_from))
+        rec = rec.get(a.licence_id, rec) if a.licence_id else rec
+        key = base64.b64decode(rec["k"])
+    else:
+        key = AESGCM.generate_key(bit_length=256)
     iv = secrets.token_bytes(12)
 
     out = a.out or re.sub(r"\.zip$", "", a.zip_in) + f"_SECURED_{a.unit}.zip"
