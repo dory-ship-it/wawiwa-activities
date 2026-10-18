@@ -104,7 +104,9 @@ async function videoRun(p, id, { shotPlaying = null, shotStop = null, shotWrong 
   `${id}: "${head.meta}", guiding question, video ${head.src} from content, one marker per stop on the timeline`);
   await tabTo(p, '[data-action="play"]');
   await press(p, 'Enter');
-  await wait(1500);
+  // a real film can open on a title card: wait for the first caption (V1 speaks from 0:04)
+  await p.waitForFunction(() => document.querySelector('.w-video').currentTime > 1 && !document.querySelector('.w-caption').hidden && document.querySelector('.w-caption').textContent, { timeout: 15000 }).catch(() => {});
+  await wait(300);
   const pl = await p.evaluate(() => {
     const v = document.querySelector('.w-video'), cap = document.querySelector('.w-caption'), line = document.querySelector('.w-tline[aria-current="true"]');
     return { t: v.currentTime, paused: v.paused, cap: cap.hidden ? '' : cap.textContent, line: line ? line.lastChild.textContent : '', label: document.querySelector('[data-action="play"]').getAttribute('aria-label') };
