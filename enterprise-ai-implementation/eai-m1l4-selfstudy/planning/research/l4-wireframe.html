@@ -1,0 +1,622 @@
+<title>Lesson 4 Wireframes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f4f7; --surface:#ffffff; --frame:#ffffff; --stage:#f2f4f9; --text:#1b1f2a; --muted:#525a6b;
+  --dim:#626879; --line:#d4d9e3; --line-strong:#aab2c2; --accent:#3346c8; --accent-soft:#e7eafc; --on-accent:#ffffff;
+  --ok:#17663a; --ok-bg:#e1f2e8; --ok-line:#5fae80; --warn:#874a00; --warn-bg:#fcefd6; --warn-line:#d79a3c;
+  --still:#e9ecf4; --still-ink:#2b3142; --shadow:0 1px 2px rgba(20,25,40,.06),0 8px 24px rgba(20,25,40,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111318; --surface:#1a1d25; --frame:#1a1d25; --stage:#232733; --text:#eceef4; --muted:#b2b8c6;
+    --dim:#a1a8b7; --line:#383e4c; --line-strong:#58607280; --accent:#a3b2ff; --accent-soft:#2a3262; --on-accent:#10131c;
+    --ok:#86dfaa; --ok-bg:#163828; --ok-line:#3f8f62; --warn:#ffc46a; --warn-bg:#3b2b10; --warn-line:#a7742a;
+    --still:#2b3040; --still-ink:#e2e6f0; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111318; --surface:#1a1d25; --frame:#1a1d25; --stage:#232733; --text:#eceef4; --muted:#b2b8c6;
+  --dim:#a1a8b7; --line:#383e4c; --line-strong:#58607280; --accent:#a3b2ff; --accent-soft:#2a3262; --on-accent:#10131c;
+  --ok:#86dfaa; --ok-bg:#163828; --ok-line:#3f8f62; --warn:#ffc46a; --warn-bg:#3b2b10; --warn-line:#a7742a;
+  --still:#2b3040; --still-ink:#e2e6f0; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:20px 40px}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+[hidden]{display:none !important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.page{max-width:1320px;margin:0 auto}
+.page-head h1{font-size:1.35rem;margin:0 0 4px}
+.page-head p{margin:0 0 16px;color:var(--muted);max-width:70ch}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tab{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;cursor:pointer;font-weight:600;font-size:.9rem}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.reset{margin-left:auto;border:1px solid var(--line-strong);background:transparent;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.9rem}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+@media (max-width:1100px){.layout{grid-template-columns:minmax(0,1fr)}}
+.frame-wrap{width:100%;max-width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;border-radius:12px;box-shadow:var(--shadow);background:var(--frame)}
+.frame{position:absolute;top:0;left:0;width:1280px;height:720px;transform-origin:0 0;transform:scale(var(--s,1));
+  display:grid;grid-template-rows:52px 64px 1fr 88px;background:var(--frame)}
+/* top bar */
+.topbar{display:flex;align-items:center;gap:18px;padding:0 24px;border-bottom:1px solid var(--line);font-size:15px}
+.topbar .lt{font-weight:700}
+.topbar .ch{color:var(--muted)}
+.dots{display:flex;gap:7px;margin-left:auto;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--line-strong)}
+.dot.done{background:var(--line-strong);border-color:var(--line-strong)}
+.dot.cur{background:var(--accent);border-color:var(--accent)}
+.iconbtn{border:0;background:transparent;width:38px;height:38px;border-radius:8px;display:grid;place-items:center;cursor:pointer}
+.iconbtn:hover{background:var(--stage)}
+.menu-pop{position:absolute;right:20px;top:50px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:10px;z-index:5;width:240px;font-size:15px}
+.menu-pop ul{list-style:none;margin:0;padding:0}
+.menu-pop li{padding:7px 10px;border-radius:6px}
+.menu-pop .saved{color:var(--ok);font-weight:600;display:flex;gap:6px;align-items:center}
+/* instruction */
+.instr{display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--accent);white-space:nowrap;padding:0 24px}
+/* stage */
+.stage-zone{display:flex;align-items:center;justify-content:center;padding:4px 0 14px;min-height:0}
+.stage{width:72%;height:100%;background:var(--stage);border-radius:14px;padding:26px 34px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;position:relative;font-size:17px}
+.stage:focus{outline:none}
+/* feedback row */
+.fb{display:flex;align-items:center;gap:14px;padding:0 calc(14% + 4px);border-top:1px solid var(--line);font-size:17px;transition:background-color .2s}
+.fb .fbi{flex:0 0 auto;display:grid;place-items:center}
+.fb p{margin:0;flex:1}
+.fb.hint{color:var(--muted)}
+.fb.ok{background:var(--ok-bg);color:var(--ok);border-top-color:var(--ok-line)}
+.fb.warn{background:var(--warn-bg);color:var(--warn);border-top-color:var(--warn-line)}
+.btn{border:2px solid var(--accent);background:var(--accent);color:var(--on-accent);border-radius:10px;padding:9px 20px;font-weight:700;cursor:pointer;font-size:16px;display:inline-flex;gap:8px;align-items:center}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.linkbtn{border:0;background:none;color:var(--accent);text-decoration:underline;cursor:pointer;font-weight:600;padding:4px}
+svg.ic{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+svg.ic.lg{width:34px;height:34px}
+/* options */
+.opts{display:grid;gap:14px}
+.opts.row{grid-template-columns:repeat(3,1fr)}
+.opts.col{grid-template-columns:1fr}
+.opts.two{grid-template-columns:1fr 1fr}
+.opt{border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;display:flex;gap:12px;align-items:center;font-size:16px;min-height:68px;transition:border-color .15s,background-color .15s}
+.opt:hover{border-color:var(--accent)}
+.opt .ltr{flex:0 0 auto;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;background:var(--accent-soft);color:var(--accent)}
+.opt.ok{border-color:var(--ok-line);background:var(--ok-bg);color:var(--ok)}
+.opt.warn{border-color:var(--warn-line);background:var(--warn-bg);color:var(--warn)}
+.opt.dimmed{color:var(--dim);border-color:var(--line)}
+.opt.dimmed .ltr{background:transparent;color:var(--dim);border:1px solid var(--line)}
+.opt[aria-disabled="true"]{cursor:default}
+/* S01 */
+.persona{display:flex;gap:20px;align-items:flex-start}
+.avatar{width:64px;height:64px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:0 0 auto}
+.who{font-weight:700;margin-bottom:10px}
+.bubble{background:var(--surface);border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:10px 16px;margin-bottom:8px;max-width:560px}
+/* fields */
+.field{display:grid;gap:4px}
+.field label{font-weight:700}
+.field .inrow{display:flex;gap:10px;align-items:center}
+.field input,.field textarea{flex:1;border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;font-size:16px;resize:none}
+.field input:focus,.field textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.counter{font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px;min-width:58px;text-align:right}
+.counter.near{color:var(--warn);font-weight:700}
+.toprow{display:flex;gap:12px;align-items:center;font-weight:600}
+.bottomrow{display:flex;gap:12px;align-items:center;justify-content:space-between}
+.pii{display:flex;gap:8px;align-items:center;color:var(--muted)}
+.chip{border:1px solid var(--line-strong);border-radius:999px;padding:3px 12px;font-size:14px;display:inline-flex;gap:6px;align-items:center;color:var(--muted)}
+/* FT */
+.ftq{font-size:21px;font-weight:600;text-align:center;max-width:640px;margin:0 auto}
+/* video */
+.player{display:flex;flex-direction:column;gap:10px;height:100%;padding:0}
+.stage.video{padding:16px 18px 14px}
+.vmain{flex:1;display:grid;grid-template-columns:40% 60%;border-radius:10px;overflow:hidden;border:1px solid var(--line);min-height:0}
+.still{background:var(--still);color:var(--still-ink);position:relative;display:flex;flex-direction:column}
+.still > svg{width:100%;height:100%}
+.paused svg.ic{width:14px;height:14px}
+.paused{position:absolute;left:10px;top:10px;font-size:13px;font-weight:700;background:var(--surface);color:var(--text);border-radius:6px;padding:2px 8px;display:flex;gap:5px;align-items:center}
+.qpanel{background:var(--surface);padding:18px 22px;display:flex;flex-direction:column;justify-content:space-between;gap:12px}
+.qpanel .q{font-size:18px;font-weight:600;margin:0}
+.qpanel .opt{min-height:52px;padding:10px 14px;font-size:15.5px}
+.qpanel .opts{gap:9px}
+.guide{font-size:14px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.controls{display:flex;gap:12px;align-items:center;font-size:14px}
+.timeline{position:relative;flex:1;height:8px;border-radius:4px;background:var(--line)}
+.timeline .fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--accent)}
+.timeline .cue{position:absolute;top:50%;width:14px;height:14px;transform:translate(-50%,-50%) rotate(45deg);background:var(--surface);border:3px solid var(--accent)}
+.timeline .cue.done{background:var(--accent)}
+.timeline .head{position:absolute;top:50%;width:6px;height:20px;border-radius:3px;transform:translate(-50%,-50%);background:var(--text)}
+.ctl{border:1px solid var(--line);background:var(--surface);border-radius:8px;height:34px;min-width:34px;display:grid;place-items:center;cursor:pointer;padding:0 6px}
+.ctl[aria-disabled="true"]{color:var(--dim);cursor:not-allowed}
+.tc{font-variant-numeric:tabular-nums;color:var(--muted)}
+/* sort */
+.sorthead{display:flex;gap:10px;align-items:center;font-weight:700;font-size:18px}
+.cols{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex:1;min-height:0}
+.colm{border:2px dashed var(--line-strong);border-radius:12px;background:var(--surface);display:flex;flex-direction:column;padding:10px;gap:8px;min-height:0}
+.colm .h{display:flex;gap:8px;align-items:center;font-weight:700;font-size:16px}
+.levels{display:flex;flex-wrap:wrap;gap:4px}
+.levels span{font-size:11px;font-weight:700;letter-spacing:.02em;border:1px solid var(--line-strong);border-radius:4px;padding:1px 5px;color:var(--muted)}
+.placed{display:grid;gap:6px;flex:1;align-content:start}
+.placed .card{cursor:default}
+.drop{border:1px solid var(--line);background:var(--stage);border-radius:8px;padding:6px;font-size:14px;cursor:pointer;color:var(--muted);font-weight:600}
+.drop.armed{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.tray{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:48px}
+.card{border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px;font-size:15px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.card .n{font-size:12px;font-weight:700;color:var(--muted)}
+.card[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.card.ok{border-color:var(--ok-line);background:var(--ok-bg);color:var(--ok)}
+.card.ok .n{color:var(--ok)}
+.card.warn{border-color:var(--warn-line);background:var(--warn-bg);color:var(--warn)}
+.trayempty{color:var(--muted);font-size:15px;align-self:center}
+/* terms */
+.term{border-bottom:2px dotted currentColor;cursor:help;position:relative}
+.term .tip{display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:4;width:260px;background:var(--text);color:var(--surface);font-size:13px;font-weight:500;line-height:1.35;border-radius:8px;padding:8px 10px;text-align:left}
+.term:hover .tip,.term:focus .tip{display:block}
+/* handoff */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.steps li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:center}
+.steps .num{width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;flex:0 0 auto}
+.title-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.title-row h2{font-size:20px;margin:0;display:flex;gap:10px;align-items:center}
+/* S21 */
+.kchead{display:flex;justify-content:space-between;align-items:center}
+.kdots{display:flex;gap:6px}
+.kdots span{width:12px;height:12px;border-radius:50%;background:var(--line-strong)}
+.kdots span.cur{background:var(--accent);outline:2px solid var(--accent-soft)}
+.mapgrid{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;grid-template-rows:repeat(4,auto);gap:10px 14px}
+.tile{border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;text-align:left;cursor:pointer;display:flex;gap:12px;align-items:center;font-size:16px}
+.tile .fno{flex:0 0 auto;width:26px;height:26px;border-radius:6px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:14px}
+.tile[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.tile.ok{border-color:var(--ok-line);background:var(--ok-bg);color:var(--ok)}
+.tile.warn{border-color:var(--warn-line);background:var(--warn-bg);color:var(--warn)}
+.tile.dimmed{color:var(--dim)}
+.aichip{font-size:13px;font-weight:700;border-radius:6px;padding:2px 8px;background:var(--accent-soft);color:var(--accent)}
+/* notes */
+.notes{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:.92rem}
+.notes h2{font-size:1rem;margin:0 0 10px}
+.notes dl{margin:0;display:grid;gap:10px}
+.notes dt{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.notes dd{margin:2px 0 0}
+.notes code{font-size:.85em;background:var(--stage);padding:1px 5px;border-radius:4px}
+.notes .flag{border-left:3px solid var(--warn-line);padding-left:8px;color:var(--text)}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+</style>
+
+<div class="page">
+  <header class="page-head">
+    <h1>Lesson 4 Wireframes: Process Modeling and Workflow Mapping</h1>
+    <p><strong>Pilot.</strong> Enterprise AI Implementation Specialist, Module 1, Lesson 4: the first self-study lesson built in this format. Eight sample screens for review, not the final design.</p>
+    <p>Pick a screen tab, then click through it as a learner would; the notes panel shows template, timing, tracking and sources, and Reset screen returns it to its first state.</p>
+  </header>
+  <div class="toolbar">
+    <div class="tabs" role="tablist" aria-label="Screens" id="tabs"></div>
+    <button class="reset" id="reset" type="button">Reset screen</button>
+  </div>
+  <div class="layout">
+    <div class="frame-wrap" id="wrap">
+      <div class="frame" id="frame" role="region" aria-label="Screen preview, 1280 by 720">
+        <div class="topbar">
+          <span class="lt">Lesson 4 · Process Modeling and Workflow Mapping</span>
+          <span class="ch" id="chname"></span>
+          <span class="dots" id="dots" role="img"></span>
+          <button class="iconbtn" id="menubtn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menupop"></button>
+          <div class="menu-pop" id="menupop" hidden>
+            <ul>
+              <li>Chapter map</li><li>Reference card</li><li>Resources</li><li>Help</li><li>Start over</li><li>Resume</li>
+              <li class="saved" id="savedline"></li>
+            </ul>
+          </div>
+        </div>
+        <div class="instr" id="instr" tabindex="-1"></div>
+        <div class="stage-zone"><div class="stage" id="stage" tabindex="-1"></div></div>
+        <div class="fb hint" id="fb" aria-live="polite">
+          <span class="fbi" id="fbi" aria-hidden="true"></span>
+          <p id="fbt"></p>
+          <button class="btn" id="cont" type="button" hidden>Continue</button>
+        </div>
+      </div>
+    </div>
+    <aside class="notes" aria-labelledby="notes-h">
+      <h2 id="notes-h">Screen notes</h2>
+      <dl id="notes"></dl>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var P = {
+    person:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+    list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+    route:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h6a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h6"/>',
+    forms:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+    folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    shield:'<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>',
+    bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+    doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>',
+    tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/>',
+    cross:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9l6 6M15 9l-6 6"/>',
+    book:'<path d="M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2z"/><path d="M4 20V5"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+    check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
+    alert:'<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/>',
+    info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+    play:'<path d="M8 5v14l11-7z"/>',
+    pause:'<path d="M8 5v14M16 5v14"/>',
+    cc:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M10 10.5a2 2 0 1 0 0 3M16 10.5a2 2 0 1 0 0 3"/>',
+    question:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17v.5"/>',
+    brief:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2"/>',
+    ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v5H5V6h5"/>',
+    scen:'<path d="M4 5h16v11H9l-5 4z"/>',
+    back:'<path d="M10 7l-5 5 5 5M5 12h12a3 3 0 0 1 3 3v2"/>',
+    save:'<path d="M5 3h11l3 3v15H5z"/><path d="M8 3v5h7M8 21v-6h8v6"/>',
+    lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'
+  };
+  function ic(n, cls){ return '<svg class="ic'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'+P[n]+'</svg>'; }
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  var tipN = 0;
+  function term(word, tip){ tipN++; return '<span class="term" tabindex="0" aria-describedby="tip'+tipN+'">'+esc(word)+'<span class="tip" role="tooltip" id="tip'+tipN+'">'+esc(tip)+'</span></span>'; }
+
+  var CHAPTERS = ["0 Entry","1 Why map","2 Toolkit","3 HR demo","4 Critical eye","5 Build yours","6 Close"];
+  var stage = document.getElementById("stage"), fb = document.getElementById("fb"), fbt = document.getElementById("fbt"),
+      fbi = document.getElementById("fbi"), cont = document.getElementById("cont"), instr = document.getElementById("instr");
+  document.getElementById("menubtn").innerHTML = ic("menu");
+  document.getElementById("savedline").innerHTML = ic("check") + "Saved";
+
+  function setFb(kind, text, showCont, contLabel){
+    fb.className = "fb " + kind;
+    fbi.innerHTML = ic(kind === "ok" ? "check" : kind === "warn" ? "alert" : "info");
+    fbt.textContent = text;
+    cont.hidden = !showCont;
+    cont.textContent = contLabel || "Continue";
+  }
+
+  /* choice group: options [{text,fb,key,icon}] */
+  function choices(host, opts, layout, onDone, contLabel){
+    var wrap = document.createElement("div");
+    wrap.className = "opts " + layout;
+    wrap.setAttribute("role","group");
+    var done = false, btns = [];
+    opts.forEach(function(o, i){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "opt";
+      b.innerHTML = (o.icon ? ic(o.icon) : '<span class="ltr" aria-hidden="true">'+"ABCD"[i]+'</span>') + '<span>'+esc(o.text)+'</span>';
+      b.addEventListener("click", function(){
+        if (done) return;
+        btns.forEach(function(x){ x.classList.remove("ok","warn"); x.classList.add("dimmed"); x.removeAttribute("aria-current"); });
+        b.classList.remove("dimmed");
+        b.classList.add(o.key ? "ok" : "warn");
+        b.setAttribute("aria-current","true");
+        if (onDone && onDone(o, i)) return;
+        setFb(o.key ? "ok" : "warn", o.fb, !!o.key, contLabel);
+        if (o.key){ done = true; btns.forEach(function(x){ x.setAttribute("aria-disabled","true"); }); }
+      });
+      btns.push(b); wrap.appendChild(b);
+    });
+    host.appendChild(wrap);
+    return wrap;
+  }
+
+  function field(id, label, ph, multi){
+    var d = document.createElement("div");
+    d.className = "field";
+    var tag = multi ? '<textarea rows="2"' : '<input type="text"';
+    d.innerHTML = '<label for="'+id+'">'+esc(label)+'</label><div class="inrow">'+tag+' id="'+id+'" maxlength="250" placeholder="'+esc(ph)+'" aria-describedby="'+id+'-c"'+(multi?'></textarea>':'>')+
+      '<span class="counter" id="'+id+'-c">0/250</span></div>';
+    var inp = d.querySelector(multi ? "textarea" : "input"), c = d.querySelector(".counter");
+    inp.addEventListener("input", function(){ c.textContent = inp.value.length + "/250"; c.classList.toggle("near", inp.value.length >= 225); });
+    return d;
+  }
+
+  /* sort: cols [{id,label,icon,extra}], cards [{text,col,ok,wrong}] */
+  function sorter(host, cols, cards, hint){
+    var sel = null, placedN = 0;
+    var colsEl = document.createElement("div"); colsEl.className = "cols";
+    var tray = document.createElement("div"); tray.className = "tray"; tray.setAttribute("role","group"); tray.setAttribute("aria-label","Cards to sort");
+    var drops = [];
+    cols.forEach(function(c){
+      var col = document.createElement("div"); col.className = "colm";
+      col.innerHTML = '<div class="h">'+ic(c.icon)+'<span>'+(c.labelHtml || esc(c.label))+'</span></div>'+(c.extra||"")+'<div class="placed" aria-label="Placed in '+esc(c.label)+'"></div>';
+      var drop = document.createElement("button"); drop.type = "button"; drop.className = "drop";
+      drop.textContent = "Place here"; drop.setAttribute("aria-label","Place selected card in " + c.label);
+      drop.addEventListener("click", function(){
+        if (!sel){ setFb("hint", hint, false); return; }
+        var card = sel.card, el = sel.el;
+        if (card.col === c.id){
+          el.classList.remove("warn"); el.classList.add("ok");
+          el.setAttribute("aria-pressed","false"); el.setAttribute("aria-disabled","true");
+          col.querySelector(".placed").appendChild(el);
+          placedN++;
+          var all = placedN === cards.length;
+          setFb("ok", card.ok, all);
+        } else {
+          el.classList.add("warn"); el.setAttribute("aria-pressed","false");
+          setFb("warn", card.wrong, false);
+          el.focus();
+        }
+        sel = null; drops.forEach(function(x){ x.classList.remove("armed"); });
+        if (!tray.querySelector(".card")) tray.innerHTML = '<span class="trayempty">All cards placed.</span>';
+      });
+      drops.push(drop); col.appendChild(drop); colsEl.appendChild(col);
+    });
+    cards.forEach(function(card, i){
+      var el = document.createElement("button"); el.type = "button"; el.className = "card";
+      el.setAttribute("aria-pressed","false");
+      el.innerHTML = '<span class="n">'+(i+1)+'</span><span>'+esc(card.text)+'</span>';
+      el.addEventListener("click", function(){
+        if (el.getAttribute("aria-disabled") === "true") return;
+        tray.querySelectorAll(".card").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+        el.classList.remove("warn");
+        el.setAttribute("aria-pressed","true"); sel = {card:card, el:el};
+        drops.forEach(function(x){ x.classList.add("armed"); });
+      });
+      tray.appendChild(el);
+    });
+    host.appendChild(colsEl); host.appendChild(tray);
+  }
+
+  function H(html){ var d = document.createElement("div"); d.innerHTML = html; return d; }
+  function moveFocus(){ stage.focus({preventScroll:true}); }
+
+  var SCREENS = [
+  { id:"S01", ch:0, instr:"Choose your first move.", hint:"Pick one. You can change your mind.",
+    notes:{template:"Decision", min:"2 min", track:"<code>L4_S01_1</code> · choice · key b · practice · Evaluate", src:"s6, s7, s15; L1 booklet Case 1 and its chatbot reminder; HW1 check item.", layout:"Top: person icon, label, two speech bubbles. Bottom: three options in a row (list, route, forms icons). 42 words."},
+    render:function(){
+      stage.appendChild(H('<div class="persona"><div class="avatar">'+ic("person","lg")+'</div><div><div class="who">Dana, HR director (fictional)</div>'+
+        '<div class="bubble">We get about 90 requests a month, most of them repeat questions.</div>'+
+        '<div class="bubble">Put a chatbot on the HR inbox. Live next month?</div></div></div>'));
+      choices(stage, [
+        {text:"Shortlist three chatbot vendors", icon:"list", fb:"Vendors will ask who answers what, through which channel, and what counts as a wrong answer. Today nobody can tell them."},
+        {text:"Map how a request flows today", icon:"route", key:true, fb:"Requests arrive by WhatsApp, email and in person, with no organized system. A chatbot would only speed up that disorder."},
+        {text:"Survey employees on what they want", icon:"forms", fb:"Employees can tell you what they want. A wish list is not a description of today's work."}
+      ], "row");
+    }},
+  { id:"S02", ch:0, instr:"Bring your case from Homework 1.", hint:"Describe what happens today, not the solution you want.",
+    notes:{template:"Input", min:"5 min", track:"<code>L4_S02_1</code> · fill-in · none · practice · Remember · neutral<br><code>L4_S02_2</code> · fill-in · none · practice · Understand · neutral<br>Stored once as <code>L4_CASE_TITLE</code> (edited again in S18).", src:"HW1 sections 1, 3; s40; s44.", layout:"Top: purpose line with folder icon. Middle: two stacked fields, counters right. Bottom: shield icon and no-PII line, Save right (always enabled). 38 words."},
+    render:function(){
+      stage.appendChild(H('<div class="toprow">'+ic("folder")+'<span>This is the case you map in Chapter 5.</span></div>'));
+      var mid = document.createElement("div"); mid.style.cssText = "display:grid;gap:14px";
+      mid.appendChild(field("f-title","Case title","3 to 6 words, e.g. Sales call summaries",false));
+      mid.appendChild(field("f-prob","The problem today","Today X happens, and it hurts because Y.",true));
+      stage.appendChild(mid);
+      var bot = H('<div class="bottomrow"><span class="pii">'+ic("shield")+'Leave out names and identifying details.</span></div>').firstChild;
+      var save = document.createElement("button"); save.type="button"; save.className="btn"; save.innerHTML = ic("save")+"Save";
+      save.addEventListener("click", function(){
+        var a = document.getElementById("f-title").value.trim(), b = document.getElementById("f-prob").value.trim();
+        if (a && b) setFb("ok","Saved. Your case comes back in Chapter 5, where you map it in eight fields.", true);
+        else setFb("warn","Add a few words to both fields. A rough version is enough; you can edit it later.", false);
+      });
+      bot.appendChild(save); stage.appendChild(bot);
+    }},
+  { id:"V1", ch:1, instr:"Answer the question to resume the video.", hint:"The video is paused at its first stop. Choose one to resume.",
+    notes:{template:"Video (stop 1 of 2)", min:"5 min (2:40 video + 2 stops)", track:"<code>L4_V1_1</code> · choice · key b · practice · Apply<br><code>L4_V1_2</code> (stop 2, 2:06) · choice · key a · practice · Analyze", src:"Video V1 \"Two cases, same lesson\", segment 3 (0:38) to stop 1 (0:58). Code-animated flat shapes, no music, captions.", layout:"Player = stage card. Frozen still left 40% (on-screen keywords only), question panel right 60%, feedback in the fixed row. Resume only after the correct option.", flag:"Instruction line for V1 is not specified in storyboard v2; the one shown is a wireframe placeholder."},
+    render:function(){
+      stage.classList.add("video");
+      var p = document.createElement("div"); p.className = "player";
+      p.innerHTML = '<div class="guide">'+ic("question")+'<span>Guiding question: What separates a technology change that works from one that has to be fixed later?</span></div>'+
+        '<div class="vmain"><div class="still"><span class="paused">'+ic("pause")+'Paused</span>'+
+        '<svg viewBox="0 0 360 300" role="img" aria-label="Still frame at 0:58: early 1980s, 500 versus about 100, 5x">'+
+        '<text x="180" y="34" text-anchor="middle" font-size="20" font-weight="700" fill="currentColor">early 1980s</text>'+
+        '<rect x="70" y="90" width="80" height="150" rx="6" fill="currentColor" opacity=".85"/>'+
+        '<rect x="210" y="210" width="80" height="30" rx="6" fill="currentColor" opacity=".45"/>'+
+        '<text x="110" y="78" text-anchor="middle" font-size="26" font-weight="700" fill="currentColor">500</text>'+
+        '<text x="250" y="198" text-anchor="middle" font-size="26" font-weight="700" fill="currentColor">~100</text>'+
+        '<line x1="40" y1="240" x2="320" y2="240" stroke="currentColor" stroke-width="2"/>'+
+        '<text x="180" y="280" text-anchor="middle" font-size="30" font-weight="800" fill="currentColor">5x</text></svg></div>'+
+        '<div class="qpanel" id="qp"><p class="q">The US company wants to close a five-times gap. What should it look at first?</p></div></div>'+
+        '<div class="controls"><button type="button" class="ctl" id="playb" aria-disabled="true" aria-label="Play, locked until the correct answer">'+ic("play")+'</button>'+
+        '<div class="timeline" role="img" aria-label="Timeline 0:58 of 2:40, question stops at 0:58 and 2:06"><div class="fill" style="width:36.25%"></div>'+
+        '<span class="cue" style="left:36.25%"></span><span class="cue" style="left:78.75%"></span><span class="head" style="left:36.25%"></span></div>'+
+        '<span class="tc">0:58 / 2:40</span><button type="button" class="ctl" aria-label="Captions on" aria-pressed="true">'+ic("cc")+'</button></div>';
+      stage.appendChild(p);
+      var qp = p.querySelector("#qp"), playb = p.querySelector("#playb");
+      choices(qp, [
+        {text:"A faster system for its current payment checks", fb:"Faster checks keep every existing step in place. If the work sits in the wrong place, it only moves faster."},
+        {text:"Where the 500 people's working time goes today", key:true, fb:"That is the question mapping answers. Watch what it found."},
+        {text:"The official payment procedure, as written", fb:"A written procedure shows how work should flow. The gap lives in how it really flows on a normal day."}
+      ], "col", function(o){
+        if (o.key){ playb.setAttribute("aria-disabled","false"); playb.setAttribute("aria-label","Resume video"); p.querySelector(".cue").classList.add("done"); }
+        return false;
+      }, "Resume video");
+    }},
+  { id:"FT", ch:1, instr:"Answer one question, or skip the challenge.", hint:"Answer if you already know this topic. Skipping costs nothing.",
+    notes:{template:"Fast track (FT1, opens Ch1)", min:"1 min", track:"<code>L4_FT1_1</code> · choice · key b · practice · Understand<br>Route (skip / full) to suspend_data. Right on first try lands on S03.", src:"s7.", layout:"Top: lightning icon and challenge line. Middle: question. Bottom: three options in a row; Skip challenge link bottom right. 44 words.", flag:"Storyboard gives no feedback text for Skip or for a correct answer after a wrong first try; the wireframe locks after the first answer and the Skip text is a placeholder."},
+    render:function(){
+      stage.appendChild(H('<div class="toprow" style="justify-content:center;color:var(--accent)">'+ic("bolt")+'<span>Optional challenge. Right on the first try? Skip to this chapter\'s last task.</span></div>'));
+      stage.appendChild(H('<p class="ftq">HBR, 1990: new technology runs on a broken process. What happens?</p>'));
+      var bottom = document.createElement("div"); bottom.style.cssText = "display:grid;gap:10px";
+      var answered = false;
+      choices(bottom, [
+        {text:"It removes the steps nobody needs", fb:"Technology runs the steps it is given. Nothing gets removed unless someone takes the process apart first."},
+        {text:"It speeds up the inefficiency already there", key:true, fb:"Right on the first try: you can jump to the last task of this chapter, or watch the video."},
+        {text:"It shows the broken steps by itself", fb:"The broken steps stay hidden and now run faster. Only mapping shows them. The full chapter starts now."}
+      ], "row", function(o){
+        if (answered) return true;
+        answered = true;
+        bottom.querySelectorAll(".opt").forEach(function(x){ x.setAttribute("aria-disabled","true"); });
+        setFb(o.key ? "ok" : "warn", o.fb, true, o.key ? "Jump to last task" : "Start chapter");
+        skip.disabled = true;
+        return true;
+      });
+      var skip = document.createElement("button"); skip.type="button"; skip.className="linkbtn"; skip.textContent="Skip challenge";
+      skip.style.justifySelf = "end";
+      skip.addEventListener("click", function(){ if(answered) return; answered = true; bottom.querySelectorAll(".opt").forEach(function(x){ x.classList.add("dimmed"); x.setAttribute("aria-disabled","true"); }); setFb("hint","Skipped. The full chapter runs.", true, "Start chapter"); });
+      bottom.appendChild(skip);
+      stage.appendChild(bottom);
+    }},
+  { id:"S09", ch:3, instr:"Sort each card into its part of Field 5.", hint:"Select a card, then a column.",
+    notes:{template:"Sort (Field 5 parts)", min:"4 min", track:"<code>L4_S09_1</code> · matching · 1.a,2.a,3.b,4.c,5.d,6.d · practice · Understand", src:"s14, s18, s20, s22, s44, s16.", layout:"Top: Field 5 header. Middle: four columns (document, person, tag, crossed box). Bottom: tray of six cards. Keyboard: select card, then a column's Place here. 25 words, plus the four-level scale under Sensitivity.", flag:"The four-level scale (PUBLIC / INTERNAL / CONFIDENTIAL / RESTRICTED) is shown under Sensitivity per this review; storyboard has it only in the Sensitivity tag tooltip."},
+    render:function(){
+      stage.appendChild(H('<div class="sorthead">'+ic("doc")+'<span>Field 5: sources, owners, '+term("sensitivity","One of four levels: PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED. It decides what may go to an AI tool.")+'</span></div>'));
+      var body = document.createElement("div"); body.style.cssText = "display:flex;flex-direction:column;gap:14px;flex:1;min-height:0";
+      sorter(body, [
+        {id:"a", label:"Source", icon:"doc"},
+        {id:"b", label:"Owner", icon:"person"},
+        {id:"c", label:"Sensitivity", icon:"tag", extra:'<div class="levels" aria-label="Four levels"><span>PUBLIC</span><span>INTERNAL</span><span>CONFIDENTIAL</span><span>RESTRICTED</span></div>'},
+        {id:"d", label:"Not Field 5", icon:"cross"}
+      ], [
+        {text:"Vacation policy", col:"a", ok:"Placed. The map now shows which document an HR answer depends on.", wrong:"A policy is not a person or a label. What role does it play in the process?"},
+        {text:"Overtime policy", col:"a", ok:"Placed. Overtime is one of the repeat topics in the Lesson 1 case.", wrong:"A policy is not a person or a label. What role does it play in the process?"},
+        {text:"HR manager", col:"b", ok:"Placed. When a policy goes stale, the map now names who has to update it.", wrong:"This is a role, not a document or a label. What does this role do for the policies?"},
+        {text:"INTERNAL", col:"c", ok:"Placed. The policies stay inside the company. An employee's own details would be CONFIDENTIAL and stay out of public AI tools.", wrong:"This is not a document and not a person. What does it tell you about the data?"},
+        {text:"No formal control", col:"d", ok:"Kept out. It describes how answers get checked. That is Field 6.", wrong:"This card says nothing about where knowledge comes from, who keeps it, or how sensitive it is."},
+        {text:"Chatbot answers policy questions", col:"d", ok:"Kept out. No chatbot runs today. Adding AI while mapping turns the AS-IS map into a plan.", wrong:"Ask whether this happens on a normal day in the HR case, as it runs now."}
+      ], "Select a card, then a column.");
+      stage.appendChild(body);
+    }},
+  { id:"S18A", ch:5, instr:"Map three fields of a case that is not HR.", hint:"Same eight fields, different case. Select a card, then a column.",
+    notes:{template:"Sort (transfer warm-up, new in v2)", min:"6 min", track:"<code>L4_S18A_1</code> · matching · 1.a,2.b,3.c,4.d · practice · Apply", src:"L1 booklet Case 3; s14, s16, s19; HW2 (model step).", layout:"Top: case label with tooltip (booklet first sentence). Middle: four columns. Bottom: tray of four cards. 40 words.", flag:"Tooltip on the case label should carry the first sentence of L1 booklet Case 3; placeholder text shown."},
+    render:function(){
+      stage.appendChild(H('<div class="sorthead">'+ic("brief")+'<span>'+term("Case 3","First sentence of that Lesson 1 booklet scenario. (Booklet text to insert.)")+': sales call summaries</span></div>'));
+      var body = document.createElement("div"); body.style.cssText = "display:flex;flex-direction:column;gap:14px;flex:1;min-height:0";
+      sorter(body, [
+        {id:"a", label:"Field 2: Trigger", icon:"bolt"},
+        {id:"b", label:"Field 3: Steps", icon:"list"},
+        {id:"c", label:"Field 7: Gaps", icon:"question"},
+        {id:"d", label:"Not AS-IS", icon:"cross"}
+      ], [
+        {text:"A sales call ends", col:"a", ok:"Placed. A concrete event starts the work, as in HR, but here it repeats 8 to 12 times a day per rep.", wrong:"Ask what has to happen before any summary can be written."},
+        {text:"The rep updates the CRM, often late", col:"b", ok:"Placed. The step and its owner, written as it really runs: often late, not as the rule says.", wrong:"This is work a role does. Where do steps and owners go?"},
+        {text:"Unclear whether reps see a problem", col:"c", ok:"Placed. An honest unknown. It tells you what to ask before Lesson 5.", wrong:"Nobody knows this yet. Which field holds what is missing or unclear?"},
+        {text:"An AI tool drafts each call summary", col:"d", ok:"Kept out. Your Homework 2 AI step is a future idea too. It stays off your AS-IS map.", wrong:"Does this happen on a normal day today, or is it an idea for later?"}
+      ], "Same eight fields, different case. Select a card, then a column.");
+      stage.appendChild(body);
+    }},
+  { id:"S19", ch:5, instr:"Open the workbook and map your own case.", hint:"Unknown? Write 'unclear'. The coach treats it as a valid answer.",
+    notes:{template:"Handoff to <code>eai-m1l4-class</code>", min:"64 min (about 60 in the workbook)", track:"<code>L4_S19_1</code> · fill-in · none · practice · Create · neutral (metric)<br>Open and return to suspend_data.", src:"s35, s14, s19, s37, s43 items 1 and 4, s44.", layout:"Brief: title (workbook icon) and time chip right; four numbered steps; shield and coach line left, Open right. Return: same grid, metric field in the middle. Brief 44 words, return 24.", flag:"Existing activity, live coach on, approved for EAI under Dor's DPA exception. In this wireframe Open does not launch a real tab."},
+    render:function(){
+      function brief(){
+        stage.innerHTML = "";
+        stage.appendChild(H('<div class="title-row"><h2>'+ic("book")+'AS-IS Process Mapping for Your Own Use Case</h2><span class="chip">'+ic("clock")+'~60 min</span></div>'));
+        stage.appendChild(H('<ol class="steps"><li><span class="num">1</span>Open Homework 1 and 2</li><li><span class="num">2</span>Fill eight fields as the process runs today</li>'+
+          '<li><span class="num">3</span>Leave your Homework 2 AI step off the map</li><li><span class="num">4</span>Export your PDF</li></ol>'));
+        var bot = H('<div class="bottomrow"><span class="pii">'+ic("shield")+'Coach on: roles, no names.</span><span class="acts" style="display:flex;gap:10px"></span></div>').firstChild;
+        var acts = bot.querySelector(".acts");
+        var open = document.createElement("button"); open.type="button"; open.className="btn"; open.innerHTML = "Open workbook"+ic("ext");
+        open.setAttribute("aria-label","Open workbook (opens in a new tab)");
+        open.addEventListener("click", function(){
+          setFb("ok","The workbook is open in a new tab. This module keeps your place.", false);
+          if (!acts.querySelector(".ghost")){
+            var back = document.createElement("button"); back.type="button"; back.className="btn ghost"; back.innerHTML = ic("back")+"I'm back";
+            back.addEventListener("click", ret); acts.insertBefore(back, open); back.focus();
+          }
+        });
+        acts.appendChild(open); stage.appendChild(bot);
+      }
+      function ret(){
+        stage.innerHTML = "";
+        stage.appendChild(H('<div class="title-row"><h2>'+ic("book")+'Back from the workbook? Export your PDF, then check your map.</h2></div>'));
+        stage.appendChild(field("f-metric","Your success metric: baseline and target","",true));
+        var bot = H('<div class="bottomrow"><span class="pii">'+ic("shield")+'Leave out names and identifying details.</span></div>').firstChild;
+        var save = document.createElement("button"); save.type="button"; save.className="btn"; save.innerHTML = ic("save")+"Save";
+        save.addEventListener("click", function(){
+          if (document.getElementById("f-metric").value.trim()) setFb("ok","Saved to your lesson record.", true);
+          else setFb("warn","Unknown? Write 'unclear'. The coach treats it as a valid answer.", false);
+        });
+        bot.appendChild(save); stage.appendChild(bot);
+        setFb("hint","Next: three questions to check your map against.", false);
+        moveFocus();
+      }
+      brief();
+    }},
+  { id:"S21-5", ch:6, instr:"Find the two errors in this AI-drafted HR map.", hint:"Select two lines, then Check. Only the first answer counts.",
+    notes:{template:"Knowledge check, item 5 of 5 (scored)", min:"12 min for all five items", track:"<code>L4_S21_5</code> · choice (multiple) · key 5,6 · scored · Evaluate (A5)<br>score.raw 0 to 100 (20 per item), pass mark 80 (4 of 5), first attempt counts.", src:"s14, s18, s20, s44; HW2 (fluent but wrong AI output).", layout:"Five dots top right; eight tiles in two columns of four; Check bottom right. 44 words.", flag:"Item hint in storyboard is the generic S21 hint (\"Choose one...\"); item 5 needs two picks, so the hint shown is adapted for review. On a correct pick the row shows both key feedbacks (tile 5 + tile 6, about 40 words), above the 25-word cap; SME to choose one combined line."},
+    render:function(){
+      stage.appendChild(H('<div class="kchead"><span class="toprow">'+ic("scen")+'<span class="aichip">AI draft</span></span><span class="kdots" role="img" aria-label="Item 5 of 5"><span></span><span></span><span></span><span></span><span class="cur"></span></span></div>'));
+      var lines = ["Repeat HR questions","WhatsApp, email, in person","Receive, check, answer or escalate","Staff to HR manager","Policies, HR manager, PUBLIC","HR manager reviews each answer","Errors uncounted; no handoff channel","~35% to 20% in 3 months"];
+      var grid = document.createElement("div"); grid.className = "mapgrid"; grid.setAttribute("role","group"); grid.setAttribute("aria-label","AI-drafted map, select two lines");
+      var tiles = [], done = false;
+      lines.forEach(function(t, i){
+        var b = document.createElement("button"); b.type="button"; b.className="tile"; b.setAttribute("aria-pressed","false");
+        b.innerHTML = '<span class="fno" aria-hidden="true">'+(i+1)+'</span><span><span class="sr">Field '+(i+1)+': </span>'+esc(t)+'</span>';
+        b.addEventListener("click", function(){
+          if (done) return;
+          var on = b.getAttribute("aria-pressed") === "true";
+          var count = tiles.filter(function(x){ return x.getAttribute("aria-pressed") === "true"; }).length;
+          if (!on && count >= 2) { setFb("hint","Two lines are selected. Deselect one to change your pick.", false); return; }
+          tiles.forEach(function(x){ x.classList.remove("ok","warn","dimmed"); });
+          b.setAttribute("aria-pressed", on ? "false" : "true");
+          check.disabled = tiles.filter(function(x){ return x.getAttribute("aria-pressed") === "true"; }).length !== 2;
+        });
+        tiles.push(b); grid.appendChild(b);
+      });
+      stage.appendChild(grid);
+      var bot = H('<div class="bottomrow" style="justify-content:flex-end"></div>').firstChild;
+      var check = document.createElement("button"); check.type="button"; check.className="btn"; check.textContent="Check"; check.disabled = true;
+      check.addEventListener("click", function(){
+        var picked = tiles.map(function(x,i){ return x.getAttribute("aria-pressed") === "true" ? i+1 : 0; }).filter(Boolean);
+        tiles.forEach(function(x,i){
+          var n = i+1, p = picked.indexOf(n) > -1;
+          x.classList.remove("ok","warn","dimmed");
+          x.classList.add(p ? ((n===5||n===6) ? "ok" : "warn") : "dimmed");
+        });
+        var wrong = picked.filter(function(n){ return n!==5 && n!==6; });
+        if (!wrong.length){
+          done = true; check.disabled = true;
+          tiles.forEach(function(x){ x.setAttribute("aria-disabled","true"); });
+          setFb("ok","Tagged PUBLIC, internal HR policy could be pasted anywhere. The HR map tags it INTERNAL; employee details are CONFIDENTIAL. No one reviews answers today. The AI invented a control that sounds right, and Lesson 5 would rely on it.", true, "Finish");
+        } else {
+          setFb("warn","This line matches the HR map. Compare each line with what the map really says.", false);
+        }
+      });
+      bot.appendChild(check); stage.appendChild(bot);
+    }}
+  ];
+
+  var tabsEl = document.getElementById("tabs"), cur = 0;
+  SCREENS.forEach(function(s, i){
+    var t = document.createElement("button"); t.type="button"; t.className="tab"; t.setAttribute("role","tab"); t.id="tab-"+s.id;
+    t.textContent = s.id; t.setAttribute("aria-selected","false"); t.tabIndex = -1;
+    t.addEventListener("click", function(){ show(i); });
+    t.addEventListener("keydown", function(e){
+      var k = e.key, n = null;
+      if (k === "ArrowRight") n = (i+1) % SCREENS.length; else if (k === "ArrowLeft") n = (i-1+SCREENS.length) % SCREENS.length;
+      else if (k === "Home") n = 0; else if (k === "End") n = SCREENS.length-1;
+      if (n !== null){ e.preventDefault(); show(n); tabsEl.children[n].focus(); }
+    });
+    tabsEl.appendChild(t);
+  });
+
+  function show(i){
+    cur = i; var s = SCREENS[i];
+    Array.prototype.forEach.call(tabsEl.children, function(t, j){ t.setAttribute("aria-selected", j===i ? "true":"false"); t.tabIndex = j===i ? 0 : -1; });
+    document.getElementById("frame").setAttribute("aria-labelledby","tab-"+s.id);
+    document.getElementById("chname").textContent = "Ch " + CHAPTERS[s.ch];
+    var dots = document.getElementById("dots"); dots.innerHTML = "";
+    dots.setAttribute("aria-label","Chapter " + (s.ch) + " of 6");
+    CHAPTERS.forEach(function(c, j){ var d = document.createElement("span"); d.className = "dot" + (j < s.ch ? " done" : j === s.ch ? " cur" : ""); dots.appendChild(d); });
+    instr.textContent = s.instr;
+    stage.innerHTML = ""; stage.className = "stage";
+    setFb("hint", s.hint, false);
+    s.render();
+    var n = s.notes, html = '<div><dt>Screen</dt><dd>'+esc(s.id)+' · Ch '+esc(CHAPTERS[s.ch])+'</dd></div>'+
+      '<div><dt>Template</dt><dd>'+n.template+'</dd></div><div><dt>Minutes</dt><dd>'+esc(n.min)+'</dd></div>'+
+      '<div><dt>Tracking (SCORM 1.2)</dt><dd>'+n.track+'</dd></div><div><dt>Source slides</dt><dd>'+esc(n.src)+'</dd></div>'+
+      '<div><dt>Layout</dt><dd>'+esc(n.layout)+'</dd></div>'+(n.flag ? '<div><dt>Review flag</dt><dd class="flag">'+esc(n.flag)+'</dd></div>' : '');
+    document.getElementById("notes").innerHTML = html;
+    document.getElementById("notes-h").textContent = "Screen notes: " + s.id;
+    closeMenu();
+  }
+
+  cont.addEventListener("click", function(){
+    var next = (cur + 1) % SCREENS.length; show(next); tabsEl.children[next].focus();
+  });
+  document.getElementById("reset").addEventListener("click", function(){ show(cur); instr.focus(); });
+
+  var menubtn = document.getElementById("menubtn"), menupop = document.getElementById("menupop");
+  function closeMenu(){ menupop.hidden = true; menubtn.setAttribute("aria-expanded","false"); }
+  menubtn.addEventListener("click", function(){ var o = menupop.hidden; menupop.hidden = !o; menubtn.setAttribute("aria-expanded", o ? "true":"false"); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && !menupop.hidden){ closeMenu(); menubtn.focus(); } });
+
+  var wrap = document.getElementById("wrap"), frame = document.getElementById("frame");
+  function fit(){ frame.style.setProperty("--s", (wrap.clientWidth / 1280).toFixed(4)); }
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(wrap); else window.addEventListener("resize", fit);
+  fit();
+  show(0);
+})();
+</script>
