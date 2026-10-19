@@ -27,5 +27,7 @@ Status: [ ] to do · [x] done (date)
 | C19 | The manager walks to the staffer's desk, they talk across the desk | v2-06 | 6, 7 | [ ] |
 | C20 | Dana and the staffer look at the finished map on a screen together | v2-12 | 12 | [ ] |
 
+19 Oct 2026: Noy approved the film as is with 4 clips (C01, C04, C06, C09), each used in three pieces. No more clips planned; the list below the decision stays for reference.
+
 Day 1 (19 Oct 2026): C01, C04, C06, C09 done. Limit confirmed: 4 clips a day.
 Next days, in order: C02, C03, C05, C07 · C08, C10, C11, C12 · C13, C14, C15, C16 · C17, C18, C19, C20.

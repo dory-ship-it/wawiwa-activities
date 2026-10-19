@@ -619,7 +619,7 @@ const G = {
       boxes.forEach(({ b, r, at }, i) => {
         b.style.opacity = ramp(t0, at, at + 0.15); b.style.transform = `scale(${outBack(ramp(t0, at, at + 0.45))})`;
         r.style.opacity = ramp(t0, at + 0.5, at + 0.8);
-        if (i < 2) root.querySelector('#sl' + i).setAttribute('stroke-dashoffset', 80 * (1 - smooth(ramp(t0, boxes[i + 1].at - 0.3, boxes[i + 1].at))));
+        if (i < 2) { const ln = root.querySelector('#sl' + i), st = boxes[i + 1].at - 0.3; ln.setAttribute('stroke-dashoffset', 80 * (1 - smooth(ramp(t0, st, boxes[i + 1].at)))); ln.setAttribute('opacity', t0 > st ? 1 : 0); }
       });
     };
   },
@@ -716,7 +716,8 @@ window.setFilm = async (film) => {
   S.shots = M.shots.map((s) => {
     const el = h('div', 'shot');
     let media;
-    if (s.video && !film.missing.includes(s.video)) { media = h('video'); media.src = '/' + s.video; media.muted = true; media.preload = 'auto'; }
+    if (s.bg) { media = h('div', null, { position: 'absolute', left: '50%', top: '50%', width: '1280px', height: '720px', background: 'radial-gradient(circle at 30% 25%, #1f4f6c 0%, #12304a 45%, #0b1b29 100%)' }); }
+    else if (s.video && !film.missing.includes(s.video)) { media = h('video'); media.src = '/' + s.video; media.muted = true; media.preload = 'auto'; }
     else if (s.img && !film.missing.includes(s.img)) { media = h('img'); media.src = '/' + s.img; }
     else { media = h('div', null, { position: 'absolute', left: '50%', top: '50%', width: '1280px', height: '720px', background: 'linear-gradient(135deg, #255777, #0e2030)' }); }
     el.append(media);
@@ -739,7 +740,7 @@ window.setFilm = async (film) => {
   await Promise.all([...document.images].map((im) => im.decode().catch(() => {})));
   await Promise.all([...document.querySelectorAll('video')].map((v) => new Promise((r) => (v.readyState >= 2 ? r() : v.addEventListener('loadeddata', r, { once: true })))));
   await document.fonts.ready;
-  return { range: M.range.map(anchor), shots: S.shots.map((s) => [s.img.split('/').pop(), +s.start.toFixed(2), +s.end.toFixed(2), s.media.tagName]) };
+  return { range: M.range.map(anchor), shots: S.shots.map((s) => [(s.img || 'chart background').split('/').pop(), +s.start.toFixed(2), +s.end.toFixed(2), s.media.tagName]) };
 };
 
 window.renderAt = async (t) => {

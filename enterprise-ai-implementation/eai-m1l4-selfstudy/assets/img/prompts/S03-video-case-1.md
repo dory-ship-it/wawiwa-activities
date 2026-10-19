@@ -1,5 +1,7 @@
 # S03: video case 1 still (Lesson 4, select two)
 
+**Current source (19 Oct 2026):** `assets/img/s03-case1.jpg` is a frame of the real V1 film at 0:56 (`ffmpeg -ss 56 -i assets/video/v1.mp4 -frames:v 1 -vf scale=800:-1`), so the still matches the case the learner just watched. No play badge: the still is a reminder, not a video. The generation prompt below is kept for reference only.
+
 Slot: S03 `cases[0].image` (layout work, still 212 x 124 px with a play badge bottom left, caption "Video case 1"). Later a click opens V1 at segment 3. Screen moment: case 1 of V1, the early-1980s accounts payable department of a US car company: about 500 people reconciling three separate documents by hand.
 No named character.
 Deviation from the master prompt: the setting clause is changed from a modern open-plan office to an early-1980s office, because the case is historical. Style, grade, lens and negatives are unchanged.

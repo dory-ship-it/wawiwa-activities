@@ -93,6 +93,7 @@ const STATES = [
   ['S03', 'correct', async (p) => { await click(p, '.w-opt[data-id="b"]'); await click(p, '.w-opt[data-id="d"]'); await click(p, '[data-action="check"]'); }],
   ['S03', 'pause marker', async (p) => { await click(p, '.w-opt[data-id="b"]'); await click(p, '.w-opt[data-id="d"]'); await click(p, '[data-action="check"]'); await click(p, '.w-next'); }],
   ['V1', 'play view', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); }],
+  ['V1', 'transcript open', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); await click(p, '.w-tr'); }],
   ['V1', 'stop, wrong', async (p) => { await toStop(p); await click(p, '.w-opt-stack[data-id="a"]'); }],
   ['V1', 'stop, right', async (p) => { await toStop(p); await click(p, '.w-opt-stack[data-id="b"]'); }],
   // R1: Chapter 2
@@ -135,8 +136,8 @@ const STATES = [
   }],
   ['V2', 'ended', async (p) => {
     for (const k of ['b', 'a', 'b']) { await toStop(p); await click(p, `.w-opt-stack[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }
-    await p.focus('.w-seek'); await p.keyboard.press('End');
-    await p.waitForFunction(() => document.querySelector('.w-next').dataset.locked === 'false');
+    await fastPlay(p);
+    await p.waitForFunction(() => document.querySelector('.w-next').dataset.locked === 'false', { timeout: 60000 });
   }],
   ['S09', 'start', async () => {}],
   ['S09', 'wrong', async (p) => { await click(p, '.w-tray-card[data-card="4"]'); await click(p, '.w-sort-target[data-column="a"]'); }],
@@ -197,12 +198,14 @@ const STATES = [
 ];
 // links that open a new tab: keep the test inside the module (the tab itself is checked in walk.mjs)
 async function noNewTab(p, sel) { await p.evaluate((s) => document.querySelector(s).addEventListener('click', (e) => e.preventDefault(), { capture: true }), sel); }
-// the video player: seek to the next stop (End is clamped there) and wait for the stop view
-async function toStop(p) {
+// the video player: no seeking ahead of what was watched, so play muted at 16x to the next stop
+async function fastPlay(p) {
   await p.waitForFunction(() => document.querySelector('.w-video').readyState >= 1);
-  await p.focus('.w-seek');
-  await p.keyboard.press('End');
-  await p.waitForSelector('.w-stop-view:not([hidden])');
+  await p.evaluate(() => { const v = document.querySelector('.w-video'); v.muted = true; v.playbackRate = 16; v.play(); });
+}
+async function toStop(p) {
+  await fastPlay(p);
+  await p.waitForSelector('.w-stop-view:not([hidden])', { timeout: 60000 });
 }
 for (const size of SIZES) {
   for (const [id, state, act] of STATES) {
@@ -220,7 +223,7 @@ for (const size of SIZES) {
   const page = await open('?reset=1&screen=S03', size);
   await click(page, '.w-rail-menu');
   await measure(page, `menu open ${size.join('x')}`);
-  for (const action of ['resources', 'help', 'startover']) {
+  for (const action of ['help', 'startover']) {
     await click(page, `.w-panel [data-action="${action}"]`);
     await measure(page, `menu dialog "${action}" ${size.join('x')}`);
     await page.keyboard.press('Escape');

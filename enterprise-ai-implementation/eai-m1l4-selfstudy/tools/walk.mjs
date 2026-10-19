@@ -102,7 +102,12 @@ async function videoRun(p, id, { shotPlaying = null, shotStop = null, shotWrong 
   expect(head.meta === wantMeta && head.guiding === `${UI.video.guiding} ${V.guidingQuestion}` && head.src === V.media.src
     && head.markers === V.stops.map((s) => ((100 * s.t) / V.media.duration).toFixed(2)).join(),
   `${id}: "${head.meta}", guiding question, video ${head.src} from content, one marker per stop on the timeline`);
-  await tabTo(p, '[data-action="play"]');
+  const trClosed = await p.evaluate(() => document.querySelector('.w-transcript').hidden && document.querySelector('.w-tr').getAttribute('aria-pressed') === 'false' && document.querySelector('.w-video-view').dataset.transcript === 'closed');
+  await tabTo(p, '.w-tr');
+  await press(p, 'Enter');
+  const trOpen = await p.evaluate(() => !document.querySelector('.w-transcript').hidden && document.querySelector('.w-tr').getAttribute('aria-pressed') === 'true' && document.querySelector('.w-video-view').dataset.transcript === 'open');
+  expect(trClosed && trOpen, `${id}: the transcript starts closed (player centred) and the transcript button opens it`);
+  await tabTo(p, '[data-action="play"]', { back: true });
   await press(p, 'Enter');
   // a real film can open on a title card: wait for the first caption (V1 speaks from 0:04)
   await p.waitForFunction(() => document.querySelector('.w-video').currentTime > 1 && !document.querySelector('.w-caption').hidden && document.querySelector('.w-caption').textContent, { timeout: 15000 }).catch(() => {});
@@ -123,14 +128,13 @@ async function videoRun(p, id, { shotPlaying = null, shotStop = null, shotWrong 
   await press(p, 'Enter'); // pause
   for (let k = 0; k < V.stops.length; k++) {
     const stop = V.stops[k];
-    await tabTo(p, '.w-seek');
-    await press(p, 'End');
-    await p.waitForSelector('.w-stop-view:not([hidden])');
+    await noSkipAhead(p, `${id} before stop ${k + 1}`);
+    await fastPlay(p);
+    await p.waitForSelector('.w-stop-view:not([hidden])', { timeout: 60000 });
     const st = await p.evaluate(() => ({ t: document.querySelector('.w-video').currentTime, q: document.querySelector('.w-stop-q').textContent, label: document.querySelector('.w-stop-panel .w-label').textContent,
       focus: document.activeElement.classList.contains('w-stop-q'), locked: document.querySelector('[data-action="resume"]').getAttribute('aria-disabled'),
-      lockLabel: document.querySelector('[data-action="resume"]').getAttribute('aria-label'), note: document.querySelector('.w-controls [aria-live]').textContent,
-      paused: document.querySelector('.w-paused').textContent }));
-    expect(Math.abs(st.t - stop.t) < 0.1 && st.note === UI.video.seekLimit, `${id} stop ${k + 1}: End on the seek bar stops at ${st.t.toFixed(1)}s = the open stop (${stop.t}s), never past it ("${st.note}")`);
+      lockLabel: document.querySelector('[data-action="resume"]').getAttribute('aria-label'), paused: document.querySelector('.w-paused').textContent }));
+    expect(Math.abs(st.t - stop.t) < 0.1, `${id} stop ${k + 1}: playback pauses at ${st.t.toFixed(2)}s = the stop (${stop.t}s)`);
     expect(st.q === stop.question && st.focus && st.locked === 'true' && st.lockLabel === UI.video.resumeLocked
       && st.label === UI.video.stopLabel.replace('{i}', k + 1).replace('{n}', V.stops.length).replace('{title}', V.title) && st.paused === UI.video.pausedAt.replace('{t}', mmssW(stop.t)),
     `${id} stop ${k + 1}: paused frame "${st.paused}", "${st.label}", question focused, Resume locked`);
@@ -153,10 +157,24 @@ async function videoRun(p, id, { shotPlaying = null, shotStop = null, shotWrong 
     expect(back.view && back.playing && back.focus === 'play', `${id} stop ${k + 1}: Resume returns to the player, the video plays on, focus on Play / Pause`);
     await press(p, 'Enter'); // pause
   }
+  await noSkipAhead(p, `${id} after the last stop`);
+  expect(await p.evaluate(() => document.querySelector('.w-next').dataset.locked === 'true'), `${id}: Next stays locked until the video is watched to the end`);
+  await fastPlay(p);
+  await p.waitForFunction(() => document.querySelector('.w-next').dataset.locked === 'false', { timeout: 60000 });
+  expect(await isActive(p, '.w-next'), `${id}: every stop answered and the end reached: Next unlocked and focused`);
+}
+// End on the seek bar moves no further than the part already watched (never to a stop or the end)
+async function noSkipAhead(p, where) {
+  const before = await p.evaluate(() => document.querySelector('.w-video').currentTime);
   await tabTo(p, '.w-seek');
   await press(p, 'End');
-  await p.waitForFunction(() => document.querySelector('.w-next').dataset.locked === 'false');
-  expect(await isActive(p, '.w-next'), `${id}: every stop answered and the end reached: Next unlocked and focused`);
+  await wait(200);
+  const r = await p.evaluate(() => ({ t: document.querySelector('.w-video').currentTime, note: document.querySelector('.w-controls [aria-live]').textContent, stop: !document.querySelector('.w-stop-view').hidden }));
+  expect(r.t <= before + 0.5 && !r.stop && r.note === UI.video.seekAhead, `${where}: End on the seek bar stays at ${r.t.toFixed(1)}s, the part already watched ("${r.note}")`);
+}
+// tests only: play muted at 16x to reach the next stop or the end quickly
+async function fastPlay(p) {
+  await p.evaluate(() => { const v = document.querySelector('.w-video'); v.muted = true; v.playbackRate = 16; v.play(); });
 }
 const mmssW = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 const press = async (page, key, n = 1) => { for (let i = 0; i < n; i++) await page.keyboard.press(key); };
@@ -238,14 +256,15 @@ let menu = await page.evaluate(() => ({
   open: !document.querySelector('.w-menu-overlay').hidden, inPanel: document.querySelector('.w-panel').contains(document.activeElement), focus: document.activeElement.className,
   role: document.querySelector('.w-panel').getAttribute('role'), modal: document.querySelector('.w-panel').getAttribute('aria-modal'), expanded: document.querySelector('.w-rail-menu').getAttribute('aria-expanded'),
   kicker: document.querySelector('.w-panel-kicker').textContent, title: document.querySelector('.w-panel-title').textContent,
-  pct: document.querySelector('.w-panel-pct').textContent, left: document.querySelector('.w-panel-left').textContent,
+  pct: document.querySelector('.w-panel-pct').textContent, left: !!document.querySelector('.w-panel-left'),
+  links: [...document.querySelectorAll('.w-panel-foot button')].map((b) => b.dataset.action).join(),
   list: [...document.querySelectorAll('.w-chapter')].map((c) => c.dataset.status + ':' + c.querySelector('.w-chapter-meta').textContent + (c.getAttribute('aria-current') ? '*' : '')),
 }));
 expect(menu.open && menu.inPanel && menu.focus === 'w-panel-close' && menu.role === 'dialog' && menu.modal === 'true' && menu.expanded === 'true',
   'Enter on the rail menu button opens the menu (dialog, aria-modal), focus on Close');
-expect(menu.kicker === UI.menu.kicker && menu.title === C.lesson.title && menu.pct === '0% complete' && menu.left === '3 h left'
-  && menu.list.join() === 'current:7 min left*,locked:9 min,locked:22 min,locked:19 min,locked:26 min,locked:1 h 22 min,locked:15 min',
-  `menu: "${menu.kicker}", "${menu.pct}", "${menu.left}", chapters ${menu.list.join(' | ')}`);
+expect(menu.kicker === UI.menu.kicker && menu.title === C.lesson.title && menu.pct === '0% complete' && !menu.left && menu.links === 'help,startover'
+  && menu.list.join() === 'current:*,locked:,locked:,locked:,locked:,locked:,locked:',
+  `menu: "${menu.kicker}", "${menu.pct}", no times, footer ${menu.links}, chapters ${menu.list.join(' | ')}`);
 let trapped = true;
 for (let i = 0; i < 30; i++) { await press(page, 'Tab'); trapped = trapped && await page.evaluate(() => document.querySelector('.w-panel').contains(document.activeElement)); }
 for (let i = 0; i < 8; i++) { await shiftTab(page); trapped = trapped && await page.evaluate(() => document.querySelector('.w-panel').contains(document.activeElement)); }
@@ -305,8 +324,8 @@ expect(s02.counters.join() === `${TITLE.length + 3}/250,${PROBLEM.length}/250` &
 await tabTo(page, '[data-action="save"]');
 await press(page, 'Enter');
 await expectBand(page, 'S02 saved', { state: 'neutral', text: S.S02.feedback.saved, unlocked: true });
-const saved = await page.evaluate(() => ({ rail: document.querySelector('.w-saved-text').textContent, f: window.__l4.state.f }));
-expect(saved.rail === UI.saved && saved.f.L4_CASE_TITLE === TITLE && saved.f.L4_CASE_PROBLEM === PROBLEM, `S02 saved: rail "${saved.rail}", values stored trimmed under L4_CASE_TITLE and L4_CASE_PROBLEM`);
+const saved = await page.evaluate(() => ({ badge: document.querySelector('.w-saved').hidden, f: window.__l4.state.f }));
+expect(saved.badge && saved.f.L4_CASE_TITLE === TITLE && saved.f.L4_CASE_PROBLEM === PROBLEM, 'S02 saved: no rail badge (shown only when saving fails), values stored trimmed under L4_CASE_TITLE and L4_CASE_PROBLEM');
 expect(await isActive(page, '.w-next'), 'S02 saved: focus moves to Next');
 await expectLayout(page, 'S02 saved');
 await shot(page, 's02.png');
@@ -384,14 +403,10 @@ expect(o.b === 'correct+pressed' && o.d === 'correct+pressed' && o.a === '' && o
 await expectLayout(page, 'S03 correct');
 await shot(page, 's03-correct.png');
 await press(page, 'Enter');
-await expectBand(page, 'S03 Next: chapter-end pause marker', { state: 'pause', text: CH.ch1.pauseMarker, unlocked: true });
-expect(await isActive(page, '.w-next') && await screen(page) === 'S03', 'pause marker: still on S03, focus on Next');
-await expectLayout(page, 'S03 pause marker');
-await press(page, 'Enter');
 
 /* ---------- Chapter 2 (R1): FT2 wrong, then the full chapter, every interaction wrong then right ---------- */
 console.log('\nchapter 2 (keyboard)');
-await expectNewScreen(page, 'FT2', 'S03 pause marker Next');
+await expectNewScreen(page, 'FT2', 'S03 Next (no pause marker: one Next moves on)');
 await expectBand(page, 'FT2 before action', { state: 'idle', text: '', unlocked: false, lockedWhy: UI.footer.locked.challenge });
 const ft2 = await page.evaluate(() => ({ head: document.querySelector('.w-memo-head').textContent, line: document.querySelector('.w-memo-line').textContent,
   q: document.querySelector('.w-memo-q').textContent, img: document.querySelector('.w-photo-memo')?.getAttribute('src'), alt: document.querySelector('.w-photo-memo')?.alt }));
@@ -565,15 +580,12 @@ expect(await isActive(page, '.w-next'), 'S08 round 3 right: Next unlocked and fo
 await expectLayout(page, 'S08 round 3 right');
 await shotR1(page, 's08-round3-right.png');
 await press(page, 'Enter');
-await expectBand(page, 'S08 Next: chapter 2 pause marker', { state: 'pause', text: CH.ch2.pauseMarker, unlocked: true });
-expect(await screen(page) === 'S08' && await isActive(page, '.w-next'), 'chapter 2 pause marker: still on S08, focus on Next');
-rl = await rail(page);
-expect(rl.dots[2].status === 'done' && rl.dots[3].status === 'current', `rail after chapter 2: Toolkit ${rl.dots[2].status}, HR demo ${rl.dots[3].status}, ${rl.pct}`);
-await press(page, 'Enter');
 
 /* ---------- Chapters 3 and 4 (R2): every interaction wrong then right, the V2 stops, seek blocked ---------- */
 console.log('\nchapters 3 and 4 (keyboard)');
-await expectNewScreen(page, 'FT3', 'chapter 2 pause marker Next');
+await expectNewScreen(page, 'FT3', 'S08 Next');
+rl = await rail(page);
+expect(rl.dots[2].status === 'done' && rl.dots[3].status === 'current', `rail after chapter 2: Toolkit ${rl.dots[2].status}, HR demo ${rl.dots[3].status}, ${rl.pct}`);
 const ft3 = await page.evaluate(() => ({ head: document.querySelector('.w-memo-head').textContent, nums: document.querySelectorAll('.w-opt-card .w-opt-num').length, img: document.querySelector('.w-photo-memo')?.getAttribute('src') }));
 expect(ft3.head === UI.memo.header.replace('{n}', '3') && ft3.nums === 0 && ft3.img === S.FT3.image.src, `FT3 memo: "${ft3.head}", no numerals on the option cards, image ${ft3.img}`);
 await expectLayout(page, 'FT3');
@@ -657,11 +669,9 @@ await tabTo(page, '[data-action="check"]');
 await press(page, 'Enter');
 await expectBand(page, 'S12 Check 4 + 7', { state: 'correct', text: tileAns(4).feedback + ' ' + tileAns(7).feedback, unlocked: true });
 await press(page, 'Enter');
-await expectBand(page, 'S12 Next: chapter 3 pause marker', { state: 'pause', text: CH.ch3.pauseMarker, unlocked: true });
-await press(page, 'Enter');
 
 // FT4
-await expectNewScreen(page, 'FT4', 'chapter 3 pause marker Next');
+await expectNewScreen(page, 'FT4', 'S12 Next');
 await expectLayout(page, 'FT4');
 await shotR2(page, 'ft4.png');
 await tabTo(page, '.w-opt[data-id="c"]');
@@ -722,15 +732,13 @@ for (const k of ['b', 'c', 'd', 'e']) {
 await expectBand(page, 'S17 done', { state: 'correct', text: card('S17', 'e').feedback.correct, unlocked: true });
 expect(await page.evaluate(() => [...document.querySelectorAll('.w-sort-marker')].length) === 5, 'S17 done: a marker in each bin (case text for screen readers only)');
 await press(page, 'Enter');
-await expectBand(page, 'S17 Next: chapter 4 pause marker', { state: 'pause', text: CH.ch4.pauseMarker, unlocked: true });
-rl = await rail(page);
-expect(rl.dots.slice(0, 5).every((d) => d.status === 'done') && rl.dots[5].status === 'current', `rail after chapter 4: chapters 0 to 4 done, Build yours ${rl.dots[5].status}, ${rl.pct}`);
-await press(page, 'Enter');
 
 /* ---------- Chapters 5 and 6 (R3): handoff in a new tab and back, S21 first-attempt scoring, finish ---------- */
 console.log('\nchapters 5 and 6 (keyboard)');
 const METRIC = 'Share of HR time on repeat questions: about 35% now, 20% within three months.';
-await expectNewScreen(page, 'S18A', 'chapter 4 pause marker Next');
+await expectNewScreen(page, 'S18A', 'S17 Next');
+rl = await rail(page);
+expect(rl.dots.slice(0, 5).every((d) => d.status === 'done') && rl.dots[5].status === 'current', `rail after chapter 4: chapters 0 to 4 done, Build yours ${rl.dots[5].status}, ${rl.pct}`);
 await trayPlace(page, '1', 'b');
 await expectBand(page, 'S18A card 1 in Field 3', { state: 'wrong', text: card('S18A', 1).feedback.wrong, unlocked: false });
 await expectLayout(page, 'S18A wrong');
@@ -789,7 +797,7 @@ await expectBand(page, 'S19 saved', { state: 'neutral', text: S.S19.states.retur
 await expectLayout(page, 'S19 saved');
 await press(page, 'Enter');
 
-// S20: three rows (one changed: a retry, still neutral), Next opens step 2, a chip, then the pause marker
+// S20: three rows (one changed: a retry, still neutral), Next opens step 2, a chip, then Next to S21
 await expectNewScreen(page, 'S20', 'S19 Next');
 const row = (id) => S.S20.steps[0].rows.find((r) => r.id === id);
 for (const [q, c] of [['q1', 'notYet'], ['q1', 'yes'], ['q2', 'yes'], ['q3', 'notYet']]) {
@@ -807,11 +815,9 @@ await press(page, 'Enter');
 await expectBand(page, 'S20 chip rushed', { state: 'neutral', text: S.S20.steps[1].chips[2].feedback, unlocked: true });
 await expectLayout(page, 'S20 step 2');
 await press(page, 'Enter');
-await expectBand(page, 'S20 Next: chapter 5 pause marker', { state: 'pause', text: CH.ch5.pauseMarker, unlocked: true });
-await press(page, 'Enter');
 
 // S21: item 1 wrong then right (the wrong first answer counts), items 2 to 5 right first: 4 of 5
-await expectNewScreen(page, 'S21', 'chapter 5 pause marker Next');
+await expectNewScreen(page, 'S21', 'S20 Next');
 const item = (k) => S.S21.items[k];
 const iopt = (k, id) => item(k).options.find((o) => o.id === id);
 await tabTo(page, '.w-kc-opt[data-id="a"]');
@@ -886,7 +892,7 @@ await page.evaluate(() => window.__l4.go('S19'));
 // menu: every chapter done
 await tabTo(page, '.w-rail-menu', { back: true });
 await press(page, 'Enter');
-menu = await page.evaluate(() => ({ pct: document.querySelector('.w-panel-pct').textContent, left: document.querySelector('.w-panel-left').textContent, list: [...document.querySelectorAll('.w-chapter')].map((c) => c.dataset.status + ':' + c.querySelector('.w-chapter-meta').textContent + (c.getAttribute('aria-current') ? '*' : '')) }));
+menu = await page.evaluate(() => ({ pct: document.querySelector('.w-panel-pct').textContent, left: '', list: [...document.querySelectorAll('.w-chapter')].map((c) => c.dataset.status + ':' + c.querySelector('.w-chapter-meta').textContent + (c.getAttribute('aria-current') ? '*' : '')) }));
 expect(menu.pct === '100% complete' && menu.list.every((x) => x === 'done:Done') && menu.list.length === 7, `menu at the end: "${menu.pct}", "${menu.left}", all 7 chapters done`);
 await expectLayout(page, 'menu open');
 await shot(page, 'menu-open.png');

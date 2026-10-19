@@ -1,9 +1,9 @@
 // Chapters menu (approved look, R2-menu-open): a 380 px panel from the left over a grey scrim,
 // role dialog, aria-modal, focus trapped, Escape closes, focus returns to the rail menu button.
-// Panel: close button, "Module 1 · Lesson 4", lesson title, % complete with a thin teal bar and time
-// left, the chapter list (status icon, title, Done / time; the current chapter on teal-tint), and a
-// footer row of text buttons: Resources, Help, Start over.
-// Also the in-page dialog used for Resources, Help, the Start over confirm and the resume prompt
+// Panel: close button, "Module 1 · Lesson 4", lesson title, % complete with a thin teal bar, the
+// chapter list (status icon, title, Done; the current chapter on teal-tint; no times), and a footer
+// row of text buttons: Help, Start over.
+// Also the in-page dialog used for Help, the Start over confirm and the resume prompt
 // (never window.confirm).
 import { h, fmt, resolveLink, trapTab, focusables } from './util.js';
 import { icon, statusMark } from './icons.js';
@@ -50,20 +50,18 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
   const closeBtn = h('button', { class: 'w-panel-close', type: 'button', 'aria-label': m.close, onclick: () => close() }, icon('x', { size: 22 }));
   const title = h('h2', { class: 'w-panel-title', id: 'w-menu-title' }, content.lesson.title);
   const pctText = h('span', { class: 'w-panel-pct' });
-  const leftText = h('span', { class: 'w-panel-left' });
   const barFill = h('span', { class: 'w-panel-bar-fill' });
   const bar = h('div', { class: 'w-panel-bar', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-label': m.progressLabel }, barFill);
   const list = h('ol', { class: 'w-chapters' });
-  const resourcesBtn = h('button', { class: 'w-panel-link', type: 'button', dataset: { action: 'resources' }, onclick: () => showResources() }, m.resources);
   const helpBtn = h('button', { class: 'w-panel-link', type: 'button', dataset: { action: 'help' }, onclick: () => showHelp() }, m.help);
   const startOverBtn = h('button', { class: 'w-panel-link w-startover', type: 'button', dataset: { action: 'startover' }, onclick: () => confirmStartOver() }, m.startOver);
 
   const panel = h('div', { class: 'w-panel', role: 'dialog', 'aria-modal': 'true', 'aria-label': m.title },
     h('div', { class: 'w-panel-head' }, closeBtn, h('span', { class: 'w-panel-kicker' }, m.kicker)),
     title,
-    h('div', { class: 'w-panel-progress' }, h('div', { class: 'w-panel-progress-line' }, pctText, leftText), bar),
+    h('div', { class: 'w-panel-progress' }, h('div', { class: 'w-panel-progress-line' }, pctText), bar),
     list,
-    h('div', { class: 'w-panel-foot' }, resourcesBtn, helpBtn, startOverBtn));
+    h('div', { class: 'w-panel-foot' }, helpBtn, startOverBtn));
   const overlay = h('div', { class: 'w-menu-overlay', hidden: true }, h('div', { class: 'w-menu-scrim', onclick: () => close() }), panel);
   stage.append(overlay);
 
@@ -72,11 +70,10 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
     trapTab(e, panel);
   });
 
-  // model: { percent, timeLeft, chapters: [{ n, title, status, meta, label, clickable, current }] }
+  // model: { percent, chapters: [{ n, title, status, meta, label, clickable, current }] }
   function render() {
     const model = getMenu();
     pctText.textContent = fmt(m.complete, { p: model.percent });
-    leftText.textContent = fmt(m.timeLeft, { t: model.timeLeft });
     barFill.style.width = model.percent + '%';
     bar.setAttribute('aria-valuenow', String(model.percent));
     list.replaceChildren(...model.chapters.map((c) => h('li', {},
@@ -110,17 +107,6 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
   }
 
   const closeAction = [{ id: 'close', label: ui.buttons.close, cancel: true, onClick: (done) => done() }];
-
-  function showResources() {
-    const items = (ui.resources || []).map((r) => {
-      const href = resolveLink(content, r.href);
-      if (!href) return h('li', { class: 'w-resource w-resource-off' }, h('span', {}, r.label), r.note ? h('span', { class: 'w-resource-note' }, r.note) : null);
-      return h('li', { class: 'w-resource' },
-        h('a', { href, target: r.newTab ? '_blank' : null, rel: r.newTab ? 'noopener noreferrer' : null },
-          h('span', {}, r.label), r.newTab ? h('span', { class: 'w-newtab' }, icon('external-link', { size: 16 }), h('span', {}, ui.newTabNote)) : null));
-    });
-    openDialog(stage, { text: m.resources, body: h('ul', { class: 'w-dialog-list' }, items), opener: resourcesBtn, inert: [panel], actions: closeAction });
-  }
 
   function showHelp() {
     openDialog(stage, { text: m.help, body: h('ul', { class: 'w-dialog-list w-help' }, (ui.help || []).map((line) => h('li', {}, line))), opener: helpBtn, inert: [panel], actions: closeAction });

@@ -218,9 +218,9 @@ function multi(ctx) {
     markers[i].firstChild.replaceChildren(state === 'correct' ? icon('check', { size: 14 }) : state === 'wrong' ? icon('x', { size: 14 }) : '');
   };
   const cases = (screen.cases || []).map((c) =>
-    // the still will open V1 at its case (c.video, c.segment) once the player exists (P3); no control until then
+    // a still from V1 as a reminder of each case: a picture only, so no play badge
     h('figure', { class: 'w-case', dataset: { video: c.video || '', segment: String(c.segment ?? '') } },
-      h('div', { class: 'w-still' }, picture(c.image, 'w-photo-still'), h('span', { class: 'w-play', 'aria-hidden': 'true' }, icon('play', { size: 16 }))),
+      h('div', { class: 'w-still' }, picture(c.image, 'w-photo-still')),
       h('figcaption', {}, c.label)));
 
   layout(ctx, 'work',

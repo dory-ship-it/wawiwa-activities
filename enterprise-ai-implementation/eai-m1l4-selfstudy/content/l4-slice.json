@@ -117,7 +117,8 @@
       "pausedAt": "Paused at {t}",
       "resume": "Resume video",
       "resumeLocked": "Resume video, locked until the answer is correct",
-      "seekLimit": "Answer the stop first. The video continues after the right answer."
+      "seekLimit": "Answer the stop first. The video continues after the right answer.",
+      "seekAhead": "You can move ahead only to the part you have already watched."
     },
     "rail": {
       "label": "Chapters",
@@ -149,13 +150,8 @@
       "kicker": "Module 1 · Lesson 4",
       "complete": "{p}% complete",
       "progressLabel": "Lesson progress",
-      "timeLeft": "{t} left",
-      "hm": "{h} h {m} min",
-      "h": "{h} h",
-      "m": "{m} min",
       "done": "Done",
       "chapterLabel": "{title}, {status}",
-      "resources": "Resources",
       "help": "Help",
       "startOver": "Start over"
     },
@@ -165,10 +161,6 @@
       "Use Tab and Enter or Space to work without a mouse. Escape closes the menu.",
       "Videos stop for questions. Captions and a transcript are under the video.",
       "Your place is saved. You can leave and come back."
-    ],
-    "resources": [
-      { "id": "workbook", "label": "AS-IS Process Mapping for Your Own Use Case (workbook)", "href": "@links.workbook", "newTab": true },
-      { "id": "refcard", "label": "Reference card: the worked HR map", "href": null, "note": "Not in this pilot" }
     ]
   },
 
@@ -219,19 +211,19 @@
     { "id": "ch0", "n": 0, "title": "Entry", "minutes": 7, "screens": ["S01", "S02"], "inSlice": true, "pauseMarker": null },
     { "id": "ch1", "n": 1, "title": "Why map", "minutes": 9, "screens": ["FT1", "V1", "S03"], "inSlice": true,
       "fastTrack": { "card": "FT1", "landing": "S03" },
-      "pauseMarker": "Good place to pause. Your place is saved." },
+      "pauseMarker": null },
     { "id": "ch2", "n": 2, "title": "Toolkit", "minutes": 22, "screens": ["FT2", "S04", "S05", "S06", "S07", "S08"], "inSlice": true,
       "fastTrack": { "card": "FT2", "landing": "S08" },
-      "pauseMarker": "Good place to pause. Your place is saved." },
+      "pauseMarker": null },
     { "id": "ch3", "n": 3, "title": "HR demo", "minutes": 19, "screens": ["FT3", "V2", "S09", "S10", "S11", "S12"], "inSlice": true,
       "fastTrack": { "card": "FT3", "landing": "S12" },
-      "pauseMarker": "Good place to pause. Your place is saved." },
+      "pauseMarker": null },
     { "id": "ch4", "n": 4, "title": "Critical eye", "minutes": 26, "screens": ["FT4", "S13", "S14", "S15", "S16", "S17"], "inSlice": true,
       "fastTrack": { "card": "FT4", "landing": "S17" },
-      "pauseMarker": "Good place to pause. Chapter 5 takes about 80 minutes. Start it fresh." },
+      "pauseMarker": null },
     { "id": "ch5", "n": 5, "title": "Build yours", "minutes": 82, "screens": ["S18A", "S18", "S19", "S20"], "inSlice": true,
       "sliceNote": "S18A and S18 come later; the slice enters Chapter 5 at S19.",
-      "pauseMarker": "Good place to pause. Your map and place are saved." },
+      "pauseMarker": null },
     { "id": "ch6", "n": 6, "title": "Close", "minutes": 15, "screens": ["S21", "S22"], "inSlice": true, "pauseMarker": null }
   ],
 
@@ -459,10 +451,10 @@
       "terms": ["Success metric"],
       "layout": "work",
       "cases": [
-        { "id": "case1", "label": "Video case 1", "video": "V1", "segment": 3,
-          "image": { "src": "assets/img/temp/ref-video-case-1.jpg", "alt": "Still from video case 1", "prompt": "assets/img/prompts/S03-video-case-1.md", "temp": true, "position": "50% 30%" } },
-        { "id": "case2", "label": "Video case 2", "video": "V1", "segment": 5,
-          "image": { "src": "assets/img/temp/ref-team-meeting.jpg", "alt": "Still from video case 2", "prompt": "assets/img/prompts/S03-video-case-2.md", "temp": true, "position": "85% 50%" } }
+        { "id": "case1", "label": "Case 1: car company, 1980s", "video": "V1", "segment": 3,
+          "image": { "src": "assets/img/s03-case1.jpg", "alt": "A manager looks over a crowded 1980s accounts payable office", "prompt": "assets/img/prompts/S03-video-case-1.md", "temp": false, "position": "50% 40%" } },
+        { "id": "case2", "label": "Case 2: fintech, 2024", "video": "V1", "segment": 5,
+          "image": { "src": "assets/img/s03-case2.jpg", "alt": "A customer service rep with a headset at a desk of screens", "prompt": "assets/img/prompts/S03-video-case-2.md", "temp": false, "position": "50% 40%" } }
       ],
       "stage": {
         "top": { "kind": "line", "icon": "history", "text": "Four causes of AI project failure, from Lesson 1. Which two do both video cases point to?" },

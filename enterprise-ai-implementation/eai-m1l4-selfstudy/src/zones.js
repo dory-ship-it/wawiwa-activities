@@ -104,7 +104,9 @@ export function createZones(stage, content, { onMenu, onChapter, onPrev, onNext 
   }
 
   function setSaved(ok) {
+    // shown only when saving fails: a working save needs no badge
     saved.dataset.ok = ok ? 'true' : 'false';
+    saved.hidden = ok;
     savedText.textContent = ok ? ui.saved : ui.notSaved;
   }
 

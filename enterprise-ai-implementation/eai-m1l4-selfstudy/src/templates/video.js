@@ -6,8 +6,8 @@
 // change of those paths and times only.
 // Stops: playback (or a seek) reaching an unanswered stop pauses the video and switches to the stop
 // view: the paused frame left, the question right with its options and the feedback band; "Resume
-// video" stays locked until the right answer. Seeking never passes the next unanswered stop (the
-// slider clamps, a polite note says why). First attempt per stop on the tracking bus. Next unlocks
+// video" stays locked until the right answer. Seeking forward never passes the part already watched
+// or the next unanswered stop (the slider clamps, a polite note says why). First attempt per stop on the tracking bus. Next unlocks
 // when the video has ended and every stop is answered.
 import { h, fmt, nextId } from '../util.js';
 import { icon } from '../icons.js';
@@ -58,19 +58,20 @@ export const video = {
     const toggle = (cls, label, name, pressed) => h('button', { class: 'w-tool ' + cls, type: 'button', 'aria-label': label, 'aria-pressed': String(pressed) }, icon(name, { size: 22 }));
     const ccBtn = toggle('w-cc', v.captions, 'captions', true);
     const muteBtn = toggle('w-mute', v.mute, 'volume', false);
-    const trBtn = toggle('w-tr', v.transcript, 'transcript', true);
+    const trBtn = toggle('w-tr', v.transcript, 'transcript', false); // closed until the learner opens it
     const limitNote = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
     const controls = h('div', { class: 'w-controls', role: 'group', 'aria-label': v.controls }, playBtn, timeText, seek, ccBtn, muteBtn, trBtn, limitNote);
 
     /* ---- transcript ---- */
     const trList = h('div', { class: 'w-transcript-list' });
-    const transcript = h('aside', { class: 'w-transcript', 'aria-label': v.transcript }, h('h2', { class: 'w-transcript-head' }, v.transcript), trList);
+    const transcript = h('aside', { class: 'w-transcript', 'aria-label': v.transcript, hidden: true }, h('h2', { class: 'w-transcript-head' }, v.transcript), trList);
 
     /* ---- play view ---- */
     const meta = h('p', { class: 'w-video-meta' }, h('span', { class: 'w-video-title' }, screen.title), ' · ', fmt(v.meta, { length: media.length, n: stops.length }));
     const guiding = h('p', { class: 'w-guiding' }, h('b', {}, v.guiding), ' ', screen.guidingQuestion);
     const player = h('figure', { class: 'w-player' }, frame, controls);
-    const playView = h('div', { class: 'w-video-view' }, h('div', { class: 'w-video-head' }, zones.instruction, meta, guiding), player, transcript);
+    // transcript closed: heading and player centred; open: player left, transcript right
+    const playView = h('div', { class: 'w-video-view', dataset: { transcript: 'closed' } }, h('div', { class: 'w-video-head' }, zones.instruction, meta, guiding), player, transcript);
 
     /* ---- stop view ---- */
     const stopFrame = h('figure', { class: 'w-stop-frame' });
@@ -89,8 +90,11 @@ export const video = {
     layout(ctx, 'video', zones.logo, playView, stopView);
 
     /* ---- time, slider, captions, transcript ---- */
+    // forward seeking stops at the furthest point already watched (and never passes an open stop);
+    // backward is always free. A finished video (revisit) seeks freely.
+    let reached = 0;
     const nextStop = () => stops.find((s) => !answered.has(s.id)) || null;
-    const limit = () => (nextStop() ? nextStop().t : duration);
+    const limit = () => (done ? duration : Math.min(reached, nextStop() ? nextStop().t : duration));
     function render() {
       const t = Math.min(vid.currentTime || 0, duration);
       timeText.textContent = `${mmss(t)} / ${mmss(duration)}`;
@@ -132,12 +136,12 @@ export const video = {
     // seek to t, never past the next unanswered stop
     function seekTo(t) {
       const max = limit();
-      if (t > max + AT_STOP) limitNote.textContent = v.seekLimit;
+      if (t > max + AT_STOP) limitNote.textContent = nextStop() && Math.abs(max - nextStop().t) <= AT_STOP ? v.seekLimit : v.seekAhead;
       vid.currentTime = Math.max(0, Math.min(t, max));
       render();
     }
 
-    vid.addEventListener('timeupdate', () => { render(); check(); });
+    vid.addEventListener('timeupdate', () => { if (!vid.seeking && !vid.paused) reached = Math.max(reached, vid.currentTime); render(); check(); });
     vid.addEventListener('seeked', () => { render(); check(); });
     vid.addEventListener('play', render);
     vid.addEventListener('pause', render);
@@ -159,7 +163,12 @@ export const video = {
     const flip = (btn) => btn.setAttribute('aria-pressed', String(btn.getAttribute('aria-pressed') !== 'true'));
     ccBtn.addEventListener('click', () => { flip(ccBtn); render(); });
     muteBtn.addEventListener('click', () => { flip(muteBtn); vid.muted = muteBtn.getAttribute('aria-pressed') === 'true'; muteBtn.replaceChildren(icon(vid.muted ? 'volume-x' : 'volume', { size: 22 })); });
-    trBtn.addEventListener('click', () => { flip(trBtn); transcript.hidden = trBtn.getAttribute('aria-pressed') !== 'true'; });
+    trBtn.addEventListener('click', () => {
+      flip(trBtn);
+      transcript.hidden = trBtn.getAttribute('aria-pressed') !== 'true';
+      playView.dataset.transcript = transcript.hidden ? 'closed' : 'open';
+      render();
+    });
 
     /* ---- stops ---- */
     function setResume(locked) {

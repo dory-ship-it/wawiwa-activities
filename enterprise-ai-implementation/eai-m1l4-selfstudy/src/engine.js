@@ -340,10 +340,9 @@ class Lesson {
     const percent = Math.min(100, Math.round((100 * minutesDone) / this.totalMinutes));
     const chapters = this.chapters.map((c) => {
       const status = this.chapterStatus(c, done, frontierChapter);
-      const left = c.minutes - c.screens.filter((id) => done.has(id)).reduce((sum, id) => sum + (this.screens[id].minutes || 0), 0);
-      return { c, status, left: Math.max(0, left), clickable: status === 'done' || status === 'current' };
+      return { c, status, clickable: status === 'done' || status === 'current' };
     });
-    return { percent, minutesLeft: this.totalMinutes - minutesDone, chapters, frontierChapter };
+    return { percent, chapters, frontierChapter };
   }
 
   renderRail() {
@@ -364,23 +363,14 @@ class Lesson {
   menuModel() {
     const p = this.progress();
     const m = this.ui.menu;
+    // no times in the menu: chapter minutes only weigh the % complete
     return {
       percent: p.percent,
-      timeLeft: this.duration(p.minutesLeft),
-      chapters: p.chapters.map(({ c, status, left, clickable }) => ({
+      chapters: p.chapters.map(({ c, status, clickable }) => ({
         n: c.n, title: c.title, status, clickable, current: c.id === p.frontierChapter,
-        meta: status === 'done' ? m.done : status === 'current' ? fmt(m.timeLeft, { t: this.duration(left) }) : this.duration(c.minutes),
+        meta: status === 'done' ? m.done : '',
         label: fmt(m.chapterLabel, { title: c.title, status: this.ui.rail.status[status] }),
       })),
     };
-  }
-
-  // 167 -> "2 h 47 min", 120 -> "2 h", 22 -> "22 min"
-  duration(min) {
-    const m = this.ui.menu;
-    const hours = Math.floor(min / 60), mins = min % 60;
-    if (hours && mins) return fmt(m.hm, { h: hours, m: mins });
-    if (hours) return fmt(m.h, { h: hours });
-    return fmt(m.m, { m: mins });
   }
 }
