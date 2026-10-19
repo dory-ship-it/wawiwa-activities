@@ -15,3 +15,15 @@ These are the exported artboard sources (1280x720, inline styles). Read them for
 | R3-video-stop.html | In-video question stop: paused frame left, question and feedback right |
 
 Images: `/_blob/...` URLs in the files do not resolve here. `ref-team-meeting.jpg` and `ref-video-case-1.jpg` are the board's images, **style references only**. Every screen gets its own new image (see `planning/IMAGE STYLE.md`). The logo is in `assets/logo/`.
+
+## Round 4 (approved by Noy, 2026-10-19): Intro and Chapter 1, storyboard v3
+
+| File | Use as reference for |
+|---|---|
+| R4-O1-title.html | O1 lesson title screen (template "title"): text column left, full-height photo right, no header or footer |
+| R4-O2-module.html | O2 "Where we are" (template "moduleMap"): five stations on a line, L4 open; the ghost hand drawn on L5 |
+| R4-O3-goals.html | O3 lesson goals (template "goals"): deliverable box, five icon tiles, tooltip on goal 5 |
+| R4-W1-warmup.html | W1 warm-up (template "warmup"): navy side panel, neutral "Your guess" state, no right/wrong colours |
+| R4-K1-key-idea.html | K1 key idea (template "concept"): light blue-grey stage, two figure cards built in HTML/CSS |
+
+Round 4 images: `/_blob/646f9fd3edb9fe9fcb18c6472fe519ab` is `assets/img/ft3.jpg` (O1 photo); `/_blob/b16ce2f524cebca874501d9731444899` is the Wawiwa logo.
