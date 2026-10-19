@@ -35,7 +35,6 @@ const toStop = async (p) => {
 
 await shot('o1.png', '?reset=1&screen=O1');
 await shot('o2.png', '?reset=1&screen=O2', noHand);
-await shot('o2-hand.png', '?reset=1&screen=O2', async (p) => { await p.waitForFunction(() => document.querySelector('.w-map-panel').dataset.station === 'l5', { timeout: 4000 }); await wait(120); }, { motion: true });
 await shot('o3.png', '?reset=1&screen=O3', async (p) => { await p.focus('.w-goal[data-goal="g5"]'); });
 await shot('w1-before.png', '?reset=1&screen=W1');
 await shot('w1-after.png', '?reset=1&screen=W1', async (p) => { await p.click('.w-guess[data-id="b"]'); await p.mouse.move(5, 715); });
@@ -46,8 +45,10 @@ await shot('s03-hand.png', '?reset=1&screen=S03', async (p) => {
   await wait(1250); // between the second card and Check
 }, { motion: true });
 await shot('v2-stop1.png', '?reset=1&screen=V2', async (p) => { await toStop(p); await noHand(p); });
-for (const id of ['O1', 'O2', 'O3', 'W1', 'K1']) {
-  await shot(`${id.toLowerCase()}-1920x950.png`, `?reset=1&screen=${id}`, id === 'O2' ? noHand : async () => {}, { size: [1920, 950] });
+for (const id of ['O1', 'O2', 'O3', 'W1', 'K1', 'S02']) {
+  await shot(`${id.toLowerCase()}-1920x950.png`, `?reset=1&screen=${id}`, async () => {}, { size: [1920, 950] });
 }
+await shot('s02-1536x730.png', '?reset=1&screen=S02', async () => {}, { size: [1536, 730] });
+await shot('s03-showme.png', '?reset=1&screen=S03', noHand);
 await browser.close();
 server.close();

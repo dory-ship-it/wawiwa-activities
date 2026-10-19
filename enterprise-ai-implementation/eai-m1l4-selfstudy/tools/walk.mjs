@@ -254,20 +254,15 @@ await expectLayout(page, 'O1');
 await tabTo(page, '[data-action="start"]');
 await press(page, 'Enter');
 
-// O2 module map: tabs by keyboard, L4 open on arrival, Next never locked; the ghost hand (reduced motion:
-// a static hand) shows once, any key stops it at once, "Show me" replays it
+// O2 module map: tabs by keyboard, L4 open on arrival, Next never locked, no ghost hand
 await expectNewScreen(page, 'O2', 'O1 "Start the lesson"');
 const tabState = () => page.evaluate(() => ({ sel: [...document.querySelectorAll('.w-map-tab')].map((t) => t.getAttribute('aria-selected') === 'true' ? t.dataset.station : '').join(''),
   panel: document.querySelector('.w-map-panel').dataset.station, text: document.querySelector('.w-map-panel-text').textContent, role: document.querySelector('.w-map-tabs').getAttribute('role') }));
 let mapTabs = await tabState();
 expect(mapTabs.sel === 'l4' && mapTabs.panel === 'l4' && mapTabs.role === 'tablist' && mapTabs.text === S.O2.stations[2].text && !(await nextState(page)).locked,
   `O2: tablist, Lesson 4 open on arrival ("${mapTabs.text}"), Next unlocked (presentation screen)`);
-await page.waitForSelector('.w-ghost', { timeout: 3000 }).catch(() => {});
-const ghostOn = await page.evaluate(() => ({ on: !!document.querySelector('.w-ghost'), hidden: document.querySelector('.w-ghost')?.getAttribute('aria-hidden'), seen: window.__l4.state.h }));
-await press(page, 'Shift');
-const ghostOff = await page.evaluate(() => !document.querySelector('.w-ghost'));
-expect(ghostOn.on && ghostOn.hidden === 'true' && ghostOn.seen.includes('t') && ghostOff && (await tabState()).panel === 'l4',
-  `O2 ghost hand: shown after the screen settles (aria-hidden, seen types "${ghostOn.seen}"), a key press removes it at once, Lesson 4 stays open`);
+await wait(1000);
+expect(await page.evaluate(() => !document.querySelector('.w-ghost') && !document.querySelector('[data-action="showMe"]')), 'O2: no ghost hand and no "Show me"');
 await expectLayout(page, 'O2');
 await tabTo(page, '.w-map-tab[data-station="l4"]');
 await press(page, 'ArrowLeft', 2);
@@ -278,11 +273,6 @@ expect(mapTabs.sel === 'l1' && mapTabs.panel === 'l1' && mapTabs.text === S.O2.s
 await press(page, 'End');
 await press(page, ' ');
 expect((await tabState()).panel === 'l6', 'O2: End then Space opens Lesson 6');
-await tabTo(page, '[data-action="showMe"]', { back: true });
-await press(page, 'Enter');
-await page.waitForSelector('.w-ghost', { timeout: 2000 }).catch(() => {});
-expect(await page.evaluate(() => !!document.querySelector('.w-ghost')), 'O2: "Show me" replays the ghost hand');
-await press(page, 'Shift');
 await tabTo(page, '.w-next');
 await press(page, 'Enter');
 
@@ -478,12 +468,19 @@ const s03g = await page.evaluate(async () => {
   for (let i = 0; i < 30 && !document.querySelector('.w-ghost'); i++) await new Promise((r) => setTimeout(r, 100));
   const shown = !!document.querySelector('.w-ghost');
   await new Promise((r) => setTimeout(r, 300));
-  return { shown, pressed: [...document.querySelectorAll('.w-opt')].filter((b) => b.getAttribute('aria-pressed') === 'true').length,
-    check: document.querySelector('[data-action="check"]').disabled, ev: window.__l4.tracking.events.filter((e) => e.trackingId === 'L4_S03_1').length };
+  return { shown, hidden: document.querySelector('.w-ghost')?.getAttribute('aria-hidden'), seen: window.__l4.state.h,
+    pressed: [...document.querySelectorAll('.w-opt')].filter((b) => b.getAttribute('aria-pressed') === 'true').length,
+    check: document.querySelector('[data-action="check"]').disabled, ev: window.__l4.tracking.events.filter((e) => e.trackingId === 'L4_S03_1').length,
+    showMe: document.querySelector('[data-action="showMe"]')?.textContent, icon: !!document.querySelector('[data-action="showMe"] svg') };
 });
 await press(page, 'Shift');
-expect(s03g.shown && !s03g.pressed && s03g.check && !s03g.ev && await page.evaluate(() => !document.querySelector('.w-ghost')),
-  'S03 ghost hand: shown once, selects no card, Check stays disabled, no tracking; a key removes it');
+expect(s03g.shown && s03g.hidden === 'true' && s03g.seen.includes('s') && !s03g.pressed && s03g.check && !s03g.ev && await page.evaluate(() => !document.querySelector('.w-ghost')),
+  `S03 ghost hand: shown once (aria-hidden, seen types "${s03g.seen}"), selects no card, Check stays disabled, no tracking; a key removes it`);
+await tabTo(page, '[data-action="showMe"]', { back: true });
+await press(page, 'Enter');
+await page.waitForSelector('.w-ghost', { timeout: 2000 }).catch(() => {});
+expect(s03g.showMe === UI.buttons.showMe && s03g.icon && await page.evaluate(() => !!document.querySelector('.w-ghost')), `S03: "${s03g.showMe}" (hand icon and text) replays the ghost hand`);
+await press(page, 'Shift');
 await expectBand(page, 'S03 before action', { state: 'hint', text: S.S03.hint, unlocked: false, lockedWhy: UI.footer.locked.multi });
 const cases = await page.evaluate(() => [...document.querySelectorAll('.w-case')].map((f) => ({ cap: f.querySelector('figcaption').textContent, alt: f.querySelector('img')?.alt, controls: f.querySelectorAll('button, a, [tabindex]').length })));
 expect(cases.map((c) => c.cap).join() === S.S03.cases.map((c) => c.label).join() && cases.every((c, i) => c.alt === S.S03.cases[i].image.alt && !c.controls),
@@ -1138,19 +1135,22 @@ console.log('\nS01 wrong row (mouse click)');
   await p.close();
 }
 
-/* ---------- ghost hand with motion: the O2 demo opens Lesson 5, any pointer input stops it at once ---------- */
+/* ---------- ghost hand with motion: the S03 demo, on target, any pointer input stops it at once ---------- */
 console.log('\nghost hand (motion)');
 {
-  const p = await open('?reset=1&screen=O2', { motion: true });
+  const p = await open('?reset=1&screen=S03', { motion: true });
   await p.waitForSelector('.w-ghost', { timeout: 3000 }).catch(() => {});
-  await p.waitForFunction(() => document.querySelector('.w-map-panel').dataset.station === 'l5', { timeout: 3000 }).catch(() => {});
-  const mid = await p.evaluate(() => ({ hand: !!document.querySelector('.w-ghost'), panel: document.querySelector('.w-map-panel').dataset.station }));
+  await wait(900); // after the first move: the ripple sits on the first card's centre
+  const mid = await p.evaluate(() => {
+    const t = document.querySelector('.w-opt').getBoundingClientRect(), r = document.querySelector('.w-ghost-ripple')?.getBoundingClientRect();
+    return { hand: !!r, off: r ? Math.round(Math.hypot(r.left + r.width / 2 - (t.left + t.width / 2), r.top + r.height / 2 - (t.top + t.height / 2))) : -1 };
+  });
   await p.mouse.click(700, 690); // a pointer press anywhere (the footer gap)
-  const after = await p.evaluate(() => ({ hand: !!document.querySelector('.w-ghost'), panel: document.querySelector('.w-map-panel').dataset.station, ev: window.__l4.tracking.events.length }));
-  expect(mid.hand && mid.panel === 'l5' && !after.hand && after.panel === 'l4' && !after.ev,
-    `ghost hand mid-demo: Lesson 5 shown by the demo (${mid.panel}); a pointer press stops it at once, Lesson 4 open again (${after.panel}), nothing tracked`);
+  const after = await p.evaluate(() => ({ hand: !!document.querySelector('.w-ghost'), pressed: document.querySelectorAll('.w-opt[aria-pressed="true"]').length, ev: window.__l4.tracking.events.length }));
+  expect(mid.hand && mid.off >= 0 && mid.off <= 2 && !after.hand && !after.pressed && !after.ev,
+    `ghost hand mid-demo: on the first card (${mid.off}px off its centre); a pointer press stops it at once, nothing selected or tracked`);
   // a seen type plays only after 8 s without input
-  await p.evaluate(() => window.__l4.go('O2'));
+  await p.evaluate(() => window.__l4.go('S03'));
   await wait(1500);
   const early = await p.evaluate(() => !!document.querySelector('.w-ghost'));
   expect(!early, 'ghost hand, seen type: no demo within 1.5 s of arriving (it waits for 8 s without input)');

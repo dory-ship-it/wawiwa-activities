@@ -22,7 +22,7 @@ export function stopGhost() { if (active) active.stop(); }
 
 export function createGhost(stage, { ui, steps, restore = null, seen = false, onPlay = () => {} }) {
   let timer = null, played = false, cancelled = false;
-  const button = h('button', { class: 'w-link w-showme', type: 'button', dataset: { action: 'showMe' } }, ui.buttons.showMe);
+  const button = h('button', { class: 'w-link w-showme', type: 'button', dataset: { action: 'showMe' } }, icon('pointer', { size: 18 }), h('span', {}, ui.buttons.showMe));
   // the click that presses "Show me" also stops a running demo first (pointerdown), then replays
   button.addEventListener('click', () => { if (!cancelled) play(); });
 

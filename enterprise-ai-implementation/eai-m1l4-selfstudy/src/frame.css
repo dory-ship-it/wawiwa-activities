@@ -189,7 +189,8 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 /* work screens: the content column is main minus a 64 px gutter each side; the logo sits at the
    column's left edge, the same x as the h1 */
 .w-main[data-layout="work"] > .w-logo, .w-main[data-layout="plain"] > .w-logo { position: absolute; left: 64px; top: 14px; }
-.w-main[data-layout="form"] > .w-logo { position: absolute; left: calc(50% - 304px); top: 14px; }
+/* the form (S02) is 608 wide at 1280 and widens with the stage (up to 928), centred; the logo sits over its left edge */
+.w-main[data-layout="form"] > .w-logo { position: absolute; left: calc(50% - (608px + var(--w-x)) / 2); top: 14px; }
 .w-work-head { position: absolute; left: 64px; top: 100px; width: 600px; }
 .w-main[data-layout="work"] .w-instruction, .w-main[data-layout="plain"] .w-instruction { margin: 16px 0 0; font-size: 36px; font-weight: 800; line-height: 1.25; letter-spacing: -0.5px; }
 .w-cases { position: absolute; right: 64px; top: 96px; width: 440px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -227,7 +228,7 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-main[data-layout="work"] .w-band-verdict { font-size: 24px; }
 
 /* ---------- layout form (S02): the centred single column ---------- */
-.w-form { position: absolute; left: calc(50% - 304px); top: 84px; width: 608px; display: flex; flex-direction: column; }
+.w-form { position: absolute; left: calc(50% - (608px + var(--w-x)) / 2); top: 84px; width: calc(608px + var(--w-x)); display: flex; flex-direction: column; }
 .w-main[data-layout="form"] .w-instruction { margin: 12px 0 22px; font-size: 32px; font-weight: 800; line-height: 1.25; letter-spacing: -0.5px; }
 .w-form-task { display: flex; flex-direction: column; gap: 16px; }
 .w-fields { display: flex; flex-direction: column; gap: 12px; }
@@ -674,7 +675,8 @@ a.w-panel-link { display: inline-flex; align-items: center; gap: 4px; text-decor
 /* header bar of the Round 4 screens: logo and the lesson line */
 .w-header-line { gap: 20px; background: var(--w-white); }
 .w-header-text { margin: 0; font: 400 14px/1.3 var(--w-meta); color: var(--w-ink-2); }
-.w-showme { flex: none; font: 600 15px/1 var(--w-head); }
+.w-showme { flex: none; display: inline-flex; align-items: center; gap: 6px; font: 600 15px/1 var(--w-head); } /* the hand icon, then "Show me" */
+.w-showme .w-icon { flex: none; }
 /* the large, tight-leaded Round 4 headings: room for the descenders inside the box */
 .w-main[data-layout="title"] .w-instruction, .w-main[data-layout="present"] .w-instruction, .w-main[data-layout="concept"] .w-instruction,
 .w-main[data-layout="warmup"] .w-instruction { padding-bottom: 0.12em; }

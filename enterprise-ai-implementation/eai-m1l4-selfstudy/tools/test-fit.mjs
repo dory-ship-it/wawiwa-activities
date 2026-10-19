@@ -26,8 +26,13 @@ const BASE = `http://127.0.0.1:${server.address().port}/index.html`;
 const browser = await puppeteer.launch({ executablePath: chromePath(), headless: true, args: ['--no-first-run', '--disable-extensions', '--hide-scrollbars'] });
 const pairs = new Map(); // every text/background pair seen, for the report
 
+// Each page in its own browser context, closed with the page: after about a thousand pages in one
+// browser the shared media loading stalled (the V1 film stopped buffering mid-way at 2560x1080).
 async function open(query, [w, h] = [1280, 720]) {
-  const page = await browser.newPage();
+  const context = await browser.createBrowserContext();
+  const page = await context.newPage();
+  const closePage = page.close.bind(page);
+  page.close = async () => { await closePage().catch(() => {}); await context.close().catch(() => {}); };
   page.errors = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warn') page.errors.push(m.type() + ': ' + m.text()); });
   page.on('pageerror', (e) => page.errors.push('pageerror: ' + e.message));
@@ -147,8 +152,7 @@ const STATES = [
   }],
   ['V2', 'ended', async (p) => {
     for (const k of ['b', 'a', 'b']) { await toStop(p); await click(p, `.w-opt-stack[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }
-    await fastPlay(p);
-    await p.waitForFunction(() => document.querySelector('.w-next').dataset.locked === 'false', { timeout: 60000 });
+    await playUntil(p, () => document.querySelector('.w-next').dataset.locked === 'false', 'video end');
   }],
   ['S09', 'start', async () => {}],
   ['S09', 'wrong', async (p) => { await click(p, '.w-tray-card[data-card="4"]'); await click(p, '.w-sort-target[data-column="a"]'); }],
@@ -220,10 +224,27 @@ async function fastPlay(p) {
   await p.waitForFunction(() => document.querySelector('.w-video').readyState >= 1);
   await p.evaluate(() => { const v = document.querySelector('.w-video'); v.muted = true; v.playbackRate = 16; v.play(); });
 }
-async function toStop(p) {
+// Headless Chrome at a 2560x1080 window sometimes stalls a 16x video (fully buffered, time stuck;
+// 1x plays normally). When the time stops moving, re-seek to the same point (it resets the decoder)
+// and play on at 4x, until done() is true. Report where it got to if it never is.
+async function playUntil(p, done, what) {
   await fastPlay(p);
-  await p.waitForSelector('.w-stop-view:not([hidden])', { timeout: 60000 });
+  let last = -1;
+  for (let i = 0; i < 60; i++) {
+    if (await p.evaluate(done)) return;
+    last = await p.evaluate((prev) => {
+      const v = document.querySelector('.w-video');
+      if (document.querySelector('.w-stop-view').hidden && !v.ended && (v.paused || Math.abs(v.currentTime - prev) < 0.01)) {
+        v.pause(); v.currentTime = v.currentTime; v.muted = true; v.playbackRate = 4; v.play().catch(() => {});
+      }
+      return v.currentTime;
+    }, last);
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  const at = await p.evaluate(() => { const v = document.querySelector('.w-video'); return `t ${v.currentTime.toFixed(1)}, paused ${v.paused}, readyState ${v.readyState}, error ${v.error?.code ?? 'none'}`; });
+  throw new Error(`${what} not reached in 60 s: ${at}`);
 }
+const toStop = (p) => playUntil(p, () => !document.querySelector('.w-stop-view').hidden, 'video stop');
 for (const size of SIZES) {
   for (const [id, state, act] of STATES) {
     const page = await open(`?reset=1&screen=${id}`, size);

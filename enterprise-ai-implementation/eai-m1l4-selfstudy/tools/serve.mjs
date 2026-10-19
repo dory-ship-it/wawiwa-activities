@@ -12,6 +12,15 @@ const TYPES = {
   '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.mp4': 'video/mp4', '.vtt': 'text/vtt; charset=utf-8', '.xml': 'application/xml',
 };
 
+// pipe a file to the response and close the file when the browser drops the request (a video range
+// request is often cancelled): a bare pipe() keeps the file open, and after about a thousand video
+// loads in one test run the server stalled
+function send(stream, res) {
+  stream.on('error', () => res.destroy());
+  res.on('close', () => stream.destroy());
+  stream.pipe(res);
+}
+
 export function startServer(port = 0) {
   const server = http.createServer((req, res) => {
     let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
@@ -27,11 +36,11 @@ export function startServer(port = 0) {
       const end = range[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
       if (start >= size || start > end) { res.writeHead(416, { 'Content-Range': `bytes */${size}` }); res.end(); return; }
       res.writeHead(206, { 'Content-Type': type, 'Cache-Control': 'no-store', 'Accept-Ranges': 'bytes', 'Content-Range': `bytes ${start}-${end}/${size}`, 'Content-Length': end - start + 1 });
-      createReadStream(file, { start, end }).pipe(res);
+      send(createReadStream(file, { start, end }), res);
       return;
     }
     res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-store', 'Accept-Ranges': 'bytes', 'Content-Length': size });
-    createReadStream(file).pipe(res);
+    send(createReadStream(file), res);
   });
   return new Promise((resolve) => server.listen(port, '127.0.0.1', () => resolve(server)));
 }
