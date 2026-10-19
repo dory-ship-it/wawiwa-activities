@@ -19,6 +19,7 @@ import { check } from './templates/check.js';
 import { createTracking } from './tracking/index.js';
 
 const STAGE_W = 1280, STAGE_H = 720;
+const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
 const NARROW_BELOW = 900; // window narrower than this: show the "best on a computer" note above the stage
 const NOTE_H = 40;
 const MAX_TEXT = 250;     // fill-in responses are trimmed and capped (SCORM 1.2 safe)
@@ -95,7 +96,9 @@ class Lesson {
     new ResizeObserver(() => this.layout()).observe(root);
   }
 
-  /* ---- stage scaling: fixed 1280x720, scale to fit, letterbox white, never scroll ---- */
+  /* ---- stage scaling: 720 px high, 1280 to 1600 px wide to fill the window, scale to fit, never
+     scroll. A wide window widens the stage: the rail stays left, the footer spans the width and
+     the 1216 px content column (main) is centred (--w-stage-w in frame.css). ---- */
   layout() {
     const W = this.root.clientWidth, H = this.root.clientHeight;
     if (!W || !H) return;
@@ -104,7 +107,9 @@ class Lesson {
     const top0 = narrow ? NOTE_H : 0;
     const availH = H - top0;
     const scale = Math.max(0.05, Math.min(W / STAGE_W, availH / STAGE_H));
-    const left = (W - STAGE_W * scale) / 2;
+    const stageW = Math.round(Math.min(STAGE_W_MAX, Math.max(STAGE_W, W / scale)));
+    this.stage.style.setProperty('--w-stage-w', stageW + 'px');
+    const left = (W - stageW * scale) / 2;
     const top = top0 + (availH - STAGE_H * scale) / 2;
     this.stage.style.transform = `translate(${left}px, ${top}px) scale(${scale})`;
     this.scale = scale;

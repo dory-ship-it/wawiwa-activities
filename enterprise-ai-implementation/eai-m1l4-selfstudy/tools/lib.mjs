@@ -24,7 +24,7 @@ export function chromePath() {
 export function measureLayout() {
   const stage = document.querySelector('.w-stage');
   const s = stage.getBoundingClientRect();
-  const k = s.width / 1280;
+  const k = s.height / 720; // the stage is 720 high, 1280 to 1600 wide
   const box = (r) => ({ top: (r.top - s.top) / k, bottom: (r.bottom - s.top) / k, left: (r.left - s.left) / k, right: (r.right - s.left) / k, w: r.width / k, h: r.height / k });
   const visible = (el) => {
     if (!el || el.closest('.w-sr-only, [hidden]')) return false;
@@ -78,7 +78,9 @@ export function measureLayout() {
 
   const hit = (b, R) => b.bottom > R.top + 0.5 && b.top < R.bottom - 0.5 && b.right > R.left + 0.5 && b.left < R.right - 0.5;
   const overlaps = bandOn ? boxes.filter((b) => hit(b, B)).map((b) => b.what) : [];
-  const outside = boxes.filter((b) => b.top < M.top - 0.5 || b.bottom > M.bottom + 0.5 || b.left < M.left - 0.5 || b.right > M.right + 0.5).map((b) => b.what);
+  // on a widened stage, main is clipped with a side margin (--w-pad) so photos can reach the rail
+  const pad = (stage.offsetWidth - 1280) / 2;
+  const outside = boxes.filter((b) => b.top < M.top - 0.5 || b.bottom > M.bottom + 0.5 || b.left < M.left - pad - 0.5 || b.right > M.right + pad + 0.5).map((b) => b.what);
 
   let bandWidth = null;
   if (bandOn) {

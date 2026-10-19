@@ -13,7 +13,7 @@ import puppeteer from 'puppeteer-core';
 import { startServer } from './serve.mjs';
 import { chromePath, measureLayout, layoutVerdict } from './lib.mjs';
 
-const SIZES = [[1280, 720], [1024, 576]];
+const SIZES = [[1280, 720], [1024, 576], [1920, 950]]; // 1920x950: a browser window with its bars, stage widened
 const fails = [];
 const ok = (m) => console.log('  ok   ' + m);
 const fail = (m) => { fails.push(m); console.log('  FAIL ' + m); };
@@ -46,12 +46,12 @@ async function measure(page, what) {
 
 /* ---- 1. load, scale, shell ---- */
 console.log('\n1. load and fit');
-for (const size of [[1280, 720], [1920, 1080], [1024, 576]]) {
+for (const size of [[1280, 720], [1920, 1080], [1024, 576], [1920, 950], [2560, 900]]) {
   const page = await open('?reset=1', size);
   const r = await page.evaluate(() => {
     const stage = document.querySelector('.w-stage');
     const s = stage.getBoundingClientRect();
-    const k = s.width / 1280;
+    const k = s.height / 720;
     const box = (sel) => { const b = document.querySelector(sel).getBoundingClientRect(); return [b.left - s.left, b.top - s.top, b.width, b.height].map((v) => Math.round(v / k)); };
     return { k, sw: s.width, sh: s.height, left: s.left, top: s.top,
       scroll: document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight,
@@ -60,9 +60,12 @@ for (const size of [[1280, 720], [1920, 1080], [1024, 576]]) {
   });
   const [w, h] = size;
   const want = Math.min(w / 1280, h / 720);
+  // a wide window widens the stage (up to 1600) instead of leaving white bars; main stays 1216, centred
+  const stageW = Math.round(Math.min(1600, Math.max(1280, w / want))), pad = (stageW - 1280) / 2;
   expect(Math.abs(r.k - want) < 0.01 && r.left >= -0.5 && r.top >= -0.5 && r.left + r.sw <= w + 0.5 && r.top + r.sh <= h + 0.5, `${w}x${h}: stage scaled ${r.k.toFixed(3)} and inside the window`);
+  expect(Math.abs(r.sw / r.k - stageW) < 1 && (stageW === 1600 || Math.abs(r.sw - w) < 2), `${w}x${h}: stage ${Math.round(r.sw / r.k)} wide, ${stageW < 1600 ? 'fills the window width' : 'capped at 1600, the rest letterboxed'}`);
   expect(!r.scroll, `${w}x${h}: no scrollbars`);
-  expect(r.rail.join() === '0,0,64,656' && r.main.join() === '64,0,1216,656' && r.footer.join() === '0,656,1280,64',
+  expect(r.rail.join() === '0,0,64,656' && r.main.join() === `${Math.round(64 + pad)},0,1216,656` && r.footer.join() === `0,656,${stageW},64`,
     `${w}x${h}: shell in place (rail ${r.rail.join(',')}, main ${r.main.join(',')}, footer ${r.footer.join(',')})`);
   expect(!r.removed.length, `${w}x${h}: no segmented bar, top bar, screen readout or minutes in the player${r.removed.length ? ' (' + r.removed.join(', ') + ')' : ''}`);
   expect(!page.errors.length, `${w}x${h}: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);

@@ -1,6 +1,6 @@
 // The shell of every screen (approved look, P1.5), in stage px:
 //   rail      x 0 to 64, y 0 to 656    menu button, one dot per chapter, % done, Saved
-//   main      x 64 to 1280, y 0 to 656 the screen's own layout (built by its template)
+//   main      1216 x 656 (x 64 to 1280, centred on a wider stage) the screen's own layout (built by its template)
 //   footer    y 656 to 720             Previous left, Next right (locked grey or unlocked red)
 // Parts a template places inside its layout: the logo, the instruction h1 (tabindex -1, focus lands
 // here on every new screen) and the feedback band (aria-live polite, directly under the interaction,

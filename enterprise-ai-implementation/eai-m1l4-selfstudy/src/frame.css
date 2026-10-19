@@ -1,6 +1,6 @@
 /* Frame: stage, shell (rail, footer, band), layouts and components of the approved look (P1.5,
-   planning/design-reference). Stage px throughout: the stage is a fixed 1280x720 box scaled as a
-   whole by src/engine.js. Colours only through src/tokens.css. No text below 14px. Radius 8px on
+   planning/design-reference). Stage px throughout: the stage is a 720 px high box, 1280 px wide
+   (up to 1600 on a wide window, --w-stage-w), scaled as a whole by src/engine.js. Colours only through src/tokens.css. No text below 14px. Radius 8px on
    buttons and cards only. No shadows except the memo card and the open menu. */
 
 [hidden] { display: none !important; }
@@ -16,7 +16,10 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-small-note { position: absolute; left: 0; right: 0; top: 0; height: 40px; margin: 0; display: flex; align-items: center; justify-content: center;
   font: 500 15px/1.2 var(--w-meta); color: var(--w-navy); background: var(--w-teal-tint); }
 
-.w-stage { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; transform-origin: 0 0; overflow: hidden;
+/* --w-pad: the extra width on each side of the centred content column (0 on a 1280 stage); photos that
+   touch main's left edge reach the rail across it, a grey layout paints it grey */
+.w-stage { --w-pad: calc((var(--w-stage-w, 1280px) - 1280px) / 2);
+  position: absolute; left: 0; top: 0; width: var(--w-stage-w, 1280px); height: 720px; transform-origin: 0 0; overflow: hidden;
   background: var(--w-white); font-family: var(--w-head); line-height: 1.35; color: var(--w-ink); }
 .w-stage *, .w-stage *::before, .w-stage *::after { box-sizing: border-box; }
 .w-stage button { font-family: inherit; }
@@ -62,8 +65,9 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-saved[data-ok="false"] { color: var(--w-error); }
 .w-saved[data-ok="false"] .w-icon { display: none; }
 
-/* ---------- main: x 64 to 1280, y 0 to 656 (each layout positions its own parts) ---------- */
-.w-main { position: absolute; left: 64px; top: 0; width: 1216px; height: 656px; overflow: hidden; background: var(--w-white); }
+/* ---------- main: 1216 x 656, x 64 to 1280 on a 1280 stage, centred on a wider one (each layout positions its own parts) ---------- */
+.w-main { position: absolute; left: calc(64px + var(--w-pad)); top: 0; width: 1216px; height: 656px;
+  clip-path: inset(0 calc(-1 * var(--w-pad))); background: var(--w-white); } /* clips like overflow:hidden, but lets a photo reach the rail */
 .w-logo { display: block; height: 50px; width: auto; }
 .w-instruction { margin: 0; font-family: var(--w-head); color: var(--w-navy); text-wrap: balance; }
 .w-photo { display: block; object-fit: cover; }
@@ -71,7 +75,7 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-label { margin: 0; display: flex; align-items: center; gap: 12px; font: 400 14px/1.45 var(--w-meta); color: var(--w-ink-2); }
 
 /* ---------- footer: y 656 to 720 ---------- */
-.w-footer { position: absolute; left: 0; top: 656px; width: 1280px; height: 64px; display: flex; align-items: center; gap: 8px; padding: 0 20px 0 12px;
+.w-footer { position: absolute; left: 0; top: 656px; width: 100%; height: 64px; display: flex; align-items: center; gap: 8px; padding: 0 20px 0 12px;
   background: var(--w-white); border-top: 1px solid var(--w-hairline); }
 .w-footer-gap { flex: 1; }
 .w-prev { min-height: 44px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border: 0; border-radius: var(--w-radius); background: transparent;
@@ -121,9 +125,9 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
   font: 400 14px/1.4 var(--w-meta); white-space: pre-line; pointer-events: none; }
 
 /* ---------- layout editorial (S01, R2A): header, image column, statement column ---------- */
-.w-header { height: 64px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--w-hairline); }
+.w-header { height: 64px; display: flex; align-items: center; margin: 0 calc(-1 * var(--w-pad)); padding: 0 calc(24px + var(--w-pad)); border-bottom: 1px solid var(--w-hairline); }
 .w-editorial { height: 592px; display: grid; grid-template-columns: 460px minmax(0, 1fr); }
-.w-photo-column { width: 460px; height: 592px; }
+.w-photo-column { width: calc(460px + var(--w-pad)); height: 592px; margin-left: calc(-1 * var(--w-pad)); }
 .w-col { min-width: 0; display: flex; flex-direction: column; padding: 30px 72px 0 60px; }
 .w-eyebrow { margin: 0; font: 600 15px/1.3 var(--w-head); color: var(--w-teal-ink); }
 .w-quote { margin: 10px 0 0; }
@@ -148,7 +152,8 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 
 /* ---------- layout memo (FT1, R2B): image with the memo card over it, cards right ---------- */
 .w-main[data-layout="memo"] { background: var(--w-grey); }
-.w-photo-memo { position: absolute; left: 0; top: 0; width: 736px; height: 340px; }
+.w-stage:has(> .w-main[data-layout="memo"]) { background: var(--w-grey); }
+.w-photo-memo { position: absolute; left: calc(-1 * var(--w-pad)); top: 0; width: calc(736px + var(--w-pad)); height: 340px; }
 .w-main[data-layout="memo"] > .w-logo { position: absolute; left: 24px; top: 18px; }
 .w-memo { position: absolute; left: 640px; top: 40px; width: 512px; min-height: 272px; display: flex; flex-direction: column; padding: 24px 34px 24px;
   background: var(--w-white); box-shadow: var(--w-shadow-memo); }
@@ -563,8 +568,8 @@ a.w-btn { text-decoration: none; }
 .w-tline { margin: 0 0 4px; padding: 8px 12px; border-radius: 6px; }
 .w-tline[data-active="true"] { background: var(--w-teal-tint); color: var(--w-ink); }
 .w-tline-time { display: block; font-weight: 500; color: var(--w-teal-ink); }
-.w-stop-frame { position: absolute; left: 0; top: 0; width: 486px; height: 656px; margin: 0; overflow: hidden; background: var(--w-ink); }
-.w-stop-frame .w-video { width: 486px; height: 656px; }
+.w-stop-frame { position: absolute; left: calc(-1 * var(--w-pad)); top: 0; width: calc(486px + var(--w-pad)); height: 656px; margin: 0; overflow: hidden; background: var(--w-ink); }
+.w-stop-frame .w-video { width: 100%; height: 656px; }
 .w-paused { position: absolute; left: 24px; bottom: 24px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 4px; background: var(--w-white);
   font: 400 14px/1.2 var(--w-meta); color: var(--w-ink); }
 .w-paused .w-icon { color: var(--w-navy); fill: currentColor; }
@@ -589,7 +594,7 @@ a.w-btn { text-decoration: none; }
 .w-main[data-layout="plain"] .w-band { margin-top: 32px; height: 72px; }
 
 /* ---------- menu (R2-menu-open): 380 px panel from the left over a grey scrim ---------- */
-.w-menu-overlay { position: absolute; left: 0; top: 0; width: 1280px; height: 656px; z-index: 30; }
+.w-menu-overlay { position: absolute; left: 0; top: 0; width: 100%; height: 656px; z-index: 30; }
 .w-menu-scrim { position: absolute; inset: 0; background: rgba(230, 230, 232, .72); }
 .w-panel { position: absolute; left: 0; top: 0; width: 380px; height: 656px; display: flex; flex-direction: column; padding: 10px 24px 0;
   background: var(--w-white); border-right: 1px solid var(--w-hairline); box-shadow: var(--w-shadow-menu); }
