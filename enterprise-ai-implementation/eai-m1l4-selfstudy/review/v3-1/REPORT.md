@@ -125,7 +125,9 @@ All passed on 19 Oct 2026, after the last code change.
   - New states at 1280x720, 1024x576, 1366x650, 1536x730, 1920x950 and 2560x1080: O1 title, O2 with L4 and with L1 open, O3 with and without a tile tip, W1 before and after the guess, K1.
   - New checks: no one-sided side strip, logo aligned, nothing clipped, band, contrast, 14 px text, 44 px targets.
   - The shell check runs on S01, because O1 has no footer by design.
-  - A first run stopped once on a 60 s wait for the V1 stop at 2560x1080 (the "wrong" state of the same stop had just passed). It ran while walk, test:scorm and the screenshot script were loading the same machine; the rerun on its own passed.
+  - Test harness fix: at a 2560x1080 window, headless Chrome sometimes stalls the test's 16x fast play. The video is fully buffered but the time does not move; 1x plays normally at that size, so the lesson is not affected. Reproduced on its own, 8 stalls in 16 runs.
+    - `test-fit.mjs` now re-seeks to the same point and plays on at 4x when the time stops (16 of 16 then reached their stop). Its pages also open in their own browser context.
+    - `serve.mjs` now closes a file when the browser drops a request (it left it open before).
 - `npm run walk`: passed, 463 ok.
   - New paths: O1 Start; O2 tabs by keyboard (arrows move, Enter or Space opens, End); O3 tile tip on focus; W1 neutral guess, changed guess as a retry, revisit keeps it; V1 watched in full; K1; S03 with its closing line.
   - O2 has no ghost hand and no "Show me".
@@ -133,7 +135,8 @@ All passed on 19 Oct 2026, after the last code change.
   - With motion: mid-demo the hand sits on the first S03 card (0 px off its centre), a pointer press stops it; a seen type waits for 8 s without input.
   - Measured separately at 1280x720, 1366x650 and 1920x950: the ripple centre matches the target's centre exactly, so the hand lands on target at any scale.
   - Rail 3% at S01 and 11% at S03; the menu's Lesson goals dialog from O3.
-- `npm run test:scorm`: passed, 379 ok. 44 interactions, each once; status passed, score 80. suspend_data is 1628 chars after the whole lesson and 2188 with every free-text field at 250 (limit 4096). Resume lands on the saved screen.
+- `npm run test:scorm`: passed, 379 ok. 44 interactions, each once; status passed, score 80. suspend_data is 1627 chars after the whole lesson and 2187 with every free-text field at 250 (limit 4096). Resume lands on the saved screen.
+- All four were rerun after Noy's changes (no hand on O2, icon on "Show me", wider S02) and the test fixes: check passed, test:fit 1182 ok, walk 463 ok, test:scorm 379 ok.
 
 ## Deviations and open points
 
