@@ -19,7 +19,9 @@ export function initTooltips(stage) {
 // (describe: false when the element's own label already says the same). container: where the
 // hidden description goes (default: right after the element); a term inside a heading puts it
 // outside, so the heading's own text stays the heading.
-export function attachTip(el, text, { describe = true, container = null } = {}) {
+// side: 'below' (default, above when there is no room) or 'right' (the rail dots: level with the
+// element, right of it, so the tip never covers the next dot).
+export function attachTip(el, text, { describe = true, container = null, side = 'below' } = {}) {
   let desc = null;
   if (describe) {
     const id = nextId('w-desc');
@@ -28,7 +30,7 @@ export function attachTip(el, text, { describe = true, container = null } = {}) 
     const prev = el.getAttribute('aria-describedby');
     el.setAttribute('aria-describedby', prev ? prev + ' ' + id : id);
   }
-  const show = () => showFor(el, text);
+  const show = () => showFor(el, text, side);
   el.addEventListener('mouseenter', show);
   el.addEventListener('focus', show);
   el.addEventListener('mouseleave', () => { if (document.activeElement !== el) hide(el); });
@@ -36,7 +38,7 @@ export function attachTip(el, text, { describe = true, container = null } = {}) 
   return desc;
 }
 
-function showFor(el, text) {
+function showFor(el, text, side = 'below') {
   if (!tipBox) return;
   owner = el;
   tipBox.textContent = text;
@@ -44,6 +46,11 @@ function showFor(el, text) {
   const s = stageEl.getBoundingClientRect();
   const scale = s.width / stageEl.offsetWidth || 1;
   const r = el.getBoundingClientRect();
+  if (side === 'right') {
+    tipBox.style.left = (r.right - s.left) / scale + 12 + 'px';
+    tipBox.style.top = Math.max(8, (r.top - s.top + r.height / 2) / scale - tipBox.offsetHeight / 2) + 'px';
+    return;
+  }
   const x = (r.left - s.left + r.width / 2) / scale;
   const below = (r.bottom - s.top) / scale + 8;
   const w = tipBox.offsetWidth, ht = tipBox.offsetHeight;

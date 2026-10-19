@@ -142,7 +142,7 @@ bootOk ? ok('index.html boot fallback equals ui.boot') : fail('index.html boot f
 const MAX_SCREEN_WORDS = 45, MAX_FEEDBACK_WORDS = 25;
 const words = (s) => String(s ?? '').split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
 // on-screen text of one stage (top / middle / bottom), whatever the kind
-const stageText = (stage = {}) => Object.values(stage).flatMap((p) => [p.eyebrow, p.text, p.label, p.chip?.text, ...(p.bubbles || []), ...(p.items || []).map((x) => x.text)]);
+const stageText = (stage = {}) => Object.values(stage).flatMap((p) => [p.eyebrow, p.text, p.label, p.chip?.text, p.help?.text, ...(p.bubbles || []), ...(p.items || []).map((x) => x.text)]);
 const fieldText = (fields = []) => fields.flatMap((f) => [f.label, f.placeholder]);
 // one entry per view the learner sees at once: [name, strings on screen]
 const views = content.screens.flatMap((s) => {
@@ -176,12 +176,21 @@ const views = content.screens.flatMap((s) => {
   if (s.variant === 'rounds') return s.rounds.map((r) => [`${s.id} ${r.id}`, [s.strip, r.badge, r.line, ...s.options.map((o) => o.label)]]);
   return [[s.id, [...stageText(s.stage), ...(s.options || []).map((o) => o.label), ...fieldText(s.fields), ...(s.cases || []).map((c) => c.label)]]];
 });
+// a screen may carry wordLimit { max, why } (copy approved over the rule, planning to cut): it is
+// listed as a WARNING with its reason, and fails only above its own max
 let wordFails = 0;
+const overRule = [];
 for (const [name, list] of views) {
   const n = list.reduce((sum, t) => sum + words(t), 0);
+  const lim = content.screens.find((s) => s.id === name.split(' ')[0])?.wordLimit;
+  if (n > MAX_SCREEN_WORDS && lim && lim.why && n <= lim.max) { overRule.push(`${name}: ${n} words (allowance ${lim.max}: ${lim.why})`); continue; }
   if (n > MAX_SCREEN_WORDS) { wordFails++; fail(`${name}: ${n} on-screen words (max ${MAX_SCREEN_WORDS})`); }
 }
-if (!wordFails) ok(`on-screen words at most ${MAX_SCREEN_WORDS} in all ${views.length} screen views (${views.map(([n, l]) => n + ' ' + l.reduce((s, t) => s + words(t), 0)).join(', ')})`);
+if (!wordFails) ok(`on-screen words at most ${MAX_SCREEN_WORDS} in all ${views.length} screen views but the allowances below (${views.map(([n, l]) => n + ' ' + l.reduce((s, t) => s + words(t), 0)).join(', ')})`);
+if (overRule.length) {
+  console.log(`  WARNING ${overRule.length} screen views over the ${MAX_SCREEN_WORDS}-word rule by an explicit content allowance:`);
+  overRule.forEach((t) => console.log('          ' + t));
+}
 const feedbackLines = [
   ...content.chapters.filter((c) => c.pauseMarker).map((c) => [`${c.id} pauseMarker`, c.pauseMarker]),
   ...content.screens.flatMap((s) => [

@@ -96,7 +96,7 @@ export function createZones(stage, content, { onMenu, onChapter, onPrev, onNext 
       const btn = h('button', { class: 'w-dot', type: 'button', dataset: { status: c.status, chapter: String(c.n) }, 'aria-label': c.label,
         'aria-current': c.viewing ? 'step' : null, 'aria-disabled': c.clickable ? null : 'true',
         onclick: () => { if (c.clickable) onChapter(c.n); } }, statusMark(c.status));
-      attachTip(btn, c.label, { describe: false });
+      attachTip(btn, c.label, { describe: false, side: 'right' }); // title and status on hover and keyboard focus
       return h('li', {}, btn);
     }));
     lineAll.style.height = (model.chapters.length - 1) * DOT_PITCH + 'px';

@@ -79,6 +79,8 @@ const STATES = [
   ['S01', 'hint', async () => {}],
   ['S01', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
   ['S01', 'correct', async (p) => { await click(p, '.w-opt[data-id="a"]'); await click(p, '.w-opt[data-id="b"]'); }],
+  ['S01B', 'hint', async () => {}],
+  ['S01B', 'picked', async (p) => click(p, '.w-opt[data-id="e"]')],
   ['S02', 'hint', async () => {}],
   ['S02', 'notice', async (p) => click(p, '[data-action="save"]')],
   ['S02', 'saved', async (p) => {
@@ -160,6 +162,7 @@ const STATES = [
   ['S14', 'right', async (p) => click(p, '.w-opt[data-id="b"]')],
   ['S15', 'wrong', async (p) => click(p, '.w-opt[data-id="b"]')],
   ['S15', 'right', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['S16', 'card selected', async (p) => click(p, '.w-tray-card[data-card="1"]')],
   ['S16', 'wrong', async (p) => { await click(p, '.w-tray-card[data-card="2"]'); await click(p, '.w-sort-target[data-column="b"]'); }],
   ['S16', 'done', async (p) => { for (const [c, col] of [['1', 'a'], ['2', 'd'], ['3', 'b'], ['4', 'd'], ['5', 'd'], ['6', 'c']]) { await click(p, `.w-tray-card[data-card="${c}"]`); await click(p, `.w-sort-target[data-column="${col}"]`); } }],
   ['S17', 'start', async () => {}],
@@ -183,6 +186,11 @@ const STATES = [
   }],
   ['S20', 'row answered', async (p) => click(p, '.w-check-row[data-row="q1"] [data-choice="notYet"]')],
   ['S20', 'step 2 chip', async (p) => {
+    for (const q of ['q1', 'q2', 'q3']) await click(p, `.w-check-row[data-row="${q}"] [data-choice="yes"]`);
+    await click(p, '.w-next'); await click(p, '.w-chip[data-chip="automating"]');
+  }],
+  ['S20', 'step 2 with goal reminder', async (p) => {
+    await p.evaluate(() => { window.__l4.state.f.L4_GOAL_FOCUS = 'e'; window.__l4.go('S20'); });
     for (const q of ['q1', 'q2', 'q3']) await click(p, `.w-check-row[data-row="${q}"] [data-choice="yes"]`);
     await click(p, '.w-next'); await click(p, '.w-chip[data-chip="automating"]');
   }],
@@ -226,7 +234,7 @@ for (const size of SIZES) {
   const page = await open('?reset=1&screen=S03', size);
   await click(page, '.w-rail-menu');
   await measure(page, `menu open ${size.join('x')}`);
-  for (const action of ['help', 'startover']) {
+  for (const action of ['goals', 'help', 'startover']) {
     await click(page, `.w-panel [data-action="${action}"]`);
     await measure(page, `menu dialog "${action}" ${size.join('x')}`);
     await page.keyboard.press('Escape');
