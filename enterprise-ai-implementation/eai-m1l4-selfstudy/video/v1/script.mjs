@@ -1,4 +1,4 @@
-// V1 script builder and validator (P2). Reads screen V1 of content/l4-slice.json and writes
+﻿// V1 script builder and validator (P2). Reads screen V1 of content/l4-slice.json and writes
 // video/v1/film.json: captions sliced verbatim from the storyboard narration, `say` with the
 // content sayOverrides and the pronunciation fixes below, planned timing, holds, stops, brand end.
 // Narration and keywords come from the content only. Text held here: spoken-only fixes (SAY_FIXES),
@@ -107,7 +107,7 @@ function build() {
     fps: T.fps,
     size: T.size,
     duration: r1(brandAt + T.brandHold),
-    voice: { engine: 'kokoro-onnx', model: 'Kokoro-82M', voice: 'af_heart', speed: 1.0, lang: 'en-us', lead: T.lead,
+    voice: { engine: 'kokoro-onnx', model: 'Kokoro-82M', voice: 'af_heart', speed: 1.1, lang: 'en-us', lead: T.lead,
       fitRule: 'speech + 0.2 s <= caption slot', loudnorm: 'I=-16:TP=-1.5:LRA=11', music: false, effects: false },
     planning: { wordsPerSecond: T.wps, minSlot: T.minSlot, note: 'Planned slots. make.py re-times from the real audio; the cue file comes from that placement.' },
     title: { text: V1.title, start: 0, end: T.titleEnd, color: '#255777', font: 'Assistant', weight: 800 },

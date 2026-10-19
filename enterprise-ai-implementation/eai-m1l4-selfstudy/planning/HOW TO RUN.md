@@ -14,13 +14,14 @@ Six phases, one Claude Code session each (P2 takes two). Each phase builds, chec
 |---|---|
 | P0 | `Read "enterprise-ai-implementation/eai-m1l4-selfstudy/planning/RUN ON OPUS - EAI L4 P0 scaffold, tokens, frame, menu.md" and run that phase exactly. Do not push.` |
 | P1 | `Read "enterprise-ai-implementation/eai-m1l4-selfstudy/planning/RUN ON OPUS - EAI L4 P1 templates and slice screens.md" and run that phase exactly. Do not push.` |
+| P1.5 | `Read "enterprise-ai-implementation/eai-m1l4-selfstudy/planning/RUN ON OPUS - EAI L4 P1.5 approved look (Claude Design R2-R3).md" and run that phase exactly. Do not push.` |
 | P2 part A | `Read "enterprise-ai-implementation/eai-m1l4-selfstudy/planning/RUN ON OPUS - EAI L4 P2 V1 video production.md" and run Part A only. Do not push.` |
 | P2 part B | `Read "enterprise-ai-implementation/eai-m1l4-selfstudy/planning/RUN ON OPUS - EAI L4 P2 V1 video production.md" and run Part B. Direction: <1 or 2, plus your notes>. Do not push.` |
 | P3 | `Read "enterprise-ai-implementation/eai-m1l4-selfstudy/planning/RUN ON OPUS - EAI L4 P3 video player, handoff, return checkpoint.md" and run that phase exactly. Do not push.` |
 | P4 | `Read "enterprise-ai-implementation/eai-m1l4-selfstudy/planning/RUN ON OPUS - EAI L4 P4 SCORM 1.2 adapter and packaging.md" and run that phase exactly. Do not push.` |
 | P5 | `Read "enterprise-ai-implementation/eai-m1l4-selfstudy/planning/RUN ON OPUS - EAI L4 P5 tests and review page.md" and run that phase exactly. Do not push.` |
 
-Order: P0, then P1 and P2A (either order), P2B after you pick a direction, then P3, P4, P5.
+Order: P0, then P1, then P1.5 (approved look, taste gate before anything else), then P2A, P2B after you pick a direction, then P3, P4, P5.
 
 ## What to check after each phase
 To look at the page yourself: in a terminal in the lesson folder run `npm run serve`, then open `http://localhost:8124/` (add `?screen=S03` to jump, `?debug=1` to see tracking).
@@ -29,6 +30,7 @@ To look at the page yourself: in a terminal in the lesson folder run `npm run se
 |---|---|---|
 | P0 | `review/p0/` screenshots, `?demo=1` | Wawiwa look (navy, red only on the main button and progress line, Assistant font, real logo); menu works with the keyboard; feedback row never covers the card |
 | P1 | `review/p1/` | Text spread over the card by role, not in one block; hint before action; correct teal, wrong dark red on pink; Continue only after correct; Dana placeholder labelled fictional |
+| P1.5 | `review/p1.5/` and localhost | Reads like the Claude Design artboards: chapter rail, footer with Previous/Next only, feedback band under each interaction, only Next is red; temp images listed in the report |
 | P2A | `review/p2/concept-1.png`, `concept-2.png` | Pick a direction; reply in the P2B prompt |
 | P2B | `assets/video/v1.mp4` | **Listen** for pronunciation (Claude cannot hear); numbers and "per reports" on screen; no music; length about 2:45 |
 | P3 | `review/p3/` and play V1 in the page | Stops at both questions; cannot skip past a question; workbook opens in a new tab; S19 return and S20 feel right |

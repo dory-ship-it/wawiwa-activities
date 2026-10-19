@@ -1,3 +1,5 @@
+> SUPERSEDED (2026-10-18): do not run. Direction A2 was rejected. Use "RUN ON OPUS - EAI L4 P1.5 approved look (Claude Design R2-R3).md".
+
 # RUN ON OPUS: EAI L4 P1.5 visual direction A2 (player look, menu, image slots)
 
 Pilot. Noy reviewed P1 on localhost: the module looks colorless and "like a code page, not an e-learning module", and the menu is overloaded. This phase restyles ONLY what exists (frame, menu, S01, S02, FT1, S03) to the approved direction A2. No new screens, no video work, no content wording changes.

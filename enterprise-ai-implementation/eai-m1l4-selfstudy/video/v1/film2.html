@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>V1 motion frame</title>
+<style>
+  @font-face { font-family: Assistant; font-weight: 400; src: url(../../assets/fonts/assistant-latin-400-normal.woff2) format('woff2'); }
+  @font-face { font-family: Assistant; font-weight: 600; src: url(../../assets/fonts/assistant-latin-600-normal.woff2) format('woff2'); }
+  @font-face { font-family: Assistant; font-weight: 700; src: url(../../assets/fonts/assistant-latin-700-normal.woff2) format('woff2'); }
+  @font-face { font-family: Assistant; font-weight: 800; src: url(../../assets/fonts/assistant-latin-800-normal.woff2) format('woff2'); }
+  :root { --navy: #255777; --deep: #0e2030; --turq: #5AB3AA; --teal: #3E868F; --red: #EE3124; --paper: #f6f1e6; }
+  html, body { margin: 0; width: 1280px; height: 720px; overflow: hidden; background: var(--deep); font-family: Assistant, 'Segoe UI', sans-serif; }
+  .abs { position: absolute; }
+  #shots, #gfx { position: absolute; inset: 0; overflow: hidden; }
+  #shots { z-index: 0; }
+  #gfx { z-index: 1; }
+  .shot { position: absolute; top: 0; height: 720px; overflow: hidden; }
+  .shot img, .shot video { position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px; object-fit: cover; transform-origin: 50% 50%; }
+  .shot .dim { position: absolute; inset: 0; background: var(--deep); }
+  .shot .edge { position: absolute; top: 0; bottom: 0; width: 4px; background: var(--turq); }
+  .g { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; pointer-events: none; }
+  .kicker { color: var(--turq); font-weight: 700; font-size: 26px; letter-spacing: 6px; text-transform: uppercase; }
+  .big { color: #fff; font-weight: 800; line-height: 1; }
+  .pill { display: inline-block; padding: 8px 18px; border-radius: 999px; font-weight: 700; }
+  .card { position: absolute; width: 250px; height: 310px; background: var(--paper); border-radius: 6px; box-shadow: 0 18px 40px rgba(0,0,0,.45); }
+  .card .t { position: absolute; left: 0; right: 0; top: 18px; text-align: center; font: 700 22px Assistant; color: var(--navy); }
+  .card .ln { position: absolute; left: 26px; height: 9px; border-radius: 4px; background: #cfc6b4; }
+  .neq { position: absolute; width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%; background: var(--red); color: #fff; font: 800 36px/54px Assistant; text-align: center; box-shadow: 0 6px 18px rgba(0,0,0,.4); }
+  .node { position: absolute; transform: translate(-50%, -50%); padding: 18px 28px; border-radius: 14px; background: #fff; color: var(--navy); font: 800 34px Assistant; white-space: nowrap; box-shadow: 0 14px 30px rgba(0,0,0,.4); }
+</style>
+</head>
+<body>
+<div id="shots"></div>
+<div id="gfx"></div>
+<script>
+// Draws the frame for time t from window.FILM = { timeline, motion, missing }. Deterministic: every value
+// is a function of t; video clips are seeked to the exact frame.
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ramp = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const smooth = (x) => x * x * (3 - 2 * x);
+const outCubic = (x) => 1 - Math.pow(1 - x, 3);
+const outBack = (x) => { const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const h = (tag, cls, css, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (css) Object.assign(e.style, css); if (html != null) e.innerHTML = html; return e; };
+const PERSON = '<svg viewBox="0 0 20 26" width="100%" height="100%"><circle cx="10" cy="6" r="5" fill="currentColor"/><path d="M1 26c0-7 4-11 9-11s9 4 9 11z" fill="currentColor"/></svg>';
+let S;
+
+function anchor(ref) {
+  const T = S.timeline;
+  let m = String(ref).match(/^(.*?)([+-][\d.]+)$/);
+  if (m && !/^[\d.]+$/.test(ref)) return anchor(m[1]) + Number(m[2]);
+  if (/^[\d.]+$/.test(ref)) return Number(ref);
+  if (ref === 'brand') return T.brandAt;
+  if (ref === 'end') return T.duration;
+  if (ref === 'titleEnd') return T.titleEnd;
+  m = ref.match(/^(stop\d)\.end$/);
+  if (m) return T.holds.find((x) => x.id === m[1]).end;
+  m = ref.match(/^(c\d+)(?:\.(end)|@([\d.]+))?$/);
+  const c = T.captions.find((x) => x.id === m[1]);
+  if (m[2]) return c.end;
+  if (m[3]) return c.start + T.rules.lead + Number(m[3]) * c.speech;
+  return c.start;
+}
+
+// ---------- graphics: each builder returns a draw(t) function ----------
+const G = {
+  chapter(g, root) {
+    const box = h('div', 'abs', { left: '80px', top: '210px' });
+    const k = h('div', 'kicker', null, g.kicker), bar = h('div', null, { height: '5px', background: 'var(--red)', margin: '14px 0 18px', width: '0px' });
+    const t = h('div', 'big', { fontSize: '96px', textShadow: '0 4px 24px rgba(0,0,0,.5)' }, g.title);
+    const s = h('div', null, { color: '#fff', font: '600 34px Assistant', marginTop: '14px', opacity: .9 }, g.sub);
+    box.append(k, bar, t, s); root.append(box);
+    root.style.background = 'linear-gradient(90deg, rgba(14,32,48,.75), rgba(14,32,48,0) 70%)';
+    return (t0) => {
+      const a = outCubic(ramp(t0, g.a, g.a + 0.6)), o = ramp(t0, g.b - 0.4, g.b);
+      root.style.opacity = a * (1 - o);
+      box.style.transform = `translateX(${(1 - a) * -60 - o * 40}px)`;
+      bar.style.width = 133 * outCubic(ramp(t0, g.a + 0.3, g.a + 0.9)) + 'px';
+      t.style.transform = `translateX(${(1 - outCubic(ramp(t0, g.a + 0.1, g.a + 0.8))) * -30}px)`;
+    };
+  },
+  peopleGrid(g, root) {
+    const cx = g.side === 'right' ? 960 : 320, cols = g.cols, size = 30, gap = 8;
+    const rows = Math.ceil(g.icons / cols), w = cols * (size + gap) - gap;
+    const num = h('div', 'big abs', { left: cx - 200 + 'px', width: '400px', top: '150px', textAlign: 'center', fontSize: '110px', textShadow: '0 4px 20px rgba(0,0,0,.5)' });
+    const grid = h('div', 'abs', { left: cx - w / 2 + 'px', top: '290px', width: w + 'px' });
+    const icons = [];
+    for (let i = 0; i < g.icons; i++) {
+      const e = h('div', null, { position: 'absolute', left: (i % cols) * (size + gap) + 'px', top: Math.floor(i / cols) * (size + 6) + 'px', width: size + 'px', height: size * 1.3 + 'px', color: g.side === 'right' ? 'var(--turq)' : '#fff' }, PERSON);
+      grid.append(e); icons.push(e);
+    }
+    const note = h('div', 'abs', { left: cx - 200 + 'px', width: '400px', top: 300 + rows * (size + 6) + 18 + 'px', textAlign: 'center', color: '#fff', font: '600 22px Assistant', opacity: .85 }, g.note);
+    root.append(num, grid, note);
+    const prefix = g.label.startsWith('~') ? '~' : '';
+    return (t0) => {
+      const a = ramp(t0, g.a, g.a + 0.3), o = ramp(t0, g.b - 0.3, g.b);
+      root.style.opacity = a * (1 - o);
+      const k = outCubic(ramp(t0, g.a, g.a + 1.4));
+      num.textContent = prefix + Math.round(g.value * k);
+      num.style.transform = `scale(${lerp(0.7, 1, outBack(ramp(t0, g.a, g.a + 0.5)))})`;
+      icons.forEach((e, i) => { const s = outBack(ramp(t0, g.a + i * (1.2 / g.icons), g.a + i * (1.2 / g.icons) + 0.35)); e.style.transform = `scale(${s})`; });
+      const dimmed = S.badgeAt && t0 > S.badgeAt ? 1 - 0.45 * ramp(t0, S.badgeAt, S.badgeAt + 0.3) : 1;
+      grid.style.opacity = dimmed;
+    };
+  },
+  badge(g, root) {
+    S.badgeAt = g.a;
+    const c = h('div', 'abs', { left: '530px', top: '200px', width: '220px', height: '220px', borderRadius: '50%', background: 'var(--red)', boxShadow: '0 20px 50px rgba(0,0,0,.5)', textAlign: 'center' });
+    c.append(h('div', 'big', { fontSize: '110px', marginTop: '36px' }, g.text), h('div', null, { color: '#fff', font: '700 30px Assistant', marginTop: '-4px' }, g.sub));
+    root.append(c);
+    return (t0) => {
+      const a = outBack(ramp(t0, g.a, g.a + 0.45)), o = ramp(t0, g.b - 0.25, g.b);
+      root.style.opacity = ramp(t0, g.a, g.a + 0.1) * (1 - o);
+      c.style.transform = `scale(${a * (1 + 0.04 * Math.sin((t0 - g.a) * 6))}) rotate(${(1 - a) * -20}deg)`;
+    };
+  },
+  question(g, root) {
+    const qx = (g.x || 640) - 100, qy = (g.y || 310) - 100; const ring = h('div', 'abs', { left: qx + 'px', top: qy + 'px', width: '200px', height: '200px', borderRadius: '50%', border: '7px solid var(--turq)', background: 'rgba(14,32,48,.72)', boxSizing: 'border-box', textAlign: 'center' });
+    ring.append(h('div', 'big', { fontSize: '140px', marginTop: '14px' }, '?'));
+    const wave = h('div', 'abs', { left: qx + 'px', top: qy + 'px', width: '200px', height: '200px', borderRadius: '50%', border: '3px solid var(--turq)', boxSizing: 'border-box' });
+    root.append(wave, ring);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.2, g.b));
+      ring.style.transform = `scale(${outBack(ramp(t0, g.a, g.a + 0.5))})`;
+      const p = ((t0 - g.a) % 1.2) / 1.2;
+      wave.style.transform = `scale(${1 + p * 0.8})`; wave.style.opacity = 1 - p;
+    };
+  },
+  mapLines(g, root) {
+    const P = [[180, 520], [330, 380], [520, 470], [640, 300], [790, 440], [960, 330], [1110, 500], [700, 590]];
+    const E = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [2, 7], [7, 4]];
+    let svg = '<svg width="1280" height="720" class="abs">';
+    E.forEach(([a, b], i) => { const L = Math.hypot(P[b][0] - P[a][0], P[b][1] - P[a][1]); svg += `<line id="ml${i}" x1="${P[a][0]}" y1="${P[a][1]}" x2="${P[b][0]}" y2="${P[b][1]}" stroke="#5AB3AA" stroke-width="4" stroke-linecap="round" stroke-dasharray="${L}" stroke-dashoffset="${L}" data-l="${L}"/>`; });
+    P.forEach((p, i) => { svg += `<circle id="mn${i}" cx="${p[0]}" cy="${p[1]}" r="11" fill="#fff" stroke="#5AB3AA" stroke-width="5"/>`; });
+    root.innerHTML = svg + '</svg>';
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.2) * (1 - ramp(t0, g.b - 0.3, g.b));
+      const span = g.b - g.a - 0.4;
+      E.forEach((e, i) => { const l = root.querySelector('#ml' + i), L = +l.dataset.l; l.setAttribute('stroke-dashoffset', L * (1 - smooth(ramp(t0, g.a + i * span / E.length, g.a + (i + 1.6) * span / E.length)))); });
+      P.forEach((p, i) => { root.querySelector('#mn' + i).setAttribute('r', 11 * outBack(ramp(t0, g.a + i * span / P.length, g.a + i * span / P.length + 0.3))); });
+    };
+  },
+  docs(g, root) {
+    const X = [250, 640, 1030], cards = [];
+    g.labels.forEach((lab, i) => {
+      const c = h('div', 'card', { left: X[i] - 125 + 'px', top: '150px' });
+      c.append(h('div', 't', null, lab));
+      for (let j = 0; j < 9; j++) c.append(h('div', 'ln', { top: 70 + j * 24 + 'px', width: [190, 150, 170, 120, 190, 140, 160, 110, 180][(j + i * 3) % 9] + 'px' }));
+      root.append(c); cards.push(c);
+    });
+    const neqs = [h('div', 'neq', { left: '445px', top: '305px' }, '≠'), h('div', 'neq', { left: '835px', top: '305px' }, '≠')];
+    root.append(...neqs);
+    const cap = h('div', 'abs', { left: 0, right: 0, top: '520px', textAlign: 'center' });
+    cap.append(h('span', 'pill', { background: 'var(--navy)', color: '#fff', fontSize: '34px', padding: '10px 26px' }, g.caption));
+    root.append(cap);
+    return (t0) => {
+      root.style.opacity = 1 - ramp(t0, g.b - 0.3, g.b);
+      const hit = S.boltHit != null ? Math.max(0, 1 - Math.abs(t0 - S.boltHit) / 0.35) : 0;
+      cards.forEach((c, i) => {
+        const k = outCubic(ramp(t0, g.a + i * 0.25, g.a + i * 0.25 + 0.6));
+        const wob = Math.sin((t0 - g.a) * 2.2 + i) * 1.5, shake = hit * Math.sin(t0 * 70 + i) * 10;
+        c.style.transform = `translate(${shake}px, ${(1 - k) * 420}px) rotate(${(i - 1) * 4 + wob}deg)`;
+      });
+      neqs.forEach((n, i) => {
+        const s = outBack(ramp(t0, g.a + 1.2 + i * 0.3, g.a + 1.5 + i * 0.3));
+        n.style.transform = `scale(${s * (1 + 0.12 * Math.max(0, Math.sin((t0 - g.a) * 7 + i * 2)))})`;
+      });
+      cap.style.opacity = ramp(t0, g.a + 1.6, g.a + 2);
+      cap.style.transform = `translateY(${(1 - outCubic(ramp(t0, g.a + 1.6, g.a + 2.1))) * 20}px)`;
+    };
+  },
+  bolt(g, root) {
+    S.boltHit = g.a + (g.b - g.a) * 0.4;
+    const b = h('div', 'abs', { left: 0, top: 0, width: '170px', textAlign: 'center' });
+    const bsvg = h('div', null, { width: '120px', height: '160px', margin: '0 auto' }, '<svg viewBox="0 0 60 80" width="120" height="160"><path d="M36 0L4 46h22L18 80l38-50H32z" fill="#5AB3AA" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>');
+    b.append(bsvg, h('span', 'pill', { background: '#fff', color: 'var(--navy)', fontSize: '24px' }, g.label));
+    root.append(b);
+    return (t0) => {
+      const hit = S.boltHit, inK = smooth(ramp(t0, g.a, hit)), outK = outCubic(ramp(t0, hit, g.b));
+      const x = t0 < hit ? lerp(1180, 620, inK) : lerp(620, 1050, outK), y = t0 < hit ? lerp(-150, 160, inK) : lerp(160, 40, outK) + Math.sin(outK * Math.PI) * -60;
+      b.style.transform = `translate(${x - 85}px, ${y}px)`;
+      bsvg.style.transform = `rotate(${t0 < hit ? 12 : 12 + outK * 200}deg)`;
+      root.style.opacity = ramp(t0, g.a, g.a + 0.1) * (1 - ramp(t0, g.b - 0.25, g.b));
+    };
+  },
+  flow(g, root) {
+    const wrap = h('div', 'abs', { left: 0, top: 0, width: '1280px', height: '720px', transformOrigin: '0 0' });
+    const n1 = h('div', 'node', { left: '360px', top: '520px' }, g.nodes[0]), n2 = h('div', 'node', { left: '920px', top: '520px', background: 'var(--turq)', color: '#fff' }, g.nodes[1]);
+    const arrow = h('div', 'abs', { left: 0, top: 0 }, '<svg width="1280" height="720"><defs><marker id="ah" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#fff"/></marker></defs><line id="fa" x1="540" y1="520" x2="780" y2="520" stroke="#fff" stroke-width="8" stroke-dasharray="240" stroke-dashoffset="240" marker-end="url(#ah)"/></svg>');
+    const inv = h('div', 'card', { left: '575px', top: '290px', width: '130px', height: '160px' });
+    inv.append(h('div', 't', { fontSize: '18px', top: '10px' }, g.strike));
+    for (let j = 0; j < 4; j++) inv.append(h('div', 'ln', { left: '18px', top: 48 + j * 22 + 'px', width: [90, 70, 85, 60][j] + 'px' }));
+    const strike = h('div', 'abs', { left: '-10px', top: '76px', width: '150px', height: '8px', background: 'var(--red)', transformOrigin: '0 50%', transform: 'rotate(-28deg) scaleX(0)' });
+    inv.append(strike);
+    wrap.append(arrow, n1, n2, inv); root.append(wrap);
+    const dock = anchor(g.dockAt);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.2) * (1 - ramp(t0, g.b - 0.3, g.b));
+      n1.style.transform = `translate(-50%, -50%) scale(${outBack(ramp(t0, g.a, g.a + 0.45))})`;
+      n2.style.transform = `translate(-50%, -50%) scale(${outBack(ramp(t0, g.a + 0.9, g.a + 1.35))})`;
+      arrow.querySelector('#fa').setAttribute('stroke-dashoffset', 240 * (1 - smooth(ramp(t0, g.a + 0.4, g.a + 1.0))));
+      const sk = outCubic(ramp(t0, g.a + 1.4, g.a + 1.8)), fall = ramp(t0, g.a + 2.0, g.a + 2.8);
+      inv.style.opacity = ramp(t0, g.a + 0.2, g.a + 0.5) * (1 - fall);
+      inv.style.transform = `translateY(${smooth(fall) * 260}px) rotate(${fall * 35}deg)`;
+      strike.style.transform = `rotate(-28deg) scaleX(${sk})`;
+      const d = outCubic(ramp(t0, dock, dock + 0.7));
+      wrap.style.transform = `translate(${lerp(0, 40, d)}px, ${lerp(0, -200, d)}px) scale(${lerp(1, 0.55, d)})`;
+    };
+  },
+  drop(g, root) {
+    const panel = h('div', 'abs', { left: '620px', top: '170px', width: '600px', height: '400px', background: 'rgba(14,32,48,.82)', borderRadius: '18px', boxShadow: '0 20px 50px rgba(0,0,0,.45)' });
+    const track = h('div', 'abs', { left: '50px', bottom: '50px', width: '110px', height: '300px', background: 'rgba(255,255,255,.15)', borderRadius: '10px' });
+    const bar = h('div', 'abs', { left: 0, right: 0, bottom: 0, background: 'var(--turq)', borderRadius: '10px' });
+    track.append(bar);
+    const num = h('div', 'big abs', { left: '200px', top: '110px', fontSize: '68px', whiteSpace: 'nowrap', color: '#fff', transformOrigin: '0 50%' }, g.label);
+    const chip = h('div', 'abs', { left: '202px', top: '210px' });
+    chip.append(h('span', 'pill', { border: '3px solid var(--turq)', color: '#fff', fontSize: '24px', background: 'rgba(14,32,48,.6)' }, g.chip));
+    panel.append(track, num, chip); root.append(panel);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.25) * (1 - ramp(t0, g.b - 0.3, g.b));
+      const k = smooth(ramp(t0, g.a + 0.5, g.a + 2.0));
+      bar.style.height = lerp(g.fromValue, g.toValue, k) / 100 * 300 + 'px';
+      num.style.opacity = ramp(t0, g.a + 1.2, g.a + 1.5);
+      num.style.transform = `scale(${lerp(0.6, 1, outBack(ramp(t0, g.a + 1.2, g.a + 1.6)))})`;
+      chip.style.opacity = ramp(t0, g.a + 1.7, g.a + 2.0);
+    };
+  },
+  // opening title: words rise one by one, a turquoise bar draws under them
+  title(g, root) {
+    root.style.background = 'rgba(14,32,48,.55)';
+    const box = h('div', 'abs', { left: 0, right: 0, top: '285px', textAlign: 'center' });
+    const words = g.text.split(' ').map((w) => h('span', 'big', { display: 'inline-block', fontSize: '76px', margin: '0 12px' }, w));
+    box.append(...words);
+    const bar = h('div', 'abs', { left: '573px', top: '400px', height: '6px', width: '134px', background: 'var(--turq)', transformOrigin: '50% 50%' });
+    root.append(box, bar);
+    return (t0) => {
+      root.style.opacity = 1 - ramp(t0, g.b - 0.5, g.b);
+      words.forEach((w, i) => { const k = outCubic(ramp(t0, g.a + 0.15 * i, g.a + 0.15 * i + 0.6)); w.style.opacity = k; w.style.transform = `translateY(${(1 - k) * 40}px)`; });
+      bar.style.transform = `scaleX(${outCubic(ramp(t0, g.a + 0.8, g.a + 1.4))})`;
+    };
+  },
+  // a tangled process: boxes, loops back, work items crawling; at `boostAt` a faster-tech chip lands,
+  // the items speed up and pile up in front of the bottleneck
+  chain(g, root) {
+    const X = [180, 400, 620, 840, 1060], Y = g.y || 470, boost = g.boostAt ? anchor(g.boostAt) : null, pileAt = g.pileAt ? anchor(g.pileAt) : null;
+    let svg = `<svg width="1280" height="720" class="abs"><defs><marker id="ca" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#fff"/></marker></defs>`;
+    for (let i = 0; i < 4; i++) svg += `<line x1="${X[i] + 55}" y1="${Y}" x2="${X[i + 1] - 62}" y2="${Y}" stroke="#fff" stroke-width="4" marker-end="url(#ca)" opacity=".9"/>`;
+    svg += `<path d="M${X[3]} ${Y - 45} C ${X[3]} ${Y - 150}, ${X[1]} ${Y - 150}, ${X[1]} ${Y - 45}" fill="none" stroke="#EE3124" stroke-width="4" stroke-dasharray="10 8" marker-end="url(#ca)"/>`;
+    svg += `<path d="M${X[2]} ${Y + 45} C ${X[2]} ${Y + 120}, ${X[0]} ${Y + 120}, ${X[0]} ${Y + 45}" fill="none" stroke="#EE3124" stroke-width="4" stroke-dasharray="10 8" marker-end="url(#ca)"/></svg>`;
+    const lines = h('div', 'abs', { left: 0, top: 0 }, svg);
+    root.append(lines);
+    const boxes = X.map((x, i) => { const b = h('div', 'abs', { left: x - 55 + 'px', top: Y - 40 + 'px', width: '110px', height: '80px', borderRadius: '14px', background: i === 2 ? 'var(--red)' : '#fff', boxShadow: '0 10px 24px rgba(0,0,0,.4)' }); root.append(b); return b; });
+    const dots = Array.from({ length: 10 }, (_, i) => { const d = h('div', 'abs', { width: '22px', height: '28px', marginLeft: '-11px', marginTop: '-14px', background: 'var(--paper)', borderRadius: '3px', boxShadow: '0 2px 6px rgba(0,0,0,.4)' }); root.append(d); return d; });
+    const pile = Array.from({ length: 12 }, (_, i) => { const p = h('div', 'abs', { left: X[2] - 150 + (i % 4) * 26 + 'px', top: Y - 70 - Math.floor(i / 4) * 22 + 'px', width: '24px', height: '30px', background: 'var(--paper)', borderRadius: '3px', boxShadow: '0 2px 6px rgba(0,0,0,.4)', transform: `rotate(${(i * 37) % 20 - 10}deg)` }); root.append(p); return p; });
+    let chip = null;
+    if (boost != null) {
+      chip = h('div', 'abs', { left: X[2] - 110 + 'px', top: Y - 190 + 'px', width: '220px', textAlign: 'center' });
+      chip.append(h('span', 'pill', { background: 'var(--turq)', color: '#fff', fontSize: '28px', boxShadow: '0 10px 24px rgba(0,0,0,.4)' }, g.chip));
+      root.append(chip);
+    }
+    const tag = g.tag ? h('div', 'abs', { left: 0, right: 0, top: Y + 150 + 'px', textAlign: 'center' }) : null;
+    if (tag) { tag.append(h('span', 'pill', { background: 'var(--navy)', color: '#fff', fontSize: '40px', padding: '10px 30px' }, g.tag)); root.append(tag); }
+    const tagAt = g.tagAt ? anchor(g.tagAt) : null;
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.4) * (1 - ramp(t0, g.b - 0.4, g.b));
+      boxes.forEach((b, i) => { b.style.transform = `scale(${outBack(ramp(t0, g.a + i * 0.12, g.a + i * 0.12 + 0.4))})`; });
+      lines.style.opacity = ramp(t0, g.a + 0.5, g.a + 0.9);
+      // position along the chain: slow before the boost, four times faster after
+      const fast = boost != null && t0 > boost ? (t0 - boost) * 4 : 0, base = (boost != null ? Math.min(t0, boost) : t0) - g.a;
+      const pos = base * 0.18 + fast * 0.18;
+      dots.forEach((d, i) => {
+        const u = (pos + i / dots.length) % 1, x = lerp(X[0], X[4], u);
+        d.style.left = x + 'px'; d.style.top = Y + Math.sin(u * 40 + i) * 6 + 'px';
+        d.style.opacity = ramp(t0, g.a + 0.6, g.a + 1) * (1 - Math.abs(u - 0.5) * 0.4);
+      });
+      const pk = pileAt != null ? ramp(t0, pileAt, pileAt + 2.5) : 0;
+      pile.forEach((p, i) => { const s = outBack(clamp(pk * pile.length - i)); p.style.opacity = s > 0 ? 1 : 0; p.style.transform = `rotate(${(i * 37) % 20 - 10}deg) scale(${s})`; });
+      if (chip) { const k = outBack(ramp(t0, boost, boost + 0.45)); chip.style.opacity = ramp(t0, boost, boost + 0.1); chip.style.transform = `translateY(${(1 - k) * -120}px) scale(${lerp(1.4, 1, k)})`; }
+      if (tag) { const k = outBack(ramp(t0, tagAt, tagAt + 0.5)); tag.style.opacity = ramp(t0, tagAt, tagAt + 0.15); tag.style.transform = `scale(${k})`; }
+    };
+  },
+  // a rubber stamp that slams onto the frame
+  stamp(g, root) {
+    const s = h('div', 'abs', { left: g.x - 230 + 'px', top: g.y - 70 + 'px', width: '460px', height: '140px', border: '8px solid var(--red)', borderRadius: '14px', color: 'var(--red)', font: '800 72px/124px Assistant', textAlign: 'center', background: 'rgba(255,255,255,.88)', letterSpacing: '3px' }, g.text);
+    root.append(s);
+    return (t0) => {
+      const k = ramp(t0, g.a, g.a + 0.25);
+      root.style.opacity = (k > 0 ? 1 : 0) * (1 - ramp(t0, g.b - 0.3, g.b));
+      s.style.transform = `rotate(-8deg) scale(${lerp(2.2, 1, outCubic(k))})`;
+    };
+  },
+  // big kinetic words, each slamming in at its own anchor
+  words(g, root) {
+    root.style.background = 'linear-gradient(0deg, rgba(14,32,48,.85), rgba(14,32,48,.25))';
+    const box = h('div', 'abs', { left: 0, right: 0, top: (g.y || 250) + 'px', textAlign: 'center' });
+    const ws = g.lines.map((l) => { const e = h('div', 'big', { fontSize: (l.size || 84) + 'px', color: l.color === 'red' ? 'var(--red)' : '#fff', margin: '6px 0' }, l.text); box.append(e); return { e, at: anchor(l.at || g.from) }; });
+    root.append(box);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.4, g.b));
+      ws.forEach(({ e, at }) => { const k = outBack(ramp(t0, at, at + 0.4)); e.style.opacity = ramp(t0, at, at + 0.1); e.style.transform = `scale(${lerp(1.6, 1, k)})`; });
+    };
+  },
+  // sticky notes in a tidy process grid that blow apart at `blowAt`
+  scatter(g, root) {
+    const C = ['#f7e27a', '#9fd8cf', '#f4a9a0', '#ffffff'], notes = [], blow = anchor(g.blowAt);
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 6; c++) {
+      const i = r * 6 + c, n = h('div', 'abs', { left: 250 + c * 135 + 'px', top: 150 + r * 135 + 'px', width: '110px', height: '110px', background: C[(i * 7) % 4], boxShadow: '0 8px 18px rgba(0,0,0,.35)' });
+      for (let j = 0; j < 3; j++) n.append(h('div', 'abs', { left: '14px', top: 22 + j * 22 + 'px', width: [70, 56, 64][(i + j) % 3] + 'px', height: '8px', borderRadius: '4px', background: 'rgba(0,0,0,.18)' }));
+      root.append(n); notes.push(n);
+    }
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      notes.forEach((n, i) => {
+        const pop = outBack(ramp(t0, g.a + i * 0.05, g.a + i * 0.05 + 0.35));
+        const k = Math.pow(ramp(t0, blow + (i % 5) * 0.03, blow + 1.4), 1.6), ang = i * 2.399, dist = 900 * k;
+        n.style.transform = `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist}px) rotate(${(i % 2 ? 1 : -1) * (6 + 360 * k)}deg) scale(${pop})`;
+      });
+    };
+  },
+  // two pills, the second replacing the first with an arrow between: "computing -> AI"
+  morph(g, root) {
+    const box = h('div', 'abs', { left: 0, right: 0, top: '560px', textAlign: 'center' });
+    const p1 = h('span', 'pill', { background: 'rgba(255,255,255,.92)', color: 'var(--navy)', fontSize: '40px', padding: '10px 28px' }, g.from_text);
+    const ar = h('span', 'big', { fontSize: '48px', margin: '0 22px', display: 'inline-block' }, '→');
+    const p2 = h('span', 'pill', { background: 'var(--turq)', color: '#fff', fontSize: '40px', padding: '10px 28px' }, g.to_text);
+    box.append(p1, ar, p2); root.append(box);
+    const second = anchor(g.secondAt);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      p1.style.opacity = ramp(t0, g.a, g.a + 0.3);
+      ar.style.opacity = ramp(t0, second - 0.2, second); ar.style.transform = `translateX(${(1 - outCubic(ramp(t0, second - 0.2, second + 0.3))) * -30}px)`;
+      p2.style.opacity = ramp(t0, second, second + 0.15); p2.style.transform = `scale(${outBack(ramp(t0, second, second + 0.45))})`;
+    };
+  },
+  // a big rolling number with a caption and an optional "per reports" chip; chat bubbles stream out
+  counter(g, root) {
+    root.style.background = 'linear-gradient(270deg, rgba(14,32,48,0) 35%, rgba(14,32,48,.85) 75%)';
+    const box = h('div', 'abs', { left: '70px', top: '200px', width: '560px' });
+    const num = h('div', 'big', { fontSize: '150px' });
+    const cap = h('div', null, { color: '#fff', font: '700 40px Assistant', marginTop: '4px' }, g.caption);
+    const chip = h('div', null, { marginTop: '22px' }); chip.append(h('span', 'pill', { border: '3px solid var(--turq)', color: '#fff', fontSize: '26px' }, g.chip));
+    box.append(num, cap, chip); root.append(box);
+    const bubbles = Array.from({ length: 14 }, (_, i) => { const b = h('div', 'abs', { width: '46px', height: '30px', borderRadius: '14px', background: i % 3 ? '#fff' : 'var(--turq)', opacity: 0 }); root.append(b); return b; });
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      const k = outCubic(ramp(t0, g.a + 0.2, g.a + 2.2));
+      num.textContent = (g.value * k).toFixed(g.decimals || 0) + (g.suffix || '');
+      cap.style.opacity = ramp(t0, g.a + 0.6, g.a + 1);
+      chip.style.opacity = ramp(t0, g.a + 1.2, g.a + 1.5);
+      bubbles.forEach((b, i) => {
+        const u = ((t0 - g.a) * 0.6 + i / bubbles.length) % 1;
+        b.style.left = lerp(820, 560, u) + Math.sin(i * 3) * 40 + 'px'; b.style.top = lerp(380, 120, u) + (i % 4) * 30 + 'px';
+        b.style.opacity = Math.sin(u * Math.PI) * ramp(t0, g.a, g.a + 0.5) * 0.9;
+      });
+    };
+  },
+  // a grid of person icons that fade out by `share`, with a label and chip
+  fadeGrid(g, root) {
+    root.style.background = 'rgba(14,32,48,.45)';
+    const cols = 14, size = 34, gap = 10, icons = [];
+    const grid = h('div', 'abs', { left: 640 - (cols * (size + gap) - gap) / 2 + 'px', top: '150px' });
+    for (let i = 0; i < g.icons; i++) { const e = h('div', null, { position: 'absolute', left: (i % cols) * (size + gap) + 'px', top: Math.floor(i / cols) * (size * 1.3 + 8) + 'px', width: size + 'px', height: size * 1.3 + 'px', color: '#fff' }, PERSON); grid.append(e); icons.push(e); }
+    const lab = h('div', 'abs', { left: 0, right: 0, top: '430px', textAlign: 'center' });
+    lab.append(h('span', 'pill', { background: 'var(--navy)', color: '#fff', fontSize: '40px', padding: '10px 28px' }, g.label), h('span', 'pill', { border: '3px solid var(--turq)', color: '#fff', fontSize: '26px', marginLeft: '16px', background: 'rgba(14,32,48,.6)' }, g.chip));
+    root.append(grid, lab);
+    const fadeAt = anchor(g.fadeAt);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      icons.forEach((e, i) => {
+        const pop = outBack(ramp(t0, g.a + i * 0.012, g.a + i * 0.012 + 0.3));
+        const gone = ramp(t0, fadeAt + ((i * 53) % icons.length) * 0.02, fadeAt + ((i * 53) % icons.length) * 0.02 + 0.3);
+        e.style.transform = `scale(${pop})`; e.style.opacity = 1 - 0.8 * gone;
+      });
+      lab.style.opacity = ramp(t0, fadeAt + 0.4, fadeAt + 0.8);
+    };
+  },
+  // a clock ring that shrinks from `fromMin` to `toMin` minutes
+  clock(g, root) {
+    root.style.background = 'rgba(14,32,48,.55)';
+    const R = 120, C = 2 * Math.PI * R;
+    const ring = h('div', 'abs', { left: '240px', top: '170px' }, `<svg width="300" height="300"><circle cx="150" cy="150" r="${R}" stroke="rgba(255,255,255,.18)" stroke-width="22" fill="none"/><circle id="arc" cx="150" cy="150" r="${R}" stroke="#5AB3AA" stroke-width="22" fill="none" stroke-linecap="round" transform="rotate(-90 150 150)" stroke-dasharray="${C}" stroke-dashoffset="0"/></svg>`);
+    const num = h('div', 'big abs', { left: '240px', top: '275px', width: '300px', textAlign: 'center', fontSize: '64px' });
+    const lab = h('div', 'abs', { left: '620px', top: '250px' });
+    lab.append(h('div', 'big', { fontSize: '58px' }, g.label), h('div', null, { marginTop: '18px' }));
+    lab.lastChild.append(h('span', 'pill', { border: '3px solid var(--turq)', color: '#fff', fontSize: '26px' }, g.chip));
+    root.append(ring, num, lab);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      const k = smooth(ramp(t0, g.a + 0.4, g.a + 2.2)), min = lerp(g.fromMin, g.toMin, k);
+      ring.querySelector('#arc').setAttribute('stroke-dashoffset', C * (1 - min / 12));
+      num.textContent = (k < 1 ? Math.round(min) : '<' + g.toMin) + ' min';
+      lab.style.opacity = ramp(t0, g.a + 1.6, g.a + 2.0);
+    };
+  },
+  // a notice card that has to stay readable
+  notice(g, root) {
+    const c = h('div', 'abs', { left: '190px', right: '190px', top: '470px', padding: '22px 34px', borderRadius: '16px', background: 'rgba(255,255,255,.95)', boxShadow: '0 16px 40px rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', gap: '22px' });
+    c.append(h('div', null, { flex: '0 0 54px', height: '54px', borderRadius: '50%', background: 'var(--navy)', color: '#fff', font: '800 36px/54px Assistant', textAlign: 'center' }, 'i'), h('div', null, { color: 'var(--navy)', font: '700 36px/1.2 Assistant' }, g.text));
+    root.append(c);
+    return (t0) => {
+      const k = outCubic(ramp(t0, g.a, g.a + 0.5));
+      root.style.opacity = k * (1 - ramp(t0, g.b - 0.3, g.b));
+      c.style.transform = `translateY(${(1 - k) * 40}px)`;
+    };
+  },
+  // person icons walking back in, with a label
+  rehire(g, root) {
+    root.style.background = 'linear-gradient(0deg, rgba(14,32,48,.85), rgba(14,32,48,0) 70%)';
+    const ps = Array.from({ length: 7 }, (_, i) => { const e = h('div', 'abs', { left: 0, top: '470px', width: '52px', height: '68px', color: i % 2 ? 'var(--turq)' : '#fff' }, PERSON); root.append(e); return e; });
+    const lab = h('div', 'abs', { left: 0, right: 0, top: '580px', textAlign: 'center' });
+    lab.append(h('span', 'pill', { background: 'var(--navy)', color: '#fff', fontSize: '40px', padding: '10px 28px' }, g.label));
+    root.append(lab);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      ps.forEach((e, i) => { const k = outCubic(ramp(t0, g.a + 0.2 + i * 0.22, g.a + 1.2 + i * 0.22)); e.style.transform = `translate(${lerp(1340, 420 + i * 66, k)}px, ${Math.abs(Math.sin((t0 - g.a) * 9 + i)) * -8 * (1 - k)}px)`; });
+      lab.style.opacity = ramp(t0, g.a + 0.6, g.a + 1.0);
+    };
+  },
+  // quality over time: the simple line stays level, the complex line drops at `dropAt`
+  quality(g, root) {
+    const panel = h('div', 'abs', { left: '640px', top: '110px', width: '580px', height: '420px', borderRadius: '18px', background: 'rgba(14,32,48,.85)', boxShadow: '0 20px 50px rgba(0,0,0,.45)' });
+    const W = 500, H = 240, ox = 40, oy = 60;
+    panel.innerHTML = `<svg width="580" height="420" class="abs"><line x1="${ox}" y1="${oy + H}" x2="${ox + W}" y2="${oy + H}" stroke="rgba(255,255,255,.35)" stroke-width="2"/><polyline id="ls" fill="none" stroke="#5AB3AA" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><polyline id="lc" fill="none" stroke="#EE3124" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const l1 = h('div', 'abs', { left: ox + 'px', top: '330px', color: 'var(--turq)', font: '800 34px Assistant' }, g.simple);
+    const l2 = h('div', 'abs', { left: ox + 'px', top: '370px', color: '#ff6b5e', font: '800 34px Assistant' }, g.complex);
+    panel.append(l1, l2); root.append(panel);
+    const drop = anchor(g.dropAt), dock = g.dockAt ? anchor(g.dockAt) : null;
+    const pts = (fn, k) => Array.from({ length: 41 }, (_, i) => { const u = i / 40; return u <= k ? `${ox + u * W},${oy + H - fn(u) * H}` : null; }).filter(Boolean).join(' ');
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      const k1 = smooth(ramp(t0, g.a + 0.3, g.a + 1.6));
+      panel.querySelector('#ls').setAttribute('points', pts((u) => 0.8 + Math.sin(u * 9) * 0.02, k1));
+      const k2 = smooth(ramp(t0, drop, drop + 1.6));
+      panel.querySelector('#lc').setAttribute('points', pts((u) => (u < 0.45 ? 0.76 : lerp(0.76, 0.22, smooth(clamp((u - 0.45) / 0.45)))), Math.min(k1, 0.45) + k2 * 0.55 * (k1 >= 0.45 ? 1 : 0)));
+      l1.style.opacity = ramp(t0, g.a + 0.8, g.a + 1.1);
+      l2.style.opacity = ramp(t0, drop + 0.6, drop + 0.9);
+      if (dock != null) { const d = outCubic(ramp(t0, dock, dock + 0.6)); panel.style.transform = `translate(${d * 50}px, ${d * -80}px) scale(${lerp(1, 0.6, d)})`; panel.style.transformOrigin = '100% 0'; }
+    };
+  },
+  // requests stream in from the left and split: routine to the AI chip, complex to the person
+  router(g, root) {
+    const panel = h('div', 'abs', { left: 0, top: 0, width: '640px', height: '720px', background: 'linear-gradient(135deg, #12304a, #0e2030)' });
+    panel.innerHTML = `<svg width="640" height="720" class="abs"><path d="M40 360 H220 C300 360 300 220 380 220 H470" fill="none" stroke="rgba(90,179,170,.6)" stroke-width="5"/><path d="M220 360 C300 360 300 500 380 500 H470" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="5"/></svg>`;
+    const ai = h('div', 'abs', { left: '470px', top: '160px', width: '120px', height: '120px', borderRadius: '22px', background: 'var(--turq)', color: '#fff', font: '800 50px/120px Assistant', textAlign: 'center' }, g.ai);
+    const person = h('div', 'abs', { left: '470px', top: '440px', width: '120px', height: '120px', borderRadius: '22px', background: '#fff', color: 'var(--navy)', padding: '18px 26px', boxSizing: 'border-box' }, PERSON);
+    const la = h('div', 'abs', { left: '380px', top: '290px', width: '300px', textAlign: 'center', color: 'var(--turq)', font: '700 28px Assistant' }, g.routine);
+    const lp = h('div', 'abs', { left: '280px', top: '570px', width: '400px', textAlign: 'center', color: '#fff', font: '700 28px Assistant' }, g.human);
+    const title = h('div', 'abs', { left: 0, top: '60px', width: '640px', textAlign: 'center' });
+    title.append(h('span', 'pill', { background: '#fff', color: 'var(--navy)', fontSize: '44px', padding: '10px 30px' }, g.title));
+    panel.append(ai, person, la, lp, title);
+    const dots = Array.from({ length: 12 }, (_, i) => { const d = h('div', 'abs', { width: i % 3 === 2 ? '26px' : '18px', height: i % 3 === 2 ? '26px' : '18px', marginLeft: '-9px', marginTop: '-9px', borderRadius: '50%', background: i % 3 === 2 ? '#fff' : 'var(--turq)' }); panel.append(d); return d; });
+    root.append(panel);
+    const titleAt = anchor(g.titleAt);
+    return (t0) => {
+      const k = outCubic(ramp(t0, g.a, g.a + 0.6));
+      root.style.opacity = 1 - ramp(t0, g.b - 0.3, g.b);
+      panel.style.transform = `translateX(${(1 - k) * -640}px)`;
+      dots.forEach((d, i) => {
+        const u = ((t0 - g.a) * 0.35 + i / dots.length) % 1, up = i % 3 !== 2;
+        let x, y;
+        if (u < 0.45) { x = lerp(40, 220, u / 0.45); y = 360; } else { const v = (u - 0.45) / 0.55; x = lerp(220, 470, v); y = lerp(360, up ? 220 : 500, smooth(clamp(v * 1.4))); }
+        d.style.left = x + 'px'; d.style.top = y + 'px'; d.style.opacity = ramp(t0, g.a + 0.5, g.a + 0.9) * (u > 0.95 ? 0 : 1);
+      });
+      [ai, person].forEach((e, i) => { e.style.transform = `scale(${outBack(ramp(t0, g.a + 0.4 + i * 0.2, g.a + 0.8 + i * 0.2))})`; });
+      la.style.opacity = ramp(t0, g.a + 1, g.a + 1.3); lp.style.opacity = ramp(t0, g.a + 1.2, g.a + 1.5);
+      title.style.opacity = ramp(t0, titleAt, titleAt + 0.2); title.style.transform = `scale(${outBack(ramp(t0, titleAt, titleAt + 0.45))})`;
+    };
+  },
+  // labels for a side-by-side split plus an "=" badge in the middle
+  equals(g, root) {
+    const mk = (txt, x) => { const e = h('div', 'abs', { left: x - 250 + 'px', width: '500px', top: '560px', textAlign: 'center' }); e.append(h('span', 'pill', { background: 'var(--navy)', color: '#fff', fontSize: '40px', padding: '10px 28px' }, txt)); root.append(e); return e; };
+    const l = mk(g.left, 320), r = mk(g.right, 960);
+    const eq = h('div', 'abs', { left: '570px', top: '290px', width: '140px', height: '140px', borderRadius: '50%', background: 'var(--turq)', color: '#fff', font: '800 100px/130px Assistant', textAlign: 'center', boxShadow: '0 16px 40px rgba(0,0,0,.5)' }, '=');
+    root.append(eq);
+    return (t0) => {
+      root.style.opacity = 1 - ramp(t0, g.b - 0.3, g.b);
+      l.style.opacity = ramp(t0, g.a + 0.3, g.a + 0.6); r.style.opacity = ramp(t0, g.a + 0.5, g.a + 0.8);
+      eq.style.transform = `scale(${outBack(ramp(t0, g.a + 1.0, g.a + 1.45))})`;
+    };
+  },
+  // three metric cards popping in one by one at their anchors
+  metrics(g, root) {
+    root.style.background = 'linear-gradient(0deg, rgba(14,32,48,.85), rgba(14,32,48,.1) 70%)';
+    const icons = [PERSON, '<svg viewBox="0 0 24 24" width="100%" height="100%"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" fill="none"/><path d="M12 6v6l4 3" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>', '<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M12 2l3 6.5 7 .8-5.2 4.7 1.5 7L12 17.5 5.7 21l1.5-7L2 9.3l7-.8z" fill="currentColor"/></svg>'];
+    const cards = g.items.map((it, i) => {
+      const c = h('div', 'abs', { left: 160 + i * 340 + 'px', top: '430px', width: '280px', height: '170px', borderRadius: '18px', background: '#fff', boxShadow: '0 16px 40px rgba(0,0,0,.45)', textAlign: 'center' });
+      c.append(h('div', null, { width: '58px', height: '58px', margin: '26px auto 10px', color: 'var(--teal)' }, icons[i % 3]), h('div', null, { color: 'var(--navy)', font: '800 38px Assistant' }, it.text));
+      root.append(c); return { c, at: anchor(it.at) };
+    });
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      cards.forEach(({ c, at }) => { const k = outBack(ramp(t0, at, at + 0.45)); c.style.opacity = ramp(t0, at, at + 0.1); c.style.transform = `translateY(${(1 - k) * 60}px) scale(${lerp(0.8, 1, k)})`; });
+    };
+  },
+  // ---------- V2: the 8-field map and the left-area diagrams (left area = 768 px wide) ----------
+  // the right-hand map panel: 8 slots, each with a label, an active highlight and a value that fills in
+  fieldMap(g, root) {
+    const panel = h('div', 'abs', { left: '768px', top: 0, width: '512px', height: '720px', background: 'rgba(14,32,48,.94)', borderLeft: '4px solid var(--turq)', boxSizing: 'border-box' });
+    panel.append(h('div', 'kicker abs', { left: '34px', top: '26px', fontSize: '20px', letterSpacing: '4px' }, g.heading));
+    const rows = g.fields.map((f, i) => {
+      const r = h('div', 'abs', { left: '22px', right: '22px', top: 70 + i * 80 + 'px', height: '72px', borderRadius: '12px', background: 'rgba(255,255,255,.05)', border: '2px solid transparent', boxSizing: 'border-box' });
+      const n = h('div', 'abs', { left: '12px', top: '17px', width: '36px', height: '36px', borderRadius: '50%', border: '2px solid rgba(255,255,255,.35)', color: '#fff', font: '800 20px/32px Assistant', textAlign: 'center', boxSizing: 'border-box' }, String(i + 1));
+      const lab = h('div', 'abs', { left: '62px', top: '8px', color: 'rgba(255,255,255,.6)', font: '600 17px Assistant', letterSpacing: '.5px' }, f.label);
+      const val = h('div', 'abs', { left: '62px', right: '10px', top: '29px', color: '#fff', font: '700 22px/1.05 Assistant' });
+      r.append(n, lab, val); panel.append(r);
+      return { r, n, val, f, active: f.activeAt ? anchor(f.activeAt) : null, parts: (f.fill || []).map((p) => ({ text: p.text, at: anchor(p.at) })) };
+    });
+    root.append(panel);
+    const doneAt = g.doneAt ? anchor(g.doneAt) : null;
+    return (t0) => {
+      const k = outCubic(ramp(t0, g.a, g.a + 0.7));
+      root.style.opacity = 1 - ramp(t0, g.b - 0.3, g.b);
+      panel.style.transform = `translateX(${(1 - k) * 520}px)`;
+      // the slot being explained is the latest one whose activeAt has passed
+      let cur = -1; rows.forEach((x, i) => { if (x.active != null && t0 >= x.active) cur = i; });
+      rows.forEach((x, i) => {
+        x.r.style.opacity = ramp(t0, g.a + 0.3 + i * 0.08, g.a + 0.6 + i * 0.08);
+        const vis = x.parts.filter((p) => t0 >= p.at);
+        const filled = vis.length > 0, isCur = i === cur, glow = doneAt != null ? ramp(t0, doneAt + i * 0.06, doneAt + i * 0.06 + 0.3) * (1 - ramp(t0, doneAt + 1.2, doneAt + 1.8)) : 0;
+        x.r.style.borderColor = isCur || glow > 0 ? `rgba(90,179,170,${Math.max(isCur ? 1 : 0, glow)})` : 'transparent';
+        x.r.style.background = filled ? 'rgba(90,179,170,.16)' : 'rgba(255,255,255,.05)';
+        x.n.style.background = filled ? 'var(--turq)' : 'transparent'; x.n.style.borderColor = filled ? 'var(--turq)' : 'rgba(255,255,255,.35)';
+        const txt = vis.map((p) => p.text).join(' · ');
+        if (x.val.textContent !== txt) x.val.textContent = txt;
+        x.val.style.fontSize = txt.length > 34 ? '18px' : '22px';
+        const last = vis.length ? vis[vis.length - 1].at : null;
+        x.val.style.opacity = last != null ? ramp(t0, last, last + 0.3) * 0.4 + 0.6 : 0;
+        x.r.style.transform = last != null ? `scale(${1 + 0.04 * (1 - ramp(t0, last, last + 0.5))})` : '';
+      });
+    };
+  },
+  // segment 1: counters, topic chips, and request dots from three channels piling onto an HR box
+  situation(g, root) {
+    root.style.background = 'linear-gradient(90deg, rgba(14,32,48,.82), rgba(14,32,48,.2) 60%)';
+    const c1 = h('div', 'abs', { left: '70px', top: '120px' }), c2 = h('div', 'abs', { left: '70px', top: '250px' });
+    const n1 = h('span', 'big', { fontSize: '86px' }), n2 = h('span', 'big', { fontSize: '86px' });
+    c1.append(n1, h('span', null, { color: '#fff', font: '700 34px Assistant', marginLeft: '14px' }, g.c1));
+    c2.append(n2, h('span', null, { color: '#fff', font: '700 34px Assistant', marginLeft: '14px' }, g.c2));
+    const chips = h('div', 'abs', { left: '70px', top: '380px', width: '620px' });
+    const cs = g.topics.map((tp) => { const e = h('span', 'pill', { background: 'rgba(255,255,255,.92)', color: 'var(--navy)', fontSize: '24px', margin: '0 10px 12px 0' }, tp); chips.append(e); return e; });
+    const chan = g.channels.map((c, i) => { const e = h('div', 'abs', { left: '70px', top: 520 + i * 52 + 'px' }); e.append(h('span', 'pill', { border: '2px solid var(--turq)', color: '#fff', fontSize: '22px', background: 'rgba(14,32,48,.6)' }, c)); root.append(e); return e; });
+    const box = h('div', 'abs', { left: '520px', top: '540px', width: '150px', height: '110px', borderRadius: '16px', background: 'var(--turq)', color: '#fff', font: '800 40px/110px Assistant', textAlign: 'center', boxShadow: '0 12px 30px rgba(0,0,0,.4)' }, g.box);
+    const dots = Array.from({ length: 18 }, (_, i) => { const d = h('div', 'abs', { width: '16px', height: '16px', borderRadius: '50%', background: '#fff', marginLeft: '-8px', marginTop: '-8px' }); root.append(d); return d; });
+    root.append(c1, c2, chips, box);
+    const at = (ref) => anchor(ref);
+    const t1 = at(g.c1At), t2 = at(g.c2At), tt = at(g.topicsAt), tc = at(g.channelsAt);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      n1.textContent = '~' + Math.round(g.v1 * outCubic(ramp(t0, t1, t1 + 1.2))); c1.style.opacity = ramp(t0, t1, t1 + 0.2);
+      n2.textContent = '~' + Math.round(g.v2 * outCubic(ramp(t0, t2, t2 + 1.2))); c2.style.opacity = ramp(t0, t2, t2 + 0.2);
+      cs.forEach((e, i) => { const k = outBack(ramp(t0, tt + i * 0.45, tt + i * 0.45 + 0.4)); e.style.opacity = ramp(t0, tt + i * 0.45, tt + i * 0.45 + 0.1); e.style.display = 'inline-block'; e.style.transform = `scale(${k})`; });
+      chan.forEach((e, i) => { e.style.opacity = ramp(t0, tc + i * 0.5, tc + i * 0.5 + 0.3); });
+      box.style.opacity = ramp(t0, tc, tc + 0.3);
+      dots.forEach((d, i) => {
+        const lane = i % 3, start = tc + 0.5 + i * 0.28, u = ramp(t0, start, start + 0.9);
+        const x0 = 330, y0 = 540 + lane * 52, x1 = 540 + (i % 6) * 22, y1 = 535 - Math.floor(i / 6) * 18;
+        d.style.left = lerp(x0, x1, smooth(u)) + 'px'; d.style.top = lerp(y0, y1, smooth(u)) - Math.sin(u * Math.PI) * 40 + 'px';
+        d.style.opacity = t0 >= start ? 1 : 0;
+      });
+    };
+  },
+  // segment 2: an AI chip gets stamped "not yet", then AS-IS with "fix" and "AI" crossed out
+  notYet(g, root) {
+    root.style.background = 'rgba(14,32,48,.55)';
+    const chip = h('div', 'abs', { left: '70px', top: '220px', width: '170px', height: '170px', borderRadius: '30px', background: 'var(--turq)', color: '#fff', font: '800 76px/170px Assistant', textAlign: 'center' }, g.chip);
+    const stamp = h('div', 'abs', { left: '5px', top: '270px', width: '300px', height: '74px', border: '6px solid var(--red)', borderRadius: '12px', color: 'var(--red)', font: '800 44px/62px Assistant', textAlign: 'center', background: 'rgba(255,255,255,.92)' }, g.stamp);
+    const asis = h('div', 'big abs', { left: '310px', top: '200px', fontSize: '100px' }, g.big);
+    const xs = g.crossed.map((w, i) => { const e = h('div', 'abs', { left: 320 + i * 170 + 'px', top: '340px' }); const s = h('span', 'pill', { background: 'rgba(255,255,255,.9)', color: 'var(--navy)', fontSize: '32px', position: 'relative' }, w); const line = h('div', 'abs', { left: '-6px', right: '-6px', top: '50%', height: '6px', background: 'var(--red)', transformOrigin: '0 50%' }); s.append(line); e.append(s); root.append(e); return { e, line }; });
+    root.append(chip, stamp, asis);
+    const ts = anchor(g.stampAt), ta = anchor(g.bigAt), tx = anchor(g.crossAt);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      chip.style.transform = `scale(${outBack(ramp(t0, g.a, g.a + 0.5))})`;
+      const k = ramp(t0, ts, ts + 0.25); stamp.style.opacity = k > 0 ? 1 : 0; stamp.style.transform = `rotate(-10deg) scale(${lerp(2, 1, outCubic(k))})`;
+      chip.style.filter = t0 > ts ? `grayscale(${ramp(t0, ts, ts + 0.4)})` : '';
+      asis.style.opacity = ramp(t0, ta, ta + 0.2); asis.style.transform = `scale(${lerp(1.5, 1, outBack(ramp(t0, ta, ta + 0.45)))})`;
+      xs.forEach(({ e, line }, i) => { e.style.opacity = ramp(t0, tx + i * 0.3, tx + i * 0.3 + 0.2); line.style.transform = `scaleX(${outCubic(ramp(t0, tx + i * 0.3 + 0.2, tx + i * 0.3 + 0.5))})`; });
+    };
+  },
+  // a pill (or a row of pills) on the left area, centred at x
+  pills(g, root) {
+    const box = h('div', 'abs', { left: (g.x || 384) - 360 + 'px', width: '720px', top: (g.y || 560) + 'px', textAlign: 'center' });
+    const ps = g.items.map((it) => { const e = h('span', 'pill', { background: it.style === 'amber' ? '#f2b544' : it.style === 'teal' ? 'var(--turq)' : 'var(--navy)', color: it.style === 'amber' ? '#1d2b36' : '#fff', fontSize: (g.size || 30) + 'px', padding: '8px 22px', margin: '6px 8px', boxShadow: '0 10px 24px rgba(0,0,0,.35)', display: 'inline-block' }, it.text); box.append(e); return { e, at: anchor(it.at || g.from) }; });
+    root.append(box);
+    return (t0) => {
+      root.style.opacity = 1 - ramp(t0, g.b - 0.3, g.b);
+      ps.forEach(({ e, at }) => { e.style.opacity = ramp(t0, at, at + 0.15); e.style.transform = `scale(${outBack(ramp(t0, at, at + 0.4))})`; });
+    };
+  },
+  // segment 4: three channel chips with arrows converging on a start circle
+  channels(g, root) {
+    root.style.background = 'linear-gradient(90deg, rgba(14,32,48,.8), rgba(14,32,48,.35))';
+    let svg = '<svg width="768" height="720" class="abs">';
+    g.items.forEach((_, i) => { svg += `<path id="cp${i}" d="M330 ${200 + i * 120} C 430 ${200 + i * 120}, 460 320, 560 320" fill="none" stroke="#5AB3AA" stroke-width="5" stroke-dasharray="320" stroke-dashoffset="320"/>`; });
+    root.innerHTML = svg + '</svg>';
+    const chips = g.items.map((c, i) => { const e = h('div', 'abs', { left: '70px', top: 176 + i * 120 + 'px', width: '250px', textAlign: 'right' }); e.append(h('span', 'pill', { background: '#fff', color: 'var(--navy)', fontSize: '28px' }, c)); root.append(e); return e; });
+    const start = h('div', 'abs', { left: '560px', top: '270px', width: '100px', height: '100px', borderRadius: '50%', background: 'var(--turq)', color: '#fff', font: '800 26px/100px Assistant', textAlign: 'center', boxShadow: '0 10px 26px rgba(0,0,0,.4)' }, g.start);
+    root.append(start);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      chips.forEach((e, i) => { e.style.opacity = ramp(t0, g.a + i * 0.35, g.a + i * 0.35 + 0.2); e.style.transform = `translateX(${(1 - outCubic(ramp(t0, g.a + i * 0.35, g.a + i * 0.35 + 0.5))) * -40}px)`; root.querySelector('#cp' + i).setAttribute('stroke-dashoffset', 320 * (1 - smooth(ramp(t0, g.a + 0.4 + i * 0.35, g.a + 1.2 + i * 0.35)))); });
+      start.style.transform = `scale(${outBack(ramp(t0, g.a + 1.4, g.a + 1.8))})`;
+    };
+  },
+  // segment 5: three steps with role chips underneath
+  steps(g, root) {
+    root.style.background = 'rgba(14,32,48,.72)';
+    const X = [130, 384, 638];
+    let svg = '<svg width="768" height="720" class="abs"><defs><marker id="sa" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#fff"/></marker></defs>';
+    [0, 1].forEach((i) => { svg += `<line id="sl${i}" x1="${X[i] + 95}" y1="300" x2="${X[i + 1] - 100}" y2="300" stroke="#fff" stroke-width="5" marker-end="url(#sa)" stroke-dasharray="80" stroke-dashoffset="80"/>`; });
+    root.innerHTML = svg + '</svg>';
+    const boxes = g.items.map((it, i) => {
+      const b = h('div', 'abs', { left: X[i] - 105 + 'px', top: '245px', width: '210px', height: '110px', borderRadius: '16px', background: '#fff', color: 'var(--navy)', font: '800 26px/1.1 Assistant', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 10px', boxSizing: 'border-box', boxShadow: '0 12px 28px rgba(0,0,0,.4)' }, it.step);
+      const r = h('div', 'abs', { left: X[i] - 120 + 'px', top: '375px', width: '240px', textAlign: 'center' }); r.append(h('span', 'pill', { background: 'var(--turq)', color: '#fff', fontSize: '20px' }, it.role));
+      root.append(b, r); return { b, r, at: anchor(it.at) };
+    });
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      boxes.forEach(({ b, r, at }, i) => {
+        b.style.opacity = ramp(t0, at, at + 0.15); b.style.transform = `scale(${outBack(ramp(t0, at, at + 0.45))})`;
+        r.style.opacity = ramp(t0, at + 0.5, at + 0.8);
+        if (i < 2) root.querySelector('#sl' + i).setAttribute('stroke-dashoffset', 80 * (1 - smooth(ramp(t0, boxes[i + 1].at - 0.3, boxes[i + 1].at))));
+      });
+    };
+  },
+  // segments 6 and 7: swimlanes; later a gateway, the handoff arrow, a checklist and an amber dot
+  lanes(g, root) {
+    root.style.background = 'rgba(14,32,48,.66)';
+    const L = g.lanes, top = 110, lh = 130;
+    const lanes = L.map((name, i) => {
+      const r = h('div', 'abs', { left: '30px', width: '708px', top: top + i * lh + 'px', height: lh - 10 + 'px', borderRadius: '12px', background: 'rgba(255,255,255,.07)', border: '1px solid rgba(255,255,255,.18)', boxSizing: 'border-box' });
+      r.append(h('div', 'abs', { left: '14px', top: '12px', color: 'var(--turq)', font: '700 20px Assistant' }, name));
+      root.append(r); return r;
+    });
+    const mk = (txt, x, y, w, hh) => { const b = h('div', 'abs', { left: x + 'px', top: y + 'px', width: w + 'px', height: hh + 'px', borderRadius: '14px', background: '#fff', color: 'var(--navy)', font: '800 22px/1.1 Assistant', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', boxShadow: '0 10px 22px rgba(0,0,0,.35)' }, txt); root.append(b); return b; };
+    const b1 = mk(g.steps[0], 130, top + 40, 150, 64), b2 = mk(g.steps[1], 300, top + lh + 40, 150, 64), b3 = mk(g.steps[2], 565, top + lh + 40, 165, lh + 64);
+    let svg = '<svg width="768" height="720" class="abs"><defs><marker id="la" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#EE3124"/></marker></defs>';
+    svg += `<polygon id="gw" points="468,${top + lh + 72} 505,${top + lh + 38} 542,${top + lh + 72} 505,${top + lh + 106}" fill="#f2b544" opacity="0"/>`;
+    svg += `<path id="ho" d="M505 ${top + lh + 106} L 505 ${top + 2 * lh + 72} L 556 ${top + 2 * lh + 72}" stroke="#EE3124" stroke-width="7" fill="none" marker-end="url(#la)" stroke-dasharray="220" stroke-dashoffset="220"/></svg>`;
+    const over = h('div', 'abs', { left: 0, top: 0 }, svg); root.append(over);
+    const gwLab = h('div', 'abs', { left: '380px', top: top + lh + 4 + 'px', width: '250px', textAlign: 'center', color: '#f2b544', font: '700 20px Assistant', opacity: 0 }, g.gateway);
+    const list = h('div', 'abs', { left: '40px', top: top + 3 * lh + 20 + 'px', width: '700px' });
+    const items = g.checklist.map((c) => { const e = h('span', 'pill', { background: '#fff', color: 'var(--navy)', fontSize: '22px', margin: '0 8px 8px 0', display: 'inline-block' }, '✓ ' + c); list.append(e); return e; });
+    const amber = h('div', 'abs', { left: '40px', top: top + 3 * lh + 80 + 'px' }); amber.append(h('span', 'pill', { background: '#f2b544', color: '#1d2b36', fontSize: '24px' }, '● ' + g.amber));
+    root.append(gwLab, list, amber);
+    const tLanes = anchor(g.lanesAt), tGw = g.gatewayAt ? anchor(g.gatewayAt) : null, tList = g.checklistAt ? anchor(g.checklistAt) : null, tAmb = g.amberAt ? anchor(g.amberAt) : null;
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      lanes.forEach((r, i) => { const k = outCubic(ramp(t0, tLanes + i * 0.35, tLanes + i * 0.35 + 0.5)); r.style.opacity = k; r.style.transform = `translateX(${(1 - k) * -60}px)`; });
+      [b1, b2, b3].forEach((b, i) => { const s = g.a + 0.3 + i * 0.3; b.style.opacity = ramp(t0, s, s + 0.15); b.style.transform = `scale(${outBack(ramp(t0, s, s + 0.4))})`; });
+      over.querySelector('#ho').setAttribute('opacity', 0);
+      if (tGw != null) {
+        over.querySelector('#gw').setAttribute('opacity', ramp(t0, tGw, tGw + 0.3));
+        over.querySelector('#ho').setAttribute('stroke-dashoffset', 220 * (1 - smooth(ramp(t0, tGw + 0.4, tGw + 1.3))));
+        over.querySelector('#ho').setAttribute('opacity', t0 > tGw + 0.4 ? 1 : 0);
+        gwLab.style.opacity = ramp(t0, tGw + 0.2, tGw + 0.5);
+      }
+      items.forEach((e, i) => { e.style.opacity = tList != null ? ramp(t0, tList + i * 0.5, tList + i * 0.5 + 0.2) : 0; });
+      amber.style.opacity = tAmb != null ? ramp(t0, tAmb, tAmb + 0.3) : 0;
+    };
+  },
+  // segment 8: owner chip, the four-level sensitivity scale with one level lit, and a confidential note
+  scale(g, root) {
+    root.style.background = 'linear-gradient(0deg, rgba(14,32,48,.9), rgba(14,32,48,.35) 75%)';
+    const owner = h('div', 'abs', { left: '40px', top: '330px' }); owner.append(h('span', 'pill', { background: 'var(--turq)', color: '#fff', fontSize: '28px' }, g.owner));
+    const row = h('div', 'abs', { left: '40px', top: '410px', display: 'flex', gap: '10px' });
+    const lv = g.levels.map((l) => { const e = h('div', null, { padding: '12px 16px', borderRadius: '10px', background: 'rgba(255,255,255,.12)', color: 'rgba(255,255,255,.7)', font: '800 22px Assistant', letterSpacing: '1px' }, l); row.append(e); return e; });
+    const note = h('div', 'abs', { left: '40px', top: '500px', width: '690px', color: '#fff', font: '700 26px/1.25 Assistant' }, g.note);
+    root.append(owner, row, note);
+    const to = anchor(g.ownerAt), ts = anchor(g.scaleAt), tl = anchor(g.litAt), tn = anchor(g.noteAt);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      owner.style.opacity = ramp(t0, to, to + 0.2); owner.style.transform = `scale(${outBack(ramp(t0, to, to + 0.4))})`;
+      lv.forEach((e, i) => {
+        e.style.opacity = ramp(t0, ts + i * 0.25, ts + i * 0.25 + 0.2);
+        const lit = i === g.lit && t0 >= tl;
+        e.style.background = lit ? 'var(--turq)' : 'rgba(255,255,255,.12)'; e.style.color = lit ? '#fff' : 'rgba(255,255,255,.7)';
+        e.style.transform = lit ? `scale(${1 + 0.12 * (1 - ramp(t0, tl, tl + 0.5))})` : '';
+      });
+      note.style.opacity = ramp(t0, tn, tn + 0.3);
+    };
+  },
+  // segment 12: a bar that pulls from the baseline to the target
+  target(g, root) {
+    root.style.background = 'linear-gradient(90deg, rgba(14,32,48,.2), rgba(14,32,48,.85) 70%)';
+    const track = h('div', 'abs', { left: '580px', top: '180px', width: '110px', height: '360px', borderRadius: '12px', background: 'rgba(255,255,255,.14)' });
+    const bar = h('div', 'abs', { left: 0, right: 0, bottom: 0, borderRadius: '12px', background: 'var(--red)' }); track.append(bar);
+    const goal = h('div', 'abs', { left: '-14px', right: '-14px', height: '5px', background: 'var(--turq)', bottom: g.toValue / 50 * 360 + 'px' }); track.append(goal);
+    const num = h('div', 'big abs', { left: '525px', top: '100px', width: '220px', textAlign: 'center', fontSize: '64px' });
+    const lab = h('div', 'abs', { left: '200px', top: '580px', width: '540px', textAlign: 'center' }); lab.append(h('span', 'pill', { background: 'var(--navy)', color: '#fff', fontSize: '32px' }, g.label));
+    root.append(track, num, lab);
+    const tp = anchor(g.pullAt);
+    return (t0) => {
+      root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
+      const v = t0 < tp ? g.fromValue * outCubic(ramp(t0, g.a, g.a + 1)) : lerp(g.fromValue, g.toValue, smooth(ramp(t0, tp, tp + 1.4)));
+      bar.style.height = v / 50 * 360 + 'px'; bar.style.background = t0 > tp + 1.2 ? 'var(--turq)' : 'var(--red)';
+      num.textContent = (t0 < tp + 1.4 ? '~' : '') + Math.round(v) + '%';
+      goal.style.opacity = ramp(t0, tp - 0.3, tp);
+      lab.style.opacity = ramp(t0, tp + 1.2, tp + 1.6);
+    };
+  },
+  // brand end: white card, the original logo pushing in slowly
+  endCard(g, root) {
+    root.style.background = '#fff';
+    const img = h('img', 'abs', { left: '50%', top: '50%', width: g.width + 'px' }); img.src = '/' + g.logo; root.append(img);
+    return (t0) => {
+      root.style.opacity = smooth(ramp(t0, g.a, g.a + 0.6));
+      img.style.transform = `translate(-50%, -50%) scale(${lerp(1, 1.05, ramp(t0, g.a, g.b))})`;
+    };
+  },
+};
+
+window.setFilm = async (film) => {
+  S = { timeline: film.timeline, motion: film.motion };
+  const M = film.motion, shotsEl = document.getElementById('shots'), gfx = document.getElementById('gfx');
+  S.shots = M.shots.map((s) => {
+    const el = h('div', 'shot');
+    let media;
+    if (s.video && !film.missing.includes(s.video)) { media = h('video'); media.src = '/' + s.video; media.muted = true; media.preload = 'auto'; }
+    else if (s.img && !film.missing.includes(s.img)) { media = h('img'); media.src = '/' + s.img; }
+    else { media = h('div', null, { position: 'absolute', left: '50%', top: '50%', width: '1280px', height: '720px', background: 'linear-gradient(135deg, #255777, #0e2030)' }); }
+    el.append(media);
+    const dim = h('div', 'dim', { opacity: s.dim || 0 }); el.append(dim);
+    if (s.side) el.append(h('div', 'edge', { [s.side === 'left' ? 'right' : 'left']: '-2px', opacity: 0 }));
+    shotsEl.append(el);
+    return { ...s, el, media, start: anchor(s.at), split: s.splitAt ? anchor(s.splitAt) : null, narrowAt: s.narrowAt ? anchor(s.narrowAt) : null };
+  });
+  S.shots.forEach((s, i) => {
+    const nx = S.shots.slice(i + 1).find((n) => !(s.side === 'left' && n.side === 'right'));
+    s.end = nx ? nx.start + (nx.fade || 0) : anchor(M.range[1]);
+  });
+  S.graphics = M.graphics.map((g) => {
+    const root = h('div', 'g'); gfx.append(root);
+    if (g.area === 'left') { root.style.width = '768px'; root.style.overflow = 'hidden'; }
+    if (g.type === 'fieldMap') root.style.zIndex = 5;
+    const gg = { ...g, a: anchor(g.from), b: anchor(g.to) };
+    return { ...gg, root, draw: G[g.type](gg, root) };
+  });
+  await Promise.all([...document.images].map((im) => im.decode().catch(() => {})));
+  await Promise.all([...document.querySelectorAll('video')].map((v) => new Promise((r) => (v.readyState >= 2 ? r() : v.addEventListener('loadeddata', r, { once: true })))));
+  await document.fonts.ready;
+  return { range: M.range.map(anchor), shots: S.shots.map((s) => [s.img.split('/').pop(), +s.start.toFixed(2), +s.end.toFixed(2), s.media.tagName]) };
+};
+
+window.renderAt = async (t) => {
+  const seeks = [];
+  for (const s of S.shots) {
+    const on = t >= s.start && t < s.end;
+    s.el.style.display = on ? 'block' : 'none';
+    if (!on) continue;
+    let left = 0, width = 1280;
+    if (s.side === 'left' && s.split != null) { const k = outCubic(ramp(t, s.split, s.split + 0.6)); width = lerp(1280, 640, k); }
+    if (s.side === 'right') { const k = outCubic(ramp(t, s.start, s.start + 0.6)); left = lerp(1280, 640, k); width = 640; }
+    if (s.width) { width = s.narrowAt != null ? lerp(1280, s.width, outCubic(ramp(t, s.narrowAt, s.narrowAt + 0.7))) : s.width; }
+    s.el.style.left = left + 'px'; s.el.style.width = width + 'px';
+    const edge = s.el.querySelector('.edge'); if (edge) edge.style.opacity = s.side === 'right' ? 1 : (s.split != null && t > s.split ? 1 : 0);
+    s.el.style.opacity = s.fade ? smooth(ramp(t, s.start, s.start + s.fade)) : 1;
+    s.el.style.zIndex = S.shots.indexOf(s);
+    const k = clamp((t - s.start) / (s.end - s.start)), [p, q] = s.cam;
+    const sc = lerp(p[0], q[0], smooth(k)), x = lerp(p[1], q[1], smooth(k)), y = lerp(p[2], q[2], smooth(k));
+    const rot = s.tilt ? lerp(-s.tilt, s.tilt, k) : 0;
+    s.media.style.transform = `translate(-50%, -50%) scale(${sc.toFixed(5)}) translate(${x.toFixed(3)}%, ${y.toFixed(3)}%) rotate(${rot.toFixed(3)}deg)`;
+    s.media.style.filter = s.blur ? `blur(${s.blur}px)` : '';
+    if (s.media.tagName === 'VIDEO') {
+      const vt = Math.min(Math.max(0, t - s.start + (s.offset || 0)), (s.media.duration || 8) - 0.05);
+      if (Math.abs(s.media.currentTime - vt) > 0.001) seeks.push(new Promise((r) => { s.media.addEventListener('seeked', r, { once: true }); s.media.currentTime = vt; }));
+    }
+  }
+  for (const g of S.graphics) {
+    const on = t >= g.a - 0.01 && t <= g.b + 0.01;
+    g.root.style.display = on ? 'block' : 'none';
+    if (on) g.draw(t);
+  }
+  await Promise.all(seeks);
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+{
+ "about": "V2 motion cut: Mapping the HR case. Story segments show the photo full screen; from 'First we map' the photo takes the left 60% (768 px) and the 8-field AS-IS map the right 40%. Anchors as in video/v1/motion.json. Every on-screen word lives here.",
+ "range": ["0", "end"],
+ "shots": [
+  { "img": "assets/img/v2/v2-01-dana-phone.jpg", "at": "0", "cam": [[1.0, 0, 0], [1.1, -2, 0]] },
+  { "img": "assets/img/v2/v2-01-dana-phone.jpg", "at": "c03", "cut": true, "dim": 0.2, "cam": [[1.45, 14, -4], [1.55, 16, -5]] },
+  { "img": "assets/img/v2/v2-03-inbox-phone.jpg", "at": "c04", "cut": true, "dim": 0.2, "cam": [[1.05, 0, 0], [1.16, -3, 0]] },
+  { "img": "assets/img/v2/v2-01-dana-phone.jpg", "at": "c05", "cut": true, "dim": 0.15, "cam": [[1.2, 6, 0], [1.08, 2, 0]] },
+
+  { "img": "assets/img/v2/v2-02-laptop-closed.jpg", "at": "c06", "cut": true, "dim": 0.2, "cam": [[1.12, 0, 0], [1.02, 0, 0]], "width": 768, "narrowAt": "c07@0.5" },
+
+  { "img": "assets/img/v2/v2-03-inbox-phone.jpg", "at": "c10", "cut": true, "dim": 0.25, "width": 768, "cam": [[1.0, 0, 0], [1.12, 4, 0]] },
+  { "img": "assets/img/v2/v2-01-dana-phone.jpg", "at": "c13", "cut": true, "dim": 0.2, "width": 768, "cam": [[1.4, 12, -6], [1.5, 14, -7]] },
+  { "img": "assets/img/v2/v2-04-three-channels.jpg", "at": "c16", "cut": true, "dim": 0.15, "width": 768, "cam": [[1.12, 4, 0], [1.02, 0, 0]] },
+  { "img": "assets/img/v2/v2-06-lanes-office.jpg", "at": "c18@0.4", "cut": true, "dim": 0.25, "width": 768, "cam": [[1.0, 0, 0], [1.12, 0, 2]] },
+  { "img": "assets/img/v2/v2-05-policy-binder.jpg", "at": "c20", "cut": true, "dim": 0.2, "width": 768, "cam": [[1.0, 6, 0], [1.1, 8, 0]] },
+  { "img": "assets/img/v2/v2-06-lanes-office.jpg", "at": "c26", "cut": true, "dim": 0.2, "width": 768, "cam": [[1.1, 0, 0], [1.0, 0, 0]] },
+  { "img": "assets/img/v2/v2-07-handoff.jpg", "at": "c30", "cut": true, "dim": 0.2, "width": 768, "cam": [[1.0, 6, 0], [1.1, 4, 0]] },
+  { "img": "assets/img/v2/v2-08-manager-binder.jpg", "at": "c36", "cut": true, "dim": 0.15, "width": 768, "cam": [[1.15, -10, 0], [1.05, -10, 0]] },
+  { "img": "assets/img/v2/v2-05-policy-binder.jpg", "at": "c39", "cut": true, "dim": 0.3, "width": 768, "cam": [[1.3, 8, 4], [1.4, 10, 4]] },
+  { "img": "assets/img/v2/v2-09-sent-alone.jpg", "at": "c40", "cut": true, "dim": 0.15, "width": 768, "cam": [[1.0, 0, 0], [1.12, 2, 0]] },
+  { "img": "assets/img/v2/v2-10-sent-message.jpg", "at": "c43", "cut": true, "dim": 0.2, "width": 768, "cam": [[1.25, -6, 0], [1.1, -4, 0]] },
+  { "img": "assets/img/v2/v2-11-old-messages.jpg", "at": "c45", "cut": true, "dim": 0.15, "width": 768, "cam": [[1.0, 6, 0], [1.12, 8, 0]] },
+  { "img": "assets/img/v2/v2-12-dana-board.jpg", "at": "c49", "cut": true, "dim": 0.1, "width": 768, "cam": [[1.0, 8, 0], [1.1, 10, 0]] }
+ ],
+ "graphics": [
+  { "type": "title", "from": "0.2", "to": "titleEnd", "text": "Mapping the HR case" },
+
+  { "type": "situation", "from": "c01@0.3", "to": "c05.end+0.3", "c1": "employees", "v1": 400, "c1At": "c02@0.5", "c2": "requests / month", "v2": 90, "c2At": "c03@0.15", "topics": ["vacation days", "pension terms", "expense submissions", "overtime policy"], "topicsAt": "c03@0.55", "channels": ["WhatsApp", "email", "in person"], "channelsAt": "c04@0.15", "box": "HR" },
+
+  { "type": "notYet", "area": "left", "from": "c06", "to": "c09.end+0.3", "chip": "AI", "stamp": "not yet", "stampAt": "c07", "big": "AS-IS", "bigAt": "c08@0.12", "crossed": ["fix", "AI"], "crossAt": "c09" },
+
+  { "type": "fieldMap", "from": "c07@0.5", "to": "brand", "heading": "AS-IS map", "doneAt": "c53",
+    "fields": [
+     { "label": "Process name", "activeAt": "c10", "fill": [ { "text": "repeat HR questions", "at": "c11@0.6" } ] },
+     { "label": "Trigger", "activeAt": "c12", "fill": [ { "text": "WhatsApp / email / in person", "at": "c16@0.1" } ] },
+     { "label": "Steps and owners", "activeAt": "c20", "fill": [ { "text": "Receive → Check → Answer / escalate", "at": "c24@0.5" } ] },
+     { "label": "Handoffs", "activeAt": "c28", "fill": [ { "text": "HR staff → HR manager", "at": "c30@0.4" } ] },
+     { "label": "Knowledge sources", "activeAt": "c36", "fill": [ { "text": "4 policies", "at": "c36@0.75" }, { "text": "owner: HR manager", "at": "c38@0.1" }, { "text": "INTERNAL", "at": "c39@0.15" } ] },
+     { "label": "Existing controls", "activeAt": "c40", "fill": [ { "text": "no formal control", "at": "c43@0.1" } ] },
+     { "label": "Gaps", "activeAt": "c45", "fill": [ { "text": "wrong answers: unclear", "at": "c46@0.3" }, { "text": "no single handoff channel", "at": "c47@0.2" } ] },
+     { "label": "Success metric", "activeAt": "c49", "fill": [ { "text": "~35% → 20% in 3 months", "at": "c51@0.5" } ] }
+    ] },
+
+  { "type": "question", "area": "left", "from": "c15@0.2", "to": "stop1.end", "x": 384, "y": 330 },
+
+  { "type": "pills", "area": "left", "from": "c13@0.25", "to": "c14.end+0.2", "y": 590, "size": 30, "items": [ { "text": "a message", "at": "c13@0.35" }, { "text": "a form", "at": "c13@0.55" }, { "text": "a date", "at": "c13@0.78" } ] },
+  { "type": "channels", "area": "left", "from": "c16", "to": "c17.end+0.3", "items": ["WhatsApp", "email", "in person"], "start": "start" },
+  { "type": "pills", "area": "left", "from": "c18@0.45", "to": "c19.end+0.2", "y": 110, "size": 36, "items": [ { "text": "boundaries = a decision", "style": "teal" } ] },
+
+  { "type": "steps", "area": "left", "from": "c20@0.4", "to": "c25.end+0.3", "items": [ { "step": "Receive", "role": "(employee)", "at": "c22@0.55" }, { "step": "Check", "role": "HR staff", "at": "c23" }, { "step": "Answer / escalate", "role": "HR staff / HR manager", "at": "c24" } ] },
+  { "type": "pills", "area": "left", "from": "c25@0.15", "to": "c25.end+0.3", "y": 480, "size": 34, "items": [ { "text": "roles, not names", "style": "teal" } ] },
+
+  { "type": "lanes", "area": "left", "from": "c26", "to": "c30.end+0.3", "lanes": ["Employee", "HR staff", "HR manager"], "steps": ["Receive", "Check", "Answer / escalate"], "lanesAt": "c26@0.2", "gateway": "beyond known policy?", "gatewayAt": "c30", "checklist": ["from", "to", "what passes", "if unavailable?"], "amber": "no single channel" },
+  { "type": "lanes", "area": "left", "from": "c33", "to": "c35.end+0.3", "lanes": ["Employee", "HR staff", "HR manager"], "steps": ["Receive", "Check", "Answer / escalate"], "lanesAt": "c33", "gateway": "beyond known policy?", "gatewayAt": "c33", "checklist": ["from", "to", "what passes", "if unavailable?"], "checklistAt": "c33@0.15", "amber": "no single channel", "amberAt": "c34" },
+  { "type": "question", "area": "left", "from": "c29@0.2", "to": "stop2.end", "x": 640, "y": 610 },
+
+  { "type": "pills", "area": "left", "from": "c36@0.3", "to": "c37.end", "y": 120, "size": 26, "items": [ { "text": "vacation", "at": "c36@0.4" }, { "text": "pension", "at": "c36@0.5" }, { "text": "expense", "at": "c36@0.6" }, { "text": "overtime", "at": "c36@0.72" } ] },
+  { "type": "scale", "area": "left", "from": "c37", "to": "c39.end+0.3", "owner": "owner: HR manager", "ownerAt": "c38", "levels": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "RESTRICTED"], "scaleAt": "c38@0.45", "lit": 1, "litAt": "c39@0.05", "note": "personal, employee, financial = CONFIDENTIAL: not to public AI", "noteAt": "c39@0.45" },
+
+  { "type": "question", "area": "left", "from": "c42@0.2", "to": "stop3.end", "x": 384, "y": 330 },
+
+  { "type": "pills", "area": "left", "from": "c43", "to": "c44.end+0.3", "y": 520, "size": 36, "items": [ { "text": "no formal control", "style": "teal", "at": "c43@0.1" }, { "text": "valid answer", "at": "c44@0.3" } ] },
+  { "type": "pills", "area": "left", "from": "c45@0.3", "to": "c48.end+0.3", "y": 520, "size": 32, "items": [ { "text": "wrong answers: unclear", "style": "amber", "at": "c46@0.2" }, { "text": "no single handoff channel", "style": "amber", "at": "c47@0.1" } ] },
+
+  { "type": "target", "area": "left", "from": "c50", "to": "c53.end+0.2", "label": "~35% → 20% in 3 months", "pullAt": "c51", "fromValue": 35, "toValue": 20 },
+
+  { "type": "endCard", "from": "brand", "to": "end", "logo": "assets/logo/wawiwa-logo-1000.png", "width": 360 }
+ ]
+}
