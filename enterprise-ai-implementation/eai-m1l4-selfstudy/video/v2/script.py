@@ -1,4 +1,4 @@
-﻿"""V2 script builder: reads screen V2 of content/l4-slice.json and writes video/v2/film.json in the same
+"""V2 script builder: reads screen V2 of content/l4-slice.json and writes video/v2/film.json in the same
 shape as video/v1/film.json (captions with shown `text` and spoken `say`, holds after the stop segments,
 voice settings). Captions are the narration's sentences, verbatim; sentences under 5 words join the next
 one in the same segment. Narration comes from the content only.
@@ -51,8 +51,8 @@ joined = " ".join(c["text"] for c in captions)
 assert joined.split() == " ".join(s["narration"] for s in SEGS).split(), "captions differ from the narration"
 film = {
     "id": "v2", "fps": 25, "size": [1280, 720],
-    "voice": {"engine": "kokoro-onnx", "voice": "af_heart", "speed": 1.1, "lang": "en-us", "lead": 0.15},
-    "timing": {"tail": 0.15, "gap": 0.22, "segGap": 0.55},
+    "voice": {"engine": "kokoro-onnx", "voice": "af_heart", "speed": 1.15, "lang": "en-us", "lead": 0.15},
+    "timing": {"tail": 0.12, "gap": 0.18, "segGap": 0.45},
     "title": V2["title"], "captions": captions, "holds": holds,
 }
 (HERE / "film.json").write_text(json.dumps(film, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
