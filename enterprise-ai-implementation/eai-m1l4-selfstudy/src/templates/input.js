@@ -5,7 +5,8 @@
 //   any field empty on Save -> feedback.empty as a notice (hint look, not an error colour)
 //   all filled              -> values stored under each field's store key, one fill-in answer per
 //                              field on the tracking bus, feedback.saved, Next unlocks
-import { h, fmt, nextId } from '../util.js';
+import { h, fmt, nextId, resolveLink } from '../util.js';
+import { icon } from '../icons.js';
 import { layout, ruleLabel, privacyLine } from './stage.js';
 
 const COUNTER_ANNOUNCE_AT = 230;
@@ -17,6 +18,12 @@ export const input = {
     const announcer = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
     const controls = screen.fields.map((f) => field(f, ctx, privacy.id, announcer));
     const save = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'save' }, onclick: () => doSave() }, ui.buttons.save);
+    // a help line by the fields, and a new-tab link to the earlier homework when content has its URL
+    const mid = screen.stage.middle || {};
+    const href = mid.link ? resolveLink(ctx.content, mid.link) : null;
+    const helpLine = mid.help ? h('p', { class: 'w-field-help' }, icon(mid.help.icon || 'info', { size: 20 }), h('span', {}, mid.help.text),
+      href ? h('a', { class: 'w-link w-field-help-link', href, target: '_blank', rel: 'noopener noreferrer', dataset: { action: 'homework1' } },
+        h('span', {}, ui.buttons.openHomework1), icon('external-link', { size: 16 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')')) : null) : null;
 
     layout(ctx, 'form',
       zones.logo,
@@ -24,6 +31,7 @@ export const input = {
         screen.stage.top?.text ? ruleLabel(screen.stage.top.text) : null,
         zones.instruction,
         h('div', { class: 'w-form-task', dataset: { interaction: '' } },
+          helpLine,
           h('div', { class: 'w-fields' }, controls.map((c) => c.el), announcer),
           h('div', { class: 'w-actionbar' }, privacy.el, save)),
         zones.band));

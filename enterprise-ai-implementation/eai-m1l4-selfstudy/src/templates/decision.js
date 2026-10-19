@@ -36,7 +36,7 @@ import { field } from './input.js';
 export const decision = {
   mount(ctx) {
     const variant = ctx.screen.variant;
-    const run = { single, challenge, multi, pair, rounds, fill, metric, bounds, safety, selfcheck, close }[variant];
+    const run = { single, goals, challenge, multi, pair, rounds, fill, metric, bounds, safety, selfcheck, close }[variant];
     if (!run) throw new Error('decision: unknown variant ' + variant);
     return run(ctx) || { unmount() {} };
   },
@@ -143,6 +143,42 @@ function single(ctx) {
   }));
 
   if (ctx.revisit) solve(screen.options.findIndex((o) => o.correct), false);
+}
+
+/* ---------- goals (S01B), layout wide, neutral ---------- */
+// The lesson's five outcomes as numbered rows; any one is accepted (no right or wrong colours), the
+// sub-line is the row's tip. The pick is kept under screen.store (S20 step 2 and the menu read it);
+// a later pick replaces it and goes out as a retry.
+function goals(ctx) {
+  const { screen, ui, zones } = ctx;
+  const top = screen.stage.top;
+  const { group, btns } = options(ctx, 'row', { interaction: false });
+  group.classList.add('w-options-goals');
+  btns.forEach((b, i) => { b.setAttribute('aria-pressed', 'false'); attachTip(b, screen.options[i].sub); });
+  layout(ctx, 'wide', zones.logo,
+    h('div', { class: 'w-wide w-goals' },
+      h('p', { class: 'w-eyebrow' }, top.eyebrow),
+      zones.instruction,
+      h('p', { class: 'w-goals-line' }, icon(top.icon, { size: 24 }), h('span', {}, top.text)),
+      h('div', { class: 'w-goals-task', dataset: { interaction: '' } }, group),
+      zones.band));
+  zones.setFeedback({ state: 'hint', text: screen.hint });
+
+  const show = (i, focus) => {
+    btns.forEach((b, j) => { b.setAttribute('aria-pressed', String(j === i)); paint(b, '', ui); });
+    zones.setFeedback({ state: 'neutral', text: screen.feedback.picked });
+    ctx.unlockNext({ focus });
+  };
+  btns.forEach((b, i) => b.addEventListener('click', () => {
+    const id = screen.options[i].id;
+    if (ctx.store.get(screen.store) === id) return; // the same row again is not a new answer
+    ctx.answer({ trackingId: screen.tracking[0].id, response: letter(i), result: 'neutral' });
+    ctx.store.set(screen.store, id);
+    ctx.complete();
+    show(i, true);
+  }));
+  const was = screen.options.findIndex((o) => o.id === ctx.store.get(screen.store));
+  if (was >= 0) show(was, false);
 }
 
 /* ---------- challenge (FT1), layout memo ---------- */
@@ -549,7 +585,11 @@ function selfcheck(ctx) {
   });
   const chipRow = h('div', { class: 'w-chips', role: 'group', 'aria-labelledby': 'w-instruction' }, chips.map((x) => x.btn));
   arrowNav(chipRow, { selector: '.w-chip' });
-  const step2 = h('div', { class: 'w-selfcheck2', dataset: { interaction: '' }, hidden: true }, chipRow,
+  // the outcome the learner marked hardest on S01B, as a one-line reminder above the chips
+  const s01b = content.screens.find((s) => s.variant === 'goals');
+  const goal = s01b && s01b.options.find((o) => o.id === ctx.store.get(s01b.store));
+  const reminder = goal ? h('p', { class: 'w-goal-reminder' }, icon('flag', { size: 20 }), h('span', {}, fmt(ui.goalReminder, { goal: goal.label }))) : null;
+  const step2 = h('div', { class: 'w-selfcheck2', dataset: { interaction: '' }, hidden: true }, reminder, chipRow,
     h('p', { class: 'w-strip' }, icon('check-circle', { size: 20 }), h('span', {}, s2.strip)));
   layout(ctx, 'wide', zones.logo, h('div', { class: 'w-wide' }, zones.instruction, step1, step2, zones.band, h('div', { class: 'w-link-row' }, reopen)));
   zones.setFeedback({ state: 'hint', text: screen.hint });

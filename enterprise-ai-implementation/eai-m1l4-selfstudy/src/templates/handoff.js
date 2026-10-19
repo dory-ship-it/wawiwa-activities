@@ -26,7 +26,7 @@ export const handoff = {
     const open = h('a', { class: 'w-btn w-btn-action w-open', href, target: '_blank', rel: screen.handoff.rel, dataset: { action: 'open' } },
       h('span', {}, ui.buttons.open), icon('external-link', { size: 18 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')'));
     const backBtn = h('button', { class: 'w-btn w-btn-ghost', type: 'button', dataset: { action: 'back' }, hidden: true }, ui.buttons.back);
-    const briefTask = h('div', { class: 'w-handoff-task', dataset: { interaction: '' } }, steps, h('div', { class: 'w-actionbar' }, coach.el, h('div', { class: 'w-action' }, backBtn, open)));
+    const briefTask = h('div', { class: 'w-handoff-task', dataset: { interaction: '' } }, steps, h('div', { class: 'w-actionbar' }, coach.el, h('div', { class: 'w-action' }, open, backBtn))); // Open workbook first (primary), then I'm back
     const briefView = h('div', { class: 'w-handoff-view' }, h('div', { class: 'w-handoff-head' }, title, chip), briefTask);
 
     /* ---- return ---- */

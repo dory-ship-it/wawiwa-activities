@@ -30,7 +30,7 @@ export const check = {
       dots.set(k, k);
       zones.instruction.textContent = it.instruction || screen.instruction;
       zones.setTool();
-      zones.setFeedback({ state: 'hint', text: screen.hint });
+      zones.setFeedback({ state: 'hint', text: it.hint || screen.hint }); // item 5 (select two) has its own hint
       (it.kind === 'tiles' ? tilesItem : choiceItem)(it, k);
     }
     const nextAction = (k) => (k < items.length - 1

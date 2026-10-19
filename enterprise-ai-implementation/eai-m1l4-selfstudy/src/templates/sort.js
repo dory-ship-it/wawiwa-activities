@@ -35,7 +35,10 @@ export const sort = {
         icon(c.icon, { size: 22, className: 'w-sort-icon' }), h('span', { class: 'w-sort-label' }, label), h('span', { class: 'w-opt-mark' }));
       if (c.term && content.tooltips[c.term]) attachTip(target, content.tooltips[c.term]);
       const chips = h('ul', { class: 'w-sort-chips', 'aria-label': c.label });
-      return { c, target, chips, el: h('div', { class: 'w-sort-col' }, target, chips) };
+      const el = h('div', { class: 'w-sort-col', dataset: { bin: c.id } }, target, chips);
+      // the whole bin is the drop area for the mouse; the name button stays the keyboard target
+      el.addEventListener('click', (e) => { if (!target.contains(e.target)) target.click(); });
+      return { c, target, chips, el };
     });
     const colRow = h('div', { class: 'w-sort-cols' + (screen.processLine ? ' w-sort-process' : ''), role: 'group', 'aria-labelledby': 'w-instruction' }, cols.map((x) => x.el));
     colRow.style.gridTemplateColumns = `repeat(${cols.length}, minmax(0, 1fr))`;

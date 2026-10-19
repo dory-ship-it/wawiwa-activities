@@ -11,7 +11,7 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["S01", "S02", "FT1", "V1", "S03", "FT2", "S04", "S05", "S06", "S07", "S08", "FT3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
+    "slice": ["S01", "S01B", "S02", "FT1", "V1", "S03", "FT2", "S04", "S05", "S06", "S07", "S08", "FT3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
     "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] }
   },
 
@@ -33,6 +33,7 @@
       "watchDemo": "Watch the demo",
       "nextQuestion": "Next question",
       "openHomework": "Open homework",
+      "openHomework1": "Open Homework 1",
       "downloadRecord": "Download my lesson record",
       "finishLesson": "Finish lesson",
       "watchVideo": "Watch the video",
@@ -61,6 +62,7 @@
       "next": "Next",
       "locked": {
         "single": "Next, locked until you choose the right answer",
+        "goals": "Next, locked until you pick one outcome",
         "challenge": "Next, locked until you answer or skip the challenge",
         "route": "Next, locked until you pick one of the two options",
         "multi": "Next, locked until both answers are correct",
@@ -153,8 +155,13 @@
       "done": "Done",
       "chapterLabel": "{title}, {status}",
       "help": "Help",
-      "startOver": "Start over"
+      "startOver": "Start over",
+      "goals": "Lesson goals",
+      "goalsIntro": "By the end of this lesson, you will be able to:",
+      "focus": "Your focus",
+      "focusLabel": "{title}, {status}, builds the outcome you marked hardest"
     },
+    "goalReminder": "You marked this as hardest: {goal}.",
     "help": [
       "Read the heading on each screen: it tells you what to do.",
       "Feedback appears in the band under each task. Next unlocks after a right answer.",
@@ -166,7 +173,8 @@
 
   "links": {
     "workbook": "https://dory-ship-it.github.io/wawiwa-activities/enterprise-ai-implementation/eai-m1l4-class/",
-    "homework": "https://dory-ship-it.github.io/wawiwa-activities/enterprise-ai-implementation/eai-m1l4-home/"
+    "homework": "https://dory-ship-it.github.io/wawiwa-activities/enterprise-ai-implementation/eai-m1l4-home/",
+    "homework1": null
   },
 
   "tooltips": {
@@ -208,7 +216,7 @@
   },
 
   "chapters": [
-    { "id": "ch0", "n": 0, "title": "Entry", "minutes": 7, "screens": ["S01", "S02"], "inSlice": true, "pauseMarker": null },
+    { "id": "ch0", "n": 0, "title": "Entry", "minutes": 8, "screens": ["S01", "S01B", "S02"], "inSlice": true, "pauseMarker": null },
     { "id": "ch1", "n": 1, "title": "Why map", "minutes": 9, "screens": ["FT1", "V1", "S03"], "inSlice": true,
       "fastTrack": { "card": "FT1", "landing": "S03" },
       "pauseMarker": null },
@@ -262,19 +270,52 @@
     },
 
     {
+      "id": "S01B",
+      "chapter": "ch0",
+      "template": "decision",
+      "variant": "goals",
+      "minutes": 1,
+      "instruction": "Pick the outcome that looks hardest for your case.",
+      "hint": "Pick one. There is no right or wrong answer here.",
+      "hintPilotCopy": true,
+      "layout": "wide",
+      "stage": {
+        "top": { "kind": "line", "eyebrow": "Today's lesson", "icon": "map",
+          "text": "By the end you hand in an AS-IS map of your own case in eight fields, with one success metric. It is your entry ticket to Lesson 5." },
+        "middle": { "kind": "options", "arrange": "stack" }
+      },
+      "wordLimit": { "max": 60, "why": "R4 copy as specified: eyebrow, deliverable line and the five deck outcome titles (slide 39) come to 60 words; the 45-word target needs a planning cut (see review/r4/REPORT.md)" },
+      "options": [
+        { "id": "a", "label": "Identify roles and handoff points", "sub": "Who is involved and where responsibility passes.", "chapter": "ch4" },
+        { "id": "b", "label": "Map knowledge sources, ownership, and sensitivity", "sub": "Which sources the process uses, who owns them, how sensitive they are.", "chapter": "ch3" },
+        { "id": "c", "label": "Mark existing controls and gaps", "sub": "Including 'unclear' as a legitimate answer.", "chapter": "ch3" },
+        { "id": "d", "label": "Define a measurable success metric", "sub": "With a quantitative baseline and a clear target.", "chapter": "ch3" },
+        { "id": "e", "label": "Spot decision points: where AI fits, where people decide", "sub": "Tell when AI fits and when human judgment is required.", "chapter": "ch4" }
+      ],
+      "feedback": { "picked": "Noted. The chapter that builds it is marked in the menu. Your self-check in Chapter 5 comes back to it." },
+      "store": "L4_GOAL_FOCUS",
+      "advance": "after-any",
+      "tracking": [
+        { "id": "L4_S01B_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" }
+      ],
+      "sources": ["deck slide 39 (learning outcomes)", "R4 planning review"]
+    },
+
+    {
       "id": "S02",
       "chapter": "ch0",
       "template": "input",
       "minutes": 5,
-      "instruction": "Bring your case from Homework 1.",
+      "instruction": "Bring your use case from Homework 1.",
       "hint": "Describe what happens today, not the solution you want.",
       "stage": {
-        "top": { "kind": "line", "icon": "folder", "text": "This is the case you map in Chapter 5." },
-        "middle": { "kind": "fields", "arrange": "stack" },
+        "top": { "kind": "line", "icon": "folder", "text": "In Lesson 1 you chose one use case for the whole module. Today you map it." },
+        "middle": { "kind": "fields", "arrange": "stack", "help": { "icon": "info", "text": "No Homework 1 at hand? Use any process at your work that repeats and that you know well." }, "link": "@links.homework1" },
         "bottom": { "kind": "privacy", "icon": "shield", "text": "Leave out names and identifying details.", "action": "save" }
       },
+      "wordLimit": { "max": 62, "why": "R4 copy as specified: the Homework 1 top line and the help line bring S02 to 62 words; the 45-word target needs a planning cut (see review/r4/REPORT.md)" },
       "fields": [
-        { "id": "caseTitle", "label": "Case title", "placeholder": "3 to 6 words, e.g. Sales call summaries", "maxLength": 250, "multiline": false,
+        { "id": "caseTitle", "label": "Case title", "placeholder": "3 to 6 words, e.g. Sales call summaries", "maxLength": 60, "multiline": false,
           "store": "L4_CASE_TITLE", "trackingId": "L4_S02_1" },
         { "id": "problem", "label": "The problem today", "placeholder": "Today X happens, and it hurts because Y.", "maxLength": 250, "multiline": true,
           "store": "L4_CASE_PROBLEM", "trackingId": "L4_S02_2" }
@@ -451,9 +492,9 @@
       "terms": ["Success metric"],
       "layout": "work",
       "cases": [
-        { "id": "case1", "label": "Case 1: car company, 1980s", "video": "V1", "segment": 3,
+        { "id": "case1", "label": "Video case: car company, 1980s", "video": "V1", "segment": 3,
           "image": { "src": "assets/img/s03-case1.jpg", "alt": "A manager looks over a crowded 1980s accounts payable office", "prompt": "assets/img/prompts/S03-video-case-1.md", "temp": false, "position": "50% 40%" } },
-        { "id": "case2", "label": "Case 2: fintech, 2024", "video": "V1", "segment": 5,
+        { "id": "case2", "label": "Video case: fintech, 2024", "video": "V1", "segment": 5,
           "image": { "src": "assets/img/s03-case2.jpg", "alt": "A customer service rep with a headset at a desk of screens", "prompt": "assets/img/prompts/S03-video-case-2.md", "temp": false, "position": "50% 40%" } }
       ],
       "stage": {
@@ -492,7 +533,7 @@
       "image": { "src": "assets/img/ft2.jpg", "alt": "A person sketching a process flow with boxes, arrows and decision diamonds on a whiteboard", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "45% 50%" },
       "stage": {
         "top": { "kind": "line", "icon": "lightning", "text": "Optional challenge. Right on the first try? Skip to this chapter's last task." },
-        "middle": { "kind": "question", "text": "Case 6: the admin team routes an inquiry to the right department. Which field records that moment?" },
+        "middle": { "kind": "question", "text": "Lesson 1 case: student inquiries. Admin routes one to a department. Which field records that moment?" },
         "bottom": { "kind": "options", "arrange": "row", "link": "skipChallenge" }
       },
       "options": [
@@ -1105,7 +1146,7 @@
       "terms": ["Bottleneck"],
       "image": { "src": "assets/img/s15.jpg", "alt": "A coordinator reading a tall stack of printed course feedback by hand", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "45% 50%" },
       "stage": {
-        "top": { "kind": "line", "eyebrow": "Case 4: course feedback", "text": "One step: the coordinator prints and reads all feedback by hand, 3 to 4 hours per course.", "highlight": "3 to 4 hours" },
+        "top": { "kind": "line", "eyebrow": "Lesson 1 case: course feedback", "text": "One step: the coordinator prints and reads all feedback by hand, 3 to 4 hours per course.", "highlight": "3 to 4 hours" },
         "bottom": { "kind": "options", "arrange": "stack" }
       },
       "options": [
@@ -1219,7 +1260,7 @@
       "instruction": "Map three fields of a case that is not HR.",
       "hint": "Same eight fields, different case. Select a card, then a column.",
       "layout": "wide",
-      "header": "Case 3: sales call summaries",
+      "header": "Lesson 1 case: sales call summaries",
       "columns": [
         { "id": "a", "label": "Field 2: Trigger", "icon": "play", "term": "Trigger" },
         { "id": "b", "label": "Field 3: Steps", "icon": "stairs", "term": "Steps" },
@@ -1270,7 +1311,7 @@
           "feedback": "Names can sit in any field, not only Field 5. Steps and handoffs still identify people." }
       ],
       "step2": {
-        "field": { "id": "caseTitle", "label": "Case title, generalized", "placeholder": "", "maxLength": 250, "multiline": false, "store": "L4_CASE_TITLE", "trackingId": "L4_S18_2" },
+        "field": { "id": "caseTitle", "label": "Case title, generalized", "placeholder": "", "maxLength": 60, "multiline": false, "store": "L4_CASE_TITLE", "trackingId": "L4_S18_2" },
         "privacy": { "icon": "shield", "text": "Leave out names and identifying details." },
         "checkbox": "I removed names and identifying details from my notes.",
         "feedback": {
@@ -1409,7 +1450,7 @@
       "layout": "wide",
       "items": [
         { "id": "i1", "icon": "speech", "trackingId": "L4_S21_1",
-          "stem": "Case 2: reps route requests to departments. Field 4 says 'Rep to department.' What is missing?",
+          "stem": "Lesson 1 case: customer service. Field 4 says 'Rep to department.' What is missing?",
           "options": [
             { "id": "a", "label": "A rule that reps must route correctly", "correct": false,
               "feedback": "That adds a rule nobody follows today. The map becomes a redesign before the gaps are known." },
@@ -1421,7 +1462,7 @@
               "feedback": "The receiver may not know what happened before. The map hides the most dangerous moment in the process." }
           ] },
         { "id": "i2", "icon": "speech", "trackingId": "L4_S21_2",
-          "stem": "Case 6: student inquiries. Which step is the strongest first place for AI?",
+          "stem": "Lesson 1 case: student inquiries. Which step suits AI first?",
           "options": [
             { "id": "a", "label": "Deciding on exceptional student requests", "correct": false,
               "feedback": "Exceptional requests need human judgment. An error here can touch a student's rights." },
@@ -1433,7 +1474,7 @@
               "feedback": "There is no breakdown of categories yet. A solution here stands on unknown foundations." }
           ] },
         { "id": "i3", "icon": "speech", "trackingId": "L4_S21_3",
-          "stem": "Case 5: the weekly report takes 4 to 6 hours. Nothing is logged. Baseline?",
+          "stem": "Lesson 1 case: weekly report, 4 to 6 hours. Nothing is logged. Baseline?",
           "options": [
             { "id": "a", "label": "About 5 hours, marked as estimated", "correct": true,
               "feedback": "An estimated metric beats no metric. You now have a starting number to check the target against." },
@@ -1445,7 +1486,7 @@
               "feedback": "That is a feeling, not a number. Nobody could check it later." }
           ] },
         { "id": "i4", "icon": "speech", "trackingId": "L4_S21_4",
-          "stem": "Case 2: nobody knows what share of requests are simple. Where does this go?",
+          "stem": "Lesson 1 case: customer service. Share of simple requests unknown. Where does this go?",
           "options": [
             { "id": "a", "label": "Field 6: reps double-check each request", "correct": false,
               "feedback": "That records a control nobody reported. Lesson 5 would rely on a check that may not exist." },
@@ -1458,6 +1499,7 @@
           ] },
         { "id": "i5", "kind": "tiles", "select": 2, "trackingId": "L4_S21_5",
           "instruction": "Find the two errors in this AI-drafted HR map.",
+          "hint": "Select two, then press Check. Your first answer counts.",
           "tiles": [
             { "n": 1, "text": "Repeat HR questions", "correct": false, "feedback": "This line matches the HR map. Compare each line with what the map really says." },
             { "n": 2, "text": "WhatsApp, email, in person", "correct": false, "feedback": "This line matches the HR map. Compare each line with what the map really says." },

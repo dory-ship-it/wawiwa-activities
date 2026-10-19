@@ -53,6 +53,7 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
   const barFill = h('span', { class: 'w-panel-bar-fill' });
   const bar = h('div', { class: 'w-panel-bar', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-label': m.progressLabel }, barFill);
   const list = h('ol', { class: 'w-chapters' });
+  const goalsBtn = h('button', { class: 'w-panel-link', type: 'button', dataset: { action: 'goals' }, onclick: () => showGoals() }, m.goals);
   const helpBtn = h('button', { class: 'w-panel-link', type: 'button', dataset: { action: 'help' }, onclick: () => showHelp() }, m.help);
   const startOverBtn = h('button', { class: 'w-panel-link w-startover', type: 'button', dataset: { action: 'startover' }, onclick: () => confirmStartOver() }, m.startOver);
 
@@ -61,7 +62,7 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
     title,
     h('div', { class: 'w-panel-progress' }, h('div', { class: 'w-panel-progress-line' }, pctText), bar),
     list,
-    h('div', { class: 'w-panel-foot' }, helpBtn, startOverBtn));
+    h('div', { class: 'w-panel-foot' }, goalsBtn, helpBtn, startOverBtn));
   const overlay = h('div', { class: 'w-menu-overlay', hidden: true }, h('div', { class: 'w-menu-scrim', onclick: () => close() }), panel);
   stage.append(overlay);
 
@@ -82,6 +83,7 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
         onclick: () => { if (c.clickable) { close(false); onChapter(c.n); } } },
       statusMark(c.status),
       h('span', { class: 'w-chapter-title' }, c.title),
+      c.focus ? h('span', { class: 'w-chapter-focus', 'aria-hidden': 'true' }, icon('flag', { size: 16 }), m.focus) : null,
       h('span', { class: 'w-chapter-meta' }, c.meta)))));
   }
 
@@ -110,6 +112,14 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
 
   function showHelp() {
     openDialog(stage, { text: m.help, body: h('ul', { class: 'w-dialog-list w-help' }, (ui.help || []).map((line) => h('li', {}, line))), opener: helpBtn, inert: [panel], actions: closeAction });
+  }
+
+  // the lesson's outcomes (S01B), read only; the one marked hardest carries "Your focus"
+  function showGoals() {
+    const list = h('ol', { class: 'w-dialog-list w-goals-list' }, getMenu().goals.map((g) => h('li', { dataset: { picked: String(g.picked) } },
+      h('span', { class: 'w-goals-title' }, g.label, g.picked ? h('span', { class: 'w-chapter-focus' }, icon('flag', { size: 16 }), m.focus) : null),
+      h('span', { class: 'w-goals-sub' }, g.sub))));
+    openDialog(stage, { text: m.goals, note: m.goalsIntro, body: list, opener: goalsBtn, inert: [panel], actions: closeAction });
   }
 
   function confirmStartOver() {

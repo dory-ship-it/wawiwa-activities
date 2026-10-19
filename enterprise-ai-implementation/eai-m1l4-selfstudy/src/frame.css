@@ -235,6 +235,20 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-privacy { margin: 0; display: flex; align-items: center; gap: 10px; font: 400 15px/1.4 var(--w-meta); color: var(--w-ink-2); }
 .w-privacy .w-icon { flex: none; color: var(--w-navy); }
 .w-main[data-layout="form"] .w-band { margin-top: 18px; height: 76px; }
+.w-field-help { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font: 400 15px/1.45 var(--w-meta); color: var(--w-ink-2); }
+.w-field-help .w-icon { flex: none; color: var(--w-teal-ink); }
+.w-field-help > span { flex: 1 1 0; min-width: 0; }
+.w-field-help-link { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ---------- S01B lesson goals (wide): eyebrow, instruction, deliverable line, five neutral rows ---------- */
+.w-goals .w-eyebrow { margin-bottom: 6px; }
+.w-goals-line { margin: 12px 0 0; display: flex; align-items: flex-start; gap: 12px; font: 600 18px/1.4 var(--w-head); color: var(--w-ink); }
+.w-goals-line .w-icon { flex: none; margin-top: 1px; color: var(--w-navy); }
+.w-goals-task { margin-top: 18px; }
+.w-options-goals .w-opt-row { height: 54px; font-size: 18px; }
+.w-options-goals .w-opt-row[aria-pressed="true"] { background: var(--w-teal-tint); box-shadow: inset 3px 0 0 var(--w-teal); }
+.w-options-goals .w-opt-row[aria-pressed="true"] .w-opt-mark { background: var(--w-teal); }
+.w-options-goals .w-opt-row[aria-pressed="true"] .w-opt-chev { display: none; }
 
 /* ---------- layout wide (R1: S04 to S08): full-width work screens in the R2D frame ---------- */
 .w-main[data-layout="wide"] > .w-logo { position: absolute; left: 24px; top: 14px; }
@@ -262,22 +276,27 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-sort-num { flex: none; width: 24px; font: 800 22px/1 var(--w-head); color: var(--w-teal-ink); }
 .w-sort-card .w-opt-mark { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; border-radius: 4px; background: var(--w-navy); }
 .w-sort-cols { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-.w-sort-process::before { content: ""; position: absolute; left: 0; right: 0; top: 26px; height: 4px; background: var(--w-turquoise); } /* the process line, seen between the columns */
+.w-sort-process::before { content: ""; position: absolute; left: 0; right: 0; top: 28px; height: 4px; background: var(--w-turquoise); } /* the process line, seen between the columns */
 .w-sort-lead { flex: none; display: grid; color: var(--w-navy); }
 .w-tray { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 24px; }
 .w-tray-card { width: auto; min-width: 0; max-width: none; min-height: 52px; gap: 12px; padding: 8px 40px 8px 16px; font-size: 17px; }
 .w-tray-card .w-sort-num { font-size: 18px; width: 18px; }
 .w-tray-card[data-placed="true"] { visibility: hidden; } /* the slot keeps its place: nothing in the tray moves */
-.w-sort-col { position: relative; display: flex; flex-direction: column; gap: 10px; }
-.w-sort-target { position: relative; min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 0 44px 0 18px; border: 2px solid var(--w-idle);
-  border-radius: var(--w-radius); background: var(--w-white); font: 700 19px/1.2 var(--w-head); color: var(--w-ink); text-align: left; cursor: pointer; }
+/* a column is a bin: a dashed, light-filled drop area with its name on top and the placed cards
+   inside it. Idle (no card selected): grey dashes on the hint grey. A card selected: every bin turns
+   white with navy dashes (a place to drop); the bin under the pointer or focus goes teal. Wrong drop:
+   red border and tint with the X. The whole bin takes the click; the name is the keyboard target. */
+.w-sort-col { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 4px 4px 8px; border: 2px dashed var(--w-idle); border-radius: var(--w-radius);
+  background: var(--w-hint); transition: background-color .15s, border-color .15s; }
+.w-sort-col:has(> .w-sort-target:not([aria-disabled="true"])) { border-color: var(--w-navy); background: var(--w-white); cursor: pointer; }
+.w-sort-col:has(> .w-sort-target:not([aria-disabled="true"])):hover, .w-sort-col:has(> .w-sort-target:not([aria-disabled="true"]):focus-visible) { border-style: solid; background: var(--w-teal-tint); }
+.w-sort-col:has(> .w-sort-target[data-result="wrong"]) { border-style: solid; border-color: var(--w-error); background: var(--w-error-tint); }
+.w-sort-target { position: relative; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 40px 0 12px; border: 0;
+  border-radius: 6px; background: transparent; font: 700 19px/1.2 var(--w-head); color: var(--w-ink); text-align: left; cursor: pointer; }
 .w-sort-target[aria-disabled="true"] { cursor: default; }
-.w-sort-target:not([aria-disabled="true"]) { border-color: var(--w-navy); }
-.w-sort-target:not([aria-disabled="true"]):hover { background: var(--w-hint); }
 .w-sort-icon { flex: none; color: var(--w-navy); }
-.w-sort-target[data-result="wrong"] { box-shadow: inset 3px 0 0 var(--w-error); }
-.w-sort-target .w-opt-mark { position: absolute; right: 12px; top: 50%; margin-top: -12px; background: transparent; color: var(--w-error); }
-.w-sort-chips { list-style: none; margin: 0; padding: 0; min-height: 96px; display: flex; flex-direction: column; gap: 8px; }
+.w-sort-target .w-opt-mark { position: absolute; right: 10px; top: 50%; margin-top: -12px; background: transparent; color: var(--w-error); }
+.w-sort-chips { list-style: none; margin: 0; padding: 0 4px; min-height: 96px; display: flex; flex-direction: column; gap: 8px; }
 .w-sort-chip { padding: 9px 14px; border: 1px solid var(--w-hairline); border-left: 3px solid var(--w-teal); border-radius: var(--w-radius); background: var(--w-white);
   font: 600 15px/1.35 var(--w-head); color: var(--w-ink); }
 .w-sort-tray .w-sort-chips { min-height: 44px; gap: 6px; }
@@ -477,6 +496,7 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-step-n { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: var(--w-navy); font: 800 15px/1 var(--w-head); color: var(--w-white); }
 .w-main[data-layout="editorial"] .w-col-handoff .w-instruction { margin: 0 0 14px; }
 .w-open { text-decoration: none; }
+.w-action { display: flex; align-items: center; gap: 12px; } /* Open workbook (primary) first, then I'm back */
 a.w-btn { text-decoration: none; }
 
 /* S20 self-check */
@@ -496,6 +516,8 @@ a.w-btn { text-decoration: none; }
 .w-chip[aria-pressed="true"] { border-color: var(--w-teal); background: var(--w-teal-tint); color: var(--w-teal-ink); }
 .w-strip { margin: 0; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--w-hairline); border-bottom: 1px solid var(--w-hairline); font: 600 17px/1.35 var(--w-head); color: var(--w-ink); }
 .w-strip .w-icon { flex: none; color: var(--w-teal-ink); }
+.w-goal-reminder { margin: 0; display: flex; align-items: center; gap: 10px; font: 600 17px/1.35 var(--w-head); color: var(--w-navy); }
+.w-goal-reminder .w-icon { flex: none; color: var(--w-teal-ink); }
 .w-link-row { margin-top: 10px; display: flex; justify-content: flex-end; }
 .w-reopen { display: inline-flex; align-items: center; gap: 6px; }
 
@@ -535,6 +557,8 @@ a.w-btn { text-decoration: none; }
 
 /* ---------- layout video (R2: V1, V2; R3-video-play and R3-video-stop) ---------- */
 .w-main[data-layout="video"] > .w-logo { position: absolute; left: 24px; top: 14px; z-index: 2; }
+/* stop view: the logo moves off the paused still to the top of the question panel */
+.w-main[data-layout="video"]:has(> .w-stop-view:not([hidden])) > .w-logo { left: 542px; top: 8px; }
 .w-video-head { position: absolute; left: 64px; top: 76px; width: 1088px; }
 .w-main[data-layout="video"] .w-video-head .w-instruction { font-size: 28px; font-weight: 800; line-height: 1.25; letter-spacing: -0.4px; }
 .w-video-meta { margin: 4px 0 0; font: 400 14px/1.3 var(--w-meta); color: var(--w-ink-2); }
@@ -624,6 +648,10 @@ a.w-btn { text-decoration: none; }
 .w-panel-foot { margin: auto -12px 0; padding: 6px 0 8px; display: flex; gap: 4px; border-top: 1px solid var(--w-hairline); }
 .w-panel-link { min-height: 44px; padding: 0 12px; border: 0; border-radius: var(--w-radius); background: transparent; font: 500 15px/1 var(--w-meta); color: var(--w-navy); cursor: pointer; }
 .w-panel-link:hover { background: var(--w-hint); }
+/* the chapter that builds the outcome marked hardest on S01B */
+.w-chapter-focus { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: var(--w-radius); background: var(--w-teal-tint);
+  font: 500 14px/1.2 var(--w-meta); color: var(--w-teal-ink); }
+.w-chapter[aria-current="step"] .w-chapter-focus { background: var(--w-white); }
 
 /* ---------- in-page dialog (resources, help, start over confirm, resume prompt) ---------- */
 .w-dialog-overlay { position: absolute; inset: 0; z-index: 60; display: grid; place-items: center; background: rgba(230, 230, 232, .72); }
@@ -634,6 +662,10 @@ a.w-btn { text-decoration: none; }
 .w-dialog-list { list-style: none; margin: 8px 0 0; padding: 0; }
 .w-help { list-style: disc; padding-left: 20px; font: 400 15px/1.45 var(--w-meta); color: var(--w-ink); }
 .w-help li { margin: 6px 0; }
+.w-goals-list { margin-top: 14px; border-bottom: 1px solid var(--w-hairline); }
+.w-goals-list li { display: flex; flex-direction: column; gap: 2px; padding: 9px 0; border-top: 1px solid var(--w-hairline); }
+.w-goals-title { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font: 700 17px/1.3 var(--w-head); color: var(--w-ink); }
+.w-goals-sub { font: 400 14px/1.4 var(--w-meta); color: var(--w-ink-2); }
 .w-resource { font: 600 17px/1.35 var(--w-head); }
 .w-resource a { min-height: 44px; display: flex; flex-wrap: wrap; align-items: center; column-gap: 10px; color: var(--w-navy); text-decoration: underline; text-underline-offset: 3px; }
 .w-newtab { display: inline-flex; align-items: center; gap: 4px; font: 400 14px/1.2 var(--w-meta); color: var(--w-ink-2); }

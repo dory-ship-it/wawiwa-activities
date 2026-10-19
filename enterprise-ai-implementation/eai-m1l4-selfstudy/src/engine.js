@@ -365,17 +365,31 @@ class Lesson {
     });
   }
 
+  // the S01B pick: { screen, picked (option id or ''), chapter (the chapter id that builds it) }
+  goalFocus() {
+    const screen = this.content.screens.find((s) => s.variant === 'goals');
+    if (!screen) return null;
+    const picked = this.state.f[screen.store] || '';
+    return { screen, picked, chapter: screen.options.find((o) => o.id === picked)?.chapter || null };
+  }
+
   menuModel() {
     const p = this.progress();
     const m = this.ui.menu;
-    // no times in the menu: chapter minutes only weigh the % complete
+    const goal = this.goalFocus();
+    // no times in the menu: chapter minutes only weigh the % complete; the chapter that builds the
+    // outcome marked hardest on S01B carries "Your focus"
     return {
       percent: p.percent,
-      chapters: p.chapters.map(({ c, status, clickable }) => ({
-        n: c.n, title: c.title, status, clickable, current: c.id === p.frontierChapter,
-        meta: status === 'done' ? m.done : '',
-        label: fmt(m.chapterLabel, { title: c.title, status: this.ui.rail.status[status] }),
-      })),
+      goals: goal ? goal.screen.options.map((o) => ({ label: o.label, sub: o.sub, picked: o.id === goal.picked })) : [],
+      chapters: p.chapters.map(({ c, status, clickable }) => {
+        const focus = !!goal && goal.chapter === c.id;
+        return {
+          n: c.n, title: c.title, status, clickable, current: c.id === p.frontierChapter, focus,
+          meta: status === 'done' ? m.done : '',
+          label: fmt(focus ? m.focusLabel : m.chapterLabel, { title: c.title, status: this.ui.rail.status[status] }),
+        };
+      }),
     };
   }
 }
