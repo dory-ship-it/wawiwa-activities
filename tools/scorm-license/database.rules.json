@@ -1,0 +1,18 @@
+{
+  "rules": {
+    "licenses": {
+      "$licenseKey": {
+        ".read": "data.child('valid').val() == true && (!data.child('expiresAt').exists() || data.child('expiresAt').val() > now)",
+        ".write": false
+      }
+    },
+    "launches": {
+      "$licenseKey": {
+        "$launch": {
+          ".write": "!data.exists() && root.child('licenses').child($licenseKey).child('valid').val() == true",
+          ".validate": "newData.hasChildren(['t', 'h']) && newData.child('t').val() <= now && newData.child('h').isString() && newData.child('h').val().length < 200"
+        }
+      }
+    }
+  }
+}
