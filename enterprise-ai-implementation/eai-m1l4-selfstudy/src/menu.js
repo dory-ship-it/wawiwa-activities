@@ -54,6 +54,10 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
   const bar = h('div', { class: 'w-panel-bar', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-label': m.progressLabel }, barFill);
   const list = h('ol', { class: 'w-chapters' });
   const goalsBtn = h('button', { class: 'w-panel-link', type: 'button', dataset: { action: 'goals' }, onclick: () => showGoals() }, m.goals);
+  // the Lesson 1 cases (class practice) in a new tab; left out when content has no URL
+  const casesHref = resolveLink(content, '@links.lesson1Cases');
+  const casesLink = casesHref ? h('a', { class: 'w-panel-link', href: casesHref, target: '_blank', rel: 'noopener noreferrer', dataset: { action: 'lesson1Cases' } },
+    h('span', {}, m.lesson1Cases), icon('external-link', { size: 14 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')')) : null;
   const helpBtn = h('button', { class: 'w-panel-link', type: 'button', dataset: { action: 'help' }, onclick: () => showHelp() }, m.help);
   const startOverBtn = h('button', { class: 'w-panel-link w-startover', type: 'button', dataset: { action: 'startover' }, onclick: () => confirmStartOver() }, m.startOver);
 
@@ -62,7 +66,9 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
     title,
     h('div', { class: 'w-panel-progress' }, h('div', { class: 'w-panel-progress-line' }, pctText), bar),
     list,
-    h('div', { class: 'w-panel-foot' }, goalsBtn, helpBtn, startOverBtn));
+    h('div', { class: 'w-panel-foot' },
+      h('div', { class: 'w-panel-row' }, goalsBtn, casesLink), // the lesson's resources
+      h('div', { class: 'w-panel-row' }, helpBtn, startOverBtn)));
   const overlay = h('div', { class: 'w-menu-overlay', hidden: true }, h('div', { class: 'w-menu-scrim', onclick: () => close() }), panel);
   stage.append(overlay);
 

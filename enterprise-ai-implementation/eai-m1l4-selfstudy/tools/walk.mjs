@@ -255,6 +255,21 @@ expect(await screen(page) === 'S01' && tip.text === rl.dots[1].label && tip.righ
   `rail: keyboard focus on a dot shows its tip "${tip.text}" (title and status) right of the dot, level with it; Enter on a future chapter does nothing`);
 await press(page, 'Escape');
 
+// full screen (rail): label from content, Enter enters and leaves (the label and icon follow)
+const fsOf = () => page.evaluate(() => { const b = document.querySelector('.w-rail-fs'); return { hidden: b.hidden, label: b.getAttribute('aria-label'), on: !!document.fullscreenElement }; });
+const fs0 = await fsOf();
+expect(fs0.hidden === !(await page.evaluate(() => document.fullscreenEnabled)) && fs0.label === UI.rail.fullscreen, `rail full screen button: "${fs0.label}", shown only where the Fullscreen API is allowed`);
+if (!fs0.hidden) {
+  await tabTo(page, '.w-rail-fs', { back: true });
+  await press(page, 'Enter');
+  await page.waitForFunction(() => !!document.fullscreenElement, { timeout: 3000 }).catch(() => {});
+  const fs1 = await fsOf();
+  await press(page, 'Enter');
+  await page.waitForFunction(() => !document.fullscreenElement, { timeout: 3000 }).catch(() => {});
+  const fs2 = await fsOf();
+  expect(fs1.on && fs1.label === UI.rail.exitFullscreen && !fs2.on && fs2.label === UI.rail.fullscreen, `full screen: Enter enters ("${fs1.label}"), Enter again leaves ("${fs2.label}")`);
+}
+
 // menu: open, trap, Escape
 await tabTo(page, '.w-rail-menu', { back: true });
 await press(page, 'Enter');
@@ -280,6 +295,9 @@ await press(page, 'Enter');
 const help = await page.evaluate(() => ({ items: document.querySelectorAll('.w-dialog .w-help li').length, focus: document.activeElement.dataset.action }));
 await press(page, 'Escape');
 expect(help.items === UI.help.length && help.focus === 'close' && await isActive(page, '.w-panel [data-action="help"]'), `menu Help: ${help.items} lines in a dialog, Escape returns focus to Help`);
+const cases1 = await page.evaluate(() => { const a = document.querySelector('.w-panel [data-action="lesson1Cases"]'); return a ? { href: a.href, target: a.target, rel: a.rel, text: a.textContent } : null; });
+expect(cases1 && cases1.href === C.links.lesson1Cases && cases1.target === '_blank' && /noopener/.test(cases1.rel) && cases1.text.startsWith(UI.menu.lesson1Cases),
+  `menu "${UI.menu.lesson1Cases}": a new-tab link to ${cases1?.href}`);
 await tabTo(page, '.w-panel [data-action="goals"]', { back: true });
 await press(page, 'Enter');
 const goals = await page.evaluate(() => ({ items: [...document.querySelectorAll('.w-dialog .w-goals-list li')].map((li) => li.querySelector('.w-goals-title').textContent + '|' + li.querySelector('.w-goals-sub').textContent),
@@ -340,8 +358,9 @@ await press(page, 'Enter');
 
 // S02
 await expectNewScreen(page, 'S02', 'S01B Next');
-const s02top = await page.evaluate(() => ({ label: document.querySelector('.w-form .w-label').textContent, help: document.querySelector('.w-field-help').textContent, hw1: !!document.querySelector('[data-action="homework1"]') }));
-expect(s02top.label === S.S02.stage.top.text && s02top.help === S.S02.stage.middle.help.text && s02top.hw1 === !!C.links.homework1,
+const s02top = await page.evaluate(() => { const a = document.querySelector('[data-action="homework1"]');
+  return { label: document.querySelector('.w-form .w-label').textContent, help: document.querySelector('.w-field-help > span').textContent, hw1: a ? a.href : null, target: a?.target }; });
+expect(s02top.label === S.S02.stage.top.text && s02top.help === S.S02.stage.middle.help.text && s02top.hw1 === C.links.homework1 && (!s02top.hw1 || s02top.target === '_blank'),
   `S02: Homework 1 context line, help line by the fields, ${C.links.homework1 ? 'Open Homework 1 link' : 'no Homework 1 link (links.homework1 is null)'}`);
 await expectBand(page, 'S02 before action', { state: 'hint', text: S.S02.hint, unlocked: false, lockedWhy: UI.footer.locked.input });
 await tabTo(page, '[data-action="save"]');

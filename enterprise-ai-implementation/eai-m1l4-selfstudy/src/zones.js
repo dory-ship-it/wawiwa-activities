@@ -1,6 +1,6 @@
 // The shell of every screen (approved look, P1.5), in stage px:
-//   rail      x 0 to 64, y 0 to 656    menu button, one dot per chapter, % done, Saved
-//   main      1216 x 656 (x 64 to 1280, centred on a wider stage) the screen's own layout (built by its template)
+//   rail      x 0 to 64, y 0 to 656    menu button, one dot per chapter, full screen, % done, Saved
+//   main      x 64 to the stage's right edge (1216 wide at 1280, up to 1536), 656 high: the screen's own layout
 //   footer    y 656 to 720             Previous left, Next right (locked grey or unlocked red)
 // Parts a template places inside its layout: the logo, the instruction h1 (tabindex -1, focus lands
 // here on every new screen) and the feedback band (aria-live polite, directly under the interaction,
@@ -25,10 +25,23 @@ export function createZones(stage, content, { onMenu, onChapter, onPrev, onNext 
   const percent = h('span', { class: 'w-rail-pct' });
   const savedText = h('span', { class: 'w-saved-text' });
   const saved = h('span', { class: 'w-saved', role: 'status' }, icon('check', { size: 16 }), savedText);
+  // full screen (Fullscreen API on the whole page): hidden where it is not allowed, e.g. an LMS iframe
+  // without allowfullscreen; the icon and label follow the real state (Escape also leaves it)
+  const fsLabel = () => (document.fullscreenElement ? ui.rail.exitFullscreen : ui.rail.fullscreen);
+  const fsBtn = h('button', { class: 'w-rail-fs', type: 'button', dataset: { action: 'fullscreen' }, hidden: !document.fullscreenEnabled,
+    onclick: () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}) });
+  const fsRender = () => {
+    fsBtn.setAttribute('aria-label', fsLabel());
+    fsBtn.setAttribute('aria-pressed', String(!!document.fullscreenElement));
+    fsBtn.replaceChildren(icon(document.fullscreenElement ? 'minimize' : 'maximize', { size: 22 }));
+  };
+  fsRender();
+  document.addEventListener('fullscreenchange', fsRender);
+  attachTip(fsBtn, fsLabel, { describe: false, side: 'right' });
   const rail = h('nav', { class: 'w-rail', 'aria-label': ui.rail.label },
     menuBtn,
     h('div', { class: 'w-rail-track' }, lineAll, lineDone, dots),
-    h('div', { class: 'w-rail-foot' }, h('p', { class: 'w-rail-done' }, percent, h('span', { class: 'w-rail-done-word' }, ui.rail.done)), saved));
+    h('div', { class: 'w-rail-foot' }, fsBtn, h('p', { class: 'w-rail-done' }, percent, h('span', { class: 'w-rail-done-word' }, ui.rail.done)), saved));
 
   /* ---- main, logo, instruction ---- */
   const main = h('main', { class: 'w-main' });

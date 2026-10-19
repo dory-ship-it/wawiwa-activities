@@ -23,8 +23,7 @@ export const explorer = {
   mount(ctx) {
     const run = { diagram, tiles, pick }[ctx.screen.variant];
     if (!run) throw new Error('explorer: unknown variant ' + ctx.screen.variant);
-    run(ctx);
-    return { unmount() {} };
+    return run(ctx) || { unmount() {} };
   },
 };
 
@@ -35,8 +34,9 @@ const mark = (el, result, ui) => {
 };
 
 /* ---------- diagram (S05) ---------- */
-// Geometry in stage px inside the diagram box (width 1088): a lane-name column, then equal node
-// columns; every node of a lane sits on the lane's centre line.
+// Geometry in stage px inside the diagram box (1088 wide on a 1280 stage, wider on a wide window): a
+// lane-name column, then equal node columns; every node of a lane sits on the lane's centre line.
+// The node columns follow the box width (place() runs again when the box is resized).
 const D = { W: 1088, HEAD: 120, LANE: 88, STEP_W: 150, STEP_H: 48, GATE: 48, EVENT: 32 };
 const HOTSPOT_OF = { gateway: 'gateway', start: 'event', end: 'event', step: 'step', lane: 'lane' };
 
@@ -47,11 +47,11 @@ function diagram(ctx) {
   const spots = Object.fromEntries(screen.hotspots.map((x) => [x.id, x]));
   const laneIndex = Object.fromEntries(dg.lanes.map((l, i) => [l.id, i]));
   const nCols = Math.max(...dg.nodes.map((n) => n.col)) + 1;
-  const colW = (D.W - D.HEAD) / nCols;
   const H = dg.lanes.length * D.LANE;
-  const pos = Object.fromEntries(dg.nodes.map((n) => {
+  let pos = {};
+  const positions = (W) => Object.fromEntries(dg.nodes.map((n) => {
     const half = n.kind === 'step' ? [D.STEP_W / 2, D.STEP_H / 2] : n.kind === 'gateway' ? [D.GATE / 2, D.GATE / 2] : [D.EVENT / 2, D.EVENT / 2];
-    return [n.id, { x: D.HEAD + (n.col + 0.5) * colW, y: laneIndex[n.lane] * D.LANE + D.LANE / 2, hw: half[0], hh: half[1] }];
+    return [n.id, { x: D.HEAD + (n.col + 0.5) * ((W - D.HEAD) / nCols), y: laneIndex[n.lane] * D.LANE + D.LANE / 2, hw: half[0], hh: half[1] }];
   }));
 
   // flows: h = straight across, vh = vertical first then across, hv = across first then vertical
@@ -64,12 +64,14 @@ function diagram(ctx) {
   };
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('class', 'w-flows');
-  svg.setAttribute('viewBox', `0 0 ${D.W} ${H}`);
-  svg.setAttribute('width', D.W);
   svg.setAttribute('height', H);
   svg.setAttribute('aria-hidden', 'true');
-  svg.innerHTML = '<defs><marker id="w-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="w-arrow-head"/></marker></defs>'
-    + dg.edges.map((e) => `<path class="w-flow" d="${path(e)}" marker-end="url(#w-arrow)"/>`).join('');
+  const drawFlows = (W) => {
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.setAttribute('width', W);
+    svg.innerHTML = '<defs><marker id="w-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="w-arrow-head"/></marker></defs>'
+      + dg.edges.map((e) => `<path class="w-flow" d="${path(e)}" marker-end="url(#w-arrow)"/>`).join('');
+  };
 
   const hotspots = [];
   const lanes = dg.lanes.map((l, i) => {
@@ -82,36 +84,51 @@ function diagram(ctx) {
     row.style.height = D.LANE + 'px';
     return [row, head];
   });
+  // each node's elements and how to place them for the current positions
+  const placers = [];
   const nodes = dg.nodes.map((n) => {
-    const p = pos[n.id];
     const kind = HOTSPOT_OF[n.kind];
     let btn;
     if (n.kind === 'step') {
       btn = h('button', { class: 'w-node w-node-step', type: 'button', dataset: { hotspot: kind, id: n.id } }, h('span', {}, n.label), h('span', { class: 'w-opt-mark' }));
-      Object.assign(btn.style, { left: p.x - p.hw + 'px', top: p.y - p.hh + 'px', width: D.STEP_W + 'px', height: D.STEP_H + 'px' });
+      placers.push(() => { const p = pos[n.id]; Object.assign(btn.style, { left: p.x - p.hw + 'px', top: p.y - p.hh + 'px', width: D.STEP_W + 'px', height: D.STEP_H + 'px' }); });
       hotspots.push(btn);
       return btn;
     }
     if (n.kind === 'gateway') {
       const labelId = nextId('w-gate');
       const label = h('span', { class: 'w-node-label w-gate-label', id: labelId }, n.label);
-      Object.assign(label.style, { left: p.x - 110 + 'px', top: p.y - p.hh - 22 + 'px' });
       btn = h('button', { class: 'w-node w-node-gateway', type: 'button', 'aria-labelledby': labelId, dataset: { hotspot: kind, id: n.id } },
         h('span', { class: 'w-diamond', 'aria-hidden': 'true' }), h('span', { class: 'w-opt-mark' }));
-      Object.assign(btn.style, { left: p.x - p.hw + 'px', top: p.y - p.hh + 'px', width: D.GATE + 'px', height: D.GATE + 'px' });
+      placers.push(() => {
+        const p = pos[n.id];
+        Object.assign(label.style, { left: p.x - 110 + 'px', top: p.y - p.hh - 22 + 'px' });
+        Object.assign(btn.style, { left: p.x - p.hw + 'px', top: p.y - p.hh + 'px', width: D.GATE + 'px', height: D.GATE + 'px' });
+      });
       hotspots.push(btn);
       return [label, btn];
     }
     // start / end event: the button covers its label (above, so flows can enter from below) and the circle
     btn = h('button', { class: 'w-node w-node-event', type: 'button', dataset: { hotspot: kind, id: n.id, end: n.kind === 'end' ? 'true' : 'false' } },
       h('span', { class: 'w-node-label' }, n.label), h('span', { class: 'w-event-circle', 'aria-hidden': 'true' }), h('span', { class: 'w-opt-mark' }));
-    Object.assign(btn.style, { left: p.x - 64 + 'px', top: p.y - p.hh - 22 + 'px', width: '128px' });
+    placers.push(() => { const p = pos[n.id]; Object.assign(btn.style, { left: p.x - 64 + 'px', top: p.y - p.hh - 22 + 'px', width: '128px' }); });
     hotspots.push(btn);
     return btn;
   });
   const box = h('div', { class: 'w-diagram', role: 'group', 'aria-labelledby': 'w-instruction' }, lanes.map((x) => x[0]), svg, lanes.map((x) => x[1]), nodes.flat());
   box.style.height = H + 'px';
   arrowNav(box, { selector: '[data-hotspot]' });
+  // lay the nodes and flows out for the box width (offsetWidth is in stage px: the scale is a transform)
+  let placedW = 0;
+  const place = () => {
+    const W = box.offsetWidth || D.W;
+    if (W === placedW) return;
+    placedW = W;
+    pos = positions(W);
+    placers.forEach((f) => f());
+    drawFlows(W);
+  };
+  const ro = new ResizeObserver(place);
 
   // legend: three disclosure buttons, the glossary text opens in place (space reserved)
   const opened = new Set();
@@ -138,6 +155,8 @@ function diagram(ctx) {
         h('div', { class: 'w-legend' }, legend.map((x) => x.el))),
       zones.band));
   zones.setFeedback({ state: 'hint', text: screen.hint });
+  place();
+  ro.observe(box);
 
   let found = false, unlocked = false, last = null;
   function check(focus) {
@@ -171,6 +190,7 @@ function diagram(ctx) {
     zones.setFeedback({ state: 'correct', text: spots[key.dataset.hotspot].feedback });
     check(false);
   }
+  return { unmount() { ro.disconnect(); } };
 }
 
 /* ---------- tiles (S07) ---------- */

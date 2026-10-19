@@ -41,7 +41,7 @@ export function attachTip(el, text, { describe = true, container = null, side = 
 function showFor(el, text, side = 'below') {
   if (!tipBox) return;
   owner = el;
-  tipBox.textContent = text;
+  tipBox.textContent = typeof text === 'function' ? text() : text; // a function: the text follows a state (full screen)
   tipBox.hidden = false;
   const s = stageEl.getBoundingClientRect();
   const scale = s.width / stageEl.offsetWidth || 1;

@@ -97,8 +97,8 @@ class Lesson {
   }
 
   /* ---- stage scaling: 720 px high, 1280 to 1600 px wide to fill the window, scale to fit, never
-     scroll. A wide window widens the stage: the rail stays left, the footer spans the width and
-     the 1216 px content column (main) is centred (--w-stage-w in frame.css). ---- */
+     scroll. A wide window widens the stage: the rail stays left, the footer and main span the rest,
+     and each layout spreads into the extra width (--w-stage-w and --w-x in frame.css). ---- */
   layout() {
     const W = this.root.clientWidth, H = this.root.clientHeight;
     if (!W || !H) return;

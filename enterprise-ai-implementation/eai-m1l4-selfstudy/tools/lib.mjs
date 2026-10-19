@@ -78,9 +78,34 @@ export function measureLayout() {
 
   const hit = (b, R) => b.bottom > R.top + 0.5 && b.top < R.bottom - 0.5 && b.right > R.left + 0.5 && b.left < R.right - 0.5;
   const overlaps = bandOn ? boxes.filter((b) => hit(b, B)).map((b) => b.what) : [];
-  // on a widened stage, main is clipped with a side margin (--w-pad) so photos can reach the rail
-  const pad = (stage.offsetWidth - 1280) / 2;
-  const outside = boxes.filter((b) => b.top < M.top - 0.5 || b.bottom > M.bottom + 0.5 || b.left < M.left - pad - 0.5 || b.right > M.right + pad + 0.5).map((b) => b.what);
+  const outside = boxes.filter((b) => b.top < M.top - 0.5 || b.bottom > M.bottom + 0.5 || b.left < M.left - 0.5 || b.right > M.right + 0.5).map((b) => b.what);
+
+  // wide windows (R5): the content column has no empty side strip wider than the gutter on one side
+  // only, and the logo lines up with it. Column = the panel of a split layout (editorial text column,
+  // video stop panel), else main. L / R = gaps from the column's edges to its painted boxes (the logo
+  // and its header excluded; a photo counts). A strip fails when the wider gap is over 72 px (the 1280
+  // paddings are 60 to 72) and the two sides differ by more than 16 px.
+  const layoutName = main.dataset.layout;
+  const stopOn = !!document.querySelector('.w-stop-view:not([hidden])');
+  const col = layoutName === 'editorial' ? main.querySelector('.w-col') : stopOn ? main.querySelector('.w-stop-panel') : main;
+  let wide = null;
+  if (col && !overlay) {
+    const C = box(col.getBoundingClientRect());
+    const inCol = boxes.filter((b) => !b.what.startsWith('text:') && !/^w-(logo|header)$/.test(b.what)
+      && b.left >= C.left - 0.5 && b.right <= C.right + 0.5);
+    const L = Math.round(Math.min(...inCol.map((b) => b.left)) - C.left), R = Math.round(C.right - Math.max(...inCol.map((b) => b.right)));
+    const strip = Math.max(L, R) > 72.5 && Math.abs(L - R) > 16;
+    const logo = main.querySelector(':scope > .w-logo, .w-header > .w-logo');
+    const h1 = document.getElementById('w-instruction');
+    let logoOk = true, logoWhy = '';
+    if (logo && visible(logo)) {
+      const G = box(logo.getBoundingClientRect());
+      if (layoutName === 'editorial' || layoutName === 'memo') { logoOk = Math.abs(G.left - M.left - 24) <= 1; logoWhy = `logo ${Math.round(G.left - M.left)} px from the rail (24)`; }
+      else if (stopOn) { const P = parseFloat(getComputedStyle(col).paddingLeft); logoOk = Math.abs(G.left - (C.left + P)) <= 1; logoWhy = `logo at the stop panel's text edge (${Math.round(G.left - C.left)} = ${Math.round(P)})`; }
+      else if (h1 && visible(h1)) { const I = box(h1.getBoundingClientRect()); logoOk = Math.abs(G.left - I.left) <= 1; logoWhy = `logo x ${Math.round(G.left - M.left)} = h1 x ${Math.round(I.left - M.left)}`; }
+    }
+    wide = { L, R, strip, logoOk, logoWhy, col: col === main ? 'main' : col.className.split(' ')[0] };
+  }
 
   let bandWidth = null;
   if (bandOn) {
@@ -135,7 +160,7 @@ export function measureLayout() {
     .map((el) => ({ el, b: box(el.getBoundingClientRect()) }))
     .filter(({ b }) => b.w < 43.5 || b.h < 43.5).map(({ el, b }) => `${name(el)} ${Math.round(b.w)}x${Math.round(b.h)}`);
 
-  return { overlaps, outside, clipped, bandOverflow, bandWidth, contrast: Object.fromEntries(contrast), lowContrast, small, smallTargets };
+  return { overlaps, outside, clipped, bandOverflow, bandWidth, contrast: Object.fromEntries(contrast), lowContrast, small, smallTargets, wide };
 }
 
 // One line verdict for a measureLayout result: [ok, detail]
@@ -150,6 +175,9 @@ export function layoutVerdict(m) {
   if (m.lowContrast.length) bad.push('contrast: ' + m.lowContrast.join('; '));
   if (m.small.length) bad.push('text under 14px: ' + m.small.join(', '));
   if (m.smallTargets.length) bad.push('targets under 44px: ' + m.smallTargets.join(', '));
-  const detail = m.bandWidth ? `band ${m.bandWidth.band}px = area ${m.bandWidth.area}px, gap ${m.bandWidth.gap}px` : 'no band';
+  if (m.wide && m.wide.strip) bad.push(`empty side strip in ${m.wide.col}: left ${m.wide.L}px, right ${m.wide.R}px`);
+  if (m.wide && !m.wide.logoOk) bad.push('logo not aligned: ' + m.wide.logoWhy);
+  const side = m.wide ? `, ${m.wide.col} gaps ${m.wide.L}/${m.wide.R}${m.wide.logoWhy ? ', ' + m.wide.logoWhy : ''}` : '';
+  const detail = (m.bandWidth ? `band ${m.bandWidth.band}px = area ${m.bandWidth.area}px, gap ${m.bandWidth.gap}px` : 'no band') + side;
   return [!bad.length, bad.length ? bad.join(' | ') : detail];
 }

@@ -23,8 +23,8 @@ The first Storyline-style self-study lesson built in code: a fixed 1280x720 stag
 | `src/state.js` | state and its codec: localStorage locally, `cmi.suspend_data` (under 4096) in the LMS |
 | `assets/logo/wawiwa-logo.png` | decoded unchanged from `../_wawiwa-logo.b64` |
 | `assets/img/` | image slots: `prompts/` (one generator prompt per slot), `temp/` (board reference images until the real ones exist), `refs/` (style reference) |
-| `tools/` | `serve.mjs` (local server), `check.mjs` (build check), `test-fit.mjs` (fit, band, clipping, contrast, targets per screen state), `walk.mjs` (keyboard-only walk: rail, menu, every slice path), `lib.mjs` (shared), `scorm-mock.js` / `scorm-mock.html` (mock SCORM 1.2 API, dev only), `package-scorm.mjs` (the zip), `shots-r4.mjs` (R4 review screenshots) |
-| `review/p0/` to `review/r4/` | screenshots and phase reports |
+| `tools/` | `serve.mjs` (local server), `check.mjs` (build check), `test-fit.mjs` (fit, band, clipping, contrast, targets per screen state), `walk.mjs` (keyboard-only walk: rail, menu, every slice path), `lib.mjs` (shared), `scorm-mock.js` / `scorm-mock.html` (mock SCORM 1.2 API, dev only), `package-scorm.mjs` (the zip), `shots-r4.mjs`, `shots-r5.mjs` (review screenshots) |
+| `review/p0/` to `review/r5/` | screenshots and phase reports |
 
 ## Preview
 
@@ -50,4 +50,5 @@ SCORM 1.2: `npm run test:scorm` walks the lesson against the mock API (interacti
 | R1 to R3 Chapters 2 to 6, video player, handoff, knowledge check, close | done (18 Oct 2026) |
 | P4 SCORM 1.2 adapter and packaging | done (18 Oct 2026) |
 | R4 planning review fixes (S01B lesson goals, S02 Homework 1 context, case labels, sort bins, rail tips) | done (19 Oct 2026) |
+| R5 wide-window layout (1280 to 1600 stage), full-screen button, Lesson 1 links | done (19 Oct 2026) |
 | P5 tests and review page | not started |
