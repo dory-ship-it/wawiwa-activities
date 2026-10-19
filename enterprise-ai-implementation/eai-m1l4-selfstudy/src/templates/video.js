@@ -38,7 +38,7 @@ export const video = {
     let cues = [], ended = false, done = false, atStop = null;
 
     /* ---- the video element (moves between the player and the stop view) ---- */
-    const vid = h('video', { class: 'w-video', src: media.src, preload: 'auto', playsinline: true, tabindex: '-1', 'aria-label': screen.title });
+    const vid = h('video', { class: 'w-video', src: media.src, poster: media.poster || null, preload: 'auto', playsinline: true, tabindex: '-1', 'aria-label': screen.title });
     const caption = h('p', { class: 'w-caption', hidden: true });
     const frame = h('div', { class: 'w-player-frame' }, vid, caption);
 
@@ -68,7 +68,7 @@ export const video = {
 
     /* ---- play view ---- */
     const meta = h('p', { class: 'w-video-meta' }, h('span', { class: 'w-video-title' }, screen.title), ' · ', fmt(v.meta, { length: media.length, n: stops.length }));
-    const guiding = h('p', { class: 'w-guiding' }, h('b', {}, v.guiding), ' ', screen.guidingQuestion);
+    const guiding = h('p', { class: 'w-guiding' }, h('b', {}, screen.guidingLabel || v.guiding), ' ', screen.guidingQuestion);
     const player = h('figure', { class: 'w-player' }, frame, controls);
     // transcript closed: heading and player centred; open: player left, transcript right
     const playView = h('div', { class: 'w-video-view', dataset: { transcript: 'closed' } }, h('div', { class: 'w-video-head' }, zones.instruction, meta, guiding), player, transcript);
@@ -84,7 +84,9 @@ export const video = {
     const resumeText = h('span', {}, v.resume);
     const resumeLock = icon('lock', { size: 16 });
     const resume = h('button', { class: 'w-btn w-btn-ghost w-resume', type: 'button', dataset: { action: 'resume' } }, resumeLock, resumeText);
-    const stopPanel = h('section', { class: 'w-stop-panel' }, stopLabel, stopQ, stopOpts);
+    const showMeSlot = h('div', { class: 'w-showme-slot' });
+    const stopPanel = h('section', { class: 'w-stop-panel' }, stopLabel, h('div', { class: 'w-stop-head' }, stopQ, showMeSlot), stopOpts);
+    let ghost = null; // the ghost hand of the open stop (type "stop": taps the first option, selects nothing)
     const stopView = h('div', { class: 'w-stop-view', hidden: true }, stopFrame, stopPanel);
 
     layout(ctx, 'video', zones.logo, playView, stopView);
@@ -215,10 +217,15 @@ export const video = {
       playView.hidden = true;
       stopView.hidden = false;
       stopQ.focus({ preventScroll: true });
+      if (screen.ghost) {
+        ghost = ctx.ghost({ type: screen.ghost.type, steps: () => [{ el: btns[0] }] });
+        showMeSlot.replaceChildren(ghost.button);
+      }
     }
     resume.addEventListener('click', () => {
       if (!atStop || resume.dataset.locked === 'true') return;
       atStop = null;
+      if (ghost) { ghost.cancel(); ghost = null; showMeSlot.replaceChildren(); }
       frame.prepend(vid);
       stopView.hidden = true;
       playView.hidden = false;

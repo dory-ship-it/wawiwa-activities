@@ -70,7 +70,9 @@ const ctaSize = parseFloat(tok('w-fs-next'));
 const ctaWeight = parseInt(tok('w-fw-next'), 10);
 const nextRule = (frameCss.match(/\.w-next\s*\{([^}]*)\}/) || [])[1] || '';
 const redRules = [...frameCss.matchAll(/([^{}]+)\{([^}]*var\(--w-red\)[^}]*)\}/g)].map((m) => m[1].trim());
-const nextOnly = redRules.length > 0 && redRules.every((sel) => /^\.w-next\[data-locked="false"\]$/.test(sel));
+// red: the unlocked Next, and on the title screen (O1, which has no footer) its "Start the lesson"
+// button, which is the screen's Next (approved board R4-O1)
+const nextOnly = redRules.length > 0 && redRules.every((sel) => /^\.w-next\[data-locked="false"\]$|^\.w-start$/.test(sel));
 const unlockedRule = (frameCss.match(/\.w-next\[data-locked="false"\]\s*\{([^}]*)\}/) || [])[1] || '';
 if (ctaSize >= 18.66 && ctaWeight >= 700 && /var\(--w-fs-next\)/.test(nextRule) && !/font(-size)?\s*:/.test(unlockedRule)) ok(`Next font token ${ctaSize}px weight ${ctaWeight} (large text, white on red allowed)`);
 else fail(`Next font token too small or overridden: ${ctaSize}px weight ${ctaWeight}`);
@@ -172,6 +174,15 @@ const views = content.screens.flatMap((s) => {
     return [...s.tiles.map((t) => [`${s.id} tile ${t.n} open`, [...nums, ...s.tiles.filter((x) => x !== t).map((x) => x.title), t.back]]),
       [`${s.id} answering`, [...nums, ...s.tiles.map((t) => t.title), s.question]]];
   }
+  // Round 4 templates (instruction h1 and buttons excluded, as everywhere)
+  if (s.template === 'title') return [[s.id, [s.program, s.kicker, s.quote]]];
+  if (s.template === 'moduleMap') {
+    const stations = s.stations.flatMap((x) => [x.kicker, x.title]);
+    return s.stations.map((x) => [`${s.id} ${x.id} open`, [s.eyebrow, s.line, ...stations, content.ui.moduleMap.today, x.kicker, x.title, x.text]]);
+  }
+  if (s.template === 'goals') return [[s.id, [s.eyebrow, s.deliverable.label, s.deliverable.text, ...s.goals.map((g) => g.label)]]];
+  if (s.template === 'warmup') return [[s.id, [s.panel.title, s.panel.chip, s.panel.text, s.panel.foot, ...s.options.map((o) => o.label)]]];
+  if (s.template === 'concept') return [[s.id, [s.label, s.topic, s.text, ...s.figures.flatMap((f) => [f.chip, f.caption]), s.evidence.text, s.evidence.source]]];
   if (s.variant === 'pair') return [[s.id, s.situations.flatMap((x) => [x.text, ...x.options.map((o) => o.label)])]];
   if (s.variant === 'rounds') return s.rounds.map((r) => [`${s.id} ${r.id}`, [s.strip, r.badge, r.line, ...s.options.map((o) => o.label)]]);
   return [[s.id, [...stageText(s.stage), ...(s.options || []).map((o) => o.label), ...fieldText(s.fields), ...(s.cases || []).map((c) => c.label)]]];
@@ -291,7 +302,7 @@ const arrowIn = [...JSON.stringify(content.ui).matchAll(/\u2192/g)].length + src
 arrowIn ? fail('arrow glyph (U+2192) in ui strings or src: use icon("arrow-right")') : ok('no arrow glyph in ui strings or src (icon arrow-right exists)');
 
 /* 12. hex allowlist: the approved tokens only */
-const ALLOWED = ['#255777', '#3E868F', '#2F6A72', '#E7F2F3', '#5AB3AA', '#EE3124', '#CC0000', '#FBEAEA', '#000000', '#3F3F3F', '#F2F2F2', '#E6E6E8', '#D8D8D8', '#BFBFBF', '#FFFFFF'];
+const ALLOWED = ['#255777', '#3E868F', '#2F6A72', '#E7F2F3', '#5AB3AA', '#EE3124', '#CC0000', '#FBEAEA', '#000000', '#3F3F3F', '#F2F2F2', '#E6E6E8', '#D8D8D8', '#BFBFBF', '#FFFFFF', '#F4F7F9', '#EEF3F7'];
 let hexHits = 0;
 for (const f of srcFiles.filter((p) => /\.(css|js)$/.test(p))) {
   read(f).split('\n').forEach((line, i) => {

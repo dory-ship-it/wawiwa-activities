@@ -16,6 +16,8 @@ import { explorer } from './templates/explorer.js';
 import { video } from './templates/video.js';
 import { handoff } from './templates/handoff.js';
 import { check } from './templates/check.js';
+import { title, moduleMap, goals, warmup, concept } from './templates/intro.js';
+import { createGhost, stopGhost } from './ghost.js';
 import { createTracking } from './tracking/index.js';
 
 const STAGE_W = 1280, STAGE_H = 720;
@@ -24,7 +26,7 @@ const NARROW_BELOW = 900; // window narrower than this: show the "best on a comp
 const NOTE_H = 40;
 const MAX_TEXT = 250;     // fill-in responses are trimmed and capped (SCORM 1.2 safe)
 
-const TEMPLATES = { decision, input, sort, explorer, video, handoff, check };
+const TEMPLATES = { decision, input, sort, explorer, video, handoff, check, title, moduleMap, goals, warmup, concept };
 
 export async function boot(root) {
   const res = await fetch(new URL('../content/l4-slice.json', import.meta.url));
@@ -55,6 +57,7 @@ class Lesson {
     this.totalMinutes = this.chapters.reduce((sum, c) => sum + (c.minutes || 0), 0);
     this.current = null;
     this.mounted = null;
+    this.ghosts = [];
     this.onNext = null;      // what the unlocked Next does on this screen (null = finish)
     this.pauseShown = false; // the chapter-end pause marker was shown on this screen
     this.shownAt = 0;
@@ -121,8 +124,9 @@ class Lesson {
     const jump = q.get('screen');
     if (jump && this.screens[jump] && this.slice.includes(jump)) { this.go(jump); return; }
     // resume: the saved place (localStorage, or suspend_data / lesson_location from the LMS)
+    // (the title screen completes on arrival, so "done screens" alone does not mean the learner went on)
     const s = this.state.s;
-    if (s && this.slice.includes(s) && (this.state.d.length || s !== this.slice[0])) {
+    if (s && this.slice.includes(s) && s !== this.slice[0]) {
       this.go(s);
       openDialog(this.stage, {
         text: this.ui.resumePrompt,
@@ -175,7 +179,11 @@ class Lesson {
       score: () => this.score(),
       finishLesson: () => this.finishLesson(),
       finished: () => !!this.state.fin,
+      // the ghost hand (src/ghost.js): a once-per-interaction-type demo with a "Show me" replay
+      ghost: (opts) => this.ghostFor(opts),
     });
+    // presentation screens (title, module map, goals, key idea) never lock Next: done on arrival
+    if (screen.presentation) { this.complete(id); this.zones.setNext(false); }
     applyTerms(this.zones.main, screen.terms, this.content.tooltips);
     this.renderRail();
     if (focus) this.zones.instruction.focus({ preventScroll: true });
@@ -267,7 +275,22 @@ class Lesson {
   unmount() {
     if (this.mounted && this.mounted.unmount) this.mounted.unmount();
     this.mounted = null;
+    this.ghosts.forEach((g) => g.cancel());
+    this.ghosts = [];
+    stopGhost();
     this.zones.clearScreen();
+  }
+
+  // The ghost hand for one interaction on this screen. The first time a type (tabs, stop, pickTwo)
+  // appears it plays ~600 ms after the screen settles; once the type is seen it plays only after 8 s
+  // without input. One letter per seen type is kept in state.h (suspend data). Returns { button, cancel }.
+  ghostFor({ type, steps, restore = null }) {
+    const code = { tabs: 't', stop: 'v', pickTwo: 's' }[type] || type.charAt(0);
+    const seen = (this.state.h || '').includes(code);
+    const g = createGhost(this.stage, { ui: this.ui, steps, restore, seen,
+      onPlay: () => { if (!(this.state.h || '').includes(code)) { this.state.h = (this.state.h || '') + code; this.persist(); } } });
+    this.ghosts.push(g);
+    return g;
   }
 
   next() {
@@ -365,31 +388,20 @@ class Lesson {
     });
   }
 
-  // the S01B pick: { screen, picked (option id or ''), chapter (the chapter id that builds it) }
-  goalFocus() {
-    const screen = this.content.screens.find((s) => s.variant === 'goals');
-    if (!screen) return null;
-    const picked = this.state.f[screen.store] || '';
-    return { screen, picked, chapter: screen.options.find((o) => o.id === picked)?.chapter || null };
-  }
-
   menuModel() {
     const p = this.progress();
     const m = this.ui.menu;
-    const goal = this.goalFocus();
-    // no times in the menu: chapter minutes only weigh the % complete; the chapter that builds the
-    // outcome marked hardest on S01B carries "Your focus"
+    // the "Lesson goals" dialog reads O3's goals (template "goals"): label and full text
+    const o3 = this.content.screens.find((s) => s.template === 'goals');
+    // no times in the menu: chapter minutes only weigh the % complete
     return {
       percent: p.percent,
-      goals: goal ? goal.screen.options.map((o) => ({ label: o.label, sub: o.sub, picked: o.id === goal.picked })) : [],
-      chapters: p.chapters.map(({ c, status, clickable }) => {
-        const focus = !!goal && goal.chapter === c.id;
-        return {
-          n: c.n, title: c.title, status, clickable, current: c.id === p.frontierChapter, focus,
-          meta: status === 'done' ? m.done : '',
-          label: fmt(focus ? m.focusLabel : m.chapterLabel, { title: c.title, status: this.ui.rail.status[status] }),
-        };
-      }),
+      goals: o3 ? o3.goals.map((g) => ({ label: g.label, text: g.text })) : [],
+      chapters: p.chapters.map(({ c, status, clickable }) => ({
+        n: c.n, title: c.title, status, clickable, current: c.id === p.frontierChapter,
+        meta: status === 'done' ? m.done : '',
+        label: fmt(m.chapterLabel, { title: c.title, status: this.ui.rail.status[status] }),
+      })),
     };
   }
 }

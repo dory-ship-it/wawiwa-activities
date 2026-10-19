@@ -2,7 +2,7 @@
 // role dialog, aria-modal, focus trapped, Escape closes, focus returns to the rail menu button.
 // Panel: close button, "Module 1 · Lesson 4", lesson title, % complete with a thin teal bar, the
 // chapter list (status icon, title, Done; the current chapter on teal-tint; no times), and a footer
-// row of text buttons: Help, Start over.
+// rows of text buttons: Lesson goals (O3's goals), Lesson 1 cases (new tab), Help, Start over.
 // Also the in-page dialog used for Help, the Start over confirm and the resume prompt
 // (never window.confirm).
 import { h, fmt, resolveLink, trapTab, focusables } from './util.js';
@@ -89,7 +89,6 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
         onclick: () => { if (c.clickable) { close(false); onChapter(c.n); } } },
       statusMark(c.status),
       h('span', { class: 'w-chapter-title' }, c.title),
-      c.focus ? h('span', { class: 'w-chapter-focus', 'aria-hidden': 'true' }, icon('flag', { size: 16 }), m.focus) : null,
       h('span', { class: 'w-chapter-meta' }, c.meta)))));
   }
 
@@ -120,11 +119,11 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
     openDialog(stage, { text: m.help, body: h('ul', { class: 'w-dialog-list w-help' }, (ui.help || []).map((line) => h('li', {}, line))), opener: helpBtn, inert: [panel], actions: closeAction });
   }
 
-  // the lesson's outcomes (S01B), read only; the one marked hardest carries "Your focus"
+  // the lesson's goals (O3's content), read only: the short label and the full goal
   function showGoals() {
-    const list = h('ol', { class: 'w-dialog-list w-goals-list' }, getMenu().goals.map((g) => h('li', { dataset: { picked: String(g.picked) } },
-      h('span', { class: 'w-goals-title' }, g.label, g.picked ? h('span', { class: 'w-chapter-focus' }, icon('flag', { size: 16 }), m.focus) : null),
-      h('span', { class: 'w-goals-sub' }, g.sub))));
+    const list = h('ol', { class: 'w-dialog-list w-goals-list' }, getMenu().goals.map((g) => h('li', {},
+      h('span', { class: 'w-goals-title' }, g.label),
+      h('span', { class: 'w-goals-sub' }, g.text))));
     openDialog(stage, { text: m.goals, note: m.goalsIntro, body: list, opener: goalsBtn, inert: [panel], actions: closeAction });
   }
 

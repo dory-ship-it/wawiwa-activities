@@ -11,7 +11,7 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["S01", "S01B", "S02", "FT1", "V1", "S03", "FT2", "S04", "S05", "S06", "S07", "S08", "FT3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
+    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "FT2", "S04", "S05", "S06", "S07", "S08", "FT3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
     "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] }
   },
 
@@ -47,8 +47,13 @@
       "captionsOff": "Captions off",
       "transcript": "Transcript",
       "yes": "Yes",
-      "notYet": "Not yet"
+      "notYet": "Not yet",
+      "startLesson": "Start the lesson",
+      "showMe": "Show me"
     },
+    "header": "Lesson 4 · Process Modeling and Workflow Mapping",
+    "warmup": { "guess": "Your guess" },
+    "moduleMap": { "today": "Today", "label": "Module 1 lessons", "status": { "done": "complete", "today": "today", "next": "not started" } },
     "feedback": {
       "correctPrefix": "Correct.",
       "wrongPrefix": "Not quite.",
@@ -62,7 +67,7 @@
       "next": "Next",
       "locked": {
         "single": "Next, locked until you choose the right answer",
-        "goals": "Next, locked until you pick one outcome",
+        "warmup": "Next, locked until you make a guess",
         "challenge": "Next, locked until you answer or skip the challenge",
         "route": "Next, locked until you pick one of the two options",
         "multi": "Next, locked until both answers are correct",
@@ -160,11 +165,8 @@
       "startOver": "Start over",
       "goals": "Lesson goals",
       "lesson1Cases": "Lesson 1 cases",
-      "goalsIntro": "By the end of this lesson, you will be able to:",
-      "focus": "Your focus",
-      "focusLabel": "{title}, {status}, builds the outcome you marked hardest"
+      "goalsIntro": "By the end of this lesson, you will be able to:"
     },
-    "goalReminder": "You marked this as hardest: {goal}.",
     "help": [
       "Read the heading on each screen: it tells you what to do.",
       "Feedback appears in the band under each task. Next unlocks after a right answer.",
@@ -220,10 +222,8 @@
   },
 
   "chapters": [
-    { "id": "ch0", "n": 0, "title": "Entry", "minutes": 8, "screens": ["S01", "S01B", "S02"], "inSlice": true, "pauseMarker": null },
-    { "id": "ch1", "n": 1, "title": "Why map", "minutes": 9, "screens": ["FT1", "V1", "S03"], "inSlice": true,
-      "fastTrack": { "card": "FT1", "landing": "S03" },
-      "pauseMarker": null },
+    { "id": "ch0", "n": 0, "title": "Intro", "minutes": 12, "screens": ["O1", "O2", "O3", "S01", "S02"], "inSlice": true, "pauseMarker": null },
+    { "id": "ch1", "n": 1, "title": "Why map", "minutes": 11, "screens": ["W1", "V1", "K1", "S03"], "inSlice": true, "pauseMarker": null },
     { "id": "ch2", "n": 2, "title": "Toolkit", "minutes": 22, "screens": ["FT2", "S04", "S05", "S06", "S07", "S08"], "inSlice": true,
       "fastTrack": { "card": "FT2", "landing": "S08" },
       "pauseMarker": null },
@@ -236,10 +236,78 @@
     { "id": "ch5", "n": 5, "title": "Build yours", "minutes": 82, "screens": ["S18A", "S18", "S19", "S20"], "inSlice": true,
       "sliceNote": "S18A and S18 come later; the slice enters Chapter 5 at S19.",
       "pauseMarker": null },
-    { "id": "ch6", "n": 6, "title": "Close", "minutes": 15, "screens": ["S21", "S22"], "inSlice": true, "pauseMarker": null }
+    { "id": "ch6", "n": 6, "title": "Wrap-up", "minutes": 15, "screens": ["S21", "S22"], "inSlice": true, "pauseMarker": null }
   ],
 
   "screens": [
+    {
+      "id": "O1",
+      "chapter": "ch0",
+      "template": "title",
+      "minutes": 1,
+      "presentation": true,
+      "instruction": "Process Modeling and Workflow Mapping",
+      "program": "Enterprise AI Implementation Specialist",
+      "kicker": "Module 1 · Lesson 4",
+      "quote": "“Don't accelerate a broken process. Take it apart first.”",
+      "start": "startLesson",
+      "layout": "title",
+      "image": { "src": "assets/img/ft3.jpg", "alt": "An HR team at work, a process map on a laptop and sticky notes for each step", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "38% 50%" },
+      "tracking": [],
+      "sources": ["Round 4 board R4-O1", "s7 (Hammer 1990)"]
+    },
+
+    {
+      "id": "O2",
+      "chapter": "ch0",
+      "template": "moduleMap",
+      "minutes": 2,
+      "presentation": true,
+      "eyebrow": "Where we are",
+      "instruction": "Lesson 4 of Module 1",
+      "line": "Open any lesson to see how it connects to today.",
+      "wordLimit": { "max": 64, "why": "Round 4 board copy (R4-O2): five station labels plus the open panel come to 54 to 64 words; the 45-word target needs a planning cut (see review/v3-1/REPORT.md)" },
+      "layout": "wide",
+      "stations": [
+        { "id": "l1", "kicker": "Lesson 1", "title": "Case diagnosis", "status": "done", "icon": "check-circle",
+          "text": "Your Lesson 1 case is the raw material for today." },
+        { "id": "l23", "kicker": "Lessons 2 and 3", "title": "Language model, working template", "status": "done", "icon": "check-circle",
+          "text": "The nine-field template looked at one step. Today you map the whole process." },
+        { "id": "l4", "kicker": "Lesson 4", "title": "A full process map", "status": "today", "icon": "map", "open": true,
+          "text": "You map one real process as it runs today, and set one number to check it by." },
+        { "id": "l5", "kicker": "Lesson 5", "title": "Architecture diagram", "status": "next", "icon": "diagram",
+          "text": "Next lesson marks on your map where AI enters." },
+        { "id": "l6", "kicker": "Lesson 6", "title": "Build vs Buy", "status": "next", "icon": "forms",
+          "text": "You choose how to build it, on an implementation canvas." }
+      ],
+      "ghost": { "type": "tabs", "target": "l5" },
+      "tracking": [],
+      "sources": ["Round 4 board R4-O2", "module outline (Lessons 1 to 6)"]
+    },
+
+    {
+      "id": "O3",
+      "chapter": "ch0",
+      "template": "goals",
+      "minutes": 2,
+      "presentation": true,
+      "eyebrow": "Lesson goals",
+      "instruction": "What you will be able to do",
+      "wordLimit": { "max": 47, "why": "Round 4 board copy (R4-O3): the deliverable line and five tile labels come to 47 words (see review/v3-1/REPORT.md)" },
+      "layout": "wide",
+      "deliverable": { "icon": "file-check", "label": "Your deliverable",
+        "text": "By the end you hand in an AS-IS map of your own case in eight fields, with one success metric. It is your entry ticket to Lesson 5." },
+      "goals": [
+        { "id": "g1", "icon": "arrows", "label": "Roles and handoffs", "text": "Identify roles and handoff points: who is involved and where responsibility passes." },
+        { "id": "g2", "icon": "database", "label": "Sources, owners, sensitivity", "text": "Map knowledge sources, ownership, and sensitivity." },
+        { "id": "g3", "icon": "shield-check", "label": "Controls and gaps", "text": "Mark existing controls and gaps, including 'unclear' as a legitimate answer." },
+        { "id": "g4", "icon": "target", "label": "A measurable metric", "text": "Define a measurable success metric with a baseline and a clear target." },
+        { "id": "g5", "icon": "fork", "label": "Where AI fits", "text": "Spot decision points: tell when AI fits and when human judgment is required." }
+      ],
+      "tracking": [],
+      "sources": ["Round 4 board R4-O3", "deck slide 39 (learning outcomes)"]
+    },
+
     {
       "id": "S01",
       "chapter": "ch0",
@@ -271,38 +339,6 @@
         { "id": "L4_S01_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Evaluate", "result": "graded" }
       ],
       "sources": ["s6", "s7", "s15", "L1 booklet Case 1", "HW1 check item"]
-    },
-
-    {
-      "id": "S01B",
-      "chapter": "ch0",
-      "template": "decision",
-      "variant": "goals",
-      "minutes": 1,
-      "instruction": "Pick the outcome that looks hardest for your case.",
-      "hint": "Pick one. There is no right or wrong answer here.",
-      "hintPilotCopy": true,
-      "layout": "wide",
-      "stage": {
-        "top": { "kind": "line", "eyebrow": "Today's lesson", "icon": "map",
-          "text": "By the end you hand in an AS-IS map of your own case in eight fields, with one success metric. It is your entry ticket to Lesson 5." },
-        "middle": { "kind": "options", "arrange": "stack" }
-      },
-      "wordLimit": { "max": 60, "why": "R4 copy as specified: eyebrow, deliverable line and the five deck outcome titles (slide 39) come to 60 words; the 45-word target needs a planning cut (see review/r4/REPORT.md)" },
-      "options": [
-        { "id": "a", "label": "Identify roles and handoff points", "sub": "Who is involved and where responsibility passes.", "chapter": "ch4" },
-        { "id": "b", "label": "Map knowledge sources, ownership, and sensitivity", "sub": "Which sources the process uses, who owns them, how sensitive they are.", "chapter": "ch3" },
-        { "id": "c", "label": "Mark existing controls and gaps", "sub": "Including 'unclear' as a legitimate answer.", "chapter": "ch3" },
-        { "id": "d", "label": "Define a measurable success metric", "sub": "With a quantitative baseline and a clear target.", "chapter": "ch3" },
-        { "id": "e", "label": "Spot decision points: where AI fits, where people decide", "sub": "Tell when AI fits and when human judgment is required.", "chapter": "ch4" }
-      ],
-      "feedback": { "picked": "Noted. The chapter that builds it is marked in the menu. Your self-check in Chapter 5 comes back to it." },
-      "store": "L4_GOAL_FOCUS",
-      "advance": "after-any",
-      "tracking": [
-        { "id": "L4_S01B_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" }
-      ],
-      "sources": ["deck slide 39 (learning outcomes)", "R4 planning review"]
     },
 
     {
@@ -338,39 +374,27 @@
     },
 
     {
-      "id": "FT1",
+      "id": "W1",
       "chapter": "ch1",
-      "template": "decision",
-      "variant": "challenge",
+      "template": "warmup",
       "minutes": 1,
-      "instruction": "Answer one question, or skip the challenge.",
-      "hint": "Answer if you already know this topic. Skipping costs nothing.",
-      "layout": "memo",
-      "image": { "src": "assets/img/ft1.jpg", "alt": "An accounts office in the early 1980s: staff at desks covered in stacks of paper forms", "prompt": "assets/img/prompts/FT1-dana-team-table.md", "temp": false, "position": "50% 45%" },
-      "stage": {
-        "top": { "kind": "line", "icon": "lightning", "text": "Optional challenge. Right on the first try? Skip to this chapter's last task." },
-        "middle": { "kind": "question", "text": "HBR, 1990: new technology runs on a broken process. What happens?" },
-        "bottom": { "kind": "options", "arrange": "row", "link": "skipChallenge" }
-      },
+      "instruction": "New technology runs on a broken process. What happens?",
+      "hint": "Pick the answer you expect. A guess cannot be wrong.",
+      "hintPilotCopy": true,
+      "layout": "warmup",
+      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored",
+        "text": "A first guess, before the video. Guessing first helps you remember.", "foot": "Chapter 1 · Why map" },
       "options": [
-        { "id": "a", "label": "It removes the steps nobody needs", "icon": "scissors", "correct": false,
-          "feedback": "Technology runs the steps it is given. Nothing gets removed unless someone takes the process apart first." },
-        { "id": "b", "label": "It speeds up the inefficiency already there", "icon": "gauge", "correct": true,
-          "feedback": "Right on the first try: you can jump to the last task of this chapter, or watch the video." },
-        { "id": "c", "label": "It shows the broken steps by itself", "icon": "eye", "correct": false,
-          "feedback": "The broken steps stay hidden and now run faster. Only mapping shows them. The full chapter starts now." }
+        { "id": "a", "label": "It removes the steps nobody needs" },
+        { "id": "b", "label": "It speeds up the inefficiency already there" },
+        { "id": "c", "label": "It shows the broken steps by itself" }
       ],
-      "attempts": 1,
-      "routing": {
-        "correctFirstTry": { "choices": [ { "button": "jumpToTask", "to": "S03", "route": "skip" }, { "button": "watchVideo", "to": "V1", "route": "full" } ] },
-        "wrong": { "to": "V1", "route": "full" },
-        "skipped": { "to": "V1", "route": "full" }
-      },
+      "feedback": { "verdict": "Hold that thought.", "text": "The video shows what really happened." },
+      "advance": "after-any",
       "tracking": [
-        { "id": "L4_FT1_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Understand", "result": "graded" }
+        { "id": "L4_W1_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Understand", "result": "neutral" }
       ],
-      "suspend": ["route"],
-      "sources": ["s7"]
+      "sources": ["Round 4 board R4-W1", "s7", "FT1 options (storyboard v2)"]
     },
 
     {
@@ -381,7 +405,9 @@
       "instruction": "Watch the video. Answer the two questions when it stops.",
       "instructionPilotCopy": true,
       "title": "Two cases, same lesson",
-      "guidingQuestion": "What separates a technology change that works from one that has to be fixed later?",
+      "guidingLabel": "Watch for:",
+      "guidingQuestion": "what separates a change that works from one you fix later?",
+      "ghost": { "type": "stop" },
       "media": {
         "$comment": "the real film: duration and stops[].t from assets/video/v1.cues.json (each stop sits in a caption gap).",
         "src": "assets/video/v1.mp4",
@@ -485,6 +511,29 @@
     },
 
     {
+      "id": "K1",
+      "chapter": "ch1",
+      "template": "concept",
+      "minutes": 2,
+      "presentation": true,
+      "label": "Key idea",
+      "topic": "Hammer's principle",
+      "instruction": "Don't accelerate. Deconstruct.",
+      "wordLimit": { "max": 51, "why": "Round 4 board copy (R4-K1): label, idea, figure captions, evidence and source come to 51 words (see review/v3-1/REPORT.md)" },
+      "text": "New technology on a broken process speeds up the inefficiency. Take the process apart first: that is what mapping does.",
+      "layout": "concept",
+      "figures": [
+        { "kind": "mess", "chip": "faster tech", "caption": "Same mess, faster.",
+          "alt": "Six step boxes at odd angles with dashed links crossing back and forth, a faster tech tag on top: the same mess, only faster." },
+        { "kind": "lean", "caption": "Fewer steps first. Then speed up.",
+          "alt": "One dashed step box crossed out, above four teal step boxes in a straight line: fewer steps first, then speed up." }
+      ],
+      "evidence": { "icon": "chart", "text": "McKinsey, 2025: redesigning workflows is the top factor in AI value.", "source": "Hammer, Harvard Business Review, 1990" },
+      "tracking": [],
+      "sources": ["Round 4 board R4-K1", "s7", "McKinsey State of AI 2025"]
+    },
+
+    {
       "id": "S03",
       "chapter": "ch1",
       "template": "decision",
@@ -517,6 +566,8 @@
           "feedback": "Both stories were judged by numbers. Today you set a baseline and a target: a number, not a feeling." }
       ],
       "feedbackPaging": false,
+      "feedbackCorrect": "Both cases changed only after someone saw how the work really flowed, and both were judged by numbers. Today you fix both: a map and a metric.",
+      "ghost": { "type": "pickTwo" },
       "advance": "after-correct",
       "endOfChapter": true,
       "tracking": [
@@ -821,20 +872,23 @@
       "instructionPilotCopy": true,
       "title": "Mapping the HR case",
       "guidingQuestion": "How do you turn about 90 messy requests a month into a map you can check later?",
+      "ghost": { "type": "stop" },
       "media": {
-        "$comment": "temp: silent placeholder until the real film exists. Swap src, captions[0].src, duration and stops[].t for the real ones and set temp to false.",
-        "src": "assets/video/temp/v2-placeholder.mp4",
-        "captions": [ { "lang": "en", "label": "English", "src": "assets/video/temp/v2-placeholder.en.vtt" } ],
-        "duration": 219,
-        "length": "3:39",
+        "$comment": "the real film: duration and stops[].t from assets/video/v2.cues.json (each stop sits in a caption gap).",
+        "src": "assets/video/v2.mp4",
+        "poster": "assets/video/v2-poster.jpg",
+        "captions": [ { "lang": "en", "label": "English", "src": "assets/video/v2.en.vtt" } ],
+        "duration": 168.323,
+        "length": "2:48",
         "transcript": "from-captions",
-        "temp": true
+        "temp": false
       },
       "stops": [
         {
           "id": "stop1",
+          "cueId": "stop1",
           "storyboardTime": "0:59",
-          "t": 59,
+          "t": 46.999,
           "question": "Which line belongs in Field 2, as the process runs today?",
           "options": [
             { "id": "a", "label": "An employee emails HR, the most formal channel", "correct": false,
@@ -849,7 +903,7 @@
         {
           "id": "stop2",
           "storyboardTime": "1:59",
-          "t": 119,
+          "t": 81.366,
           "question": "Where does responsibility pass from one role to another?",
           "options": [
             { "id": "a", "label": "HR staff to HR manager, when policy is exceeded", "correct": true,
@@ -864,7 +918,7 @@
         {
           "id": "stop3",
           "storyboardTime": "3:02",
-          "t": 182,
+          "t": 131.097,
           "question": "What goes in Field 6, existing controls?",
           "options": [
             { "id": "a", "label": "A manager review before answers go out", "correct": false,

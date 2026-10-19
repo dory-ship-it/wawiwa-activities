@@ -49,7 +49,7 @@ async function measure(page, what) {
 /* ---- 1. load, scale, shell ---- */
 console.log('\n1. load and fit');
 for (const size of [[1280, 720], [1920, 1080], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 900], [2560, 1080]]) {
-  const page = await open('?reset=1', size);
+  const page = await open('?reset=1&screen=S01', size); // the shell (O1, the title, has no footer by design)
   const r = await page.evaluate(() => {
     const stage = document.querySelector('.w-stage');
     const s = stage.getBoundingClientRect();
@@ -81,8 +81,15 @@ const STATES = [
   ['S01', 'hint', async () => {}],
   ['S01', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
   ['S01', 'correct', async (p) => { await click(p, '.w-opt[data-id="a"]'); await click(p, '.w-opt[data-id="b"]'); }],
-  ['S01B', 'hint', async () => {}],
-  ['S01B', 'picked', async (p) => click(p, '.w-opt[data-id="e"]')],
+  // V3-1: Intro and Chapter 1 (Round 4)
+  ['O1', 'title', async () => {}],
+  ['O2', 'L4 open', async (p) => p.keyboard.press('Shift')], // any key stops the ghost hand
+  ['O2', 'L1 open', async (p) => click(p, '.w-map-tab[data-station="l1"]')],
+  ['O3', 'goals', async () => {}],
+  ['O3', 'goal tip', async (p) => p.focus('.w-goal[data-goal="g5"]')],
+  ['W1', 'hint', async () => {}],
+  ['W1', 'guess', async (p) => click(p, '.w-guess[data-id="b"]')],
+  ['K1', 'key idea', async () => {}],
   ['S02', 'hint', async () => {}],
   ['S02', 'notice', async (p) => click(p, '[data-action="save"]')],
   ['S02', 'saved', async (p) => {
@@ -90,9 +97,6 @@ const STATES = [
     await p.type('.w-input[data-store="L4_CASE_PROBLEM"]', 'Today reps write call summaries by hand, and it hurts because notes reach the CRM a day late and nobody can find them again.');
     await click(p, '[data-action="save"]');
   }],
-  ['FT1', 'idle', async () => {}],
-  ['FT1', 'wrong', async (p) => click(p, '.w-opt[data-id="c"]')],
-  ['FT1', 'correct + routes', async (p) => click(p, '.w-opt[data-id="b"]')],
   ['S03', 'hint', async () => {}],
   ['S03', 'two selected', async (p) => { await click(p, '.w-opt[data-id="a"]'); await click(p, '.w-opt[data-id="c"]'); }],
   ['S03', 'not quite', async (p) => { await click(p, '.w-opt[data-id="a"]'); await click(p, '.w-opt[data-id="c"]'); await click(p, '[data-action="check"]'); }],

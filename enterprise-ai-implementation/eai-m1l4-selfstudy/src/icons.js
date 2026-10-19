@@ -60,7 +60,17 @@ const P = {
   'arrow-right': '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>', // arrow-right (use instead of the arrow glyph: the font subset has none)
   lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>', // lock
   'external-link': '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3"/>', // external-link
-  maximize: '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>', // maximize
+  lightbulb: '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z"/>', // lightbulb (Round 4 board)
+  'key-idea': '<circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3 21 2"/><path d="m17 6 3 3"/><path d="m14 9 2 2"/>', // key (Round 4 board, K1 label)
+  chart: '<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>', // bar chart (Round 4 board)
+  'file-check': '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="m9 15 2 2 4-4"/>', // file-check (Round 4 board)
+  arrows: '<path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>', // arrow-right-left (Round 4 board)
+  database: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>', // database (Round 4 board)
+  'shield-check': '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m9 12 2 2 4-4"/>', // shield-check (Round 4 board)
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>', // target (Round 4 board)
+  fork: '<circle cx="6" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><path d="M6 7v2a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V7"/><path d="M12 12v5"/>', // git-fork (Round 4 board)
+  pointer: '<path d="M22 14a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15V4a2 2 0 0 1 4 0v5a2 2 0 0 1 4 0v1a2 2 0 0 1 4 0v1a2 2 0 0 1 3 1.73z"/>', // hand pointer (the ghost hand, Round 4 board)
+  maximize:'<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>', // maximize
   minimize: '<path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>', // minimize
   'rotate-ccw':'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>', // rotate-ccw
   map: '<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/>', // map
@@ -69,7 +79,8 @@ const P = {
 export const ICON_NAMES = Object.keys(P);
 
 // 28 px chapter status mark (rail dots and the menu list): done = teal fill + white check,
-// current = teal ring 3 px, anything else = grey ring. Always decorative: the button label says it.
+// current = teal ring 3 px, today (O2 module map) = navy disc with a white centre, anything else =
+// grey ring. Always decorative: the button label says it.
 export function statusMark(status) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '0 0 28 28');
@@ -80,7 +91,9 @@ export function statusMark(status) {
   svg.setAttribute('class', 'w-dot-mark');
   svg.innerHTML = status === 'done'
     ? '<circle class="w-dot-fill" cx="14" cy="14" r="13"/><path class="w-dot-check" d="M8.5 14.5l3.5 3.5 7.5-8"/>'
-    : status === 'current' ? '<circle class="w-dot-ring-on" cx="14" cy="14" r="11.5"/>' : '<circle class="w-dot-ring" cx="14" cy="14" r="11"/>';
+    : status === 'current' ? '<circle class="w-dot-ring-on" cx="14" cy="14" r="11.5"/>'
+    : status === 'today' ? '<circle class="w-dot-today" cx="14" cy="14" r="12.5"/><circle class="w-dot-today-c" cx="14" cy="14" r="5"/>'
+    : '<circle class="w-dot-ring" cx="14" cy="14" r="11"/>';
   return svg;
 }
 

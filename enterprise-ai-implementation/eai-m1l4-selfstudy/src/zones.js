@@ -11,7 +11,8 @@ import { icon, statusMark } from './icons.js';
 import { attachTip, hide as hideTip } from './tooltip.js';
 
 // notice = a message that is not an answer result (S02 empty Save): hint look, no state word.
-const BAND_ICON = { hint: 'info', notice: 'info', neutral: 'check', pause: 'pause' };
+// guess = the warm-up's neutral "your guess" (W1): hint ground, lightbulb, a navy verdict.
+const BAND_ICON = { hint: 'info', notice: 'info', neutral: 'check', pause: 'pause', guess: 'lightbulb' };
 
 export function createZones(stage, content, { onMenu, onChapter, onPrev, onNext }) {
   const ui = content.ui;
@@ -67,7 +68,7 @@ export function createZones(stage, content, { onMenu, onChapter, onPrev, onNext 
     bIcon.replaceChildren(name ? icon(name, { size: 22 }) : '');
     bIcon.hidden = !name || !text;
     const v = verdict ?? (state === 'correct' ? ui.feedback.correctPrefix : state === 'wrong' ? ui.feedback.wrongPrefix : '');
-    const sr = state === 'correct' ? ui.feedback.srCorrect : state === 'wrong' ? ui.feedback.srWrong : state === 'neutral' ? ui.feedback.srNeutral : '';
+    const sr = state === 'correct' ? ui.feedback.srCorrect : state === 'wrong' ? ui.feedback.srWrong : state === 'neutral' || state === 'guess' ? ui.feedback.srNeutral : '';
     bSr.textContent = sr ? sr + ' ' : '';
     bVerdict.textContent = v ? v + ' ' : '';
     bVerdict.hidden = !v;

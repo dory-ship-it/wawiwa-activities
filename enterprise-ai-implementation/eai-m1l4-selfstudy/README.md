@@ -18,13 +18,15 @@ The first Storyline-style self-study lesson built in code: a fixed 1280x720 stag
 | `src/templates/stage.js` | layout parts: image slot, rule label, privacy line, arrow-key option groups |
 | `src/templates/decision.js` | Decision template: `single`, `goals` (S01B lesson goals, neutral, pick kept as L4_GOAL_FOCUS), `challenge`, `multi`, `safety` (S18), `selfcheck` (S20), `close` (S22, lesson record download, Finish) |
 | `src/templates/input.js`, `sort.js`, `explorer.js`, `video.js` | Input (S02), Sort (S04, S09, S16, S17, S18A), Explorer (S05 and others), Video player with stops (V1, V2) |
+| `src/templates/intro.js` | Round 4 templates (storyboard v3): `title` (O1), `moduleMap` (O2, ARIA tabs), `goals` (O3), `warmup` (W1, neutral guess), `concept` (K1, key idea); presentation screens never lock Next |
+| `src/ghost.js` | the ghost hand: shows an interaction once per type (tabs, video stop, pick two), stops on any input, "Show me" replays it; seen types in state `h` |
 | `src/templates/handoff.js`, `check.js` | S19 handoff to the class workbook (new tab) and return metric; S21 knowledge check (first attempt scored) |
 | `src/tracking/index.js` | tracking event bus (answer, retry, route, finish) and adapter choice: `scorm12.js` when an API is found on the parent or opener chain, else `local.js` |
 | `src/state.js` | state and its codec: localStorage locally, `cmi.suspend_data` (under 4096) in the LMS |
 | `assets/logo/wawiwa-logo.png` | decoded unchanged from `../_wawiwa-logo.b64` |
 | `assets/img/` | image slots: `prompts/` (one generator prompt per slot), `temp/` (board reference images until the real ones exist), `refs/` (style reference) |
-| `tools/` | `serve.mjs` (local server), `check.mjs` (build check), `test-fit.mjs` (fit, band, clipping, contrast, targets per screen state), `walk.mjs` (keyboard-only walk: rail, menu, every slice path), `lib.mjs` (shared), `scorm-mock.js` / `scorm-mock.html` (mock SCORM 1.2 API, dev only), `package-scorm.mjs` (the zip), `shots-r4.mjs`, `shots-r5.mjs` (review screenshots) |
-| `review/p0/` to `review/r5/` | screenshots and phase reports |
+| `tools/` | `serve.mjs` (local server), `check.mjs` (build check), `test-fit.mjs` (fit, band, clipping, contrast, targets per screen state), `walk.mjs` (keyboard-only walk: rail, menu, every slice path), `lib.mjs` (shared), `scorm-mock.js` / `scorm-mock.html` (mock SCORM 1.2 API, dev only), `package-scorm.mjs` (the zip), `shots-r4.mjs`, `shots-r5.mjs`, `shots-v31.mjs` (review screenshots) |
+| `review/p0/` to `review/v3-1/` | screenshots and phase reports |
 
 ## Preview
 
@@ -51,4 +53,5 @@ SCORM 1.2: `npm run test:scorm` walks the lesson against the mock API (interacti
 | P4 SCORM 1.2 adapter and packaging | done (18 Oct 2026) |
 | R4 planning review fixes (S01B lesson goals, S02 Homework 1 context, case labels, sort bins, rail tips) | done (19 Oct 2026) |
 | R5 wide-window layout (1280 to 1600 stage), full-screen button, Lesson 1 links | done (19 Oct 2026) |
+| V3-1 Intro and Chapter 1 on storyboard v3 (O1, O2, O3, W1, K1, ghost hand), V2 real film | done (19 Oct 2026) |
 | P5 tests and review page | not started |

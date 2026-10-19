@@ -87,7 +87,8 @@ export function measureLayout() {
   // paddings are 60 to 72) and the two sides differ by more than 16 px.
   const layoutName = main.dataset.layout;
   const stopOn = !!document.querySelector('.w-stop-view:not([hidden])');
-  const col = layoutName === 'editorial' ? main.querySelector('.w-col') : stopOn ? main.querySelector('.w-stop-panel') : main;
+  const col = layoutName === 'editorial' ? main.querySelector('.w-col') : layoutName === 'warmup' ? main.querySelector('.w-warmup-main')
+    : stopOn ? main.querySelector('.w-stop-panel') : main;
   let wide = null;
   if (col && !overlay) {
     const C = box(col.getBoundingClientRect());
@@ -95,12 +96,13 @@ export function measureLayout() {
       && b.left >= C.left - 0.5 && b.right <= C.right + 0.5);
     const L = Math.round(Math.min(...inCol.map((b) => b.left)) - C.left), R = Math.round(C.right - Math.max(...inCol.map((b) => b.right)));
     const strip = Math.max(L, R) > 72.5 && Math.abs(L - R) > 16;
-    const logo = main.querySelector(':scope > .w-logo, .w-header > .w-logo');
+    const logo = main.querySelector(':scope > .w-logo, .w-header > .w-logo, .w-title-col > .w-logo');
     const h1 = document.getElementById('w-instruction');
     let logoOk = true, logoWhy = '';
     if (logo && visible(logo)) {
       const G = box(logo.getBoundingClientRect());
-      if (layoutName === 'editorial' || layoutName === 'memo') { logoOk = Math.abs(G.left - M.left - 24) <= 1; logoWhy = `logo ${Math.round(G.left - M.left)} px from the rail (24)`; }
+      // in a header bar (editorial, Round 4 present / warm-up / key idea) or over a photo (memo): 24 px from the rail
+      if (['editorial', 'memo', 'present', 'warmup', 'concept'].includes(layoutName)) { logoOk = Math.abs(G.left - M.left - 24) <= 1; logoWhy = `logo ${Math.round(G.left - M.left)} px from the rail (24)`; }
       else if (stopOn) { const P = parseFloat(getComputedStyle(col).paddingLeft); logoOk = Math.abs(G.left - (C.left + P)) <= 1; logoWhy = `logo at the stop panel's text edge (${Math.round(G.left - C.left)} = ${Math.round(P)})`; }
       else if (h1 && visible(h1)) { const I = box(h1.getBoundingClientRect()); logoOk = Math.abs(G.left - I.left) <= 1; logoWhy = `logo x ${Math.round(G.left - M.left)} = h1 x ${Math.round(I.left - M.left)}`; }
     }
@@ -156,7 +158,7 @@ export function measureLayout() {
 
   // operable controls at least 44 x 44 (inline glossary terms inside running text excepted)
   const smallTargets = [...scope.querySelectorAll('button, a[href], input, textarea, select, [tabindex="0"]')]
-    .filter((el) => visible(el) && !el.inert && !el.closest('[inert]') && !el.matches('.w-term'))
+    .filter((el) => visible(el) && el.getClientRects().length && !el.inert && !el.closest('[inert]') && !el.matches('.w-term')) // not rendered (O1's hidden footer): not a target
     .map((el) => ({ el, b: box(el.getBoundingClientRect()) }))
     .filter(({ b }) => b.w < 43.5 || b.h < 43.5).map(({ el, b }) => `${name(el)} ${Math.round(b.w)}x${Math.round(b.h)}`);
 
