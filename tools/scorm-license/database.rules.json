@@ -13,6 +13,14 @@
           ".validate": "newData.hasChildren(['t', 'h']) && newData.child('t').val() <= now && newData.child('h').isString() && newData.child('h').val().length < 200"
         }
       }
+    },
+    "learners": {
+      "$licenseKey": {
+        "$learner": {
+          ".write": "!data.exists() && root.child('licenses').child($licenseKey).child('valid').val() == true",
+          ".validate": "$learner.length <= 64 && newData.hasChildren(['t']) && newData.child('t').val() <= now"
+        }
+      }
     }
   }
 }

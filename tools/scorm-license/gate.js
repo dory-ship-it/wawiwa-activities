@@ -40,6 +40,32 @@
         method: 'POST', body: JSON.stringify({ t: { '.sv': 'timestamp' }, h: location.hostname })
       }).catch(function () {});
     } catch (e) {}
+    try { countLearner(cfg); } catch (e) {}
     return onText(text);
   };
+  /* Unique-learner counter: stores only a one-way hash of the LMS learner id (no name, no id), once per learner. */
+  function findApi() {
+    var w = window, n = 0;
+    while (w && n++ < 10) {
+      try { if (w.API && typeof w.API.LMSGetValue === 'function') return w.API; } catch (e) {}
+      try { if (w.opener && w.opener.API && typeof w.opener.API.LMSGetValue === 'function') return w.opener.API; } catch (e) {}
+      if (w === w.parent) break; w = w.parent;
+    }
+    return null;
+  }
+  function countLearner(cfg) {
+    var tries = 0;
+    (function attempt() {
+      tries++;
+      var api = findApi(), sid = '';
+      try { sid = api ? String(api.LMSGetValue('cmi.core.student_id') || '') : ''; } catch (e) { sid = ''; }
+      if (!sid) { if (tries < 15) setTimeout(attempt, 2000); return; }
+      crypto.subtle.digest('SHA-256', new TextEncoder().encode(cfg.id + ':' + sid)).then(function (buf) {
+        var hex = Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('').slice(0, 32);
+        return fetch(cfg.db + '/learners/' + encodeURIComponent(cfg.id) + '/' + hex + '.json', {
+          method: 'PUT', body: JSON.stringify({ t: { '.sv': 'timestamp' } })
+        });
+      }).catch(function () {});
+    })();
+  }
 })();
