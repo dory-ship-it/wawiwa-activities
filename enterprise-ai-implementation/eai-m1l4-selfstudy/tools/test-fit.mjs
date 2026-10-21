@@ -116,10 +116,11 @@ const STATES = [
   ['V1', 'transcript open', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); await click(p, '.w-tr'); }],
   ['V1', 'stop, wrong', async (p) => { await toStop(p); await click(p, '.w-stop-view .w-opt[data-id="a"]'); }],
   ['V1', 'stop, right', async (p) => { await toStop(p); await click(p, '.w-stop-view .w-opt[data-id="b"]'); }],
-  // R1: Chapter 2
-  ['FT2', 'idle', async () => {}],
-  ['FT2', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
-  ['FT2', 'correct + routes', async (p) => click(p, '.w-opt[data-id="b"]')],
+  // NL2: Chapter 2 (storyboard v3)
+  ['W2', 'hint', async () => {}],
+  ['W2', 'guess', async (p) => click(p, '.w-guess[data-id="a"]')],
+  ['K2', 'key idea', async () => {}],
+  ['K2', 'HR case on', async (p) => click(p, '[data-action="caseToggle"]')],
   ['S04', 'start', async () => {}],
   ['S04', 'card selected', async (p) => click(p, '[data-action="card"]')],
   ['S04', 'wrong', async (p) => { await click(p, '[data-action="card"]'); await click(p, '.w-sort-target[data-column="c"]'); }],

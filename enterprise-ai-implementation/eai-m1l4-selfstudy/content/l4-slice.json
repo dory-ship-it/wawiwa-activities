@@ -11,7 +11,7 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "FT2", "S04", "S05", "S06", "S07", "S08", "FT3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
+    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05", "S06", "S07", "S08", "FT3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
     "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] }
   },
 
@@ -229,9 +229,7 @@
   "chapters": [
     { "id": "ch0", "n": 0, "title": "Intro", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 12, "screens": ["O1", "O2", "O3", "S01", "S02"], "inSlice": true, "pauseMarker": null },
     { "id": "ch1", "n": 1, "title": "Why map", "photo": { "src": "assets/img/l4/w1-new-computer-same-mess.jpg", "position": "30% 50%", "temp": true }, "minutes": 11, "screens": ["W1", "V1", "K1", "S03"], "inSlice": true, "pauseMarker": null },
-    { "id": "ch2", "n": 2, "title": "Toolkit", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 22, "screens": ["FT2", "S04", "S05", "S06", "S07", "S08"], "inSlice": true,
-      "fastTrack": { "card": "FT2", "landing": "S08" },
-      "pauseMarker": null },
+    { "id": "ch2", "n": 2, "title": "Toolkit", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 22, "screens": ["W2", "K2", "S04", "S05", "S06", "S07", "S08"], "inSlice": true, "pauseMarker": null },
     { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 19, "screens": ["FT3", "V2", "S09", "S10", "S11", "S12"], "inSlice": true,
       "fastTrack": { "card": "FT3", "landing": "S12" },
       "pauseMarker": null },
@@ -589,40 +587,50 @@
     },
 
     {
-      "id": "FT2",
+      "id": "W2",
       "chapter": "ch2",
-      "template": "decision",
-      "step": { "verb": "Decide", "icon": "decide" },
-      "variant": "challenge",
+      "template": "warmup",
+      "step": { "verb": "Guess", "icon": "guess" },
       "minutes": 1,
-      "instruction": "Answer one question, or skip the challenge.",
-      "hint": "Answer if you already know the eight fields. Skipping costs nothing.",
-      "layout": "memo",
-      "image": { "src": "assets/img/ft2.jpg", "alt": "A person sketching a process flow with boxes, arrows and decision diamonds on a whiteboard", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "45% 50%" },
-      "stage": {
-        "top": { "kind": "line", "icon": "lightning", "text": "Optional challenge. Right on the first try? Skip to this chapter's last task." },
-        "middle": { "kind": "question", "text": "Lesson 1 case: student inquiries. Admin routes one to a department. Which field records that moment?" },
-        "bottom": { "kind": "options", "arrange": "row", "link": "skipChallenge" }
-      },
+      "instruction": "An employee emails HR a question. In process terms, what is that email?",
+      "hint": "Pick the answer you expect. A guess cannot be wrong.",
+      "hintPilotCopy": true,
+      "layout": "warmup",
+      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "foot": "Chapter 2 · Toolkit" },
       "options": [
-        { "id": "a", "label": "Field 3: Steps and role owners", "correct": false,
-          "feedback": "Field 3 lists who does each step. The moment work moves between roles needs its own record." },
-        { "id": "b", "label": "Field 4: Handoffs", "correct": true,
-          "feedback": "Right on the first try: you can jump to the last task of this chapter, or take the full chapter." },
-        { "id": "c", "label": "Field 6: Existing controls", "correct": false,
-          "feedback": "Routing is not a check on quality. Ask what changes hands here. The full chapter starts now." }
+        { "id": "a", "label": "The trigger" },
+        { "id": "b", "label": "The first step" },
+        { "id": "c", "label": "The output" }
       ],
-      "attempts": 1,
-      "routing": {
-        "correctFirstTry": { "choices": [ { "button": "jumpToTask", "to": "S08", "route": "skip" }, { "button": "fullChapter", "to": "S04", "route": "full" } ] },
-        "wrong": { "to": "S04", "route": "full" },
-        "skipped": { "to": "S04", "route": "full" }
-      },
+      "feedback": { "verdict": "Hold that thought.", "text": "This chapter names the three parts of every process." },
+      "advance": "after-any",
       "tracking": [
-        { "id": "L4_FT2_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Apply", "result": "graded" }
+        { "id": "L4_W2_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Understand", "result": "neutral" }
       ],
-      "suspend": ["route"],
-      "sources": ["s14", "s27", "L1 booklet Case 6"]
+      "sources": ["planning/CH2-SPEC.md 1 (replaces FT2)", "s9"]
+    },
+
+    {
+      "id": "K2",
+      "chapter": "ch2",
+      "template": "keyParts",
+      "step": { "verb": "Learn", "icon": "learn" },
+      "minutes": 2,
+      "presentation": true,
+      "label": "Key idea · Process mapping",
+      "instruction": "Every process has three parts",
+      "text": "Process mapping shows how work really flows: who does each step, what goes in, what comes out.",
+      "layout": "concept",
+      "parts": [
+        { "id": "trigger", "title": "Trigger", "text": "What starts it: a message, a form, a date.", "case": "A question arrives" },
+        { "id": "steps", "title": "Steps", "text": "The path to the result. Three to seven is usually enough.", "case": "Check, answer or escalate" },
+        { "id": "output", "title": "Output", "text": "What comes out, and to whom.", "case": "The employee gets an answer" }
+      ],
+      "caseToggle": "See it in the HR case",
+      "caseLabel": "HR case",
+      "wordLimit": { "max": 68, "why": "storyboard v3 decision (keep the approved text word for word): the K2 frame copy is 50 words, 68 with the HR case on; a presentation screen, read at the learner's pace" },
+      "tracking": [],
+      "sources": ["planning/CH2-SPEC.md 2", "s9", "s10", "s11"]
     },
 
     {

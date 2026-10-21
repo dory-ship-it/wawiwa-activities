@@ -20,7 +20,7 @@ import { explorer } from './templates/explorer.js';
 import { video } from './templates/video.js';
 import { handoff } from './templates/handoff.js';
 import { check } from './templates/check.js';
-import { title, moduleMap, goals, warmup, concept } from './templates/intro.js';
+import { title, moduleMap, goals, warmup, concept, keyParts } from './templates/intro.js';
 import { createGhost, stopGhost } from './ghost.js';
 import { createTracking } from './tracking/index.js';
 
@@ -30,7 +30,7 @@ const NARROW_BELOW = 900; // window narrower than this: show the "best on a comp
 const NOTE_H = 40;
 const MAX_TEXT = 250;     // fill-in responses are trimmed and capped (SCORM 1.2 safe)
 
-const TEMPLATES = { decision, input, sort, explorer, video, handoff, check, title, moduleMap, goals, warmup, concept };
+const TEMPLATES = { decision, input, sort, explorer, video, handoff, check, title, moduleMap, goals, warmup, concept, keyParts };
 
 export async function boot(root) {
   const res = await fetch(new URL('../content/l4-slice.json', import.meta.url));

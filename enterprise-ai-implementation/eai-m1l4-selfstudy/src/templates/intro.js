@@ -16,6 +16,8 @@
 //                    Next after a pick. One neutral interaction; a later pick goes out as a retry.
 //   concept    (K1)  Focus: the "Key idea" pill, h1, one line; two figure cards with an arrow between
 //                    them, their line drawings draw on (1.2 s); the evidence line and source at the foot.
+//   keyParts   (K2)  Focus: the K1 head, three numbered figure cards on a line (arrows between); the case
+//                    toggle top right adds each card's case line.
 // Title, module map, goals and key idea are presentation screens (screen.presentation): the engine
 // marks them done on arrival, so Next never locks. All text comes from the content.
 import { h } from '../util.js';
@@ -215,6 +217,39 @@ export const concept = {
         h('p', { class: 'w-concept-text' }, screen.text)),
       h('div', { class: 'w-figs' }, figs[0], glyph('g-arrow-long', { size: 38.4, className: 'w-figs-arrow' }), figs.slice(1)),
       h('p', { class: 'w-evidence' }, h('span', {}, evHead ? [h('b', {}, evHead), ' '] : null, evRest), h('span', { class: 'w-evidence-source' }, ev.source)));
+    return { unmount() {} };
+  },
+};
+
+/* ---------- keyParts (K2) ---------- */
+// The K1 head (pill, h1, one line) over three numbered figure cards on a line with arrows between
+// them. The case toggle (an outline button, top right, aria-pressed) adds a divider and the case
+// line in teal ink under each card. Not tracked; a presentation screen.
+export const keyParts = {
+  mount(ctx) {
+    const { screen, zones } = ctx;
+    const cases = screen.parts.map((p) => h('div', { class: 'w-part-case', id: 'w-case-' + p.id, hidden: true },
+      h('span', { class: 'w-part-case-label' }, screen.caseLabel), h('b', { class: 'w-part-case-text' }, p.case)));
+    const cards = screen.parts.map((p, i) => h('figure', { class: 'w-part', dataset: { part: p.id } },
+      h('span', { class: 'w-part-num', 'aria-hidden': 'true' }, String(i + 1)),
+      h('div', { class: 'w-part-body' }, h('b', { class: 'w-part-title' }, p.title), h('span', { class: 'w-part-text' }, p.text)),
+      cases[i]));
+    const toggle = h('button', { class: 'w-case-toggle', type: 'button', 'aria-pressed': 'false', 'aria-controls': cases.map((c) => c.id).join(' '), dataset: { action: 'caseToggle' } },
+      screen.caseToggle);
+    toggle.addEventListener('click', () => {
+      const on = toggle.getAttribute('aria-pressed') !== 'true';
+      toggle.setAttribute('aria-pressed', String(on));
+      cases.forEach((c) => { c.hidden = !on; });
+    });
+    const row = [];
+    cards.forEach((c, i) => row.push(i ? glyph('g-arrow-long', { size: 38.4, className: 'w-parts-arrow' }) : null, c));
+    layout(ctx, 'concept',
+      h('div', { class: 'w-focus-head' },
+        h('p', { class: 'w-key-label' }, glyph('learn', { size: 23.04 }), h('span', {}, screen.label)),
+        zones.instruction,
+        h('p', { class: 'w-concept-text' }, screen.text),
+        toggle),
+      h('div', { class: 'w-parts' }, row));
     return { unmount() {} };
   },
 };
