@@ -11,7 +11,7 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05", "S06", "S07", "S08", "FT3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
+    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "FT3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
     "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] }
   },
 
@@ -96,6 +96,7 @@
     "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "case": "Case {i} of {n}", "question": "Question {i} of {n}", "deck": "{i} of {n}" },
     "drag": {
       "help": "Drag the card to a column, or press 1 to {n} to choose a column and Enter to drop it. Escape cancels.",
+      "helpPlaces": "Drag the label to a place on the diagram, or press 1 to {n} to choose a place and Enter to drop it. Escape cancels.",
       "picked": "Picked up: {item}. Choose a column, 1 to {n}, then press Enter, or click a column.",
       "chosen": "{target} chosen. Press Enter to drop.",
       "cancelled": "Cancelled."
@@ -232,10 +233,38 @@
     }
   },
 
+  "diagrams": {
+    "hr": {
+      "$comment": "The HR process as a BPMN diagram (S05a, S05b). Geometry in src/templates/bpmn.js; edge labelAt = [dx, dy] from the edge's first node, in diagram units (.1cqw).",
+      "alt": "BPMN diagram of the HR case in three lanes: Employee, HR staff, HR manager. A circle in the Employee lane, Question sent, starts it. HR staff check the topic. A diamond asks Within policy? Yes: HR staff answer. No: Escalate, in the HR manager lane. Both paths end at a thick circle in the Employee lane, Answer received.",
+      "lanes": [
+        { "id": "employee", "label": "Employee" },
+        { "id": "staff", "label": "HR staff" },
+        { "id": "manager", "label": "HR manager", "tint": true }
+      ],
+      "nodes": [
+        { "id": "start", "kind": "start", "lane": "employee", "col": 0, "label": "Question sent" },
+        { "id": "check", "kind": "step", "lane": "staff", "col": 1, "label": "Check the topic" },
+        { "id": "split", "kind": "gateway", "lane": "staff", "col": 2, "label": "Within policy?" },
+        { "id": "answer", "kind": "step", "lane": "staff", "col": 3, "label": "Answer" },
+        { "id": "escalate", "kind": "step", "lane": "manager", "col": 3, "label": "Escalate" },
+        { "id": "end", "kind": "end", "lane": "employee", "col": 4, "label": "Answer received" }
+      ],
+      "edges": [
+        { "from": "start", "to": "check", "route": "vh" },
+        { "from": "check", "to": "split", "route": "h" },
+        { "from": "split", "to": "answer", "route": "h", "label": "Yes", "labelAt": [25, -23] },
+        { "from": "split", "to": "escalate", "route": "vh", "label": "No", "labelAt": [-26, 48] },
+        { "from": "answer", "to": "end", "route": "hv" },
+        { "from": "escalate", "to": "end", "route": "hv", "joinAt": "answer" }
+      ]
+    }
+  },
+
   "chapters": [
     { "id": "ch0", "n": 0, "title": "Intro", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 12, "screens": ["O1", "O2", "O3", "S01", "S02"], "inSlice": true, "pauseMarker": null },
     { "id": "ch1", "n": 1, "title": "Why map", "photo": { "src": "assets/img/l4/w1-new-computer-same-mess.jpg", "position": "30% 50%", "temp": true }, "minutes": 11, "screens": ["W1", "V1", "K1", "S03"], "inSlice": true, "pauseMarker": null },
-    { "id": "ch2", "n": 2, "title": "Toolkit", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 22, "screens": ["W2", "K2", "S04", "S05", "S06", "S07", "S08"], "inSlice": true, "pauseMarker": null },
+    { "id": "ch2", "n": 2, "title": "Toolkit", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 22, "screens": ["W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08"], "inSlice": true, "pauseMarker": null },
     { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 19, "screens": ["FT3", "V2", "S09", "S10", "S11", "S12"], "inSlice": true,
       "fastTrack": { "card": "FT3", "landing": "S12" },
       "pauseMarker": null },
@@ -685,60 +714,61 @@
     },
 
     {
-      "id": "S05",
+      "id": "S05a",
       "chapter": "ch2",
-      "template": "explorer",
-      "step": { "verb": "Explore", "icon": "explore" },
-      "variant": "diagram",
-      "minutes": 4,
-      "instruction": "Select where the path splits. Then open the other two parts.",
-      "hint": "You only need to recognize these parts, not draw them.",
-      "layout": "wide",
-      "diagram": {
-        "tag": "Illustrative, built from the HR case",
-        "lanes": [
-          { "id": "employee", "label": "Employee" },
-          { "id": "staff", "label": "HR staff" },
-          { "id": "manager", "label": "HR manager" }
-        ],
-        "nodes": [
-          { "id": "start", "kind": "start", "lane": "employee", "col": 0, "label": "Question sent" },
-          { "id": "check", "kind": "step", "lane": "staff", "col": 1, "label": "Check the topic" },
-          { "id": "split", "kind": "gateway", "lane": "staff", "col": 2, "label": "Exceeds known policy?" },
-          { "id": "answer", "kind": "step", "lane": "staff", "col": 3, "label": "Answer" },
-          { "id": "escalate", "kind": "step", "lane": "manager", "col": 3, "label": "Escalate" },
-          { "id": "end", "kind": "end", "lane": "employee", "col": 4, "label": "Answer received" }
-        ],
-        "edges": [
-          { "from": "start", "to": "check", "route": "vh" },
-          { "from": "check", "to": "split", "route": "h" },
-          { "from": "split", "to": "answer", "route": "h" },
-          { "from": "split", "to": "escalate", "route": "vh" },
-          { "from": "answer", "to": "end", "route": "vh" },
-          { "from": "escalate", "to": "end", "route": "hv" }
-        ]
-      },
-      "hotspots": [
-        { "id": "gateway", "correct": true,
-          "feedback": "The path splits here: within known policy, staff answer; beyond it, the question goes to the manager." },
-        { "id": "lane", "correct": false,
-          "feedback": "This band shows one role and its work. The split you are after sits on the path itself." },
-        { "id": "event", "correct": false,
-          "feedback": "This marks where the process begins or ends. Nothing splits here; one path passes through." },
-        { "id": "step", "correct": false,
-          "feedback": "This is a task with one way out. Follow the path to where it divides." }
+      "template": "bpmn",
+      "variant": "key",
+      "step": { "verb": "Learn", "icon": "learn" },
+      "minutes": 2,
+      "presentation": true,
+      "label": "Key idea · BPMN",
+      "instruction": "How to read a BPMN diagram",
+      "text": "BPMN is a standard way to draw a process. You only need to recognize three parts.",
+      "layout": "bpmn-key",
+      "diagram": "hr",
+      "key": [
+        { "n": 1, "part": "swimlane", "text": "Swimlane: one row per role: who does what.", "marker": [564, 169] },
+        { "n": 2, "part": "gateway", "text": "Gateway: a decision. The path splits.", "marker": [364, 83] },
+        { "n": 3, "part": "event", "text": "Event: where the process starts or ends.", "marker": [103, 19] }
       ],
-      "legend": [
-        { "id": "swimlanes", "label": "Swimlanes", "icon": "lanes", "text": "Who does what, one lane per role." },
-        { "id": "gateway", "label": "Gateway", "icon": "diamond", "text": "A decision point; the path splits." },
-        { "id": "event", "label": "Event", "icon": "circle", "text": "Start, end, and intermediate points." }
+      "wordLimit": { "max": 60, "why": "storyboard v3 decision (keep the approved text word for word): the S05a frame (diagram labels, the key) as approved; a presentation screen, read at the learner's pace" },
+      "tracking": [],
+      "sources": ["planning/CH2-SPEC.md 4", "s12", "s13", "HR canon Fields 2 to 4", "End event 'Answer received' is illustrative (FL14)"]
+    },
+
+    {
+      "id": "S05b",
+      "chapter": "ch2",
+      "template": "bpmn",
+      "variant": "label",
+      "step": { "verb": "Label", "icon": "label" },
+      "minutes": 3,
+      "instruction": "Drag each label to its part of the diagram.",
+      "hint": "Drag a label onto the diagram. Or press 1 to 3 to choose a place, then Enter.",
+      "hintPilotCopy": true,
+      "layout": "bpmn-label",
+      "diagram": "hr",
+      "ghost": { "type": "label", "showMe": true },
+      "dropLabel": "Drop here",
+      "targets": [
+        { "id": "a", "name": "Place 1: the HR manager's row", "rect": [10, 162, 580, 78], "chip": [552, 157] },
+        { "id": "b", "name": "Place 2: the diamond after Check the topic", "rect": [311, 98, 58, 58], "chip": [340, 93] },
+        { "id": "c", "name": "Place 3: the circle at Question sent", "rect": [123, 31, 44, 44], "chip": [145, 26] }
       ],
-      "advance": "after-key-and-all-chips",
+      "targetsNote": "rect [left, top, width, height] and chip [centre x, centre y] in diagram units (.1cqw), from the S05b frames",
+      "labels": [
+        { "id": "swimlane", "text": "Swimlane", "target": "a",
+          "feedback": { "correct": "Right: each row is one role. Escalations sit in the HR manager's lane.", "wrong": "A swimlane is a whole row, one per role." } },
+        { "id": "gateway", "text": "Gateway", "target": "b",
+          "feedback": { "correct": "Right: the diamond is a decision. Within policy, staff answer; beyond it, the manager does.", "wrong": "Look for the shape where the path splits in two." } },
+        { "id": "event", "text": "Event", "target": "c",
+          "feedback": { "correct": "Right: the circle marks where the process starts.", "wrong": "Look for the circle where the process starts." } }
+      ],
+      "advance": "after-all-placed",
       "tracking": [
-        { "id": "L4_S05_1", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Remember", "result": "graded" }
+        { "id": "L4_S05B_1", "type": "matching", "correctResponse": "swimlane.a,gateway.b,event.c", "scored": false, "bloom": "Remember", "result": "graded" }
       ],
-      "suspend": ["chips"],
-      "sources": ["s12", "s13", "HR canon Fields 2 to 4", "End event 'Answer received' is illustrative (FL14)"]
+      "sources": ["planning/CH2-SPEC.md 4", "s12", "s13"]
     },
 
     {

@@ -34,7 +34,13 @@ export function screenViews(s, content) {
   if (s.template === 'check') return s.items.map((it) => [`${s.id} ${it.id}`, it.kind === 'tiles' ? it.tiles.flatMap((t) => [String(t.n), t.text]) : [it.stem, ...it.options.map((o) => o.label)]]);
   if (s.variant === 'close') return [[`${s.id} step1`, s.options.map((o) => o.label)], [`${s.id} step2`, [s.step2.bridge.text, s.step2.homework.text]]];
   if (s.variant === 'pick') return s.tiles.map((t) => [`${s.id} tile ${t.n} open`, [...s.tiles.flatMap((x) => [String(x.n), x.title]), s.question, t.text]]);
-  if (s.variant === 'diagram') return [[s.id, [s.diagram.tag, ...s.diagram.lanes.map((l) => l.label), ...s.diagram.nodes.map((n) => n.label), ...s.legend.map((g) => g.label)]]];
+  if (s.template === 'bpmn') {
+    const dg = content.diagrams[s.diagram];
+    const drawn = [...dg.lanes.map((l) => l.label), ...dg.nodes.map((n) => n.label), ...dg.edges.map((e) => e.label)];
+    if (s.variant === 'key') return [[s.id, [s.label, s.text, ...drawn, ...s.key.map((k) => k.text)]]];
+    // labels: the drop chips until each label is placed (then the label sits there): the label texts once
+    return [[s.id, [...drawn, ...s.labels.map((l) => l.text)]]];
+  }
   if (s.variant === 'tiles') {
     const nums = s.tiles.map((t) => String(t.n));
     return [...s.tiles.map((t) => [`${s.id} tile ${t.n} open`, [...nums, ...s.tiles.filter((x) => x !== t).map((x) => x.title), t.back]]),

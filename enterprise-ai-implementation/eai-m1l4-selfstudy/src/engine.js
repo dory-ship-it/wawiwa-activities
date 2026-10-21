@@ -17,6 +17,7 @@ import { decision } from './templates/decision.js';
 import { input } from './templates/input.js';
 import { sort } from './templates/sort.js';
 import { sortDeck } from './templates/sortdeck.js';
+import { bpmn } from './templates/bpmn.js';
 import { explorer } from './templates/explorer.js';
 import { video } from './templates/video.js';
 import { handoff } from './templates/handoff.js';
@@ -31,7 +32,7 @@ const NARROW_BELOW = 900; // window narrower than this: show the "best on a comp
 const NOTE_H = 40;
 const MAX_TEXT = 250;     // fill-in responses are trimmed and capped (SCORM 1.2 safe)
 
-const TEMPLATES = { decision, input, sort, sortDeck, explorer, video, handoff, check, title, moduleMap, goals, warmup, concept, keyParts };
+const TEMPLATES = { decision, input, sort, sortDeck, bpmn, explorer, video, handoff, check, title, moduleMap, goals, warmup, concept, keyParts };
 
 export async function boot(root) {
   const res = await fetch(new URL('../content/l4-slice.json', import.meta.url));

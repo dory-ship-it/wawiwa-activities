@@ -1,9 +1,5 @@
-// Explorer template, a Focus panel (styled by analogy with the frames). Variants:
-//   diagram (S05)  a swimlane diagram drawn from the content (lanes, start / end events, step boxes,
-//                  the gateway diamond, orthogonal flows) is the stage. Every part is a hotspot button:
-//                  the key one ends the search (band right, all hotspots locked), the others give their
-//                  feedback (band wrong, retry). Three legend buttons under the diagram open their
-//                  glossary text in place. Next unlocks once the key is found and all three were opened.
+// Explorer template, a Focus panel (styled by analogy with the frames). Variants (the S05 diagram
+// explorer is gone: NL2 splits it into S05a and S05b, src/templates/bpmn.js):
 //   tiles   (S07)  a 2 x 4 grid of numbered tiles that flip in place, one open at a time. After all
 //                  eight were opened the question appears and the tiles become answer buttons (one
 //                  question, wrong = retry, right = Next). Before that the question row is a lock icon
@@ -12,17 +8,15 @@
 //                  click opens its text in the panel (check mark once read) and selects it (two at most);
 //                  Check in the band; one band per attempt: verdict + the first wrong tile's line, no
 //                  paging; right = both key lines, Next.
-// Tracking: diagram = the letter of the first part chosen, in screen.hotspots order;
-// tiles = the field number of the first answer. Retries as retry events.
+// Tracking: tiles = the field number of the first answer. Retries as retry events.
 import { h, nextId } from '../util.js';
-import { icon, glyph } from '../icons.js';
+import { glyph } from '../icons.js';
 import { checkButton } from './decision.js';
-import { letter } from '../tracking/index.js';
-import { layout, sheet, ruleLabel, arrowNav } from './stage.js';
+import { layout, sheet, arrowNav } from './stage.js';
 
 export const explorer = {
   mount(ctx) {
-    const run = { diagram, tiles, pick }[ctx.screen.variant];
+    const run = { tiles, pick }[ctx.screen.variant];
     if (!run) throw new Error('explorer: unknown variant ' + ctx.screen.variant);
     return run(ctx) || { unmount() {} };
   },
@@ -33,171 +27,6 @@ const mark = (el, result, ui) => {
   const m = el.querySelector(':scope > .w-opt-mark');
   if (m) m.replaceChildren(result === 'correct' ? glyph('g-check-b', { size: 16, label: ui.feedback.correctPrefix }) : result === 'wrong' ? glyph('g-cross', { size: 14.08, label: ui.feedback.wrongPrefix }) : '');
 };
-
-/* ---------- diagram (S05) ---------- */
-// Geometry in stage px inside the diagram box (1088 wide on a 1280 stage, wider on a wide window): a
-// lane-name column, then equal node columns; every node of a lane sits on the lane's centre line.
-// The node columns follow the box width (place() runs again when the box is resized).
-// (NL1: 70 px lanes so the diagram fits the Focus panel; start / end labels sit beside their circle)
-const D = { W: 1088, HEAD: 120, LANE: 70, STEP_W: 150, STEP_H: 44, GATE: 44, EVENT: 32 };
-const HOTSPOT_OF = { gateway: 'gateway', start: 'event', end: 'event', step: 'step', lane: 'lane' };
-
-function diagram(ctx) {
-  const { screen, ui, zones } = ctx;
-  const dg = screen.diagram;
-  const trackingId = screen.tracking[0].id;
-  const spots = Object.fromEntries(screen.hotspots.map((x) => [x.id, x]));
-  const laneIndex = Object.fromEntries(dg.lanes.map((l, i) => [l.id, i]));
-  const nCols = Math.max(...dg.nodes.map((n) => n.col)) + 1;
-  const H = dg.lanes.length * D.LANE;
-  let pos = {};
-  const positions = (W) => Object.fromEntries(dg.nodes.map((n) => {
-    const half = n.kind === 'step' ? [D.STEP_W / 2, D.STEP_H / 2] : n.kind === 'gateway' ? [D.GATE / 2, D.GATE / 2] : [D.EVENT / 2, D.EVENT / 2];
-    return [n.id, { x: D.HEAD + (n.col + 0.5) * ((W - D.HEAD) / nCols), y: laneIndex[n.lane] * D.LANE + D.LANE / 2, hw: half[0], hh: half[1] }];
-  }));
-
-  // flows: h = straight across, vh = vertical first then across, hv = across first then vertical
-  const path = (e) => {
-    const a = pos[e.from], b = pos[e.to];
-    const down = b.y > a.y;
-    if (e.route === 'vh') return `M${a.x} ${down ? a.y + a.hh : a.y - a.hh} V${b.y} H${b.x - b.hw}`;
-    if (e.route === 'hv') return `M${a.x + a.hw} ${a.y} H${b.x} V${down ? b.y - b.hh : b.y + b.hh}`;
-    return `M${a.x + a.hw} ${a.y} H${b.x - b.hw}`;
-  };
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('class', 'w-flows');
-  svg.setAttribute('height', H);
-  svg.setAttribute('aria-hidden', 'true');
-  const drawFlows = (W) => {
-    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    svg.setAttribute('width', W);
-    svg.innerHTML = '<defs><marker id="w-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="w-arrow-head"/></marker></defs>'
-      + dg.edges.map((e) => `<path class="w-flow" d="${path(e)}" marker-end="url(#w-arrow)"/>`).join('');
-  };
-
-  const hotspots = [];
-  const lanes = dg.lanes.map((l, i) => {
-    const head = h('button', { class: 'w-lane-head', type: 'button', dataset: { hotspot: 'lane', id: l.id } }, h('span', {}, l.label), h('span', { class: 'w-opt-mark' }));
-    head.style.top = i * D.LANE + 'px';
-    head.style.height = D.LANE + 'px';
-    hotspots.push(head);
-    const row = h('div', { class: 'w-lane', 'aria-hidden': 'true' });
-    row.style.top = i * D.LANE + 'px';
-    row.style.height = D.LANE + 'px';
-    return [row, head];
-  });
-  // each node's elements and how to place them for the current positions
-  const placers = [];
-  const nodes = dg.nodes.map((n) => {
-    const kind = HOTSPOT_OF[n.kind];
-    let btn;
-    if (n.kind === 'step') {
-      btn = h('button', { class: 'w-node w-node-step', type: 'button', dataset: { hotspot: kind, id: n.id } }, h('span', {}, n.label), h('span', { class: 'w-opt-mark' }));
-      placers.push(() => { const p = pos[n.id]; Object.assign(btn.style, { left: p.x - p.hw + 'px', top: p.y - p.hh + 'px', width: D.STEP_W + 'px', height: D.STEP_H + 'px' }); });
-      hotspots.push(btn);
-      return btn;
-    }
-    if (n.kind === 'gateway') {
-      const labelId = nextId('w-gate');
-      const label = h('span', { class: 'w-node-label w-gate-label', id: labelId }, n.label);
-      btn = h('button', { class: 'w-node w-node-gateway', type: 'button', 'aria-labelledby': labelId, dataset: { hotspot: kind, id: n.id } },
-        h('span', { class: 'w-diamond', 'aria-hidden': 'true' }), h('span', { class: 'w-opt-mark' }));
-      placers.push(() => {
-        const p = pos[n.id];
-        Object.assign(label.style, { left: p.x - 110 + 'px', top: p.y - p.hh - 20 + 'px' });
-        Object.assign(btn.style, { left: p.x - p.hw + 'px', top: p.y - p.hh + 'px', width: D.GATE + 'px', height: D.GATE + 'px' });
-      });
-      hotspots.push(btn);
-      return [label, btn];
-    }
-    // start / end event: the button covers its label (above, so flows can enter from below) and the circle
-    btn = h('button', { class: 'w-node w-node-event', type: 'button', dataset: { hotspot: kind, id: n.id, end: n.kind === 'end' ? 'true' : 'false' } },
-      h('span', { class: 'w-node-label' }, n.label), h('span', { class: 'w-event-circle', 'aria-hidden': 'true' }), h('span', { class: 'w-opt-mark' }));
-    // the start's label right of its circle (its flow leaves from below), the end's above it (flows
-    // enter it from the left and from below)
-    placers.push(() => {
-      const p = pos[n.id];
-      Object.assign(btn.style, n.kind === 'end' ? { left: p.x - 64 + 'px', top: p.y - p.hh - 19 + 'px', width: '128px' } : { left: p.x - p.hw + 'px', top: p.y - 22 + 'px', width: '170px', height: '44px' }); // a 44 px target
-    });
-    hotspots.push(btn);
-    return btn;
-  });
-  const box = h('div', { class: 'w-diagram', role: 'group', 'aria-labelledby': 'w-instruction' }, lanes.map((x) => x[0]), svg, lanes.map((x) => x[1]), nodes.flat());
-  box.style.height = H + 'px';
-  arrowNav(box, { selector: '[data-hotspot]' });
-  // lay the nodes and flows out for the box width (offsetWidth is in stage px: the scale is a transform)
-  let placedW = 0;
-  const place = () => {
-    const W = box.offsetWidth || D.W;
-    if (W === placedW) return;
-    placedW = W;
-    pos = positions(W);
-    placers.forEach((f) => f());
-    drawFlows(W);
-  };
-  const ro = new ResizeObserver(place);
-
-  // legend: three disclosure buttons, the glossary text opens in place (space reserved)
-  const opened = new Set();
-  const legend = screen.legend.map((g) => {
-    const textId = nextId('w-legend');
-    const btn = h('button', { class: 'w-legend-btn', type: 'button', 'aria-expanded': 'false', 'aria-controls': textId, dataset: { legend: g.id } },
-      h('span', { class: 'w-legend-label' }, g.label), h('span', { class: 'w-legend-state' }, icon('chevron-right', { size: 18 })));
-    const text = h('p', { class: 'w-legend-text', id: textId, dataset: { open: 'false' } }, g.text);
-    const toggle = (open) => {
-      btn.setAttribute('aria-expanded', String(open));
-      text.dataset.open = String(open); // closed text keeps its space (visibility only): nothing below moves
-      if (open) { opened.add(g.id); btn.dataset.seen = 'true'; btn.querySelector('.w-legend-state').replaceChildren(glyph('g-check-b', { size: 17.92 })); }
-    };
-    btn.addEventListener('click', () => { toggle(btn.getAttribute('aria-expanded') !== 'true'); check(true); });
-    return { g, btn, text, toggle, el: h('div', { class: 'w-legend-item' }, btn, text) };
-  });
-
-  layout(ctx, 'focus',
-    sheet('focus w-sheet-wide',
-      h('div', { class: 'w-head-row' }, zones.instruction, ruleLabel(dg.tag, 'w-tag')),
-      h('div', { class: 'w-explore', dataset: { interaction: '' } },
-        box,
-        h('div', { class: 'w-legend' }, legend.map((x) => x.el))),
-      zones.band));
-  zones.setFeedback({ state: 'hint', text: screen.hint });
-  place();
-  ro.observe(box);
-
-  let found = false, unlocked = false, last = null;
-  function check(focus) {
-    if (unlocked || !found || opened.size < legend.length) return;
-    unlocked = true;
-    ctx.complete();
-    ctx.unlockNext({ focus });
-  }
-  hotspots.forEach((btn) => btn.addEventListener('click', () => {
-    if (found || btn === last) return; // the same wrong part again is not a new attempt
-    const spot = spots[btn.dataset.hotspot];
-    // response: the part's letter in content order (a = gateway, b = lane, c = event, d = step), SCORM 1.2 safe
-    ctx.answer({ trackingId, response: letter(screen.hotspots.indexOf(spot)), result: spot.correct ? 'correct' : 'wrong' });
-    hotspots.forEach((x) => mark(x, '', ui));
-    last = btn;
-    if (!spot.correct) { mark(btn, 'wrong', ui); zones.setFeedback({ state: 'wrong', text: spot.feedback }); return; }
-    found = true;
-    mark(btn, 'correct', ui);
-    hotspots.forEach((x) => x.setAttribute('aria-disabled', 'true'));
-    zones.setFeedback({ state: 'correct', text: spot.feedback });
-    check(true);
-  }));
-
-  if (ctx.revisit) {
-    const key = hotspots.find((x) => spots[x.dataset.hotspot].correct);
-    found = true;
-    last = key;
-    mark(key, 'correct', ui);
-    hotspots.forEach((x) => x.setAttribute('aria-disabled', 'true'));
-    legend.forEach((x) => x.toggle(true));
-    zones.setFeedback({ state: 'correct', text: spots[key.dataset.hotspot].feedback });
-    check(false);
-  }
-  return { unmount() { ro.disconnect(); } };
-}
 
 /* ---------- tiles (S07) ---------- */
 function tiles(ctx) {
