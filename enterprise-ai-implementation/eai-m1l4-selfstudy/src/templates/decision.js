@@ -88,7 +88,8 @@ function single(ctx) {
   const top = screen.stage.top;
   const { group, btns } = options(ctx, 'radio');
   if (isStage(screen)) {
-    // the character's last line is the quote on the photo; the lines before it are the panel's context line
+    // the character's last line is the quote on the photo; the panel's context line is the content's
+    // context (S01: in the third person), or else the character's lines before the quote
     const ch = content.characters[top.character];
     const bubbles = top.bubbles || [];
     const attribution = [top.label || ch.label, ch.fictional ? ui.fictionalBadge : null].filter(Boolean).join(' · ');
@@ -97,7 +98,7 @@ function single(ctx) {
         glyph('g-quote', { size: 51.2 }),
         h('blockquote', { class: 'w-quote' }, h('p', { class: 'w-quote-1' }, bubbles[bubbles.length - 1] || '')),
         h('figcaption', { class: 'w-attrib' }, attribution)),
-      h('section', { class: 'w-sheet w-sheet-right w-sheet-46' }, contextLine(bubbles.slice(0, -1).join(' ')), zones.instruction, group, zones.band));
+      h('section', { class: 'w-sheet w-sheet-right w-sheet-46' }, contextLine(top.context ?? bubbles.slice(0, -1).join(' ')), zones.instruction, group, zones.band));
   } else {
     // a statement line (S14, S15) whose optional highlight (the hours in S15) is set in bold inside it
     const k = top.highlight ? top.text.indexOf(top.highlight) : -1;

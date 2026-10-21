@@ -9,7 +9,7 @@ export const words = (s) => String(s ?? '').split(/\s+/).filter((w) => /[A-Za-z0
 const sum = (list) => list.reduce((n, t) => n + words(t), 0);
 
 // on-screen text of one stage (top / middle / bottom), whatever the kind
-const stageText = (stage = {}) => Object.values(stage).flatMap((p) => [p.eyebrow, p.text, p.label, p.chip?.text, p.help?.text, ...(p.bubbles || []), ...(p.items || []).map((x) => x.text)]);
+const stageText = (stage = {}) => Object.values(stage).flatMap((p) => [p.eyebrow, p.text, p.label, p.context, p.chip?.text, p.help?.text, ...(p.bubbles || []), ...(p.items || []).map((x) => x.text)]);
 const fieldText = (fields = []) => fields.flatMap((f) => [f.label, f.placeholder]);
 
 // One entry per view the learner sees at once on screen s: [name, strings on screen]

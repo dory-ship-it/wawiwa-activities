@@ -119,7 +119,7 @@ export const moduleMap = {
     });
 
     layout(ctx, 'map',
-      focusHead(screen.eyebrow, 'overview', zones.instruction),
+      focusHead(screen.eyebrow, 'overview', zones.instruction, screen.line ? h('p', { class: 'w-concept-text' }, screen.line) : null),
       h('div', { class: 'w-map' }, list),
       panel);
     return { unmount() {} };
