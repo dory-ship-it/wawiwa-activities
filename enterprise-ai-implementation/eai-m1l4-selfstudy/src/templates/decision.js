@@ -11,9 +11,11 @@
 //   Styled by analogy (no frame yet; interaction and text unchanged), each in a Focus panel:
 //   challenge  (FT2 to FT4)  the memo's header, line and question, the instruction, three answer cards,
 //                     Skip as the band's tool before an answer, the route buttons in the strip after.
-//   pair       (S06)  two situation cards side by side, the right one revealed after the left is right.
-//   rounds     (S08)  AS-IS strip, template row (field badge + map line), round dots, three answers;
-//                     "Next round" in the strip after a right answer, Next after round 3.
+//   NL2 (the Chapter 2 frames), each in a Focus panel:
+//   pair       (S06)  one situation at a time in a raised figure card, the solved one as a small done card
+//                     on the left; "Next situation" in the strip after a right answer.
+//   rounds     (S08)  the rules band on top; left the round, the map line in a figure card, the hint;
+//                     right the three rules; "Next round" in the strip after a right answer.
 //   fill       (S10)  situation line, the field rows (a pre-filled row, the active row whose slot
 //                     takes the chosen line), 2 x 2 answer cards.
 //   metric     (S11)  the field row, four answers, then "Checkable later?" with three slots.
@@ -29,7 +31,7 @@ import { h, fmt, resolveLink } from '../util.js';
 import { icon, glyph } from '../icons.js';
 import { attachTip } from '../tooltip.js';
 import { letter } from '../tracking/index.js';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, progressDots, privacyLine, paintAnswer } from './stage.js';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer } from './stage.js';
 import { field } from './input.js';
 import { targetSteps } from '../ghost.js';
 
@@ -281,67 +283,87 @@ function rowQuestion(ctx, btns, list, { trackingId, isRight, feedbackOf, onRight
   };
 }
 
-/* ---------- pair (S06), Focus by analogy ---------- */
+/* ---------- pair (S06): one situation at a time, Focus ---------- */
+// The heading, the situation's hint line (bulb), then a raised figure card: "Situation n of 2", the
+// situation, "Your answer" and two answer cards with a second line. After a right answer the strip
+// offers "Next situation": the solved situation shrinks into a small done card on the left (its
+// answer with a check) and the next one comes in (no motion with reduced motion).
 function pair(ctx) {
-  const { screen, zones } = ctx;
-  const sides = screen.situations.map((s, k) => {
+  const { screen, ui, zones } = ctx;
+  const list = screen.situations;
+  const hintText = h('span', {});
+  const row = h('div', { class: 'w-sit-row', dataset: { interaction: '' } });
+  layout(ctx, 'focus', sheet('focus w-sheet-sit', zones.instruction,
+    h('p', { class: 'w-hintline' }, glyph('guess', { size: 23.04 }), hintText), row, zones.band));
+  zones.setHintVisible(false); // the hint is the line under the heading
+
+  const doneCard = (s, o) => h('div', { class: 'w-sit-done', role: 'group', 'aria-label': s.doneLabel },
+    h('span', { class: 'w-sit-kicker' }, s.doneLabel),
+    h('span', { class: 'w-sit-done-answer' }, h('span', { class: 'w-placed-disc', 'aria-hidden': 'true' }, glyph('g-check-b', { size: 15.36 })), o.label));
+  function show(k, { focus = false, enter = false } = {}) {
+    const s = list[k];
     const textId = 'w-situation-' + s.id;
-    const { group, btns } = options(ctx, 'radio', { list: s.options, labelledby: textId, interaction: false });
-    const col = h('section', { class: 'w-situation' },
-      h('div', { class: 'w-situation-card' },
-        h('span', { class: 'w-situation-num', 'aria-hidden': 'true' }, String(k + 1)),
-        h('p', { class: 'w-situation-text', id: textId }, s.text)),
-      group,
-      h('span', { class: 'w-situation-lock', 'aria-hidden': 'true' }, glyph('g-lock', { size: 30.72 })));
-    return { s, col, btns };
-  });
-  const setOpen = (side, open) => { side.col.dataset.state = open ? 'open' : 'locked'; side.col.inert = !open; };
-  sides.forEach((side, k) => setOpen(side, k === 0));
+    const btns = s.options.map((o, i) => h('button', { class: 'w-opt w-ans w-ans-two', type: 'button', dataset: { id: o.id, letter: letter(i) } },
+      h('span', { class: 'w-opt-mark w-ans-mark' }),
+      h('span', { class: 'w-opt-label' }, h('b', {}, o.label), h('span', {}, o.sub))));
+    const group = h('div', { class: 'w-options w-ans-list w-ans-cols-2', role: 'group', 'aria-labelledby': textId }, btns);
+    arrowNav(group);
+    const card = h('section', { class: 'w-situation-now' + (enter ? ' w-sit-in' : '') },
+      h('span', { class: 'w-sit-kicker' }, fmt(ui.progress.situation, { i: k + 1, n: list.length })),
+      h('b', { class: 'w-sit-text', id: textId }, s.text),
+      h('span', { class: 'w-sit-kicker' }, screen.answerLabel), group);
+    row.replaceChildren(...list.slice(0, k).map((x) => doneCard(x, x.options.find((o) => o.correct))), card);
+    hintText.textContent = s.hint;
+    zones.setFeedback({ state: 'hint', text: s.hint });
+    const q = rowQuestion(ctx, btns, s.options, {
+      trackingId: () => s.trackingId,
+      isRight: (o) => o.correct,
+      feedbackOf: (o) => o.feedback,
+      onRight: (i, f) => {
+        const more = k < list.length - 1;
+        const go = zones.setFeedback({ state: 'correct', text: s.options[i].feedback,
+          actions: more ? [{ id: 'nextSituation', label: ui.buttons.nextSituation, onClick: () => show(k + 1, { focus: true, enter: true }) }] : [] });
+        if (more) { if (f) go.focus(); return; }
+        ctx.complete();
+        ctx.unlockNext({ focus: f });
+      },
+    });
+    if (focus) btns[0].focus();
+    return { q, s };
+  }
 
-  layout(ctx, 'focus', sheet('focus', zones.instruction, h('div', { class: 'w-pair', dataset: { interaction: '' } }, sides.map((x) => x.col)), zones.band));
-  zones.setFeedback({ state: 'hint', text: screen.hint });
-
-  const questions = sides.map((side, k) => rowQuestion(ctx, side.btns, side.s.options, {
-    trackingId: () => side.s.trackingId,
-    isRight: (o) => o.correct,
-    feedbackOf: (o) => o.feedback,
-    onRight: (i, focus) => {
-      zones.setFeedback({ state: 'correct', text: side.s.options[i].feedback });
-      const next = sides[k + 1];
-      if (next) { setOpen(next, true); if (focus) next.btns[0].focus(); return; }
-      ctx.complete();
-      ctx.unlockNext({ focus });
-    },
-  }));
-
-  if (ctx.revisit) questions.forEach((q, k) => q.solve(sides[k].s.options.findIndex((o) => o.correct), false));
+  if (ctx.revisit) { const last = show(list.length - 1); last.q.solve(last.s.options.findIndex((o) => o.correct), false); }
+  else show(0);
 }
 
-/* ---------- rounds (S08), Focus by analogy ---------- */
+/* ---------- rounds (S08): the rules band, then one map line per round, Focus ---------- */
+// The explain band on top of the panel (the three AS-IS rules, numbered); left: the round counter, the
+// instruction, the map line in a figure card with its field chip, the hint; right: the three rules
+// as answers. "Next round" in the strip after a right answer, Next after round 3.
 function rounds(ctx) {
   const { screen, ui, zones } = ctx;
   const list = screen.rounds;
-  const badge = h('span', { class: 'w-field-badge' });
+  const badge = h('span', { class: 'w-field-chip' });
   const line = h('p', { class: 'w-round-line' });
-  const dots = progressDots(list.length, (i, n) => fmt(ui.progress.round, { i, n }));
-  const { group, btns } = options(ctx, 'radio', { cols: 3, interaction: false });
+  const counter = h('p', { class: 'w-round-count' });
+  const { group, btns } = options(ctx, 'radio', { interaction: false });
   let r = 0;
 
   layout(ctx, 'focus',
     sheet('focus',
-      ruleLabel(screen.strip),
-      zones.instruction,
+      h('div', { class: 'w-rules' }, h('b', { class: 'w-rules-label' }, screen.rules.label),
+        screen.rules.items.map((t, i) => h('span', { class: 'w-rule' }, h('span', { class: 'w-rule-n', 'aria-hidden': 'true' }, String(i + 1)), t))),
       h('div', { class: 'w-rounds', dataset: { interaction: '' } },
-        h('div', { class: 'w-template-row' }, badge, line, dots.el),
+        h('div', { class: 'w-round-left' }, counter, zones.instruction, h('div', { class: 'w-round-card' }, badge, line), h('p', { class: 'w-round-hint' }, screen.hint)),
         group),
       zones.band));
+  zones.setHintVisible(false); // the hint is shown in the left column
 
   const q = rowQuestion(ctx, btns, screen.options, {
     trackingId: () => list[r].trackingId,
     isRight: (o) => o.id === list[r].correct,
     feedbackOf: (o) => list[r].feedback[o.id],
     onRight: (i, focus) => {
-      dots.set(r, r + 1);
       const fb = list[r].feedback[screen.options[i].id];
       if (r < list.length - 1) {
         const go = zones.setFeedback({ state: 'correct', text: fb, actions: [{ id: 'nextRound', label: ui.buttons.nextRound, onClick: () => { show(r + 1); btns[0].focus(); } }] });
@@ -357,8 +379,8 @@ function rounds(ctx) {
   function show(k) {
     r = k;
     badge.textContent = list[k].badge;
-    line.textContent = list[k].line;
-    dots.set(k, k);
+    line.textContent = '“' + list[k].line + '”'; // the map line as a quote (the frames' curly marks)
+    counter.textContent = fmt(ui.progress.round, { i: k + 1, n: list.length });
     q.reset();
     zones.setFeedback({ state: 'hint', text: screen.hint });
   }
@@ -618,7 +640,8 @@ function close(ctx) {
 }
 
 // The downloadable lesson record (S22): a small self-contained HTML page with the case title, the
-// metric, the self-check answers and the knowledge check score. Every label comes from ui.record.
+// Chapter 2 sketch, the metric, the self-check answers and the knowledge check score. Every label
+// comes from ui.record (the sketch's part names from S08B).
 function lessonRecord(ctx) {
   const { ui, content } = ctx;
   const r = ui.record;
@@ -629,6 +652,8 @@ function lessonRecord(ctx) {
   const val = (v) => esc(v || r.empty);
   const rows = s20.steps[0].rows.map((q) => `<tr><td>${esc(q.text)}</td><td>${val(ans[q.id] && ui.buttons[ans[q.id]])}</td></tr>`).join('');
   const chip = s20.steps[1].chips.find((c) => c.id === ans.chip);
+  // the Chapter 2 sketch (S08B): one row per part
+  const sketch = (content.screens.find((s) => s.id === 'S08B')?.fields || []).map((f) => `<tr><td>${esc(f.label)}</td><td>${val(ctx.store.get(f.store))}</td></tr>`).join('');
   const score = sc.raw === null ? r.empty : fmt(r.scoreLine, { x: sc.x, n: sc.n, p: sc.raw, pass: content.lesson.completion.passMark });
   return `<!DOCTYPE html><html lang="${esc(content.lesson.lang)}"><head><meta charset="UTF-8"><title>${esc(r.heading)}: ${esc(content.lesson.title)}</title>`
     + '<style>body{font:16px/1.5 Assistant,Arial,sans-serif;color:#16293A;max-width:720px;margin:40px auto;padding:0 20px}h1,h2{color:#255777}'
@@ -636,6 +661,7 @@ function lessonRecord(ctx) {
     + `<h1>${esc(r.heading)}</h1><p>${esc(content.lesson.program)} · ${esc(content.lesson.module)} · ${esc(content.lesson.title)}</p>`
     + `<p>${esc(r.date)}: ${esc(new Date().toISOString().slice(0, 10))}</p>`
     + `<h2>${esc(r.caseTitle)}</h2><p>${val(ctx.store.get('L4_CASE_TITLE'))}</p>`
+    + `<h2>${esc(r.sketch)}</h2><table>${sketch}</table>`
     + `<h2>${esc(r.metric)}</h2><p>${val(ctx.store.get('L4_METRIC'))}</p>`
     + `<h2>${esc(r.selfCheck)}</h2><table>${rows}<tr><td>${esc(r.risk)}</td><td>${val(chip && chip.label)}</td></tr></table>`
     + `<h2>${esc(r.score)}</h2><p>${esc(score)}</p></body></html>`;

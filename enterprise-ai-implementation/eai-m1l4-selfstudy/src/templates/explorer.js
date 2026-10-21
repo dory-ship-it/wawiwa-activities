@@ -1,18 +1,16 @@
 // Explorer template, a Focus panel (styled by analogy with the frames). Variants (the S05 diagram
 // explorer is gone: NL2 splits it into S05a and S05b, src/templates/bpmn.js):
-//   tiles   (S07)  a 2 x 4 grid of numbered tiles that flip in place, one open at a time. After all
-//                  eight were opened the question appears and the tiles become answer buttons (one
-//                  question, wrong = retry, right = Next). Before that the question row is a lock icon
-//                  with the content's aria-label.
+//   tiles   (S07)  NL2: on the Focus wash, a 4 x 2 grid of tiles that open in place; after all eight the
+//                  heading becomes the question and the tiles answer it (one question, wrong = retry).
 //   pick    (S12)  eight field tiles left (40%), the question and a reading panel right (60%). A tile
 //                  click opens its text in the panel (check mark once read) and selects it (two at most);
 //                  Check in the band; one band per attempt: verdict + the first wrong tile's line, no
 //                  paging; right = both key lines, Next.
 // Tracking: tiles = the field number of the first answer. Retries as retry events.
-import { h, nextId } from '../util.js';
+import { h, fmt, nextId } from '../util.js';
 import { glyph } from '../icons.js';
 import { checkButton } from './decision.js';
-import { layout, sheet, arrowNav } from './stage.js';
+import { layout, sheet, arrowNav, paintAnswer } from './stage.js';
 
 export const explorer = {
   mount(ctx) {
@@ -28,66 +26,75 @@ const mark = (el, result, ui) => {
   if (m) m.replaceChildren(result === 'correct' ? glyph('g-check-b', { size: 16, label: ui.feedback.correctPrefix }) : result === 'wrong' ? glyph('g-cross', { size: 14.08, label: ui.feedback.wrongPrefix }) : '');
 };
 
-/* ---------- tiles (S07) ---------- */
+/* ---------- tiles (S07), on the Focus wash, no panel ---------- */
+// The task head (the instruction, the counter "0/8" under it), a 4 x 2 grid of tiles: number disc,
+// task icon, title. A tile opens in place (one at a time; Escape closes it): its title in teal ink
+// and its definition, the selected border; an opened tile keeps a done check in its disc. After all
+// eight the heading becomes the question, the counter line its hint, and every tile gets an answer
+// marker (the open one stays open to read). Wrong = retry, right = Next; the strip sits under the grid.
 function tiles(ctx) {
   const { screen, ui, zones } = ctx;
   const trackingId = screen.tracking[0].id;
   const visited = new Set();
   let phase = 'explore', solved = false, chosen = -1;
 
+  const sub = h('p', { class: 'w-task-sub', 'aria-live': 'polite' });
   const list = screen.tiles.map((t) => {
-    const front = h('span', { class: 'w-tile-face w-tile-front' }, h('span', { class: 'w-tile-num' }, String(t.n)), h('span', { class: 'w-tile-title' }, t.title));
-    const back = h('span', { class: 'w-tile-face w-tile-back', 'aria-hidden': 'true' }, h('span', { class: 'w-tile-num' }, String(t.n)), h('span', { class: 'w-tile-text' }, t.back));
-    const seen = h('span', { class: 'w-tile-seen', 'aria-hidden': 'true' });
+    const disc = h('span', { class: 'w-tile-disc', 'aria-hidden': 'true' });
+    const icon = glyph(t.icon, { size: 30.72, className: 'w-tile-icon' });
+    const openTitle = h('b', { class: 'w-tile-open-title' }, t.title);
+    const mark = h('span', { class: 'w-opt-mark w-tile-mark' });
+    const title = h('b', { class: 'w-tile-title' }, t.title);
+    const back = h('span', { class: 'w-tile-text' }, t.back);
     const btn = h('button', { class: 'w-tile', type: 'button', 'aria-expanded': 'false', dataset: { n: String(t.n) } },
-      h('span', { class: 'w-tile-inner' }, front, back), seen, h('span', { class: 'w-opt-mark' }));
-    return { t, btn, front, back, seen };
+      h('span', { class: 'w-tile-row' }, disc, icon, openTitle, mark), title, back);
+    return { t, btn, disc };
   });
+  const paintDisc = (x) => x.disc.replaceChildren(phase === 'explore' && visited.has(x.t.n) && x.btn.dataset.open !== 'true' ? glyph('g-check', { size: 19.2 }) : String(x.t.n));
   const flip = (x, open) => {
     x.btn.dataset.open = String(open);
     if (phase === 'explore') x.btn.setAttribute('aria-expanded', String(open));
-    x.front.setAttribute('aria-hidden', String(open));
-    x.back.setAttribute('aria-hidden', String(!open));
+    paintDisc(x);
   };
-  const grid = h('div', { class: 'w-tiles', role: 'group', 'aria-labelledby': 'w-instruction' }, list.map((x) => x.btn));
+  const grid = h('div', { class: 'w-tiles', role: 'group', 'aria-labelledby': 'w-instruction', dataset: { interaction: '' } }, list.map((x) => x.btn));
   arrowNav(grid, { selector: '.w-tile', cols: 4 });
+  grid.addEventListener('keydown', (e) => { if (e.key === 'Escape' && list.some((x) => x.btn.dataset.open === 'true')) { e.stopPropagation(); list.forEach((x) => flip(x, false)); } });
 
-  const lock = h('span', { class: 'w-question-lock', role: 'img', 'aria-label': screen.lockedLabel }, glyph('g-lock', { size: 23.04 }));
-  const question = h('h2', { class: 'w-question-text', id: nextId('w-question'), hidden: true }, screen.question);
-  const qRow = h('div', { class: 'w-question-row', 'aria-live': 'polite' }, lock, question);
+  // the ghost hand taps between the tiles once (lower left of tile 2, as in the frame), opening nothing
+  if (!ctx.revisit && screen.ghost) ctx.ghost({ type: screen.ghost.type,
+    steps: () => [{ point: () => { const r = list[1].btn.getBoundingClientRect(), k = zones.main.getBoundingClientRect().height / zones.main.offsetHeight || 1; return { x: r.left + 13.8 * k, y: r.top + 125.2 * k }; } }] });
 
-  layout(ctx, 'focus', sheet('focus w-sheet-wide', zones.instruction, h('div', { class: 'w-tiles-task', dataset: { interaction: '' } }, grid, qRow), zones.band));
+  layout(ctx, 'tiles', h('div', { class: 'w-task-head w-task-head-col' }, zones.instruction, sub), grid, h('div', { class: 'w-float w-float-tiles' }, zones.band));
+  zones.setHintVisible(false); // the frame shows no hint line: the hint stays for screen readers
   zones.setFeedback({ state: 'hint', text: screen.hint });
+  const count = () => { sub.textContent = fmt(ui.progress.opened, { i: visited.size, n: list.length }); };
 
   const unlock = () => {
     phase = 'answer';
-    lock.hidden = true;
-    question.hidden = false;
-    grid.setAttribute('aria-labelledby', question.id);
-    list.forEach((x) => x.btn.removeAttribute('aria-expanded'));
-    zones.setFeedback({ state: 'hint', text: screen.questionHint || screen.hint }); // the band now hints at the question
+    grid.dataset.phase = 'answer';
+    zones.instruction.textContent = screen.question;
+    sub.textContent = screen.questionHint;
+    list.forEach((x) => { x.btn.removeAttribute('aria-expanded'); paintDisc(x); });
+    zones.setFeedback({ state: 'hint', text: screen.questionHint });
   };
-  const toFront = () => list.forEach((x) => flip(x, false));
 
   list.forEach((x, i) => x.btn.addEventListener('click', () => {
     if (phase === 'explore') {
       const open = x.btn.dataset.open !== 'true';
       list.forEach((y) => { if (y !== x) flip(y, false); });
+      if (open) visited.add(x.t.n);
       flip(x, open);
-      if (open && !visited.has(x.t.n)) {
-        visited.add(x.t.n);
-        x.btn.dataset.seen = 'true';
-        x.seen.replaceChildren(glyph('g-check-b', { size: 16 }));
-      }
+      list.forEach(paintDisc);
+      count();
       if (visited.size === list.length) unlock(); // the last tile stays open to read; any click now answers
       return;
     }
     if (solved || i === chosen) return;
-    toFront();
+    list.forEach((y) => flip(y, false));
     chosen = i;
     const right = !!x.t.correct;
     ctx.answer({ trackingId, response: String(x.t.n), result: right ? 'correct' : 'wrong' });
-    list.forEach((y) => mark(y.btn, y === x ? (right ? 'correct' : 'wrong') : '', ui));
+    list.forEach((y) => paintAnswer(y.btn, y === x ? (right ? 'correct' : 'wrong') : '', ui));
     if (!right) { zones.setFeedback({ state: 'wrong', text: x.t.feedback }); return; }
     solved = true;
     list.forEach((y) => y.btn.setAttribute('aria-disabled', 'true'));
@@ -97,13 +104,14 @@ function tiles(ctx) {
   }));
 
   list.forEach((x) => flip(x, false));
+  count();
   if (ctx.revisit) {
-    list.forEach((x) => { visited.add(x.t.n); x.btn.dataset.seen = 'true'; x.seen.replaceChildren(glyph('g-check-b', { size: 16 })); });
+    list.forEach((x) => visited.add(x.t.n));
     unlock();
     const k = list.findIndex((x) => x.t.correct);
     solved = true;
     chosen = k;
-    mark(list[k].btn, 'correct', ui);
+    paintAnswer(list[k].btn, 'correct', ui);
     list.forEach((y) => y.btn.setAttribute('aria-disabled', 'true'));
     zones.setFeedback({ state: 'correct', text: list[k].t.feedback });
     ctx.unlockNext({ focus: false });

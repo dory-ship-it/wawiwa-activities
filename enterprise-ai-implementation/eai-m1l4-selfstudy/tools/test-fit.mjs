@@ -130,22 +130,27 @@ const STATES = [
   ['S05b', 'wrong', async (p) => { await p.keyboard.press('Shift'); await click(p, '.w-label-card[data-label="event"]'); await click(p, '.w-target[data-target="a"]'); }],
   ['S05b', 'done', async (p) => { await p.keyboard.press('Shift'); for (const [l, t] of [['swimlane', 'a'], ['gateway', 'b'], ['event', 'c']]) { await click(p, `.w-label-card[data-label="${l}"]`); await click(p, `.w-target[data-target="${t}"]`); } }],
   ['S06', 'hint', async () => {}],
-  ['S06', 'left wrong', async (p) => click(p, '.w-situation .w-opt[data-id="b"]')],
-  ['S06', 'both right', async (p) => { await click(p, '.w-situation .w-opt[data-id="a"]'); await click(p, '.w-situation + .w-situation .w-opt[data-id="b"]'); }],
-  ['S07', 'tile 5 open', async (p) => click(p, '.w-tile[data-n="5"]')],
-  ['S07', 'question', async (p) => { for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); }],
-  ['S07', 'wrong', async (p) => { for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); await click(p, '.w-tile[data-n="7"]'); }],
-  ['S07', 'correct', async (p) => { for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); await click(p, '.w-tile[data-n="8"]'); }],
+  ['S06', 'situation 1 wrong', async (p) => click(p, '.w-opt[data-id="b"]')],
+  ['S06', 'situation 1 right', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['S06', 'situation 2 wrong', async (p) => { await click(p, '.w-opt[data-id="a"]'); await click(p, '[data-action="nextSituation"]'); await click(p, '.w-situation-now .w-opt[data-id="a"]'); }],
+  ['S06', 'both right', async (p) => { await click(p, '.w-opt[data-id="a"]'); await click(p, '[data-action="nextSituation"]'); await click(p, '.w-situation-now .w-opt[data-id="b"]'); }],
+  ['S07', 'tile 5 open', async (p) => { await p.keyboard.press('Shift'); await click(p, '.w-tile[data-n="5"]'); }],
+  ['S07', 'question', async (p) => { await p.keyboard.press('Shift'); for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); }],
+  ['S07', 'wrong', async (p) => { await p.keyboard.press('Shift'); for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); await click(p, '.w-tile[data-n="7"]'); }],
+  ['S07', 'correct', async (p) => { await p.keyboard.press('Shift'); for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); await click(p, '.w-tile[data-n="8"]'); }],
   ['S08', 'round 1 wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
   ['S08', 'round 1 right', async (p) => click(p, '.w-opt[data-id="b"]')],
   ['S08', 'round 3 right', async (p) => {
     for (const k of ['b', 'c']) { await click(p, `.w-opt[data-id="${k}"]`); await click(p, '[data-action="nextRound"]'); }
     await click(p, '.w-opt[data-id="a"]');
   }],
-  ['S08', 'pause marker', async (p) => {
-    for (const k of ['b', 'c']) { await click(p, `.w-opt[data-id="${k}"]`); await click(p, '[data-action="nextRound"]'); }
-    await click(p, '.w-opt[data-id="a"]');
-    await click(p, '.w-next');
+  ['S08B', 'hint', async () => {}],
+  ['S08B', 'empty save', async (p) => click(p, '[data-action="save"]')],
+  ['S08B', 'saved, full', async (p) => {
+    await p.type('.w-input[data-store="L4_CASE_TRIGGER"]', 'A request form arrives from a sales rep after every customer call, by email');
+    await p.type('.w-input[data-store="L4_CASE_STEPS"]', 'The rep writes notes by hand, the team lead checks them, the sales manager reads them two days later and asks follow-up questions by phone');
+    await p.type('.w-input[data-store="L4_CASE_OUTPUT"]', 'A call summary in the CRM, to the sales manager and the account team');
+    await click(p, '[data-action="save"]');
   }],
   // R2: Chapters 3 and 4
   ['FT3', 'idle', async () => {}],
@@ -193,6 +198,9 @@ const STATES = [
   ['S18', 'step 2 unticked', async (p) => { await click(p, '.w-opt[data-id="b"]'); await p.type('.w-input', 'Sales call summaries'); await click(p, '[data-action="save"]'); }],
   ['S18', 'saved', async (p) => { await click(p, '.w-opt[data-id="b"]'); await p.type('.w-input', 'Sales call summaries'); await click(p, '.w-checkbox'); await click(p, '[data-action="save"]'); }],
   ['S19', 'brief', async () => {}],
+  ['S19', 'brief, full sketch', async (p) => {
+    await p.evaluate(() => { const f = window.__l4.state.f; f.L4_CASE_TRIGGER = 'Trigger text '.repeat(10).slice(0, 120); f.L4_CASE_STEPS = 'Steps and who does them '.repeat(11).slice(0, 250); f.L4_CASE_OUTPUT = 'Output text '.repeat(11).slice(0, 120); window.__l4.go('S19'); });
+  }],
   ['S19', 'opened', async (p) => { await noNewTab(p, '[data-action="open"]'); await click(p, '[data-action="open"]'); }],
   ['S19', 'return, saved', async (p) => {
     await noNewTab(p, '[data-action="open"]'); await click(p, '[data-action="open"]'); await click(p, '[data-action="back"]');

@@ -15,7 +15,11 @@ const fieldText = (fields = []) => fields.flatMap((f) => [f.label, f.placeholder
 // One entry per view the learner sees at once on screen s: [name, strings on screen]
 export function screenViews(s, content) {
   if (s.template === 'video') return [[s.id, [s.title, s.guidingQuestion]], ...(s.stops || []).map((st) => [`${s.id} ${st.id}`, [st.question, ...st.options.map((o) => o.label)]])];
-  if (s.template === 'handoff') return Object.entries(s.states).map(([k, st]) => [`${s.id} ${k}`, [...stageText(st.stage), ...fieldText(st.fields)]]);
+  if (s.template === 'handoff') {
+    // the brief's read-only sketch (S08B): its heading and the three part names (the learner's own text not counted)
+    const sketchText = (st) => (st.sketch ? [st.sketch.label, ...(content.screens.find((x) => x.id === st.sketch.from)?.fields || []).map((f) => f.label)] : []);
+    return Object.entries(s.states).map(([k, st]) => [`${s.id} ${k}`, [...stageText(st.stage), ...fieldText(st.fields), ...sketchText(st)]]);
+  }
   if (s.variant === 'selfcheck') return s.steps.map((st) => [`${s.id} ${st.id}`, [...(st.rows || []).map((r) => r.text), ...(st.chips || []).map((c) => c.label), st.strip]]);
   // R1 templates, each in its fullest state
   // sort: placed cards stay on screen as chips, so every card counts, unless the chips are markers
@@ -43,8 +47,10 @@ export function screenViews(s, content) {
   }
   if (s.variant === 'tiles') {
     const nums = s.tiles.map((t) => String(t.n));
-    return [...s.tiles.map((t) => [`${s.id} tile ${t.n} open`, [...nums, ...s.tiles.filter((x) => x !== t).map((x) => x.title), t.back]]),
-      [`${s.id} answering`, [...nums, ...s.tiles.map((t) => t.title), s.question]]];
+    // NL2: the open tile shows its title and definition; when answering, the question is the heading
+    // (excluded) and its hint the line under it
+    return [...s.tiles.map((t) => [`${s.id} tile ${t.n} open`, [...nums, ...s.tiles.map((x) => x.title), t.back]]),
+      [`${s.id} answering`, [...nums, ...s.tiles.map((t) => t.title), s.questionHint]]];
   }
   // Round 4 templates (instruction h1 and buttons excluded, as everywhere)
   if (s.template === 'title') return [[s.id, [s.program, s.kicker, s.quote]]];
@@ -63,8 +69,10 @@ export function screenViews(s, content) {
     const base = [s.label, s.text, ...s.parts.flatMap((p) => [p.title, p.text])];
     return [[s.id, base], [`${s.id} case on`, [...base, ...s.parts.flatMap((p) => [s.caseLabel, p.case])]]];
   }
-  if (s.variant === 'pair') return [[s.id, s.situations.flatMap((x) => [x.text, ...x.options.map((o) => o.label)])]];
-  if (s.variant === 'rounds') return s.rounds.map((r) => [`${s.id} ${r.id}`, [s.strip, r.badge, r.line, ...s.options.map((o) => o.label)]]);
+  // NL2: one situation at a time (the solved ones as done cards), the rounds with their rules band
+  if (s.variant === 'pair') return s.situations.map((x, k) => [`${s.id} ${x.id}`, [x.hint, s.answerLabel, x.text, ...x.options.flatMap((o) => [o.label, o.sub]),
+    ...s.situations.slice(0, k).flatMap((d) => [d.doneLabel, d.options.find((o) => o.correct).label])]]);
+  if (s.variant === 'rounds') return s.rounds.map((r) => [`${s.id} ${r.id}`, [s.rules.label, ...s.rules.items, r.badge, r.line, s.hint, ...s.options.map((o) => o.label)]]);
   return [[s.id, [...stageText(s.stage), ...(s.options || []).map((o) => o.label), ...fieldText(s.fields), ...(s.cases || []).map((c) => c.label)]]];
 }
 

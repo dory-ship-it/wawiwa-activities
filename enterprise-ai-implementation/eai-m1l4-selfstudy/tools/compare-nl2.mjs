@@ -68,7 +68,7 @@ const FRAMES = [
   [37, 'S07', 'ghost', async (p) => atGhost(p)],
   [38, 'S07', 'three-opened', async (p) => { await stopGhost(p); for (const n of [1, 2, 3]) await click(p, `.w-tile[data-n="${n}"]`); await rest(p); }],
   [39, 'S07', 'question', async (p) => { await stopGhost(p); for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); await p.keyboard.press('Escape'); await rest(p); }],
-  [40, 'S07', 'correct', async (p) => { await stopGhost(p); for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); await p.keyboard.press('Escape'); await click(p, '.w-tile[data-n="8"]'); await rest(p); }],
+  [40, 'S07', 'correct', async (p) => { await stopGhost(p); for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); await click(p, '.w-tile[data-n="8"]'); await rest(p); }], // the open tile 8 answers on click
   [41, 'S08', 'round1', async () => {}],
   [42, 'S08', 'round1-correct', async (p) => { await click(p, '.w-opt[data-id="b"]'); await rest(p); }],
   [43, 'S08', 'round2-wrong', async (p) => { await click(p, '.w-opt[data-id="b"]'); await click(p, '[data-action="nextRound"]'); await click(p, '.w-opt[data-id="a"]'); await rest(p); }],

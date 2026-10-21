@@ -1,9 +1,10 @@
-// Input template (S02; the S18 and S19 fields reuse the field builder), "Hybrid cinematic" look:
+// Input template (S02, S08B; the S18 and S19 fields reuse the field builder), "Hybrid cinematic" look:
 // a Focus panel. Context line, the heading with "Show me" beside it, the hint as the line under it,
 // the labelled fields side by side (maxlength and a live {n} / {max} counter, announced to screen
 // readers only from COUNTER_ANNOUNCE_AT characters on), then one row: "Open Homework 1" (new tab),
 // the help question as a button with its answer in a glass tooltip, the privacy line and Save; the
-// feedback strip at the panel's foot. Save is always enabled:
+// feedback strip at the panel's foot. S08B (arrange "chain", no hint): the heading alone, the three
+// fields on one line with arrows between them, the privacy line and Save. Save is always enabled:
 //   any field empty on Save -> feedback.empty in the neutral strip (its first sentence as the head)
 //   all filled              -> values stored under each field's store key, one fill-in answer per
 //                              field on the tracking bus, feedback.saved, Next unlocks
@@ -39,13 +40,15 @@ export const input = {
         tap: () => s.el.classList.add('w-ghost-on'), hold: 900 } : s)),
       restore: () => first?.classList.remove('w-ghost-on') }) : null;
 
+    // S08B (arrange "chain"): the fields on one line with an arrow between each two
+    const chain = screen.arrange === 'chain';
+    const fieldEls = chain ? controls.flatMap((c, i) => [i ? h('span', { class: 'w-chain-arrow', 'aria-hidden': 'true' }, glyph('g-arrow', { size: 30.72 })) : null, c.el]) : controls.map((c) => c.el);
     layout(ctx, 'focus',
       sheet('focus',
         contextLine(screen.stage.top?.text),
-        h('div', { class: 'w-head-row' }, zones.instruction, g && screen.ghost.showMe ? g.button : null),
-        h('p', { class: 'w-subline' }, screen.hint),
+        screen.hint ? [h('div', { class: 'w-head-row' }, zones.instruction, g && screen.ghost.showMe ? g.button : null), h('p', { class: 'w-subline' }, screen.hint)] : zones.instruction,
         h('div', { class: 'w-form-task', dataset: { interaction: '' } },
-          h('div', { class: 'w-fields' }, controls.map((c) => c.el), announcer),
+          h('div', { class: 'w-fields' + (chain ? ' w-fields-chain' : '') }, fieldEls, announcer),
           h('div', { class: 'w-actionbar' }, hw, help, privacy.el, save)),
         zones.band));
 

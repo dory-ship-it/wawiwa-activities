@@ -1,5 +1,6 @@
 // Handoff template (S19), a Focus panel (styled by analogy; the screen's image waits for the media track).
-//   brief   the activity title with its time chip, the instruction, four numbered steps, the coach
+//   brief   the activity title with its time chip, the instruction, the learner's Chapter 2 sketch
+//           (S08B, read-only: Trigger, Steps, Output), four numbered steps, the coach
 //           line and "Open workbook": a real link to the EXISTING workbook (content links, new tab,
 //           rel noopener noreferrer). After it is opened the band says so and "I'm back" appears.
 //   return  "I'm back" switches to the return state: its title, the metric field (250 max, counter),
@@ -26,7 +27,13 @@ export const handoff = {
     const open = h('a', { class: 'w-btn w-btn-action w-open', href, target: '_blank', rel: screen.handoff.rel, dataset: { action: 'open' } },
       h('span', {}, ui.buttons.open), glyph('g-arrow', { size: 19.2 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')'));
     const backBtn = h('button', { class: 'w-btn w-btn-ghost', type: 'button', dataset: { action: 'back' }, hidden: true }, ui.buttons.back);
-    const briefTask = h('div', { class: 'w-handoff-task', dataset: { interaction: '' } }, steps, h('div', { class: 'w-actionbar' }, coach.el, h('div', { class: 'w-action' }, open, backBtn))); // Open workbook first (primary), then I'm back
+    // the steps, and beside them the learner's sketch from Chapter 2 (S08B, read-only), when the content asks for it
+    const sk = brief.sketch;
+    const sketchFields = sk ? (content.screens.find((s) => s.id === sk.from)?.fields || []) : [];
+    const sketch = sk ? h('section', { class: 'w-sketch', 'aria-label': sk.label }, h('p', { class: 'w-label' }, h('span', {}, sk.label)),
+      h('dl', { class: 'w-sketch-list' }, sketchFields.map((f) => h('div', { class: 'w-sketch-row' }, h('dt', {}, f.label), h('dd', {}, ctx.store.get(f.store) || ui.record.empty))))) : null;
+    const briefTask = h('div', { class: 'w-handoff-task', dataset: { interaction: '' } }, sketch ? h('div', { class: 'w-brief-grid' }, steps, sketch) : steps,
+      h('div', { class: 'w-actionbar' }, coach.el, h('div', { class: 'w-action' }, open, backBtn))); // Open workbook first (primary), then I'm back
     const briefView = h('div', { class: 'w-handoff-view' }, h('div', { class: 'w-handoff-head' }, title, chip), briefTask);
 
     /* ---- return ---- */
