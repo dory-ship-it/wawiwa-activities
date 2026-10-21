@@ -50,11 +50,10 @@ export const moduleMap = {
     const mm = ui.moduleMap;
     const stations = screen.stations;
     const panelId = 'w-map-panel';
+    // the panel shows the open lesson's own line only: its kicker and title already sit on the open tab
     const panelIcon = h('span', { class: 'w-map-panel-icon' });
-    const panelKicker = h('p', { class: 'w-map-panel-kicker' });
-    const panelTitle = h('p', { class: 'w-map-panel-title' });
     const panelText = h('p', { class: 'w-map-panel-text' });
-    const panel = h('section', { class: 'w-map-panel', id: panelId, role: 'tabpanel', tabindex: '0' }, panelIcon, h('div', {}, panelKicker, panelTitle, panelText));
+    const panel = h('section', { class: 'w-map-panel', id: panelId, role: 'tabpanel', tabindex: '0' }, panelIcon, panelText);
 
     const tabs = stations.map((st) => {
       const today = st.status === 'today';
@@ -73,8 +72,6 @@ export const moduleMap = {
       panel.setAttribute('aria-labelledby', tabs[i].tab.id);
       panel.dataset.station = st.id;
       panelIcon.replaceChildren(icon(st.icon, { size: 28 }));
-      panelKicker.textContent = st.status === 'today' ? st.kicker + ' · ' + mm.today : st.kicker;
-      panelTitle.textContent = st.title;
       panelText.textContent = st.text;
       if (focus) tabs[i].tab.focus();
     }
@@ -106,7 +103,7 @@ export const moduleMap = {
       h('div', { class: 'w-present' },
         h('p', { class: 'w-eyebrow' }, screen.eyebrow),
         h('div', { class: 'w-present-head' }, zones.instruction, g ? g.button : null),
-        h('p', { class: 'w-present-line' }, screen.line),
+        screen.line ? h('p', { class: 'w-present-line' }, screen.line) : null,
         h('div', { class: 'w-map' }, h('span', { class: 'w-map-line', 'aria-hidden': 'true' }), list),
         panel));
     return { unmount() {} };
@@ -128,9 +125,9 @@ export const goals = {
       h('div', { class: 'w-present' },
         h('p', { class: 'w-eyebrow' }, screen.eyebrow),
         zones.instruction,
-        h('section', { class: 'w-deliverable', 'aria-label': d.label },
+        h('section', { class: 'w-deliverable', 'aria-label': d.label || null },
           h('span', { class: 'w-deliverable-icon' }, icon(d.icon, { size: 28 })),
-          h('div', {}, h('p', { class: 'w-deliverable-label' }, d.label), h('p', { class: 'w-deliverable-text' }, d.text))),
+          h('div', {}, d.label ? h('p', { class: 'w-deliverable-label' }, d.label) : null, h('p', { class: 'w-deliverable-text' }, d.text))),
         h('ul', { class: 'w-goals' }, tiles)));
     // the full goal on hover or keyboard focus, and for screen readers through aria-describedby
     tiles.forEach((li, i) => attachTip(li, screen.goals[i].text));
@@ -222,7 +219,7 @@ export const concept = {
     layout(ctx, 'concept', header(ctx),
       h('div', { class: 'w-concept' },
         h('p', { class: 'w-key-label' }, h('span', { class: 'w-key-icon' }, icon('key-idea', { size: 20 })),
-          h('span', { class: 'w-key-word' }, screen.label), h('span', { class: 'w-key-topic' }, '· ' + screen.topic)),
+          h('span', { class: 'w-key-word' }, screen.label), screen.topic ? h('span', { class: 'w-key-topic' }, '· ' + screen.topic) : null),
         zones.instruction,
         h('p', { class: 'w-concept-text' }, screen.text),
         h('div', { class: 'w-figs' }, figs),

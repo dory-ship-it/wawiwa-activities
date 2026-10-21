@@ -6,11 +6,12 @@
 //  4. every icon name used in content exists in src/icons.js
 //  5. the Next button (white on --w-red) font token is at least 18.66px and bold
 //  6. contrast of every text/background pair in the token table (4.5:1 text, 3:1 large text and UI)
-//  7. no learner-facing sentences in src/*.js string literals; no italics in src/*.css
+//  7. no learner-facing sentences in src/*.js string literals (src/review/ is exempt: review-only UI
+//     for the team, never in the package); no italics in src/*.css
 //  8. the boot fallback copy in index.html equals ui.boot in the content file
 //  9. word counts (storyboard rule): on-screen words per screen view at most 45, every hint,
 //     feedback line and pause marker at most 25; instruction line, buttons and the memo's
-//     header label excluded
+//     header label excluded (the counting is src/review/words.js, shared with the review toolbar)
 // 10. every interaction has full tracking metadata, ids are unique, graded keys match the options
 // 11. no arrow glyph (U+2192) in ui strings or src: the font subset has none, use the arrow icon
 // 12. hex allowlist (P1.5): every hex colour in src/ is one of the approved tokens
@@ -123,7 +124,7 @@ console.log('');
 /* 7. no learner-facing sentences in src, no italics */
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`])\/\/.*$/gm, '$1');
 let sentenceHits = 0;
-for (const f of srcFiles.filter((p) => p.endsWith('.js'))) {
+for (const f of srcFiles.filter((p) => p.endsWith('.js') && !relative(ROOT, p).startsWith(join('src', 'review')))) {
   const code = stripComments(read(f));
   for (const m of code.matchAll(/(['"`])((?:\\.|(?!\1)[^\\\n])*)\1/g)) {
     const s = m[2];
@@ -140,53 +141,10 @@ const fb = Object.fromEntries([...html.matchAll(/data-key="(\w+)">([^<]*)</g)].m
 const bootOk = Object.entries(content.ui.boot).every(([k, v]) => fb[k] === v) && Object.keys(fb).length === Object.keys(content.ui.boot).length;
 bootOk ? ok('index.html boot fallback equals ui.boot') : fail('index.html boot fallback differs from ui.boot');
 
-/* 9. word counts */
-const MAX_SCREEN_WORDS = 45, MAX_FEEDBACK_WORDS = 25;
-const words = (s) => String(s ?? '').split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
-// on-screen text of one stage (top / middle / bottom), whatever the kind
-const stageText = (stage = {}) => Object.values(stage).flatMap((p) => [p.eyebrow, p.text, p.label, p.chip?.text, p.help?.text, ...(p.bubbles || []), ...(p.items || []).map((x) => x.text)]);
-const fieldText = (fields = []) => fields.flatMap((f) => [f.label, f.placeholder]);
+/* 9. word counts (the counting lives in src/review/words.js, shared with the review mode) */
+const { MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS, words, screenViews, screenFeedback } = await import('../src/review/words.js');
 // one entry per view the learner sees at once: [name, strings on screen]
-const views = content.screens.flatMap((s) => {
-  if (s.template === 'video') return [[s.id, [s.title, s.guidingQuestion]], ...(s.stops || []).map((st) => [`${s.id} ${st.id}`, [st.question, ...st.options.map((o) => o.label)]])];
-  if (s.template === 'handoff') return Object.entries(s.states).map(([k, st]) => [`${s.id} ${k}`, [...stageText(st.stage), ...fieldText(st.fields)]]);
-  if (s.variant === 'selfcheck') return s.steps.map((st) => [`${s.id} ${st.id}`, [...(st.rows || []).map((r) => r.text), ...(st.chips || []).map((c) => c.label), st.strip]]);
-  // R1 templates, each in its fullest state
-  // sort: placed cards stay on screen as chips, so every card counts, unless the chips are markers
-  // without text (S17: one case on screen at a time); then the longest case counts
-  if (s.template === 'sort') {
-    const cardText = s.chipStyle === 'marker' ? [s.cards.map((c) => c.text).sort((a, b) => words(b) - words(a))[0]] : s.cards.map((c) => c.text);
-    return [[s.id, [s.header, ...s.columns.map((c) => c.label), ...cardText]]];
-  }
-  // R2 templates
-  if (s.variant === 'fill') return [[s.id, [s.situation.text, ...s.fieldRows.flatMap((f) => [f.label, f.value]), ...s.options.map((o) => o.label)]]];
-  if (s.variant === 'metric') return [[s.id, [s.field.label, ...s.options.map((o) => o.label), s.slotsTitle, ...s.slots.map((x) => x.label)]]];
-  if (s.variant === 'bounds') return [[s.id, [s.strip, ...s.options.flatMap((o) => [s.startLabel, o.start, s.endLabel, o.end])]]];
-  // R3 templates
-  if (s.variant === 'safety') return [[`${s.id} step1`, [s.stage.top.text, ...s.options.map((o) => o.label)]],
-    [`${s.id} step2`, [s.stage.top.text, s.step2.field.label, s.step2.privacy.text, s.step2.checkbox]]];
-  if (s.template === 'check') return s.items.map((it) => [`${s.id} ${it.id}`, it.kind === 'tiles' ? it.tiles.flatMap((t) => [String(t.n), t.text]) : [it.stem, ...it.options.map((o) => o.label)]]);
-  if (s.variant === 'close') return [[`${s.id} step1`, s.options.map((o) => o.label)], [`${s.id} step2`, [s.step2.bridge.text, s.step2.homework.text]]];
-  if (s.variant === 'pick') return s.tiles.map((t) => [`${s.id} tile ${t.n} open`, [...s.tiles.flatMap((x) => [String(x.n), x.title]), s.question, t.text]]);
-  if (s.variant === 'diagram') return [[s.id, [s.diagram.tag, ...s.diagram.lanes.map((l) => l.label), ...s.diagram.nodes.map((n) => n.label), ...s.legend.map((g) => g.label)]]];
-  if (s.variant === 'tiles') {
-    const nums = s.tiles.map((t) => String(t.n));
-    return [...s.tiles.map((t) => [`${s.id} tile ${t.n} open`, [...nums, ...s.tiles.filter((x) => x !== t).map((x) => x.title), t.back]]),
-      [`${s.id} answering`, [...nums, ...s.tiles.map((t) => t.title), s.question]]];
-  }
-  // Round 4 templates (instruction h1 and buttons excluded, as everywhere)
-  if (s.template === 'title') return [[s.id, [s.program, s.kicker, s.quote]]];
-  if (s.template === 'moduleMap') {
-    const stations = s.stations.flatMap((x) => [x.kicker, x.title]);
-    return s.stations.map((x) => [`${s.id} ${x.id} open`, [s.eyebrow, s.line, ...stations, content.ui.moduleMap.today, x.kicker, x.title, x.text]]);
-  }
-  if (s.template === 'goals') return [[s.id, [s.eyebrow, s.deliverable.label, s.deliverable.text, ...s.goals.map((g) => g.label)]]];
-  if (s.template === 'warmup') return [[s.id, [s.panel.title, s.panel.chip, s.panel.text, s.panel.foot, ...s.options.map((o) => o.label)]]];
-  if (s.template === 'concept') return [[s.id, [s.label, s.topic, s.text, ...s.figures.flatMap((f) => [f.chip, f.caption]), s.evidence.text, s.evidence.source]]];
-  if (s.variant === 'pair') return [[s.id, s.situations.flatMap((x) => [x.text, ...x.options.map((o) => o.label)])]];
-  if (s.variant === 'rounds') return s.rounds.map((r) => [`${s.id} ${r.id}`, [s.strip, r.badge, r.line, ...s.options.map((o) => o.label)]]);
-  return [[s.id, [...stageText(s.stage), ...(s.options || []).map((o) => o.label), ...fieldText(s.fields), ...(s.cases || []).map((c) => c.label)]]];
-});
+const views = content.screens.flatMap((s) => screenViews(s, content));
 // a screen may carry wordLimit { max, why } (copy approved over the rule, planning to cut): it is
 // listed as a WARNING with its reason, and fails only above its own max
 let wordFails = 0;
@@ -203,26 +161,10 @@ if (overRule.length) {
   overRule.forEach((t) => console.log('          ' + t));
 }
 const feedbackLines = [
-  ...content.chapters.filter((c) => c.pauseMarker).map((c) => [`${c.id} pauseMarker`, c.pauseMarker]),
-  ...content.screens.flatMap((s) => [
-    [`${s.id} hint`, s.hint],
-    ...(s.options || []).map((o) => [`${s.id} option ${o.id}`, o.feedback]),
-    ...Object.entries(s.feedback || {}).map(([k, v]) => [`${s.id} feedback.${k}`, v]),
-    ...(s.stops || []).flatMap((st) => st.options.map((o) => [`${s.id} ${st.id} option ${o.id}`, o.feedback])),
-    ...Object.entries(s.states || {}).flatMap(([k, st]) => Object.entries(st).filter(([f, v]) => /Feedback$/.test(f) && typeof v === 'string').map(([f, v]) => [`${s.id} ${k}.${f}`, v])),
-    ...(s.steps || []).flatMap((st) => [...(st.rows || []).flatMap((r) => Object.entries(r.feedback).map(([k, v]) => [`${s.id} ${r.id} ${k}`, v])),
-      ...(st.chips || []).map((c) => [`${s.id} chip ${c.id}`, c.feedback])]),
-    [`${s.id} questionHint`, s.questionHint],
-    ...(s.cards || []).flatMap((c) => Object.entries(c.feedback).map(([k, v]) => [`${s.id} card ${c.id ?? c.n} ${k}`, v])),
-    ...(s.hotspots || []).map((x) => [`${s.id} hotspot ${x.id}`, x.feedback]),
-    ...(s.legend || []).map((g) => [`${s.id} legend ${g.id}`, g.text]),
-    ...(s.tiles || []).map((t) => [`${s.id} tile ${t.n}`, t.feedback]),
-    ...(s.situations || []).flatMap((x) => x.options.map((o) => [`${s.id} ${x.id} option ${o.id}`, o.feedback])),
-    ...(s.rounds || []).flatMap((r) => Object.entries(r.feedback).map(([k, v]) => [`${s.id} ${r.id} option ${k}`, v])),
-    ...Object.entries(s.step2?.feedback || {}).map(([k, v]) => [`${s.id} step2.${k}`, v]),
-    ...(s.items || []).flatMap((it) => [...(it.options || []).map((o) => [`${s.id} ${it.id} option ${o.id}`, o.feedback]), ...(it.tiles || []).map((t) => [`${s.id} ${it.id} tile ${t.n}`, t.feedback])]),
-  ]),
-].filter(([, v]) => v);
+  // a chapter's pause marker counts even when its last screen is not in content yet
+  ...content.chapters.filter((c) => c.pauseMarker && !ids.has(c.screens[c.screens.length - 1])).map((c) => [`${c.id} pauseMarker`, c.pauseMarker]),
+  ...content.screens.flatMap((s) => screenFeedback(s, content)),
+];
 const longFb = feedbackLines.filter(([, v]) => words(v) > MAX_FEEDBACK_WORDS);
 longFb.forEach(([k, v]) => fail(`${k}: ${words(v)} words (max ${MAX_FEEDBACK_WORDS})`));
 if (!longFb.length) ok(`all ${feedbackLines.length} hints, feedback lines and pause markers at most ${MAX_FEEDBACK_WORDS} words`);

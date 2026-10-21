@@ -84,6 +84,27 @@ async function newTabFrom(p, key = 'Enter') {
   return url;
 }
 
+// Where the ghost hand points now (its ripple centre, = the fingertip): whether that spot is on an
+// option, and how far it is from the point the content's target names (src/ghost.js targetSteps:
+// options-gap = between the first two options, options-centre = the centre of all the options).
+async function ghostSpot(p, target) {
+  return p.evaluate((target) => {
+    const g = document.querySelector('.w-ghost-ripple')?.getBoundingClientRect();
+    if (!g) return null;
+    const c = { x: g.left + g.width / 2, y: g.top + g.height / 2 };
+    const rs = [...document.querySelectorAll('.w-opt')].filter((el) => el.getClientRects().length).map((el) => el.getBoundingClientRect());
+    const onOption = rs.some((o) => c.x >= o.left && c.x <= o.right && c.y >= o.top && c.y <= o.bottom);
+    let want;
+    if (target === 'options-gap') {
+      const [a, b] = rs;
+      want = b.top >= a.bottom - 1 ? { x: a.right - 48, y: (a.bottom + b.top) / 2 } : { x: (a.right + b.left) / 2, y: (a.top + a.bottom) / 2 };
+    } else {
+      want = { x: (Math.min(...rs.map((r) => r.left)) + Math.max(...rs.map((r) => r.right))) / 2, y: (Math.min(...rs.map((r) => r.top)) + Math.max(...rs.map((r) => r.bottom))) / 2 };
+    }
+    return { onOption, off: Math.round(Math.hypot(c.x - want.x, c.y - want.y)) };
+  }, target);
+}
+
 // Sort, tray mode: select a tray card (Space), then a column (Enter), keyboard only.
 // reselect: false when the card is still selected after a wrong column.
 async function trayPlace(p, cardKey, col, { reselect = true } = {}) {
@@ -100,11 +121,11 @@ async function videoRun(p, id, { shotPlaying = null, shotStop = null, shotWrong 
   const V = S[id];
   await p.waitForFunction(() => document.querySelector('.w-video').readyState >= 1 && document.querySelectorAll('.w-tline').length > 0);
   const head = await p.evaluate(() => ({ meta: document.querySelector('.w-video-meta').textContent, guiding: document.querySelector('.w-guiding').textContent, src: document.querySelector('.w-video').getAttribute('src'),
-    markers: [...document.querySelectorAll('.w-seek-stop')].map((m) => parseFloat(m.style.left).toFixed(2)).join() }));
+    poster: document.querySelector('.w-video').getAttribute('poster'), markers: [...document.querySelectorAll('.w-seek-stop')].map((m) => parseFloat(m.style.left).toFixed(2)).join() }));
   const wantMeta = `${V.title} · ${UI.video.meta.replace('{length}', V.media.length).replace('{n}', V.stops.length)}`;
-  expect(head.meta === wantMeta && head.guiding === `${V.guidingLabel || UI.video.guiding} ${V.guidingQuestion}` && head.src === V.media.src
+  expect(head.meta === wantMeta && head.guiding === `${V.guidingLabel || UI.video.guiding} ${V.guidingQuestion}` && head.src === V.media.src && head.poster === (V.media.poster || null)
     && head.markers === V.stops.map((s) => ((100 * s.t) / V.media.duration).toFixed(2)).join(),
-  `${id}: "${head.meta}", guiding question, video ${head.src} from content, one marker per stop on the timeline`);
+  `${id}: "${head.meta}", guiding question, video ${head.src} and poster ${head.poster} from content, one marker per stop on the timeline`);
   const trClosed = await p.evaluate(() => document.querySelector('.w-transcript').hidden && document.querySelector('.w-tr').getAttribute('aria-pressed') === 'false' && document.querySelector('.w-video-view').dataset.transcript === 'closed');
   await tabTo(p, '.w-tr');
   await press(p, 'Enter');
@@ -145,13 +166,16 @@ async function videoRun(p, id, { shotPlaying = null, shotStop = null, shotWrong 
     expect(logoOff, `${id} stop ${k + 1}: the Wawiwa logo sits off the paused still (top of the question panel)`);
     if (k === 0 && shotStop) await shotR2(p, shotStop);
     if (k === 0 && ghost) {
-      // the ghost hand demonstrates the stop once: it taps an option but selects nothing; a key removes it
+      // the ghost hand demonstrates the stop once: it points at the content's target (between the
+      // first two options, on none of them) and selects nothing; a key removes it
       await p.waitForSelector('.w-ghost', { timeout: 3000 }).catch(() => {});
       const gh = await p.evaluate(() => ({ on: !!document.querySelector('.w-ghost'), showMe: !!document.querySelector('.w-stop-panel [data-action="showMe"]'),
         marked: [...document.querySelectorAll('.w-opt-stack')].filter((b) => b.dataset.result).length }));
+      const spot = await ghostSpot(p, V.ghost.target);
       await press(p, 'Shift');
       const gone = await p.evaluate(() => !document.querySelector('.w-ghost'));
       expect(gh.on && gh.showMe && !gh.marked && gone, `${id} stop 1 ghost hand: shown with "Show me" beside the question, no option marked, a key removes it`);
+      expect(V.ghost.target && spot && !spot.onOption && spot.off <= 2, `${id} stop 1 ghost hand: points at "${V.ghost.target}" (${spot?.off}px off), on no option`);
     }
     const wrongI = stop.options.findIndex((o) => !o.correct), rightI = stop.options.findIndex((o) => o.correct);
     await tabTo(p, `.w-opt-stack[data-id="${stop.options[wrongI].id}"]`);
@@ -257,10 +281,11 @@ await press(page, 'Enter');
 // O2 module map: tabs by keyboard, L4 open on arrival, Next never locked, no ghost hand
 await expectNewScreen(page, 'O2', 'O1 "Start the lesson"');
 const tabState = () => page.evaluate(() => ({ sel: [...document.querySelectorAll('.w-map-tab')].map((t) => t.getAttribute('aria-selected') === 'true' ? t.dataset.station : '').join(''),
-  panel: document.querySelector('.w-map-panel').dataset.station, text: document.querySelector('.w-map-panel-text').textContent, role: document.querySelector('.w-map-tabs').getAttribute('role') }));
+  panel: document.querySelector('.w-map-panel').dataset.station, text: document.querySelector('.w-map-panel-text').textContent, all: document.querySelector('.w-map-panel').textContent,
+  role: document.querySelector('.w-map-tabs').getAttribute('role') }));
 let mapTabs = await tabState();
-expect(mapTabs.sel === 'l4' && mapTabs.panel === 'l4' && mapTabs.role === 'tablist' && mapTabs.text === S.O2.stations[2].text && !(await nextState(page)).locked,
-  `O2: tablist, Lesson 4 open on arrival ("${mapTabs.text}"), Next unlocked (presentation screen)`);
+expect(mapTabs.sel === 'l4' && mapTabs.panel === 'l4' && mapTabs.role === 'tablist' && mapTabs.text === S.O2.stations[2].text && mapTabs.all === mapTabs.text && !(await nextState(page)).locked,
+  `O2: tablist, Lesson 4 open on arrival, the panel holds its line only ("${mapTabs.text}"), Next unlocked (presentation screen)`);
 await wait(1000);
 expect(await page.evaluate(() => !document.querySelector('.w-ghost') && !document.querySelector('[data-action="showMe"]')), 'O2: no ghost hand and no "Show me"');
 await expectLayout(page, 'O2');
@@ -278,8 +303,9 @@ await press(page, 'Enter');
 
 // O3 goals: deliverable, five tiles, the full goal as the tile's tip on keyboard focus
 await expectNewScreen(page, 'O3', 'O2 Next');
-const o3 = await page.evaluate(() => ({ d: document.querySelector('.w-deliverable-text').textContent, tiles: [...document.querySelectorAll('.w-goal')].map((t) => t.textContent) }));
-expect(o3.d === S.O3.deliverable.text && o3.tiles.join() === S.O3.goals.map((g) => g.label).join() && !(await nextState(page)).locked, `O3: deliverable and ${o3.tiles.length} goal tiles from content, Next unlocked`);
+const o3 = await page.evaluate(() => ({ d: document.querySelector('.w-deliverable-text').textContent, label: !!document.querySelector('.w-deliverable-label'), tiles: [...document.querySelectorAll('.w-goal')].map((t) => t.textContent) }));
+expect(o3.d === S.O3.deliverable.text && o3.label === !!S.O3.deliverable.label && o3.tiles.join() === S.O3.goals.map((g) => g.label).join() && !(await nextState(page)).locked,
+  `O3: deliverable (label ${o3.label ? 'shown' : 'none'}) and ${o3.tiles.length} goal tiles from content, Next unlocked`);
 await tabTo(page, '.w-goal[data-goal="g5"]');
 const goalTip = await page.evaluate(() => { const t = document.querySelector('.w-tip'); return t.hidden ? '' : t.textContent; });
 expect(goalTip === S.O3.goals[4].text, `O3: focus on a tile shows the full goal ("${goalTip}")`);
@@ -449,9 +475,10 @@ await press(page, 'Enter'); // Next
 
 // K1 key idea: presentation screen, the figures carry their meaning in their labels
 await expectNewScreen(page, 'K1', 'V1 Next');
-const k1 = await page.evaluate(() => ({ bg: getComputedStyle(document.querySelector('.w-main')).backgroundColor, label: document.querySelector('.w-key-word').textContent,
+const k1 = await page.evaluate(() => ({ bg: getComputedStyle(document.querySelector('.w-main')).backgroundColor, label: document.querySelector('.w-key-label').textContent,
+  ev: document.querySelector('.w-evidence').textContent,
   figs: [...document.querySelectorAll('.w-fig')].map((f) => f.getAttribute('role') + ':' + f.getAttribute('aria-label')), caps: [...document.querySelectorAll('.w-fig-caption')].map((c) => c.textContent) }));
-expect(k1.bg === 'rgb(244, 247, 249)' && k1.label === S.K1.label && k1.figs.join() === S.K1.figures.map((f) => 'img:' + f.alt).join() && k1.caps.join() === S.K1.figures.map((f) => f.caption).join() && !(await nextState(page)).locked,
+expect(k1.bg === 'rgb(244, 247, 249)' && k1.label === S.K1.label + (S.K1.topic ? '· ' + S.K1.topic : '') && k1.ev === S.K1.evidence.text + S.K1.evidence.source && k1.figs.join() === S.K1.figures.map((f) => 'img:' + f.alt).join() && k1.caps.join() === S.K1.figures.map((f) => f.caption).join() && !(await nextState(page)).locked,
   `K1: key idea stage ${k1.bg}, "${k1.label}", two figures (role img with the meaning as label), Next unlocked`);
 await expectLayout(page, 'K1');
 await shot(page, 'k1.png');
@@ -473,6 +500,8 @@ const s03g = await page.evaluate(async () => {
     check: document.querySelector('[data-action="check"]').disabled, ev: window.__l4.tracking.events.filter((e) => e.trackingId === 'L4_S03_1').length,
     showMe: document.querySelector('[data-action="showMe"]')?.textContent, icon: !!document.querySelector('[data-action="showMe"] svg') };
 });
+const s03spot = await ghostSpot(page, S.S03.ghost.target[0]);
+expect(s03spot && !s03spot.onOption && s03spot.off <= 2, `S03 ghost hand: points at "${S.S03.ghost.target[0]}" (${s03spot?.off}px off), on no card`);
 await press(page, 'Shift');
 expect(s03g.shown && s03g.hidden === 'true' && s03g.seen.includes('s') && !s03g.pressed && s03g.check && !s03g.ev && await page.evaluate(() => !document.querySelector('.w-ghost')),
   `S03 ghost hand: shown once (aria-hidden, seen types "${s03g.seen}"), selects no card, Check stays disabled, no tracking; a key removes it`);
@@ -1140,15 +1169,13 @@ console.log('\nghost hand (motion)');
 {
   const p = await open('?reset=1&screen=S03', { motion: true });
   await p.waitForSelector('.w-ghost', { timeout: 3000 }).catch(() => {});
-  await wait(900); // after the first move: the ripple sits on the first card's centre
-  const mid = await p.evaluate(() => {
-    const t = document.querySelector('.w-opt').getBoundingClientRect(), r = document.querySelector('.w-ghost-ripple')?.getBoundingClientRect();
-    return { hand: !!r, off: r ? Math.round(Math.hypot(r.left + r.width / 2 - (t.left + t.width / 2), r.top + r.height / 2 - (t.top + t.height / 2))) : -1 };
-  });
+  await wait(900); // after the first move: the ripple sits on the first target (the centre of the cards)
+  const spot = await ghostSpot(p, S.S03.ghost.target[0]);
+  const mid = { hand: !!spot, off: spot ? spot.off : -1, onOption: spot ? spot.onOption : true };
   await p.mouse.click(700, 690); // a pointer press anywhere (the footer gap)
   const after = await p.evaluate(() => ({ hand: !!document.querySelector('.w-ghost'), pressed: document.querySelectorAll('.w-opt[aria-pressed="true"]').length, ev: window.__l4.tracking.events.length }));
-  expect(mid.hand && mid.off >= 0 && mid.off <= 2 && !after.hand && !after.pressed && !after.ev,
-    `ghost hand mid-demo: on the first card (${mid.off}px off its centre); a pointer press stops it at once, nothing selected or tracked`);
+  expect(mid.hand && mid.off >= 0 && mid.off <= 2 && !mid.onOption && !after.hand && !after.pressed && !after.ev,
+    `ghost hand mid-demo: on "${S.S03.ghost.target[0]}" (${mid.off}px off), on no card; a pointer press stops it at once, nothing selected or tracked`);
   // a seen type plays only after 8 s without input
   await p.evaluate(() => window.__l4.go('S03'));
   await wait(1500);

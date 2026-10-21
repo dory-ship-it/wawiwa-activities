@@ -4,6 +4,10 @@
 // Stage scaling adapted from genai-for-marketing/s1-ai-awareness/src/engine.js (layout(), the
 // fit-to-container math): one fixed stage, transform: scale(), letterboxed on white.
 // All learner-facing text comes from content/l4-slice.json.
+// ?review=1 (review mode, for the team, see review.html): Next never locks, Previous / Next walk every
+// screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
+// writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
+// the screen's id, template, chapter and word count. Works with ?screen=ID.
 import { h, fmt } from './util.js';
 import { createZones } from './zones.js';
 import { createMenu, openDialog } from './menu.js';
@@ -46,6 +50,13 @@ export async function boot(root) {
   }
 }
 
+// review order: every screen of every chapter in chapter order, then any screen no chapter lists
+export function reviewOrder(content) {
+  const ids = new Set(content.screens.map((s) => s.id));
+  const listed = content.chapters.flatMap((c) => c.screens).filter((id) => ids.has(id));
+  return [...new Set([...listed, ...content.screens.map((s) => s.id)])];
+}
+
 class Lesson {
   constructor(root, content) {
     this.root = root;
@@ -62,7 +73,13 @@ class Lesson {
     this.pauseShown = false; // the chapter-end pause marker was shown on this screen
     this.shownAt = 0;
     const q = new URLSearchParams(location.search);
-    this.tracking = createTracking({ debug: q.get('debug') === '1', force: q.get('tracking') });
+    this.review = q.get('review') === '1';
+    // a review thumbnail (an iframe on review.html) never takes the focus from the page around it
+    this.thumb = this.review && window.self !== window.top;
+    // Previous / Next order: the slice; in review mode every screen, chapter by chapter
+    this.order = this.review ? reviewOrder(content) : this.slice;
+    this.toolbar = null;
+    this.tracking = createTracking({ debug: q.get('debug') === '1', force: q.get('tracking'), off: this.review });
 
     this.note = h('p', { class: 'w-small-note', hidden: true }, this.ui.smallScreenNote);
     this.stage = h('div', { class: 'w-stage' });
@@ -85,7 +102,11 @@ class Lesson {
     // SCORM 1.2: the LMS holds the state (suspend_data, lesson_location); local mode: localStorage
     const lms = this.tracking.init();
     this.lms = !!lms.ok;
-    if (this.lms) {
+    if (this.review) {
+      // review mode: a fresh state in memory, so every screen shows as a first visit; storage untouched
+      this.state = emptyState();
+      this.zones.setSaved(true);
+    } else if (this.lms) {
       this.state = lms.suspend ? decode(lms.suspend) : emptyState();
       if (!this.state.s && lms.location && this.screens[lms.location]) this.state.s = lms.location;
       this.zones.setSaved(true);
@@ -120,6 +141,14 @@ class Lesson {
 
   start() {
     const q = new URLSearchParams(location.search);
+    if (this.review) {
+      // any screen by id, the first screen otherwise; no resume prompt, no reset of the saved state.
+      // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
+      const jump = q.get('screen');
+      this.go(jump && this.screens[jump] ? jump : this.order[0]);
+      import('./review/toolbar.js').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      return;
+    }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
     const jump = q.get('screen');
     if (jump && this.screens[jump] && this.slice.includes(jump)) { this.go(jump); return; }
@@ -153,8 +182,8 @@ class Lesson {
     this.state.s = id;
     this.persist();
     this.zones.instruction.textContent = screen.instruction;
-    this.zones.setNext(true, this.lockedWhy(screen));
-    this.zones.setPrev(this.slice.indexOf(id) > 0);
+    this.zones.setNext(!this.review, this.lockedWhy(screen)); // review mode: never locked
+    this.zones.setPrev(this.order.indexOf(id) > 0);
     const tpl = TEMPLATES[screen.template];
     if (!tpl) throw new Error('no template ' + screen.template + ' for ' + id);
     const done = this.doneSet();
@@ -166,8 +195,9 @@ class Lesson {
       next: () => this.next(),
       goTo: (to) => this.go(to),
       // Next in the footer: unlock (red), optionally with its own action (FT1 wrong = the route)
-      unlockNext: ({ focus: f = false, onNext = null } = {}) => { this.onNext = onNext; this.zones.setNext(false); if (f) this.zones.nextBtn.focus(); },
-      lockNext: (why = null) => { this.onNext = null; this.zones.setNext(true, why || this.lockedWhy(screen)); },
+      // (review mode: Next stays unlocked and always walks on in order, so both only keep the focus move)
+      unlockNext: ({ focus: f = false, onNext = null } = {}) => { if (!this.review) this.onNext = onNext; this.zones.setNext(false); if (f) this.zones.nextBtn.focus(); },
+      lockNext: (why = null) => { if (this.review) return; this.onNext = null; this.zones.setNext(true, why || this.lockedWhy(screen)); },
       answer: (a) => this.answer(id, a),
       firstAnswer: (trackingId) => this.firstAnswer(trackingId),
       store: { get: (key) => this.state.f[key] ?? '', set: (key, value) => { this.state.f[key] = value; } },
@@ -186,7 +216,8 @@ class Lesson {
     if (screen.presentation) { this.complete(id); this.zones.setNext(false); }
     applyTerms(this.zones.main, screen.terms, this.content.tooltips);
     this.renderRail();
-    if (focus) this.zones.instruction.focus({ preventScroll: true });
+    if (this.toolbar) this.toolbar.show(id);
+    if (focus && !this.thumb) this.zones.instruction.focus({ preventScroll: true });
   }
 
   // why Next is locked on this screen (its aria-label), by variant, then template
@@ -196,7 +227,8 @@ class Lesson {
   }
 
   nextAction() {
-    if (this.onNext) this.onNext();
+    if (this.review) this.next();
+    else if (this.onNext) this.onNext();
     else this.finish(this.current);
   }
 
@@ -294,14 +326,14 @@ class Lesson {
   }
 
   next() {
-    const i = this.slice.indexOf(this.current);
-    if (i >= 0 && i < this.slice.length - 1) this.go(this.slice[i + 1]);
+    const i = this.order.indexOf(this.current);
+    if (i >= 0 && i < this.order.length - 1) this.go(this.order[i + 1]);
     else this.zones.setFeedback({ state: 'pause', text: this.ui.sliceEnd });
   }
 
   prev() {
-    const i = this.slice.indexOf(this.current);
-    if (i > 0) this.go(this.slice[i - 1]);
+    const i = this.order.indexOf(this.current);
+    if (i > 0) this.go(this.order[i - 1]);
   }
 
   // Mark a screen done. First answers are kept by answer() and never overwritten (and, from P4,
@@ -316,20 +348,22 @@ class Lesson {
   goChapter(n) {
     const c = this.chapters.find((x) => x.n === n);
     if (!c || !c.screens.length) return;
+    if (this.review) { this.go(c.screens[0]); return; }
     const fi = this.frontierIndex();
     const here = fi < this.slice.length && c.screens.includes(this.slice[fi]) ? this.slice[fi] : c.screens[0];
     this.go(here);
   }
 
   startOver() {
-    clearState();
+    if (!this.review) clearState();
     this.state = emptyState();
-    this.go(this.slice[0]);
+    this.go(this.order[0]);
   }
 
   // every change: to the LMS (suspend_data, lesson_location) in SCORM mode, else to localStorage;
-  // the Saved indicator shows whether the last write was accepted
+  // the Saved indicator shows whether the last write was accepted. Review mode: nothing is written.
   persist() {
+    if (this.review) return;
     const sent = this.tracking.persist(this.state);
     this.zones.setSaved(this.lms ? sent : saveState(this.state));
   }
@@ -368,7 +402,8 @@ class Lesson {
     const percent = Math.min(100, Math.round((100 * minutesDone) / this.totalMinutes));
     const chapters = this.chapters.map((c) => {
       const status = this.chapterStatus(c, done, frontierChapter);
-      return { c, status, clickable: status === 'done' || status === 'current' };
+      // review mode: every chapter with screens opens from the rail and the menu
+      return { c, status, clickable: this.review ? c.screens.length > 0 : status === 'done' || status === 'current' };
     });
     return { percent, chapters, frontierChapter };
   }

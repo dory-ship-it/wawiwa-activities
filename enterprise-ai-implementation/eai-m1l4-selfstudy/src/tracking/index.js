@@ -16,7 +16,7 @@ import { encode } from '../state.js';
 import { findAPI, createScorm12 } from './scorm12.js';
 import { createLocal } from './local.js';
 
-export function createTracking({ debug = false, force = null } = {}) {
+export function createTracking({ debug = false, force = null, off = false } = {}) {
   const events = [];
   const listeners = new Set();
   const calls = [];
@@ -24,6 +24,18 @@ export function createTracking({ debug = false, force = null } = {}) {
     calls.push(line);
     if (debug) console.log('[tracking]', line);
   };
+  // review mode (?review=1): the bus still records events (tests read them), but no adapter exists,
+  // so nothing reaches an LMS and nothing is saved
+  if (off) {
+    return {
+      mode: 'off', events, calls,
+      emit(e) { const ev = { ...e, at: new Date().toISOString() }; events.push(ev); for (const fn of listeners) fn(ev); return ev; },
+      on(fn) { listeners.add(fn); return () => listeners.delete(fn); },
+      init() { return { ok: false }; },
+      persist() { return true; },
+      terminate() {},
+    };
+  }
   const api = force === 'none' ? null : findAPI();
   const adapter = api ? createScorm12(api, { log }) : createLocal({ log });
   let resume = { ok: false };

@@ -13,6 +13,7 @@ import { h, fmt, nextId } from '../util.js';
 import { icon } from '../icons.js';
 import { letter } from '../tracking/index.js';
 import { layout, ruleLabel, arrowNav } from './stage.js';
+import { targetSteps } from '../ghost.js';
 
 const SEEK_STEP = 5, SEEK_PAGE = 15, AT_STOP = 0.05, AT_END = 0.3;
 const mmss = (t) => { const s = Math.max(0, Math.floor(t)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -86,7 +87,7 @@ export const video = {
     const resume = h('button', { class: 'w-btn w-btn-ghost w-resume', type: 'button', dataset: { action: 'resume' } }, resumeLock, resumeText);
     const showMeSlot = h('div', { class: 'w-showme-slot' });
     const stopPanel = h('section', { class: 'w-stop-panel' }, stopLabel, h('div', { class: 'w-stop-head' }, stopQ, showMeSlot), stopOpts);
-    let ghost = null; // the ghost hand of the open stop (type "stop": taps the first option, selects nothing)
+    let ghost = null; // the ghost hand of the open stop (type "stop": taps beside the options, selects nothing)
     const stopView = h('div', { class: 'w-stop-view', hidden: true }, stopFrame, stopPanel);
 
     layout(ctx, 'video', zones.logo, playView, stopView);
@@ -218,7 +219,9 @@ export const video = {
       stopView.hidden = false;
       stopQ.focus({ preventScroll: true });
       if (screen.ghost) {
-        ghost = ctx.ghost({ type: screen.ghost.type, steps: () => [{ el: btns[0] }] });
+        // the target the content names (V1, V2: the gap between the first two options, on none of
+        // them); without one, the first option
+        ghost = ctx.ghost({ type: screen.ghost.type, steps: () => (screen.ghost.target ? targetSteps(stopOpts, screen.ghost.target) : [{ el: btns[0] }]) });
         showMeSlot.replaceChildren(ghost.button);
       }
     }

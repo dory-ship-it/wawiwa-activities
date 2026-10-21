@@ -4,6 +4,9 @@
 //   url(...) in those stylesheets, content/l4-slice.json and every assets/ path in the content and in src/.
 // imsmanifest.xml at the zip root: one organization, one item, one SCO (adlcp:scormtype "sco",
 // href index.html) listing every file. No dev tools, tests, planning, review or video sources.
+// Review mode stays out: review.html is never linked, and src/review/ (the toolbar the engine imports
+// only with ?review=1, the review page, the word counter) is skipped; in the package ?review=1 runs
+// without its toolbar.
 // The zip is written with node:zlib (deflate raw + CRC-32), no zip library.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, posix } from 'node:path';
@@ -15,9 +18,10 @@ const content = JSON.parse(readFileSync(join(ROOT, 'content', 'l4-slice.json'), 
 const files = new Set();
 const missing = [];
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
+const REVIEW_ONLY = /^(review\.html$|src\/review\/)/;
 const add = (p) => {
   p = posix.normalize(p.replace(/\\/g, '/'));
-  if (files.has(p)) return false;
+  if (files.has(p) || REVIEW_ONLY.test(p)) return false;
   if (!existsSync(join(ROOT, p)) || !statSync(join(ROOT, p)).isFile()) { missing.push(p); return false; }
   files.add(p);
   return true;

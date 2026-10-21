@@ -265,16 +265,14 @@
       "presentation": true,
       "eyebrow": "Where we are",
       "instruction": "Lesson 4 of Module 1",
-      "line": "Open any lesson to see how it connects to today.",
-      "wordLimit": { "max": 64, "why": "Round 4 board copy (R4-O2): five station labels plus the open panel come to 54 to 64 words; the 45-word target needs a planning cut (see review/v3-1/REPORT.md)" },
       "layout": "wide",
       "stations": [
         { "id": "l1", "kicker": "Lesson 1", "title": "Case diagnosis", "status": "done", "icon": "check-circle",
           "text": "Your Lesson 1 case is the raw material for today." },
-        { "id": "l23", "kicker": "Lessons 2 and 3", "title": "Language model, working template", "status": "done", "icon": "check-circle",
+        { "id": "l23", "kicker": "Lessons 2 and 3", "title": "Working template", "status": "done", "icon": "check-circle",
           "text": "The nine-field template looked at one step. Today you map the whole process." },
         { "id": "l4", "kicker": "Lesson 4", "title": "A full process map", "status": "today", "icon": "map", "open": true,
-          "text": "You map one real process as it runs today, and set one number to check it by." },
+          "text": "You map one process as it runs today, and set one number to check it by." },
         { "id": "l5", "kicker": "Lesson 5", "title": "Architecture diagram", "status": "next", "icon": "diagram",
           "text": "Next lesson marks on your map where AI enters." },
         { "id": "l6", "kicker": "Lesson 6", "title": "Build vs Buy", "status": "next", "icon": "forms",
@@ -292,9 +290,8 @@
       "presentation": true,
       "eyebrow": "Lesson goals",
       "instruction": "What you will be able to do",
-      "wordLimit": { "max": 47, "why": "Round 4 board copy (R4-O3): the deliverable line and five tile labels come to 47 words (see review/v3-1/REPORT.md)" },
       "layout": "wide",
-      "deliverable": { "icon": "file-check", "label": "Your deliverable",
+      "deliverable": { "icon": "file-check",
         "text": "By the end you hand in an AS-IS map of your own case in eight fields, with one success metric. It is your entry ticket to Lesson 5." },
       "goals": [
         { "id": "g1", "icon": "arrows", "label": "Roles and handoffs", "text": "Identify roles and handoff points: who is involved and where responsibility passes." },
@@ -406,7 +403,7 @@
       "title": "Two cases, same lesson",
       "guidingLabel": "Watch for:",
       "guidingQuestion": "what separates a change that works from one you fix later?",
-      "ghost": { "type": "stop" },
+      "ghost": { "type": "stop", "target": "options-gap" },
       "media": {
         "$comment": "the real film: duration and stops[].t from assets/video/v1.cues.json (each stop sits in a caption gap).",
         "src": "assets/video/v1.mp4",
@@ -516,9 +513,7 @@
       "minutes": 2,
       "presentation": true,
       "label": "Key idea",
-      "topic": "Hammer's principle",
       "instruction": "Don't accelerate. Deconstruct.",
-      "wordLimit": { "max": 51, "why": "Round 4 board copy (R4-K1): label, idea, figure captions, evidence and source come to 51 words (see review/v3-1/REPORT.md)" },
       "text": "New technology on a broken process speeds up the inefficiency. Take the process apart first: that is what mapping does.",
       "layout": "concept",
       "figures": [
@@ -527,7 +522,7 @@
         { "kind": "lean", "caption": "Fewer steps first. Then speed up.",
           "alt": "One dashed step box crossed out, above four teal step boxes in a straight line: fewer steps first, then speed up." }
       ],
-      "evidence": { "icon": "chart", "text": "McKinsey, 2025: redesigning workflows is the top factor in AI value.", "source": "Hammer, Harvard Business Review, 1990" },
+      "evidence": { "icon": "chart", "text": "McKinsey, 2025: workflow redesign drives AI value most.", "source": "Hammer, HBR, 1990" },
       "tracking": [],
       "sources": ["Round 4 board R4-K1", "s7", "McKinsey State of AI 2025"]
     },
@@ -565,8 +560,8 @@
           "feedback": "Both stories were judged by numbers. Today you set a baseline and a target: a number, not a feeling." }
       ],
       "feedbackPaging": false,
-      "feedbackCorrect": "Both cases changed only after someone saw how the work really flowed, and both were judged by numbers. Today you fix both: a map and a metric.",
-      "ghost": { "type": "pickTwo" },
+      "feedbackCorrect": "Both cases changed once someone saw how the work really flowed; both were judged by numbers. Today you fix both: a map and a metric.",
+      "ghost": { "type": "pickTwo", "target": ["options-centre", "check"] },
       "advance": "after-correct",
       "endOfChapter": true,
       "tracking": [
@@ -871,7 +866,7 @@
       "instructionPilotCopy": true,
       "title": "Mapping the HR case",
       "guidingQuestion": "How do you turn about 90 messy requests a month into a map you can check later?",
-      "ghost": { "type": "stop" },
+      "ghost": { "type": "stop", "target": "options-gap" },
       "media": {
         "$comment": "the real film: duration and stops[].t from assets/video/v2.cues.json (each stop sits in a caption gap).",
         "src": "assets/video/v2.mp4",

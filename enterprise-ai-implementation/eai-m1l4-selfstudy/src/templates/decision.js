@@ -32,6 +32,7 @@ import { attachTip } from '../tooltip.js';
 import { letter } from '../tracking/index.js';
 import { layout, picture, ruleLabel, arrowNav, progressDots, privacyLine } from './stage.js';
 import { field } from './input.js';
+import { targetSteps } from '../ghost.js';
 
 export const decision = {
   mount(ctx) {
@@ -225,8 +226,10 @@ function multi(ctx) {
 
   const check = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'check' }, disabled: true, onclick: () => doCheck() },
     ui.buttons[screen.stage.bottom.action]);
-  // the ghost hand: taps the first two cards, then Check (it never selects or checks anything)
-  const g = screen.ghost && !ctx.revisit ? ctx.ghost({ type: screen.ghost.type, steps: () => [{ el: btns[0] }, { el: btns[1] }, { el: check }] }) : null;
+  // the ghost hand (it never selects or checks anything): the targets the content names (S03: the
+  // centre of the cards, on none of them, then Check); without one, the first two cards, then Check
+  const g = screen.ghost && !ctx.revisit ? ctx.ghost({ type: screen.ghost.type,
+    steps: () => (screen.ghost.target ? targetSteps(zones.main, screen.ghost.target) : [{ el: btns[0] }, { el: btns[1] }, { el: check }]) }) : null;
 
   layout(ctx, 'work',
     zones.logo,

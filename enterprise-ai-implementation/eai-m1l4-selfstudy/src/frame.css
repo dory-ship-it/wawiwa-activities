@@ -723,13 +723,12 @@ a.w-panel-link { display: inline-flex; align-items: center; gap: 4px; text-decor
 .w-map-tab[aria-selected="true"] .w-map-today { color: var(--w-ink); }
 .w-map-panel { margin-top: 28px; display: flex; align-items: center; gap: 24px; padding: 26px 30px; border-radius: var(--w-radius); background: var(--w-teal-tint); }
 .w-map-panel-icon, .w-deliverable-icon { flex: none; width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50%; background: var(--w-navy); color: var(--w-white); }
-.w-map-panel-kicker, .w-deliverable-label { margin: 0; font: 500 14px/1.3 var(--w-meta); color: var(--w-teal-ink); }
-.w-map-panel-title { margin: 2px 0 0; font: 800 24px/1.2 var(--w-head); color: var(--w-navy); }
-.w-map-panel-text { margin: 6px 0 0; font: 400 18px/1.4 var(--w-head); color: var(--w-ink); }
+.w-deliverable-label { margin: 0 0 4px; font: 500 14px/1.3 var(--w-meta); color: var(--w-teal-ink); }
+/* the panel holds the open lesson's line only (RV1), set like O3's deliverable line */
+.w-map-panel-text, .w-deliverable-text { margin: 0; font: 600 21px/1.4 var(--w-head); color: var(--w-ink); }
 
 /* goals (O3): the deliverable box, five icon tiles appearing 150 ms apart */
 .w-deliverable { margin-top: 26px; display: flex; align-items: center; gap: 22px; padding: 22px 28px; border-radius: var(--w-radius); background: var(--w-teal-tint); }
-.w-deliverable-text { margin: 4px 0 0; font: 600 21px/1.4 var(--w-head); color: var(--w-ink); }
 .w-goals { margin: 28px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
 .w-goal { height: 148px; display: flex; flex-direction: column; padding: 20px; border: 1px solid var(--w-hairline); border-radius: var(--w-radius); background: var(--w-white);
   cursor: default; animation: w-rise .35s ease both; animation-delay: calc(var(--i, 0) * 150ms); }

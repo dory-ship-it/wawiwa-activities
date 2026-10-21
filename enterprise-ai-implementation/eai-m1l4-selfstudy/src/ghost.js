@@ -3,7 +3,15 @@
 // checks or tracks anything (a step's tap() may change what is shown, e.g. open a tab, and the
 // restore() callback puts it back). aria-hidden; the written instruction always stays.
 //   createGhost(stage, { ui, steps, restore, seen, onPlay }) -> { button, play, cancel }
-//     steps()   -> [{ el, tap? }] the targets in order, read when the demo starts
+//     steps()   -> [{ el, tap? } | { point }] the targets in order, read when the demo starts
+//                  (point() -> { x, y } in window px, for a spot that is not an element)
+//   targetSteps(scope, target) -> the steps for the target the content names (screen.ghost.target,
+//     one name or a list), so the hand never points at an answer:
+//       "options-gap"     the gap between the first two options (on no option; stacked: its right end)
+//       "options-centre"  the centre of all the options (a 2x2 grid or a row of four: between cards)
+//       "check"           the Check button
+//       anything else     a CSS selector inside scope
+//     Templates keep their position-based steps only for a screen with no target.
 //     seen      false: plays ~600 ms after the screen settles; true: only after 8 s without input
 //     button    the "Show me" text button (the template places it next to its instruction)
 // Timing: in ~150 ms, then per step a 450 ms move, a tap with a ripple, a short hold; out by 3 s.
@@ -19,6 +27,33 @@ const TIP = { x: 21, y: 5 }; // the fingertip inside the 56 px pointer icon
 let active = null; // the demo on screen now (one at a time)
 
 export function stopGhost() { if (active) active.stop(); }
+
+const OPTION = '.w-opt';
+const GAP_INSET = 48; // window px from the options' right edge (stacked options)
+export function targetSteps(scope, target) {
+  const opts = () => [...scope.querySelectorAll(OPTION)].filter((el) => el.getClientRects().length);
+  const zones = {
+    'options-gap': () => {
+      const [a, b] = opts().map((el) => el.getBoundingClientRect());
+      if (!a || !b) return null;
+      // one under the other: the gap's right end, where the hand's body (down and right of the
+      // fingertip) covers no option text; side by side: the middle of the gap
+      const stacked = b.top >= a.bottom - 1;
+      return stacked ? { x: a.right - GAP_INSET, y: (a.bottom + b.top) / 2 } : { x: (a.right + b.left) / 2, y: (a.top + a.bottom) / 2 };
+    },
+    'options-centre': () => {
+      const rs = opts().map((el) => el.getBoundingClientRect());
+      if (!rs.length) return null;
+      const l = Math.min(...rs.map((r) => r.left)), r = Math.max(...rs.map((x) => x.right));
+      const t = Math.min(...rs.map((x) => x.top)), b = Math.max(...rs.map((x) => x.bottom));
+      return { x: (l + r) / 2, y: (t + b) / 2 };
+    },
+  };
+  return (Array.isArray(target) ? target : [target]).map((name) => {
+    if (zones[name]) return { point: zones[name] };
+    return { el: name === 'check' ? scope.querySelector('[data-action="check"]') : scope.querySelector(name) };
+  });
+}
 
 export function createGhost(stage, { ui, steps, restore = null, seen = false, onPlay = () => {} }) {
   let timer = null, played = false, cancelled = false;
@@ -60,7 +95,7 @@ export function createGhost(stage, { ui, steps, restore = null, seen = false, on
 
 // One run of the demo. Returns { stop }.
 function run(stage, list, restore) {
-  const targets = list.filter((s) => s.el && s.el.isConnected);
+  const targets = list.filter((s) => (s.el && s.el.isConnected) || (s.point && s.point()));
   const ripple = h('span', { class: 'w-ghost-ripple' });
   const hand = h('div', { class: 'w-ghost', 'aria-hidden': 'true' }, ripple, icon('pointer', { size: 56, className: 'w-ghost-hand' }));
   let done = false;
@@ -80,17 +115,21 @@ function run(stage, list, restore) {
   document.addEventListener('pointerdown', stop, true);
   document.addEventListener('keydown', stop, true);
 
-  // stage px of an element's centre (the stage is scaled as a whole)
+  // stage px of a step: its element's centre, or its point (the stage is scaled as a whole)
   const s = stage.getBoundingClientRect();
   const k = s.width / stage.offsetWidth || 1;
-  const at = (el) => { const r = el.getBoundingClientRect(); return { x: (r.left - s.left + r.width / 2) / k, y: (r.top - s.top + r.height / 2) / k }; };
+  const at = (step) => {
+    let p = step.point && step.point();
+    if (!p) { const r = step.el.getBoundingClientRect(); p = { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+    return { x: (p.x - s.left) / k, y: (p.y - s.top) / k };
+  };
   const place = (p) => `translate(${p.x - TIP.x}px, ${p.y - TIP.y}px)`;
   stage.append(hand);
 
   if (reducedMotion()) {
     hand.classList.add('w-ghost-static');
     hand.append(icon('arrow-right', { size: 28, className: 'w-ghost-arrow' }));
-    hand.style.transform = place(at(targets[0].el));
+    hand.style.transform = place(at(targets[0]));
     setTimeout(stop, STATIC);
     return me;
   }
@@ -98,13 +137,13 @@ function run(stage, list, restore) {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const anim = (el, frames, opts) => { const a = el.animate(frames, { fill: 'forwards', ...opts }); anims.push(a); return a.finished.catch(() => {}); };
   (async () => {
-    const first = at(targets[0].el);
+    const first = at(targets[0]);
     let from = { x: first.x + 70, y: first.y + 80 };
     hand.style.transform = place(from);
     await anim(hand, [{ opacity: 0, transform: place(from) }, { opacity: 1, transform: place(from) }], { duration: IN });
     for (const step of targets) {
       if (done) return;
-      const to = at(step.el);
+      const to = at(step);
       await anim(hand, [{ opacity: 1, transform: place(from) }, { opacity: 1, transform: place(to) }], { duration: MOVE, easing: 'cubic-bezier(.3,.7,.3,1)' });
       if (done) return;
       anim(ripple, [{ opacity: 0.55, transform: 'scale(.4)' }, { opacity: 0, transform: 'scale(1.6)' }], { duration: 420, easing: 'ease-out' });
