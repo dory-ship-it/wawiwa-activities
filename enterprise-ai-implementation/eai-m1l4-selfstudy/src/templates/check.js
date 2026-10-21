@@ -1,4 +1,4 @@
-// Knowledge check template (S21), layout "wide": scored items one at a time, item dots top right.
+// Knowledge check template (S21), a Focus panel (styled by analogy): scored items one at a time, item dots top right.
 //   items 1 to 4  the stem (scenario icon) and four options 2x2 with letter badges; a click answers.
 //   item 5        eight tiles in two columns of four: select two, then Check in the band.
 // Wrong = the calm wrong mark and the option's line, retry allowed; right = "Next question" in the
@@ -6,9 +6,10 @@
 // retries), and the result card counts first attempts: "x of 5 on first try. Pass mark: 4 of 5."
 // The score (0 to 100) and passed / failed are set at Finish (S22), from the same first attempts.
 import { h, fmt } from '../util.js';
-import { icon } from '../icons.js';
+import { glyph } from '../icons.js';
+import { checkButton } from './decision.js';
 import { letter } from '../tracking/index.js';
-import { layout, progressDots, arrowNav } from './stage.js';
+import { layout, sheet, progressDots, arrowNav } from './stage.js';
 
 export const check = {
   mount(ctx) {
@@ -16,13 +17,13 @@ export const check = {
     const items = screen.items;
     const dots = progressDots(items.length, (i, n) => fmt(ui.progress.question, { i, n }));
     const body = h('div', { class: 'w-kc-body', dataset: { interaction: '' } });
-    layout(ctx, 'wide', zones.logo,
-      h('div', { class: 'w-wide' }, h('div', { class: 'w-kc-head' }, zones.instruction, dots.el), body, zones.band));
+    layout(ctx, 'focus',
+      sheet('focus w-sheet-wide', h('div', { class: 'w-kc-head' }, zones.instruction, dots.el), body, zones.band));
 
     const mark = (btn, result) => {
       btn.dataset.result = result;
-      btn.querySelector(':scope > .w-opt-mark').replaceChildren(result === 'correct' ? icon('check', { size: 16, label: ui.feedback.correctPrefix })
-        : result === 'wrong' ? icon('x', { size: 16, label: ui.feedback.wrongPrefix }) : '');
+      btn.querySelector(':scope > .w-opt-mark').replaceChildren(result === 'correct' ? glyph('g-check-b', { size: 16, label: ui.feedback.correctPrefix })
+        : result === 'wrong' ? glyph('g-cross', { size: 14.08, label: ui.feedback.wrongPrefix }) : '');
     };
 
     function show(k) {
@@ -46,11 +47,11 @@ export const check = {
     /* ---- items 1 to 4 ---- */
     function choiceItem(it, k) {
       let chosen = -1, solved = false;
-      const btns = it.options.map((o, i) => h('button', { class: 'w-opt w-kc-opt', type: 'button', dataset: { id: o.id, letter: letter(i) } },
+      const btns = it.options.map((o, i) => h('button', { class: 'w-opt w-ans w-kc-opt', type: 'button', dataset: { id: o.id, letter: letter(i) } },
         h('span', { class: 'w-kc-letter', 'aria-hidden': 'true' }, letter(i).toUpperCase()), h('span', { class: 'w-opt-label' }, o.label), h('span', { class: 'w-opt-mark' })));
       const group = h('div', { class: 'w-kc-grid', role: 'group', 'aria-labelledby': 'w-kc-stem' }, btns);
       arrowNav(group);
-      body.replaceChildren(h('p', { class: 'w-situation-line w-kc-stem', id: 'w-kc-stem' }, icon(it.icon || 'speech', { size: 24 }), h('span', {}, it.stem)), group);
+      body.replaceChildren(h('p', { class: 'w-context w-kc-stem', id: 'w-kc-stem' }, h('span', {}, it.stem)), group);
       btns.forEach((b, i) => b.addEventListener('click', () => {
         if (solved || i === chosen) return;
         chosen = i;
@@ -70,12 +71,12 @@ export const check = {
       const keys = it.tiles.map((t, i) => (t.correct ? i : -1)).filter((i) => i >= 0);
       const selected = new Set();
       let solved = false, marked = false;
-      const btns = it.tiles.map((t) => h('button', { class: 'w-opt w-pick-tile w-kc-tile', type: 'button', 'aria-pressed': 'false', dataset: { n: String(t.n) } },
+      const btns = it.tiles.map((t) => h('button', { class: 'w-opt w-ans w-pick-tile w-kc-tile', type: 'button', 'aria-pressed': 'false', dataset: { n: String(t.n) } },
         h('span', { class: 'w-tile-num', 'aria-hidden': 'true' }, String(t.n)), h('span', { class: 'w-opt-label' }, t.text), h('span', { class: 'w-opt-mark' })));
       const group = h('div', { class: 'w-kc-tiles', role: 'group', 'aria-labelledby': 'w-instruction' }, btns);
       arrowNav(group, { selector: '.w-kc-tile', cols: 2 });
       body.replaceChildren(group);
-      const checkBtn = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'check' }, disabled: true }, ui.buttons.check);
+      const checkBtn = checkButton(ui, ui.buttons.check, null);
       zones.setTool(checkBtn);
       const update = () => {
         btns.forEach((b, i) => { b.setAttribute('aria-pressed', String(selected.has(i))); if (!marked || !b.dataset.result) mark(b, ''); });
@@ -105,7 +106,7 @@ export const check = {
         wrong.forEach((i) => selected.delete(i));
         marked = true;
         update();
-        zones.setFeedback({ state: 'wrong', verdict: rightCount === 1 && keys.length === 2 ? ui.feedback.oneOfTwo : ui.feedback.wrongPrefix, text: it.tiles[wrong[0]].feedback });
+        zones.setFeedback({ state: rightCount === 1 && keys.length === 2 ? 'partial' : 'wrong', verdict: rightCount === 1 && keys.length === 2 ? ui.feedback.oneOfTwo : ui.feedback.wrongPrefix, text: it.tiles[wrong[0]].feedback });
         btns[wrong[0]].focus();
       });
     }

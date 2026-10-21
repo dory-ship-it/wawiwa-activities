@@ -1,6 +1,6 @@
 // Engine: fixed 1280x720 stage scaled to fit, routing by screen id from lesson.slice, screen
-// lifecycle (mount, unmount), focus management, the footer Previous / Next, the rail and menu
-// models, resume prompt hook.
+// lifecycle (mount, unmount), the scene (Stage / Focus photo), focus management, the footer Previous /
+// Next, the top bar's steps and the menu model, resume prompt hook.
 // Stage scaling adapted from genai-for-marketing/s1-ai-awareness/src/engine.js (layout(), the
 // fit-to-container math): one fixed stage, transform: scale(), letterboxed on white.
 // All learner-facing text comes from content/l4-slice.json.
@@ -88,7 +88,6 @@ class Lesson {
 
     this.zones = createZones(this.stage, content, {
       onMenu: (btn) => this.menu.open(btn),
-      onChapter: (n) => this.goChapter(n),
       onPrev: () => this.prev(),
       onNext: () => this.nextAction(),
     });
@@ -121,7 +120,7 @@ class Lesson {
   }
 
   /* ---- stage scaling: 720 px high, 1280 to 1600 px wide to fill the window, scale to fit, never
-     scroll. A wide window widens the stage: the rail stays left, the footer and main span the rest,
+     scroll. A wide window widens the stage: the bar, main and the footer span it, the scene photo covers it,
      and each layout spreads into the extra width (--w-stage-w and --w-x in frame.css). ---- */
   layout() {
     const W = this.root.clientWidth, H = this.root.clientHeight;
@@ -159,7 +158,7 @@ class Lesson {
       this.go(s);
       openDialog(this.stage, {
         text: this.ui.resumePrompt,
-        inert: [this.zones.rail, this.zones.main, this.zones.footer],
+        inert: [this.zones.bar, this.zones.main, this.zones.footer],
         opener: this.zones.instruction,
         actions: [
           { id: 'resume', label: this.ui.buttons.resume, primary: true, onClick: (close) => close() },
@@ -186,6 +185,10 @@ class Lesson {
     this.zones.setPrev(this.order.indexOf(id) > 0);
     const tpl = TEMPLATES[screen.template];
     if (!tpl) throw new Error('no template ' + screen.template + ' for ' + id);
+    // the scene: Stage (the chapter photo under the bar), Focus (the photo wash) or O1's dark title
+    // scene, chosen by the template; the photo is the screen's own (O1) or its chapter's
+    const chapter = this.chapters.find((c) => c.id === screen.chapter);
+    this.zones.setScene(tpl.scene ? tpl.scene(screen) : 'focus', screen.photo || chapter?.photo || null);
     const done = this.doneSet();
     this.shownAt = performance.now();
     this.mounted = tpl.mount({
@@ -204,7 +207,7 @@ class Lesson {
       // small per-screen flags kept in suspend data (handoff opened / back, checkbox, chosen chip, ...)
       flags: { get: (key) => this.state.g[id]?.[key], set: (key, value) => { (this.state.g[id] ||= {})[key] = value; this.persist(); } },
       flagsOf: (screenId) => this.state.g[screenId] || {},
-      chapter: this.chapters.find((c) => c.id === screen.chapter),
+      chapter,
       setRoute: (route) => this.setRoute(id, route),
       score: () => this.score(),
       finishLesson: () => this.finishLesson(),
@@ -215,7 +218,7 @@ class Lesson {
     // presentation screens (title, module map, goals, key idea) never lock Next: done on arrival
     if (screen.presentation) { this.complete(id); this.zones.setNext(false); }
     applyTerms(this.zones.main, screen.terms, this.content.tooltips);
-    this.renderRail();
+    this.renderBar();
     if (this.toolbar) this.toolbar.show(id);
     if (focus && !this.thumb) this.zones.instruction.focus({ preventScroll: true });
   }
@@ -341,7 +344,7 @@ class Lesson {
   complete(id) {
     if (!this.state.d.includes(id)) this.state.d.push(id);
     this.persist();
-    this.renderRail();
+    this.renderBar();
   }
 
   // A completed chapter opens at its first screen; the chapter in progress opens where the learner is.
@@ -368,7 +371,7 @@ class Lesson {
     this.zones.setSaved(this.lms ? sent : saveState(this.state));
   }
 
-  /* ---- progress model (rail and menu) ---- */
+  /* ---- progress model (top bar and menu) ---- */
   // Done screens, plus the screens a fast-track jump skipped (route "skip"): they count as done,
   // so the chapter completes with its landing screen.
   doneSet() { return new Set([...this.state.d, ...this.skippedScreens()]); }
@@ -402,39 +405,40 @@ class Lesson {
     const percent = Math.min(100, Math.round((100 * minutesDone) / this.totalMinutes));
     const chapters = this.chapters.map((c) => {
       const status = this.chapterStatus(c, done, frontierChapter);
-      // review mode: every chapter with screens opens from the rail and the menu
+      // review mode: every chapter with screens opens from the menu
       return { c, status, clickable: this.review ? c.screens.length > 0 : status === 'done' || status === 'current' };
     });
     return { percent, chapters, frontierChapter };
   }
 
-  renderRail() {
-    const p = this.progress();
-    const viewChapter = this.screens[this.current]?.chapter;
-    let frontier = p.chapters.findIndex((x) => x.status === 'current');
-    if (frontier < 0) frontier = p.chapters.reduce((last, x, i) => (x.status === 'done' ? i : last), 0);
-    this.zones.setRail({
-      percent: p.percent,
-      frontier,
-      chapters: p.chapters.map(({ c, status, clickable }) => ({
-        n: c.n, status, clickable, viewing: c.id === viewChapter,
-        label: fmt(this.ui.rail.dot, { title: c.title, status: this.ui.rail.status[status] }),
-      })),
+  // The top bar: the viewed chapter's name and its steps. Each screen names its step (verb + icon key)
+  // in the content; a screen with step.join shares the step of the screen before it. Steps before
+  // the current one are done, so are later ones whose screens are all done; the rest are to come.
+  renderBar() {
+    const screen = this.screens[this.current];
+    const chapter = screen && this.chapters.find((c) => c.id === screen.chapter);
+    if (!chapter) return;
+    const groups = [];
+    chapter.screens.filter((sid) => this.screens[sid]).forEach((sid) => {
+      const st = this.screens[sid].step || {};
+      if (st.join && groups.length) groups[groups.length - 1].ids.push(sid);
+      else groups.push({ verb: st.verb || '', icon: st.icon || 'decide', ids: [sid] });
+    });
+    const done = this.doneSet();
+    const ci = groups.findIndex((g) => g.ids.includes(this.current));
+    this.zones.setBar({
+      chapter: chapter.title,
+      steps: groups.map((g, i) => ({ verb: g.verb, icon: g.icon,
+        state: i === ci ? 'current' : i < ci || g.ids.every((sid) => done.has(sid)) ? 'done' : 'next' })),
     });
   }
-
+  // the side menu: each chapter's status only (no times, no % in the look; minutes still weigh progress())
   menuModel() {
     const p = this.progress();
     const m = this.ui.menu;
-    // the "Lesson goals" dialog reads O3's goals (template "goals"): label and full text
-    const o3 = this.content.screens.find((s) => s.template === 'goals');
-    // no times in the menu: chapter minutes only weigh the % complete
     return {
-      percent: p.percent,
-      goals: o3 ? o3.goals.map((g) => ({ label: g.label, text: g.text })) : [],
       chapters: p.chapters.map(({ c, status, clickable }) => ({
         n: c.n, title: c.title, status, clickable, current: c.id === p.frontierChapter,
-        meta: status === 'done' ? m.done : '',
         label: fmt(m.chapterLabel, { title: c.title, status: this.ui.rail.status[status] }),
       })),
     };

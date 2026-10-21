@@ -1,40 +1,43 @@
-// Decision template (PRD sections 5 and 6), approved look (P1.5). Variants and their layouts:
-//   single     (S01)  layout "editorial" (R2A): image column left; eyebrow, two quotes, attribution,
-//                     instruction and three numbered hairline rows right, band under the rows.
-//                     Click an option = answer; wrong = retry; Next unlocks only after the right one.
-//   challenge  (FT1)  layout "memo" (R2B): image top left with the memo card over it; instruction and
-//                     hint left, three option cards right, band under the cards (Skip in it before an
-//                     answer, the route buttons after). One attempt; routes by result.
-//   multi      (S03)  layout "work" (R2D): label and instruction left, the video-case stills right,
-//                     the process line with one marker per option, four cards in a row, the band
-//                     under them with Check inside. One band per attempt, no paging.
-//   pair       (S06)  layout "wide": two situation cards side by side, the right one revealed after
-//                     the left is right; two option rows under each; one band under both.
-//   rounds     (S08)  layout "wide": AS-IS strip, template row (field badge + map line), round dots,
-//                     three rule rows, band under them; "Next round" in the band after a right answer,
-//                     Next after round 3.
-//   fill       (S10)  layout "wide": situation line, the field rows (a pre-filled grey row, the active
-//                     row whose slot takes the chosen line), 2x2 option cards, band under them.
-//   metric     (S11)  layout "wide": the field row, four stacked option rows, then "Checkable later?"
-//                     with three slots (Baseline, Target, Date) that light up for the chosen option.
-//   bounds     (S13)  layout "wide": a strip of the process steps, three Start / End cards in a row.
-//   S14 and S15 use single in the editorial layout with a statement line instead of the quotes.
-//   safety     (S18)  editorial: step 1 three option rows; once right, step 2 in the same column: the case
-//                     title (pre-filled from S02, 250 max), the privacy line, a checkbox and Save.
-//   selfcheck  (S20)  layout "wide", two steps, all neutral: three question rows with Yes / Not yet
-//                     toggles (Next opens step 2), then five chips, any one; "Reopen workbook" link.
-//   close      (S22)  editorial, two steps: three takeaway cards (any one), then the bridge and homework
-//                     lines with Open homework (new tab), Download my lesson record and Finish lesson.
-// State is never colour alone: a check or cross mark with a label, the verdict word in the band.
+// Decision template (PRD sections 5 and 6), "Hybrid cinematic" look (NL1). Variants and their layouts:
+//   single     (S01)  Stage: the character's quote on dark glass over the chapter photo (bottom left),
+//                     the panel right: context line, the instruction as heading, three answer cards
+//                     (radio marker), the feedback strip flush to the panel's foot. Click = answer; wrong
+//                     = retry; Next unlocks only after the right one. Ghost hand: below the panel.
+//                     S14 and S15 (a statement instead of a character): the same panel, Focus.
+//   multi      (S03)  Focus: context line, heading, four answer cards 2 x 2 (rounded-square marker),
+//                     the hint and Check under them (Check locked until two are picked), the strip.
+//                     One strip per attempt: "One of two." (neutral) or "Not quite." with the first
+//                     wrong card's line; both right = the closing line. Ghost hand: the left gutter.
+//   Styled by analogy (no frame yet; interaction and text unchanged), each in a Focus panel:
+//   challenge  (FT2 to FT4)  the memo's header, line and question, the instruction, three answer cards,
+//                     Skip as the band's tool before an answer, the route buttons in the strip after.
+//   pair       (S06)  two situation cards side by side, the right one revealed after the left is right.
+//   rounds     (S08)  AS-IS strip, template row (field badge + map line), round dots, three answers;
+//                     "Next round" in the strip after a right answer, Next after round 3.
+//   fill       (S10)  situation line, the field rows (a pre-filled row, the active row whose slot
+//                     takes the chosen line), 2 x 2 answer cards.
+//   metric     (S11)  the field row, four answers, then "Checkable later?" with three slots.
+//   bounds     (S13)  a strip of the process steps, three Start / End cards in a row.
+//   safety     (S18)  step 1 three answers; once right, step 2 in the same panel: the case title (from
+//                     S02, 250 max), the privacy line, a checkbox and Save.
+//   selfcheck  (S20)  two steps, all neutral: three question rows with Yes / Not yet toggles (Next
+//                     opens step 2), then five chips, any one; "Reopen workbook" link.
+//   close      (S22)  two steps: three takeaway cards (any one), then the bridge and homework lines with
+//                     Open homework (new tab), Download my lesson record and Finish lesson.
+// State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
 import { h, fmt, resolveLink } from '../util.js';
-import { icon } from '../icons.js';
+import { icon, glyph } from '../icons.js';
 import { attachTip } from '../tooltip.js';
 import { letter } from '../tracking/index.js';
-import { layout, picture, ruleLabel, arrowNav, progressDots, privacyLine } from './stage.js';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, progressDots, privacyLine, paintAnswer } from './stage.js';
 import { field } from './input.js';
 import { targetSteps } from '../ghost.js';
 
+const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
+
 export const decision = {
+  // S01 (a character speaks) is a Stage screen; every other decision screen is Focus
+  scene: (screen) => (isStage(screen) ? 'stage' : 'focus'),
   mount(ctx) {
     const variant = ctx.screen.variant;
     const run = { single, challenge, multi, pair, rounds, fill, metric, bounds, safety, selfcheck, close }[variant];
@@ -43,31 +46,23 @@ export const decision = {
   },
 };
 
-/* ---------- option buttons ---------- */
-// kind: 'row' (numbered hairline row, S01), 'card' (numbered card with a radio ring, FT1),
-// 'check' (text card with a checkbox mark, S03). list: the options (default screen.options);
-// lead: 'num' (1, 2, 3), 'icon' (the option's icon, S06 and S08 rows) or 'none'; interaction: false when the
-// group sits inside a larger interaction area.
-function options(ctx, kind, { list = ctx.screen.options, lead = 'num', labelledby = 'w-instruction', interaction = true } = {}) {
+/* ---------- answer cards ---------- */
+// kind: 'radio' (one answer: a round marker) or 'check' (select several: a rounded-square marker,
+// aria-pressed). list: the options (default screen.options); cols: 1 (stacked), 2 (2 x 2) or 3 (a
+// row); interaction: false when the group sits inside a larger interaction area.
+function options(ctx, kind, { list = ctx.screen.options, cols = 1, labelledby = 'w-instruction', interaction = true } = {}) {
   const { content } = ctx;
-  const group = h('div', { class: 'w-options w-options-' + kind, role: 'group', 'aria-labelledby': labelledby, dataset: interaction ? { interaction: '' } : {} });
+  const group = h('div', { class: `w-options w-ans-list w-ans-cols-${cols}` + (kind === 'check' ? ' w-ans-multi' : ''), role: 'group', 'aria-labelledby': labelledby, dataset: interaction ? { interaction: '' } : {} });
   const btns = list.map((o, i) => {
-    const label = h('span', { class: 'w-opt-label' }, labelWithTerm(o, content.tooltips));
-    const num = kind === 'check' || lead === 'none' ? null : lead === 'icon'
-      ? h('span', { class: 'w-opt-num w-opt-lead' }, icon(o.icon, { size: 24 }))
-      : h('span', { class: 'w-opt-num', 'aria-hidden': 'true' }, String(i + 1));
-    const tail = kind === 'row' ? icon('chevron-right', { size: 20, className: 'w-opt-chev' }) : null;
-    const mark = h('span', { class: 'w-opt-mark' });
-    const btn = kind === 'card'
-      ? h('button', { class: 'w-opt w-opt-card', type: 'button', dataset: { id: o.id, letter: letter(i) } }, h('span', { class: 'w-opt-top' }, num, mark), label)
-      : h('button', { class: 'w-opt w-opt-' + kind, type: 'button', dataset: { id: o.id, letter: letter(i) }, 'aria-pressed': kind === 'check' ? 'false' : null }, num, label, tail, mark);
+    const btn = h('button', { class: 'w-opt w-ans', type: 'button', dataset: { id: o.id, letter: letter(i) }, 'aria-pressed': kind === 'check' ? 'false' : null },
+      h('span', { class: 'w-opt-mark w-ans-mark' }), h('span', { class: 'w-opt-label' }, labelWithTerm(o, content.tooltips)));
     group.append(btn);
     // a term inside a button: no nested focusable; the definition goes on the button itself
-    // (aria-describedby plus the tip on hover or focus), with a visible info dot
+    // (aria-describedby plus the tip on hover or focus); the term keeps its dotted underline
     if (o.term && content.tooltips[o.term]) attachTip(btn, content.tooltips[o.term]);
     return btn;
   });
-  arrowNav(group);
+  arrowNav(group); // keys as before NL1: Left / Up back, Right / Down on, whatever the visual grid
   return { group, btns };
 }
 
@@ -75,52 +70,44 @@ function labelWithTerm(o, tooltips) {
   if (!o.term || !tooltips[o.term]) return o.label;
   const i = o.label.toLowerCase().indexOf(o.term.toLowerCase());
   if (i < 0) return o.label;
-  return [o.label.slice(0, i), h('span', { class: 'w-term-static' }, o.label.slice(i, i + o.term.length)), o.label.slice(i + o.term.length),
-    icon('info', { size: 18, className: 'w-opt-info' })];
+  return [o.label.slice(0, i), h('span', { class: 'w-term-static' }, o.label.slice(i, i + o.term.length)), o.label.slice(i + o.term.length)];
 }
 
-// result: 'correct' | 'wrong' | '' (plain). The mark carries the state word for screen readers.
-function paint(btn, result, ui) {
-  btn.dataset.result = result;
-  const mark = btn.querySelector('.w-opt-mark');
-  if (result === 'correct') mark.replaceChildren(icon('check', { size: 16, label: ui.feedback.correctPrefix }));
-  else if (result === 'wrong') mark.replaceChildren(icon('x', { size: 16, label: ui.feedback.wrongPrefix }));
-  else mark.replaceChildren(btn.getAttribute('aria-pressed') === 'true' ? icon('check', { size: 16 }) : '');
-}
-
+const paint = (btn, result, ui) => paintAnswer(btn, result, ui);
 const lock = (btns) => btns.forEach((b) => b.setAttribute('aria-disabled', 'true'));
 
-/* ---------- single (S01), layout editorial ---------- */
+// the Check button of a select-several task: locked (grey, lock) until the selection is complete
+export const checkButton = (ui, label, onclick) => h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'check' }, disabled: true, onclick },
+  glyph('g-lock', { size: 20.48, className: 'w-btn-lock' }), h('span', {}, label));
+
+/* ---------- single (S01 on Stage; S14, S15 in Focus) ---------- */
 function single(ctx) {
   const { screen, ui, zones, content } = ctx;
   const top = screen.stage.top;
-  const { group, btns } = options(ctx, 'row');
-  // top: a character's two quotes with the attribution (S01), or one statement line (S14, S15) whose
-  // optional highlight (the hours in S15) is set as a large number inside the sentence
-  let statement;
-  if (top.kind === 'character') {
+  const { group, btns } = options(ctx, 'radio');
+  if (isStage(screen)) {
+    // the character's last line is the quote on the photo; the lines before it are the panel's context line
     const ch = content.characters[top.character];
+    const bubbles = top.bubbles || [];
     const attribution = [top.label || ch.label, ch.fictional ? ui.fictionalBadge : null].filter(Boolean).join(' · ');
-    statement = [
-      h('blockquote', { class: 'w-quote' }, (top.bubbles || []).map((b, i) => h('p', { class: i === 0 ? 'w-quote-1' : 'w-quote-2' }, '“' + b + '”'))),
-      h('p', { class: 'w-attrib' }, h('span', { class: 'w-rule', 'aria-hidden': 'true' }), h('span', {}, attribution))];
+    layout(ctx, 'stage-decision',
+      h('figure', { class: 'w-glass w-quote-glass' },
+        glyph('g-quote', { size: 51.2 }),
+        h('blockquote', { class: 'w-quote' }, h('p', { class: 'w-quote-1' }, bubbles[bubbles.length - 1] || '')),
+        h('figcaption', { class: 'w-attrib' }, attribution)),
+      h('section', { class: 'w-sheet w-sheet-right w-sheet-46' }, contextLine(bubbles.slice(0, -1).join(' ')), zones.instruction, group, zones.band));
   } else {
+    // a statement line (S14, S15) whose optional highlight (the hours in S15) is set in bold inside it
     const k = top.highlight ? top.text.indexOf(top.highlight) : -1;
-    statement = h('p', { class: 'w-statement' + (k >= 0 ? ' w-statement-figure' : '') },
-      k < 0 ? top.text : [top.text.slice(0, k), h('span', { class: 'w-figure' }, top.highlight), top.text.slice(k + top.highlight.length)]);
+    const statement = k < 0 ? top.text : [top.text.slice(0, k), h('b', { class: 'w-figure' }, top.highlight), top.text.slice(k + top.highlight.length)];
+    layout(ctx, 'focus',
+      sheet('focus', top.eyebrow ? ruleLabel(top.eyebrow) : null, contextLine(top.text, statement), zones.instruction, group, zones.band));
   }
-
-  layout(ctx, 'editorial',
-    h('header', { class: 'w-header' }, zones.logo),
-    h('div', { class: 'w-editorial' },
-      picture(screen.image, 'w-photo-column'),
-      h('section', { class: 'w-col' },
-        top.eyebrow ? h('p', { class: 'w-eyebrow' }, top.eyebrow) : null,
-        statement,
-        zones.instruction,
-        group,
-        zones.band)));
+  // S01's frame shows no hint line: the hint stays for screen readers. S14 and S15 keep it visible.
+  zones.setHintVisible(!isStage(screen));
   zones.setFeedback({ state: 'hint', text: screen.hint });
+  // the ghost hand (S01): it slides down the gutter and stops under the panel, never on an answer
+  if (screen.ghost && !ctx.revisit) ctx.ghost({ type: screen.ghost.type, steps: () => targetSteps(zones.main, screen.ghost.target) });
 
   const trackingId = screen.tracking[0].id;
   let solved = false, chosen = -1;
@@ -134,22 +121,22 @@ function single(ctx) {
   };
 
   btns.forEach((btn, i) => btn.addEventListener('click', () => {
-    if (solved || i === chosen) return; // the same wrong row again is not a new attempt
+    if (solved || i === chosen) return; // the same wrong card again is not a new attempt
     chosen = i;
     const o = screen.options[i];
     ctx.answer({ trackingId, response: letter(i), result: o.correct ? 'correct' : 'wrong' });
     if (o.correct) { ctx.complete(); solve(i, true); return; }
-    show(i); // wrong: the chosen row turns red, the others stay operable for the retry
+    show(i); // wrong: the chosen card turns red, the others stay operable for the retry
     zones.setFeedback({ state: 'wrong', text: o.feedback });
   }));
 
   if (ctx.revisit) solve(screen.options.findIndex((o) => o.correct), false);
 }
 
-/* ---------- challenge (FT2 to FT4), layout memo ---------- */
+/* ---------- challenge (FT2 to FT4), Focus by analogy ---------- */
 function challenge(ctx) {
   const { screen, ui, zones } = ctx;
-  const { group, btns } = options(ctx, 'card', { lead: 'none' }); // no numerals: FT labels carry their own field numbers
+  const { group, btns } = options(ctx, 'radio', { cols: 3 });
   const trackingId = screen.tracking[0].id;
   const routing = screen.routing;
   const header = fmt(ui.memo.header, { n: ctx.chapter?.n ?? '' });
@@ -157,19 +144,16 @@ function challenge(ctx) {
 
   const skip = h('button', { class: 'w-link', type: 'button', dataset: { action: screen.stage.bottom.link }, onclick: () => go(routing.skipped) }, ui.buttons[screen.stage.bottom.link]);
 
-  layout(ctx, 'memo',
-    picture(screen.image, 'w-photo-memo'),
-    zones.logo,
-    h('article', { class: 'w-memo', 'aria-label': header },
-      h('p', { class: 'w-memo-head' }, header),
-      h('p', { class: 'w-memo-line' }, screen.stage.top.text),
-      h('p', { class: 'w-memo-q' }, screen.stage.middle.text),
-      h('span', { class: 'w-memo-rule', 'aria-hidden': 'true' })),
-    h('div', { class: 'w-memo-left' },
+  layout(ctx, 'focus',
+    sheet('focus w-sheet-memo',
+      h('article', { class: 'w-memo', 'aria-label': header },
+        h('p', { class: 'w-memo-head' }, header),
+        h('p', { class: 'w-memo-line' }, screen.stage.top.text),
+        h('p', { class: 'w-memo-q' }, screen.stage.middle.text)),
       zones.instruction,
-      h('p', { class: 'w-hintline' }, icon('info', { size: 20 }), h('span', {}, screen.hint))),
-    h('div', { class: 'w-memo-right' }, group, zones.band));
-  zones.setFeedback({ state: 'idle' });
+      group,
+      zones.band));
+  zones.setFeedback({ state: 'hint', text: screen.hint });
   zones.setTool(skip);
 
   function go(r) { ctx.setRoute(r.route); ctx.complete(); ctx.goTo(r.to); }
@@ -202,43 +186,22 @@ function challenge(ctx) {
   if (first) outcome(first.response.charCodeAt(0) - 97, false);
 }
 
-/* ---------- multi (S03), layout work ---------- */
+/* ---------- multi (S03), Focus ---------- */
 function multi(ctx) {
   const { screen, ui, zones } = ctx;
   const need = screen.select;
-  const { group, btns } = options(ctx, 'check');
+  const { group, btns } = options(ctx, 'check', { cols: 2 });
   const trackingId = screen.tracking[0].id;
   const keys = screen.options.map((o, i) => (o.correct ? i : -1)).filter((i) => i >= 0);
   const selected = new Set();
   let solved = false, marked = false;
 
-  // the process line: one marker per option, in the same columns as the cards
-  const markers = screen.options.map(() => h('span', { class: 'w-marker' }, h('span', { class: 'w-marker-box' }), h('span', { class: 'w-marker-stem' })));
-  const setMarker = (i, state) => {
-    markers[i].dataset.state = state;
-    markers[i].firstChild.replaceChildren(state === 'correct' ? icon('check', { size: 14 }) : state === 'wrong' ? icon('x', { size: 14 }) : '');
-  };
-  const cases = (screen.cases || []).map((c) =>
-    // a still from V1 as a reminder of each case: a picture only, so no play badge
-    h('figure', { class: 'w-case', dataset: { video: c.video || '', segment: String(c.segment ?? '') } },
-      h('div', { class: 'w-still' }, picture(c.image, 'w-photo-still')),
-      h('figcaption', {}, c.label)));
+  const check = checkButton(ui, ui.buttons[screen.stage.bottom.action], () => doCheck());
+  // the ghost hand (it never selects or checks anything): the target the content names (S03: it
+  // slides down the left gutter beside the cards)
+  if (screen.ghost && !ctx.revisit) ctx.ghost({ type: screen.ghost.type, steps: () => targetSteps(zones.main, screen.ghost.target) });
 
-  const check = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'check' }, disabled: true, onclick: () => doCheck() },
-    ui.buttons[screen.stage.bottom.action]);
-  // the ghost hand (it never selects or checks anything): the targets the content names (S03: the
-  // centre of the cards, on none of them, then Check); without one, the first two cards, then Check
-  const g = screen.ghost && !ctx.revisit ? ctx.ghost({ type: screen.ghost.type,
-    steps: () => (screen.ghost.target ? targetSteps(zones.main, screen.ghost.target) : [{ el: btns[0] }, { el: btns[1] }, { el: check }]) }) : null;
-
-  layout(ctx, 'work',
-    zones.logo,
-    h('div', { class: 'w-work-head' }, ruleLabel(screen.stage.top.text), zones.instruction, g ? g.button : null),
-    cases.length ? h('div', { class: 'w-cases' }, cases) : null,
-    h('div', { class: 'w-work-task' },
-      h('div', { class: 'w-process', 'aria-hidden': 'true' }, h('span', { class: 'w-process-line' }), markers),
-      group,
-      zones.band));
+  layout(ctx, 'focus', sheet('focus', contextLine(screen.stage.top.text), zones.instruction, group, zones.band));
   zones.setFeedback({ state: 'hint', text: screen.hint });
   zones.setTool(check);
 
@@ -248,7 +211,6 @@ function multi(ctx) {
       b.setAttribute('aria-pressed', String(selected.has(i)));
       if (!marked || !b.dataset.result) paint(b, '', ui);
       if (full && !selected.has(i)) b.setAttribute('aria-disabled', 'true'); else b.removeAttribute('aria-disabled');
-      setMarker(i, b.dataset.result || (selected.has(i) ? 'selected' : ''));
     });
     check.disabled = selected.size !== need;
   }
@@ -263,7 +225,7 @@ function multi(ctx) {
   function solve(focus) {
     solved = true;
     keys.forEach((i) => selected.add(i));
-    btns.forEach((b, i) => { b.setAttribute('aria-pressed', String(keys.includes(i))); paint(b, keys.includes(i) ? 'correct' : '', ui); setMarker(i, keys.includes(i) ? 'correct' : ''); });
+    btns.forEach((b, i) => { b.setAttribute('aria-pressed', String(keys.includes(i))); paint(b, keys.includes(i) ? 'correct' : '', ui); });
     lock(btns);
     zones.setTool(); // Check is done
     // one closing line for the pair when the content has it (S03), else each key's line
@@ -279,22 +241,25 @@ function multi(ctx) {
     ctx.answer({ trackingId, response: chosen.map(letter).join(','), result: right ? 'correct' : 'wrong' });
     if (right) { ctx.complete(); solve(true); return; }
     // any wrong: every chosen card shows its state, the wrong ones are deselected, try again.
-    // One band: the verdict for the attempt and the feedback of the first wrong card chosen.
+    // One strip: the verdict for the attempt and the feedback of the first wrong card chosen;
+    // "One of two." is the neutral strip (the frame), "Not quite." the wrong one.
     chosen.forEach((i) => paint(btns[i], screen.options[i].correct ? 'correct' : 'wrong', ui));
     const wrong = chosen.filter((i) => !screen.options[i].correct);
     wrong.forEach((i) => selected.delete(i));
     marked = true;
     update();
-    zones.setFeedback({ state: 'wrong', verdict: rightCount === 1 && keys.length === 2 ? ui.feedback.oneOfTwo : ui.feedback.wrongPrefix, text: screen.options[wrong[0]].feedback });
+    const partial = rightCount === 1 && keys.length === 2;
+    zones.setFeedback({ state: partial ? 'partial' : 'wrong', verdict: partial ? ui.feedback.oneOfTwo : ui.feedback.wrongPrefix, text: screen.options[wrong[0]].feedback });
     btns[wrong[0]].focus();
   }
 
   if (ctx.revisit) solve(false);
+  else update();
 }
 
-/* ---------- one single-choice question on hairline rows (S06 situations, S08 rounds) ---------- */
-// Wrong = the calm wrong mark on the row, retry; right = rows locked, onRight(focus). The same wrong
-// row again is not a new attempt. feedbackOf / isRight read the option (or the round) as needed.
+/* ---------- one single-choice question on answer cards (S06 situations, S08 rounds, ...) ---------- */
+// Wrong = the wrong mark on the card, retry; right = rows locked, onRight(focus). The same wrong
+// card again is not a new attempt. feedbackOf / isRight read the option (or the round) as needed.
 function rowQuestion(ctx, btns, list, { trackingId, isRight, feedbackOf, onRight, onChoose = () => {} }) {
   const { ui, zones } = ctx;
   let solved = false, chosen = -1;
@@ -316,25 +281,24 @@ function rowQuestion(ctx, btns, list, { trackingId, isRight, feedbackOf, onRight
   };
 }
 
-/* ---------- pair (S06), layout wide ---------- */
+/* ---------- pair (S06), Focus by analogy ---------- */
 function pair(ctx) {
   const { screen, zones } = ctx;
   const sides = screen.situations.map((s, k) => {
     const textId = 'w-situation-' + s.id;
-    const { group, btns } = options(ctx, 'row', { list: s.options, lead: 'icon', labelledby: textId, interaction: false });
+    const { group, btns } = options(ctx, 'radio', { list: s.options, labelledby: textId, interaction: false });
     const col = h('section', { class: 'w-situation' },
       h('div', { class: 'w-situation-card' },
         h('span', { class: 'w-situation-num', 'aria-hidden': 'true' }, String(k + 1)),
         h('p', { class: 'w-situation-text', id: textId }, s.text)),
       group,
-      h('span', { class: 'w-situation-lock', 'aria-hidden': 'true' }, icon('lock', { size: 28 })));
+      h('span', { class: 'w-situation-lock', 'aria-hidden': 'true' }, glyph('g-lock', { size: 30.72 })));
     return { s, col, btns };
   });
   const setOpen = (side, open) => { side.col.dataset.state = open ? 'open' : 'locked'; side.col.inert = !open; };
   sides.forEach((side, k) => setOpen(side, k === 0));
 
-  layout(ctx, 'wide', zones.logo,
-    h('div', { class: 'w-wide' }, zones.instruction, h('div', { class: 'w-pair', dataset: { interaction: '' } }, sides.map((x) => x.col)), zones.band));
+  layout(ctx, 'focus', sheet('focus', zones.instruction, h('div', { class: 'w-pair', dataset: { interaction: '' } }, sides.map((x) => x.col)), zones.band));
   zones.setFeedback({ state: 'hint', text: screen.hint });
 
   const questions = sides.map((side, k) => rowQuestion(ctx, side.btns, side.s.options, {
@@ -353,23 +317,22 @@ function pair(ctx) {
   if (ctx.revisit) questions.forEach((q, k) => q.solve(sides[k].s.options.findIndex((o) => o.correct), false));
 }
 
-/* ---------- rounds (S08), layout wide ---------- */
+/* ---------- rounds (S08), Focus by analogy ---------- */
 function rounds(ctx) {
   const { screen, ui, zones } = ctx;
   const list = screen.rounds;
   const badge = h('span', { class: 'w-field-badge' });
   const line = h('p', { class: 'w-round-line' });
   const dots = progressDots(list.length, (i, n) => fmt(ui.progress.round, { i, n }));
-  const { group, btns } = options(ctx, 'row', { lead: 'icon', interaction: false });
+  const { group, btns } = options(ctx, 'radio', { cols: 3, interaction: false });
   let r = 0;
 
-  layout(ctx, 'wide', zones.logo,
-    h('div', { class: 'w-wide' },
+  layout(ctx, 'focus',
+    sheet('focus',
+      ruleLabel(screen.strip),
       zones.instruction,
       h('div', { class: 'w-rounds', dataset: { interaction: '' } },
-        ruleLabel(screen.strip),
-        h('div', { class: 'w-template-row' }, badge, line),
-        dots.el,
+        h('div', { class: 'w-template-row' }, badge, line, dots.el),
         group),
       zones.band));
 
@@ -417,19 +380,18 @@ function oneQuestion(ctx, btns, { onChoose } = {}) {
   if (ctx.revisit) q.solve(screen.options.findIndex((o) => o.correct), false);
 }
 
-/* ---------- fill (S10), layout wide ---------- */
+/* ---------- fill (S10), Focus by analogy ---------- */
 function fill(ctx) {
   const { screen, zones } = ctx;
-  const { group, btns } = options(ctx, 'card', { lead: 'none', interaction: false });
-  group.classList.add('w-options-grid2');
+  const { group, btns } = options(ctx, 'radio', { cols: 2, interaction: false });
   const slot = h('span', { class: 'w-field-slot', 'aria-live': 'polite' });
   const rows = screen.fieldRows.map((f) => h('div', { class: 'w-field-row', dataset: { state: f.prefilled ? 'prefilled' : 'active' } },
     h('span', { class: 'w-field-name' }, f.label), f.prefilled ? h('span', { class: 'w-field-value' }, f.value) : slot));
-  layout(ctx, 'wide', zones.logo,
-    h('div', { class: 'w-wide' },
+  layout(ctx, 'focus',
+    sheet('focus',
+      contextLine(screen.situation.text),
       zones.instruction,
       h('div', { class: 'w-fill', dataset: { interaction: '' } },
-        h('p', { class: 'w-situation-line' }, icon(screen.situation.icon, { size: 24 }), h('span', {}, screen.situation.text)),
         h('div', { class: 'w-field-rows' }, rows),
         group),
       zones.band));
@@ -437,10 +399,10 @@ function fill(ctx) {
   oneQuestion(ctx, btns, { onChoose: (i, right) => { slot.textContent = screen.options[i].label; slot.dataset.result = right ? 'correct' : 'wrong'; } });
 }
 
-/* ---------- metric (S11), layout wide ---------- */
+/* ---------- metric (S11), Focus by analogy ---------- */
 function metric(ctx) {
   const { screen, ui, zones } = ctx;
-  const { group, btns } = options(ctx, 'row', { interaction: false });
+  const { group, btns } = options(ctx, 'radio', { cols: 2, interaction: false });
   const slots = screen.slots.map((s) => {
     const state = h('span', { class: 'w-sr-only' });
     const el = h('li', { class: 'w-slot', dataset: { slot: s.id } }, h('span', { class: 'w-slot-mark', 'aria-hidden': 'true' }), h('span', { class: 'w-slot-label' }, s.label), state);
@@ -449,14 +411,14 @@ function metric(ctx) {
   const setSlots = (o) => slots.forEach((x) => {
     const on = !!o.checks[x.s.id];
     x.el.dataset.on = String(on);
-    x.el.querySelector('.w-slot-mark').replaceChildren(icon(on ? 'check' : 'x', { size: 16 }));
+    x.el.querySelector('.w-slot-mark').replaceChildren(glyph(on ? 'g-check-b' : 'g-cross', { size: 16 }));
     x.state.textContent = ' ' + (on ? ui.slot.on : ui.slot.off);
   });
-  layout(ctx, 'wide', zones.logo,
-    h('div', { class: 'w-wide' },
+  layout(ctx, 'focus',
+    sheet('focus',
+      ruleLabel(screen.field.label),
       zones.instruction,
       h('div', { class: 'w-metric', dataset: { interaction: '' } },
-        h('p', { class: 'w-field-row w-field-head' }, icon(screen.field.icon, { size: 22 }), h('span', { class: 'w-field-name' }, screen.field.label)),
         group,
         h('div', { class: 'w-slots', 'aria-live': 'polite' }, h('p', { class: 'w-slots-title' }, screen.slotsTitle), h('ul', {}, slots.map((x) => x.el)))),
       zones.band));
@@ -464,53 +426,51 @@ function metric(ctx) {
   oneQuestion(ctx, btns, { onChoose: (i) => setSlots(screen.options[i]) });
 }
 
-/* ---------- bounds (S13), layout wide ---------- */
+/* ---------- bounds (S13), Focus by analogy ---------- */
 function bounds(ctx) {
   const { screen, zones } = ctx;
   const steps = screen.strip.split(', ');
   const strip = h('p', { class: 'w-steps-strip' }, steps.map((s, i) => [
-    i ? [h('span', { class: 'w-sr-only' }, ', '), icon('arrow-right', { size: 18, className: 'w-steps-arrow' })] : null,
+    i ? [h('span', { class: 'w-sr-only' }, ', '), glyph('g-arrow', { size: 19.2, className: 'w-steps-arrow' })] : null,
     h('span', { class: 'w-step-chip' }, s)]));
-  const btns = screen.options.map((o, i) => h('button', { class: 'w-opt w-opt-bounds', type: 'button', dataset: { id: o.id, letter: letter(i) } },
-    h('span', { class: 'w-bound' }, icon('flag', { size: 22, className: 'w-bound-icon' }), h('span', {}, h('b', {}, screen.startLabel), ' ', o.start)),
-    h('span', { class: 'w-bound w-bound-end' }, icon('finish', { size: 22, className: 'w-bound-icon' }), h('span', {}, h('b', {}, screen.endLabel), ' ', o.end)),
-    h('span', { class: 'w-opt-mark' })));
-  const group = h('div', { class: 'w-options w-options-bounds', role: 'group', 'aria-labelledby': 'w-instruction' }, btns);
+  const btns = screen.options.map((o, i) => h('button', { class: 'w-opt w-ans w-opt-bounds', type: 'button', dataset: { id: o.id, letter: letter(i) } },
+    h('span', { class: 'w-opt-mark w-ans-mark' }),
+    h('span', { class: 'w-bound' }, glyph('start', { size: 23.04, className: 'w-bound-icon' }), h('span', {}, h('b', {}, screen.startLabel), ' ', o.start)),
+    h('span', { class: 'w-bound w-bound-end' }, icon('finish', { size: 23.04, className: 'w-bound-icon' }), h('span', {}, h('b', {}, screen.endLabel), ' ', o.end))));
+  const group = h('div', { class: 'w-options w-ans-list w-options-bounds', role: 'group', 'aria-labelledby': 'w-instruction' }, btns);
   arrowNav(group);
-  layout(ctx, 'wide', zones.logo,
-    h('div', { class: 'w-wide' }, zones.instruction, h('div', { class: 'w-bounds', dataset: { interaction: '' } }, strip, group), zones.band));
+  layout(ctx, 'focus', sheet('focus', zones.instruction, h('div', { class: 'w-bounds', dataset: { interaction: '' } }, strip, group), zones.band));
   zones.setFeedback({ state: 'hint', text: screen.hint });
   oneQuestion(ctx, btns);
 }
 
-// the editorial frame for the R3 screens: header logo, image column, the right column's parts
+// the panel of the R3 screens that had an image column (S18, S22): a Focus panel by analogy (the
+// screen's own image waits for the media track; the chapter photo is the wash behind)
 function editorial(ctx, ...parts) {
-  layout(ctx, 'editorial',
-    h('header', { class: 'w-header' }, ctx.zones.logo),
-    h('div', { class: 'w-editorial' }, picture(ctx.screen.image, 'w-photo-column'), h('section', { class: 'w-col' }, ...parts)));
+  layout(ctx, 'focus', sheet('focus', ...parts));
 }
 const newTabLink = (ctx, href, label, action, cls = 'w-btn w-btn-ghost') => h('a', { class: cls, href, target: '_blank', rel: 'noopener noreferrer', dataset: { action } },
-  h('span', {}, label), icon('external-link', { size: 16 }), h('span', { class: 'w-sr-only' }, ' (' + ctx.ui.newTabNote + ')'));
+  h('span', {}, label), glyph('g-arrow', { size: 19.2 }), h('span', { class: 'w-sr-only' }, ' (' + ctx.ui.newTabNote + ')'));
 
-/* ---------- safety (S18), editorial, two steps ---------- */
+/* ---------- safety (S18), Focus by analogy, two steps ---------- */
 function safety(ctx) {
   const { screen, ui, zones } = ctx;
   const s2 = screen.step2;
-  const { group, btns } = options(ctx, 'row');
+  const { group, btns } = options(ctx, 'radio');
   const privacy = privacyLine(s2.privacy);
   const announcer = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
   const ctl = field(s2.field, ctx, privacy.id, announcer);
   const box = h('input', { class: 'w-checkbox', type: 'checkbox', id: 'w-s18-box' });
-  const boxLabel = h('label', { class: 'w-checkline', for: box.id }, box, icon('shield', { size: 20 }), h('span', {}, s2.checkbox));
+  const boxLabel = h('label', { class: 'w-checkline', for: box.id }, box, h('span', {}, s2.checkbox));
   const save = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'save' } }, ui.buttons.save);
   const step2 = h('div', { class: 'w-form-task w-safety-form', dataset: { interaction: '' }, hidden: true }, ctl.el, announcer, privacy.el, h('div', { class: 'w-actionbar' }, boxLabel, save));
   editorial(ctx,
-    h('p', { class: 'w-statement w-statement-icon' }, icon(screen.stage.top.icon || 'lock', { size: 26 }), h('span', {}, screen.stage.top.text)),
+    contextLine(screen.stage.top.text),
     zones.instruction, group, step2, zones.band);
   zones.setFeedback({ state: 'hint', text: screen.hint });
 
   const toStep2 = (focus) => { group.hidden = true; step2.hidden = false; if (focus) ctl.input.focus(); };
-  const saved = (focus) => { save.className = 'w-btn w-btn-ghost'; zones.setFeedback({ state: 'neutral', text: s2.feedback.saved }); ctx.unlockNext({ focus }); };
+  const saved = (focus) => { zones.setFeedback({ state: 'neutral', tone: 'correct', text: s2.feedback.saved }); ctx.unlockNext({ focus }); };
   const q = rowQuestion(ctx, btns, screen.options, {
     trackingId: () => screen.tracking[0].id,
     isRight: (o) => o.correct,
@@ -532,7 +492,7 @@ function safety(ctx) {
   if (ctx.revisit) { q.solve(screen.options.findIndex((o) => o.correct), false); box.checked = !!ctx.flags.get('box'); saved(false); }
 }
 
-/* ---------- selfcheck (S20), wide, two steps, neutral ---------- */
+/* ---------- selfcheck (S20), Focus by analogy, two steps, neutral ---------- */
 function selfcheck(ctx) {
   const { screen, ui, zones, content } = ctx;
   const [s1, s2] = screen.steps;
@@ -543,7 +503,7 @@ function selfcheck(ctx) {
   const rows = s1.rows.map((r) => {
     const qid = 'w-sc-' + r.id;
     const toggles = s1.choices.map((c) => h('button', { class: 'w-toggle', type: 'button', 'aria-pressed': 'false', dataset: { choice: c } }, ui.buttons[c]));
-    const el = h('div', { class: 'w-check-row', dataset: { row: r.id } }, icon(r.icon, { size: 24 }), h('p', { class: 'w-check-q', id: qid }, r.text),
+    const el = h('div', { class: 'w-check-row', dataset: { row: r.id } }, h('p', { class: 'w-check-q', id: qid }, r.text),
       h('div', { class: 'w-toggles', role: 'group', 'aria-labelledby': qid }, toggles));
     return { r, el, toggles };
   });
@@ -556,8 +516,8 @@ function selfcheck(ctx) {
   const chipRow = h('div', { class: 'w-chips', role: 'group', 'aria-labelledby': 'w-instruction' }, chips.map((x) => x.btn));
   arrowNav(chipRow, { selector: '.w-chip' });
   const step2 = h('div', { class: 'w-selfcheck2', dataset: { interaction: '' }, hidden: true }, chipRow,
-    h('p', { class: 'w-strip' }, icon('check-circle', { size: 20 }), h('span', {}, s2.strip)));
-  layout(ctx, 'wide', zones.logo, h('div', { class: 'w-wide' }, zones.instruction, step1, step2, zones.band, h('div', { class: 'w-link-row' }, reopen)));
+    h('p', { class: 'w-note-line' }, h('span', {}, s2.strip)));
+  layout(ctx, 'focus', sheet('focus', h('div', { class: 'w-head-row' }, zones.instruction, reopen), step1, step2, zones.band));
   zones.setFeedback({ state: 'hint', text: screen.hint });
 
   const press = (list, on) => list.forEach((b) => b.setAttribute('aria-pressed', String(b === on)));
@@ -596,18 +556,18 @@ function selfcheck(ctx) {
   else if (allAnswered()) ctx.unlockNext({ focus: false, onNext: () => toStep2(true) });
 }
 
-/* ---------- close (S22), editorial, two steps ---------- */
+/* ---------- close (S22), Focus by analogy, two steps ---------- */
 function close(ctx) {
   const { screen, ui, zones, content } = ctx;
   const s2 = screen.step2;
-  const cards = screen.options.map((o, i) => h('button', { class: 'w-opt w-takeaway', type: 'button', 'aria-pressed': 'false', dataset: { id: o.id, letter: letter(i) } },
-    icon(o.icon, { size: 28, className: 'w-takeaway-icon' }), h('span', { class: 'w-opt-label' }, o.label)));
+  const cards = screen.options.map((o, i) => h('button', { class: 'w-opt w-ans w-takeaway', type: 'button', 'aria-pressed': 'false', dataset: { id: o.id, letter: letter(i) } },
+    h('span', { class: 'w-opt-mark w-ans-mark' }), h('span', { class: 'w-opt-label' }, o.label)));
   const step1 = h('div', { class: 'w-takeaways', role: 'group', 'aria-labelledby': 'w-instruction', dataset: { interaction: '' } }, cards);
   arrowNav(step1);
   const homework = newTabLink(ctx, resolveLink(content, s2.homework.href), ui.buttons.openHomework, 'homework');
-  const download = h('button', { class: 'w-btn w-btn-ghost', type: 'button', dataset: { action: 'download' } }, icon('document', { size: 18 }), h('span', {}, ui.buttons.downloadRecord));
+  const download = h('button', { class: 'w-btn w-btn-ghost', type: 'button', dataset: { action: 'download' } }, h('span', {}, ui.buttons.downloadRecord));
   const finish = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'finish' } }, ui.buttons.finishLesson);
-  const line = (part) => h('p', { class: 'w-close-line' }, icon(part.icon, { size: 22 }), h('span', {}, part.text));
+  const line = (part) => h('p', { class: 'w-close-line' }, h('span', {}, part.text));
   const step2 = h('div', { class: 'w-close2', dataset: { interaction: '' }, hidden: true }, line(s2.bridge), line(s2.homework),
     h('div', { class: 'w-close-actions' }, homework, download, finish));
   editorial(ctx, zones.instruction, step1, step2, zones.band);
@@ -671,8 +631,8 @@ function lessonRecord(ctx) {
   const chip = s20.steps[1].chips.find((c) => c.id === ans.chip);
   const score = sc.raw === null ? r.empty : fmt(r.scoreLine, { x: sc.x, n: sc.n, p: sc.raw, pass: content.lesson.completion.passMark });
   return `<!DOCTYPE html><html lang="${esc(content.lesson.lang)}"><head><meta charset="UTF-8"><title>${esc(r.heading)}: ${esc(content.lesson.title)}</title>`
-    + '<style>body{font:16px/1.5 Assistant,Arial,sans-serif;color:#000000;max-width:720px;margin:40px auto;padding:0 20px}h1,h2{color:#255777}'
-    + 'td{padding:6px 12px 6px 0;vertical-align:top;border-bottom:1px solid #D8D8D8}table{border-collapse:collapse;width:100%}</style></head><body>'
+    + '<style>body{font:16px/1.5 Assistant,Arial,sans-serif;color:#16293A;max-width:720px;margin:40px auto;padding:0 20px}h1,h2{color:#255777}'
+    + 'td{padding:6px 12px 6px 0;vertical-align:top;border-bottom:1px solid #E2DED6}table{border-collapse:collapse;width:100%}</style></head><body>'
     + `<h1>${esc(r.heading)}</h1><p>${esc(content.lesson.program)} · ${esc(content.lesson.module)} · ${esc(content.lesson.title)}</p>`
     + `<p>${esc(r.date)}: ${esc(new Date().toISOString().slice(0, 10))}</p>`
     + `<h2>${esc(r.caseTitle)}</h2><p>${val(ctx.store.get('L4_CASE_TITLE'))}</p>`

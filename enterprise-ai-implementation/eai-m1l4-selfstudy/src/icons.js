@@ -76,30 +76,76 @@ const P = {
   map: '<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/>', // map
 };
 
-export const ICON_NAMES = Object.keys(P);
+// The "Hybrid cinematic" glyphs (NL1), copied from planning/design-reference/hybrid-cinematic/
+// screens-intro-ch2.html: custom line icons on a 24 grid, 1.9 stroke, round caps (not Lucide). One
+// task icon per step verb, the two player glyphs, and the shell's own marks (bold check and cross,
+// lock, arrows, close, quote mark, the hand). [viewBox, stroke width, body]; fill / stroke colours
+// come from CSS (currentColor), never from here.
+const G = {
+  // task verbs (the top step bar, the step field in content JSON)
+  start: [24, 1.9, '<path d="M6 21V4M6 4h11l-2.2 4L17 12H6"/>'],
+  overview: [24, 1.9, '<path d="M9 4L3.5 6v14L9 18l6 2 5.5-2V4L15 6zM9 4v14M15 6v14"/>'],
+  goals: [24, 1.9, '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/>'],
+  decide: [24, 1.9, '<path d="M9.3 9a2.7 2.7 0 1 1 3.8 2.5c-.7.3-1.1 1-1.1 1.8v.6"/><circle cx="12" cy="17.3" r=".6" fill="currentColor"/>'],
+  write: [24, 1.9, '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>'],
+  sketch: [24, 1.9, '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>'],
+  guess: [24, 1.9, '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/>'],
+  watch: [24, 1.9, '<path d="M9 7.2v9.6l7.8-4.8z" fill="currentColor"/>'],
+  learn: [24, 1.9, '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5z"/>'],
+  sort: [24, 1.9, '<rect x="3.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.2"/><path d="M10.5 7h3.5a3 3 0 0 1 3 3v1.5M15 9.5l2 2 2-2"/>'],
+  label: [24, 1.9, '<path d="M3.5 12.5V4.5a1 1 0 0 1 1-1h8l8.5 8.5-9 9z"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/>'],
+  explore: [24, 1.9, '<circle cx="10.5" cy="10.5" r="6"/><path d="M20 20l-5-5"/>'],
+  // the two player glyphs (same grid, stroke and caps); muted = the speaker with a cross
+  'g-pause': [24, 1.9, '<path d="M9 6.5v11M15 6.5v11"/>'],
+  'g-volume': [24, 1.9, '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>'],
+  'g-muted': [24, 1.9, '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>'],
+  // shell marks
+  'g-check': [24, 3, '<path d="M5 12.5l4.5 4.5L19 7.5"/>'],
+  'g-check-b': [24, 3.2, '<path d="M5 12.5l4.5 4.5L19 7.5"/>'],
+  'g-cross': [24, 3.2, '<path d="M7 7l10 10M17 7L7 17"/>'],
+  'g-lock': [24, 2.2, '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'],
+  'g-arrow': [24, 2.2, '<path d="M5 12h13M13 6l6 6-6 6"/>'],
+  'g-arrow-o1': [24, 2.4, '<path d="M5 12h13M13 6l6 6-6 6"/>'],
+  'g-arrow-long': [24, 2.2, '<path d="M4 12h15M14 6l6 6-6 6"/>'],
+  'g-close': [24, 2, '<path d="M6 6l12 12M18 6L6 18"/>'],
+  'g-hand': [24, 1.8, '<path d="M9 11V4.6a1.6 1.6 0 0 1 3.2 0V10m0-1.2a1.6 1.6 0 0 1 3.2 0V10m0-.6a1.6 1.6 0 0 1 3.2 0v1.2m0 0a1.4 1.4 0 0 1 2.8 0V15a6.3 6.3 0 0 1-6.3 6.3h-1.8a6.3 6.3 0 0 1-4.9-2.3L4.4 15.4a1.5 1.5 0 0 1 2.3-2L9 15.5V11"/>'],
+  // feedback strip leads: a filled disc with a white mark (the bulb is "guess")
+  'g-ok-disc': [24, 2.6, '<circle cx="12" cy="12" r="11" class="w-gd"/><path d="M6.5 12.5l3.5 3.5 7.5-7.5" class="w-gm"/>'],
+  'g-no-disc': [24, 2.6, '<circle cx="12" cy="12" r="11" class="w-gd"/><path d="M8 8l8 8M16 8l-8 8" class="w-gm"/>'],
+  // the quote mark (filled, 40 x 30)
+  'g-quote': [[40, 30], 0, '<path d="M0 30V17C0 7 6 1 16 0v6c-5 1-8 5-8 10h8v14zm22 0V17c0-10 6-16 16-17v6c-5 1-8 5-8 10h8v14z" class="w-gq"/>'],
+};
 
-// 28 px chapter status mark (rail dots and the menu list): done = teal fill + white check,
-// current = teal ring 3 px, today (O2 module map) = navy disc with a white centre, anything else =
-// grey ring. Always decorative: the button label says it.
-export function statusMark(status) {
+export const ICON_NAMES = [...Object.keys(P), ...Object.keys(G)];
+
+// glyph('decide', { size: 21.76 }) -> <svg> from the Hybrid cinematic set. size = width in stage px
+// (height follows the viewBox). Decorative unless a label is given.
+export function glyph(name, { size = 24, label = null, className = '' } = {}) {
+  const [vb, sw, body] = G[name] || G.decide;
+  if (!G[name]) console.warn('icons.js: unknown glyph', name);
+  const [w, hgt] = Array.isArray(vb) ? vb : [vb, vb];
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 28 28');
-  svg.setAttribute('width', '28');
-  svg.setAttribute('height', '28');
-  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('viewBox', `0 0 ${w} ${hgt}`);
+  svg.setAttribute('width', String(size));
+  svg.setAttribute('height', String(Math.round((size * hgt / w) * 100) / 100));
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  if (sw) svg.setAttribute('stroke-width', String(sw));
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
   svg.setAttribute('focusable', 'false');
-  svg.setAttribute('class', 'w-dot-mark');
-  svg.innerHTML = status === 'done'
-    ? '<circle class="w-dot-fill" cx="14" cy="14" r="13"/><path class="w-dot-check" d="M8.5 14.5l3.5 3.5 7.5-8"/>'
-    : status === 'current' ? '<circle class="w-dot-ring-on" cx="14" cy="14" r="11.5"/>'
-    : status === 'today' ? '<circle class="w-dot-today" cx="14" cy="14" r="12.5"/><circle class="w-dot-today-c" cx="14" cy="14" r="5"/>'
-    : '<circle class="w-dot-ring" cx="14" cy="14" r="11"/>';
+  svg.setAttribute('class', ('w-glyph ' + className).trim());
+  if (label) { svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', label); }
+  else svg.setAttribute('aria-hidden', 'true');
+  svg.innerHTML = body;
   return svg;
 }
+export const isGlyph = (name) => name in G;
 
 // icon('check', { size: 24, label: 'Correct' }) -> <svg>. With a label the icon is meaningful
 // (role img + aria-label); without, it is decorative (aria-hidden).
 export function icon(name, { size = 24, label = null, className = '' } = {}) {
+  if (isGlyph(name)) return glyph(name, { size, label, className: ('w-icon ' + className).trim() });
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '0 0 24 24');
   svg.setAttribute('width', size);

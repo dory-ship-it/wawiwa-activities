@@ -2,10 +2,11 @@
 // genai-for-marketing/s1-ai-awareness/tools/test-fit.mjs: tiny static server + puppeteer-core +
 // the machine's Chrome. Mouse-driven (the keyboard walk is tools/walk.mjs).
 //   1. load and scale at 1280x720, 1920x1080, 1024x576: stage inside the window, no scrollbars,
-//      the shell in place (rail 64 px, main, footer 64 px), no console errors
-//   2. every slice screen in every band state, at 1280x720 and 1024x576: the band never overlaps the
-//      screen's content, its width equals its interaction area and it sits directly under it,
-//      nothing clipped, contrast of every text/background pair, no text under 14 px, targets 44 px
+//      the shell in place (NL1: top bar 97.28 px, main under it, Previous / Next bottom left and
+//      right), no console errors
+//   2. every slice screen in every band state: the band never overlaps the screen's content, it is
+//      flush to its panel's edges, nothing clipped, contrast of every text/background pair, no text
+//      under 14 px, targets 44 px
 //   3. the open menu and its dialogs: the same contrast, size and target checks
 // Usage: npm run test:fit
 // Chrome: set CHROME_PATH, or a stock Google Chrome / Chromium install is found on its own.
@@ -38,7 +39,7 @@ async function open(query, [w, h] = [1280, 720]) {
   page.on('pageerror', (e) => page.errors.push('pageerror: ' + e.message));
   await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
   await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
-  await page.goto(BASE + query, { waitUntil: 'networkidle0' });
+  await page.goto(BASE + query, { waitUntil: /screen=V\d/.test(query) ? 'load' : 'networkidle0' }); // a film keeps a range request open
   await page.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
   await page.evaluate(() => document.fonts.ready);
   return page;
@@ -62,7 +63,7 @@ for (const size of [[1280, 720], [1920, 1080], [1024, 576], [1366, 650], [1536, 
     const box = (sel) => { const b = document.querySelector(sel).getBoundingClientRect(); return [b.left - s.left, b.top - s.top, b.width, b.height].map((v) => Math.round(v / k)); };
     return { k, sw: s.width, sh: s.height, left: s.left, top: s.top,
       scroll: document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight,
-      rail: box('.w-rail'), main: box('.w-main'), footer: box('.w-footer'),
+      bar: box('.w-bar'), main: box('.w-main'), prev: box('.w-prev'), next: box('.w-next'),
       removed: ['.w-segments', '.w-topbar', '.w-readout', '.w-minutes'].filter((sel) => document.querySelector(sel)) };
   });
   const [w, h] = size;
@@ -72,8 +73,11 @@ for (const size of [[1280, 720], [1920, 1080], [1024, 576], [1366, 650], [1536, 
   expect(Math.abs(r.k - want) < 0.01 && r.left >= -0.5 && r.top >= -0.5 && r.left + r.sw <= w + 0.5 && r.top + r.sh <= h + 0.5, `${w}x${h}: stage scaled ${r.k.toFixed(3)} and inside the window`);
   expect(Math.abs(r.sw / r.k - stageW) < 1 && (stageW === 1600 || Math.abs(r.sw - w) < 2), `${w}x${h}: stage ${Math.round(r.sw / r.k)} wide, ${stageW < 1600 ? 'fills the window width' : 'capped at 1600, the rest letterboxed'}`);
   expect(!r.scroll, `${w}x${h}: no scrollbars`);
-  expect(r.rail.join() === '0,0,64,656' && r.main.join() === `64,0,${stageW - 64},656` && r.footer.join() === `0,656,${stageW},64`,
-    `${w}x${h}: shell in place (rail ${r.rail.join(',')}, main ${r.main.join(',')}, footer ${r.footer.join(',')})`);
+  // the bar 97.28 high (rounded 97), main under it; Previous 23 px from the left, Next 23 px from the right, both 18 px over the foot
+  const near = (a, b) => Math.abs(a - b) <= 1; // edges rounded one by one
+  expect(r.bar.join() === `0,0,${stageW},97` && r.main.join() === `0,97,${stageW},623` && near(r.prev[0], 23) && near(r.next[0] + r.next[2], stageW - 23)
+    && near(r.prev[1] + r.prev[3], 702) && near(r.next[1] + r.next[3], 702),
+    `${w}x${h}: shell in place (bar ${r.bar.join(',')}, main ${r.main.join(',')}, Previous ${r.prev.join(',')}, Next ${r.next.join(',')})`);
   expect(!r.removed.length, `${w}x${h}: no segmented bar, top bar, screen readout or minutes in the player${r.removed.length ? ' (' + r.removed.join(', ') + ')' : ''}`);
   expect(!page.errors.length, `${w}x${h}: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);
   await page.close();
@@ -110,8 +114,8 @@ const STATES = [
   ['S03', 'pause marker', async (p) => { await click(p, '.w-opt[data-id="b"]'); await click(p, '.w-opt[data-id="d"]'); await click(p, '[data-action="check"]'); await click(p, '.w-next'); }],
   ['V1', 'play view', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); }],
   ['V1', 'transcript open', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); await click(p, '.w-tr'); }],
-  ['V1', 'stop, wrong', async (p) => { await toStop(p); await click(p, '.w-opt-stack[data-id="a"]'); }],
-  ['V1', 'stop, right', async (p) => { await toStop(p); await click(p, '.w-opt-stack[data-id="b"]'); }],
+  ['V1', 'stop, wrong', async (p) => { await toStop(p); await click(p, '.w-stop-view .w-opt[data-id="a"]'); }],
+  ['V1', 'stop, right', async (p) => { await toStop(p); await click(p, '.w-stop-view .w-opt[data-id="b"]'); }],
   // R1: Chapter 2
   ['FT2', 'idle', async () => {}],
   ['FT2', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
@@ -147,11 +151,11 @@ const STATES = [
   ['FT3', 'correct + routes', async (p) => click(p, '.w-opt[data-id="c"]')],
   ['V2', 'play view', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); }],
   ['V2', 'stop 3, wrong', async (p) => {
-    for (const k of ['b', 'a']) { await toStop(p); await click(p, `.w-opt-stack[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }
-    await toStop(p); await click(p, '.w-opt-stack[data-id="a"]');
+    for (const k of ['b', 'a']) { await toStop(p); await click(p, `.w-stop-view .w-opt[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }
+    await toStop(p); await click(p, '.w-stop-view .w-opt[data-id="a"]');
   }],
   ['V2', 'ended', async (p) => {
-    for (const k of ['b', 'a', 'b']) { await toStop(p); await click(p, `.w-opt-stack[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }
+    for (const k of ['b', 'a', 'b']) { await toStop(p); await click(p, `.w-stop-view .w-opt[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }
     await playUntil(p, () => document.querySelector('.w-next').dataset.locked === 'false', 'video end');
   }],
   ['S09', 'start', async () => {}],
@@ -259,9 +263,9 @@ for (const size of SIZES) {
 console.log('\n3. menu and dialogs');
 for (const size of SIZES) {
   const page = await open('?reset=1&screen=S03', size);
-  await click(page, '.w-rail-menu');
+  await click(page, '.w-bar-menu');
   await measure(page, `menu open ${size.join('x')}`);
-  for (const action of ['goals', 'help', 'startover']) {
+  for (const action of ['help', 'startover']) {
     await click(page, `.w-panel [data-action="${action}"]`);
     await measure(page, `menu dialog "${action}" ${size.join('x')}`);
     await page.keyboard.press('Escape');

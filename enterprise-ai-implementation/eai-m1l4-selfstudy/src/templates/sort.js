@@ -1,4 +1,5 @@
-// Sort template, layout "wide". Two modes:
+// Sort template, a Focus panel (styled by analogy with the frames; drag and drop and one card at a
+// time come with the Chapter 2 build). Two modes:
 //   deck (S04, S17)  one card at a time: the deck (progress dots + the current card) on top, the
 //                    columns below; a placed card becomes a small chip in its column.
 //   tray (S09, S16)  every card at once in a tray under the columns; a placed card leaves the tray
@@ -13,7 +14,7 @@
 import { h, fmt } from '../util.js';
 import { icon } from '../icons.js';
 import { attachTip } from '../tooltip.js';
-import { layout, progressDots, arrowNav, ruleLabel } from './stage.js';
+import { layout, sheet, progressDots, arrowNav, ruleLabel } from './stage.js';
 
 const keyOf = (c) => String(c.id ?? c.n);
 
@@ -28,11 +29,9 @@ export const sort = {
 
     /* ---- columns ---- */
     const cols = screen.columns.map((c) => {
-      const label = c.term && content.tooltips[c.term]
-        ? [h('span', { class: 'w-term-static' }, c.label), icon('info', { size: 18, className: 'w-opt-info' })]
-        : c.label;
+      const label = c.term && content.tooltips[c.term] ? h('span', { class: 'w-term-static' }, c.label) : c.label;
       const target = h('button', { class: 'w-sort-target', type: 'button', 'aria-disabled': 'true', dataset: { column: c.id } },
-        icon(c.icon, { size: 22, className: 'w-sort-icon' }), h('span', { class: 'w-sort-label' }, label), h('span', { class: 'w-opt-mark' }));
+        h('span', { class: 'w-sort-label' }, label), h('span', { class: 'w-opt-mark' }));
       if (c.term && content.tooltips[c.term]) attachTip(target, content.tooltips[c.term]);
       const chips = h('ul', { class: 'w-sort-chips', 'aria-label': c.label });
       const el = h('div', { class: 'w-sort-col', dataset: { bin: c.id } }, target, chips);
@@ -64,11 +63,11 @@ export const sort = {
     const trayEl = tray ? h('div', { class: 'w-tray', role: 'group', 'aria-labelledby': 'w-instruction' }, items.map((it) => it.btn)) : null;
     if (trayEl) arrowNav(trayEl, { selector: '.w-tray-card' });
 
-    layout(ctx, 'wide', zones.logo,
-      h('div', { class: 'w-wide' },
+    layout(ctx, 'focus',
+      sheet('focus w-sheet-wide',
+        screen.header ? ruleLabel(screen.header) : null,
         zones.instruction,
         h('div', { class: 'w-sort' + (tray ? ' w-sort-tray' : ''), dataset: { interaction: '' } },
-          screen.header ? ruleLabel(screen.header) : null,
           tray ? null : h('div', { class: 'w-deck' }, deck.dots.el, deck.btn),
           colRow,
           trayEl),
@@ -95,7 +94,7 @@ export const sort = {
       : h('li', { class: 'w-sort-chip' }, c.text));
     // reserve the chip lists' final height (measured with every chip in place) so nothing moves later
     cols.forEach((x) => x.chips.append(...cards.filter((c) => c.column === x.c.id).map(chip)));
-    const tallest = Math.max(...cols.map((x) => x.chips.getBoundingClientRect().height)) / (zones.main.getBoundingClientRect().height / 656 || 1);
+    const tallest = Math.max(...cols.map((x) => x.chips.getBoundingClientRect().height)) / (zones.main.getBoundingClientRect().height / zones.main.offsetHeight || 1);
     cols.forEach((x) => { x.chips.replaceChildren(); x.chips.style.minHeight = Math.ceil(tallest) + 'px'; });
     const remaining = () => items.filter((it) => !it.placed);
     const showDeck = () => {

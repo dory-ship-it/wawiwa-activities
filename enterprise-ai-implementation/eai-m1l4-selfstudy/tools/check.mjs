@@ -4,7 +4,7 @@
 //  2. every screen id in lesson.slice exists in screens[]
 //  3. no em dash (U+2014) or en dash (U+2013) in content or src (or index.html)
 //  4. every icon name used in content exists in src/icons.js
-//  5. the Next button (white on --w-red) font token is at least 18.66px and bold
+//  5. the Next button (white on --wl-red) font token is at least 18.66px and bold
 //  6. contrast of every text/background pair in the token table (4.5:1 text, 3:1 large text and UI)
 //  7. no learner-facing sentences in src/*.js string literals (src/review/ is exempt: review-only UI
 //     for the team, never in the package); no italics in src/*.css
@@ -14,9 +14,10 @@
 //     header label excluded (the counting is src/review/words.js, shared with the review toolbar)
 // 10. every interaction has full tracking metadata, ids are unique, graded keys match the options
 // 11. no arrow glyph (U+2192) in ui strings or src: the font subset has none, use the arrow icon
-// 12. hex allowlist (P1.5): every hex colour in src/ is one of the approved tokens
-// 13. image slots: src file exists, alt set, prompt file exists; a WARNING lists every temp image
-//     (not a failure)
+// 12. hex allowlist (NL1): every hex colour in src/ is one of the --wl-* tokens in src/tokens.css
+// 13. image slots: src file exists, alt set, prompt file exists; the scene photos (chapter.photo,
+//     screen.photo) exist; every screen of a chapter names its step (verb + a glyph icon); a WARNING
+//     lists every temp image (not a failure)
 // 14. fonts load offline: no Google Fonts anywhere, every @font-face file exists (Roboto 700 too)
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
@@ -67,17 +68,17 @@ unknown.length ? fail('icons used in content but missing in icons.js: ' + unknow
 const tokensCss = read(join(ROOT, 'src', 'tokens.css'));
 const frameCss = read(join(ROOT, 'src', 'frame.css'));
 const tok = (name) => (tokensCss.match(new RegExp(`--${name}:\\s*([^;]+);`)) || [])[1]?.trim();
-const ctaSize = parseFloat(tok('w-fs-next'));
-const ctaWeight = parseInt(tok('w-fw-next'), 10);
+const ctaSize = parseFloat(tok('wl-fs-next'));
+const ctaWeight = parseInt(tok('wl-fw-next'), 10);
 const nextRule = (frameCss.match(/\.w-next\s*\{([^}]*)\}/) || [])[1] || '';
-const redRules = [...frameCss.matchAll(/([^{}]+)\{([^}]*var\(--w-red\)[^}]*)\}/g)].map((m) => m[1].trim());
+const redRules = [...frameCss.matchAll(/([^{}]+)\{([^}]*var\(--wl-red\)[^}]*)\}/g)].map((m) => m[1].trim());
 // red: the unlocked Next, and on the title screen (O1, which has no footer) its "Start the lesson"
 // button, which is the screen's Next (approved board R4-O1)
 const nextOnly = redRules.length > 0 && redRules.every((sel) => /^\.w-next\[data-locked="false"\]$|^\.w-start$/.test(sel));
 const unlockedRule = (frameCss.match(/\.w-next\[data-locked="false"\]\s*\{([^}]*)\}/) || [])[1] || '';
-if (ctaSize >= 18.66 && ctaWeight >= 700 && /var\(--w-fs-next\)/.test(nextRule) && !/font(-size)?\s*:/.test(unlockedRule)) ok(`Next font token ${ctaSize}px weight ${ctaWeight} (large text, white on red allowed)`);
+if (ctaSize >= 18.66 && ctaWeight >= 700 && /var\(--wl-fs-next\)/.test(nextRule) && !/font(-size)?\s*:/.test(unlockedRule)) ok(`Next font token ${ctaSize}px weight ${ctaWeight} (large text, white on red allowed)`);
 else fail(`Next font token too small or overridden: ${ctaSize}px weight ${ctaWeight}`);
-nextOnly ? ok('--w-red is used by the unlocked Next button only') : fail('--w-red used outside .w-next[data-locked="false"]: ' + redRules.join(', '));
+nextOnly ? ok('--wl-red is used by the unlocked Next button (and O1 Start) only') : fail('--wl-red used outside .w-next[data-locked="false"]: ' + redRules.join(', '));
 
 /* 6. contrast */
 const hex = (name) => { const v = tok(name); if (!/^#[0-9a-f]{6}$/i.test(v || '')) throw new Error('token ' + name + ' is not a hex colour'); return v; };
@@ -87,29 +88,38 @@ const lum = (c) => {
 };
 const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
 const PAIRS = [
-  ['w-navy', 'w-white', 4.5, 'headings, statements, links, Previous'],
-  ['w-navy', 'w-grey', 4.5, 'instruction and Skip on the memo ground'],
-  ['w-navy', 'w-teal-tint', 4.5, 'current chapter in the menu'],
-  ['w-teal-ink', 'w-white', 4.5, 'teal labels, numerals, % complete'],
-  ['w-teal-ink', 'w-teal-tint', 4.5, 'correct verdict and option'],
-  ['w-ink', 'w-white', 4.5, 'body, answers'],
-  ['w-ink', 'w-hint', 4.5, 'pause band'],
-  ['w-ink', 'w-teal-tint', 4.5, 'band text, correct and saved'],
-  ['w-ink', 'w-error-tint', 4.5, 'band text, wrong'],
-  ['w-ink-2', 'w-white', 4.5, 'secondary text, counters, meta'],
-  ['w-ink-2', 'w-hint', 4.5, 'hint band'],
-  ['w-ink-2', 'w-grey', 4.5, 'locked Next, memo hint'],
-  ['w-error', 'w-error-tint', 4.5, 'wrong verdict and option'],
-  ['w-error', 'w-white', 4.5, 'not saved'],
-  ['w-white', 'w-navy', 4.5, 'Check, Save, tooltip'],
-  ['w-white', 'w-red', 3, 'Next label (large text: 19px bold)'],
-  ['w-teal', 'w-white', 3, 'FT1 numerals (large text: 40px)'],
-  ['w-white', 'w-teal', 3, 'check on teal (graphic)'],
-  ['w-white', 'w-error', 3, 'cross on red (graphic)'],
-  ['w-navy', 'w-white', 3, 'focus ring, ghost button border (UI)'],
-  ['w-ink-2', 'w-white', 3, 'input border, radio ring (UI)'],
-  ['w-teal', 'w-teal-tint', 3, 'correct card border (UI)'],
-  ['w-error', 'w-error-tint', 3, 'wrong card border (UI)'],
+  ['wl-ink', 'wl-stone', 4.5, 'headings and chapter name on the ground and the bar'],
+  ['wl-ink', 'wl-ivory', 4.5, 'panel headings'],
+  ['wl-ink', 'wl-white', 4.5, 'card text, menu current chapter'],
+  ['wl-body-ink', 'wl-white', 4.5, 'answer cards'],
+  ['wl-text-2', 'wl-ivory', 4.5, 'context line, subline'],
+  ['wl-text-2', 'wl-white', 4.5, 'card body copy'],
+  ['wl-muted', 'wl-stone', 4.5, 'step labels'],
+  ['wl-muted', 'wl-ivory', 4.5, 'hint line, counters, privacy line, menu chapters'],
+  ['wl-navy', 'wl-white', 4.5, 'Previous, Save, Check, Show me'],
+  ['wl-teal-ink', 'wl-stone', 4.5, 'Focus labels (Where we are, Lesson goals)'],
+  ['wl-teal-ink', 'wl-keypill-bg', 4.5, 'Key idea pill'],
+  ['wl-teal-ink', 'wl-white', 4.5, 'current-step icon and today number, "With mapping"'],
+  ['wl-correct-head', 'wl-correct-bg', 4.5, 'correct verdict'],
+  ['wl-correct-head', 'wl-chip-bg', 4.5, 'Today chip'],
+  ['wl-fb-text', 'wl-correct-bg', 4.5, 'strip line, correct'],
+  ['wl-error-head', 'wl-error-bg', 4.5, 'wrong verdict'],
+  ['wl-fb-text', 'wl-error-bg', 4.5, 'strip line, wrong'],
+  ['wl-text-2', 'wl-neutral-bg', 4.5, 'neutral verdict'],
+  ['wl-fb-text', 'wl-neutral-bg', 4.5, 'strip line, neutral'],
+  ['wl-grey-ink', 'wl-white', 4.5, '"Without mapping"'],
+  ['wl-evidence', 'wl-stone', 4.5, 'K1 evidence line'],
+  ['wl-idle-ink', 'wl-white', 4.5, 'numbers of steps and stations to come'],
+  ['wl-o1-ground', 'wl-turquoise', 4.5, 'Not scored, length and CC chips on glass'],
+  ['wl-white', 'wl-o1-ground', 4.5, 'text on dark glass (the darkest ground it sits on)'],
+  ['wl-white', 'wl-red', 3, 'Next label (large text: 18.7px bold), O1 Start (23px bold)'],
+  ['wl-white', 'wl-navy', 3, 'check on navy (graphic)'],
+  ['wl-white', 'wl-teal', 3, 'check on teal (graphic)'],
+  ['wl-white', 'wl-error', 3, 'cross on red (graphic)'],
+  ['wl-navy', 'wl-white', 3, 'focus ring, selected border, markers (UI)'],
+  ['wl-teal', 'wl-white', 3, 'correct border (UI)'],
+  ['wl-error', 'wl-white', 3, 'wrong border (UI)'],
+  ['wl-turquoise', 'wl-white', 2, 'current-step ring (decorative; the label is bold and the state is in aria-current)'],
 ];
 console.log('\n  contrast (text / background, ratio, needed, use)');
 for (const [fg, bg, need, use] of PAIRS) {
@@ -117,8 +127,9 @@ for (const [fg, bg, need, use] of PAIRS) {
   const line = `${('--' + fg).padEnd(14)} on ${('--' + bg).padEnd(16)} ${r.toFixed(2).padStart(5)}:1  >= ${need}  ${use}`;
   r >= need ? ok(line) : fail(line);
 }
-const turquoiseText = /color:\s*var\(--w-turquoise\)/.test(frameCss);
-turquoiseText ? fail('--w-turquoise used as text colour in frame.css') : ok('--w-turquoise never used as a text colour');
+// turquoise is never text on a light ground (it is the glass card's icon colour, and a ring)
+const turquoiseText = [...frameCss.matchAll(/([^{}]+)\{([^}]*[^-]color:\s*var\(--wl-turquoise\)[^}]*)\}/g)].map((m) => m[1].trim()).filter((sel) => !/glass|\.w-tr\[/.test(sel));
+turquoiseText.length ? fail('--wl-turquoise used as text colour in frame.css: ' + turquoiseText.join(', ')) : ok('--wl-turquoise is text colour only on dark glass');
 console.log('');
 
 /* 7. no learner-facing sentences in src, no italics */
@@ -244,9 +255,9 @@ const arrowIn = [...JSON.stringify(content.ui).matchAll(/\u2192/g)].length + src
 arrowIn ? fail('arrow glyph (U+2192) in ui strings or src: use icon("arrow-right")') : ok('no arrow glyph in ui strings or src (icon arrow-right exists)');
 
 /* 12. hex allowlist: the approved tokens only */
-const ALLOWED = ['#255777', '#3E868F', '#2F6A72', '#E7F2F3', '#5AB3AA', '#EE3124', '#CC0000', '#FBEAEA', '#000000', '#3F3F3F', '#F2F2F2', '#E6E6E8', '#D8D8D8', '#BFBFBF', '#FFFFFF', '#F4F7F9', '#EEF3F7'];
+const ALLOWED = [...tokensCss.matchAll(/--wl-[\w-]+:\s*(#[0-9A-Fa-f]{6})\s*;/g)].map((m) => m[1].toUpperCase());
 let hexHits = 0;
-for (const f of srcFiles.filter((p) => /\.(css|js)$/.test(p))) {
+for (const f of srcFiles.filter((p) => /\.(css|js)$/.test(p) && !p.endsWith('tokens.css'))) {
   read(f).split('\n').forEach((line, i) => {
     for (const m of line.matchAll(/#[0-9a-fA-F]{3,8}\b/g)) {
       if (!ALLOWED.includes(m[0].toUpperCase())) { hexHits++; fail(`hex ${m[0]} not an approved token in ${relative(ROOT, f)}:${i + 1}`); }
@@ -289,6 +300,15 @@ for (const [where, img] of slots) {
   if (img.temp) temps.push(`${where}: ${img.src}`);
 }
 if (!imgFails) ok(`all ${slots.length} image slots have a file or null, alt text and a prompt file (${slots.map(([w]) => w).join(', ')})`);
+// the scene photos: one per chapter (Stage photo, Focus wash) and a screen's own (O1); paths in the content
+const photos = [...content.chapters.map((c) => [c.id, c.photo]), ...content.screens.filter((s) => s.photo).map((s) => [s.id, s.photo])];
+const badPhotos = photos.filter(([, p]) => !p || !p.src || !existsSync(join(ROOT, p.src)));
+badPhotos.length ? badPhotos.forEach(([w]) => fail(`${w}: photo missing or its file missing`)) : ok(`${photos.length} scene photos exist (${photos.map(([w, p]) => w + ' ' + p.src.split('/').pop()).join(', ')})`);
+photos.filter(([, p]) => p && p.temp).forEach(([w, p]) => temps.push(`${w} photo: ${p.src}`));
+// every screen in a chapter names its step for the top bar: a verb and a glyph from icons.js
+const { isGlyph } = await import('../src/icons.js');
+const noStep = content.chapters.flatMap((c) => c.screens).filter((id) => { const s = content.screens.find((x) => x.id === id); return s && !(s.step && (s.step.join || (s.step.verb && isGlyph(s.step.icon)))); });
+noStep.length ? fail('screens without a step (verb + glyph icon): ' + noStep.join(', ')) : ok('every chapter screen names its step (verb + glyph icon)');
 if (temps.length) {
   console.log(`  WARNING ${temps.length} temp images in use (board references, replace before release):`);
   temps.forEach((t) => console.log('          ' + t));

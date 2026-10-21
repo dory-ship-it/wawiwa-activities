@@ -1,4 +1,4 @@
-// Explorer template, layout "wide". Variants:
+// Explorer template, a Focus panel (styled by analogy with the frames). Variants:
 //   diagram (S05)  a swimlane diagram drawn from the content (lanes, start / end events, step boxes,
 //                  the gateway diamond, orthogonal flows) is the stage. Every part is a hotspot button:
 //                  the key one ends the search (band right, all hotspots locked), the others give their
@@ -15,9 +15,10 @@
 // Tracking: diagram = the letter of the first part chosen, in screen.hotspots order;
 // tiles = the field number of the first answer. Retries as retry events.
 import { h, nextId } from '../util.js';
-import { icon } from '../icons.js';
+import { icon, glyph } from '../icons.js';
+import { checkButton } from './decision.js';
 import { letter } from '../tracking/index.js';
-import { layout, ruleLabel, arrowNav } from './stage.js';
+import { layout, sheet, ruleLabel, arrowNav } from './stage.js';
 
 export const explorer = {
   mount(ctx) {
@@ -30,14 +31,15 @@ export const explorer = {
 const mark = (el, result, ui) => {
   el.dataset.result = result;
   const m = el.querySelector(':scope > .w-opt-mark');
-  if (m) m.replaceChildren(result === 'correct' ? icon('check', { size: 16, label: ui.feedback.correctPrefix }) : result === 'wrong' ? icon('x', { size: 16, label: ui.feedback.wrongPrefix }) : '');
+  if (m) m.replaceChildren(result === 'correct' ? glyph('g-check-b', { size: 16, label: ui.feedback.correctPrefix }) : result === 'wrong' ? glyph('g-cross', { size: 14.08, label: ui.feedback.wrongPrefix }) : '');
 };
 
 /* ---------- diagram (S05) ---------- */
 // Geometry in stage px inside the diagram box (1088 wide on a 1280 stage, wider on a wide window): a
 // lane-name column, then equal node columns; every node of a lane sits on the lane's centre line.
 // The node columns follow the box width (place() runs again when the box is resized).
-const D = { W: 1088, HEAD: 120, LANE: 88, STEP_W: 150, STEP_H: 48, GATE: 48, EVENT: 32 };
+// (NL1: 70 px lanes so the diagram fits the Focus panel; start / end labels sit beside their circle)
+const D = { W: 1088, HEAD: 120, LANE: 70, STEP_W: 150, STEP_H: 44, GATE: 44, EVENT: 32 };
 const HOTSPOT_OF = { gateway: 'gateway', start: 'event', end: 'event', step: 'step', lane: 'lane' };
 
 function diagram(ctx) {
@@ -102,7 +104,7 @@ function diagram(ctx) {
         h('span', { class: 'w-diamond', 'aria-hidden': 'true' }), h('span', { class: 'w-opt-mark' }));
       placers.push(() => {
         const p = pos[n.id];
-        Object.assign(label.style, { left: p.x - 110 + 'px', top: p.y - p.hh - 22 + 'px' });
+        Object.assign(label.style, { left: p.x - 110 + 'px', top: p.y - p.hh - 20 + 'px' });
         Object.assign(btn.style, { left: p.x - p.hw + 'px', top: p.y - p.hh + 'px', width: D.GATE + 'px', height: D.GATE + 'px' });
       });
       hotspots.push(btn);
@@ -111,7 +113,12 @@ function diagram(ctx) {
     // start / end event: the button covers its label (above, so flows can enter from below) and the circle
     btn = h('button', { class: 'w-node w-node-event', type: 'button', dataset: { hotspot: kind, id: n.id, end: n.kind === 'end' ? 'true' : 'false' } },
       h('span', { class: 'w-node-label' }, n.label), h('span', { class: 'w-event-circle', 'aria-hidden': 'true' }), h('span', { class: 'w-opt-mark' }));
-    placers.push(() => { const p = pos[n.id]; Object.assign(btn.style, { left: p.x - 64 + 'px', top: p.y - p.hh - 22 + 'px', width: '128px' }); });
+    // the start's label right of its circle (its flow leaves from below), the end's above it (flows
+    // enter it from the left and from below)
+    placers.push(() => {
+      const p = pos[n.id];
+      Object.assign(btn.style, n.kind === 'end' ? { left: p.x - 64 + 'px', top: p.y - p.hh - 19 + 'px', width: '128px' } : { left: p.x - p.hw + 'px', top: p.y - 22 + 'px', width: '170px', height: '44px' }); // a 44 px target
+    });
     hotspots.push(btn);
     return btn;
   });
@@ -135,22 +142,21 @@ function diagram(ctx) {
   const legend = screen.legend.map((g) => {
     const textId = nextId('w-legend');
     const btn = h('button', { class: 'w-legend-btn', type: 'button', 'aria-expanded': 'false', 'aria-controls': textId, dataset: { legend: g.id } },
-      icon(g.icon, { size: 20, className: 'w-legend-icon' }), h('span', { class: 'w-legend-label' }, g.label), h('span', { class: 'w-legend-state' }, icon('chevron-right', { size: 18 })));
+      h('span', { class: 'w-legend-label' }, g.label), h('span', { class: 'w-legend-state' }, icon('chevron-right', { size: 18 })));
     const text = h('p', { class: 'w-legend-text', id: textId, dataset: { open: 'false' } }, g.text);
     const toggle = (open) => {
       btn.setAttribute('aria-expanded', String(open));
       text.dataset.open = String(open); // closed text keeps its space (visibility only): nothing below moves
-      if (open) { opened.add(g.id); btn.dataset.seen = 'true'; btn.querySelector('.w-legend-state').replaceChildren(icon('check', { size: 18 })); }
+      if (open) { opened.add(g.id); btn.dataset.seen = 'true'; btn.querySelector('.w-legend-state').replaceChildren(glyph('g-check-b', { size: 17.92 })); }
     };
     btn.addEventListener('click', () => { toggle(btn.getAttribute('aria-expanded') !== 'true'); check(true); });
     return { g, btn, text, toggle, el: h('div', { class: 'w-legend-item' }, btn, text) };
   });
 
-  layout(ctx, 'wide', zones.logo,
-    h('div', { class: 'w-wide' },
-      zones.instruction,
+  layout(ctx, 'focus',
+    sheet('focus w-sheet-wide',
+      h('div', { class: 'w-head-row' }, zones.instruction, ruleLabel(dg.tag, 'w-tag')),
       h('div', { class: 'w-explore', dataset: { interaction: '' } },
-        ruleLabel(dg.tag, 'w-tag'),
         box,
         h('div', { class: 'w-legend' }, legend.map((x) => x.el))),
       zones.band));
@@ -217,12 +223,11 @@ function tiles(ctx) {
   const grid = h('div', { class: 'w-tiles', role: 'group', 'aria-labelledby': 'w-instruction' }, list.map((x) => x.btn));
   arrowNav(grid, { selector: '.w-tile', cols: 4 });
 
-  const lock = h('span', { class: 'w-question-lock', role: 'img', 'aria-label': screen.lockedLabel }, icon('lock', { size: 22 }));
+  const lock = h('span', { class: 'w-question-lock', role: 'img', 'aria-label': screen.lockedLabel }, glyph('g-lock', { size: 23.04 }));
   const question = h('h2', { class: 'w-question-text', id: nextId('w-question'), hidden: true }, screen.question);
   const qRow = h('div', { class: 'w-question-row', 'aria-live': 'polite' }, lock, question);
 
-  layout(ctx, 'wide', zones.logo,
-    h('div', { class: 'w-wide' }, zones.instruction, h('div', { class: 'w-tiles-task', dataset: { interaction: '' } }, grid, qRow), zones.band));
+  layout(ctx, 'focus', sheet('focus w-sheet-wide', zones.instruction, h('div', { class: 'w-tiles-task', dataset: { interaction: '' } }, grid, qRow), zones.band));
   zones.setFeedback({ state: 'hint', text: screen.hint });
 
   const unlock = () => {
@@ -243,7 +248,7 @@ function tiles(ctx) {
       if (open && !visited.has(x.t.n)) {
         visited.add(x.t.n);
         x.btn.dataset.seen = 'true';
-        x.seen.replaceChildren(icon('check', { size: 16 }));
+        x.seen.replaceChildren(glyph('g-check-b', { size: 16 }));
       }
       if (visited.size === list.length) unlock(); // the last tile stays open to read; any click now answers
       return;
@@ -264,7 +269,7 @@ function tiles(ctx) {
 
   list.forEach((x) => flip(x, false));
   if (ctx.revisit) {
-    list.forEach((x) => { visited.add(x.t.n); x.btn.dataset.seen = 'true'; x.seen.replaceChildren(icon('check', { size: 16 })); });
+    list.forEach((x) => { visited.add(x.t.n); x.btn.dataset.seen = 'true'; x.seen.replaceChildren(glyph('g-check-b', { size: 16 })); });
     unlock();
     const k = list.findIndex((x) => x.t.correct);
     solved = true;
@@ -295,10 +300,10 @@ function pick(ctx) {
   });
   const grid = h('div', { class: 'w-pick-tiles', role: 'group', 'aria-labelledby': question.id }, list.map((x) => x.btn));
   arrowNav(grid, { selector: '.w-pick-tile', cols: 2 });
-  const check = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'check' }, disabled: true, onclick: () => doCheck() }, ui.buttons.check);
+  const check = checkButton(ui, ui.buttons.check, () => doCheck());
 
-  layout(ctx, 'wide', zones.logo,
-    h('div', { class: 'w-wide' },
+  layout(ctx, 'focus',
+    sheet('focus w-sheet-wide',
       zones.instruction,
       h('div', { class: 'w-pick', dataset: { interaction: '' } }, grid, h('div', { class: 'w-pick-side' }, question, h('div', { class: 'w-pick-panel' }, panelText))),
       zones.band));
@@ -309,7 +314,7 @@ function pick(ctx) {
     list.forEach((y) => { y.btn.dataset.open = String(y === x); });
     panelText.textContent = x.t.text;
     x.btn.dataset.seen = 'true';
-    x.seen.replaceChildren(icon('check', { size: 16 }));
+    x.seen.replaceChildren(glyph('g-check-b', { size: 16 }));
   };
   const paintOne = (x, result) => mark(x.btn, result, ui);
   function update() {
@@ -348,7 +353,7 @@ function pick(ctx) {
     wrong.forEach((i) => selected.delete(i));
     marked = true;
     update();
-    zones.setFeedback({ state: 'wrong', verdict: rightCount === 1 && keys.length === 2 ? ui.feedback.oneOfTwo : ui.feedback.wrongPrefix, text: screen.tiles[wrong[0]].feedback });
+    zones.setFeedback({ state: rightCount === 1 && keys.length === 2 ? 'partial' : 'wrong', verdict: rightCount === 1 && keys.length === 2 ? ui.feedback.oneOfTwo : ui.feedback.wrongPrefix, text: screen.tiles[wrong[0]].feedback });
     list[wrong[0]].btn.focus();
   }
 

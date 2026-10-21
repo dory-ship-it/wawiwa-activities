@@ -1,6 +1,7 @@
-// Tooltips: dotted-underline glossary terms and the progress-bar segment tips.
+// Tooltips: dotted-underline glossary terms, the O3 goal tiles, the S02 help button.
 // Shown on hover or keyboard focus, hidden on Escape, linked with aria-describedby.
-// One tip box per stage, positioned in stage px (the stage is scaled as a whole).
+// One tip box per stage, positioned in stage px (the stage is scaled as a whole), in the frames'
+// quote-glass look (dark glass, white text, 30cqw wide at most).
 import { h, nextId } from './util.js';
 
 let tipBox = null;
@@ -19,9 +20,10 @@ export function initTooltips(stage) {
 // (describe: false when the element's own label already says the same). container: where the
 // hidden description goes (default: right after the element); a term inside a heading puts it
 // outside, so the heading's own text stays the heading.
-// side: 'below' (default, above when there is no room) or 'right' (the rail dots: level with the
-// element, right of it, so the tip never covers the next dot).
-export function attachTip(el, text, { describe = true, container = null, side = 'below' } = {}) {
+// side: 'below' (default: centred under the element, above when there is no room), 'below-left'
+// (under it, left edges aligned: the S02 help button) or 'above' (over it, 1cqw to the left and
+// above: the O3 goal tiles). width: a fixed width in stage px (the frames' 26cqw / 30cqw).
+export function attachTip(el, text, { describe = true, container = null, side = 'below', width = null } = {}) {
   let desc = null;
   if (describe) {
     const id = nextId('w-desc');
@@ -30,7 +32,7 @@ export function attachTip(el, text, { describe = true, container = null, side = 
     const prev = el.getAttribute('aria-describedby');
     el.setAttribute('aria-describedby', prev ? prev + ' ' + id : id);
   }
-  const show = () => showFor(el, text, side);
+  const show = () => showFor(el, text, side, width);
   el.addEventListener('mouseenter', show);
   el.addEventListener('focus', show);
   el.addEventListener('mouseleave', () => { if (document.activeElement !== el) hide(el); });
@@ -38,17 +40,25 @@ export function attachTip(el, text, { describe = true, container = null, side = 
   return desc;
 }
 
-function showFor(el, text, side = 'below') {
+function showFor(el, text, side = 'below', width = null) {
   if (!tipBox) return;
   owner = el;
-  tipBox.textContent = typeof text === 'function' ? text() : text; // a function: the text follows a state (full screen)
+  tipBox.textContent = typeof text === 'function' ? text() : text; // a function: the text follows a state
+  tipBox.style.width = width ? width + 'px' : '';
   tipBox.hidden = false;
   const s = stageEl.getBoundingClientRect();
   const scale = s.width / stageEl.offsetWidth || 1;
   const r = el.getBoundingClientRect();
-  if (side === 'right') {
-    tipBox.style.left = (r.right - s.left) / scale + 12 + 'px';
-    tipBox.style.top = Math.max(8, (r.top - s.top + r.height / 2) / scale - tipBox.offsetHeight / 2) + 'px';
+  const GAP = 12.8; // 1cqw
+  if (side === 'above') {
+    // measured from the element's padding box (inside its border), as the frame's tip sits inside the tile
+    tipBox.style.left = (r.left - s.left) / scale + el.clientLeft - GAP + 'px';
+    tipBox.style.top = (r.top - s.top) / scale + el.clientTop - GAP - tipBox.offsetHeight + 'px';
+    return;
+  }
+  if (side === 'below-left') {
+    tipBox.style.left = (r.left - s.left) / scale + 'px';
+    tipBox.style.top = (r.bottom - s.top) / scale + GAP + 'px';
     return;
   }
   const x = (r.left - s.left + r.width / 2) / scale;

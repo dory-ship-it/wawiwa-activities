@@ -11,14 +11,16 @@ export function chromePath() {
 }
 
 // Runs inside the page: page.evaluate(measureLayout). All numbers in stage px. Reports:
-//   overlaps     painted boxes of the screen (outside the band) reaching into the feedback band
-//   bandWidth    band width vs its interaction area ([data-interaction]) width, and the gap between
-//                the area's bottom and the band's top (the band sits directly under the area)
+//   overlaps     painted boxes of the screen (outside the band and its panel) reaching into the band
+//   bandWidth    NL1: the band is flush to its panel's edges: band width vs the panel's width, its left
+//                offset and the gap between their bottoms (all 0)
 //   outside      painted boxes of the screen outside the main area (would be clipped)
 //   clipped      text cut off inside its own box
 //   bandOverflow band text running outside the band
 //   contrast     every visible text run: colour on its effective background, ratio and need
-//                (4.5:1, or 3:1 for large text: 24px, or 18.66px bold); lowContrast = the failures
+//                (4.5:1, or 3:1 for large text: 24px, or 18.66px bold); lowContrast = the failures.
+//                Inactive controls (aria-disabled, disabled, a locked Next / Check / Resume) are exempt
+//                (WCAG 1.4.3: text in an inactive user interface component)
 //   small        text below 14px
 //   smallTargets operable controls under 44 x 44 px
 export function measureLayout() {
@@ -46,7 +48,7 @@ export function measureLayout() {
   const main = document.querySelector('.w-main'), band = document.querySelector('.w-band');
   const overlay = document.querySelector('.w-menu-overlay:not([hidden]), .w-dialog-overlay');
   const M = box(main.getBoundingClientRect());
-  const bandOn = band && main.contains(band) && visible(band);
+  const bandOn = band && main.contains(band) && visible(band) && band.dataset.empty !== 'true';
   const B = bandOn ? box(band.getBoundingClientRect()) : null;
 
   // painted boxes and text runs inside main (the band's own subtree excluded)
@@ -54,7 +56,8 @@ export function measureLayout() {
   for (const el of main.querySelectorAll('*')) {
     const tag = el.tagName.toLowerCase();
     if (el.closest('svg') && tag !== 'svg') continue;
-    if (bandOn && band.contains(el)) continue;
+    if (bandOn && (band.contains(el) || el.contains(band))) continue; // the band, and the panel it sits in
+    if (el.matches('.w-video')) continue; // the film is the screen's backdrop (V1, V2), like the scene photo
     if (!visible(el)) continue;
     const r = el.getBoundingClientRect();
     if (r.width < 1 || r.height < 1 || scrolledAway(el, r)) continue;
@@ -80,48 +83,36 @@ export function measureLayout() {
   const overlaps = bandOn ? boxes.filter((b) => hit(b, B)).map((b) => b.what) : [];
   const outside = boxes.filter((b) => b.top < M.top - 0.5 || b.bottom > M.bottom + 0.5 || b.left < M.left - 0.5 || b.right > M.right + 0.5).map((b) => b.what);
 
-  // wide windows (R5): the content column has no empty side strip wider than the gutter on one side
-  // only, and the logo lines up with it. Column = the panel of a split layout (editorial text column,
-  // video stop panel), else main. L / R = gaps from the column's edges to its painted boxes (the logo
-  // and its header excluded; a photo counts). A strip fails when the wider gap is over 72 px (the 1280
-  // paddings are 60 to 72) and the two sides differ by more than 16 px.
+  // equal gutters (NL1): a Focus panel sits centred in main at any stage width, the same gap left and
+  // right (L / R from main's edges to the panel). Stage panels and the title are placed by design.
   const layoutName = main.dataset.layout;
-  const stopOn = !!document.querySelector('.w-stop-view:not([hidden])');
-  const col = layoutName === 'editorial' ? main.querySelector('.w-col') : layoutName === 'warmup' ? main.querySelector('.w-warmup-main')
-    : stopOn ? main.querySelector('.w-stop-panel') : main;
+  const focusSheet = main.querySelector('.w-sheet-focus');
   let wide = null;
-  if (col && !overlay) {
-    const C = box(col.getBoundingClientRect());
-    const inCol = boxes.filter((b) => !b.what.startsWith('text:') && !/^w-(logo|header)$/.test(b.what)
-      && b.left >= C.left - 0.5 && b.right <= C.right + 0.5);
-    const L = Math.round(Math.min(...inCol.map((b) => b.left)) - C.left), R = Math.round(C.right - Math.max(...inCol.map((b) => b.right)));
-    const strip = Math.max(L, R) > 72.5 && Math.abs(L - R) > 16;
-    const logo = main.querySelector(':scope > .w-logo, .w-header > .w-logo, .w-title-col > .w-logo');
-    const h1 = document.getElementById('w-instruction');
-    let logoOk = true, logoWhy = '';
-    if (logo && visible(logo)) {
-      const G = box(logo.getBoundingClientRect());
-      // in a header bar (editorial, Round 4 present / warm-up / key idea) or over a photo (memo): 24 px from the rail
-      if (['editorial', 'memo', 'present', 'warmup', 'concept'].includes(layoutName)) { logoOk = Math.abs(G.left - M.left - 24) <= 1; logoWhy = `logo ${Math.round(G.left - M.left)} px from the rail (24)`; }
-      else if (stopOn) { const P = parseFloat(getComputedStyle(col).paddingLeft); logoOk = Math.abs(G.left - (C.left + P)) <= 1; logoWhy = `logo at the stop panel's text edge (${Math.round(G.left - C.left)} = ${Math.round(P)})`; }
-      else if (h1 && visible(h1)) { const I = box(h1.getBoundingClientRect()); logoOk = Math.abs(G.left - I.left) <= 1; logoWhy = `logo x ${Math.round(G.left - M.left)} = h1 x ${Math.round(I.left - M.left)}`; }
-    }
-    wide = { L, R, strip, logoOk, logoWhy, col: col === main ? 'main' : col.className.split(' ')[0] };
+  if (focusSheet && visible(focusSheet) && !overlay) {
+    const P = box(focusSheet.getBoundingClientRect());
+    const L = Math.round(P.left - M.left), R = Math.round(M.right - P.right);
+    wide = { L, R, strip: Math.abs(L - R) > 1, logoOk: true, logoWhy: '', col: 'focus panel (' + layoutName + ')' };
   }
 
   let bandWidth = null;
   if (bandOn) {
-    const area = [...band.parentElement.querySelectorAll(':scope > [data-interaction]')].find((el) => visible(el)) || band.closest('[data-interaction]');
-    if (area) {
-      const A = box(area.getBoundingClientRect());
-      bandWidth = { band: Math.round(B.w), area: Math.round(A.w), gap: Math.round(B.top - (area.contains(band) ? B.top : A.bottom)), left: Math.round(B.left - A.left) };
+    const sheet = band.closest('.w-sheet');
+    if (sheet) {
+      const P = box(sheet.getBoundingClientRect());
+      bandWidth = { band: Math.round(B.w), area: Math.round(P.w), gap: Math.round(P.bottom - B.bottom), left: Math.round(B.left - P.left) };
     }
   }
 
-  const TEXT_BOXES = '.w-instruction, .w-band-live, .w-band-text, .w-btn, .w-link, .w-opt, .w-opt-label, .w-label, .w-eyebrow, .w-quote-1, .w-quote-2, .w-attrib, .w-memo-line, .w-memo-q, .w-hintline, '
-    + '.w-privacy, .w-field-label, .w-counter, .w-next, .w-prev, .w-chapter-title, .w-chapter-meta, .w-panel-title, .w-panel-link, .w-saved, .w-rail-done, figcaption';
-  const clipped = [...document.querySelectorAll(TEXT_BOXES)].filter((el) => visible(el) && getComputedStyle(el).display !== 'inline'
-    && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1)).map(name);
+  const TEXT_BOXES = '.w-instruction, .w-band-live, .w-band-text, .w-band-hint, .w-btn, .w-link, .w-opt, .w-opt-label, .w-label, .w-eyebrow, .w-quote-1, .w-attrib, .w-memo-line, .w-memo-q, .w-context, .w-subline, '
+    + '.w-privacy, .w-field-label, .w-counter, .w-next, .w-prev, .w-chapter-title, .w-panel-title, .w-panel-link, .w-saved, .w-step-label, .w-bar-chapter, .w-map-kicker, .w-map-title, .w-goal-label, figcaption';
+  // cut off: content beyond the box. A tight heading (the frames set line-height 1.0 to 1.2) lets its
+  // glyphs' content area pass the line box by up to about 0.15em with overflow visible: not cut off
+  const clipped = [...document.querySelectorAll(TEXT_BOXES)].filter((el) => {
+    if (!visible(el) || getComputedStyle(el).display === 'inline') return false;
+    const cs = getComputedStyle(el);
+    const slack = cs.overflowY === 'visible' ? Math.max(1, 0.2 * parseFloat(cs.fontSize)) : 1;
+    return el.scrollHeight > el.clientHeight + slack || el.scrollWidth > el.clientWidth + 1;
+  }).map(name);
   let bandOverflow = false;
   if (bandOn) for (const t of textRuns(band)) if (t.top < B.top - 0.5 || t.bottom > B.bottom + 0.5 || t.left < B.left - 0.5 || t.right > B.right + 0.5) bandOverflow = true;
 
@@ -144,6 +135,7 @@ export function measureLayout() {
   for (const t of textRuns(scope)) {
     const el = t.node.parentElement;
     if (overlay && !overlay.contains(el)) continue;
+    if (el.closest('[aria-disabled="true"], :disabled, [data-locked="true"]')) continue; // inactive control (WCAG 1.4.3)
     const cs = getComputedStyle(el);
     const size = parseFloat(cs.fontSize), weight = parseInt(cs.fontWeight, 10);
     if (size < 14) small.push(`${t.what} ${size}px`);
@@ -172,14 +164,14 @@ export function layoutVerdict(m) {
   if (m.outside.length) bad.push('outside main: ' + m.outside.join(', '));
   if (m.clipped.length) bad.push('clipped: ' + m.clipped.join(', '));
   if (m.bandOverflow) bad.push('band text overflows the band');
-  if (m.bandWidth && (Math.abs(m.bandWidth.band - m.bandWidth.area) > 1 || m.bandWidth.left !== 0 || m.bandWidth.gap < 0 || m.bandWidth.gap > 40))
-    bad.push(`band ${m.bandWidth.band}px vs interaction area ${m.bandWidth.area}px, offset ${m.bandWidth.left}, gap ${m.bandWidth.gap}`);
+  if (m.bandWidth && (Math.abs(m.bandWidth.band - m.bandWidth.area) > 1 || Math.abs(m.bandWidth.left) > 1 || Math.abs(m.bandWidth.gap) > 1))
+    bad.push(`band ${m.bandWidth.band}px vs its panel ${m.bandWidth.area}px, offset ${m.bandWidth.left}, bottom gap ${m.bandWidth.gap}`);
   if (m.lowContrast.length) bad.push('contrast: ' + m.lowContrast.join('; '));
   if (m.small.length) bad.push('text under 14px: ' + m.small.join(', '));
   if (m.smallTargets.length) bad.push('targets under 44px: ' + m.smallTargets.join(', '));
-  if (m.wide && m.wide.strip) bad.push(`empty side strip in ${m.wide.col}: left ${m.wide.L}px, right ${m.wide.R}px`);
+  if (m.wide && m.wide.strip) bad.push(`${m.wide.col} not centred: left gap ${m.wide.L}px, right gap ${m.wide.R}px`);
   if (m.wide && !m.wide.logoOk) bad.push('logo not aligned: ' + m.wide.logoWhy);
   const side = m.wide ? `, ${m.wide.col} gaps ${m.wide.L}/${m.wide.R}${m.wide.logoWhy ? ', ' + m.wide.logoWhy : ''}` : '';
-  const detail = (m.bandWidth ? `band ${m.bandWidth.band}px = area ${m.bandWidth.area}px, gap ${m.bandWidth.gap}px` : 'no band') + side;
+  const detail = (m.bandWidth ? `band ${m.bandWidth.band}px = panel ${m.bandWidth.area}px, flush` : 'no band') + side;
   return [!bad.length, bad.length ? bad.join(' | ') : detail];
 }

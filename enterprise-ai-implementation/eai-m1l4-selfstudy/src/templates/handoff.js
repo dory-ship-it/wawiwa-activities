@@ -1,4 +1,4 @@
-// Handoff template (S19), layout "editorial": image column left, the work right.
+// Handoff template (S19), a Focus panel (styled by analogy; the screen's image waits for the media track).
 //   brief   the activity title with its time chip, the instruction, four numbered steps, the coach
 //           line and "Open workbook": a real link to the EXISTING workbook (content links, new tab,
 //           rel noopener noreferrer). After it is opened the band says so and "I'm back" appears.
@@ -7,8 +7,8 @@
 //           the tracking bus (fill-in, neutral), the band's saved line, Next.
 // Opened and back are flags in suspend data, so a reload or LMS resume comes back to the right state.
 import { h, resolveLink } from '../util.js';
-import { icon } from '../icons.js';
-import { layout, picture, privacyLine } from './stage.js';
+import { icon, glyph } from '../icons.js';
+import { layout, sheet, privacyLine } from './stage.js';
 import { field } from './input.js';
 
 export const handoff = {
@@ -19,18 +19,18 @@ export const handoff = {
     const top = brief.stage.top;
 
     /* ---- brief ---- */
-    const title = h('p', { class: 'w-handoff-title' }, icon(top.icon, { size: 26 }), h('span', {}, top.text));
-    const chip = top.chip ? h('p', { class: 'w-time-chip' }, icon(top.chip.icon, { size: 16 }), h('span', {}, top.chip.text)) : null;
+    const title = h('p', { class: 'w-handoff-title' }, h('span', {}, top.text));
+    const chip = top.chip ? h('p', { class: 'w-time-chip' }, h('span', {}, top.chip.text)) : null;
     const steps = h('ol', { class: 'w-steps' }, brief.stage.middle.items.map((s) => h('li', {}, h('span', { class: 'w-step-n', 'aria-hidden': 'true' }, String(s.n)), h('span', {}, s.text))));
     const coach = privacyLine(brief.stage.bottom);
     const open = h('a', { class: 'w-btn w-btn-action w-open', href, target: '_blank', rel: screen.handoff.rel, dataset: { action: 'open' } },
-      h('span', {}, ui.buttons.open), icon('external-link', { size: 18 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')'));
+      h('span', {}, ui.buttons.open), glyph('g-arrow', { size: 19.2 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')'));
     const backBtn = h('button', { class: 'w-btn w-btn-ghost', type: 'button', dataset: { action: 'back' }, hidden: true }, ui.buttons.back);
     const briefTask = h('div', { class: 'w-handoff-task', dataset: { interaction: '' } }, steps, h('div', { class: 'w-actionbar' }, coach.el, h('div', { class: 'w-action' }, open, backBtn))); // Open workbook first (primary), then I'm back
     const briefView = h('div', { class: 'w-handoff-view' }, h('div', { class: 'w-handoff-head' }, title, chip), briefTask);
 
     /* ---- return ---- */
-    const rTitle = h('p', { class: 'w-handoff-title' }, icon(back.stage.top.icon, { size: 26 }), h('span', {}, back.stage.top.text));
+    const rTitle = h('p', { class: 'w-handoff-title' }, h('span', {}, back.stage.top.text));
     const privacy = privacyLine(back.stage.bottom);
     const announcer = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
     const f = back.fields[0];
@@ -39,11 +39,7 @@ export const handoff = {
     const returnTask = h('div', { class: 'w-handoff-task w-form-task', dataset: { interaction: '' } }, ctl.el, announcer, h('div', { class: 'w-actionbar' }, privacy.el, save));
     const returnView = h('div', { class: 'w-handoff-view', hidden: true }, h('div', { class: 'w-handoff-head' }, rTitle), returnTask);
 
-    layout(ctx, 'editorial',
-      h('header', { class: 'w-header' }, zones.logo),
-      h('div', { class: 'w-editorial' },
-        picture(screen.image, 'w-photo-column'),
-        h('section', { class: 'w-col w-col-handoff' }, zones.instruction, briefView, returnView)));
+    layout(ctx, 'focus', sheet('focus w-col-handoff', zones.instruction, briefView, returnView));
 
     const showBrief = () => {
       briefView.hidden = false; returnView.hidden = true;
@@ -62,8 +58,7 @@ export const handoff = {
       if (focus) ctl.input.focus();
     }
     function saved(focus) {
-      save.className = 'w-btn w-btn-ghost';
-      zones.setFeedback({ state: 'neutral', text: back.savedFeedback });
+      zones.setFeedback({ state: 'neutral', tone: 'correct', text: back.savedFeedback });
       ctx.unlockNext({ focus });
     }
 

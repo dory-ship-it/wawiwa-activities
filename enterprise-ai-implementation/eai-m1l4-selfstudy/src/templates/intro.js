@@ -1,78 +1,92 @@
-// Round 4 templates (storyboard v3, Intro and Chapter 1), refs planning/design-reference/R4-*.html.
-//   title      (O1)  layout "title": no header or footer (the rail stays). Text column left (logo,
-//                    programme, module and lesson, h1, rule, quote, "Start the lesson"), photo right.
-//   moduleMap  (O2)  layout "present": header line; five lesson stations on a line as ARIA tabs
-//                    (arrow keys move, Enter or Space opens, roving tabindex), the open lesson's panel
-//                    under them. Today's lesson is open on arrival. Ghost hand type "tabs".
-//   goals      (O3)  layout "present": the deliverable box, five icon tiles (the full goal as the
-//                    tile's tooltip on hover or focus), appearing 150 ms apart.
-//   warmup     (W1)  layout "warmup": navy panel left, the question right as a radio group. Any pick is
-//                    a neutral "Your guess" (no right or wrong colours); the pick can change. Next after
-//                    a pick. One neutral interaction; a later pick goes out as a retry.
-//   concept    (K1)  layout "concept": "Key idea" on a light blue-grey stage, the idea in one line, two
-//                    figure cards drawn in HTML / CSS (they draw on in about 1 s), an evidence line.
+// Intro and Chapter 1 presentation templates, "Hybrid cinematic" look (NL1), frames in
+// planning/design-reference/hybrid-cinematic/screens-intro-ch2.html:
+//   title      (O1)  the only dark screen: O1's photo under its veil, no bar or footer. Logo top left;
+//                    programme and lesson line, h1, the quote with a turquoise mark, "Start the lesson".
+//   moduleMap  (O2)  Focus: "Where we are" and h1; five lesson stations on a line (ARIA tabs: arrow
+//                    keys move, Enter or Space opens, roving tabindex), each a disc (done = navy check,
+//                    today = turquoise ring with its number and a "Today" chip, to come = outline) with
+//                    its lesson and title; the open lesson's line in a card whose caret follows it.
+//                    Today's lesson is open on arrival. Ghost hand type "tabs" (the station the content
+//                    names, once).
+//   goals      (O3)  Focus: the deliverable in a figure card, five numbered goal tiles; the full goal in
+//                    a glass tooltip above the tile on hover or focus.
+//   warmup     (W1)  Stage: the question on a glass card over the photo (bulb, "Warm-up", "Not scored");
+//                    the panel holds "Make your best guess." and the answers as a radio group. Any pick
+//                    is neutral (navy outline and dot, no right or wrong colours); the pick can change.
+//                    Next after a pick. One neutral interaction; a later pick goes out as a retry.
+//   concept    (K1)  Focus: the "Key idea" pill, h1, one line; two figure cards with an arrow between
+//                    them, their line drawings draw on (1.2 s); the evidence line and source at the foot.
 // Title, module map, goals and key idea are presentation screens (screen.presentation): the engine
 // marks them done on arrival, so Next never locks. All text comes from the content.
 import { h } from '../util.js';
-import { icon, statusMark } from '../icons.js';
+import { glyph } from '../icons.js';
 import { attachTip } from '../tooltip.js';
+import { scaleOf } from '../ghost.js';
 import { letter } from '../tracking/index.js';
-import { layout, picture, arrowNav } from './stage.js';
-
-// the header bar of the Round 4 screens: logo and the lesson line
-const header = (ctx) => h('header', { class: 'w-header w-header-line' }, ctx.zones.logo, h('p', { class: 'w-header-text' }, ctx.ui.header));
+import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst } from './stage.js';
 
 /* ---------- title (O1) ---------- */
 export const title = {
+  scene: () => 'title',
   mount(ctx) {
     const { screen, ui, zones } = ctx;
     const start = h('button', { class: 'w-btn w-start', type: 'button', dataset: { action: 'start' }, onclick: () => ctx.next() },
-      h('span', {}, ui.buttons[screen.start]), icon('arrow-right', { size: 20 }));
+      h('span', {}, ui.buttons[screen.start]), glyph('g-arrow-o1', { size: 25.6 }));
+    // the quote mark is drawn, so the typographic marks around the content's quote are left out
+    const quote = String(screen.quote || '').replace(/^[“"]+|[”"]+$/g, '');
     layout(ctx, 'title',
-      h('section', { class: 'w-title-col' },
-        zones.logo,
-        h('div', { class: 'w-title-body' },
-          h('p', { class: 'w-title-program' }, screen.program),
-          h('p', { class: 'w-title-kicker' }, screen.kicker),
-          zones.instruction,
-          h('span', { class: 'w-title-rule', 'aria-hidden': 'true' }),
-          h('p', { class: 'w-title-quote' }, screen.quote),
-          h('div', { class: 'w-title-actions' }, start))),
-      picture(screen.image, 'w-title-photo'));
+      h('img', { class: 'w-o1-logo', src: 'assets/logo/wawiwa-logo.png', alt: ui.logoAlt, width: '271', height: '102' }),
+      h('section', { class: 'w-o1-body' },
+        h('p', { class: 'w-title-program' }, [screen.program, screen.kicker].filter(Boolean).join(' · ')),
+        zones.instruction,
+        h('div', { class: 'w-o1-quote' }, glyph('g-quote', { size: 33.28 }), h('p', { class: 'w-title-quote' }, quote)),
+        h('div', { class: 'w-title-actions' }, start)));
     return { unmount() {} };
   },
 };
 
 /* ---------- moduleMap (O2) ---------- */
+const PITCH = 215.04, STATION_W = 204.8; // 16.8cqw and 16cqw at 1280
 export const moduleMap = {
   mount(ctx) {
     const { screen, ui, zones } = ctx;
     const mm = ui.moduleMap;
     const stations = screen.stations;
+    const today = Math.max(0, stations.findIndex((st) => st.status === 'today'));
     const panelId = 'w-map-panel';
-    // the panel shows the open lesson's own line only: its kicker and title already sit on the open tab
-    const panelIcon = h('span', { class: 'w-map-panel-icon' });
+    const caret = h('i', { class: 'w-map-caret', 'aria-hidden': 'true' });
     const panelText = h('p', { class: 'w-map-panel-text' });
-    const panel = h('section', { class: 'w-map-panel', id: panelId, role: 'tabpanel', tabindex: '0' }, panelIcon, panelText);
+    const panel = h('section', { class: 'w-map-panel', id: panelId, role: 'tabpanel', tabindex: '0' }, caret, panelText);
 
-    const tabs = stations.map((st) => {
-      const today = st.status === 'today';
-      const kicker = h('span', { class: 'w-map-kicker' }, st.kicker, today ? h('span', { class: 'w-map-today' }, mm.today) : null);
+    const tabs = stations.map((st, i) => {
+      const isToday = st.status === 'today';
+      const disc = h('span', { class: 'w-map-disc', 'aria-hidden': 'true' }, st.status === 'done' ? glyph('g-check', { size: 40.96 }) : st.n || String(i + 1));
       const tab = h('button', { class: 'w-map-tab', type: 'button', role: 'tab', id: 'w-map-tab-' + st.id, 'aria-selected': 'false', 'aria-controls': panelId, tabindex: '-1',
         dataset: { station: st.id, status: st.status } },
-        kicker, h('span', { class: 'w-map-title' }, st.title), h('span', { class: 'w-sr-only' }, ', ' + mm.status[st.status]));
-      const mark = st.status === 'done' ? statusMark('done') : statusMark(today ? 'today' : 'locked');
-      return { st, tab, el: h('div', { class: 'w-map-station', dataset: { status: st.status } }, mark, tab) };
+        isToday ? h('span', { class: 'w-map-today', 'aria-hidden': 'true' }, mm.today) : null,
+        disc,
+        h('span', { class: 'w-map-labels' }, h('b', { class: 'w-map-kicker' }, st.kicker), h('span', { class: 'w-map-title' }, st.title)),
+        h('span', { class: 'w-sr-only' }, ', ' + mm.status[st.status]));
+      tab.style.left = i * PITCH + 'px';
+      return { st, tab, disc };
     });
-    const list = h('div', { class: 'w-map-tabs', role: 'tablist', 'aria-label': mm.label }, tabs.map((x) => x.el));
+    // the line: navy from the first station to today's, then the stone line to the last one
+    const centre = (i) => i * PITCH + STATION_W / 2;
+    const lineDone = h('i', { class: 'w-map-line w-map-line-done', 'aria-hidden': 'true' });
+    const lineNext = h('i', { class: 'w-map-line', 'aria-hidden': 'true' });
+    Object.assign(lineDone.style, { left: centre(0) + 'px', width: centre(today) - centre(0) + 'px' });
+    Object.assign(lineNext.style, { left: centre(today) + 'px', width: centre(stations.length - 1) - centre(today) + 'px' });
+    const list = h('div', { class: 'w-map-tabs', role: 'tablist', 'aria-label': mm.label }, lineDone, lineNext, tabs.map((x) => x.tab));
+    list.style.width = (stations.length - 1) * PITCH + STATION_W + 'px';
     const openIndex = () => tabs.findIndex((x) => x.tab.getAttribute('aria-selected') === 'true');
     function open(i, { focus = false } = {}) {
       tabs.forEach((x, j) => { x.tab.setAttribute('aria-selected', String(i === j)); x.tab.tabIndex = i === j ? 0 : -1; });
       const st = stations[i];
       panel.setAttribute('aria-labelledby', tabs[i].tab.id);
       panel.dataset.station = st.id;
-      panelIcon.replaceChildren(icon(st.icon, { size: 28 }));
       panelText.textContent = st.text;
+      // the caret sits under the open station (the card is 10.24 px wider than the line of stations)
+      caret.style.left = centre(i) + 5.12 - 11.52 + 'px';
       if (focus) tabs[i].tab.focus();
     }
     // arrow keys move the focus (and the tab stop); Enter or Space opens (manual activation)
@@ -92,20 +106,20 @@ export const moduleMap = {
 
     const home = Math.max(0, stations.findIndex((st) => st.open));
     open(home);
-    const g = screen.ghost ? ctx.ghost({
+    // the ghost hand shows the first click once, on the station the content names (O2: Lesson 1);
+    // it taps it (that lesson opens), then today's lesson opens again. The frame has no "Show me" here.
+    if (screen.ghost) ctx.ghost({
       type: screen.ghost.type,
-      // tap the station named in the content: it opens, then today's lesson opens again
-      steps: () => { const i = stations.findIndex((st) => st.id === screen.ghost.target); return [{ el: tabs[i].tab, tap: () => open(i), hold: 700 }]; },
+      // the fingertip rests on the disc's upper right, as in the frame (8 px right of its centre, 6 px under its top)
+      steps: () => { const i = Math.max(0, stations.findIndex((st) => st.id === screen.ghost.target)); const d = tabs[i].disc;
+        return [{ point: () => { const r = d.getBoundingClientRect(), k = scaleOf(d); return { x: r.left + r.width / 2 + 8 * k, y: r.top + 6 * k }; }, tap: () => open(i), hold: 700 }]; },
       restore: () => open(home),
-    }) : null;
+    });
 
-    layout(ctx, 'present', header(ctx),
-      h('div', { class: 'w-present' },
-        h('p', { class: 'w-eyebrow' }, screen.eyebrow),
-        h('div', { class: 'w-present-head' }, zones.instruction, g ? g.button : null),
-        screen.line ? h('p', { class: 'w-present-line' }, screen.line) : null,
-        h('div', { class: 'w-map' }, h('span', { class: 'w-map-line', 'aria-hidden': 'true' }), list),
-        panel));
+    layout(ctx, 'map',
+      focusHead(screen.eyebrow, 'overview', zones.instruction),
+      h('div', { class: 'w-map' }, list),
+      panel);
     return { unmount() {} };
   },
 };
@@ -115,45 +129,38 @@ export const goals = {
   mount(ctx) {
     const { screen, zones } = ctx;
     const d = screen.deliverable;
-    const tiles = screen.goals.map((g, i) => {
-      const li = h('li', { class: 'w-goal', tabindex: '0', dataset: { goal: g.id } },
-        icon(g.icon, { size: 32, className: 'w-goal-icon' }), h('span', { class: 'w-goal-label' }, g.label));
-      li.style.setProperty('--i', String(i));
-      return li;
-    });
-    layout(ctx, 'present', header(ctx),
-      h('div', { class: 'w-present' },
-        h('p', { class: 'w-eyebrow' }, screen.eyebrow),
-        zones.instruction,
-        h('section', { class: 'w-deliverable', 'aria-label': d.label || null },
-          h('span', { class: 'w-deliverable-icon' }, icon(d.icon, { size: 28 })),
-          h('div', {}, d.label ? h('p', { class: 'w-deliverable-label' }, d.label) : null, h('p', { class: 'w-deliverable-text' }, d.text))),
-        h('ul', { class: 'w-goals' }, tiles)));
-    // the full goal on hover or keyboard focus, and for screen readers through aria-describedby
-    tiles.forEach((li, i) => attachTip(li, screen.goals[i].text));
+    const [lead, rest] = splitFirst(d.text);
+    const tiles = screen.goals.map((g, i) => h('li', { class: 'w-goal', tabindex: '0', dataset: { goal: g.id } },
+      h('span', { class: 'w-goal-num', 'aria-hidden': 'true' }, String(i + 1)), h('b', { class: 'w-goal-label' }, g.label)));
+    layout(ctx, 'goals',
+      focusHead(screen.eyebrow, 'goals', zones.instruction),
+      h('section', { class: 'w-deliverable', 'aria-label': d.label || null },
+        h('span', { class: 'w-deliverable-icon' }, glyph(d.icon || 'write', { size: 28.16 })),
+        h('p', { class: 'w-deliverable-text' }, d.label ? h('span', { class: 'w-sr-only' }, d.label + ': ') : null,
+          h('b', {}, lead), rest ? [' ', h('span', { class: 'w-deliverable-next' }, rest)] : null)),
+      h('ul', { class: 'w-goals' }, tiles));
+    // the full goal on hover or keyboard focus (a glass tooltip above the tile), and for screen
+    // readers through aria-describedby
+    tiles.forEach((li, i) => attachTip(li, screen.goals[i].text, { side: 'above', width: 332.8 }));
     return { unmount() {} };
   },
 };
 
 /* ---------- warmup (W1) ---------- */
 export const warmup = {
+  scene: () => 'stage',
   mount(ctx) {
     const { screen, ui, zones } = ctx;
     const p = screen.panel;
     const trackingId = screen.tracking[0].id;
-    const btns = screen.options.map((o) => h('button', { class: 'w-guess', type: 'button', role: 'radio', 'aria-checked': 'false', dataset: { id: o.id } },
-      h('span', { class: 'w-guess-ring', 'aria-hidden': 'true' }), h('span', { class: 'w-guess-label' }, o.label), h('span', { class: 'w-guess-tag' })));
-    const group = h('div', { class: 'w-guesses', role: 'radiogroup', 'aria-labelledby': 'w-instruction', dataset: { interaction: '' } }, btns);
+    const btns = screen.options.map((o) => h('button', { class: 'w-guess w-ans', type: 'button', role: 'radio', 'aria-checked': 'false', dataset: { id: o.id } },
+      h('span', { class: 'w-guess-ring w-ans-mark', 'aria-hidden': 'true' }), h('span', { class: 'w-guess-label' }, o.label), h('span', { class: 'w-guess-tag w-sr-only' })));
+    const group = h('div', { class: 'w-guesses w-ans-list', role: 'radiogroup', 'aria-labelledby': 'w-instruction', dataset: { interaction: '' } }, btns);
     arrowNav(group, { selector: '.w-guess' });
-    layout(ctx, 'warmup', header(ctx),
-      h('div', { class: 'w-warmup' },
-        h('aside', { class: 'w-warmup-panel' },
-          h('span', { class: 'w-warmup-icon' }, icon(p.icon, { size: 32 })),
-          h('p', { class: 'w-warmup-title' }, p.title),
-          h('p', { class: 'w-warmup-chip' }, p.chip),
-          h('p', { class: 'w-warmup-text' }, p.text),
-          h('p', { class: 'w-warmup-foot' }, p.foot)),
-        h('section', { class: 'w-warmup-main' }, zones.instruction, group, zones.band)));
+    layout(ctx, 'warmup',
+      h('section', { class: 'w-glass w-glass-top w-warmup-panel' }, glassKicker('guess', p.title, p.chip), zones.instruction),
+      sheet('right w-sheet-44', h('p', { class: 'w-sheet-title' }, ui.warmup.prompt), group, zones.band));
+    zones.setHintVisible(false); // the frame shows no hint line: the hint stays for screen readers
     zones.setFeedback({ state: 'hint', text: screen.hint });
 
     const show = (i, focus) => {
@@ -178,52 +185,36 @@ export const warmup = {
 };
 
 /* ---------- concept (K1) ---------- */
-// the two figure drawings, in stage px inside a 440 x 112 box (positions from the R4-K1 board)
-const MESS = [[0, 46, -6], [82, 18, 5], [150, 60, -3], [226, 14, 8], [300, 58, -7], [372, 30, 4]];
-const MESS_LINKS = 'M64 60 C 74 40, 78 36, 84 36 M146 40 C 150 70, 148 72, 152 76 M214 72 C 220 40, 222 34, 228 32 M290 34 C 296 70, 296 72, 302 74 M364 70 C 368 50, 368 46, 374 46 M400 64 C 380 110, 130 110, 110 56';
-function drawing(fig) {
-  const box = h('div', { class: 'w-fig-draw', 'aria-hidden': 'true' });
-  if (fig.kind === 'mess') {
-    MESS.forEach(([x, y, r], i) => {
-      const b = h('span', { class: 'w-fig-box w-fig-box-mess' });
-      Object.assign(b.style, { left: x + 'px', top: y + 'px', '--r': r + 'deg', '--i': String(i) });
-      box.append(b);
-    });
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('class', 'w-fig-links');
-    svg.setAttribute('viewBox', '0 0 440 112');
-    svg.setAttribute('width', '440');
-    svg.setAttribute('height', '112');
-    svg.innerHTML = `<path d="${MESS_LINKS}"/>`;
-    box.append(svg, h('span', { class: 'w-fig-chip' }, icon('lightning', { size: 14 }), h('span', {}, fig.chip)));
-  } else {
-    box.append(h('span', { class: 'w-fig-box w-fig-box-cut' }, icon('x', { size: 16 })));
-    const row = h('div', { class: 'w-fig-row' });
-    for (let i = 0; i < 4; i++) {
-      if (i) row.append(icon('arrow-right', { size: 22, className: 'w-fig-arrow' }));
-      const b = h('span', { class: 'w-fig-box w-fig-box-lean' });
-      b.style.setProperty('--i', String(i));
-      row.append(b);
-    }
-    box.append(row);
-  }
-  return box;
+// the two line drawings of the frame (viewBox 400 x 110), drawn on when the screen opens
+const DRAW = {
+  mess: '<circle cx="18" cy="70" r="11"/><path d="M29 70c25-45 45 45 70 0s35-55 60 5 35 35 55-25 30-25 45 30 25 15 40-15 15 0 25 5"/><circle cx="385" cy="70" r="10" stroke-width="5"/>',
+  lean: '<circle cx="18" cy="70" r="11"/><path d="M29 70h56"/><rect x="85" y="48" width="84" height="44" rx="8"/><path d="M169 70h52"/><rect x="221" y="48" width="84" height="44" rx="8"/><path d="M305 70h70"/><circle cx="385" cy="70" r="10" stroke-width="5"/>',
+  heads: '<path d="M330 22l20 14-20 14z"/><path d="M350 22l20 14-20 14z"/>',
+};
+function drawing(kind) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'w-fig-draw draw');
+  svg.setAttribute('viewBox', '0 0 400 110');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.innerHTML = `<g class="w-fig-lines">${DRAW[kind] || DRAW.lean}</g><g class="w-fig-heads">${DRAW.heads}</g>`;
+  return svg;
 }
 
 export const concept = {
   mount(ctx) {
     const { screen, zones } = ctx;
     const ev = screen.evidence;
+    const [evHead, evRest] = String(ev.text).includes(': ') ? [ev.text.slice(0, ev.text.indexOf(': ') + 1), ev.text.slice(ev.text.indexOf(': ') + 2)] : ['', ev.text];
     const figs = screen.figures.map((f) => h('figure', { class: 'w-fig', dataset: { kind: f.kind }, role: 'img', 'aria-label': f.alt },
-      drawing(f), h('figcaption', { class: 'w-fig-caption' }, f.caption)));
-    layout(ctx, 'concept', header(ctx),
-      h('div', { class: 'w-concept' },
-        h('p', { class: 'w-key-label' }, h('span', { class: 'w-key-icon' }, icon('key-idea', { size: 20 })),
-          h('span', { class: 'w-key-word' }, screen.label), screen.topic ? h('span', { class: 'w-key-topic' }, '· ' + screen.topic) : null),
+      h('div', { class: 'w-fig-text' }, f.label ? h('span', { class: 'w-fig-label' }, f.label) : null, h('b', { class: 'w-fig-caption' }, f.caption)),
+      drawing(f.kind)));
+    layout(ctx, 'concept',
+      h('div', { class: 'w-focus-head' },
+        h('p', { class: 'w-key-label' }, glyph('learn', { size: 23.04 }), h('span', {}, screen.label)),
         zones.instruction,
-        h('p', { class: 'w-concept-text' }, screen.text),
-        h('div', { class: 'w-figs' }, figs),
-        h('p', { class: 'w-evidence' }, icon(ev.icon, { size: 22 }), h('span', {}, ev.text), h('span', { class: 'w-evidence-source' }, ev.source))));
+        h('p', { class: 'w-concept-text' }, screen.text)),
+      h('div', { class: 'w-figs' }, figs[0], glyph('g-arrow-long', { size: 38.4, className: 'w-figs-arrow' }), figs.slice(1)),
+      h('p', { class: 'w-evidence' }, h('span', {}, evHead ? [h('b', {}, evHead), ' '] : null, evRest), h('span', { class: 'w-evidence-source' }, ev.source)));
     return { unmount() {} };
   },
 };

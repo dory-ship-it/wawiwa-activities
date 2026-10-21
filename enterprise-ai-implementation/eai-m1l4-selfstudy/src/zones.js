@@ -1,93 +1,147 @@
-// The shell of every screen (approved look, P1.5), in stage px:
-//   rail      x 0 to 64, y 0 to 656    menu button, one dot per chapter, full screen, % done, Saved
-//   main      x 64 to the stage's right edge (1216 wide at 1280, up to 1536), 656 high: the screen's own layout
-//   footer    y 656 to 720             Previous left, Next right (locked grey or unlocked red)
-// Parts a template places inside its layout: the logo, the instruction h1 (tabindex -1, focus lands
-// here on every new screen) and the feedback band (aria-live polite, directly under the interaction,
-// the width of the interaction area; its height is reserved so nothing moves when it changes).
+// The shell of every screen, "Hybrid cinematic" look (NL1, planning/design-reference/hybrid-cinematic),
+// in stage px (the stage is 720 high, 1280 to 1600 wide, scaled as a whole):
+//   scene   the whole stage, behind everything: the chapter photo below the bar (Stage mode, push-in
+//           once), the blurred photo under a stone veil (Focus mode), or O1's photo under its veil
+//   bar     y 0 to 97.28, every screen but O1: logo | menu button | chapter name; right, the
+//           chapter's steps (disc + verb; done / current / next)
+//   main    y 97.28 to 720, the screen's own layout (O1: the whole stage)
+//   footer  Previous bottom-left, Next bottom-right, floating over main (O1: none)
+// Parts a template places inside its layout: the instruction h1 (tabindex -1, focus lands here on
+// every new screen) and the band: the hint row (hint text, the band's tool such as Check or Resume)
+// and the feedback strip (aria-live polite) flush to the bottom edges of the panel it sits in.
 // No learner-facing text here: every string arrives from the content JSON.
-import { h, fmt } from './util.js';
-import { icon, statusMark } from './icons.js';
-import { attachTip, hide as hideTip } from './tooltip.js';
+import { h, reducedMotion } from './util.js';
+import { glyph } from './icons.js';
 
-// notice = a message that is not an answer result (S02 empty Save): hint look, no state word.
-// guess = the warm-up's neutral "your guess" (W1): hint ground, lightbulb, a navy verdict.
-const BAND_ICON = { hint: 'info', notice: 'info', neutral: 'check', pause: 'pause', guess: 'lightbulb' };
+const TONE = { correct: 'correct', neutral: 'neutral', wrong: 'wrong', notice: 'neutral', guess: 'neutral', partial: 'neutral', pause: 'neutral' };
+const LEAD = { correct: 'g-ok-disc', wrong: 'g-no-disc', neutral: 'guess' };
+// "Saved. Your case comes back ..." -> ["Saved.", "Your case comes back ..."]: a message without a
+// verdict word shows its first sentence as the strip's head (the frames' S02 strips)
+const splitHead = (t) => { const m = /^(.+?[.?!])\s+(\S[\s\S]*)$/.exec(t || ''); return m ? [m[1], m[2]] : [t || '', '']; };
 
-export function createZones(stage, content, { onMenu, onChapter, onPrev, onNext }) {
+export function createZones(stage, content, { onMenu, onPrev, onNext }) {
   const ui = content.ui;
 
-  /* ---- rail ---- */
-  const menuBtn = h('button', { class: 'w-rail-menu', type: 'button', 'aria-label': ui.rail.openMenu, 'aria-haspopup': 'dialog', 'aria-expanded': 'false',
-    onclick: () => onMenu(menuBtn) }, icon('rail-menu', { size: 22 }));
-  const lineAll = h('span', { class: 'w-rail-line', 'aria-hidden': 'true' });
-  const lineDone = h('span', { class: 'w-rail-line w-rail-line-done', 'aria-hidden': 'true' });
-  const dots = h('ol', { class: 'w-rail-dots' });
-  const percent = h('span', { class: 'w-rail-pct' });
-  const savedText = h('span', { class: 'w-saved-text' });
-  const saved = h('span', { class: 'w-saved', role: 'status' }, icon('check', { size: 16 }), savedText);
-  // full screen (Fullscreen API on the whole page): hidden where it is not allowed, e.g. an LMS iframe
-  // without allowfullscreen; the icon and label follow the real state (Escape also leaves it)
-  const fsLabel = () => (document.fullscreenElement ? ui.rail.exitFullscreen : ui.rail.fullscreen);
-  const fsBtn = h('button', { class: 'w-rail-fs', type: 'button', dataset: { action: 'fullscreen' }, hidden: !document.fullscreenEnabled,
-    onclick: () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}) });
-  const fsRender = () => {
-    fsBtn.setAttribute('aria-label', fsLabel());
-    fsBtn.setAttribute('aria-pressed', String(!!document.fullscreenElement));
-    fsBtn.replaceChildren(icon(document.fullscreenElement ? 'minimize' : 'maximize', { size: 22 }));
-  };
-  fsRender();
-  document.addEventListener('fullscreenchange', fsRender);
-  attachTip(fsBtn, fsLabel, { describe: false, side: 'right' });
-  const rail = h('nav', { class: 'w-rail', 'aria-label': ui.rail.label },
-    menuBtn,
-    h('div', { class: 'w-rail-track' }, lineAll, lineDone, dots),
-    h('div', { class: 'w-rail-foot' }, fsBtn, h('p', { class: 'w-rail-done' }, percent, h('span', { class: 'w-rail-done-word' }, ui.rail.done)), saved));
+  /* ---- scene ---- */
+  const scene = h('div', { class: 'w-scene', 'aria-hidden': 'true' });
+  let lastScene = '';
+  // mode: 'stage' | 'focus' | 'title'; photo: { src, position } from the content (chapter or screen)
+  function setScene(mode, photo) {
+    stage.dataset.scene = mode;
+    const key = mode + '|' + (photo?.src || '');
+    if (key === lastScene) return; // the same photo in the same mode stays still (push-in once)
+    lastScene = key;
+    const layer = (cls) => {
+      const el = h('div', { class: cls });
+      if (photo?.src) { el.style.backgroundImage = `url("${photo.src}")`; el.style.backgroundPosition = photo.position || '50% 50%'; }
+      return el;
+    };
+    if (mode === 'focus') scene.replaceChildren(layer('w-wash-photo'), h('div', { class: 'w-wash-veil' }));
+    else if (mode === 'title') scene.replaceChildren(layer('w-scene-photo w-scene-full w-push'), h('div', { class: 'w-o1-veil' }));
+    else scene.replaceChildren(layer('w-scene-photo w-push'));
+  }
 
-  /* ---- main, logo, instruction ---- */
+  /* ---- top bar ---- */
+  const menuBtn = h('button', { class: 'w-bar-menu', type: 'button', 'aria-label': ui.rail.openMenu, 'aria-haspopup': 'dialog', 'aria-expanded': 'false',
+    onclick: () => onMenu(menuBtn) }, h('i'), h('i'), h('i'));
+  const chapterName = h('p', { class: 'w-bar-chapter' });
+  const steps = h('ol', { class: 'w-steps-bar', 'aria-label': ui.rail.steps });
+  const savedText = h('span', { class: 'w-saved-text' });
+  const saved = h('span', { class: 'w-saved', role: 'status', hidden: true }, savedText);
+  const bar = h('nav', { class: 'w-bar', 'aria-label': ui.rail.label },
+    h('img', { class: 'w-bar-logo', src: 'assets/logo/wawiwa-logo.png', alt: ui.logoAlt, width: '271', height: '102' }),
+    h('span', { class: 'w-bar-rule', 'aria-hidden': 'true' }), menuBtn, chapterName, saved, steps);
+
+  // model: { chapter: title, steps: [{ verb, icon, state: done | current | next }] }
+  function setBar(model) {
+    chapterName.textContent = model.chapter || '';
+    const items = [];
+    model.steps.forEach((s, i) => {
+      if (i) items.push(h('li', { class: 'w-step-link', 'aria-hidden': 'true', dataset: { state: s.state === 'next' ? 'next' : 'done' } }));
+      const disc = h('span', { class: 'w-step-disc' }, s.state === 'done' ? glyph('g-check', { size: 21.76 }) : glyph(s.icon, { size: s.state === 'current' ? 23.04 : 21.76 }));
+      items.push(h('li', { class: 'w-step', dataset: { state: s.state }, 'aria-current': s.state === 'current' ? 'step' : null },
+        disc, h('span', { class: 'w-step-label' }, s.verb), h('span', { class: 'w-sr-only' }, ', ' + ui.rail.stepStatus[s.state])));
+    });
+    steps.replaceChildren(...items);
+  }
+
+  /* ---- main, logo (kept for templates that still ask for it), instruction ---- */
   const main = h('main', { class: 'w-main' });
-  const logo = h('img', { class: 'w-logo', src: 'assets/logo/wawiwa-logo.png', alt: ui.logoAlt, width: '133', height: '50' });
+  const logo = h('img', { class: 'w-logo', src: 'assets/logo/wawiwa-logo.png', alt: ui.logoAlt, width: '271', height: '102' });
   const instruction = h('h1', { class: 'w-instruction', id: 'w-instruction', tabindex: '-1' });
 
-  /* ---- feedback band ---- */
-  const bIcon = h('span', { class: 'w-band-icon' });
+  /* ---- band: hint row + feedback strip ---- */
+  const bHint = h('span', { class: 'w-band-hint', 'aria-live': 'polite' });
+  const bTool = h('div', { class: 'w-band-tool' });
+  const row = h('div', { class: 'w-band-row' }, bHint, bTool);
+  const sIcon = h('span', { class: 'w-strip-icon' });
   const bSr = h('span', { class: 'w-sr-only' });
   const bVerdict = h('strong', { class: 'w-band-verdict' });
   const bText = h('span', { class: 'w-band-text' });
   const bLive = h('p', { class: 'w-band-live', 'aria-live': 'polite', 'aria-atomic': 'true' }, bSr, bVerdict, bText);
   const bActions = h('div', { class: 'w-band-actions' });
-  const bTool = h('div', { class: 'w-band-tool' });
-  const band = h('div', { class: 'w-band', dataset: { state: 'hint' } }, bIcon, bLive, bActions, bTool);
+  const strip = h('div', { class: 'w-strip' }, sIcon, h('div', { class: 'w-strip-body' }, bLive), bActions);
+  const band = h('div', { class: 'w-band', dataset: { state: 'hint', strip: 'off' } }, row, strip);
 
-  // setFeedback({ state, text, verdict, actions }). state: hint | notice | correct | wrong | neutral | pause.
-  // correct and wrong carry a verdict word (default ui.feedback.correctPrefix / wrongPrefix).
-  // actions: [{ id, label, onClick }] secondary buttons in the band (FT1 routes); Next lives in the footer.
-  function setFeedback({ state = 'hint', text = '', verdict = null, actions = [] } = {}) {
+  const refresh = () => {
+    const hintShown = !!bHint.textContent && band.dataset.hint !== 'off';
+    bHint.classList.toggle('w-sr-only', band.dataset.hint === 'off');
+    row.hidden = !hintShown && !bTool.children.length;
+    band.dataset.empty = String(row.hidden && band.dataset.strip === 'off');
+  };
+
+  // setFeedback({ state, text, verdict, actions, tone }). state: hint | idle | notice | correct | wrong |
+  // neutral | guess | partial | pause. hint sets the row's hint line (no strip); every other state
+  // shows the strip in its tone: correct teal, wrong red, the rest stone. tone 'correct' gives a
+  // neutral answer the teal strip (a save: the frames' S02 "Saved.").
+  // actions: [{ id, label, onClick }] secondary buttons in the strip (FT routes, Next round).
+  function setFeedback({ state = 'hint', text = '', verdict = null, actions = [], tone: toneOf = null } = {}) {
     band.dataset.state = state;
-    const name = BAND_ICON[state];
-    bIcon.replaceChildren(name ? icon(name, { size: 22 }) : '');
-    bIcon.hidden = !name || !text;
-    const v = verdict ?? (state === 'correct' ? ui.feedback.correctPrefix : state === 'wrong' ? ui.feedback.wrongPrefix : '');
-    const sr = state === 'correct' ? ui.feedback.srCorrect : state === 'wrong' ? ui.feedback.srWrong : state === 'neutral' || state === 'guess' ? ui.feedback.srNeutral : '';
+    if (state === 'hint' || state === 'idle') {
+      bHint.textContent = state === 'hint' ? text || '' : '';
+      band.dataset.strip = 'off';
+      bSr.textContent = ''; bVerdict.textContent = ''; bText.textContent = '';
+      bActions.replaceChildren();
+      refresh();
+      return null;
+    }
+    const tone = toneOf || TONE[state] || 'neutral';
+    let head = verdict ?? (state === 'correct' ? ui.feedback.correctPrefix : state === 'wrong' ? ui.feedback.wrongPrefix : null);
+    let line = text || '';
+    if (head === null) [head, line] = splitHead(line);
+    strip.dataset.tone = tone;
+    sIcon.replaceChildren(glyph(LEAD[tone], { size: 33.28 }));
+    const sr = state === 'correct' ? ui.feedback.srCorrect : state === 'wrong' ? ui.feedback.srWrong : ['neutral', 'guess', 'partial'].includes(state) ? ui.feedback.srNeutral : '';
     bSr.textContent = sr ? sr + ' ' : '';
-    bVerdict.textContent = v ? v + ' ' : '';
-    bVerdict.hidden = !v;
-    bText.textContent = text || '';
+    bVerdict.textContent = head ? head + ' ' : '';
+    bVerdict.hidden = !head;
+    bText.textContent = line;
+    // the message as the content wrote it (the head is display only), for tools/walk.mjs
+    strip.dataset.verdict = verdict ?? (state === 'correct' ? ui.feedback.correctPrefix : state === 'wrong' ? ui.feedback.wrongPrefix : '');
+    strip.dataset.text = text || '';
+    bText.hidden = !line;
     bActions.replaceChildren(...actions.map((a) => h('button', { class: 'w-btn w-btn-ghost', type: 'button', onclick: a.onClick, dataset: { action: a.id || '' } }, a.label)));
+    band.dataset.strip = 'on';
+    refresh();
+    // the strip slides up 8 px in 320 ms, each time it changes (none with reduced motion)
+    strip.classList.remove('w-strip-in');
+    if (!reducedMotion()) { void strip.offsetWidth; strip.classList.add('w-strip-in'); }
     return bActions.querySelector('button');
   }
-  // the band's persistent tool (Check, Skip): stays through state changes until the screen goes
-  const setTool = (...els) => bTool.replaceChildren(...els);
+  // the band's persistent tool (Check, Resume, Skip): stays through state changes until the screen goes
+  const setTool = (...els) => { bTool.replaceChildren(...els); refresh(); };
+  // a screen whose frame shows no hint line keeps the hint for screen readers only
+  const setHintVisible = (on) => { band.dataset.hint = on ? 'on' : 'off'; refresh(); };
 
   /* ---- footer ---- */
   const prevBtn = h('button', { class: 'w-prev', type: 'button', dataset: { action: 'previous' }, onclick: () => { if (prevBtn.getAttribute('aria-disabled') !== 'true') onPrev(); } },
-    icon('chevron-left', { size: 18 }), h('span', {}, ui.footer.previous));
-  const nextLock = icon('lock', { size: 16, className: 'w-next-lock' });
+    h('span', {}, ui.footer.previous));
+  const nextLock = glyph('g-lock', { size: 17.92, className: 'w-next-lock' });
   const nextBtn = h('button', { class: 'w-next', type: 'button', dataset: { action: 'next' }, onclick: () => { if (nextBtn.dataset.locked !== 'true') onNext(); } },
     nextLock, h('span', {}, ui.footer.next));
-  const footer = h('footer', { class: 'w-footer' }, prevBtn, h('span', { class: 'w-footer-gap' }), nextBtn);
+  const footer = h('footer', { class: 'w-footer' }, prevBtn, nextBtn);
 
-  stage.append(rail, main, footer);
+  stage.append(scene, bar, main, footer); // the bar first: the reading and Tab order follow the screen top down
 
   // Next: locked = grey with a lock, aria-disabled, its aria-label says why; unlocked = red.
   function setNext(locked, why = '') {
@@ -100,23 +154,6 @@ export function createZones(stage, content, { onMenu, onChapter, onPrev, onNext 
     if (enabled) prevBtn.removeAttribute('aria-disabled'); else prevBtn.setAttribute('aria-disabled', 'true');
   }
 
-  /* ---- rail model ---- */
-  // model: { percent, frontier (index of the in-progress chapter), chapters: [{ n, status, label, clickable, viewing }] }
-  const DOT_PITCH = 52; // 44 px button + 8 px gap
-  function setRail(model) {
-    hideTip();
-    percent.textContent = fmt(ui.rail.percent, { p: model.percent });
-    dots.replaceChildren(...model.chapters.map((c) => {
-      const btn = h('button', { class: 'w-dot', type: 'button', dataset: { status: c.status, chapter: String(c.n) }, 'aria-label': c.label,
-        'aria-current': c.viewing ? 'step' : null, 'aria-disabled': c.clickable ? null : 'true',
-        onclick: () => { if (c.clickable) onChapter(c.n); } }, statusMark(c.status));
-      attachTip(btn, c.label, { describe: false, side: 'right' }); // title and status on hover and keyboard focus
-      return h('li', {}, btn);
-    }));
-    lineAll.style.height = (model.chapters.length - 1) * DOT_PITCH + 'px';
-    lineDone.style.height = Math.max(0, model.frontier) * DOT_PITCH + 'px';
-  }
-
   function setSaved(ok) {
     // shown only when saving fails: a working save needs no badge
     saved.dataset.ok = ok ? 'true' : 'false';
@@ -127,9 +164,10 @@ export function createZones(stage, content, { onMenu, onChapter, onPrev, onNext 
   function clearScreen() {
     main.replaceChildren();
     main.removeAttribute('data-layout');
+    delete band.dataset.hint;
     setTool();
     setFeedback({ state: 'hint', text: '' });
   }
 
-  return { rail, main, footer, logo, instruction, band, menuBtn, nextBtn, prevBtn, setFeedback, setTool, setNext, setPrev, setRail, setSaved, clearScreen };
+  return { scene, bar, main, footer, logo, instruction, band, menuBtn, nextBtn, prevBtn, setScene, setFeedback, setTool, setHintVisible, setNext, setPrev, setBar, setSaved, clearScreen };
 }

@@ -1,14 +1,49 @@
-// Layout parts shared by the templates (approved look, P1.5). Each template builds its own layout
-// (editorial, memo, work, form, wide, plain) inside zones.main from these parts, then places the shell's
-// logo, instruction h1 and feedback band where its artboard puts them.
-// The interaction area carries data-interaction; the band sits directly under it at its width.
+// Layout parts shared by the templates, "Hybrid cinematic" look (NL1). One builder per repeated part
+// of the frames (planning/design-reference/hybrid-cinematic/screens-intro-ch2.html):
+//   sheet        the ivory panel: Stage = right of the photo, Focus = centred on the photo wash. It hugs
+//                its content and is vertically centred between the bar and the footer; the band (hint
+//                row and feedback strip) goes last in it, the strip flush to its bottom edges
+//   glassKicker  the dark glass card's first row: task icon, label, turquoise chip
+//   focusHead    a Focus screen's head: small teal label with its icon, then the h1
+//   contextLine  the panel's first line (body copy above the heading)
+//   answers      the white answer cards with their marker (radio circle, or a rounded square for
+//                multi-select), and paint() for their selected / correct / wrong states
+//   showMe       the "Show me" outline button with the hand
+// Each template builds its own layout inside zones.main from these parts; layout() names it.
 import { h, nextId } from '../util.js';
-import { icon } from '../icons.js';
+import { glyph } from '../icons.js';
 
 // layout(ctx, name, ...children): set main's layout and fill it
 export function layout(ctx, name, ...children) {
   ctx.zones.main.dataset.layout = name;
   ctx.zones.main.append(...children.flat().filter(Boolean));
+}
+
+// sheet('right w-sheet-46', ...children) or sheet('focus', ...): the panel
+export const sheet = (kind, ...children) => h('section', { class: 'w-sheet ' + kind.split(' ').map((k) => (k.startsWith('w-') ? k : 'w-sheet-' + k)).join(' ') }, children);
+
+export const glassKicker = (iconName, label, chip) => h('div', { class: 'w-glass-kicker' },
+  glyph(iconName, { size: 28.16 }), h('span', { class: 'w-glass-label' }, label), chip ? h('span', { class: 'w-chip-dark' }, chip) : null);
+
+export const focusHead = (eyebrow, iconName, instruction, ...more) => h('div', { class: 'w-focus-head' },
+  eyebrow ? h('p', { class: 'w-eyebrow' }, glyph(iconName, { size: 23.04 }), h('span', {}, eyebrow)) : null, instruction, more);
+
+export const contextLine = (text, extra = null) => (text ? h('p', { class: 'w-context' }, extra || text) : null);
+
+// "First sentence. The rest." -> ['First sentence.', 'The rest.']
+export const splitFirst = (t) => { const m = /^(.+?[.?!])\s+(\S[\s\S]*)$/.exec(String(t || '')); return m ? [m[1], m[2]] : [String(t || ''), '']; };
+
+export const showMe = (label) => h('button', { class: 'w-showme', type: 'button', dataset: { action: 'showMe' } }, glyph('g-hand', { size: 24.32 }), h('span', {}, label));
+
+// the answer card's marker states. result: 'correct' | 'wrong' | '' (plain; a pressed multi card
+// shows its check). The marker carries the state word for screen readers.
+export function paintAnswer(btn, result, ui) {
+  btn.dataset.result = result;
+  const mark = btn.querySelector('.w-opt-mark');
+  if (!mark) return;
+  if (result === 'correct') mark.replaceChildren(glyph('g-check-b', { size: 17.92, label: ui.feedback.correctPrefix }));
+  else if (result === 'wrong') mark.replaceChildren(glyph('g-cross', { size: 16.64, label: ui.feedback.wrongPrefix }));
+  else mark.replaceChildren(btn.getAttribute('aria-pressed') === 'true' ? glyph('g-check-b', { size: 17.92 }) : '');
 }
 
 // A screen image slot: content image object { src, alt, prompt, temp, position }.
@@ -20,17 +55,17 @@ export function picture(image, className) {
   return img;
 }
 
-// Small label with a short turquoise rule before it (S03, S02, placeholder)
-export const ruleLabel = (text, className = '') => h('p', { class: ('w-label ' + className).trim() }, h('span', { class: 'w-rule', 'aria-hidden': 'true' }), h('span', {}, text));
+// Small label line (the panel's lead-in on screens styled by analogy)
+export const ruleLabel = (text, className = '') => h('p', { class: ('w-label ' + className).trim() }, h('span', {}, text));
 
-// Privacy line (shield icon + text) with an id inputs point aria-describedby at
+// Privacy line (the frames' lock + text) with an id inputs point aria-describedby at
 export function privacyLine(part) {
   const id = nextId('w-privacy');
-  return { id, el: h('p', { class: 'w-privacy', id }, icon(part.icon || 'shield', { size: 20 }), h('span', {}, part.text)) };
+  return { id, el: h('p', { class: 'w-privacy', id }, glyph('g-lock', { size: 19.2 }), h('span', {}, part.text)) };
 }
 
-// Progress dots (S04 cards, S08 rounds): done = teal fill, current = teal ring, to come = grey ring.
-// One role img with a text label ("Card 2 of 5"); set(current, doneCount).
+// Progress dots (S04 cards, S08 rounds, S21 items): done = teal fill, current = teal ring, to come =
+// outline. One role img with a text label ("Card 2 of 5"); set(current, doneCount).
 export function progressDots(n, labelOf) {
   const dots = Array.from({ length: n }, () => h('span', { class: 'w-dot-s' }));
   const el = h('div', { class: 'w-dots', role: 'img' }, dots);

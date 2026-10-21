@@ -1,18 +1,24 @@
-// Video template (V1, V2), approved look R3-video-play / R3-video-stop, layout "video".
-// Play view: instruction, title + "Video · length · N stops", guiding question; the player (custom
-// controls: play / pause, time, a seek slider with one diamond per stop, captions, mute, transcript)
-// and the transcript panel that marks the current line. Everything is read from the content: media.src,
-// media.captions[0].src (WebVTT, parsed here), media.duration, stops[].t. Swapping the real film in is a
-// change of those paths and times only.
-// Stops: playback (or a seek) reaching an unanswered stop pauses the video and switches to the stop
-// view: the paused frame left, the question right with its options and the feedback band; "Resume
-// video" stays locked until the right answer. Seeking forward never passes the part already watched
-// or the next unanswered stop (the slider clamps, a polite note says why). First attempt per stop on the tracking bus. Next unlocks
-// when the video has ended and every stop is answered.
+// Video template (V1, V2), "Hybrid cinematic" look, a Stage screen: the video fills the stage under
+// the top bar.
+//   ready    the chapter photo (the film is shown once it plays); a glass card top left (play icon,
+//            "Video", the length chip, the title, "Watch for:" and the instruction); a large Play disc
+//            (the current-step disc at about 2.8x); the player bar.
+//   playing  one caption line on glass above the player bar. Player bar (glass): play / pause, time,
+//            the track (step-bar weight, turquoise fill, one ringed disc per stop), CC (a chip),
+//            volume, transcript (kept: the media alternative; a glass panel on the right).
+//   stop     playback (or a seek) reaching an unanswered stop pauses the film: the question on the
+//            glass card ("Stop 1 of 2" + time chip), the answers in the panel right, the player bar
+//            hidden. "Resume video" (the band's tool) stays locked (grey, lock) until the right
+//            answer, then becomes the outline button with the play icon. Next stays locked until the
+//            film ends and every stop is answered. First attempt per stop on the tracking bus.
+// Everything is read from the content: media.src, media.captions[0].src (WebVTT, parsed here),
+// media.duration, stops[].t. Swapping the real film in is a change of those paths and times only.
+// Seeking forward never passes the part already watched or the next unanswered stop (the slider
+// clamps, a polite note says why).
 import { h, fmt, nextId } from '../util.js';
-import { icon } from '../icons.js';
+import { glyph } from '../icons.js';
 import { letter } from '../tracking/index.js';
-import { layout, ruleLabel, arrowNav } from './stage.js';
+import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js';
 import { targetSteps } from '../ghost.js';
 
 const SEEK_STEP = 5, SEEK_PAGE = 15, AT_STOP = 0.05, AT_END = 0.3;
@@ -31,6 +37,7 @@ export function parseVTT(text) {
 }
 
 export const video = {
+  scene: () => 'stage',
   mount(ctx) {
     const { screen, ui, zones } = ctx;
     const v = ui.video, media = screen.media, stops = screen.stops || [];
@@ -38,16 +45,14 @@ export const video = {
     const answered = new Set();
     let cues = [], ended = false, done = false, atStop = null;
 
-    /* ---- the video element (moves between the player and the stop view) ---- */
-    const vid = h('video', { class: 'w-video', src: media.src, poster: media.poster || null, preload: 'auto', playsinline: true, tabindex: '-1', 'aria-label': screen.title });
+    /* ---- the film: fills main (under the bar); hidden until it first plays, so the photo shows ---- */
+    const vid = h('video', { class: 'w-video', src: media.src, poster: media.poster || null, preload: 'auto', playsinline: true, tabindex: '-1', 'aria-label': screen.title, dataset: { started: 'false' } });
     const caption = h('p', { class: 'w-caption', hidden: true });
-    const frame = h('div', { class: 'w-player-frame' }, vid, caption);
 
-    /* ---- controls ---- */
-    const playBtn = h('button', { class: 'w-play-btn', type: 'button', 'aria-label': v.play, dataset: { action: 'play' } }, icon('play', { size: 18 }));
+    /* ---- player bar ---- */
+    const playBtn = h('button', { class: 'w-play-btn', type: 'button', 'aria-label': v.play, dataset: { action: 'play' } }, glyph('watch', { size: 30.72 }));
     const timeText = h('span', { class: 'w-time' });
     const fill = h('span', { class: 'w-seek-fill' });
-    const thumb = h('span', { class: 'w-seek-thumb' });
     const markers = stops.map((s, i) => {
       const m = h('span', { class: 'w-seek-stop', dataset: { stop: s.id } });
       m.style.left = (100 * s.t) / duration + '%';
@@ -55,42 +60,37 @@ export const video = {
       return m;
     });
     const seek = h('div', { class: 'w-seek', role: 'slider', tabindex: '0', 'aria-label': v.seek, 'aria-valuemin': '0', 'aria-valuemax': String(duration) },
-      h('span', { class: 'w-seek-track' }), fill, markers, thumb);
-    const toggle = (cls, label, name, pressed) => h('button', { class: 'w-tool ' + cls, type: 'button', 'aria-label': label, 'aria-pressed': String(pressed) }, icon(name, { size: 22 }));
-    const ccBtn = toggle('w-cc', v.captions, 'captions', true);
-    const muteBtn = toggle('w-mute', v.mute, 'volume', false);
-    const trBtn = toggle('w-tr', v.transcript, 'transcript', false); // closed until the learner opens it
+      h('span', { class: 'w-seek-track' }, fill, markers));
+    const tool = (cls, label, child, pressed) => h('button', { class: 'w-tool ' + cls, type: 'button', 'aria-label': label, 'aria-pressed': String(pressed) }, child);
+    const ccBtn = tool('w-cc', v.captions, h('span', { class: 'w-cc-chip', 'aria-hidden': 'true' }, v.ccChip), true);
+    const muteBtn = tool('w-mute', v.mute, glyph('g-volume', { size: 28.16 }), false);
+    const trBtn = tool('w-tr', v.transcript, glyph('learn', { size: 28.16 }), false); // closed until the learner opens it
     const limitNote = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
     const controls = h('div', { class: 'w-controls', role: 'group', 'aria-label': v.controls }, playBtn, timeText, seek, ccBtn, muteBtn, trBtn, limitNote);
 
-    /* ---- transcript ---- */
+    /* ---- transcript (glass panel, right) ---- */
     const trList = h('div', { class: 'w-transcript-list' });
     const transcript = h('aside', { class: 'w-transcript', 'aria-label': v.transcript, hidden: true }, h('h2', { class: 'w-transcript-head' }, v.transcript), trList);
 
-    /* ---- play view ---- */
-    const meta = h('p', { class: 'w-video-meta' }, h('span', { class: 'w-video-title' }, screen.title), ' · ', fmt(v.meta, { length: media.length, n: stops.length }));
+    /* ---- ready card and the large Play disc ---- */
     const guiding = h('p', { class: 'w-guiding' }, h('b', {}, screen.guidingLabel || v.guiding), ' ', screen.guidingQuestion);
-    const player = h('figure', { class: 'w-player' }, frame, controls);
-    // transcript closed: heading and player centred; open: player left, transcript right
-    const playView = h('div', { class: 'w-video-view', dataset: { transcript: 'closed' } }, h('div', { class: 'w-video-head' }, zones.instruction, meta, guiding), player, transcript);
+    const readyCard = h('section', { class: 'w-glass w-glass-top w-video-head' },
+      glassKicker('watch', v.kicker, media.length), h('p', { class: 'w-video-title' }, screen.title), guiding, zones.instruction);
+    const bigPlay = h('button', { class: 'w-bigplay', type: 'button', 'aria-label': v.play, dataset: { action: 'bigplay' } }, glyph('watch', { size: 64 }));
+    const playView = h('div', { class: 'w-video-view', dataset: { transcript: 'closed', phase: 'ready' } }, readyCard, bigPlay, caption, transcript, controls);
 
     /* ---- stop view ---- */
-    const stopFrame = h('figure', { class: 'w-stop-frame' });
-    const pausedChip = h('figcaption', { class: 'w-paused' }, icon('pause', { size: 16 }), h('span', {}));
-    stopFrame.append(pausedChip);
-    const stopLabel = ruleLabel('');
     const stopQ = h('h2', { class: 'w-stop-q', id: nextId('w-stop-q'), tabindex: '-1' });
-    const stopOpts = h('div', { class: 'w-options w-options-stack', role: 'group', 'aria-labelledby': stopQ.id, dataset: { interaction: '' } });
+    const stopCard = h('section', { class: 'w-glass w-glass-top w-stop-card' }, glassKicker('watch', '', ''), stopQ); // the kicker is set per stop
+    const stopOpts = h('div', { class: 'w-options w-ans-list w-ans-cols-1', role: 'group', 'aria-labelledby': stopQ.id, dataset: { interaction: '' } });
     arrowNav(stopOpts);
-    const resumeText = h('span', {}, v.resume);
-    const resumeLock = icon('lock', { size: 16 });
-    const resume = h('button', { class: 'w-btn w-btn-ghost w-resume', type: 'button', dataset: { action: 'resume' } }, resumeLock, resumeText);
-    const showMeSlot = h('div', { class: 'w-showme-slot' });
-    const stopPanel = h('section', { class: 'w-stop-panel' }, stopLabel, h('div', { class: 'w-stop-head' }, stopQ, showMeSlot), stopOpts);
-    let ghost = null; // the ghost hand of the open stop (type "stop": taps beside the options, selects nothing)
-    const stopView = h('div', { class: 'w-stop-view', hidden: true }, stopFrame, stopPanel);
+    const resume = h('button', { class: 'w-btn w-btn-action w-resume', type: 'button', dataset: { action: 'resume' } },
+      glyph('g-lock', { size: 20.48, className: 'w-btn-lock' }), glyph('watch', { size: 24.32, className: 'w-resume-play' }), h('span', {}, v.resume));
+    const stopPanel = sheet('right w-sheet-44 w-stop-panel', stopOpts);
+    let ghost = null; // the ghost hand of the open stop (type "stop": it slides down the panel's gutter)
+    const stopView = h('div', { class: 'w-stop-view', hidden: true }, stopCard, stopPanel);
 
-    layout(ctx, 'video', zones.logo, playView, stopView);
+    layout(ctx, 'video', vid, playView, stopView);
 
     /* ---- time, slider, captions, transcript ---- */
     // forward seeking stops at the furthest point already watched (and never passes an open stop);
@@ -102,7 +102,6 @@ export const video = {
       const t = Math.min(vid.currentTime || 0, duration);
       timeText.textContent = `${mmss(t)} / ${mmss(duration)}`;
       fill.style.width = (100 * t) / duration + '%';
-      thumb.style.left = (100 * t) / duration + '%';
       seek.setAttribute('aria-valuenow', String(Math.round(t)));
       seek.setAttribute('aria-valuetext', fmt(v.seekText, { t: mmss(t), d: mmss(duration) }));
       markers.forEach((m, i) => { m.dataset.done = String(answered.has(stops[i].id)); });
@@ -116,8 +115,9 @@ export const video = {
         if (on) { p.setAttribute('aria-current', 'true'); trList.scrollTop = Math.max(0, p.offsetTop - trList.offsetTop - 12); } else p.removeAttribute('aria-current');
       });
       const playing = !vid.paused && !vid.ended;
+      if (playing || t > 0) { vid.dataset.started = 'true'; playView.dataset.phase = 'playing'; }
       playBtn.setAttribute('aria-label', playing ? v.pause : v.play);
-      playBtn.replaceChildren(icon(playing ? 'pause' : 'play', { size: 18 }));
+      playBtn.replaceChildren(glyph(playing ? 'g-pause' : 'watch', { size: 30.72 }));
     }
     fetch(media.captions[0].src).then((r) => (r.ok ? r.text() : '')).then((txt) => {
       cues = parseVTT(txt);
@@ -151,7 +151,9 @@ export const video = {
     vid.addEventListener('ended', () => { ended = true; render(); check(); });
     vid.addEventListener('seeking', () => { if (vid.currentTime > limit() + AT_STOP) vid.currentTime = limit(); });
 
-    playBtn.addEventListener('click', () => { if (vid.paused || vid.ended) { if (vid.ended) { ended = false; vid.currentTime = 0; } vid.play().catch(() => {}); } else vid.pause(); });
+    const playPause = () => { if (vid.paused || vid.ended) { if (vid.ended) { ended = false; vid.currentTime = 0; } vid.play().catch(() => {}); } else vid.pause(); };
+    playBtn.addEventListener('click', playPause);
+    bigPlay.addEventListener('click', () => { playPause(); playBtn.focus(); });
     seek.addEventListener('keydown', (e) => {
       const t = vid.currentTime || 0;
       const to = { ArrowRight: t + SEEK_STEP, ArrowUp: t + SEEK_STEP, ArrowLeft: t - SEEK_STEP, ArrowDown: t - SEEK_STEP,
@@ -165,7 +167,7 @@ export const video = {
     seek.addEventListener('pointermove', (e) => { if (seek.hasPointerCapture(e.pointerId)) fromPointer(e); });
     const flip = (btn) => btn.setAttribute('aria-pressed', String(btn.getAttribute('aria-pressed') !== 'true'));
     ccBtn.addEventListener('click', () => { flip(ccBtn); render(); });
-    muteBtn.addEventListener('click', () => { flip(muteBtn); vid.muted = muteBtn.getAttribute('aria-pressed') === 'true'; muteBtn.replaceChildren(icon(vid.muted ? 'volume-x' : 'volume', { size: 22 })); });
+    muteBtn.addEventListener('click', () => { flip(muteBtn); vid.muted = muteBtn.getAttribute('aria-pressed') === 'true'; muteBtn.replaceChildren(glyph(vid.muted ? 'g-muted' : 'g-volume', { size: 28.16 })); });
     trBtn.addEventListener('click', () => {
       flip(trBtn);
       transcript.hidden = trBtn.getAttribute('aria-pressed') !== 'true';
@@ -176,7 +178,6 @@ export const video = {
     /* ---- stops ---- */
     function setResume(locked) {
       resume.dataset.locked = String(locked);
-      resumeLock.style.display = locked ? '' : 'none';
       if (locked) { resume.setAttribute('aria-disabled', 'true'); resume.setAttribute('aria-label', v.resumeLocked); }
       else { resume.removeAttribute('aria-disabled'); resume.removeAttribute('aria-label'); }
     }
@@ -186,18 +187,13 @@ export const video = {
       vid.pause();
       vid.currentTime = s.t;
       const i = stops.indexOf(s);
-      stopFrame.prepend(vid);
-      pausedChip.lastChild.textContent = fmt(v.pausedAt, { t: mmss(s.t) });
-      stopLabel.lastChild.textContent = fmt(v.stopLabel, { i: i + 1, n: stops.length, title: screen.title });
+      stopCard.querySelector('.w-glass-kicker').replaceWith(glassKicker('watch', fmt(v.stopKicker, { i: i + 1, n: stops.length }), mmss(s.t)));
       stopQ.textContent = s.question;
       let chosen = -1, right = false;
-      const btns = s.options.map((o, k) => h('button', { class: 'w-opt w-opt-stack', type: 'button', dataset: { id: o.id, letter: letter(k) } },
-        h('span', { class: 'w-opt-mark' }), h('span', { class: 'w-opt-label' }, o.label)));
+      const btns = s.options.map((o, k) => h('button', { class: 'w-opt w-ans', type: 'button', dataset: { id: o.id, letter: letter(k) } },
+        h('span', { class: 'w-opt-mark w-ans-mark' }), h('span', { class: 'w-opt-label' }, o.label)));
       stopOpts.replaceChildren(...btns);
-      const paint = (k, res) => btns.forEach((b, j) => {
-        b.dataset.result = j === k ? res : '';
-        b.querySelector('.w-opt-mark').replaceChildren(j === k && res ? icon(res === 'correct' ? 'check' : 'x', { size: 16, label: res === 'correct' ? ui.feedback.correctPrefix : ui.feedback.wrongPrefix }) : '');
-      });
+      const paint = (k, res) => btns.forEach((b, j) => paintAnswer(b, j === k ? res : '', ui));
       btns.forEach((b, k) => b.addEventListener('click', () => {
         if (right || k === chosen) return;
         chosen = k;
@@ -212,24 +208,25 @@ export const video = {
         setResume(false);
         resume.focus();
       }));
-      stopPanel.append(zones.band, resume);
+      stopPanel.append(zones.band);
+      zones.setTool(resume);
+      zones.setHintVisible(false); // the frame shows no hint line at a stop: the note stays for screen readers
       zones.setFeedback({ state: 'hint', text: ui.videoResumeNote });
       setResume(true);
       playView.hidden = true;
       stopView.hidden = false;
       stopQ.focus({ preventScroll: true });
       if (screen.ghost) {
-        // the target the content names (V1, V2: the gap between the first two options, on none of
-        // them); without one, the first option
-        ghost = ctx.ghost({ type: screen.ghost.type, steps: () => (screen.ghost.target ? targetSteps(stopOpts, screen.ghost.target) : [{ el: btns[0] }]) });
-        showMeSlot.replaceChildren(ghost.button);
+        // the target the content names (V1, V2: down the panel's left gutter, on no answer)
+        ghost = ctx.ghost({ type: screen.ghost.type, steps: () => targetSteps(stopView, screen.ghost.target) });
+        if (screen.ghost.showMe) stopCard.append(ghost.button);
       }
     }
     resume.addEventListener('click', () => {
       if (!atStop || resume.dataset.locked === 'true') return;
       atStop = null;
-      if (ghost) { ghost.cancel(); ghost = null; showMeSlot.replaceChildren(); }
-      frame.prepend(vid);
+      if (ghost) { ghost.cancel(); ghost.button.remove(); ghost = null; }
+      zones.setTool();
       stopView.hidden = true;
       playView.hidden = false;
       render();

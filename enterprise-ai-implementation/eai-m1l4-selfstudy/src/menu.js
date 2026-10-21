@@ -1,12 +1,7 @@
-// Chapters menu (approved look, R2-menu-open): a 380 px panel from the left over a grey scrim,
-// role dialog, aria-modal, focus trapped, Escape closes, focus returns to the rail menu button.
-// Panel: close button, "Module 1 · Lesson 4", lesson title, % complete with a thin teal bar, the
-// chapter list (status icon, title, Done; the current chapter on teal-tint; no times), and a footer
-// rows of text buttons: Lesson goals (O3's goals), Lesson 1 cases (new tab), Help, Start over.
-// Also the in-page dialog used for Help, the Start over confirm and the resume prompt
-// (never window.confirm).
-import { h, fmt, resolveLink, trapTab, focusables } from './util.js';
-import { icon, statusMark } from './icons.js';
+// The chapters menu (createMenu, below) and the in-page dialog used for Help, the Start over confirm
+// and the resume prompt (never window.confirm).
+import { h, trapTab, focusables } from './util.js';
+import { glyph } from './icons.js';
 
 // In-page modal dialog. actions: [{ id, label, primary, cancel, onClick(close) }].
 // body: optional extra node under the text. inert: elements made inert while open. Returns { close, root }.
@@ -41,34 +36,28 @@ export function openDialog(stage, { text, note = null, body = null, actions = []
   return { close, root: overlay };
 }
 
+// Side menu (NL1, frame "O2 Side menu open"): a 358 px ivory panel from the left over a navy scrim,
+// role dialog, aria-modal, focus trapped, Escape closes, focus returns to the bar's menu button.
+// Panel: logo and close, the lesson title, the seven chapters with their status only (done = navy
+// disc and check, current = numbered turquoise ring on a white row, to come = numbered outline). No
+// resources, no times, no step lists. Help and Start over stay as two small links at the foot.
 export function createMenu(stage, content, { zones, getMenu, onChapter, onStartOver }) {
   const ui = content.ui;
   const m = ui.menu;
   let opener = null;
   let open = false;
 
-  const closeBtn = h('button', { class: 'w-panel-close', type: 'button', 'aria-label': m.close, onclick: () => close() }, icon('x', { size: 22 }));
+  const closeBtn = h('button', { class: 'w-panel-close', type: 'button', 'aria-label': m.close, onclick: () => close() }, glyph('g-close', { size: 28.16 }));
   const title = h('h2', { class: 'w-panel-title', id: 'w-menu-title' }, content.lesson.title);
-  const pctText = h('span', { class: 'w-panel-pct' });
-  const barFill = h('span', { class: 'w-panel-bar-fill' });
-  const bar = h('div', { class: 'w-panel-bar', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-label': m.progressLabel }, barFill);
   const list = h('ol', { class: 'w-chapters' });
-  const goalsBtn = h('button', { class: 'w-panel-link', type: 'button', dataset: { action: 'goals' }, onclick: () => showGoals() }, m.goals);
-  // the Lesson 1 cases (class practice) in a new tab; left out when content has no URL
-  const casesHref = resolveLink(content, '@links.lesson1Cases');
-  const casesLink = casesHref ? h('a', { class: 'w-panel-link', href: casesHref, target: '_blank', rel: 'noopener noreferrer', dataset: { action: 'lesson1Cases' } },
-    h('span', {}, m.lesson1Cases), icon('external-link', { size: 14 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')')) : null;
   const helpBtn = h('button', { class: 'w-panel-link', type: 'button', dataset: { action: 'help' }, onclick: () => showHelp() }, m.help);
   const startOverBtn = h('button', { class: 'w-panel-link w-startover', type: 'button', dataset: { action: 'startover' }, onclick: () => confirmStartOver() }, m.startOver);
 
   const panel = h('div', { class: 'w-panel', role: 'dialog', 'aria-modal': 'true', 'aria-label': m.title },
-    h('div', { class: 'w-panel-head' }, closeBtn, h('span', { class: 'w-panel-kicker' }, m.kicker)),
+    h('div', { class: 'w-panel-head' }, h('img', { class: 'w-panel-logo', src: 'assets/logo/wawiwa-logo.png', alt: ui.logoAlt, width: '271', height: '102' }), closeBtn),
     title,
-    h('div', { class: 'w-panel-progress' }, h('div', { class: 'w-panel-progress-line' }, pctText), bar),
     list,
-    h('div', { class: 'w-panel-foot' },
-      h('div', { class: 'w-panel-row' }, goalsBtn, casesLink), // the lesson's resources
-      h('div', { class: 'w-panel-row' }, helpBtn, startOverBtn)));
+    h('div', { class: 'w-panel-foot' }, helpBtn, startOverBtn));
   const overlay = h('div', { class: 'w-menu-overlay', hidden: true }, h('div', { class: 'w-menu-scrim', onclick: () => close() }), panel);
   stage.append(overlay);
 
@@ -77,22 +66,18 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
     trapTab(e, panel);
   });
 
-  // model: { percent, chapters: [{ n, title, status, meta, label, clickable, current }] }
+  // model: { chapters: [{ n, title, status, label, clickable, current }] }; the disc shows n + 1 (Intro = 1)
   function render() {
     const model = getMenu();
-    pctText.textContent = fmt(m.complete, { p: model.percent });
-    barFill.style.width = model.percent + '%';
-    bar.setAttribute('aria-valuenow', String(model.percent));
     list.replaceChildren(...model.chapters.map((c) => h('li', {},
       h('button', { class: 'w-chapter', type: 'button', dataset: { status: c.status, chapter: String(c.n) }, 'aria-label': c.label,
         'aria-current': c.current ? 'step' : null, 'aria-disabled': c.clickable ? null : 'true',
         onclick: () => { if (c.clickable) { close(false); onChapter(c.n); } } },
-      statusMark(c.status),
-      h('span', { class: 'w-chapter-title' }, c.title),
-      h('span', { class: 'w-chapter-meta' }, c.meta)))));
+      h('span', { class: 'w-menu-disc', 'aria-hidden': 'true' }, c.status === 'done' ? glyph('g-check', { size: 16.64 }) : String(c.n + 1)),
+      h('span', { class: 'w-chapter-title' }, c.title)))));
   }
 
-  const inertShell = (on) => { zones.rail.inert = on; zones.main.inert = on; zones.footer.inert = on; };
+  const inertShell = (on) => { zones.bar.inert = on; zones.main.inert = on; zones.footer.inert = on; };
 
   function openMenu(from) {
     opener = from || zones.menuBtn;
@@ -117,14 +102,6 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
 
   function showHelp() {
     openDialog(stage, { text: m.help, body: h('ul', { class: 'w-dialog-list w-help' }, (ui.help || []).map((line) => h('li', {}, line))), opener: helpBtn, inert: [panel], actions: closeAction });
-  }
-
-  // the lesson's goals (O3's content), read only: the short label and the full goal
-  function showGoals() {
-    const list = h('ol', { class: 'w-dialog-list w-goals-list' }, getMenu().goals.map((g) => h('li', {},
-      h('span', { class: 'w-goals-title' }, g.label),
-      h('span', { class: 'w-goals-sub' }, g.text))));
-    openDialog(stage, { text: m.goals, note: m.goalsIntro, body: list, opener: goalsBtn, inert: [panel], actions: closeAction });
   }
 
   function confirmStartOver() {

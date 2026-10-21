@@ -1,6 +1,6 @@
 // Keyboard-only walk through the slice in the approved look (P1.5). Puppeteer drives Tab, Shift+Tab,
-// arrows, Enter, Space, Escape and typing only (one separate mouse check: a clicked wrong row shows
-// no focus ring; its screenshot is s01-wrong.png). Covers the rail, the menu (open,
+// arrows, Enter, Space, Escape and typing only (one separate mouse check: a clicked wrong card shows
+// no focus ring; its screenshot is s01-wrong.png). Covers the top bar's steps (NL1), the menu (open,
 // navigate, Escape), the Intro (O1 title, O2 module map tabs, O3 goals, S01, S02), Chapter 1 (W1 neutral
 // warm-up, V1 with its stops, K1 key idea, S03 wrong then right), the ghost hand (shown once, any key
 // stops it, it never selects or tracks), then every later chapter. Asserts on every state:
@@ -10,8 +10,7 @@
 //   the band never overlaps the screen's content and keeps its interaction area's width; nothing
 //   clipped; contrast, text size and targets; one first-attempt tracking event per interaction id.
 // Usage: npm run walk                 checks only
-//        npm run walk -- --shots      checks + screenshots into review/p1.5/ (and the artboard
-//                                     comparisons compare-s01.png, compare-s03.png)
+//        npm run walk -- --shots      checks + screenshots into review/p1.5/
 import puppeteer from 'puppeteer-core';
 import { mkdirSync, readFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -51,7 +50,7 @@ async function open(query, { lms = null, motion = false } = {}) {
   // reduced motion: no transitions, so every assertion and screenshot sees the settled state
   // (motion: true only for the ghost hand's animated demo)
   await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: motion ? 'no-preference' : 'reduce' }]);
-  await page.goto(BASE + query, { waitUntil: 'networkidle0' });
+  await page.goto(BASE + query, { waitUntil: /screen=V\d/.test(query) ? 'load' : 'networkidle0' }); // a film keeps a range request open
   await page.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
   return page;
 }
@@ -95,7 +94,15 @@ async function ghostSpot(p, target) {
     const rs = [...document.querySelectorAll('.w-opt')].filter((el) => el.getClientRects().length).map((el) => el.getBoundingClientRect());
     const onOption = rs.some((o) => c.x >= o.left && c.x <= o.right && c.y >= o.top && c.y <= o.bottom);
     let want;
-    if (target === 'options-gap') {
+    const sheet = document.querySelector('.w-sheet:not([hidden])');
+    const st = document.querySelector('.w-stage');
+    const k = st.getBoundingClientRect().width / st.offsetWidth;
+    const P = sheet?.getBoundingClientRect();
+    const top = Math.min(...rs.map((r) => r.top)), bottom = Math.max(...rs.map((r) => r.bottom));
+    if (target === 'below-panel') want = { x: P.left + 26 * k, y: P.bottom + 22.7 * k };
+    else if (target === 'gutter-left') want = { x: P.left - 7.3 * k, y: (top + bottom) / 2 };
+    else if (target === 'gutter-low') want = { x: P.left - 4.7 * k, y: bottom + 45 * k };
+    else if (target === 'options-gap') {
       const [a, b] = rs;
       want = b.top >= a.bottom - 1 ? { x: a.right - 48, y: (a.bottom + b.top) / 2 } : { x: (a.right + b.left) / 2, y: (a.top + a.bottom) / 2 };
     } else {
@@ -120,17 +127,18 @@ async function trayPlace(p, cardKey, col, { reselect = true } = {}) {
 async function videoRun(p, id, { shotPlaying = null, shotStop = null, shotWrong = null, ghost = false } = {}) {
   const V = S[id];
   await p.waitForFunction(() => document.querySelector('.w-video').readyState >= 1 && document.querySelectorAll('.w-tline').length > 0);
-  const head = await p.evaluate(() => ({ meta: document.querySelector('.w-video-meta').textContent, guiding: document.querySelector('.w-guiding').textContent, src: document.querySelector('.w-video').getAttribute('src'),
+  const head = await p.evaluate(() => ({ meta: [...document.querySelectorAll('.w-video-head .w-glass-label, .w-video-head .w-chip-dark, .w-video-title')].map((e) => e.textContent).join(' · '),
+    guiding: document.querySelector('.w-guiding').textContent, src: document.querySelector('.w-video').getAttribute('src'),
     poster: document.querySelector('.w-video').getAttribute('poster'), markers: [...document.querySelectorAll('.w-seek-stop')].map((m) => parseFloat(m.style.left).toFixed(2)).join() }));
-  const wantMeta = `${V.title} · ${UI.video.meta.replace('{length}', V.media.length).replace('{n}', V.stops.length)}`;
+  const wantMeta = `${UI.video.kicker} · ${V.media.length} · ${V.title}`; // the glass card: "Video", the length chip, the title
   expect(head.meta === wantMeta && head.guiding === `${V.guidingLabel || UI.video.guiding} ${V.guidingQuestion}` && head.src === V.media.src && head.poster === (V.media.poster || null)
     && head.markers === V.stops.map((s) => ((100 * s.t) / V.media.duration).toFixed(2)).join(),
-  `${id}: "${head.meta}", guiding question, video ${head.src} and poster ${head.poster} from content, one marker per stop on the timeline`);
+  `${id}: ready card "${head.meta}", guiding question, video ${head.src} and poster ${head.poster} from content, one marker per stop on the timeline`);
   const trClosed = await p.evaluate(() => document.querySelector('.w-transcript').hidden && document.querySelector('.w-tr').getAttribute('aria-pressed') === 'false' && document.querySelector('.w-video-view').dataset.transcript === 'closed');
   await tabTo(p, '.w-tr');
   await press(p, 'Enter');
   const trOpen = await p.evaluate(() => !document.querySelector('.w-transcript').hidden && document.querySelector('.w-tr').getAttribute('aria-pressed') === 'true' && document.querySelector('.w-video-view').dataset.transcript === 'open');
-  expect(trClosed && trOpen, `${id}: the transcript starts closed (player centred) and the transcript button opens it`);
+  expect(trClosed && trOpen, `${id}: the transcript starts closed and the transcript button opens it (a glass panel)`);
   await tabTo(p, '[data-action="play"]', { back: true });
   await press(p, 'Enter');
   // a real film can open on a title card: wait for the first caption (V1 speaks from 0:04)
@@ -155,30 +163,29 @@ async function videoRun(p, id, { shotPlaying = null, shotStop = null, shotWrong 
     await noSkipAhead(p, `${id} before stop ${k + 1}`);
     await fastPlay(p);
     await p.waitForSelector('.w-stop-view:not([hidden])', { timeout: 60000 });
-    const st = await p.evaluate(() => ({ t: document.querySelector('.w-video').currentTime, q: document.querySelector('.w-stop-q').textContent, label: document.querySelector('.w-stop-panel .w-label').textContent,
+    const st = await p.evaluate(() => ({ t: document.querySelector('.w-video').currentTime, q: document.querySelector('.w-stop-q').textContent, label: document.querySelector('.w-stop-card .w-glass-label').textContent,
       focus: document.activeElement.classList.contains('w-stop-q'), locked: document.querySelector('[data-action="resume"]').getAttribute('aria-disabled'),
-      lockLabel: document.querySelector('[data-action="resume"]').getAttribute('aria-label'), paused: document.querySelector('.w-paused').textContent }));
+      lockLabel: document.querySelector('[data-action="resume"]').getAttribute('aria-label'), paused: document.querySelector('.w-stop-card .w-chip-dark').textContent,
+      bar: !document.querySelector('.w-video-view').hidden }));
     expect(Math.abs(st.t - stop.t) < 0.1, `${id} stop ${k + 1}: playback pauses at ${st.t.toFixed(2)}s = the stop (${stop.t}s)`);
     expect(st.q === stop.question && st.focus && st.locked === 'true' && st.lockLabel === UI.video.resumeLocked
-      && st.label === UI.video.stopLabel.replace('{i}', k + 1).replace('{n}', V.stops.length).replace('{title}', V.title) && st.paused === UI.video.pausedAt.replace('{t}', mmssW(stop.t)),
-    `${id} stop ${k + 1}: paused frame "${st.paused}", "${st.label}", question focused, Resume locked`);
-    const logoOff = await p.evaluate(() => document.querySelector('.w-logo').getBoundingClientRect().left >= document.querySelector('.w-stop-frame').getBoundingClientRect().right);
-    expect(logoOff, `${id} stop ${k + 1}: the Wawiwa logo sits off the paused still (top of the question panel)`);
+      && st.label === UI.video.stopKicker.replace('{i}', k + 1).replace('{n}', V.stops.length) && st.paused === mmssW(stop.t) && !st.bar,
+    `${id} stop ${k + 1}: glass card "${st.label}" with the time chip ${st.paused}, question focused, Resume locked, player bar hidden`);
     if (k === 0 && shotStop) await shotR2(p, shotStop);
     if (k === 0 && ghost) {
       // the ghost hand demonstrates the stop once: it points at the content's target (between the
       // first two options, on none of them) and selects nothing; a key removes it
       await p.waitForSelector('.w-ghost', { timeout: 3000 }).catch(() => {});
-      const gh = await p.evaluate(() => ({ on: !!document.querySelector('.w-ghost'), showMe: !!document.querySelector('.w-stop-panel [data-action="showMe"]'),
-        marked: [...document.querySelectorAll('.w-opt-stack')].filter((b) => b.dataset.result).length }));
+      const gh = await p.evaluate(() => ({ on: !!document.querySelector('.w-ghost'), showMe: !!document.querySelector('.w-stop-view [data-action="showMe"]'),
+        marked: [...document.querySelectorAll('.w-stop-view .w-opt')].filter((b) => b.dataset.result).length }));
       const spot = await ghostSpot(p, V.ghost.target);
       await press(p, 'Shift');
       const gone = await p.evaluate(() => !document.querySelector('.w-ghost'));
-      expect(gh.on && gh.showMe && !gh.marked && gone, `${id} stop 1 ghost hand: shown with "Show me" beside the question, no option marked, a key removes it`);
+      expect(gh.on && !gh.showMe && !gh.marked && gone, `${id} stop 1 ghost hand: shown (no "Show me" at a stop, as in the frame), no option marked, a key removes it`);
       expect(V.ghost.target && spot && !spot.onOption && spot.off <= 2, `${id} stop 1 ghost hand: points at "${V.ghost.target}" (${spot?.off}px off), on no option`);
     }
     const wrongI = stop.options.findIndex((o) => !o.correct), rightI = stop.options.findIndex((o) => o.correct);
-    await tabTo(p, `.w-opt-stack[data-id="${stop.options[wrongI].id}"]`);
+    await tabTo(p, `.w-stop-view .w-opt[data-id="${stop.options[wrongI].id}"]`);
     await press(p, 'Enter');
     await expectBand(p, `${id} stop ${k + 1} ${stop.options[wrongI].id}`, { state: 'wrong', text: stop.options[wrongI].feedback, unlocked: false, lockedWhy: UI.footer.locked.video });
     expect(await p.evaluate(() => document.querySelector('[data-action="resume"]').getAttribute('aria-disabled') === 'true'), `${id} stop ${k + 1} wrong: Resume stays locked`);
@@ -228,19 +235,24 @@ async function tabTo(page, sel, { back = false, max = 40 } = {}) {
   if (!hit) fail(`keyboard could not reach ${sel}`);
   return hit;
 }
+// NL1: the band is the panel's hint row (the hint, the tool) and its feedback strip; the strip keeps
+// the content's own message in data-text and data-verdict (its head is display only)
 const band = (page) => page.evaluate(() => {
-  const r = document.querySelector('.w-band');
-  return { state: r.dataset.state, verdict: r.querySelector('.w-band-verdict').textContent.trim(), text: r.querySelector('.w-band-text').textContent.trim(),
+  const r = document.querySelector('.w-band'), s = r.querySelector('.w-strip');
+  const hint = r.dataset.state === 'hint' || r.dataset.state === 'idle';
+  return { state: r.dataset.state, verdict: hint ? '' : (s.dataset.verdict || ''), text: hint ? r.querySelector('.w-band-hint').textContent.trim() : (s.dataset.text || '').trim(),
     actions: [...r.querySelectorAll('.w-band-actions button')].map((b) => b.dataset.action), tool: [...r.querySelectorAll('.w-band-tool button')].map((b) => b.dataset.action),
-    live: r.querySelector('[aria-live]')?.getAttribute('aria-live') };
+    live: (hint ? r.querySelector('.w-band-hint') : r.querySelector('.w-band-live'))?.getAttribute('aria-live') };
 });
 const nextState = (page) => page.evaluate(() => { const n = document.querySelector('.w-next'); return { locked: n.dataset.locked === 'true', aria: n.getAttribute('aria-disabled'), label: n.getAttribute('aria-label') }; });
 const screen = (page) => page.evaluate(() => window.__l4.current);
 const opts = (page) => page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.w-opt')].map((b) => [b.dataset.id, (b.dataset.result || '') + (b.getAttribute('aria-pressed') === 'true' ? '+pressed' : '')])));
 const events = (page) => page.evaluate(() => window.__l4.tracking.events);
-const rail = (page) => page.evaluate(() => ({
-  dots: [...document.querySelectorAll('.w-dot')].map((d) => ({ status: d.dataset.status, label: d.getAttribute('aria-label'), disabled: d.getAttribute('aria-disabled'), current: d.getAttribute('aria-current') })),
-  pct: document.querySelector('.w-rail-pct').textContent, line: parseFloat(document.querySelector('.w-rail-line-done').style.height),
+// the top bar (NL1): the chapter's name and its steps; the chapters' status from the progress model
+const bar = (page) => page.evaluate(() => ({
+  chapter: document.querySelector('.w-bar-chapter').textContent,
+  steps: [...document.querySelectorAll('.w-step')].map((s) => s.dataset.state + (s.getAttribute('aria-current') ? '*' : '') + ':' + s.querySelector('.w-step-label').textContent),
+  status: window.__l4.progress().chapters.map((x) => x.status), pct: window.__l4.progress().percent,
 }));
 
 // band equals the JSON: state, verdict word, text, route buttons; Next locked or not
@@ -267,18 +279,18 @@ console.log(SCORM ? '\nmain path in an LMS (mock SCORM 1.2 API)' : '\nmain path 
 const page = await open('?reset=1&debug=1', { lms: SCORM ? {} : null });
 if (SCORM) expect(await page.evaluate(() => window.__l4.tracking.mode) === 'scorm12', 'SCORM: the API is found, the scorm12 adapter runs');
 
-// O1 title: no header, no footer, the rail stays; "Start the lesson" goes on
+// O1 title (the only dark screen): no top bar, no footer; "Start the lesson" goes on
 await expectNewScreen(page, 'O1', 'start');
-const o1 = await page.evaluate(() => ({ footer: getComputedStyle(document.querySelector('.w-footer')).display, header: !!document.querySelector('.w-main .w-header'),
-  rail: !!document.querySelector('.w-rail').getClientRects().length, quote: document.querySelector('.w-title-quote').textContent, program: document.querySelector('.w-title-program').textContent,
-  img: document.querySelector('.w-title-photo')?.alt, start: document.querySelector('[data-action="start"]').textContent }));
-expect(o1.footer === 'none' && !o1.header && o1.rail && o1.quote === S.O1.quote && o1.program === S.O1.program && o1.img === S.O1.image.alt && o1.start === UI.buttons[S.O1.start],
-  `O1: title screen without header or footer, rail kept; programme, quote, photo alt and "${o1.start}" from content`);
+const o1 = await page.evaluate(() => ({ footer: getComputedStyle(document.querySelector('.w-footer')).display, bar: !!document.querySelector('.w-bar').getClientRects().length,
+  scene: document.querySelector('.w-stage').dataset.scene, photo: document.querySelector('.w-scene-photo')?.style.backgroundImage || '',
+  quote: document.querySelector('.w-title-quote').textContent, program: document.querySelector('.w-title-program').textContent, start: document.querySelector('[data-action="start"]').textContent }));
+expect(o1.footer === 'none' && !o1.bar && o1.scene === 'title' && o1.photo.includes(S.O1.photo.src) && S.O1.quote.includes(o1.quote) && o1.program === S.O1.program + ' · ' + S.O1.kicker && o1.start === UI.buttons[S.O1.start],
+  `O1: dark title scene with O1's photo, no bar or footer; programme line, quote (its marks drawn) and "${o1.start}" from content`);
 await expectLayout(page, 'O1');
 await tabTo(page, '[data-action="start"]');
 await press(page, 'Enter');
 
-// O2 module map: tabs by keyboard, L4 open on arrival, Next never locked, no ghost hand
+// O2 module map: tabs by keyboard, L4 open on arrival, Next never locked; the ghost hand once on Lesson 1
 await expectNewScreen(page, 'O2', 'O1 "Start the lesson"');
 const tabState = () => page.evaluate(() => ({ sel: [...document.querySelectorAll('.w-map-tab')].map((t) => t.getAttribute('aria-selected') === 'true' ? t.dataset.station : '').join(''),
   panel: document.querySelector('.w-map-panel').dataset.station, text: document.querySelector('.w-map-panel-text').textContent, all: document.querySelector('.w-map-panel').textContent,
@@ -286,8 +298,10 @@ const tabState = () => page.evaluate(() => ({ sel: [...document.querySelectorAll
 let mapTabs = await tabState();
 expect(mapTabs.sel === 'l4' && mapTabs.panel === 'l4' && mapTabs.role === 'tablist' && mapTabs.text === S.O2.stations[2].text && mapTabs.all === mapTabs.text && !(await nextState(page)).locked,
   `O2: tablist, Lesson 4 open on arrival, the panel holds its line only ("${mapTabs.text}"), Next unlocked (presentation screen)`);
-await wait(1000);
-expect(await page.evaluate(() => !document.querySelector('.w-ghost') && !document.querySelector('[data-action="showMe"]')), 'O2: no ghost hand and no "Show me"');
+await page.waitForSelector('.w-ghost', { timeout: 3000 }).catch(() => {});
+expect(await page.evaluate(() => !!document.querySelector('.w-ghost') && !document.querySelector('[data-action="showMe"]') && document.querySelector('.w-map-panel').dataset.station === 'l4'),
+  'O2: the ghost hand shows the first click once (on Lesson 1), no "Show me" (the frame), Lesson 4 stays open');
+await press(page, 'Shift');
 await expectLayout(page, 'O2');
 await tabTo(page, '.w-map-tab[data-station="l4"]');
 await press(page, 'ArrowLeft', 2);
@@ -303,7 +317,7 @@ await press(page, 'Enter');
 
 // O3 goals: deliverable, five tiles, the full goal as the tile's tip on keyboard focus
 await expectNewScreen(page, 'O3', 'O2 Next');
-const o3 = await page.evaluate(() => ({ d: document.querySelector('.w-deliverable-text').textContent, label: !!document.querySelector('.w-deliverable-label'), tiles: [...document.querySelectorAll('.w-goal')].map((t) => t.textContent) }));
+const o3 = await page.evaluate(() => ({ d: document.querySelector('.w-deliverable-text').textContent, label: !!document.querySelector('.w-deliverable-label'), tiles: [...document.querySelectorAll('.w-goal-label')].map((t) => t.textContent) }));
 expect(o3.d === S.O3.deliverable.text && o3.label === !!S.O3.deliverable.label && o3.tiles.join() === S.O3.goals.map((g) => g.label).join() && !(await nextState(page)).locked,
   `O3: deliverable (label ${o3.label ? 'shown' : 'none'}) and ${o3.tiles.length} goal tiles from content, Next unlocked`);
 await tabTo(page, '.w-goal[data-goal="g5"]');
@@ -315,59 +329,35 @@ await press(page, 'Enter');
 
 await expectNewScreen(page, 'S01', 'O3 Next');
 await expectBand(page, 'S01 before action', { state: 'hint', text: S.S01.hint, unlocked: false, lockedWhy: UI.footer.locked.single });
-const img = await page.evaluate(() => { const i = document.querySelector('.w-photo-column'); return { alt: i?.alt, temp: i?.dataset.temp, loaded: i?.naturalWidth > 0 }; });
-expect(img.alt === S.S01.image.alt && img.temp === String(S.S01.image.temp) && img.loaded,
-  `S01 image slot: alt from content, ${S.S01.image.temp ? 'temp' : 'real'} image loaded (${S.S01.image.src})`);
+const img = await page.evaluate(() => ({ scene: document.querySelector('.w-stage').dataset.scene, photo: document.querySelector('.w-scene-photo')?.style.backgroundImage || '',
+  quote: document.querySelector('.w-quote-glass .w-quote-1')?.textContent, attrib: document.querySelector('.w-quote-glass .w-attrib')?.textContent }));
+expect(img.scene === 'stage' && img.photo.includes(CH.ch0.photo.src) && img.quote === S.S01.stage.top.bubbles[1] && img.attrib === S.S01.stage.top.label + ' · ' + UI.fictionalBadge,
+  `S01 Stage: the chapter photo (${CH.ch0.photo.src}), Dana's quote on glass with "${img.attrib}"`);
 await expectLayout(page, 'S01 hint');
 await shot(page, 's01-hint.png');
 
-// rail at the start
-let rl = await rail(page);
-expect(rl.dots.map((d) => d.status).join() === 'current,locked,locked,locked,locked,locked,locked' && rl.pct === '3%' && rl.line === 0,
-  `rail at start: ${rl.dots.map((d) => d.status).join(' ')}, ${rl.pct}, teal line ${rl.line}px`);
-expect(rl.dots[0].label === `${CH.ch0.title}, ${UI.rail.status.current}` && rl.dots[0].current === 'step' && rl.dots[1].disabled === 'true' && rl.dots[1].label === `${CH.ch1.title}, ${UI.rail.status.locked}`,
-  `rail labels: "${rl.dots[0].label}" (aria-current step), "${rl.dots[1].label}" (aria-disabled)`);
-await tabTo(page, '.w-dot[data-chapter="1"]', { back: true });
-const tip = await page.evaluate(() => {
-  const t = document.querySelector('.w-tip'), d = document.activeElement.getBoundingClientRect(), r = t.getBoundingClientRect();
-  return t.hidden ? {} : { text: t.textContent, right: r.left >= d.right, level: r.top < d.bottom && r.bottom > d.top };
-});
-await press(page, 'Enter');
-expect(await screen(page) === 'S01' && tip.text === rl.dots[1].label && tip.right && tip.level,
-  `rail: keyboard focus on a dot shows its tip "${tip.text}" (title and status) right of the dot, level with it; Enter on a future chapter does nothing`);
-await press(page, 'Escape');
-
-// full screen (rail): label from content, Enter enters and leaves (the label and icon follow)
-const fsOf = () => page.evaluate(() => { const b = document.querySelector('.w-rail-fs'); return { hidden: b.hidden, label: b.getAttribute('aria-label'), on: !!document.fullscreenElement }; });
-const fs0 = await fsOf();
-expect(fs0.hidden === !(await page.evaluate(() => document.fullscreenEnabled)) && fs0.label === UI.rail.fullscreen, `rail full screen button: "${fs0.label}", shown only where the Fullscreen API is allowed`);
-if (!fs0.hidden) {
-  await tabTo(page, '.w-rail-fs', { back: true });
-  await press(page, 'Enter');
-  await page.waitForFunction(() => !!document.fullscreenElement, { timeout: 3000 }).catch(() => {});
-  const fs1 = await fsOf();
-  await press(page, 'Enter');
-  await page.waitForFunction(() => !document.fullscreenElement, { timeout: 3000 }).catch(() => {});
-  const fs2 = await fsOf();
-  expect(fs1.on && fs1.label === UI.rail.exitFullscreen && !fs2.on && fs2.label === UI.rail.fullscreen, `full screen: Enter enters ("${fs1.label}"), Enter again leaves ("${fs2.label}")`);
-}
+// the top bar at the start: the chapter's name and its steps from content (done / current / to come)
+let rl = await bar(page);
+const stepsOf = (c) => CH[c].screens.map((id) => S[id].step.verb);
+expect(rl.chapter === CH.ch0.title && rl.steps.join() === stepsOf('ch0').map((v, i) => (i < 3 ? 'done:' : i === 3 ? 'current*:' : 'next:') + v).join()
+  && rl.status.join() === 'current,locked,locked,locked,locked,locked,locked' && rl.pct === 3,
+  `top bar at S01: "${rl.chapter}", steps ${rl.steps.join(' ')} (aria-current on the current step); chapters ${rl.status.join(' ')}, ${rl.pct}%`);
 
 // menu: open, trap, Escape
-await tabTo(page, '.w-rail-menu', { back: true });
+await tabTo(page, '.w-bar-menu', { back: true });
 await press(page, 'Enter');
 let menu = await page.evaluate(() => ({
   open: !document.querySelector('.w-menu-overlay').hidden, inPanel: document.querySelector('.w-panel').contains(document.activeElement), focus: document.activeElement.className,
-  role: document.querySelector('.w-panel').getAttribute('role'), modal: document.querySelector('.w-panel').getAttribute('aria-modal'), expanded: document.querySelector('.w-rail-menu').getAttribute('aria-expanded'),
-  kicker: document.querySelector('.w-panel-kicker').textContent, title: document.querySelector('.w-panel-title').textContent,
-  pct: document.querySelector('.w-panel-pct').textContent, left: !!document.querySelector('.w-panel-left'),
+  role: document.querySelector('.w-panel').getAttribute('role'), modal: document.querySelector('.w-panel').getAttribute('aria-modal'), expanded: document.querySelector('.w-bar-menu').getAttribute('aria-expanded'),
+  title: document.querySelector('.w-panel-title').textContent, extras: document.querySelectorAll('.w-panel-pct, .w-panel-bar, .w-chapter-meta, [data-action="goals"], [data-action="lesson1Cases"]').length,
   links: [...document.querySelectorAll('.w-panel-foot button')].map((b) => b.dataset.action).join(),
-  list: [...document.querySelectorAll('.w-chapter')].map((c) => c.dataset.status + ':' + c.querySelector('.w-chapter-meta').textContent + (c.getAttribute('aria-current') ? '*' : '')),
+  list: [...document.querySelectorAll('.w-chapter')].map((c) => c.dataset.status + ':' + c.querySelector('.w-menu-disc').textContent + ':' + c.querySelector('.w-chapter-title').textContent + (c.getAttribute('aria-current') ? '*' : '')),
 }));
 expect(menu.open && menu.inPanel && menu.focus === 'w-panel-close' && menu.role === 'dialog' && menu.modal === 'true' && menu.expanded === 'true',
-  'Enter on the rail menu button opens the menu (dialog, aria-modal), focus on Close');
-expect(menu.kicker === UI.menu.kicker && menu.title === C.lesson.title && menu.pct === '3% complete' && !menu.left && menu.links === 'goals,help,startover'
-  && menu.list.join() === 'current:*,locked:,locked:,locked:,locked:,locked:,locked:',
-  `menu: "${menu.kicker}", "${menu.pct}", no times, footer ${menu.links}, chapters ${menu.list.join(' | ')}`);
+  'Enter on the bar\'s menu button opens the menu (dialog, aria-modal), focus on Close');
+expect(menu.title === C.lesson.title && !menu.extras && menu.links === 'help,startover'
+  && menu.list.join() === C.chapters.map((c, i) => (i ? 'locked' : 'current') + ':' + (c.n + 1) + ':' + c.title + (i ? '' : '*')).join(),
+  `menu: "${menu.title}", the seven chapters with their status only (numbered, no %, times or resources), foot ${menu.links}: ${menu.list.join(' | ')}`);
 let trapped = true;
 for (let i = 0; i < 30; i++) { await press(page, 'Tab'); trapped = trapped && await page.evaluate(() => document.querySelector('.w-panel').contains(document.activeElement)); }
 for (let i = 0; i < 8; i++) { await shiftTab(page); trapped = trapped && await page.evaluate(() => document.querySelector('.w-panel').contains(document.activeElement)); }
@@ -377,33 +367,23 @@ await press(page, 'Enter');
 const help = await page.evaluate(() => ({ items: document.querySelectorAll('.w-dialog .w-help li').length, focus: document.activeElement.dataset.action }));
 await press(page, 'Escape');
 expect(help.items === UI.help.length && help.focus === 'close' && await isActive(page, '.w-panel [data-action="help"]'), `menu Help: ${help.items} lines in a dialog, Escape returns focus to Help`);
-const cases1 = await page.evaluate(() => { const a = document.querySelector('.w-panel [data-action="lesson1Cases"]'); return a ? { href: a.href, target: a.target, rel: a.rel, text: a.textContent } : null; });
-expect(cases1 && cases1.href === C.links.lesson1Cases && cases1.target === '_blank' && /noopener/.test(cases1.rel) && cases1.text.startsWith(UI.menu.lesson1Cases),
-  `menu "${UI.menu.lesson1Cases}": a new-tab link to ${cases1?.href}`);
-await tabTo(page, '.w-panel [data-action="goals"]', { back: true });
-await press(page, 'Enter');
-const goals = await page.evaluate(() => ({ items: [...document.querySelectorAll('.w-dialog .w-goals-list li')].map((li) => li.querySelector('.w-goals-title').textContent + '|' + li.querySelector('.w-goals-sub').textContent),
-  focus: document.activeElement.dataset.action, controls: document.querySelectorAll('.w-dialog .w-goals-list button, .w-dialog .w-goals-list a').length }));
-await press(page, 'Escape');
-expect(goals.items.join() === S.O3.goals.map((g) => g.label + '|' + g.text).join() && goals.focus === 'close' && !goals.controls && await isActive(page, '.w-panel [data-action="goals"]'),
-  `menu Lesson goals: the ${goals.items.length} outcomes with their sub-lines, read only, Escape returns focus to Lesson goals`);
 await tabTo(page, '.w-panel [data-action="startover"]');
 await press(page, 'Enter');
 const confirm = await page.evaluate(() => document.querySelector('.w-dialog')?.getAttribute('role') === 'alertdialog' && document.activeElement.dataset.action === 'cancel');
 await press(page, 'Escape');
 expect(confirm && await isActive(page, '.w-panel [data-action="startover"]'), 'menu Start over: in-page confirm, focus on Cancel, Escape cancels');
 await press(page, 'Escape');
-expect(await page.evaluate(() => document.querySelector('.w-menu-overlay').hidden && document.activeElement.classList.contains('w-rail-menu')
-  && document.querySelector('.w-rail-menu').getAttribute('aria-expanded') === 'false'), 'Escape closes the menu, focus returns to the menu button');
+expect(await page.evaluate(() => document.querySelector('.w-menu-overlay').hidden && document.activeElement.classList.contains('w-bar-menu')
+  && document.querySelector('.w-bar-menu').getAttribute('aria-expanded') === 'false'), 'Escape closes the menu, focus returns to the menu button');
 
 // S01: wrong then right
 await tabTo(page, '.w-opt[data-id="a"]');
 await press(page, 'Enter');
 await expectBand(page, 'S01 wrong (a)', { state: 'wrong', text: opt('S01', 'a').feedback, unlocked: false });
 let o = await opts(page);
-expect(o.a === 'wrong' && o.b === '' && o.c === '', `S01 wrong: the chosen row is marked wrong, the others stay plain (${JSON.stringify(o)})`);
+expect(o.a === 'wrong' && o.b === '' && o.c === '', `S01 wrong: the chosen card is marked wrong, the others stay plain (${JSON.stringify(o)})`);
 await expectLayout(page, 'S01 wrong');
-expect(await page.evaluate(() => getComputedStyle(document.activeElement).outlineStyle !== 'none'), 'S01 wrong by keyboard: the focus ring shows on the row');
+expect(await page.evaluate(() => getComputedStyle(document.activeElement).outlineStyle !== 'none'), 'S01 wrong by keyboard: the focus ring shows on the card');
 await press(page, 'ArrowDown');
 expect(await isActive(page, '.w-opt[data-id="b"]'), 'S01 ArrowDown moves focus to option b');
 await press(page, 'Enter');
@@ -415,10 +395,11 @@ await press(page, 'Enter');
 
 // S02
 await expectNewScreen(page, 'S02', 'S01 Next');
-const s02top = await page.evaluate(() => { const a = document.querySelector('[data-action="homework1"]');
-  return { label: document.querySelector('.w-form .w-label').textContent, help: document.querySelector('.w-field-help > span').textContent, hw1: a ? a.href : null, target: a?.target }; });
-expect(s02top.label === S.S02.stage.top.text && s02top.help === S.S02.stage.middle.help.text && s02top.hw1 === C.links.homework1 && (!s02top.hw1 || s02top.target === '_blank'),
-  `S02: Homework 1 context line, help line by the fields, ${C.links.homework1 ? 'Open Homework 1 link' : 'no Homework 1 link (links.homework1 is null)'}`);
+const s02top = await page.evaluate(() => { const a = document.querySelector('[data-action="homework1"]'), q = document.querySelector('[data-action="homeworkHelp"]');
+  const tip = (q.getAttribute('aria-describedby') || '').split(' ').map((id) => document.getElementById(id)?.textContent).join(' ');
+  return { label: document.querySelector('.w-sheet .w-context').textContent, help: q.textContent + ' ' + tip, sub: document.querySelector('.w-subline').textContent, hw1: a ? a.href : null, target: a?.target }; });
+expect(s02top.label === S.S02.stage.top.text && s02top.help === S.S02.stage.middle.help.text && s02top.sub === S.S02.hint && s02top.hw1 === C.links.homework1 && (!s02top.hw1 || s02top.target === '_blank'),
+  `S02: context line, the hint under the heading, the help question as a button with its answer as the tooltip, ${C.links.homework1 ? 'Open Homework 1 link' : 'no Homework 1 link (links.homework1 is null)'}`);
 await expectBand(page, 'S02 before action', { state: 'hint', text: S.S02.hint, unlocked: false, lockedWhy: UI.footer.locked.input });
 await tabTo(page, '[data-action="save"]');
 await press(page, 'Enter');
@@ -436,13 +417,14 @@ const s02 = await page.evaluate(() => ({
   described: [...document.querySelectorAll('.w-input')].every((i) => i.getAttribute('aria-describedby').split(' ').every((id) => document.getElementById(id))),
   labelled: [...document.querySelectorAll('.w-input')].every((i) => document.querySelector(`label[for="${i.id}"]`)),
 }));
-expect(s02.counters.join() === `${TITLE.length + 3}/60,${PROBLEM.length}/250` && s02.max.join() === '60,250' && s02.described && s02.labelled,
+const cnt = (n, max) => UI.counter.replace('{n}', n).replace('{max}', max);
+expect(s02.counters.join() === `${cnt(TITLE.length + 3, 60)},${cnt(PROBLEM.length, 250)}` && s02.max.join() === '60,250' && s02.described && s02.labelled,
   `S02 fields: labelled, maxlength 60 (title) and 250 (problem), live counters ${s02.counters.join(' and ')}, aria-describedby counter + privacy line`);
 await tabTo(page, '[data-action="save"]');
 await press(page, 'Enter');
 await expectBand(page, 'S02 saved', { state: 'neutral', text: S.S02.feedback.saved, unlocked: true });
 const saved = await page.evaluate(() => ({ badge: document.querySelector('.w-saved').hidden, f: window.__l4.state.f }));
-expect(saved.badge && saved.f.L4_CASE_TITLE === TITLE && saved.f.L4_CASE_PROBLEM === PROBLEM, 'S02 saved: no rail badge (shown only when saving fails), values stored trimmed under L4_CASE_TITLE and L4_CASE_PROBLEM');
+expect(saved.badge && saved.f.L4_CASE_TITLE === TITLE && saved.f.L4_CASE_PROBLEM === PROBLEM, 'S02 saved: no "Not saved" badge in the bar (shown only when saving fails), values stored trimmed under L4_CASE_TITLE and L4_CASE_PROBLEM');
 expect(await isActive(page, '.w-next'), 'S02 saved: focus moves to Next');
 await expectLayout(page, 'S02 saved');
 await shot(page, 's02.png');
@@ -453,7 +435,9 @@ await expectNewScreen(page, 'W1', 'S02 Next');
 await expectBand(page, 'W1 before action', { state: 'hint', text: S.W1.hint, unlocked: false, lockedWhy: UI.footer.locked.warmup });
 const w1 = await page.evaluate(() => ({ role: document.querySelector('.w-guesses').getAttribute('role'), panel: document.querySelector('.w-warmup-panel').textContent,
   skip: !!document.querySelector('[data-action="skipChallenge"]') }));
-expect(w1.role === 'radiogroup' && w1.panel.includes(S.W1.panel.chip) && !w1.skip, `W1: radio group, "${S.W1.panel.chip}" panel, no Skip`);
+const w1p = await page.evaluate(() => document.querySelector('.w-sheet-title')?.textContent);
+expect(w1.role === 'radiogroup' && w1.panel.includes(S.W1.panel.title) && w1.panel.includes(S.W1.panel.chip) && w1.panel.includes(S.W1.instruction) && w1p === UI.warmup.prompt && !w1.skip,
+  `W1: the question on the glass card ("${S.W1.panel.title}", "${S.W1.panel.chip}"), the panel "${w1p}" and a radio group, no Skip`);
 await expectLayout(page, 'W1 hint');
 await shot(page, 'w1.png');
 await tabTo(page, '.w-guess[data-id="a"]');
@@ -475,21 +459,21 @@ await press(page, 'Enter'); // Next
 
 // K1 key idea: presentation screen, the figures carry their meaning in their labels
 await expectNewScreen(page, 'K1', 'V1 Next');
-const k1 = await page.evaluate(() => ({ bg: getComputedStyle(document.querySelector('.w-main')).backgroundColor, label: document.querySelector('.w-key-label').textContent,
+const k1 = await page.evaluate(() => ({ bg: document.querySelector('.w-stage').dataset.scene, label: document.querySelector('.w-key-label').textContent,
   ev: document.querySelector('.w-evidence').textContent,
   figs: [...document.querySelectorAll('.w-fig')].map((f) => f.getAttribute('role') + ':' + f.getAttribute('aria-label')), caps: [...document.querySelectorAll('.w-fig-caption')].map((c) => c.textContent) }));
-expect(k1.bg === 'rgb(244, 247, 249)' && k1.label === S.K1.label + (S.K1.topic ? '· ' + S.K1.topic : '') && k1.ev === S.K1.evidence.text + S.K1.evidence.source && k1.figs.join() === S.K1.figures.map((f) => 'img:' + f.alt).join() && k1.caps.join() === S.K1.figures.map((f) => f.caption).join() && !(await nextState(page)).locked,
-  `K1: key idea stage ${k1.bg}, "${k1.label}", two figures (role img with the meaning as label), Next unlocked`);
+expect(k1.bg === 'focus' && k1.label === S.K1.label + (S.K1.topic ? '· ' + S.K1.topic : '') && k1.ev === S.K1.evidence.text + S.K1.evidence.source && k1.figs.join() === S.K1.figures.map((f) => 'img:' + f.alt).join() && k1.caps.join() === S.K1.figures.map((f) => f.caption).join() && !(await nextState(page)).locked,
+  `K1: key idea on the ${k1.bg} wash, "${k1.label}" pill, two figures (role img with the meaning as label), Next unlocked`);
 await expectLayout(page, 'K1');
 await shot(page, 'k1.png');
 await tabTo(page, '.w-next');
 await press(page, 'Enter');
 
-// S03 and the rail in chapter 1 (no skipping: V1 was watched)
+// S03 and the top bar in chapter 1 (no skipping: V1 was watched)
 await expectNewScreen(page, 'S03', 'K1 Next');
-rl = await rail(page);
-expect(rl.dots[0].status === 'done' && rl.dots[1].status === 'current' && rl.dots[1].current === 'step' && rl.line === 52 && rl.pct === '11%',
-  `rail in chapter 1: ${CH.ch0.title} ${rl.dots[0].status}, ${CH.ch1.title} ${rl.dots[1].status}, teal line ${rl.line}px, ${rl.pct}`);
+rl = await bar(page);
+expect(rl.chapter === CH.ch1.title && rl.steps.join() === stepsOf('ch1').map((v, i) => (i < 3 ? 'done:' : 'current*:') + v).join() && rl.status[0] === 'done' && rl.status[1] === 'current' && rl.pct === 11,
+  `top bar in chapter 1: "${rl.chapter}", steps ${rl.steps.join(' ')}; ${CH.ch0.title} ${rl.status[0]}, ${CH.ch1.title} ${rl.status[1]}, ${rl.pct}%`);
 // the ghost hand on S03 never selects or checks anything, and tracks nothing
 const s03g = await page.evaluate(async () => {
   for (let i = 0; i < 30 && !document.querySelector('.w-ghost'); i++) await new Promise((r) => setTimeout(r, 100));
@@ -500,28 +484,23 @@ const s03g = await page.evaluate(async () => {
     check: document.querySelector('[data-action="check"]').disabled, ev: window.__l4.tracking.events.filter((e) => e.trackingId === 'L4_S03_1').length,
     showMe: document.querySelector('[data-action="showMe"]')?.textContent, icon: !!document.querySelector('[data-action="showMe"] svg') };
 });
-const s03spot = await ghostSpot(page, S.S03.ghost.target[0]);
-expect(s03spot && !s03spot.onOption && s03spot.off <= 2, `S03 ghost hand: points at "${S.S03.ghost.target[0]}" (${s03spot?.off}px off), on no card`);
+const s03spot = await ghostSpot(page, S.S03.ghost.target);
+expect(s03spot && !s03spot.onOption && s03spot.off <= 2, `S03 ghost hand: points at "${S.S03.ghost.target}" (${s03spot?.off}px off), on no card`);
 await press(page, 'Shift');
 expect(s03g.shown && s03g.hidden === 'true' && s03g.seen.includes('s') && !s03g.pressed && s03g.check && !s03g.ev && await page.evaluate(() => !document.querySelector('.w-ghost')),
   `S03 ghost hand: shown once (aria-hidden, seen types "${s03g.seen}"), selects no card, Check stays disabled, no tracking; a key removes it`);
-await tabTo(page, '[data-action="showMe"]', { back: true });
-await press(page, 'Enter');
-await page.waitForSelector('.w-ghost', { timeout: 2000 }).catch(() => {});
-expect(s03g.showMe === UI.buttons.showMe && s03g.icon && await page.evaluate(() => !!document.querySelector('.w-ghost')), `S03: "${s03g.showMe}" (hand icon and text) replays the ghost hand`);
-await press(page, 'Shift');
+expect(!s03g.showMe, 'S03: no "Show me" (the frame has none here; S02 has it)');
 await expectBand(page, 'S03 before action', { state: 'hint', text: S.S03.hint, unlocked: false, lockedWhy: UI.footer.locked.multi });
-const cases = await page.evaluate(() => [...document.querySelectorAll('.w-case')].map((f) => ({ cap: f.querySelector('figcaption').textContent, alt: f.querySelector('img')?.alt, controls: f.querySelectorAll('button, a, [tabindex]').length })));
-expect(cases.map((c) => c.cap).join() === S.S03.cases.map((c) => c.label).join() && cases.every((c, i) => c.alt === S.S03.cases[i].image.alt && !c.controls),
-  `S03 video-case stills: captions "${cases.map((c) => c.cap).join('", "')}", alt from content, no control until the player exists`);
+const s03ctx = await page.evaluate(() => ({ ctx: document.querySelector('.w-sheet .w-context').textContent, cases: document.querySelectorAll('.w-case').length }));
+expect(s03ctx.ctx === S.S03.stage.top.text && !s03ctx.cases, 'S03: the context line from content; no video-case stills (left out in the frame)');
 await expectLayout(page, 'S03 hint');
 await shot(page, 'rail-ch1.png');
 const term = await page.evaluate(() => {
   const d = document.querySelector('.w-opt[data-id="d"]');
   const desc = (d.getAttribute('aria-describedby') || '').split(' ').map((id) => document.getElementById(id)?.textContent).join(' ');
-  return { desc, dot: !!d.querySelector('.w-opt-info'), nested: d.querySelectorAll('a, button, input, [tabindex]').length };
+  return { desc, dotted: !!d.querySelector('.w-term-static'), nested: d.querySelectorAll('a, button, input, [tabindex]').length };
 });
-expect(term.desc === C.tooltips['Success metric'] && term.dot && !term.nested, 'S03 term on the "No success metric" card: aria-describedby definition, info dot, no nested focusable');
+expect(term.desc === C.tooltips['Success metric'] && term.dotted && !term.nested, 'S03 term on the "No success metric" card: aria-describedby definition, dotted underline, no nested focusable');
 await tabTo(page, '.w-opt[data-id="a"]');
 await press(page, ' ');
 await press(page, 'ArrowRight');
@@ -533,11 +512,10 @@ await press(page, ' ');
 expect(!(await opts(page)).c.includes('pressed'), 'S03 a third card cannot be selected while two are');
 await tabTo(page, '[data-action="check"]');
 await press(page, 'Enter');
-await expectBand(page, 'S03 Check a + b', { state: 'wrong', verdict: UI.feedback.oneOfTwo, text: opt('S03', 'a').feedback, unlocked: false });
+await expectBand(page, 'S03 Check a + b', { state: 'partial', verdict: UI.feedback.oneOfTwo, text: opt('S03', 'a').feedback, unlocked: false });
 o = await opts(page);
-const marks = await page.evaluate(() => [...document.querySelectorAll('.w-marker')].map((m) => m.dataset.state || '-').join());
-expect(o.a === 'wrong' && o.b === 'correct+pressed' && marks === 'wrong,correct,-,-' && await isActive(page, '.w-opt[data-id="a"]'),
-  `S03 after Check: a red and deselected, b teal and kept, process markers ${marks}, focus on a`);
+expect(o.a === 'wrong' && o.b === 'correct+pressed' && await isActive(page, '.w-opt[data-id="a"]'),
+  'S03 after Check: a red and deselected, b teal and kept ("One of two." in the neutral strip), focus on a');
 await expectLayout(page, 'S03 one of two');
 await shot(page, 's03-one-of-two.png');
 await tabTo(page, '.w-opt[data-id="d"]');
@@ -557,11 +535,11 @@ await press(page, 'Enter');
 /* ---------- Chapter 2 (R1): FT2 wrong, then the full chapter, every interaction wrong then right ---------- */
 console.log('\nchapter 2 (keyboard)');
 await expectNewScreen(page, 'FT2', 'S03 Next (no pause marker: one Next moves on)');
-await expectBand(page, 'FT2 before action', { state: 'idle', text: '', unlocked: false, lockedWhy: UI.footer.locked.challenge });
+await expectBand(page, 'FT2 before action', { state: 'hint', text: S.FT2.hint, unlocked: false, lockedWhy: UI.footer.locked.challenge });
 const ft2 = await page.evaluate(() => ({ head: document.querySelector('.w-memo-head').textContent, line: document.querySelector('.w-memo-line').textContent,
-  q: document.querySelector('.w-memo-q').textContent, img: document.querySelector('.w-photo-memo')?.getAttribute('src'), alt: document.querySelector('.w-photo-memo')?.alt }));
-expect(ft2.head === UI.memo.header.replace('{n}', '2') && ft2.line === S.FT2.stage.top.text && ft2.q === S.FT2.stage.middle.text && ft2.img === S.FT2.image.src && ft2.alt === S.FT2.image.alt,
-  `FT2 memo: header "${ft2.head}" (once), challenge text from content, image ${ft2.img}`);
+  q: document.querySelector('.w-memo-q').textContent, skip: [...document.querySelectorAll('.w-band-tool [data-action]')].map((b) => b.dataset.action).join() }));
+expect(ft2.head === UI.memo.header.replace('{n}', '2') && ft2.line === S.FT2.stage.top.text && ft2.q === S.FT2.stage.middle.text && ft2.skip === S.FT2.stage.bottom.link,
+  `FT2 memo (Focus panel, by analogy): header "${ft2.head}" (once), challenge text from content, Skip in the hint row`);
 await expectLayout(page, 'FT2 memo');
 await shotR1(page, 'ft2.png');
 await tabTo(page, '.w-opt[data-id="a"]');
@@ -734,10 +712,10 @@ await press(page, 'Enter');
 /* ---------- Chapters 3 and 4 (R2): every interaction wrong then right, the V2 stops, seek blocked ---------- */
 console.log('\nchapters 3 and 4 (keyboard)');
 await expectNewScreen(page, 'FT3', 'S08 Next');
-rl = await rail(page);
-expect(rl.dots[2].status === 'done' && rl.dots[3].status === 'current', `rail after chapter 2: Toolkit ${rl.dots[2].status}, HR demo ${rl.dots[3].status}, ${rl.pct}`);
-const ft3 = await page.evaluate(() => ({ head: document.querySelector('.w-memo-head').textContent, nums: document.querySelectorAll('.w-opt-card .w-opt-num').length, img: document.querySelector('.w-photo-memo')?.getAttribute('src') }));
-expect(ft3.head === UI.memo.header.replace('{n}', '3') && ft3.nums === 0 && ft3.img === S.FT3.image.src, `FT3 memo: "${ft3.head}", no numerals on the option cards, image ${ft3.img}`);
+rl = await bar(page);
+expect(rl.status[2] === 'done' && rl.status[3] === 'current' && rl.chapter === CH.ch3.title, `after chapter 2: Toolkit ${rl.status[2]}, HR demo ${rl.status[3]}, the bar shows "${rl.chapter}", ${rl.pct}%`);
+const ft3 = await page.evaluate(() => ({ head: document.querySelector('.w-memo-head').textContent, nums: document.querySelectorAll('.w-opt-num').length, img: document.querySelector('.w-photo-memo')?.getAttribute('src') }));
+expect(ft3.head === UI.memo.header.replace('{n}', '3') && ft3.nums === 0 && !ft3.img, `FT3 memo: "${ft3.head}", no numerals on the answer cards, no memo photo (the chapter photo is the wash)`);
 await expectLayout(page, 'FT3');
 await shotR2(page, 'ft3.png');
 await tabTo(page, '.w-opt[data-id="a"]');
@@ -810,7 +788,7 @@ await press(page, 'ArrowLeft');
 await press(page, ' ');
 await tabTo(page, '[data-action="check"]');
 await press(page, 'Enter');
-await expectBand(page, 'S12 Check 3 + 4', { state: 'wrong', verdict: UI.feedback.oneOfTwo, text: tileAns(3).feedback, unlocked: false });
+await expectBand(page, 'S12 Check 3 + 4', { state: 'partial', verdict: UI.feedback.oneOfTwo, text: tileAns(3).feedback, unlocked: false });
 await expectLayout(page, 'S12 one of two');
 await shotR2(page, 's12-one-of-two.png');
 await tabTo(page, '.w-pick-tile[data-n="7"]');
@@ -887,8 +865,8 @@ await press(page, 'Enter');
 console.log('\nchapters 5 and 6 (keyboard)');
 const METRIC = 'Share of HR time on repeat questions: about 35% now, 20% within three months.';
 await expectNewScreen(page, 'S18A', 'S17 Next');
-rl = await rail(page);
-expect(rl.dots.slice(0, 5).every((d) => d.status === 'done') && rl.dots[5].status === 'current', `rail after chapter 4: chapters 0 to 4 done, Build yours ${rl.dots[5].status}, ${rl.pct}`);
+rl = await bar(page);
+expect(rl.status.slice(0, 5).every((s) => s === 'done') && rl.status[5] === 'current', `after chapter 4: chapters 0 to 4 done, Build yours ${rl.status[5]}, ${rl.pct}%`);
 await trayPlace(page, '1', 'b');
 await expectBand(page, 'S18A card 1 in Field 3', { state: 'wrong', text: card('S18A', 1).feedback.wrong, unlocked: false });
 await expectLayout(page, 'S18A wrong');
@@ -906,7 +884,7 @@ await expectBand(page, 'S18 a', { state: 'wrong', text: opt('S18', 'a').feedback
 await press(page, 'ArrowDown');
 await press(page, 'Enter');
 await expectBand(page, 'S18 b', { state: 'correct', text: opt('S18', 'b').feedback, unlocked: false });
-const s18 = await page.evaluate(() => ({ focus: document.activeElement.classList.contains('w-input'), value: document.querySelector('.w-input').value, rows: !document.querySelector('.w-options-row').hidden }));
+const s18 = await page.evaluate(() => ({ focus: document.activeElement.classList.contains('w-input'), value: document.querySelector('.w-input').value, rows: !document.querySelector('.w-sheet .w-options').hidden }));
 expect(s18.focus && s18.value === TITLE && !s18.rows, `S18 step 2: the case title field, pre-filled from S02 ("${s18.value}"), takes the focus`);
 await tabTo(page, '[data-action="save"]');
 await press(page, 'Enter');
@@ -1041,10 +1019,10 @@ for (const id of ['S04', 'S05', 'S06', 'S07', 'S08', 'V2', 'S09', 'S10', 'S11', 
 await page.evaluate(() => window.__l4.go('S19'));
 
 // menu: every chapter done
-await tabTo(page, '.w-rail-menu', { back: true });
+await tabTo(page, '.w-bar-menu', { back: true });
 await press(page, 'Enter');
-menu = await page.evaluate(() => ({ pct: document.querySelector('.w-panel-pct').textContent, left: '', list: [...document.querySelectorAll('.w-chapter')].map((c) => c.dataset.status + ':' + c.querySelector('.w-chapter-meta').textContent + (c.getAttribute('aria-current') ? '*' : '')) }));
-expect(menu.pct === '100% complete' && menu.list.every((x) => x === 'done:Done') && menu.list.length === 7, `menu at the end: "${menu.pct}", "${menu.left}", all 7 chapters done`);
+menu = await page.evaluate(() => ({ pct: window.__l4.progress().percent, list: [...document.querySelectorAll('.w-chapter')].map((c) => c.dataset.status + ':' + (c.querySelector('.w-menu-disc svg') ? 'check' : c.querySelector('.w-menu-disc').textContent)) }));
+expect(menu.pct === 100 && menu.list.every((x) => x === 'done:check') && menu.list.length === 7, `menu at the end (${menu.pct}%): all 7 chapters done, each a navy check`);
 await expectLayout(page, 'menu open');
 await shot(page, 'menu-open.png');
 await tabTo(page, '.w-chapter[data-chapter="0"]');
@@ -1059,9 +1037,11 @@ await expectNewScreen(page, 'O1', 'Previous from O2');
 await page.evaluate(() => window.__l4.go('W1'));
 expect(await page.evaluate(() => document.querySelector('.w-guess[aria-checked="true"]')?.dataset.id) === 'b' && !(await nextState(page)).locked, 'W1 revisit: the kept guess (b) is shown, Next unlocked');
 await page.evaluate(() => window.__l4.go('S01'));
-await tabTo(page, '.w-dot[data-chapter="5"]', { back: true });
+await tabTo(page, '.w-bar-menu', { back: true });
 await press(page, 'Enter');
-await expectNewScreen(page, 'S18A', 'rail: Enter on the completed chapter 5 opens its first screen');
+await tabTo(page, '.w-chapter[data-chapter="5"]');
+await press(page, 'Enter');
+await expectNewScreen(page, 'S18A', 'menu: Enter on the completed chapter 5 opens its first screen');
 
 const ev = await events(page);
 const first = (id) => ev.filter((e) => e.kind === 'answer' && e.trackingId === id);
@@ -1136,28 +1116,28 @@ async function scormChecks(p, ids) {
   await r.close();
 }
 
-/* ---------- S01 wrong row by mouse: calm mark, no focus ring ---------- */
-// The one mouse check in this walk: a click must not leave the keyboard focus ring on the row.
-console.log('\nS01 wrong row (mouse click)');
+/* ---------- S01 wrong card by mouse: the frame's wrong card, no focus ring ---------- */
+// The one mouse check in this walk: a click must not leave the keyboard focus ring on the card.
+console.log('\nS01 wrong card (mouse click)');
 {
   const p = await open('?reset=1&screen=S01');
   await p.click('.w-opt[data-id="a"]');
-  await p.mouse.move(5, 700); // off the row: no hover state in the check or the screenshot
+  await p.mouse.move(5, 300); // off the card: no hover state in the check or the screenshot
   const r = await p.evaluate(() => {
     const row = document.querySelector('.w-opt[data-id="a"]');
     const cs = getComputedStyle(row);
     const mark = row.querySelector('.w-opt-mark');
     const ms = getComputedStyle(mark);
     return { focused: document.activeElement === row, visible: row.matches(':focus-visible'), outline: cs.outlineStyle, bg: cs.backgroundColor, color: cs.color,
-      label: getComputedStyle(row.querySelector('.w-opt-label')).color, shadow: cs.boxShadow, markBg: ms.backgroundColor, markColor: ms.color,
+      label: getComputedStyle(row.querySelector('.w-opt-label')).color, border: cs.borderTopWidth + ' ' + cs.borderTopColor, markBg: ms.backgroundColor, markColor: ms.color,
       x: mark.querySelector('svg')?.getAttribute('aria-label'), w: Math.round(mark.querySelector('svg')?.getBoundingClientRect().width || 0),
       others: [...document.querySelectorAll('.w-opt:not([data-id="a"])')].map((b) => b.dataset.result || '-').join() };
   });
-  expect(r.focused && !r.visible && r.outline === 'none', `S01 click: the row has focus but no focus ring (outline ${r.outline})`);
-  expect(r.bg === 'rgb(255, 255, 255)' && r.color === 'rgb(0, 0, 0)' && r.label === 'rgb(0, 0, 0)' && /rgb\(204, 0, 0\) 3px 0px 0px 0px inset/.test(r.shadow),
-    `S01 wrong row: black text on white, 3px #CC0000 line on the left edge (${r.shadow})`);
-  expect(r.markBg === 'rgba(0, 0, 0, 0)' && r.markColor === 'rgb(204, 0, 0)' && r.x === UI.feedback.wrongPrefix && r.w === 20 && r.others === '-,-',
-    `S01 wrong row: small red X on the right (${r.w}px, label "${r.x}"), the other rows plain`);
+  expect(r.focused && !r.visible && r.outline === 'none', `S01 click: the card has focus but no focus ring (outline ${r.outline})`);
+  expect(r.bg === 'rgb(255, 255, 255)' && r.color === 'rgb(17, 26, 32)' && r.label === 'rgb(17, 26, 32)' && /^3(\.2)?px rgb\(204, 0, 0\)$/.test(r.border) /* .25cqw; Chrome draws it on whole device pixels */,
+    `S01 wrong card: dark text on white, a 3.2px #CC0000 border (${r.border})`);
+  expect(r.markBg === 'rgb(204, 0, 0)' && r.markColor === 'rgb(255, 255, 255)' && r.x === UI.feedback.wrongPrefix && r.w === 17 && r.others === '-,-',
+    `S01 wrong card: the filled red marker with a white X (${r.w}px, label "${r.x}"), the other cards plain`);
   await expectBand(p, 'S01 wrong by mouse', { state: 'wrong', text: opt('S01', 'a').feedback, unlocked: false });
   await expectLayout(p, 'S01 wrong by mouse');
   await shot(p, 's01-wrong.png');
@@ -1169,13 +1149,13 @@ console.log('\nghost hand (motion)');
 {
   const p = await open('?reset=1&screen=S03', { motion: true });
   await p.waitForSelector('.w-ghost', { timeout: 3000 }).catch(() => {});
-  await wait(900); // after the first move: the ripple sits on the first target (the centre of the cards)
-  const spot = await ghostSpot(p, S.S03.ghost.target[0]);
+  await wait(900); // after the first move: the ripple sits on the target (the left gutter, level with the cards)
+  const spot = await ghostSpot(p, S.S03.ghost.target);
   const mid = { hand: !!spot, off: spot ? spot.off : -1, onOption: spot ? spot.onOption : true };
-  await p.mouse.click(700, 690); // a pointer press anywhere (the footer gap)
+  await p.mouse.click(700, 690); // a pointer press anywhere (between Previous and Next)
   const after = await p.evaluate(() => ({ hand: !!document.querySelector('.w-ghost'), pressed: document.querySelectorAll('.w-opt[aria-pressed="true"]').length, ev: window.__l4.tracking.events.length }));
   expect(mid.hand && mid.off >= 0 && mid.off <= 2 && !mid.onOption && !after.hand && !after.pressed && !after.ev,
-    `ghost hand mid-demo: on "${S.S03.ghost.target[0]}" (${mid.off}px off), on no card; a pointer press stops it at once, nothing selected or tracked`);
+    `ghost hand mid-demo: on "${S.S03.ghost.target}" (${mid.off}px off), on no card; a pointer press stops it at once, nothing selected or tracked`);
   // a seen type plays only after 8 s without input
   await p.evaluate(() => window.__l4.go('S03'));
   await wait(1500);
@@ -1270,7 +1250,7 @@ console.log('\nS21 first attempts wrong, S22 finish without download');
   for (const n of [5, 7]) { await tabTo(p, `.w-kc-tile[data-n="${n}"]`); await press(p, ' '); }
   await tabTo(p, '[data-action="check"]');
   await press(p, 'Enter');
-  await expectBand(p, 'S21 item 5 tiles 5 + 7', { state: 'wrong', verdict: UI.feedback.oneOfTwo, text: S.S21.items[4].tiles[6].feedback, unlocked: false });
+  await expectBand(p, 'S21 item 5 tiles 5 + 7', { state: 'partial', verdict: UI.feedback.oneOfTwo, text: S.S21.items[4].tiles[6].feedback, unlocked: false });
   await expectLayout(p, 'S21 item 5 one of two');
   await tabTo(p, '.w-kc-tile[data-n="6"]', { back: true });
   await press(p, ' ');
@@ -1308,47 +1288,7 @@ console.log('\nV1 player (keyboard)');
   await p.close();
 }
 
-/* ---------- artboard comparisons (shots only) ---------- */
-if (SHOTS) {
-  console.log('\nartboard comparisons');
-  // The artboards are design exports: their /_blob/ images and support.js runtime do not exist here.
-  // The board's own images (kept next to the artboards) are served in place of the blobs, the local
-  // fonts in place of Google Fonts; the markup renders as plain HTML without the runtime.
-  const BLOBS = { '8d2be42ae36f206cf42200cd5af8b242': 'planning/design-reference/ref-team-meeting.jpg',
-    dc048ae4ed0a8ee82f02cf1ceb1b9e21: 'planning/design-reference/ref-video-case-1.jpg', b16ce2f524cebca874501d9731444899: 'assets/logo/wawiwa-logo.png' };
-  async function artboard(file) {
-    const p = await browser.newPage();
-    await p.setViewport({ width: 1280, height: 720, deviceScaleFactor: 1 });
-    await p.setRequestInterception(true);
-    p.on('request', (req) => {
-      const u = new URL(req.url());
-      const blob = u.pathname.startsWith('/_blob/') && BLOBS[u.pathname.slice(7)];
-      if (blob) req.respond({ status: 200, contentType: blob.endsWith('.png') ? 'image/png' : 'image/jpeg', body: readFileSync(join(ROOT, blob)) });
-      else if (u.pathname.endsWith('/support.js')) req.respond({ status: 200, contentType: 'text/javascript', body: '' });
-      else if (u.host !== new URL(ORIGIN).host) req.abort();
-      else req.continue();
-    });
-    await p.goto(`${ORIGIN}/planning/design-reference/${file}`, { waitUntil: 'networkidle0' });
-    await p.addStyleTag({ url: ORIGIN + '/src/fonts.css' });
-    await p.evaluate(() => document.fonts.ready);
-    const png = await p.screenshot({ clip: { x: 0, y: 0, width: 1280, height: 720 } });
-    await p.close();
-    return png;
-  }
-  async function compare(name, file, built) {
-    const ref = await artboard(file);
-    const ours = readFileSync(join(OUT, built));
-    const p = await browser.newPage();
-    await p.setViewport({ width: 2600, height: 770, deviceScaleFactor: 1 });
-    const cell = (png, cap) => `<figure style="margin:0"><figcaption style="font:600 18px Arial;margin:0 0 8px">${cap}</figcaption><img style="display:block;width:1280px;height:720px;outline:1px solid #ccc" src="data:image/png;base64,${png.toString('base64')}"></figure>`;
-    await p.setContent(`<body style="margin:0;padding:12px 14px;display:flex;gap:16px;background:#fff">${cell(ref, 'Artboard: planning/design-reference/' + file)}${cell(ours, 'Module: review/p1.5/' + built)}</body>`, { waitUntil: 'load' });
-    await p.screenshot({ path: join(OUT, name), clip: { x: 0, y: 0, width: 2600, height: 770 } });
-    await p.close();
-    console.log('       shot ' + name);
-  }
-  await compare('compare-s01.png', 'R2A-decision-editorial.html', 's01-hint.png');
-  await compare('compare-s03.png', 'R2D-work-select-two.html', 's03-one-of-two.png');
-}
+// (the P1.5 artboard comparisons are retired: tools/compare-nl1.mjs sets the NL1 frames side by side)
 
 await browser.close();
 server.close();
