@@ -208,7 +208,7 @@ for (const [s, t, stop] of interactions) {
 // option letters in on-screen order; sort = "card.column" pairs; diagram = hotspot letters; tiles = numbers.
 function keyOf(s, t, stop) {
   const letters = (opts) => opts.map((o, i) => (o.correct ? String.fromCharCode(97 + i) : null)).filter(Boolean).join(',');
-  if (s.template === 'sort') return s.cards.map((c) => `${c.id ?? c.n}.${c.column}`).join(',');
+  if (s.template === 'sort' || s.template === 'sortDeck') return s.cards.map((c) => `${c.id ?? c.n}.${c.column}`).join(',');
   if (s.variant === 'diagram') return letters(s.hotspots);
   if (s.variant === 'tiles' || s.variant === 'pick') return s.tiles.filter((x) => x.correct).map((x) => String(x.n)).join(',');
   if (s.variant === 'pair') return letters(s.situations.find((x) => x.trackingId === t.id)?.options || []);

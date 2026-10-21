@@ -112,6 +112,8 @@ const G = {
   // feedback strip leads: a filled disc with a white mark (the bulb is "guess")
   'g-ok-disc': [24, 2.6, '<circle cx="12" cy="12" r="11" class="w-gd"/><path d="M6.5 12.5l3.5 3.5 7.5-7.5" class="w-gm"/>'],
   'g-no-disc': [24, 2.6, '<circle cx="12" cy="12" r="11" class="w-gd"/><path d="M8 8l8 8M16 8l-8 8" class="w-gm"/>'],
+  // the drag grip of a sort card (six dots, 10 x 16)
+  'g-grip': [[10, 16], 0, '<g fill="currentColor" stroke="none"><circle cx="2" cy="2" r="1.4"/><circle cx="8" cy="2" r="1.4"/><circle cx="2" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="2" cy="14" r="1.4"/><circle cx="8" cy="14" r="1.4"/></g>'],
   // the quote mark (filled, 40 x 30)
   'g-quote': [[40, 30], 0, '<path d="M0 30V17C0 7 6 1 16 0v6c-5 1-8 5-8 10h8v14zm22 0V17c0-10 6-16 16-17v6c-5 1-8 5-8 10h8v14z" class="w-gq"/>'],
 };

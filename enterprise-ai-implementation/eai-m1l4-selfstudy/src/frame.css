@@ -611,6 +611,49 @@ a.w-btn { text-decoration: none; }
 .w-pick-text { font: 400 18.56px/1.45 var(--wl-font-ui); color: var(--wl-ink); }
 .w-figure { font-weight: 800; color: var(--wl-ink); }
 
+/* ---------- NL2: practice on the Focus wash without a panel (S04, S05b, S07) ---------- */
+/* the task head: the instruction left, Show me right, 4cqw from the edges (centred on a wide stage) */
+.w-task-head { position: absolute; left: max(51.2px, calc((100% - 1177.6px) / 2)); right: max(51.2px, calc((100% - 1177.6px) / 2)); top: 30.72px;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 20.48px; }
+.w-task-head .w-instruction { margin: 0; font: 800 33.28px/normal var(--wl-font-ui); letter-spacing: -.64px; color: var(--wl-ink); }
+.w-task-sub { margin-top: 7.68px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+/* the off-panel feedback strip: the strip component, all corners rounded, the head inline, a card shadow */
+.w-float { position: absolute; z-index: 2; }
+.w-float .w-band { margin: 0; }
+.w-float .w-strip { margin-top: 0; padding: 12.8px 23.04px; gap: 12.8px; align-items: center; border-top-width: 3.84px; border-radius: 15.36px; box-shadow: var(--wl-card-shadow); }
+.w-float .w-strip-icon svg { width: 28.16px; height: 28.16px; }
+.w-float .w-band-live { font: 400 18.56px/1.4 var(--wl-font-ui); color: var(--wl-fb-text); }
+.w-float .w-band-verdict { display: inline; font: 800 20.48px/normal var(--wl-font-ui); }
+.w-float .w-band-text { display: inline; margin: 0; font: inherit; color: inherit; }
+.w-float-deck { left: 50%; width: min(819.2px, calc(100% - 102.4px)); transform: translateX(-50%); top: 232.96px; }
+
+/* the sort deck (S04): one card at a time, two offset cards behind it, the counter under it */
+.w-sdeck { position: absolute; left: 50%; top: 102.4px; width: 435.2px; transform: translateX(-50%); }
+.w-deck-stack { position: relative; }
+.w-deck-stack[data-done="true"] { visibility: hidden; }
+.w-deck-under { position: absolute; inset: 0; border: 1px solid var(--wl-line); border-radius: 15.36px; background: var(--wl-white); }
+.w-deck-under-2 { transform: translate(11.52px, 11.52px); }
+.w-deck-under-1 { transform: translate(5.76px, 5.76px); }
+.w-deck-card { position: relative; width: 100%; margin: 0; display: flex; align-items: center; gap: 15.36px; padding: 23.04px 25.6px; border: 2.56px solid var(--wl-navy);
+  border-radius: 15.36px; background: var(--wl-white); box-shadow: var(--wl-card-shadow); text-align: left; cursor: grab; touch-action: none; }
+.w-deck-card[aria-pressed="true"] { box-shadow: var(--wl-card-shadow), 0 0 0 3.84px var(--wl-press-ring); }
+.w-dragging { z-index: 20; cursor: grabbing; box-shadow: 0 25.6px 51.2px rgba(15, 42, 61, .22); }
+.w-grip { color: var(--wl-neutral-line); }
+.w-deck-text { font: 800 28.16px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-deck-count { margin-top: 20.48px; text-align: center; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+/* drop columns: dashed, title and subtitle, fixed from the top (they grow down with the placed cards) */
+.w-drops { position: absolute; left: max(51.2px, calc((100% - 1177.6px) / 2)); right: max(51.2px, calc((100% - 1177.6px) / 2)); top: 314.88px;
+  display: grid; gap: 20.48px; align-items: start; }
+.w-drop { min-height: 166.4px; padding: 17.92px 23.04px; border: 2.56px dashed var(--wl-dash); border-radius: 15.36px; background: var(--wl-drop-bg); }
+.w-drop[data-armed="true"] { cursor: pointer; }
+.w-drop[data-over="true"], .w-drop[data-chosen="true"] { border-style: solid; border-color: var(--wl-navy); background: var(--wl-keypill-bg); }
+.w-drop-title { display: block; font: 800 28.16px/normal var(--wl-font-ui); color: var(--wl-ink); }
+.w-drop-sub { display: block; margin-top: 3.84px; font: 400 17.28px/normal var(--wl-font-label); color: var(--wl-muted); }
+.w-drop-cards { list-style: none; margin: 0; padding: 0; }
+.w-placed { margin-top: 12.8px; display: flex; align-items: center; gap: 10.24px; padding: 7.68px 12.8px; border: 2.56px solid var(--wl-teal); border-radius: 10.24px; background: var(--wl-white);
+  font: 600 16px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-placed-disc { flex: none; width: 25.6px; height: 25.6px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-teal); color: var(--wl-white); }
+
 /* ---------- side menu (frame "O2 Side menu open") ---------- */
 .w-menu-overlay { position: absolute; inset: 0; z-index: 30; }
 .w-menu-scrim { position: absolute; inset: 0; background: var(--wl-scrim); }

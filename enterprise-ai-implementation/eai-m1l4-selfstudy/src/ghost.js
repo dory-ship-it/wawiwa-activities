@@ -4,7 +4,8 @@
 // restore() callback puts it back). aria-hidden; the written instruction always stays.
 //   createGhost(stage, { ui, steps, restore, seen, onPlay }) -> { button, play, cancel }
 //     steps()   -> [{ el, tap? } | { point }] the targets in order, read when the demo starts
-//                  (point() -> { x, y } in window px, for a spot that is not an element)
+//                  (point() -> { x, y } in window px, for a spot that is not an element); a step's
+//                  carry (an element) is grabbed there and moves with the hand to the later steps
 //   targetSteps(scope, target) -> the steps for the target the content names (screen.ghost.target,
 //     one name or a list), so the hand never points at an answer:
 //       "options-gap"     the gap between the first two options (on no option; stacked: its right end)
@@ -166,19 +167,27 @@ function run(stage, list, restore) {
     let from = targets[0].from === 'above' ? { x: first.x, y: first.y - 150 } : { x: first.x + 70, y: first.y + 80 };
     hand.style.transform = place(from);
     await anim(hand, [{ opacity: 0, transform: place(from) }, { opacity: 1, transform: place(from) }], { duration: IN });
+    // a step with carry (an element) grabs it there: it moves with the hand to the next steps, and slides
+    // back home as the hand leaves (the sort deck: the card dragged down, stopping above the columns)
+    let carried = null;
+    const shift = (p) => `translate(${p.x - carried.origin.x}px, ${p.y - carried.origin.y}px)`;
     for (const step of targets) {
       if (done) return;
       const to = at(step);
-      await anim(hand, [{ opacity: 1, transform: place(from) }, { opacity: 1, transform: place(to) }], { duration: MOVE, easing: 'cubic-bezier(.3,.7,.3,1)' });
+      const easing = 'cubic-bezier(.3,.7,.3,1)';
+      if (carried) anim(carried.el, [{ transform: shift(from) }, { transform: shift(to) }], { duration: MOVE, easing });
+      await anim(hand, [{ opacity: 1, transform: place(from) }, { opacity: 1, transform: place(to) }], { duration: MOVE, easing });
       if (done) return;
       anim(ripple, [{ opacity: 0.55, transform: 'scale(.4)' }, { opacity: 0, transform: 'scale(1.6)' }], { duration: 420, easing: 'ease-out' });
       await anim(hand, [{ transform: place(to) + ' scale(1)' }, { transform: place(to) + ' scale(.88)' }, { transform: place(to) + ' scale(1)' }], { duration: TAP });
       if (done) return;
       if (step.tap) step.tap();
+      if (step.carry) carried = { el: step.carry, origin: to };
       await wait(step.hold ?? HOLD);
       from = to;
     }
     if (done) return;
+    if (carried) anim(carried.el, [{ transform: shift(from) }, { transform: 'none' }], { duration: OUT + 100 });
     await anim(hand, [{ opacity: 1, transform: place(from) }, { opacity: 0, transform: place(from) }], { duration: OUT });
     stop();
   })();

@@ -51,6 +51,8 @@ export function screenViews(s, content) {
   if (s.template === 'warmup') return [[s.id, [s.panel.title, s.panel.chip, s.panel.text, s.panel.foot, ...s.options.map((o) => o.label)]]];
   if (s.template === 'concept') return [[s.id, [s.label, s.topic, s.text, ...s.figures.flatMap((f) => [f.chip, f.caption]), s.evidence.text, s.evidence.source]]];
   // NL2 templates
+  // sort deck: every placed card stays on screen in its column, with the current card on the deck
+  if (s.template === 'sortDeck') return [[s.id, [...s.columns.flatMap((c) => [c.label, c.sub]), ...s.cards.map((c) => c.text)]]];
   if (s.template === 'keyParts') {
     const base = [s.label, s.text, ...s.parts.flatMap((p) => [p.title, p.text])];
     return [[s.id, base], [`${s.id} case on`, [...base, ...s.parts.flatMap((p) => [s.caseLabel, p.case])]]];
