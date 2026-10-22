@@ -127,22 +127,28 @@ export const sortDeck = {
     // name, "Case 1", with the case's text for screen readers (R2's S17 markers did the same).
     // state: 'pending' (placed, not checked yet: no mark), 'right' (teal border, check), 'shown' (moved
     // there after the last attempt: the check, and a button that shows its explanation)
+    // While the learner sorts (any number of cards may land in one column) a placed card is a small
+    // token, "Card 2" (S17's "Case n" markers), with its text for screen readers; when the screen is done
+    // every card shows in full in its right column (the frames' placed card).
     const chips = {};
-    function chip(c, state) {
+    function chip(c, state, full) {
       const k = cards.indexOf(c) + 1;
-      const label = screen.placedLabel ? [h('span', { 'aria-hidden': 'true' }, fmt(ui.progress[screen.placedLabel], { i: k })), h('span', { class: 'w-sr-only' }, c.text)] : h('span', {}, c.text);
+      const short = screen.placedLabel || (!full && 'cardChip');
+      const label = short ? [h('span', { 'aria-hidden': 'true' }, fmt(ui.progress[short], { i: k })), h('span', { class: 'w-sr-only' }, c.text)] : h('span', {}, c.text);
       const disc = state === 'pending' ? null : h('span', { class: 'w-placed-disc', 'aria-hidden': 'true' }, glyph('g-check-b', { size: 15.36 }));
       const body = state === 'shown'
         ? h('button', { class: 'w-placed-explain', type: 'button', dataset: { action: 'explain' }, onclick: () => zones.setFeedback({ state: 'neutral', verdict: ui.feedback.revealedPlaces, text: c.feedback.correct }) }, disc, label)
         : [disc, label];
-      return h('li', { class: 'w-placed', dataset: { state, card: keyOf(c) } }, body);
+      return h('li', { class: 'w-placed' + (short && !screen.placedLabel ? ' w-placed-token' : ''), dataset: { state, card: keyOf(c) } }, body);
     }
-    function put(c, colId, state) {
+    function put(c, colId, state, full = false) {
       const key = keyOf(c);
       chips[key]?.remove();
-      chips[key] = chip(c, state);
+      chips[key] = chip(c, state, full);
       cols.find((x) => x.id === colId).placed.append(chips[key]);
     }
+    // done: every card in full, in card order within its column
+    const showAll = () => cards.forEach((c) => put(c, c.column, chips[keyOf(c)]?.dataset.state === 'shown' ? 'shown' : 'right', true));
 
     function show() {
       const left = queue.length - qi; // this card and the ones still to come
@@ -199,6 +205,7 @@ export const sortDeck = {
       card.focus({ preventScroll: true });
     }
     function finish(focus) {
+      showAll();
       done = true;
       stack.dataset.done = 'true';
       card.inert = true; // nothing left to drop (the columns stay reachable: a shown card explains itself)
@@ -210,7 +217,7 @@ export const sortDeck = {
 
     show();
     if (ctx.revisit) {
-      cards.forEach((c) => put(c, c.column, 'right'));
+      cards.forEach((c) => put(c, c.column, 'right', true));
       zones.setFeedback({ state: 'correct', text: ui.feedback.allPlaced });
       finish(false);
     }

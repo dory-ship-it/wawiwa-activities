@@ -81,7 +81,8 @@ export const video = {
 
     /* ---- stop view ---- */
     const stopQ = h('h2', { class: 'w-stop-q', id: nextId('w-stop-q'), tabindex: '-1' });
-    const stopCard = h('section', { class: 'w-glass w-glass-top w-stop-card' }, glassKicker('watch', '', ''), stopQ); // the kicker is set per stop
+    const stopTools = h('div', { class: 'w-card-tools' });
+    const stopCard = h('section', { class: 'w-glass w-glass-top w-stop-card' }, glassKicker('watch', '', ''), stopQ, stopTools); // the kicker is set per stop
     const stopOpts = h('div', { class: 'w-options w-ans-list w-ans-cols-1', role: 'group', 'aria-labelledby': stopQ.id, dataset: { interaction: '' } });
     arrowNav(stopOpts);
     const resume = h('button', { class: 'w-btn w-btn-action w-resume', type: 'button', dataset: { action: 'resume' } },
@@ -213,7 +214,9 @@ export const video = {
         resume.focus();
       }));
       stopPanel.append(zones.band);
-      zones.setTool(resume);
+      // FX1 C2: Resume (and "Show me how") on the glass card, so the panel (answers + strip) stays above
+      // the player bar
+      stopTools.replaceChildren(resume);
       zones.setHintVisible(false); // the frame shows no hint line at a stop: the note stays for screen readers
       zones.setFeedback({ state: 'hint', text: ui.videoResumeNote });
       setResume(true);
@@ -225,14 +228,14 @@ export const video = {
       if (screen.ghost) {
         // FX1 B1: the sweep over the answers with "Pick one" (the content's target), "Show me how" on the card
         ghost = ctx.ghost({ type: screen.ghost.type, chip: ui.ghost.pickOne, steps: () => targetSteps(stopView, screen.ghost.target) });
-        if (screen.ghost.showMe) stopCard.append(ghost.button);
+        if (screen.ghost.showMe) stopTools.prepend(ghost.button);
       }
     }
     resume.addEventListener('click', () => {
       if (!atStop || resume.dataset.locked === 'true') return;
       atStop = null;
       if (ghost) { ghost.cancel(); ghost.button.remove(); ghost = null; }
-      zones.setTool();
+      stopTools.replaceChildren();
       stopView.hidden = true;
       playView.hidden = false;
       controls.inert = false;

@@ -48,12 +48,14 @@ export const SHOTS = [
   ['S05b', 'show-me-how', async (p) => ghost(p, 1300)],
   ['S06', 'situation-1', async () => {}],
   ['S07', 'tiles', async () => {}],
+  ['S07', 'question-wrong', async (p) => { for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); await click(p, '.w-tile[data-n="7"]'); }],
+  ['S11', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['S01', 'revealed', async (p) => { await click(p, '.w-opt[data-id="a"]'); await click(p, '.w-opt[data-id="c"]'); }],
   ['S08', 'round-1', async () => {}],
   ['S08', 'round-1-right', async (p) => click(p, '.w-opt[data-id="b"]')],
-  ['S10', 'attempt-2', async () => {}],
-  ['S12', 'start', async () => {}],
+  ['S10', 'attempt-2', async (p) => click(p, '.w-opt[data-id="d"]')],
+  ['S12', 'checked', async (p) => { await flag(p, 'r1', '3'); await flag(p, 'r2', '7'); await click(p, '[data-action="check"]'); }],
   ['S14', 'stage', async () => {}],
-  ['S16', 'start', async () => {}],
   ['S17B', 'start', async (p) => { await SKETCH(p); await p.evaluate(() => window.__l4.go('S17B')); }],
 ];
 

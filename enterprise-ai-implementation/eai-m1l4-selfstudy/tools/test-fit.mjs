@@ -17,7 +17,9 @@ import { chromePath, measureLayout, layoutVerdict } from './lib.mjs';
 
 // every screen state at these sizes; 1366x650 to 2560x1080: browser windows with their bars, stage
 // widened (2560x1080 caps the stage at 1600 and letterboxes the rest)
-const SIZES = [[1280, 720], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 1080]];
+// FX1: --sizes=1280x720,1600x900 measures only these sizes (the fast run); the full six are for packaging
+const SIZE_ARG = process.argv.find((a) => a.startsWith('--sizes='));
+const SIZES = SIZE_ARG ? SIZE_ARG.slice(8).split(',').map((s) => s.split('x').map(Number)) : [[1280, 720], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 1080]];
 const ONLY = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const fails = [];
 const ok = (m) => console.log('  ok   ' + m);
@@ -67,7 +69,7 @@ async function measure(page, what) {
 
 /* ---- 1. load, scale, shell ---- */
 console.log('\n1. load and fit');
-for (const size of ONLY.length ? [] : [[1280, 720], [1920, 1080], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 900], [2560, 1080]]) {
+for (const size of ONLY.length ? [] : SIZE_ARG ? SIZES : [[1280, 720], [1920, 1080], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 900], [2560, 1080]]) {
   const page = await open('?reset=1&screen=S01', size); // the shell (O1, the title, has no footer by design)
   const r = await page.evaluate(() => {
     const stage = document.querySelector('.w-stage');
@@ -108,12 +110,12 @@ const STATES = [
   ['O2', 'L4 open', async (p) => p.keyboard.press('Shift')], // any key stops the ghost hand
   ['O2', 'L1 open', async (p) => click(p, '.w-map-tab[data-station="l1"]')],
   ['O3', 'goals', async () => {}],
-  ['O3', 'goal tip', async (p) => p.focus('.w-goal[data-goal="g5"]')],
+  ['O3', 'goal 5 open', async (p) => click(p, '.w-goal[data-goal="g5"]')],
   ['W1', 'hint', async () => {}],
   ['W1', 'guess', async (p) => click(p, '.w-guess[data-id="b"]')],
   ['K1', 'key idea', async () => {}],
   ['S02', 'hint', async () => {}],
-  ['S02', 'notice', async (p) => click(p, '[data-action="save"]')],
+  ['S02', 'one field, Save locked', async (p) => p.type('.w-input[data-store="L4_CASE_TITLE"]', 'Sales call summaries')],
   ['S02', 'saved', async (p) => {
     await p.type('.w-input[data-store="L4_CASE_TITLE"]', 'Sales call summaries');
     await p.type('.w-input[data-store="L4_CASE_PROBLEM"]', 'Today reps write call summaries by hand, and it hurts because notes reach the CRM a day late and nobody can find them again.');
@@ -136,12 +138,17 @@ const STATES = [
   ['K2', 'HR case on', async (p) => click(p, '[data-action="caseToggle"]')],
   ['S04', 'start', async (p) => p.keyboard.press('Shift')], // any key stops the ghost hand
   ['S04', 'card picked up', async (p) => { await p.keyboard.press('Shift'); await click(p, '[data-action="card"]'); }],
-  ['S04', 'wrong', async (p) => { await p.keyboard.press('Shift'); await click(p, '[data-action="card"]'); await click(p, '.w-drop[data-column="c"]'); }],
-  ['S04', 'done', async (p) => { await p.keyboard.press('Shift'); for (const col of ['a', 'b', 'a', 'b', 'c']) { await click(p, '[data-action="card"]'); await click(p, `.w-drop[data-column="${col}"]`); } }],
+  // FX1 E2: place everything, then Check
+  ['S04', 'one placed', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['c']); }],
+  ['S04', 'all placed', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'c', 'a', 'b', 'a']); }],
+  ['S04', 'checked, two back', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'c', 'a', 'b', 'a']); await click(p, '[data-action="check"]'); }],
+  ['S04', 'shown after attempt 2', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'c', 'a', 'b', 'a']); await click(p, '[data-action="check"]'); await deck(p, ['a', 'b']); await click(p, '[data-action="check"]'); }],
+  ['S04', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'b', 'a', 'b', 'c']); await click(p, '[data-action="check"]'); }],
   ['S05a', 'key idea', async () => {}],
   ['S05b', 'start', async (p) => p.keyboard.press('Shift')],
-  ['S05b', 'wrong', async (p) => { await p.keyboard.press('Shift'); await click(p, '.w-label-card[data-label="event"]'); await click(p, '.w-target[data-target="a"]'); }],
-  ['S05b', 'done', async (p) => { await p.keyboard.press('Shift'); for (const [l, t] of [['swimlane', 'a'], ['gateway', 'b'], ['event', 'c']]) { await click(p, `.w-label-card[data-label="${l}"]`); await click(p, `.w-target[data-target="${t}"]`); } }],
+  ['S05b', 'checked, wrong', async (p) => { await p.keyboard.press('Shift'); await labels(p, [['event', 'a'], ['swimlane', 'b'], ['gateway', 'c']]); await click(p, '[data-action="check"]'); }],
+  ['S05b', 'shown after attempt 2', async (p) => { await p.keyboard.press('Shift'); await labels(p, [['event', 'a'], ['swimlane', 'b'], ['gateway', 'c']]); await click(p, '[data-action="check"]'); await labels(p, [['event', 'b'], ['swimlane', 'c'], ['gateway', 'a']]); await click(p, '[data-action="check"]'); }],
+  ['S05b', 'done', async (p) => { await p.keyboard.press('Shift'); await labels(p, [['swimlane', 'a'], ['gateway', 'b'], ['event', 'c']]); await click(p, '[data-action="check"]'); }],
   ['S06', 'hint', async () => {}],
   ['S06', 'situation 1 wrong', async (p) => click(p, '.w-opt[data-id="b"]')],
   ['S06', 'situation 1 right', async (p) => click(p, '.w-opt[data-id="a"]')],
@@ -178,18 +185,19 @@ const STATES = [
     await playUntil(p, () => document.querySelector('.w-next').dataset.locked === 'false', 'video end');
   }],
   ['S09', 'start', async (p) => p.keyboard.press('Shift')],
-  ['S09', 'wrong', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b']); }],
-  ['S09', 'longest line', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'a', 'b', 'c']); }], // card 4's right line, the longest
-  ['S09', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'a', 'b', 'c', 'd', 'd']); }],
+  ['S09', 'checked, wrong back', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b', 'a', 'b', 'c', 'd', 'a']); await click(p, '[data-action="check"]'); }],
+  ['S09', 'shown after attempt 2', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b', 'a', 'b', 'c', 'd', 'a']); await click(p, '[data-action="check"]'); await deck(p, ['c', 'b']); await click(p, '[data-action="check"]'); }],
+  ['S09', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'a', 'b', 'c', 'd', 'd']); await click(p, '[data-action="check"]'); }],
   ['S10', 'wrong', async (p) => click(p, '.w-opt[data-id="d"]')],
   ['S10', 'right', async (p) => click(p, '.w-opt[data-id="c"]')],
   ['S11', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
   ['S11', 'right', async (p) => click(p, '.w-opt[data-id="d"]')],
   ['S12', 'start', async () => {}],
   ['S12', 'flag picked up', async (p) => click(p, '.w-flag-card[data-flag="r1"]')],
-  ['S12', 'wrong (field 3)', async (p) => flag(p, 'r1', '3')],
-  ['S12', 'one placed', async (p) => flag(p, 'r1', '4')],
-  ['S12', 'both placed', async (p) => { await flag(p, 'r1', '4'); await flag(p, 'r2', '7'); }],
+  ['S12', 'one placed', async (p) => flag(p, 'r1', '3')],
+  ['S12', 'checked, one back', async (p) => { await flag(p, 'r1', '3'); await flag(p, 'r2', '7'); await click(p, '[data-action="check"]'); }],
+  ['S12', 'shown after attempt 2', async (p) => { await flag(p, 'r1', '3'); await flag(p, 'r2', '7'); await click(p, '[data-action="check"]'); await flag(p, 'r1', '2'); await click(p, '[data-action="check"]'); }],
+  ['S12', 'both right', async (p) => { await flag(p, 'r1', '4'); await flag(p, 'r2', '7'); await click(p, '[data-action="check"]'); }],
   ['S12B', 'hint', async () => {}],
   ['S12B', 'empty save', async (p) => click(p, '[data-action="save"]')],
   ['S12B', 'saved, full', async (p) => {
@@ -201,10 +209,10 @@ const STATES = [
   ['W4', 'hint', async () => {}],
   ['W4', 'guess', async (p) => click(p, '.w-guess[data-id="a"]')],
   ['S13', 'start', async () => {}],
-  ['S13', 'start on 2', async (p) => flag(p, 'start', '2')],
-  ['S13', 'end on 4', async (p) => flag(p, 'end', '4')],
-  ['S13', 'start placed', async (p) => flag(p, 'start', '1')],
-  ['S13', 'both placed', async (p) => { await flag(p, 'start', '1'); await flag(p, 'end', '5'); }],
+  ['S13', 'start placed', async (p) => flag(p, 'start', '2')],
+  ['S13', 'checked, both back', async (p) => { await flag(p, 'start', '2'); await flag(p, 'end', '4'); await click(p, '[data-action="check"]'); }],
+  ['S13', 'shown after attempt 2', async (p) => { await flag(p, 'start', '2'); await flag(p, 'end', '4'); await click(p, '[data-action="check"]'); await flag(p, 'start', '3'); await flag(p, 'end', '1'); await click(p, '[data-action="check"]'); }],
+  ['S13', 'both right', async (p) => { await flag(p, 'start', '1'); await flag(p, 'end', '5'); await click(p, '[data-action="check"]'); }],
   ['S14', 'hint', async () => {}],
   ['S14', 'wrong', async (p) => click(p, '.w-opt[data-id="d"]')],
   ['S14', 'right', async (p) => click(p, '.w-opt[data-id="b"]')],
@@ -215,13 +223,14 @@ const STATES = [
   ['K4', 'key idea', async () => {}],
   ['S16', 'start', async (p) => p.keyboard.press('Shift')],
   ['S16', 'card picked up', async (p) => { await p.keyboard.press('Shift'); await click(p, '[data-action="card"]'); }],
-  ['S16', 'wrong', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b']); }],
-  ['S16', 'longest line', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'd']); }], // card 2's right line, the longest
-  ['S16', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'd', 'b', 'd', 'd', 'c']); }],
+  ['S16', 'checked, wrong back', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b', 'd', 'b', 'd', 'd', 'c']); await click(p, '[data-action="check"]'); }],
+  ['S16', 'shown after attempt 2', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b', 'c', 'b', 'd', 'd', 'c']); await click(p, '[data-action="check"]'); await deck(p, ['c', 'b']); await click(p, '[data-action="check"]'); }],
+  ['S16', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'd', 'b', 'd', 'd', 'c']); await click(p, '[data-action="check"]'); }],
   ['S17', 'start', async (p) => p.keyboard.press('Shift')],
-  ['S17', 'wrong', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['5']); }],
   ['S17', 'longest case', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['3', '1', '5', '4']); }], // case e on the deck
-  ['S17', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['3', '1', '5', '4', '2']); }],
+  ['S17', 'checked, wrong back', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['5', '1', '3', '4', '2']); await click(p, '[data-action="check"]'); }],
+  ['S17', 'shown after attempt 2', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['5', '1', '3', '4', '2']); await click(p, '[data-action="check"]'); await deck(p, ['1', '5']); await click(p, '[data-action="check"]'); }],
+  ['S17', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['3', '1', '5', '4', '2']); await click(p, '[data-action="check"]'); }],
   ['S17B', 'hint', async () => {}],
   ['S17B', 'empty save', async (p) => click(p, '[data-action="save"]')],
   ['S17B', 'saved, full, long steps', async (p) => {
@@ -280,6 +289,8 @@ const STATES = [
 ];
 // the flags (S12, S13): click a flag, then its target
 async function flag(p, f, t) { await click(p, `.w-flag-card[data-flag="${f}"]`); await click(p, `.w-target[data-target="${t}"]`); }
+// S05b: click a label, then its place, per pair
+async function labels(p, pairs) { for (const [l, t] of pairs) { await click(p, `.w-label-card[data-label="${l}"]`); await click(p, `.w-target[data-target="${t}"]`); } }
 // the sort deck: click the card, then a column, once per column given
 async function deck(p, cols) { for (const col of cols) { await click(p, '[data-action="card"]'); await click(p, `.w-drop[data-column="${col}"]`); } }
 // links that open a new tab: keep the test inside the module (the tab itself is checked in walk.mjs)

@@ -60,8 +60,14 @@ function tiles(ctx) {
   // the ghost hand taps a tile that is not the answer (the first one), it opens for a moment, then closes
   const demo = list.find((x) => !x.t.correct);
   let demoWas = null;
-  const g = !ctx.revisit ? ctx.ghost({ type: screen.ghost?.type || 'open',
-    steps: () => (phase !== 'explore' || !demo ? [] : [{ el: demo.btn, tap: () => { demoWas = list.find((x) => x.btn.dataset.open === 'true') || null; list.forEach((y) => flip(y, y === demo)); }, hold: 1100 }]),
+  // with the question on, the demo is the choice screens' sweep over the tiles with "Pick one" (it taps nothing)
+  const sweep = () => {
+    const r = grid.getBoundingClientRect(), k = zones.main.getBoundingClientRect().height / zones.main.offsetHeight || 1;
+    return [{ point: () => ({ x: r.left + r.width / 2, y: r.top - 14 * k }), from: 'above', sweep: true, hold: 60 },
+      { point: () => ({ x: r.left + r.width / 2, y: r.bottom + 12 * k }), sweep: true, slow: true, hold: 1100 }];
+  };
+  const g = !ctx.revisit ? ctx.ghost({ type: screen.ghost?.type || 'open', chip: () => (phase === 'answer' ? ui.ghost.pickOne : null),
+    steps: () => (phase === 'answer' ? sweep() : !demo ? [] : [{ el: demo.btn, tap: () => { demoWas = list.find((x) => x.btn.dataset.open === 'true') || null; list.forEach((y) => flip(y, y === demo)); }, hold: 1100 }]),
     restore: () => { if (phase !== 'explore') return; list.forEach((y) => flip(y, y === demoWas)); demoWas = null; } }) : null;
 
   layout(ctx, 'tiles', h('div', { class: 'w-task-head' }, h('div', {}, zones.instruction, sub), h('span', { class: 'w-head-tools' }, g ? g.button : null)),
@@ -76,6 +82,8 @@ function tiles(ctx) {
     zones.instruction.textContent = screen.question;
     sub.textContent = screen.questionHint;
     list.forEach((x) => { x.btn.removeAttribute('aria-expanded'); paintDisc(x); });
+    // "Show me how" moves to the row above the strip (the question takes the heading's full width)
+    if (g) zones.setTool(g.button);
     zones.setFeedback({ state: 'hint', text: screen.questionHint });
     if (max) zones.setAttempts(1, max);
   };

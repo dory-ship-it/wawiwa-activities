@@ -150,7 +150,8 @@ async function typeInto(el, text, stopped) {
 }
 
 // One run of the demo. Returns { stop }.
-function run(stage, list, restore, chip) {
+function run(stage, list, restore, chipOf) {
+  const chip = typeof chipOf === 'function' ? chipOf() : chipOf; // (a function: the chip of the moment, S07)
   const targets = list.filter((s) => (s.el && s.el.isConnected) || (s.point && s.point()));
   const ripple = h('span', { class: 'w-ghost-ripple' });
   const hand = h('div', { class: 'w-ghost', 'aria-hidden': 'true' }, ripple, glyph('g-hand', { size: HAND, className: 'w-ghost-hand' }),

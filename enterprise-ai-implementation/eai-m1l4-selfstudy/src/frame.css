@@ -145,6 +145,13 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-sheet-focus .w-head-q { margin: 15.36px 0 20.48px; }
 .w-sheet > .w-head-q:first-child { margin-top: 0; }
 .w-round-top { display: flex; align-items: center; justify-content: space-between; gap: 12.8px; }
+.w-sheet .w-head-metric { align-items: center; margin: 12.8px 0 5.12px; } /* S11: NL3's row, one line with the chip and "Show me how" */
+/* FX1: "Show me how" and the attempt marker on the card over the photo (S01's glass, S14 / S15's case card) */
+.w-card-tools { display: flex; align-items: center; gap: 17.92px; margin-top: 17.92px; }
+.w-card-tools .w-attempts { margin: 0; }
+.w-glass .w-card-tools .w-attempts { color: var(--wl-on-glass); }
+.w-glass .w-attempt-discs i { border-color: var(--wl-white); background: transparent; }
+.w-glass .w-attempt-discs i[data-used="true"] { background: var(--wl-white); }
 .w-subline { margin: 0 0 20.48px; font: 400 19.2px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
 .w-label { margin: 0 0 6.4px; font: 600 14.72px/normal var(--wl-font-label); letter-spacing: .04em; color: var(--wl-teal-ink); }
 
@@ -185,6 +192,9 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-ans[data-result="correct"] .w-opt-mark { border-color: var(--wl-teal); background: var(--wl-teal); }
 .w-ans[data-result="wrong"] { border: 3.2px solid var(--wl-error); }
 .w-ans[data-result="wrong"] .w-opt-mark { border-color: var(--wl-error); background: var(--wl-error); }
+/* FX1 B2: on S01 two cards can carry the thick border (the right one shown, the last wrong one): the
+   padding gives back the border's 2.2px, so the panel keeps its height (41cqw) */
+.w-sheet-46 .w-ans[data-result="correct"], .w-sheet-46 .w-ans[data-result="wrong"] { padding: 10.6px 17px; }
 /* glossary terms: a dotted underline (#55626C, offset .35cqw) */
 .w-term-static, .w-term { text-decoration: underline dotted var(--wl-muted); text-underline-offset: 4.48px; }
 .w-term { cursor: help; border-radius: 2px; }
@@ -470,8 +480,12 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-sit-head { display: flex; align-items: center; justify-content: space-between; gap: 12.8px; min-height: 22px; }
 .w-sit-head .w-attempts { margin-left: auto; }
 .w-sit-top { display: flex; align-items: center; gap: 17.92px; }
-.w-sit-still { flex: none; width: 104.96px; height: 59.04px; border-radius: var(--wl-radius-card); object-fit: cover; }
-.w-sit-fork { display: block; width: 100%; height: 28.16px; margin: 0 0 -6.4px; fill: none; stroke: var(--wl-teal-ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+/* (the panel stays within 41cqw: the still is two text lines high, the fork short, the card's gaps 7.68) */
+.w-situation-now:has(.w-sit-fork) { gap: 7.68px; }
+.w-sheet-sit .w-hintline { margin: 6.4px 0 12.8px; }
+.w-ans-two .w-mini { height: 44.8px; }
+.w-sit-still { flex: none; width: 74.24px; height: 41.76px; border-radius: 7.68px; object-fit: cover; }
+.w-sit-fork { display: block; width: 100%; height: 14.08px; margin: 0 0 -6.4px; fill: none; stroke: var(--wl-teal-ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .w-sit-fork path { vector-effect: non-scaling-stroke; }
 .w-mini { flex: none; position: relative; width: 76.8px; height: 51.2px; padding: 5.12px 6.4px; border: 1px solid var(--wl-line); border-radius: 6.4px; background: var(--wl-stone); }
 .w-mini-table { display: grid; grid-template-rows: repeat(8, 1fr); gap: 2.56px; }
@@ -687,7 +701,10 @@ a.w-btn { text-decoration: none; }
 .w-tile-disc:has(svg) { border: 0; background: var(--wl-navy); color: var(--wl-white); }
 .w-tile-icon { color: var(--wl-navy); }
 /* FX1 E5: the icon in a soft round tile, no number; the done check a small badge in the corner; the flip */
-.w-tile { position: relative; }
+.w-tile { position: relative; padding-top: 14.08px; padding-bottom: 14.08px; gap: 8.96px; } /* the round icon tile is taller than the number disc */
+/* FX1: the row above the strip (the attempt marker, "Show me how") sits under an open tile of the second row;
+   the float is centred, clear of Previous and Next */
+.w-main[data-layout="tiles"] .w-float-tiles { top: 476.16px; }
 .w-tile-icon-wrap { flex: none; width: 56.32px; height: 56.32px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-keypill-bg); }
 .w-tile-icon-wrap .w-tile-icon { color: var(--wl-teal-ink); }
 .w-tile[data-open="true"] .w-tile-icon-wrap { display: none; }
@@ -790,10 +807,18 @@ a.w-btn { text-decoration: none; }
 /* FX1 E2: a card placed but not checked yet (white, the card line, no mark); a card shown in its right
    place after the last attempt (the check, the whole chip a button for its explanation) */
 .w-placed[data-state="pending"] { border-color: var(--wl-line-strong); }
-.w-placed-explain { all: unset; display: flex; align-items: center; gap: 10.24px; width: 100%; min-height: 28px; cursor: pointer; }
+.w-drop-cards { display: flex; flex-wrap: wrap; column-gap: 6.4px; }
+.w-drop-cards > .w-placed { flex: 1 1 100%; }
+.w-drop-cards > .w-placed-token { flex: none; margin-top: 8.96px; gap: 6.4px; padding: 3.84px 10.24px; }
+.w-placed-token .w-placed-disc { width: 20.48px; height: 20.48px; }
+.w-placed-explain { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 10.24px; width: calc(100% + 25.6px); min-height: 44px; margin: -7.68px -12.8px; padding: 7.68px 12.8px; cursor: pointer; }
 .w-placed-explain:focus-visible { outline: var(--wl-focus); outline-offset: 4px; }
 .w-placed:has(.w-placed-explain) { border-style: dashed; }
-.w-drops[data-done="true"] .w-drop { cursor: default; }
+.w-drops[data-done="true"] .w-drop { cursor: default; padding-bottom: 12.8px; }
+/* a shown card's whole chip is its 44px explain button: the cards sit a little closer once done */
+.w-drops[data-done="true"]:is([data-count="4"], [data-count="5"]) .w-placed { margin-top: 6.4px; }
+.w-placed:has(.w-placed-explain) { padding-top: 0; padding-bottom: 0; }
+.w-placed:has(.w-placed-explain) .w-placed-explain { margin-top: 0; margin-bottom: 0; }
 
 /* the BPMN diagram (S05a, S05b): a white figure card 60cqw x 25.4cqw; inside it 1 diagram unit = .1cqw */
 .w-board { position: absolute; }

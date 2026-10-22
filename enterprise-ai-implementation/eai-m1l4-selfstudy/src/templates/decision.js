@@ -112,7 +112,10 @@ function single(ctx) {
   const k = top.highlight ? top.text.indexOf(top.highlight) : -1;
   const statement = k < 0 ? top.text : [top.text.slice(0, k), h('b', { class: 'w-figure' }, top.highlight), top.text.slice(k + top.highlight.length)];
   const g = choiceGhost(ctx);
-  const head = headRow(ctx, g);
+  // FX1: on Stage the panel is at its height limit (41cqw), so "Show me how" and the attempt marker
+  // sit on the card over the photo (S01: the quote's glass card; S14, S15: the case card), as at a
+  // video stop; the panel keeps its heading, the answers and the strip
+  const tools = () => h('div', { class: 'w-card-tools' }, g ? g.button : null, zones.attempts);
   if (isCase(screen)) {
     const v = screen.visual;
     layout(ctx, 'stage-decision',
@@ -122,8 +125,9 @@ function single(ctx) {
         h('p', { class: 'w-case-line' }, statement),
         v ? h('div', { class: 'w-hv', role: 'img', 'aria-label': v.alt },
           h('span', { class: 'w-hv-box' }, v.from), glyph('g-arrow-long', { size: 38.4, className: 'w-hv-arrow' }),
-          h('span', { class: 'w-hv-box w-hv-away' }, v.to, h('span', { class: 'w-hv-chip' }, v.away))) : null),
-      h('section', { class: 'w-sheet w-sheet-right w-sheet-50' }, head, group, zones.band));
+          h('span', { class: 'w-hv-box w-hv-away' }, v.to, h('span', { class: 'w-hv-chip' }, v.away))) : null,
+        tools()),
+      h('section', { class: 'w-sheet w-sheet-right w-sheet-50' }, zones.instruction, group, zones.band));
   } else if (isStage(screen)) {
     // the character's last line is the quote on the photo; the panel's context line is the content's
     // context (S01: in the third person), or else the character's lines before the quote
@@ -134,11 +138,11 @@ function single(ctx) {
       h('figure', { class: 'w-glass w-quote-glass' },
         glyph('g-quote', { size: 51.2 }),
         h('blockquote', { class: 'w-quote' }, h('p', { class: 'w-quote-1' }, bubbles[bubbles.length - 1] || '')),
-        h('figcaption', { class: 'w-attrib' }, attribution)),
-      h('section', { class: 'w-sheet w-sheet-right w-sheet-46' }, contextLine(top.context ?? bubbles.slice(0, -1).join(' ')), head, group, zones.band));
+        h('figcaption', { class: 'w-attrib' }, attribution), tools()),
+      h('section', { class: 'w-sheet w-sheet-right w-sheet-46' }, contextLine(top.context ?? bubbles.slice(0, -1).join(' ')), zones.instruction, group, zones.band));
   } else {
     layout(ctx, 'focus',
-      sheet('focus', top.eyebrow ? ruleLabel(top.eyebrow) : null, contextLine(top.text, statement), head, group, zones.band));
+      sheet('focus', top.eyebrow ? ruleLabel(top.eyebrow) : null, contextLine(top.text, statement), headRow(ctx, g), group, zones.band));
   }
   // S01's frame shows no hint line: the hint stays for screen readers. S14 and S15 keep it visible.
   zones.setHintVisible(!isStage(screen));
@@ -438,6 +442,7 @@ function fill(ctx) {
 function metric(ctx) {
   const { screen, ui, zones } = ctx;
   const { group, btns } = options(ctx, 'radio', { cols: 2, interaction: false });
+  const g = choiceGhost(ctx);
   const slots = screen.slots.map((s) => {
     const state = h('span', { class: 'w-sr-only' });
     const el = h('li', { class: 'w-slot', dataset: { slot: s.id } }, h('span', { class: 'w-slot-mark', 'aria-hidden': 'true' }), h('span', { class: 'w-slot-label' }, s.label), state);
@@ -452,8 +457,10 @@ function metric(ctx) {
   // NL3: the explain band on top (S08's), so the field name moves beside the heading as its chip
   layout(ctx, 'focus',
     sheet('focus',
-      screen.band ? [explainBand(screen.band), headRow(ctx, choiceGhost(ctx), h('span', { class: 'w-field-chip w-head-chip' }, screen.field.label))]
-        : [ruleLabel(screen.field.label), headRow(ctx, choiceGhost(ctx))],
+      // (S11: the heading on one line with the field chip and "Show me how" on its right; the row keeps
+      // NL3's tighter margins, so the panel stays within 41cqw)
+      screen.band ? [explainBand(screen.band), h('div', { class: 'w-head-row w-head-metric' }, zones.instruction, h('span', { class: 'w-head-tools' }, h('span', { class: 'w-field-chip w-head-chip' }, screen.field.label), g ? g.button : null))]
+        : [ruleLabel(screen.field.label), headRow(ctx, g)],
       h('div', { class: 'w-metric', dataset: { interaction: '' } },
         group,
         h('div', { class: 'w-slots', 'aria-live': 'polite' }, h('p', { class: 'w-slots-title' }, screen.slotsTitle), h('ul', {}, slots.map((x) => x.el)))),
