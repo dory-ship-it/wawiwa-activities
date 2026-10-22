@@ -10,8 +10,8 @@
 // every new screen) and the band: the hint row (hint text, the band's tool such as Check or Resume)
 // and the feedback strip (aria-live polite) flush to the bottom edges of the panel it sits in.
 // No learner-facing text here: every string arrives from the content JSON.
-import { h, fmt, reducedMotion } from './util.js?v=1e11956b';
-import { glyph } from './icons.js?v=1e11956b';
+import { h, fmt, reducedMotion } from './util.js?v=27c63b76';
+import { glyph, icon } from './icons.js?v=27c63b76';
 
 const TONE = { correct: 'correct', neutral: 'neutral', wrong: 'wrong', notice: 'neutral', guess: 'neutral', partial: 'neutral', pause: 'neutral' };
 const LEAD = { correct: 'g-ok-disc', wrong: 'g-no-disc', neutral: 'guess' };
@@ -159,7 +159,11 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
   const nextText = h('span', {}, ui.footer.next);
   const nextBtn = h('button', { class: 'w-next', type: 'button', dataset: { action: 'next' }, onclick: () => { if (nextBtn.dataset.locked !== 'true') onNext(); } },
     nextLock, nextText);
-  const footer = h('footer', { class: 'w-footer' }, prevBtn, nextBtn);
+  // NL4: "Back to the check" (a review link from S21R opened an earlier screen), beside Previous
+  let backFn = null;
+  const backChip = h('button', { class: 'w-backchip', type: 'button', hidden: true, dataset: { action: 'backToCheck' }, onclick: () => backFn?.() },
+    icon('chevron-left', { size: 19.2 }), h('span', {}));
+  const footer = h('footer', { class: 'w-footer' }, prevBtn, backChip, nextBtn);
 
   stage.append(scene, bar, main, footer); // the bar first: the reading and Tab order follow the screen top down
 
@@ -171,6 +175,12 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
     nextLock.style.display = locked ? '' : 'none';
     if (locked) { nextBtn.setAttribute('aria-disabled', 'true'); nextBtn.setAttribute('aria-label', why || ui.footer.locked.default); }
     else { nextBtn.removeAttribute('aria-disabled'); nextBtn.removeAttribute('aria-label'); }
+  }
+  // setBack(label, fn): the chip shown with its label; setBack(null): hidden
+  function setBack(label, fn) {
+    backChip.hidden = !label;
+    backChip.lastElementChild.textContent = label || '';
+    backFn = label ? fn : null;
   }
   function setPrev(enabled) {
     if (enabled) prevBtn.removeAttribute('aria-disabled'); else prevBtn.setAttribute('aria-disabled', 'true');
@@ -193,5 +203,5 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
     setFeedback({ state: 'hint', text: '' });
   }
 
-  return { scene, bar, main, footer, logo, instruction, band, attempts: bTries, menuBtn, nextBtn, prevBtn, setScene, setFeedback, setTool, setHintVisible, setAttempts, setNext, setPrev, setBar, setSaved, clearScreen };
+  return { scene, bar, main, footer, logo, instruction, band, attempts: bTries, menuBtn, nextBtn, prevBtn, setScene, setFeedback, setTool, setHintVisible, setAttempts, setNext, setPrev, setBack, setBar, setSaved, clearScreen };
 }

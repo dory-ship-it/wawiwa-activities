@@ -8,24 +8,24 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt } from './util.js?v=1e11956b';
-import { createZones } from './zones.js?v=1e11956b';
-import { createMenu, openDialog } from './menu.js?v=1e11956b';
-import { initTooltips, applyTerms } from './tooltip.js?v=1e11956b';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=1e11956b';
-import { decision } from './templates/decision.js?v=1e11956b';
-import { input } from './templates/input.js?v=1e11956b';
-import { sort } from './templates/sort.js?v=1e11956b';
-import { sortDeck } from './templates/sortdeck.js?v=1e11956b';
-import { bpmn } from './templates/bpmn.js?v=1e11956b';
-import { flags } from './templates/flags.js?v=1e11956b';
-import { explorer } from './templates/explorer.js?v=1e11956b';
-import { video } from './templates/video.js?v=1e11956b';
-import { handoff } from './templates/handoff.js?v=1e11956b';
-import { check } from './templates/check.js?v=1e11956b';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=1e11956b';
-import { createGhost, stopGhost } from './ghost.js?v=1e11956b';
-import { createTracking } from './tracking/index.js?v=1e11956b';
+import { h, fmt } from './util.js?v=27c63b76';
+import { createZones } from './zones.js?v=27c63b76';
+import { createMenu, openDialog } from './menu.js?v=27c63b76';
+import { initTooltips, applyTerms } from './tooltip.js?v=27c63b76';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=27c63b76';
+import { decision } from './templates/decision.js?v=27c63b76';
+import { input } from './templates/input.js?v=27c63b76';
+import { sortDeck } from './templates/sortdeck.js?v=27c63b76';
+import { bpmn } from './templates/bpmn.js?v=27c63b76';
+import { flags } from './templates/flags.js?v=27c63b76';
+import { explorer } from './templates/explorer.js?v=27c63b76';
+import { video } from './templates/video.js?v=27c63b76';
+import { handoff } from './templates/handoff.js?v=27c63b76';
+import { check } from './templates/check.js?v=27c63b76';
+import { result } from './templates/result.js?v=27c63b76';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=27c63b76';
+import { createGhost, stopGhost } from './ghost.js?v=27c63b76';
+import { createTracking } from './tracking/index.js?v=27c63b76';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -33,7 +33,7 @@ const NARROW_BELOW = 900; // window narrower than this: show the "best on a comp
 const NOTE_H = 40;
 const MAX_TEXT = 250;     // fill-in responses are trimmed and capped (SCORM 1.2 safe)
 
-const TEMPLATES = { decision, input, sort, sortDeck, bpmn, flags, explorer, video, handoff, check, title, moduleMap, goals, warmup, concept, keyParts, keyColumns };
+const TEMPLATES = { decision, input, sortDeck, bpmn, flags, explorer, video, handoff, check, result, title, moduleMap, goals, warmup, concept, keyParts, keyColumns };
 
 export async function boot(root) {
   // no-cache: the browser asks the server every time whether the content changed (tools/stamp.mjs)
@@ -76,6 +76,7 @@ class Lesson {
     this.onNext = null;      // what the unlocked Next does on this screen (null = finish)
     this.pauseShown = false; // the chapter-end pause marker was shown on this screen
     this.shownAt = 0;
+    this.backTo = null;      // NL4: the check screen a "Review Chapter N" link came from (S21R)
     const q = new URLSearchParams(location.search);
     this.review = q.get('review') === '1';
     // a review thumbnail (an iframe on review.html) never takes the focus from the page around it
@@ -112,6 +113,9 @@ class Lesson {
     } else if (this.lms) {
       this.state = lms.suspend ? decode(lms.suspend) : emptyState();
       if (!this.state.s && lms.location && this.screens[lms.location]) this.state.s = lms.location;
+      // NL4: "passed" can reach the LMS before the finish (S21R), so the adapter learns from the state,
+      // not from lesson_status, whether the lesson is finished (exit "" only then)
+      this.tracking.setFinished(!!this.state.fin);
       this.zones.setSaved(true);
     } else {
       const { state, ok } = loadState();
@@ -149,7 +153,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=1e11956b').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=27c63b76').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -187,6 +191,10 @@ class Lesson {
     this.zones.instruction.textContent = screen.instruction;
     this.zones.setNext(!this.review, this.lockedWhy(screen), screen.lockedNext); // review mode: never locked
     this.zones.setPrev(this.order.indexOf(id) > 0);
+    // NL4: a "Review Chapter N" link on S21R opens an earlier screen with "Back to the check" in the
+    // footer; the chip stays while the learner looks around and goes once they are back at the check
+    if (this.backTo && (id === this.backTo || id === this.content.screens.find((s) => s.id === this.backTo)?.from)) this.backTo = null;
+    this.zones.setBack(this.backTo ? this.ui.buttons.backToCheck : null, () => this.go(this.backTo));
     const tpl = TEMPLATES[screen.template];
     if (!tpl) throw new Error('no template ' + screen.template + ' for ' + id);
     // the scene: Stage (the chapter photo under the bar), Focus (the photo wash) or O1's dark title
@@ -214,6 +222,13 @@ class Lesson {
       chapter,
       setRoute: (route) => this.setRoute(id, route),
       score: () => this.score(),
+      // NL4 knowledge check attempts (S21, S21R): the attempt number, the state kept for it, the end of
+      // an attempt, a retake, and a review link that comes back here
+      attempt: () => this.state.k?.n || 1,
+      checkState: () => ({ n: 1, s: null, p: 0, ...(this.state.k || {}) }),
+      checkDone: () => this.checkDone(),
+      retake: () => this.retakeCheck(),
+      reviewGo: (to) => { this.backTo = id; this.go(to); },
       finishLesson: () => this.finishLesson(),
       finished: () => !!this.state.fin,
       // the ghost hand (src/ghost.js): a once-per-interaction-type demo with a "Show me" replay
@@ -227,10 +242,11 @@ class Lesson {
     if (focus && !this.thumb) this.zones.instruction.focus({ preventScroll: true });
   }
 
-  // why Next is locked on this screen (its aria-label), by variant, then template
+  // why Next is locked on this screen (its aria-label): the screen's own key (NL4: S19, S20B), by
+  // variant, then template
   lockedWhy(screen) {
     const l = this.ui.footer.locked;
-    return l[screen.variant] || l[screen.template] || l.default;
+    return l[screen.locked] || l[screen.variant] || l[screen.template] || l.default;
   }
 
   nextAction() {
@@ -248,13 +264,44 @@ class Lesson {
     return { x, n: ids.length, raw: ids.length ? Math.round((100 * x) / ids.length) : null };
   }
 
-  // Finish (S22): passed / failed against the pass mark (completed when nothing is scored), once.
+  // NL4: the end of a knowledge-check attempt (the last S21 item done). The attempt's score is the
+  // latest (state.k.s, score.raw in SCORM); an attempt at or over the pass mark makes the lesson passed
+  // for good (state.k.p, sticky): the LMS gets "passed" now, and a later finish stays passed.
+  checkDone() {
+    const c = this.content.lesson.completion;
+    const sc = this.score();
+    const k = this.state.k = { n: 1, p: 0, ...(this.state.k || {}), s: sc.raw };
+    if (sc.raw !== null && sc.raw >= c.passMark) k.p = 1;
+    if (k.p && this.state.fin) this.state.fin = 'passed';
+    this.tracking.emit({ kind: 'score', score: sc.raw, passed: !!k.p, attempt: k.n });
+    this.persist();
+    return { ...sc, passed: !!k.p, attempt: k.n };
+  }
+
+  // NL4 "Retake now": a new attempt of the whole check, at once. The check's answers are cleared, so
+  // each item's first answer in the new attempt goes out again as an answer (SCORM: one more
+  // cmi.interactions entry per item and attempt); S21 and S21R are no longer done.
+  retakeCheck() {
+    const k = this.state.k = { n: 1, s: null, p: 0, ...(this.state.k || {}) };
+    k.n += 1;
+    const ids = this.content.lesson.completion.scoredScreens.flatMap((sid) => (this.screens[sid]?.tracking || []).map((t) => t.id));
+    ids.forEach((tid) => { delete this.state.a[tid]; delete this.state.x[tid]; });
+    const again = new Set([...this.content.lesson.completion.scoredScreens, ...this.content.screens.filter((s) => this.content.lesson.completion.scoredScreens.includes(s.from)).map((s) => s.id)]);
+    this.state.d = this.state.d.filter((sid) => !again.has(sid));
+    this.backTo = null;
+    this.persist();
+    this.go(this.content.lesson.completion.scoredScreens[0]);
+  }
+
+  // Finish (S22): passed once any attempt reached the pass mark (sticky), failed otherwise (completed
+  // when nothing is scored); the score is the latest attempt's.
   finishLesson() {
     const c = this.content.lesson.completion;
     const sc = this.score();
-    const status = sc.n ? (sc.raw >= c.passMark ? 'passed' : 'failed') : c.statusWhenNoScoredItems;
+    const passed = !!this.state.k?.p || (sc.raw !== null && sc.raw >= c.passMark);
+    const status = sc.n ? (passed ? 'passed' : 'failed') : c.statusWhenNoScoredItems;
     this.state.fin = status;
-    this.tracking.emit({ kind: 'finish', status, score: sc.raw, passMark: c.passMark });
+    this.tracking.emit({ kind: 'finish', status, score: sc.raw, passMark: c.passMark, attempt: this.state.k?.n || 1 });
     this.persist();
     return { status, ...sc };
   }
@@ -324,7 +371,7 @@ class Lesson {
   // appears it plays ~600 ms after the screen settles; once the type is seen it plays only after 8 s
   // without input. One letter per seen type is kept in state.h (suspend data). Returns { button, cancel }.
   ghostFor({ type, steps, restore = null, chip = null }) {
-    const code = { tabs: 't', stop: 'v', pickTwo: 's' }[type] || type.charAt(0);
+    const code = { tabs: 't', stop: 'v', pickTwo: 's', copy: 'y' }[type] || type.charAt(0); // NL4: S19's Copy (y)
     const seen = (this.state.h || '').includes(code);
     const g = createGhost(this.stage, { ui: this.ui, steps, restore, seen, chip,
       onPlay: () => { if (!(this.state.h || '').includes(code)) { this.state.h = (this.state.h || '') + code; this.persist(); } } });
@@ -364,6 +411,7 @@ class Lesson {
   startOver() {
     if (!this.review) clearState();
     this.state = emptyState();
+    this.backTo = null;
     this.go(this.order[0]);
   }
 

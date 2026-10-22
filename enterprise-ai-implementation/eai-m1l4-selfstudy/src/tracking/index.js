@@ -7,14 +7,19 @@
 //   retry   any later attempt:               { kind, trackingId, type, response, result, attempt, latencyMs, at }
 //           -> suspend data only
 //   route   fast-track route chosen:         { kind, screen, route, at } -> suspend data only
-//   finish  the lesson is finished (S22):    { kind, status, score, passMark, at } -> status and score
-// response: option letters in on-screen order ("b", "b,d"), "1.a,2.b" for matching, the trimmed
+//   score   a knowledge-check attempt ends (NL4): { kind, score, passed, attempt, at } -> score.raw
+//           (the latest attempt) and, once passed, lesson_status passed (sticky)
+//   finish  the lesson is finished (S22):    { kind, status, score, passMark, attempt, at } -> status and score
+// response: option letters in on-screen order ("b", "b,d"; NL4: S21 sends the option's id, so a
+// shuffled retake still reports "c" for the same answer), "1.a,2.b" for matching, the trimmed
 // text for fill-in (max 250). result: correct | wrong | neutral.
+// A retake of the check (NL4) clears the check's first answers: each item's first answer in the new
+// attempt is an 'answer' again (one more cmi.interactions entry per item and attempt).
 // persist(): the encoded state to suspend_data and the screen to lesson_location (SCORM) on every
 // change. ?debug=1 logs every call to the console (calls keeps them for the tests).
-import { encode } from '../state.js?v=1e11956b';
-import { findAPI, createScorm12 } from './scorm12.js?v=1e11956b';
-import { createLocal } from './local.js?v=1e11956b';
+import { encode } from '../state.js?v=27c63b76';
+import { findAPI, createScorm12 } from './scorm12.js?v=27c63b76';
+import { createLocal } from './local.js?v=27c63b76';
 
 export function createTracking({ debug = false, force = null, off = false } = {}) {
   const events = [];
@@ -33,6 +38,7 @@ export function createTracking({ debug = false, force = null, off = false } = {}
       on(fn) { listeners.add(fn); return () => listeners.delete(fn); },
       init() { return { ok: false }; },
       persist() { return true; },
+      setFinished() {},
       terminate() {},
     };
   }
@@ -46,7 +52,7 @@ export function createTracking({ debug = false, force = null, off = false } = {}
     events.push(ev);
     if (debug) console.log('[tracking]', JSON.stringify(ev));
     for (const fn of listeners) fn(ev);
-    if (ev.kind === 'answer' || ev.kind === 'finish') adapter.record(ev);
+    if (ev.kind === 'answer' || ev.kind === 'score' || ev.kind === 'finish') adapter.record(ev);
     return ev;
   }
 
@@ -69,6 +75,8 @@ export function createTracking({ debug = false, force = null, off = false } = {}
       try { lastOk = adapter.save(encode(state), state.s || ''); } catch (e) { log('persist failed ' + e.message); lastOk = false; }
       return lastOk;
     },
+    // NL4: whether the lesson is finished (from the state, read at launch): exit "" only then
+    setFinished(f) { adapter.setFinished(f); },
     terminate() { adapter.terminate(); },
   };
 }

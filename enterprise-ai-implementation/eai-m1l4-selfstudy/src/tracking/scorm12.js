@@ -5,6 +5,9 @@
 //   record     first attempts only (the engine sends one 'answer' per interaction id): one
 //              cmi.interactions.n per id with id, type, student_response, result, latency, time,
 //              weighting (1 scored, 0 practice) and correct_responses.0.pattern when there is one.
+//              NL4: a retake of the check sends each item again (one more entry per item and attempt).
+//              'score' (an attempt of the check ends) sets score raw / min / max (the latest attempt)
+//              and, once an attempt passed, lesson_status passed; never back down from passed.
 //              'finish' sets score raw / min / max and passed / failed (or completed), exit "".
 //   save       suspend_data and lesson_location on every change; exit "suspend" until finished.
 //   terminate  session_time, exit, commit and LMSFinish, once (pagehide / beforeunload).
@@ -45,7 +48,7 @@ const cleanResponse = (type, v) => {
 };
 
 export function createScorm12(api, { log = () => {} } = {}) {
-  let initialized = false, terminated = false, finished = false, lastCommit = 0, pending = null;
+  let initialized = false, terminated = false, finished = false, passed = false, lastCommit = 0, pending = null;
   const started = Date.now();
   const guard = (el) => { if (IDENTITY_FIELDS.test(el)) throw new Error('identity_field_refused ' + el); return el; };
   const err = (what) => {
@@ -76,10 +79,12 @@ export function createScorm12(api, { log = () => {} } = {}) {
       const suspend = get('cmi.suspend_data');
       const location = get('cmi.core.lesson_location');
       if (!status || status === 'not attempted') set('cmi.core.lesson_status', 'incomplete');
-      finished = ['passed', 'failed', 'completed'].includes(status);
+      finished = ['passed', 'failed', 'completed'].includes(status); // until the engine says (setFinished)
+      passed = status === 'passed'; // sticky: a later finish never turns it into failed
       commitNow();
       return { ok: true, entry, status, suspend, location };
     },
+    setFinished(f) { finished = !!f; },
     record(ev) {
       if (!initialized || terminated) return;
       if (ev.kind === 'answer') {
@@ -94,13 +99,21 @@ export function createScorm12(api, { log = () => {} } = {}) {
         set(p + 'weighting', ev.scored ? '1' : '0');
         if (ev.correctResponse != null) set(p + 'correct_responses.0.pattern', String(ev.correctResponse).toLowerCase());
         commit();
+      } else if (ev.kind === 'score') {
+        if (ev.score != null) {
+          set('cmi.core.score.min', '0');
+          set('cmi.core.score.max', '100');
+          set('cmi.core.score.raw', String(ev.score));
+        }
+        if (ev.passed) { set('cmi.core.lesson_status', 'passed'); passed = true; }
+        commitNow();
       } else if (ev.kind === 'finish') {
         if (ev.score != null) {
           set('cmi.core.score.min', '0');
           set('cmi.core.score.max', '100');
           set('cmi.core.score.raw', String(ev.score));
         }
-        set('cmi.core.lesson_status', ev.status);
+        set('cmi.core.lesson_status', passed ? 'passed' : ev.status);
         set('cmi.core.exit', '');
         finished = true;
         commitNow();

@@ -3,18 +3,23 @@
 //   item 5        eight tiles in two columns of four: select two, then Check in the band.
 // Wrong = the calm wrong mark and the option's line, retry allowed; right = "Next question" in the
 // band. ONLY THE FIRST ATTEMPT COUNTS: the engine keeps it per interaction id (later tries go out as
-// retries), and the result card counts first attempts: "x of 5 on first try. Pass mark: 4 of 5."
-// The score (0 to 100) and passed / failed are set at Finish (S22), from the same first attempts.
-import { h, fmt } from '../util.js?v=1e11956b';
-import { glyph } from '../icons.js?v=1e11956b';
-import { checkButton } from './decision.js?v=1e11956b';
-import { letter } from '../tracking/index.js?v=1e11956b';
-import { layout, sheet, progressDots, arrowNav } from './stage.js?v=1e11956b';
+// retries). NL4: after the last item the attempt ends (ctx.checkDone: the score, passed once 80 or
+// more) and Next leads to the result screen, S21R; "Retake now" there starts a new attempt: the
+// answers reset and (shuffleOnRetake) items 1 to 4 show their options in a new order, one per attempt
+// (item 5's tiles keep the HR map's line order). Responses are the options' ids, so a shuffled
+// option reports the same letter as before. A revisit shows the result line (resultCard).
+import { h, fmt } from '../util.js?v=27c63b76';
+import { glyph } from '../icons.js?v=27c63b76';
+import { checkButton } from './decision.js?v=27c63b76';
+import { letter } from '../tracking/index.js?v=27c63b76';
+import { layout, sheet, progressDots, arrowNav } from './stage.js?v=27c63b76';
 
 export const check = {
   mount(ctx) {
     const { screen, ui, zones } = ctx;
-    const items = screen.items;
+    // a retake shows items 1 to 4 with their options in another order (never the first attempt's)
+    const attempt = ctx.attempt();
+    const items = screen.shuffleOnRetake && attempt > 1 ? screen.items.map((it, k) => (it.options ? { ...it, options: shuffled(it.options, attempt * 7 + k) } : it)) : screen.items;
     const dots = progressDots(items.length, (i, n) => fmt(ui.progress.question, { i, n }));
     const body = h('div', { class: 'w-kc-body', dataset: { interaction: '' } });
     layout(ctx, 'focus',
@@ -40,7 +45,7 @@ export const check = {
     function right(k, text, focusTarget) {
       dots.set(k, k + 1);
       const go = zones.setFeedback({ state: 'correct', text, actions: nextAction(k) });
-      if (k === items.length - 1) { result(true); return; }
+      if (k === items.length - 1) { ctx.checkDone(); ctx.complete(); ctx.unlockNext({ focus: true }); return; }
       (go || focusTarget)?.focus();
     }
 
@@ -56,7 +61,7 @@ export const check = {
         if (solved || i === chosen) return;
         chosen = i;
         const o = it.options[i];
-        ctx.answer({ trackingId: it.trackingId, response: letter(i), result: o.correct ? 'correct' : 'wrong' });
+        ctx.answer({ trackingId: it.trackingId, response: o.id, result: o.correct ? 'correct' : 'wrong' });
         btns.forEach((x, j) => mark(x, j === i ? (o.correct ? 'correct' : 'wrong') : ''));
         if (!o.correct) { zones.setFeedback({ state: 'wrong', text: o.feedback }); return; }
         solved = true;
@@ -127,3 +132,13 @@ export const check = {
     return { unmount() {} };
   },
 };
+
+// A fixed new order per attempt and item (the same after a reload), never the original order:
+// Fisher-Yates with a small seeded generator; an unchanged result is turned by one place.
+function shuffled(list, seed) {
+  let s = seed >>> 0;
+  const rand = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  const out = [...list];
+  for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [out[i], out[j]] = [out[j], out[i]]; }
+  return out.every((o, i) => o === list[i]) ? [...out.slice(1), out[0]] : out;
+}
