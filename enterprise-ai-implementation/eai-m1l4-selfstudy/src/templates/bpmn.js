@@ -19,6 +19,7 @@ import { h, fmt } from '../util.js';
 import { glyph } from '../icons.js';
 import { layout } from './stage.js';
 import { dragDrop } from '../drag.js';
+import { checkButton } from './decision.js';
 
 const U = 1.28; // stage px per diagram unit
 const G = { W: 600, H: 254, PAD: 16, LANE: 74, HEAD: 96, X0: 145, PITCH: 97.5, STEP_W: 84, STEP_H: 42, R: 14, GATE: 22 };
@@ -101,14 +102,21 @@ function keyIdea(ctx) {
 }
 
 /* ---------- label (S05b) ---------- */
+// FX1 E3: the diagram drawn bigger (the board's free space, the same proportions: a zoom of the whole
+// card), the targets in a turquoise dashed outline with "Drop here", pulsing gently while a label is
+// picked up or dragged (none with reduced motion). FX1 E2 (B2): every drop places the label as it is
+// (no mark); with the tray empty, Check: the right ones turn solid teal with a check, the wrong ones go
+// back to the tray with their line; attempt 2 the same; after it the labels still wrong move to their
+// right places with a check and the explanation, and Next unlocks.
 function labelTask(ctx) {
   const { screen, ui, content, zones } = ctx;
   const trackingId = screen.tracking[0].id;
   // the task's own description of the diagram (NL3): rows and places, no shape names (they are the answers)
   const dg = content.diagrams[screen.diagram];
   const d = diagram({ ...dg, alt: screen.diagramAlt || dg.alt });
-  const first = {};
-  let left = screen.labels.length;
+  const first = {}, at = {};
+  const max = ctx.revisit ? 0 : screen.attempts || 2;
+  let tries = 0;
 
   const targets = screen.targets.map((t) => {
     const el = h('div', { class: 'w-target', dataset: { target: t.id } });
@@ -127,52 +135,97 @@ function labelTask(ctx) {
   const dd = dragDrop({ ui, live, targets, nameOf: (c) => byCard.get(c).text, onDrop: (c, tid) => dropOn(c, tid), picked: ui.drag.pickedPlace });
   cards.forEach((c) => dd.add(c));
 
-  // the ghost hand: it grabs the first label (its right part) and stops before the diagram
-  const g = !ctx.revisit && screen.ghost ? ctx.ghost({ type: screen.ghost.type,
+  // the ghost hand: it grabs the first label in the tray and really drags it toward its nearest place
+  // on the diagram, stopping before it gets there (it drops nothing and points at no answer)
+  const g = !ctx.revisit ? ctx.ghost({ type: screen.ghost?.type || 'label',
     steps: () => {
-      const k = zones.main.getBoundingClientRect().height / zones.main.offsetHeight || 1;
       const c = tray.querySelector('.w-label-card:not([hidden])');
-      if (!c) return [];
+      const free = targets.filter((t) => !t.el.inert);
+      if (!c || !free.length) return [];
       const r = c.getBoundingClientRect();
-      const grab = { x: r.left + 0.8725 * r.width, y: r.top + 0.39 * r.height };
-      return [{ point: () => grab, carry: c, hold: 120 }, { point: () => ({ x: grab.x - 40 * k, y: grab.y + 24 * k }), hold: 700 }];
+      const grab = { x: r.left + 0.8 * r.width, y: r.top + 0.39 * r.height };
+      // toward the diagram's centre, stopping at 45% of the way (at the diagram's right edge, on no place)
+      const b = d.el.getBoundingClientRect();
+      const aim = { x: b.left + b.width * 0.62, y: b.top + b.height * 0.5 };
+      return [{ point: () => grab, carry: c, hold: 120 }, { point: () => ({ x: grab.x + (aim.x - grab.x) * 0.45, y: grab.y + (aim.y - grab.y) * 0.45 }), hold: 800 }];
     } }) : null;
 
+  const check = checkButton(ui, ui.buttons.check, () => doCheck());
   layout(ctx, 'bpmn-label',
-    h('div', { class: 'w-task-head' }, zones.instruction, g && screen.ghost.showMe ? g.button : null),
+    h('div', { class: 'w-task-head' }, zones.instruction, h('span', { class: 'w-head-tools' }, g ? g.button : null)),
     h('div', { class: 'w-board w-board-label', dataset: { interaction: '' } },
-      d.el, tray, h('span', { class: 'w-sr-only', id: helpId }, fmt(ui.drag.helpPlaces, { n: targets.length })), live,
+      h('div', { class: 'w-bpmn-zoom' }, d.el), tray, h('span', { class: 'w-sr-only', id: helpId }, fmt(ui.drag.helpPlaces, { n: targets.length })), live,
       h('div', { class: 'w-float w-float-tray' }, zones.band)));
   zones.setHintVisible(false); // the frame shows no hint line: the hint stays for screen readers
   zones.setFeedback({ state: 'hint', text: screen.hint });
+  if (!ctx.revisit) { zones.setTool(check); zones.setAttempts(1, max); }
 
-  function place(l, t) {
-    t.el.dataset.placed = 'true';
+  // state: 'pending' (placed, not checked: the label, no mark), 'right' (teal with a check), 'shown'
+  // (moved there after the last attempt: the check, dashed)
+  function place(l, t, state) {
+    t.el.dataset.placed = state;
     t.el.inert = true;
     t.chip.className = 'w-target-placed';
-    t.chip.replaceChildren(h('span', { class: 'w-placed-disc w-placed-disc-s' }, glyph('g-check-b', { size: 12.8 })), l.text);
+    t.chip.dataset.state = state;
+    t.chip.replaceChildren(state === 'pending' ? '' : h('span', { class: 'w-placed-disc w-placed-disc-s' }, glyph('g-check-b', { size: 12.8 })), l.text);
     t.chip.removeAttribute('aria-hidden');
-    const c = cards[screen.labels.indexOf(l)];
-    c.hidden = true;
-    left -= 1;
+    cards[screen.labels.indexOf(l)].hidden = true;
+    at[l.id] = t.id;
   }
+  function unplace(l) {
+    const t = targets.find((x) => x.id === at[l.id]);
+    delete t.el.dataset.placed;
+    t.el.inert = false;
+    t.chip.className = 'w-target-chip';
+    delete t.chip.dataset.state;
+    t.chip.setAttribute('aria-hidden', 'true');
+    t.chip.replaceChildren(screen.dropLabel);
+    const c = cards[screen.labels.indexOf(l)];
+    c.hidden = false;
+    c.dataset.line = l.feedback.wrong; // its line comes back when it is picked up again
+  }
+  const inTray = () => cards.filter((c) => !c.hidden);
   function dropOn(c, tid) {
     const l = byCard.get(c);
     if (!(l.id in first)) first[l.id] = tid;
-    if (tid !== l.target) { zones.setFeedback({ state: 'wrong', text: l.feedback.wrong }); return 'kept'; }
-    place(l, targets.find((t) => t.id === tid));
-    zones.setFeedback({ state: 'correct', verdict: '', text: l.feedback.correct });
-    if (left) { tray.querySelector('.w-label-card:not([hidden])').focus({ preventScroll: true }); return 'placed'; }
-    ctx.answer({ trackingId, response: screen.labels.map((x) => `${x.code}.${first[x.id]}`).join(','), result: screen.labels.every((x) => first[x.id] === x.target) ? 'correct' : 'wrong' });
-    ctx.complete();
-    ctx.unlockNext({ focus: true });
+    place(l, targets.find((t) => t.id === tid), 'pending');
+    const next = inTray()[0];
+    if (next) { next.focus({ preventScroll: true }); if (!tries) zones.setFeedback({ state: 'hint', text: screen.hint }); }
+    else { check.disabled = false; zones.setFeedback({ state: 'hint', text: screen.hint }); check.focus({ preventScroll: true }); }
     return 'placed';
+  }
+  // a label that came back shows its line again when it is picked up
+  cards.forEach((c) => ['pointerdown', 'focus'].forEach((ev) => c.addEventListener(ev, () => { if (c.dataset.line && tries) zones.setFeedback({ state: 'wrong', text: c.dataset.line }); })));
+  function doCheck() {
+    if (inTray().length) return;
+    tries += 1;
+    const wrong = screen.labels.filter((l) => at[l.id] !== l.target);
+    screen.labels.filter((l) => !wrong.includes(l)).forEach((l) => place(l, targets.find((t) => t.id === l.target), 'right'));
+    const response = (pick) => screen.labels.map((x) => `${x.code}.${pick[x.id]}`).join(',');
+    if (tries === 1) ctx.answer({ trackingId, response: response(first), result: screen.labels.every((x) => first[x.id] === x.target) ? 'correct' : 'wrong' });
+    else ctx.answer({ trackingId, response: response(at), result: wrong.length ? 'wrong' : 'correct' });
+    if (!wrong.length) { zones.setFeedback({ state: 'correct', verdict: '', text: ui.feedback.allPlaced }); finish(true); return; }
+    if (tries >= max) {
+      wrong.forEach((l) => { unplace(l); place(l, targets.find((t) => t.id === l.target), 'shown'); delete cards[screen.labels.indexOf(l)].dataset.line; });
+      zones.setFeedback({ state: 'neutral', verdict: ui.feedback.revealedPlaces, text: wrong[0].feedback.correct });
+      finish(true);
+      return;
+    }
+    wrong.forEach(unplace);
+    check.disabled = true;
+    zones.setAttempts(tries + 1, max);
+    zones.setFeedback({ state: 'wrong', text: wrong[0].feedback.wrong });
+    cards[screen.labels.indexOf(wrong[0])].focus({ preventScroll: true });
+  }
+  function finish(focus) {
+    zones.setTool();
+    ctx.complete();
+    ctx.unlockNext({ focus });
   }
 
   if (ctx.revisit) {
-    screen.labels.forEach((l) => place(l, targets.find((t) => t.id === l.target)));
-    const last = screen.labels[screen.labels.length - 1];
-    zones.setFeedback({ state: 'correct', verdict: '', text: last.feedback.correct });
+    screen.labels.forEach((l) => place(l, targets.find((t) => t.id === l.target), 'right'));
+    zones.setFeedback({ state: 'correct', verdict: '', text: ui.feedback.allPlaced });
     ctx.unlockNext({ focus: false });
   }
 }

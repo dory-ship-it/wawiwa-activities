@@ -17,6 +17,7 @@ import { h, fmt } from '../util.js';
 import { glyph } from '../icons.js';
 import { layout } from './stage.js';
 import { dragDrop } from '../drag.js';
+import { checkButton } from './decision.js';
 
 export const flags = {
   mount(ctx) {
@@ -66,8 +67,21 @@ export const flags = {
     const dd = dragDrop({ ui, live, targets, nameOf: (c) => c.getAttribute('aria-label'), onDrop: (c, tid) => dropOn(c, tid), picked: ui.drag.pickedPlace });
     cards.forEach((c) => dd.add(c));
 
+    // FX1 B1: the ghost hand grabs the first flag in the tray and drags it toward the card, stopping
+    // before it gets there (it drops nothing, points at no field or step); "Show me how" replays it
+    const g = !ctx.revisit ? ctx.ghost({ type: screen.ghost?.type || 'flag',
+      steps: () => {
+        const c = cards.find((x) => !x.hidden);
+        if (!c) return [];
+        const r = c.getBoundingClientRect(), b = card.getBoundingClientRect();
+        const grab = { x: r.left + 0.8 * r.width, y: r.top + 0.45 * r.height };
+        // 55% of the way to the card's right edge, level with the flag: it ends in the gap beside the card
+        const aim = { x: b.right + (grab.x - b.right) * 0.45, y: grab.y };
+        return [{ point: () => grab, carry: c, hold: 120 }, { point: () => aim, hold: 800 }];
+      } }) : null;
+
     layout(ctx, 'flags',
-      h('div', { class: 'w-task-head w-task-head-col' }, screen.context ? h('p', { class: 'w-context' }, screen.context) : null, zones.instruction),
+      h('div', { class: 'w-task-head' }, h('div', {}, screen.context ? h('p', { class: 'w-context' }, screen.context) : null, zones.instruction), h('span', { class: 'w-head-tools' }, g ? g.button : null)),
       h('div', { class: 'w-board w-board-flags', dataset: { interaction: '', variant: screen.variant } },
         card,
         h('div', { class: 'w-flag-side' }, tray, h('div', { class: 'w-float w-float-side' }, zones.band)),
@@ -77,45 +91,84 @@ export const flags = {
 
     const isRight = (f, tid) => (map ? !!screen.map.find((x) => String(x.n) === tid)?.correct : f.target === tid);
     const lineFor = (f, tid) => (map ? screen.map.find((x) => String(x.n) === tid).feedback : f.feedback[tid] || f.feedback.other);
-    function place(f, t) {
-      t.el.dataset.placed = 'true';
+    // FX1 E2 (B2): every drop places the flag as it is (no mark); with the tray empty, Check: the right
+    // flags turn solid teal with a check, the wrong ones go back to the tray, each with its line (shown
+    // again when it is picked up); attempt 2 the same; after it the flags still wrong move to the right
+    // places with a check, the closing line explains, and Next unlocks.
+    // state: 'pending' | 'right' | 'shown' (the S05b states)
+    const at = {};
+    function place(f, t, state) {
+      t.el.dataset.placed = state;
       t.el.inert = true;
-      const chip = h('span', { class: 'w-target-placed' }, h('span', { class: 'w-placed-disc w-placed-disc-s' }, glyph('g-check-b', { size: 12.8 })), f.text || screen.flagLabel);
+      const chip = h('span', { class: 'w-target-placed', dataset: { state } }, state === 'pending' ? null : h('span', { class: 'w-placed-disc w-placed-disc-s' }, glyph('g-check-b', { size: 12.8 })), f.text || screen.flagLabel);
       if (t.chip) t.chip.replaceWith(chip); else t.el.append(chip);
+      t.home = t.home || (t.chip && t.chip.classList.contains('w-target-chip') ? t.chip : null); // the line's "Drop here" chip
       t.chip = chip;
-      const c = cards[screen.flags.indexOf(f)];
-      c.hidden = true;
-      placed.add(f.id);
+      cards[screen.flags.indexOf(f)].hidden = true;
+      at[f.id] = t.id;
     }
-    const placed = new Set();
-    const left = () => screen.flags.length - placed.size;
+    function unplace(f, line) {
+      const t = targets.find((x) => x.id === at[f.id]);
+      delete t.el.dataset.placed;
+      t.el.inert = false;
+      if (t.home) { t.chip.replaceWith(t.home); t.chip = t.home; } else { t.chip.remove(); t.chip = null; }
+      const c = cards[screen.flags.indexOf(f)];
+      c.hidden = false;
+      c.dataset.line = line;
+      delete at[f.id];
+    }
+    const max = ctx.revisit ? 0 : screen.attempts || 2;
+    let tries = 0;
+    const check = checkButton(ui, ui.buttons.check, () => doCheck());
+    if (!ctx.revisit) { zones.setTool(check); zones.setAttempts(1, max); }
+    const inTray = () => cards.filter((c) => !c.hidden);
+    cards.forEach((c) => ['pointerdown', 'focus'].forEach((ev) => c.addEventListener(ev, () => { if (c.dataset.line && tries) zones.setFeedback({ state: 'wrong', text: c.dataset.line }); })));
     function dropOn(c, tid) {
       const f = byCard.get(c);
       if (!(f.id in first)) first[f.id] = tid;
-      if (!isRight(f, tid)) { zones.setFeedback({ state: 'wrong', text: lineFor(f, tid) }); return 'kept'; }
-      place(f, targets.find((t) => t.id === tid));
-      if (left()) {
-        // the first flag in place: the field's own line (map), or the verdict alone (line)
-        zones.setFeedback(map ? { state: 'correct', verdict: '', text: lineFor(f, tid) } : { state: 'correct' });
-        tray.querySelector('.w-flag-card:not([hidden])').focus({ preventScroll: true });
-        return 'placed';
-      }
-      const response = type === 'matching' ? screen.flags.map((x) => `${x.code}.${first[x.id]}`).join(',')
-        : screen.flags.map((x) => Number(first[x.id])).sort((a, b) => a - b).join(',');
-      const right = screen.flags.every((x) => isRight(x, first[x.id])) && new Set(screen.flags.map((x) => first[x.id])).size === screen.flags.length;
-      ctx.answer({ trackingId, response, result: right ? 'correct' : 'wrong' });
-      done(true);
+      place(f, targets.find((t) => t.id === tid), 'pending');
+      const next = inTray()[0];
+      if (next) { next.focus({ preventScroll: true }); if (!tries) zones.setFeedback({ state: 'hint', text: screen.hint }); }
+      else { check.disabled = false; zones.setFeedback({ state: 'hint', text: screen.hint }); check.focus({ preventScroll: true }); }
       return 'placed';
     }
-    function done(focus) {
-      zones.setFeedback({ state: 'correct', verdict: '', text: screen.feedbackCorrect }); // as the drops on S04 and S05b: the line alone
+    const responseOf = (pick) => (type === 'matching' ? screen.flags.map((x) => `${x.code}.${pick[x.id]}`).join(',')
+      : screen.flags.map((x) => Number(pick[x.id])).sort((a, b) => a - b).join(','));
+    const allRight = (pick) => screen.flags.every((x) => isRight(x, pick[x.id])) && new Set(screen.flags.map((x) => pick[x.id])).size === screen.flags.length;
+    function doCheck() {
+      if (inTray().length) return;
+      tries += 1;
+      const pick = { ...at };
+      if (tries === 1) ctx.answer({ trackingId, response: responseOf(first), result: allRight(first) ? 'correct' : 'wrong' });
+      else ctx.answer({ trackingId, response: responseOf(pick), result: allRight(pick) ? 'correct' : 'wrong' });
+      const wrong = screen.flags.filter((f) => !isRight(f, pick[f.id]));
+      screen.flags.filter((f) => !wrong.includes(f)).forEach((f) => place(f, targets.find((t) => t.id === pick[f.id]), 'right'));
+      if (!wrong.length) { done(true); return; }
+      if (tries >= max) {
+        // the right places still free (map: a key field no right flag holds; line: the flag's own step)
+        const taken = new Set(screen.flags.filter((f) => !wrong.includes(f)).map((f) => pick[f.id]));
+        const free = map ? screen.map.filter((x) => x.correct && !taken.has(String(x.n))).map((x) => String(x.n)) : null;
+        wrong.forEach((f, i) => { unplace(f, ''); delete cards[screen.flags.indexOf(f)].dataset.line; place(f, targets.find((t) => t.id === (map ? free[i] : f.target)), 'shown'); });
+        done(true, true);
+        return;
+      }
+      wrong.forEach((f) => unplace(f, lineFor(f, pick[f.id])));
+      check.disabled = true;
+      zones.setAttempts(tries + 1, max);
+      zones.setFeedback({ state: 'wrong', text: lineFor(wrong[0], pick[wrong[0].id]) });
+      cards[screen.flags.indexOf(wrong[0])].focus({ preventScroll: true });
+    }
+    // as the drops on S04 and S05b: the closing line alone; after the last attempt it explains the places shown
+    function done(focus, revealed = false) {
+      zones.setTool();
+      zones.setFeedback(revealed ? { state: 'neutral', verdict: ui.feedback.revealedPlaces, text: screen.feedbackCorrect } : { state: 'correct', verdict: '', text: screen.feedbackCorrect });
       ctx.complete();
       ctx.unlockNext({ focus });
     }
 
     if (ctx.revisit) {
       const keys = map ? screen.map.filter((x) => x.correct).map((x) => String(x.n)) : screen.flags.map((f) => f.target);
-      screen.flags.forEach((f, i) => place(f, targets.find((t) => t.id === keys[i])));
+      screen.flags.forEach((f, i) => place(f, targets.find((t) => t.id === keys[i]), 'right'));
       done(false);
     }
     return { unmount() {} };
