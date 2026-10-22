@@ -184,7 +184,7 @@ class Lesson {
     this.state.s = id;
     this.persist();
     this.zones.instruction.textContent = screen.instruction;
-    this.zones.setNext(!this.review, this.lockedWhy(screen)); // review mode: never locked
+    this.zones.setNext(!this.review, this.lockedWhy(screen), screen.lockedNext); // review mode: never locked
     this.zones.setPrev(this.order.indexOf(id) > 0);
     const tpl = TEMPLATES[screen.template];
     if (!tpl) throw new Error('no template ' + screen.template + ' for ' + id);
@@ -203,7 +203,7 @@ class Lesson {
       // Next in the footer: unlock (red), optionally with its own action (FT1 wrong = the route)
       // (review mode: Next stays unlocked and always walks on in order, so both only keep the focus move)
       unlockNext: ({ focus: f = false, onNext = null } = {}) => { if (!this.review) this.onNext = onNext; this.zones.setNext(false); if (f) this.zones.nextBtn.focus(); },
-      lockNext: (why = null) => { if (this.review) return; this.onNext = null; this.zones.setNext(true, why || this.lockedWhy(screen)); },
+      lockNext: (why = null) => { if (this.review) return; this.onNext = null; this.zones.setNext(true, why || this.lockedWhy(screen), screen.lockedNext); },
       answer: (a) => this.answer(id, a),
       firstAnswer: (trackingId) => this.firstAnswer(trackingId),
       store: { get: (key) => this.state.f[key] ?? '', set: (key, value) => { this.state.f[key] = value; } },
@@ -322,10 +322,10 @@ class Lesson {
   // The ghost hand for one interaction on this screen. The first time a type (tabs, stop, pickTwo)
   // appears it plays ~600 ms after the screen settles; once the type is seen it plays only after 8 s
   // without input. One letter per seen type is kept in state.h (suspend data). Returns { button, cancel }.
-  ghostFor({ type, steps, restore = null }) {
+  ghostFor({ type, steps, restore = null, chip = null }) {
     const code = { tabs: 't', stop: 'v', pickTwo: 's' }[type] || type.charAt(0);
     const seen = (this.state.h || '').includes(code);
-    const g = createGhost(this.stage, { ui: this.ui, steps, restore, seen,
+    const g = createGhost(this.stage, { ui: this.ui, steps, restore, seen, chip,
       onPlay: () => { if (!(this.state.h || '').includes(code)) { this.state.h = (this.state.h || '') + code; this.persist(); } } });
     this.ghosts.push(g);
     return g;

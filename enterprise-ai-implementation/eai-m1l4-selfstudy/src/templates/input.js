@@ -16,7 +16,7 @@ import { h, fmt, nextId, resolveLink } from '../util.js';
 import { glyph } from '../icons.js';
 import { attachTip } from '../tooltip.js';
 import { layout, sheet, contextLine, privacyLine, showMe, splitFirst } from './stage.js';
-import { targetSteps, scaleOf } from '../ghost.js';
+import { scaleOf } from '../ghost.js';
 
 const COUNTER_ANNOUNCE_AT = 230;
 
@@ -27,23 +27,38 @@ export const input = {
     const privacy = screen.stage.bottom ? privacyLine(screen.stage.bottom) : null;
     const announcer = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
     const controls = screen.fields.map((f) => field(f, ctx, privacy?.id, announcer));
-    const save = h('button', { class: 'w-btn w-btn-action' + (privacy ? '' : ' w-btn-end'), type: 'button', dataset: { action: 'save' }, onclick: () => doSave() }, ui.buttons.save);
+    // FX1 D4 (S02, saveWhenFilled): Save is the primary filled button, enabled once every required
+    // field has text (locked = grey with a lock, as Check); otherwise the outline action, always enabled
+    const primary = !!screen.saveWhenFilled;
+    const save = h('button', { class: 'w-btn ' + (primary ? 'w-btn-primary' : 'w-btn-action') + (privacy ? '' : ' w-btn-end'), type: 'button', dataset: { action: 'save' }, onclick: () => doSave() },
+      primary ? glyph('g-lock', { size: 20.48, className: 'w-btn-lock' }) : null, h('span', {}, ui.buttons.save));
     // the earlier homework in a new tab when content has its URL; the help line's question is a
     // button, its answer the tooltip (one string in the content, split at the question mark)
     const mid = screen.stage.middle || {};
     const href = mid.link ? resolveLink(ctx.content, mid.link) : null;
-    const hw = href ? h('a', { class: 'w-btn w-btn-ghost', href, target: '_blank', rel: 'noopener noreferrer', dataset: { action: 'homework1' } },
+    // FX1 D4: on S02 (headAbove) the two help controls are a small row of links under the fields
+    const small = !!screen.headAbove;
+    const hw = href ? h('a', { class: small ? 'w-link w-link-small' : 'w-btn w-btn-ghost', href, target: '_blank', rel: 'noopener noreferrer', dataset: { action: 'homework1' } },
       h('span', {}, ui.buttons.openHomework1), glyph('g-arrow', { size: 19.2 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')')) : null;
     const [question, answer] = mid.help ? splitFirst(mid.help.text) : ['', ''];
-    const help = mid.help ? h('button', { class: 'w-btn w-btn-ghost w-help-btn', type: 'button', dataset: { action: 'homeworkHelp' } }, question) : null;
+    const help = mid.help ? h('button', { class: (small ? 'w-link w-link-small' : 'w-btn w-btn-ghost') + ' w-help-btn', type: 'button', dataset: { action: 'homeworkHelp' } }, question) : null;
 
-    // the ghost hand taps the first field (the frame shows it with the focus border); "Show me" replays it
-    const first = controls[0]?.input;
-    const g = screen.ghost && !ctx.revisit ? ctx.ghost({ type: screen.ghost.type,
-      // the fingertip rests on the field's left part (92 x 41 px in, the frame), never on another control
-      steps: () => targetSteps(zones.main, screen.ghost.target).map((s) => (s.el ? { point: () => { const r = s.el.getBoundingClientRect(), k = scaleOf(s.el); return { x: r.left + 92 * k, y: r.top + 41 * k }; },
-        tap: () => s.el.classList.add('w-ghost-on'), hold: 900 } : s)),
-      restore: () => first?.classList.remove('w-ghost-on') }) : null;
+    // FX1 B1 / D4: the ghost hand taps each field and types its demo line (content, never stored), then
+    // moves to Save and stops there without pressing it; the fields get their text back afterwards.
+    // "Show me how" replays it.
+    let before = null;
+    const g = !ctx.revisit ? ctx.ghost({ type: screen.ghost?.type || 'input',
+      steps: () => {
+        before = controls.map((c) => c.input.value);
+        // the fingertip rests on the field's left part (92 x 41 px in, the frame), never on another control
+        const at = (el) => () => { const r = el.getBoundingClientRect(), k = scaleOf(el); return { x: r.left + Math.min(92, r.width / 3) * k, y: r.top + Math.min(41, r.height / 2) * k }; };
+        return [
+          ...controls.map((c, i) => ({ point: at(c.input), tap: () => { controls.forEach((x) => x.input.classList.toggle('w-ghost-on', x === c)); c.input.value = ''; c.input.dispatchEvent(new Event('input')); },
+            type: screen.fields[i].demo ? { el: c.input, text: screen.fields[i].demo } : null, hold: 300 })),
+          { point: () => { const r = save.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, sweep: true, hold: 900 },
+        ];
+      },
+      restore: () => controls.forEach((c, i) => { c.input.classList.remove('w-ghost-on'); if (before) { c.input.value = before[i]; c.input.dispatchEvent(new Event('input')); } }) }) : null;
 
     // S08B (arrange "chain"): the fields on one line with an arrow between each two
     const chain = screen.arrange === 'chain';
@@ -52,15 +67,30 @@ export const input = {
     if (chain) fields.style.gridTemplateColumns = screen.fields.map((f) => `minmax(0, ${f.width || 1}fr)`).join(' auto ');
     // S17B: what the learner wrote before (read-only), under the context line
     const shown = screen.stage.top?.show ? h('p', { class: 'w-shown' }, h('span', {}, ctx.store.get(screen.stage.top.show) || ui.record.empty)) : null;
-    layout(ctx, 'focus',
-      sheet('focus',
-        contextLine(screen.stage.top?.text),
-        shown,
-        screen.hint ? [h('div', { class: 'w-head-row' }, zones.instruction, g && screen.ghost.showMe ? g.button : null), h('p', { class: 'w-subline' }, screen.hint)] : zones.instruction,
-        h('div', { class: 'w-form-task', dataset: { interaction: '' } },
-          fields,
-          h('div', { class: 'w-actionbar' }, hw, help, privacy?.el, save)),
-        zones.band));
+    // the heading with "Show me how" on its right (FX1 B1: on every input screen)
+    const head = h('div', { class: 'w-head-row w-head-q' }, zones.instruction, h('span', { class: 'w-head-tools' }, g ? g.button : null));
+    const heading = [head, screen.hint ? h('p', { class: 'w-subline' }, screen.hint) : null];
+    // G1: a privacy line beside the note (S17B: the note and the privacy line both stand before Save)
+    const extra = screen.stage.privacy ? privacyLine(screen.stage.privacy) : null;
+    // (S02: the two help links small on the left of the same row, so the panel and its strip stay
+    // between the bar and the footer)
+    const task = h('div', { class: 'w-form-task', dataset: { interaction: '' } },
+      fields,
+      h('div', { class: 'w-actionbar' }, small ? h('div', { class: 'w-helprow' }, hw, help) : [hw, help], privacy?.el, extra?.el, save));
+    if (small) {
+      // FX1 D4 (S02): the context line and the heading stand above the panel, on the wash; the panel
+      // holds the fields, the small help row and the action bar, with more space between the groups
+      layout(ctx, 'focus',
+        h('div', { class: 'w-open' },
+          h('div', { class: 'w-open-head' }, contextLine(screen.stage.top?.text), shown, heading),
+          sheet('focus w-sheet-open', task, zones.band)));
+    } else {
+      layout(ctx, 'focus', sheet('focus', contextLine(screen.stage.top?.text), shown, heading, task, zones.band));
+    }
+    if (extra) controls.forEach((c) => c.input.setAttribute('aria-describedby', c.input.getAttribute('aria-describedby') + ' ' + extra.id));
+    // Save enabled once every required field has text (S02)
+    const fillState = () => { if (primary) save.disabled = controls.some((c, i) => !c.input.value.trim() && !screen.fields[i].optional); };
+    if (primary) { controls.forEach((c) => c.input.addEventListener('input', fillState)); fillState(); }
 
     // the help answer as the button's glass tooltip (and its description), once the button is in place
     if (help && answer) attachTip(help, answer, { side: 'below-left', width: 384 });

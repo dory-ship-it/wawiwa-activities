@@ -14,7 +14,12 @@
 //       "gutter-left"     in the gutter left of the panel, level with the answers (S03)
 //       "gutter-low"      in the gutter left of the panel, under the answers (V1, V2 stops)
 //       "check"           the Check button
+//       "options-sweep"   FX1 B1 (choice screens): two steps, from just above the first option down
+//                         to just under the last one; the hand sweeps over every option and taps
+//                         nothing (with a "Pick one" chip, createGhost's chip)
 //       anything else     a CSS selector inside scope
+//     A step's sweep (true) moves there without a tap; its type ({ el, text }) types the text into
+//     that field after the tap, one character at a time (restore() puts the field back).
 //     The three gutter targets come in from above ("slides down"), never crossing an answer.
 //     Templates keep their position-based steps only for a screen with no target.
 //     seen      false: plays ~600 ms after the screen settles; true: only after 8 s without input
@@ -74,13 +79,28 @@ export function targetSteps(scope, target) {
     return rs.length ? { top: Math.min(...rs.map((r) => r.top)), bottom: Math.max(...rs.map((r) => r.bottom)) } : null;
   };
   const FROM_ABOVE = ['below-panel', 'gutter-left', 'gutter-low'];
-  return (Array.isArray(target) ? target : [target]).map((name) => {
+  // the sweep line: the right part of stacked options, the middle of a grid (between its columns)
+  const sweepX = () => {
+    const rs = opts().map((el) => el.getBoundingClientRect());
+    if (!rs.length) return null;
+    const l = Math.min(...rs.map((r) => r.left)), r = Math.max(...rs.map((x) => x.right));
+    return rs.some((x) => x.left > l + 1) ? (l + r) / 2 : r - GAP_INSET;
+  };
+  return (Array.isArray(target) ? target : [target]).flatMap((name) => {
+    if (name === 'options-sweep') {
+      const k = () => scaleOf(scope);
+      return [
+        { point: () => { const A = optsBox(), x = sweepX(); return A && x !== null && { x, y: A.top - 14 * k() }; }, from: 'above', sweep: true, hold: 60 },
+        { point: () => { const A = optsBox(), x = sweepX(); return A && x !== null && { x, y: A.bottom + 18 * k() }; }, sweep: true, slow: true, hold: 1100 },
+      ];
+    }
     if (zones[name]) return { point: zones[name], from: FROM_ABOVE.includes(name) ? 'above' : null };
     return { el: name === 'check' ? scope.querySelector('[data-action="check"]') : scope.querySelector(name) };
   });
 }
 
-export function createGhost(stage, { ui, steps, restore = null, seen = false, onPlay = () => {} }) {
+// chip: a short label that travels with the hand (FX1 B1: "Pick one" on the choice screens)
+export function createGhost(stage, { ui, steps, restore = null, seen = false, chip = null, onPlay = () => {} }) {
   let timer = null, played = false, cancelled = false;
   const button = h('button', { class: 'w-showme', type: 'button', dataset: { action: 'showMe' } }, glyph('g-hand', { size: 24.32 }), h('span', {}, ui.buttons.showMe));
   // the click that presses "Show me" also stops a running demo first (pointerdown), then replays
@@ -96,7 +116,7 @@ export function createGhost(stage, { ui, steps, restore = null, seen = false, on
     document.removeEventListener('keydown', idleReset, true);
     onPlay();
     stopGhost();
-    active = run(stage, steps(), restore);
+    active = run(stage, steps(), restore, chip);
   }
   if (seen) {
     // a seen type: only after 8 s without input (any input restarts the wait)
@@ -118,11 +138,23 @@ export function createGhost(stage, { ui, steps, restore = null, seen = false, on
   };
 }
 
+// the demo types into a field, one character at a time (never announced: only the value is shown)
+const TYPE_MS = 45;
+async function typeInto(el, text, stopped) {
+  for (let n = 1; n <= text.length; n++) {
+    if (stopped()) return;
+    el.value = text.slice(0, n);
+    el.dispatchEvent(new Event('input'));
+    await new Promise((r) => setTimeout(r, TYPE_MS));
+  }
+}
+
 // One run of the demo. Returns { stop }.
-function run(stage, list, restore) {
+function run(stage, list, restore, chip) {
   const targets = list.filter((s) => (s.el && s.el.isConnected) || (s.point && s.point()));
   const ripple = h('span', { class: 'w-ghost-ripple' });
-  const hand = h('div', { class: 'w-ghost', 'aria-hidden': 'true' }, ripple, glyph('g-hand', { size: HAND, className: 'w-ghost-hand' }));
+  const hand = h('div', { class: 'w-ghost', 'aria-hidden': 'true' }, ripple, glyph('g-hand', { size: HAND, className: 'w-ghost-hand' }),
+    chip ? h('span', { class: 'w-ghost-chip' }, chip) : null);
   let done = false;
   const anims = [];
   const stop = () => {
@@ -175,13 +207,17 @@ function run(stage, list, restore) {
       if (done) return;
       const to = at(step);
       const easing = 'cubic-bezier(.3,.7,.3,1)';
-      if (carried) anim(carried.el, [{ transform: shift(from) }, { transform: shift(to) }], { duration: MOVE, easing });
-      await anim(hand, [{ opacity: 1, transform: place(from) }, { opacity: 1, transform: place(to) }], { duration: MOVE, easing });
+      const move = step.slow ? MOVE * 3 : MOVE; // a sweep over the options moves slowly enough to follow
+      if (carried) anim(carried.el, [{ transform: shift(from) }, { transform: shift(to) }], { duration: move, easing });
+      await anim(hand, [{ opacity: 1, transform: place(from) }, { opacity: 1, transform: place(to) }], { duration: move, easing: step.slow ? 'ease-in-out' : easing });
       if (done) return;
-      anim(ripple, [{ opacity: 0.55, transform: 'scale(.4)' }, { opacity: 0, transform: 'scale(1.6)' }], { duration: 420, easing: 'ease-out' });
-      await anim(hand, [{ transform: place(to) + ' scale(1)' }, { transform: place(to) + ' scale(.88)' }, { transform: place(to) + ' scale(1)' }], { duration: TAP });
+      if (!step.sweep) {
+        anim(ripple, [{ opacity: 0.55, transform: 'scale(.4)' }, { opacity: 0, transform: 'scale(1.6)' }], { duration: 420, easing: 'ease-out' });
+        await anim(hand, [{ transform: place(to) + ' scale(1)' }, { transform: place(to) + ' scale(.88)' }, { transform: place(to) + ' scale(1)' }], { duration: TAP });
+      }
       if (done) return;
       if (step.tap) step.tap();
+      if (step.type) await typeInto(step.type.el, step.type.text, () => done);
       if (step.carry) carried = { el: step.carry, origin: to };
       await wait(step.hold ?? HOLD);
       from = to;

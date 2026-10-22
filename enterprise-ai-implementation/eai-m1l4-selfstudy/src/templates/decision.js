@@ -80,6 +80,24 @@ function labelWithTerm(o, tooltips) {
 const paint = (btn, result, ui) => paintAnswer(btn, result, ui);
 const lock = (btns) => btns.forEach((b) => b.setAttribute('aria-disabled', 'true'));
 
+/* ---------- FX1 B1: "Show me how" on every choice screen ---------- */
+// The hand sweeps down over all the options with a small "Pick one" chip ("Pick two" on S03) and
+// taps nothing. The first choice screen plays it once on arrival; later ones only after 8 s idle.
+function choiceGhost(ctx, chip = ctx.ui.ghost.pickOne) {
+  if (ctx.revisit) return null;
+  const { screen, zones } = ctx;
+  return ctx.ghost({ type: screen.ghost?.type || 'choice', chip, steps: () => targetSteps(zones.main, screen.ghost?.target || 'options-sweep') });
+}
+// the heading with its tools on the right (the field chip, "Show me how")
+const headRow = (ctx, g, ...tools) => h('div', { class: 'w-head-row w-head-q' }, ctx.zones.instruction,
+  h('span', { class: 'w-head-tools' }, tools, g ? g.button : null));
+
+// FX1 B2: the strip after a right answer, or after the last wrong attempt (revealed: the right answer
+// is marked and explained, in the neutral strip, so it never looks like the learner's own)
+const rightStrip = (ctx, text, revealed, more = {}) => ctx.zones.setFeedback(revealed
+  ? { state: 'neutral', verdict: ctx.ui.feedback.revealed, text, ...more }
+  : { state: 'correct', text, ...more });
+
 // the Check button of a select-several task: locked (grey, lock) until the selection is complete
 export const checkButton = (ui, label, onclick) => h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'check' }, disabled: true, onclick },
   glyph('g-lock', { size: 20.48, className: 'w-btn-lock' }), h('span', {}, label));
@@ -93,6 +111,8 @@ function single(ctx) {
   // a statement line (S14, S15) whose optional highlight (the hours in S15) is set in bold inside it
   const k = top.highlight ? top.text.indexOf(top.highlight) : -1;
   const statement = k < 0 ? top.text : [top.text.slice(0, k), h('b', { class: 'w-figure' }, top.highlight), top.text.slice(k + top.highlight.length)];
+  const g = choiceGhost(ctx);
+  const head = headRow(ctx, g);
   if (isCase(screen)) {
     const v = screen.visual;
     layout(ctx, 'stage-decision',
@@ -103,7 +123,7 @@ function single(ctx) {
         v ? h('div', { class: 'w-hv', role: 'img', 'aria-label': v.alt },
           h('span', { class: 'w-hv-box' }, v.from), glyph('g-arrow-long', { size: 38.4, className: 'w-hv-arrow' }),
           h('span', { class: 'w-hv-box w-hv-away' }, v.to, h('span', { class: 'w-hv-chip' }, v.away))) : null),
-      h('section', { class: 'w-sheet w-sheet-right w-sheet-50' }, zones.instruction, group, zones.band));
+      h('section', { class: 'w-sheet w-sheet-right w-sheet-50' }, head, group, zones.band));
   } else if (isStage(screen)) {
     // the character's last line is the quote on the photo; the panel's context line is the content's
     // context (S01: in the third person), or else the character's lines before the quote
@@ -115,39 +135,16 @@ function single(ctx) {
         glyph('g-quote', { size: 51.2 }),
         h('blockquote', { class: 'w-quote' }, h('p', { class: 'w-quote-1' }, bubbles[bubbles.length - 1] || '')),
         h('figcaption', { class: 'w-attrib' }, attribution)),
-      h('section', { class: 'w-sheet w-sheet-right w-sheet-46' }, contextLine(top.context ?? bubbles.slice(0, -1).join(' ')), zones.instruction, group, zones.band));
+      h('section', { class: 'w-sheet w-sheet-right w-sheet-46' }, contextLine(top.context ?? bubbles.slice(0, -1).join(' ')), head, group, zones.band));
   } else {
     layout(ctx, 'focus',
-      sheet('focus', top.eyebrow ? ruleLabel(top.eyebrow) : null, contextLine(top.text, statement), zones.instruction, group, zones.band));
+      sheet('focus', top.eyebrow ? ruleLabel(top.eyebrow) : null, contextLine(top.text, statement), head, group, zones.band));
   }
   // S01's frame shows no hint line: the hint stays for screen readers. S14 and S15 keep it visible.
   zones.setHintVisible(!isStage(screen));
   zones.setFeedback({ state: 'hint', text: screen.hint });
-  // the ghost hand (S01): it slides down the gutter and stops under the panel, never on an answer
-  if (screen.ghost && !ctx.revisit) ctx.ghost({ type: screen.ghost.type, steps: () => targetSteps(zones.main, screen.ghost.target) });
-
-  const trackingId = screen.tracking[0].id;
-  let solved = false, chosen = -1;
-  const show = (i) => btns.forEach((b, j) => paint(b, j === i ? (screen.options[i].correct ? 'correct' : 'wrong') : '', ui));
-  const solve = (i, focus) => {
-    solved = true;
-    show(i);
-    lock(btns);
-    zones.setFeedback({ state: 'correct', text: screen.options[i].feedback });
-    ctx.unlockNext({ focus });
-  };
-
-  btns.forEach((btn, i) => btn.addEventListener('click', () => {
-    if (solved || i === chosen) return; // the same wrong card again is not a new attempt
-    chosen = i;
-    const o = screen.options[i];
-    ctx.answer({ trackingId, response: letter(i), result: o.correct ? 'correct' : 'wrong' });
-    if (o.correct) { ctx.complete(); solve(i, true); return; }
-    show(i); // wrong: the chosen card turns red, the others stay operable for the retry
-    zones.setFeedback({ state: 'wrong', text: o.feedback });
-  }));
-
-  if (ctx.revisit) solve(screen.options.findIndex((o) => o.correct), false);
+  // one right answer; wrong = the chosen card turns red, the others stay operable for the next attempt
+  oneQuestion(ctx, btns);
 }
 
 /* ---------- multi (S03), Focus ---------- */
@@ -158,16 +155,17 @@ function multi(ctx) {
   const trackingId = screen.tracking[0].id;
   const keys = screen.options.map((o, i) => (o.correct ? i : -1)).filter((i) => i >= 0);
   const selected = new Set();
-  let solved = false, marked = false;
+  const max = ctx.revisit ? 0 : screen.attempts || 0;
+  let solved = false, marked = false, tries = 0;
 
   const check = checkButton(ui, ui.buttons[screen.stage.bottom.action], () => doCheck());
-  // the ghost hand (it never selects or checks anything): the target the content names (S03: it
-  // slides down the left gutter beside the cards)
-  if (screen.ghost && !ctx.revisit) ctx.ghost({ type: screen.ghost.type, steps: () => targetSteps(zones.main, screen.ghost.target) });
+  // the ghost hand (it never selects or checks anything): it sweeps over the cards with "Pick two"
+  const g = choiceGhost(ctx, ui.ghost.pickTwo);
 
-  layout(ctx, 'focus', sheet('focus', contextLine(screen.stage.top.text), zones.instruction, group, zones.band));
+  layout(ctx, 'focus', sheet('focus', contextLine(screen.stage.top.text), headRow(ctx, g), group, zones.band));
   zones.setFeedback({ state: 'hint', text: screen.hint });
   zones.setTool(check);
+  if (max) zones.setAttempts(1, max);
 
   function update() {
     const full = selected.size >= need;
@@ -186,14 +184,15 @@ function multi(ctx) {
     update();
   }));
 
-  function solve(focus) {
+  // revealed (FX1 B2): after the last wrong attempt the wrong picks keep their cross, the keys are marked
+  function solve(focus, revealed = false, wrongPicks = []) {
     solved = true;
     keys.forEach((i) => selected.add(i));
-    btns.forEach((b, i) => { b.setAttribute('aria-pressed', String(keys.includes(i))); paint(b, keys.includes(i) ? 'correct' : '', ui); });
+    btns.forEach((b, i) => { b.setAttribute('aria-pressed', String(keys.includes(i))); paint(b, keys.includes(i) ? 'correct' : wrongPicks.includes(i) ? 'wrong' : '', ui); });
     lock(btns);
     zones.setTool(); // Check is done
     // one closing line for the pair when the content has it (S03), else each key's line
-    zones.setFeedback({ state: 'correct', text: screen.feedbackCorrect || keys.map((i) => screen.options[i].feedback).join(' ') });
+    rightStrip(ctx, screen.feedbackCorrect || keys.map((i) => screen.options[i].feedback).join(' '), revealed);
     ctx.unlockNext({ focus });
   }
 
@@ -203,7 +202,10 @@ function multi(ctx) {
     const rightCount = chosen.filter((i) => keys.includes(i)).length;
     const right = rightCount === keys.length && chosen.length === keys.length;
     ctx.answer({ trackingId, response: chosen.map(letter).join(','), result: right ? 'correct' : 'wrong' });
+    tries += 1;
     if (right) { ctx.complete(); solve(true); return; }
+    if (max && tries >= max) { ctx.complete(); solve(true, true, chosen.filter((i) => !keys.includes(i))); return; }
+    if (max) zones.setAttempts(tries + 1, max);
     // any wrong: every chosen card shows its state, the wrong ones are deselected, try again.
     // One strip: the verdict for the attempt and the feedback of the first wrong card chosen;
     // "One of two." is the neutral strip (the frame), "Not quite." the wrong one.
@@ -222,26 +224,42 @@ function multi(ctx) {
 }
 
 /* ---------- one single-choice question on answer cards (S06 situations, S08 rounds, ...) ---------- */
-// Wrong = the wrong mark on the card, retry; right = rows locked, onRight(focus). The same wrong
-// card again is not a new attempt. feedbackOf / isRight read the option (or the round) as needed.
+// Wrong = the wrong mark on the card, retry; right = rows locked, onRight(i, focus, revealed). The same
+// wrong card again is not a new attempt. feedbackOf / isRight read the option (or the round) as needed.
+// FX1 B2: with screen.attempts (2) the attempt marker counts the tries; after the last wrong one the
+// right card is marked (the wrong one keeps its cross) and onRight runs with revealed = true. The
+// first attempt is the one tracked (ctx.answer; later ones go out as retries).
 function rowQuestion(ctx, btns, list, { trackingId, isRight, feedbackOf, onRight, onChoose = () => {} }) {
   const { ui, zones } = ctx;
-  let solved = false, chosen = -1;
+  const max = ctx.revisit ? 0 : ctx.screen.attempts || 0;
+  let solved = false, chosen = -1, tries = 0;
   const show = (i) => btns.forEach((b, j) => paint(b, j === i ? (isRight(list[i]) ? 'correct' : 'wrong') : '', ui));
-  const solve = (i, focus) => { solved = true; chosen = i; show(i); lock(btns); onChoose(i, true); onRight(i, focus); };
+  const solve = (i, focus) => { solved = true; chosen = i; show(i); lock(btns); onChoose(i, true); onRight(i, focus, false); };
+  const reveal = (wrong) => {
+    solved = true;
+    const k = list.findIndex((o) => isRight(o));
+    btns.forEach((b, j) => paint(b, j === k ? 'correct' : j === wrong ? 'wrong' : '', ui));
+    lock(btns);
+    onChoose(k, true);
+    onRight(k, true, true);
+  };
   btns.forEach((btn, i) => btn.addEventListener('click', () => {
     if (solved || i === chosen) return;
     chosen = i;
+    tries += 1;
     const right = isRight(list[i]);
     if (!right) onChoose(i, false);
     ctx.answer({ trackingId: trackingId(), response: letter(i), result: right ? 'correct' : 'wrong' });
     if (right) { solve(i, true); return; }
+    if (max && tries >= max) { reveal(i); return; }
     show(i);
+    if (max) zones.setAttempts(tries + 1, max);
     zones.setFeedback({ state: 'wrong', text: feedbackOf(list[i]) });
   }));
+  if (max) zones.setAttempts(1, max);
   return {
     solve,
-    reset() { solved = false; chosen = -1; btns.forEach((b) => { paint(b, '', ui); b.removeAttribute('aria-disabled'); }); },
+    reset() { solved = false; chosen = -1; tries = 0; if (max) zones.setAttempts(1, max); btns.forEach((b) => { paint(b, '', ui); b.removeAttribute('aria-disabled'); }); },
   };
 }
 
@@ -255,7 +273,7 @@ function pair(ctx) {
   const list = screen.situations;
   const hintText = h('span', {});
   const row = h('div', { class: 'w-sit-row', dataset: { interaction: '' } });
-  layout(ctx, 'focus', sheet('focus w-sheet-sit', zones.instruction,
+  layout(ctx, 'focus', sheet('focus w-sheet-sit', headRow(ctx, choiceGhost(ctx)),
     h('p', { class: 'w-hintline' }, glyph('guess', { size: 23.04 }), hintText), row, zones.band));
   zones.setHintVisible(false); // the hint is the line under the heading
 
@@ -281,10 +299,10 @@ function pair(ctx) {
       trackingId: () => s.trackingId,
       isRight: (o) => o.correct,
       feedbackOf: (o) => o.feedback,
-      onRight: (i, f) => {
+      onRight: (i, f, revealed) => {
         const more = k < list.length - 1;
-        const go = zones.setFeedback({ state: 'correct', text: s.options[i].feedback,
-          actions: more ? [{ id: 'nextSituation', label: ui.buttons.nextSituation, onClick: () => show(k + 1, { focus: true, enter: true }) }] : [] });
+        const go = rightStrip(ctx, s.options[i].feedback, revealed,
+          { actions: more ? [{ id: 'nextSituation', label: ui.buttons.nextSituation, onClick: () => show(k + 1, { focus: true, enter: true }) }] : [] });
         if (more) { if (f) go.focus(); return; }
         ctx.complete();
         ctx.unlockNext({ focus: f });
@@ -315,7 +333,7 @@ function rounds(ctx) {
     sheet('focus',
       explainBand(screen.rules),
       h('div', { class: 'w-rounds', dataset: { interaction: '' } },
-        h('div', { class: 'w-round-left' }, counter, zones.instruction, h('div', { class: 'w-round-card' }, badge, line), h('p', { class: 'w-round-hint' }, screen.hint)),
+        h('div', { class: 'w-round-left' }, h('div', { class: 'w-round-top' }, counter, choiceGhost(ctx)?.button), zones.instruction, h('div', { class: 'w-round-card' }, badge, line), h('p', { class: 'w-round-hint' }, screen.hint)),
         group),
       zones.band));
   zones.setHintVisible(false); // the hint is shown in the left column
@@ -324,14 +342,14 @@ function rounds(ctx) {
     trackingId: () => list[r].trackingId,
     isRight: (o) => o.id === list[r].correct,
     feedbackOf: (o) => list[r].feedback[o.id],
-    onRight: (i, focus) => {
+    onRight: (i, focus, revealed) => {
       const fb = list[r].feedback[screen.options[i].id];
       if (r < list.length - 1) {
-        const go = zones.setFeedback({ state: 'correct', text: fb, actions: [{ id: 'nextRound', label: ui.buttons.nextRound, onClick: () => { show(r + 1); btns[0].focus(); } }] });
+        const go = rightStrip(ctx, fb, revealed, { actions: [{ id: 'nextRound', label: ui.buttons.nextRound, onClick: () => { show(r + 1); btns[0].focus(); } }] });
         if (focus) go.focus();
         return;
       }
-      zones.setFeedback({ state: 'correct', text: fb });
+      rightStrip(ctx, fb, revealed);
       ctx.complete();
       ctx.unlockNext({ focus });
     },
@@ -350,15 +368,15 @@ function rounds(ctx) {
   if (ctx.revisit) { show(list.length - 1); q.solve(screen.options.findIndex((o) => o.id === list[r].correct), false); }
 }
 
-// One right answer on screen.options, Next after it (fill, metric, bounds).
+// One right answer on screen.options, Next after it (single, fill, metric).
 function oneQuestion(ctx, btns, { onChoose } = {}) {
-  const { screen, zones } = ctx;
+  const { screen } = ctx;
   const q = rowQuestion(ctx, btns, screen.options, {
     trackingId: () => screen.tracking[0].id,
     isRight: (o) => o.correct,
     feedbackOf: (o) => o.feedback,
     onChoose,
-    onRight: (i, focus) => { zones.setFeedback({ state: 'correct', text: screen.options[i].feedback }); ctx.complete(); ctx.unlockNext({ focus }); },
+    onRight: (i, focus, revealed) => { rightStrip(ctx, screen.options[i].feedback, revealed); ctx.complete(); ctx.unlockNext({ focus }); },
   });
   if (ctx.revisit) q.solve(screen.options.findIndex((o) => o.correct), false);
 }
@@ -373,7 +391,7 @@ function fill(ctx) {
   layout(ctx, 'focus',
     sheet('focus',
       contextLine(screen.situation.text),
-      zones.instruction,
+      headRow(ctx, choiceGhost(ctx)),
       h('div', { class: 'w-fill', dataset: { interaction: '' } },
         h('div', { class: 'w-field-rows' }, rows),
         group),
@@ -400,8 +418,8 @@ function metric(ctx) {
   // NL3: the explain band on top (S08's), so the field name moves beside the heading as its chip
   layout(ctx, 'focus',
     sheet('focus',
-      screen.band ? [explainBand(screen.band), h('div', { class: 'w-head-row' }, zones.instruction, h('span', { class: 'w-field-chip w-head-chip' }, screen.field.label))]
-        : [ruleLabel(screen.field.label), zones.instruction],
+      screen.band ? [explainBand(screen.band), headRow(ctx, choiceGhost(ctx), h('span', { class: 'w-field-chip w-head-chip' }, screen.field.label))]
+        : [ruleLabel(screen.field.label), headRow(ctx, choiceGhost(ctx))],
       h('div', { class: 'w-metric', dataset: { interaction: '' } },
         group,
         h('div', { class: 'w-slots', 'aria-live': 'polite' }, h('p', { class: 'w-slots-title' }, screen.slotsTitle), h('ul', {}, slots.map((x) => x.el)))),

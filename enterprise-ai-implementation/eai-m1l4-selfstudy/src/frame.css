@@ -137,6 +137,14 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-head-row { display: flex; align-items: baseline; justify-content: space-between; gap: 20.48px; margin: 15.36px 0 7.68px; }
 .w-sheet > .w-head-row:first-child { margin-top: 0; }
 .w-head-row .w-instruction, .w-sheet .w-head-row .w-instruction { margin: 0; }
+/* FX1 B1: a question's heading with its tools on the right ("Show me how", a field chip); the
+   heading keeps its own margins */
+.w-head-tools { flex: none; display: inline-flex; align-items: center; gap: 12.8px; }
+.w-head-tools:empty { display: none; }
+.w-sheet .w-head-q { align-items: center; margin: 17.92px 0; }
+.w-sheet-focus .w-head-q { margin: 15.36px 0 20.48px; }
+.w-sheet > .w-head-q:first-child { margin-top: 0; }
+.w-round-top { display: flex; align-items: center; justify-content: space-between; gap: 12.8px; }
 .w-subline { margin: 0 0 20.48px; font: 400 19.2px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
 .w-label { margin: 0 0 6.4px; font: 600 14.72px/normal var(--wl-font-label); letter-spacing: .04em; color: var(--wl-teal-ink); }
 
@@ -189,6 +197,13 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-band-hint { font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
 .w-band-tool { margin-left: auto; display: flex; gap: 12.8px; }
 .w-band-tool:empty { display: none; }
+/* FX1 B2: the attempt marker, two small discs and "Attempt 1 of 2" (the S04 counter's type) */
+.w-attempts { margin: 0 0 0 auto; flex: none; display: inline-flex; align-items: center; gap: 8.96px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); white-space: nowrap; }
+.w-attempts:not([hidden]) + .w-band-tool { margin-left: 0; }
+.w-attempt-discs { display: inline-flex; gap: 5.12px; }
+.w-attempt-discs i { width: 12.8px; height: 12.8px; border-radius: 50%; border: 1.92px solid var(--wl-navy); background: var(--wl-white); }
+.w-attempt-discs i[data-used="true"] { background: var(--wl-navy); }
+.w-float .w-band-row { margin-top: 0; padding: 0 0 10.24px; }
 .w-strip { display: none; margin-top: 17.92px; padding: 16.64px 30.72px; gap: 15.36px; align-items: flex-start; border-top: 3.84px solid; border-radius: 0 0 var(--wl-radius-panel) var(--wl-radius-panel); }
 .w-band[data-strip="on"] .w-strip { display: flex; }
 .w-strip[data-tone="correct"] { background: var(--wl-correct-bg); border-top-color: var(--wl-teal); }
@@ -338,6 +353,22 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-fields-chain { gap: 15.36px; } /* the columns from each field's width (src/templates/input.js) */
 .w-fields-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .w-btn-end { margin-left: auto; }
+/* FX1 D4 (S02): the head above the panel, the panel below it, the whole group centred between the bar
+   and the footer; the help row of small links; Save as the primary filled navy button */
+.w-open { position: absolute; left: 50%; top: 275.2px; width: min(1075.2px, calc(100% - 204.8px)); transform: translate(-50%, -50%); z-index: 2; display: flex; flex-direction: column; gap: 20.48px; }
+.w-open > .w-sheet { position: relative; left: auto; top: auto; width: auto; transform: none; }
+.w-open-head { padding: 0 30.72px; }
+.w-open-head .w-head-q { margin: 7.68px 0 0; }
+.w-open-head .w-instruction { font: 800 38.4px/1.05 var(--wl-font-ui); letter-spacing: -1.024px; color: var(--wl-ink); }
+.w-open-head .w-subline { margin: 6.4px 0 0; }
+.w-sheet-open .w-helprow { display: flex; align-items: center; gap: 12.8px; margin-left: -10.24px; }
+.w-sheet-open .w-actionbar { margin-top: 20.48px; }
+.w-link-small { font: 600 15.36px/normal var(--wl-font-ui); }
+.w-link-small.w-help-btn:hover, .w-link-small.w-help-btn:focus-visible { border: 0; }
+.w-btn-primary { padding: 7.68px 25.6px; border: 0; background: var(--wl-navy); font: 700 17.28px/normal var(--wl-font-ui); color: var(--wl-white); }
+.w-btn-primary:hover:not(:disabled) { filter: brightness(1.12); }
+.w-btn-primary:disabled { background: var(--wl-neutral-line); cursor: not-allowed; }
+.w-btn-primary:disabled .w-btn-lock { display: block; }
 /* S17B: the learner's earlier text, read-only (the S19 sketch's stone box) */
 .w-shown { margin-top: 5.12px; padding: 6.4px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-stone);
   font: 400 15.36px/1.35 var(--wl-font-ui); color: var(--wl-text-2); overflow-wrap: anywhere; }
@@ -690,6 +721,13 @@ a.w-btn { text-decoration: none; }
 .w-placed { margin-top: 12.8px; display: flex; align-items: center; gap: 10.24px; padding: 7.68px 12.8px; border: 2.56px solid var(--wl-teal); border-radius: 10.24px; background: var(--wl-white);
   font: 600 16px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
 .w-placed-disc { flex: none; width: 25.6px; height: 25.6px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-teal); color: var(--wl-white); }
+/* FX1 E2: a card placed but not checked yet (white, the card line, no mark); a card shown in its right
+   place after the last attempt (the check, the whole chip a button for its explanation) */
+.w-placed[data-state="pending"] { border-color: var(--wl-line-strong); }
+.w-placed-explain { all: unset; display: flex; align-items: center; gap: 10.24px; width: 100%; min-height: 28px; cursor: pointer; }
+.w-placed-explain:focus-visible { outline: var(--wl-focus); outline-offset: 4px; }
+.w-placed:has(.w-placed-explain) { border-style: dashed; }
+.w-drops[data-done="true"] .w-drop { cursor: default; }
 
 /* the BPMN diagram (S05a, S05b): a white figure card 60cqw x 25.4cqw; inside it 1 diagram unit = .1cqw */
 .w-board { position: absolute; }
@@ -722,7 +760,24 @@ a.w-btn { text-decoration: none; }
 .w-target { border: 2.56px dashed var(--wl-dash); border-radius: 11.52px; }
 .w-target[data-armed="true"] { cursor: pointer; }
 .w-target[data-over="true"], .w-target[data-chosen="true"] { border-style: solid; border-color: var(--wl-navy); background: var(--wl-press-ring); }
-.w-target[data-placed="true"] { border-style: solid; border-color: var(--wl-teal); background: transparent; }
+.w-target[data-placed="true"], .w-target[data-placed="right"], .w-target[data-placed="shown"] { border-style: solid; border-color: var(--wl-teal); background: transparent; }
+/* FX1 E2: placed, not checked yet (the card line, no mark); shown after the last attempt (dashed teal) */
+.w-target[data-placed="pending"] { border-style: solid; border-color: var(--wl-line-strong); background: transparent; }
+.w-target[data-placed="shown"] { border-style: dashed; }
+.w-target-placed[data-state="pending"] { border-color: var(--wl-line-strong); }
+.w-target-placed[data-state="shown"] { border-style: dashed; }
+/* FX1 E3 (S05b): the diagram zoomed into the board's free space (same proportions), the tray beside it;
+   the places in a turquoise dashed outline with "Drop here", a gentle pulse while a label is picked up */
+.w-board-label { --z: 1.15; }
+.w-bpmn-zoom { width: calc(768px * var(--z)); height: calc(325.12px * var(--z)); }
+.w-bpmn-zoom > .w-bpmn { transform: scale(var(--z)); transform-origin: 0 0; }
+.w-board-label .w-label-tray, .w-board-label .w-float-tray { left: calc(768px * var(--z) + 25.6px); }
+.w-board-label .w-target:not([data-placed]) { border-color: var(--wl-turquoise); }
+.w-board-label .w-target-chip { border-color: var(--wl-turquoise); color: var(--wl-teal-ink); }
+@media (prefers-reduced-motion: no-preference) {
+  .w-board-label .w-target[data-armed="true"]:not([data-placed]) { animation: w-drop-pulse 1.6s ease-in-out infinite; }
+}
+@keyframes w-drop-pulse { 0%, 100% { box-shadow: 0 0 0 0 var(--wl-halo); } 50% { box-shadow: 0 0 0 7.68px var(--wl-halo); } }
 .w-target-chip, .w-target-placed { transform: translate(-50%, -50%); pointer-events: none; background: var(--wl-white); border-radius: 7.68px; }
 .w-target-chip { width: 97.28px; padding: 1.28px 0; border: 1.92px dashed var(--wl-dash); text-align: center; font: 500 14.08px/normal var(--wl-font-label); color: var(--wl-muted); }
 .w-target-placed { display: inline-flex; align-items: center; gap: 6.4px; padding: 2.56px 8.96px; border: 2.56px solid var(--wl-teal); white-space: nowrap;
@@ -805,6 +860,8 @@ a.w-btn { text-decoration: none; }
 .w-ghost-ripple { position: absolute; left: 0; top: -18.6px; width: 52px; height: 52px; border: 3px solid var(--wl-teal); border-radius: 50%; opacity: 0; }
 .w-ghost-static .w-ghost-ripple { opacity: .45; }
 .w-ghost-arrow { position: absolute; left: -38px; top: -34px; color: var(--wl-navy); transform: rotate(40deg); }
+/* FX1 B1: the chip that travels with the hand ("Pick one"; the kit's "Drag down to a column" chip) */
+.w-ghost-chip { position: absolute; left: 48px; top: 44px; font: 700 15.36px/normal var(--wl-font-ui); color: var(--wl-white); background: var(--wl-navy); border-radius: 6.4px; padding: 3.84px 10.24px; white-space: nowrap; }
 
 /* ---------- motion: push-in once, draw-on, the strip's slide-up; nothing ambient ---------- */
 @media (prefers-reduced-motion: no-preference) {

@@ -10,7 +10,7 @@
 // every new screen) and the band: the hint row (hint text, the band's tool such as Check or Resume)
 // and the feedback strip (aria-live polite) flush to the bottom edges of the panel it sits in.
 // No learner-facing text here: every string arrives from the content JSON.
-import { h, reducedMotion } from './util.js';
+import { h, fmt, reducedMotion } from './util.js';
 import { glyph } from './icons.js';
 
 const TONE = { correct: 'correct', neutral: 'neutral', wrong: 'wrong', notice: 'neutral', guess: 'neutral', partial: 'neutral', pause: 'neutral' };
@@ -78,7 +78,9 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
   /* ---- band: hint row + feedback strip ---- */
   const bHint = h('span', { class: 'w-band-hint', 'aria-live': 'polite' });
   const bTool = h('div', { class: 'w-band-tool' });
-  const row = h('div', { class: 'w-band-row' }, bHint, bTool);
+  // FX1 B2: the attempt marker (two small discs, "Attempt 1 of 2") before the band's tool
+  const bTries = h('p', { class: 'w-attempts', hidden: true });
+  const row = h('div', { class: 'w-band-row' }, bHint, bTries, bTool);
   const sIcon = h('span', { class: 'w-strip-icon' });
   const bSr = h('span', { class: 'w-sr-only' });
   const bVerdict = h('strong', { class: 'w-band-verdict' });
@@ -91,7 +93,7 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
   const refresh = () => {
     const hintShown = !!bHint.textContent && band.dataset.hint !== 'off';
     bHint.classList.toggle('w-sr-only', band.dataset.hint === 'off');
-    row.hidden = !hintShown && !bTool.children.length;
+    row.hidden = !hintShown && !bTool.children.length && bTries.hidden;
     band.dataset.empty = String(row.hidden && band.dataset.strip === 'off');
   };
 
@@ -137,19 +139,33 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
   const setTool = (...els) => { bTool.replaceChildren(...els); refresh(); };
   // a screen whose frame shows no hint line keeps the hint for screen readers only
   const setHintVisible = (on) => { band.dataset.hint = on ? 'on' : 'off'; refresh(); };
+  // FX1 B2: setAttempts(i, n) shows "Attempt i of n" with n small discs (the first i filled);
+  // setAttempts(null) hides it
+  function setAttempts(i, n = 2) {
+    bTries.hidden = !i;
+    if (i) {
+      bTries.dataset.attempt = String(i);
+      bTries.replaceChildren(h('span', { class: 'w-attempt-discs', 'aria-hidden': 'true' },
+        Array.from({ length: n }, (_, k) => h('i', { dataset: { used: String(k < i) } }))), h('span', {}, fmt(ui.attempts.label, { i, n })));
+    }
+    refresh();
+  }
 
   /* ---- footer ---- */
   const prevBtn = h('button', { class: 'w-prev', type: 'button', dataset: { action: 'previous' }, onclick: () => { if (prevBtn.getAttribute('aria-disabled') !== 'true') onPrev(); } },
     h('span', {}, ui.footer.previous));
   const nextLock = glyph('g-lock', { size: 17.92, className: 'w-next-lock' });
+  const nextText = h('span', {}, ui.footer.next);
   const nextBtn = h('button', { class: 'w-next', type: 'button', dataset: { action: 'next' }, onclick: () => { if (nextBtn.dataset.locked !== 'true') onNext(); } },
-    nextLock, h('span', {}, ui.footer.next));
+    nextLock, nextText);
   const footer = h('footer', { class: 'w-footer' }, prevBtn, nextBtn);
 
   stage.append(scene, bar, main, footer); // the bar first: the reading and Tab order follow the screen top down
 
   // Next: locked = grey with a lock, aria-disabled, its aria-label says why; unlocked = red.
-  function setNext(locked, why = '') {
+  // label: the locked button's own words (FX1 D4, S02: "Save to continue"); unlocked it reads Next
+  function setNext(locked, why = '', label = null) {
+    nextText.textContent = locked && label ? label : ui.footer.next;
     nextBtn.dataset.locked = String(locked);
     nextLock.style.display = locked ? '' : 'none';
     if (locked) { nextBtn.setAttribute('aria-disabled', 'true'); nextBtn.setAttribute('aria-label', why || ui.footer.locked.default); }
@@ -170,9 +186,10 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
     main.replaceChildren();
     main.removeAttribute('data-layout');
     delete band.dataset.hint;
+    setAttempts(null);
     setTool();
     setFeedback({ state: 'hint', text: '' });
   }
 
-  return { scene, bar, main, footer, logo, instruction, band, menuBtn, nextBtn, prevBtn, setScene, setFeedback, setTool, setHintVisible, setNext, setPrev, setBar, setSaved, clearScreen };
+  return { scene, bar, main, footer, logo, instruction, band, menuBtn, nextBtn, prevBtn, setScene, setFeedback, setTool, setHintVisible, setAttempts, setNext, setPrev, setBar, setSaved, clearScreen };
 }
