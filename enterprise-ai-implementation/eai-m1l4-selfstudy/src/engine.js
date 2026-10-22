@@ -8,24 +8,25 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt } from './util.js?v=27c63b76';
-import { createZones } from './zones.js?v=27c63b76';
-import { createMenu, openDialog } from './menu.js?v=27c63b76';
-import { initTooltips, applyTerms } from './tooltip.js?v=27c63b76';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=27c63b76';
-import { decision } from './templates/decision.js?v=27c63b76';
-import { input } from './templates/input.js?v=27c63b76';
-import { sortDeck } from './templates/sortdeck.js?v=27c63b76';
-import { bpmn } from './templates/bpmn.js?v=27c63b76';
-import { flags } from './templates/flags.js?v=27c63b76';
-import { explorer } from './templates/explorer.js?v=27c63b76';
-import { video } from './templates/video.js?v=27c63b76';
-import { handoff } from './templates/handoff.js?v=27c63b76';
-import { check } from './templates/check.js?v=27c63b76';
-import { result } from './templates/result.js?v=27c63b76';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=27c63b76';
-import { createGhost, stopGhost } from './ghost.js?v=27c63b76';
-import { createTracking } from './tracking/index.js?v=27c63b76';
+import { h, fmt } from './util.js?v=13d5742a';
+import { createZones } from './zones.js?v=13d5742a';
+import { createMenu, openDialog } from './menu.js?v=13d5742a';
+import { initTooltips, applyTerms } from './tooltip.js?v=13d5742a';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=13d5742a';
+import { decision } from './templates/decision.js?v=13d5742a';
+import { input } from './templates/input.js?v=13d5742a';
+import { sortDeck } from './templates/sortdeck.js?v=13d5742a';
+import { bpmn } from './templates/bpmn.js?v=13d5742a';
+import { flags } from './templates/flags.js?v=13d5742a';
+import { explorer } from './templates/explorer.js?v=13d5742a';
+import { video } from './templates/video.js?v=13d5742a';
+import { handoff } from './templates/handoff.js?v=13d5742a';
+import { check } from './templates/check.js?v=13d5742a';
+import { result } from './templates/result.js?v=13d5742a';
+import { end } from './templates/end.js?v=13d5742a';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=13d5742a';
+import { createGhost, stopGhost } from './ghost.js?v=13d5742a';
+import { createTracking } from './tracking/index.js?v=13d5742a';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -33,7 +34,7 @@ const NARROW_BELOW = 900; // window narrower than this: show the "best on a comp
 const NOTE_H = 40;
 const MAX_TEXT = 250;     // fill-in responses are trimmed and capped (SCORM 1.2 safe)
 
-const TEMPLATES = { decision, input, sortDeck, bpmn, flags, explorer, video, handoff, check, result, title, moduleMap, goals, warmup, concept, keyParts, keyColumns };
+const TEMPLATES = { decision, input, sortDeck, bpmn, flags, explorer, video, handoff, check, result, end, title, moduleMap, goals, warmup, concept, keyParts, keyColumns };
 
 export async function boot(root) {
   // no-cache: the browser asks the server every time whether the content changed (tools/stamp.mjs)
@@ -153,7 +154,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=27c63b76').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=13d5742a').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }

@@ -22,7 +22,8 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
   position: absolute; left: 0; top: 0; width: var(--w-stage-w, 1280px); height: 720px; transform-origin: 0 0; overflow: hidden;
   background: var(--wl-stone); font-family: var(--wl-font-ui); line-height: 1.6; color: var(--wl-body-ink); }
 .w-stage[data-scene="stage"] { background: var(--wl-stage-ground); }
-.w-stage[data-scene="title"] { background: var(--wl-o1-ground); }
+.w-stage:is([data-scene="title"], [data-scene="end"]) { background: var(--wl-o1-ground); }
+.w-stage[data-scene="plain"] { background: var(--wl-stage-ground); } /* FX2 A: the video's clean ground */
 .w-stage *, .w-stage *::before, .w-stage *::after { box-sizing: border-box; }
 .w-stage button { font-family: inherit; }
 :where(.w-stage) p { margin: 0; } /* no specificity: any class's own margin wins */
@@ -42,46 +43,47 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-wash-photo { position: absolute; inset: -38.4px; background-size: cover; background-repeat: no-repeat; filter: blur(17.92px) saturate(.8); }
 .w-wash-veil { position: absolute; inset: 0; background: var(--wl-wash-veil); }
 
-/* ---------- top bar: y 0 to 97.28 (FX1: theme-kit13-topbar.html, Round 5 Kit 13; its cqw x 12.8) ---------- */
-.w-bar { position: absolute; left: 0; top: 0; width: 100%; height: var(--wl-bar-h); z-index: 4; display: flex; align-items: center; gap: 15.36px; padding: 0 23.04px;
+/* ---------- top bar: y 0 to 80.64 (FX1: theme-kit13-topbar.html, Round 5 Kit 13; its cqw x 12.8;
+   FX2 C: on every screen, O1 and END included, and 17% lower: logo, chapter label and steps with it) ---------- */
+.w-bar { position: absolute; left: 0; top: 0; width: 100%; height: var(--wl-bar-h); z-index: 4; display: flex; align-items: center; gap: 13.44px; padding: 0 23.04px;
   background: var(--wl-bar-focus-bg); border-bottom: 1px solid var(--wl-line); }
-.w-stage[data-scene="stage"] > .w-bar { background: var(--wl-bar-stage-bg); border-bottom: 0; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
-.w-stage[data-scene="title"] > .w-bar, .w-stage[data-scene="title"] > .w-footer { display: none; }
-.w-bar-logo { flex: none; width: 84.48px; height: auto; }
-.w-bar-rule { flex: none; width: 1px; height: 38.4px; background: var(--wl-line-mid); }
-.w-bar-menu { flex: none; width: 44px; height: 44px; margin: 0 -0.88px; display: grid; place-content: center; gap: 4.864px; padding: 0; border: 0;
+/* the dark bar: Stage screens, and O1 / END over their dark photo */
+.w-stage[data-bar="dark"] > .w-bar { background: var(--wl-bar-stage-bg); border-bottom: 0; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.w-stage[data-scene="title"] > .w-footer { display: none; }
+.w-bar-logo { flex: none; width: 70.4px; height: auto; }
+.w-bar-rule { flex: none; width: 1px; height: 32px; background: var(--wl-line-mid); }
+.w-bar-menu { flex: none; width: 44px; height: 44px; margin: 0 -0.88px; display: grid; place-content: center; gap: 4.224px; padding: 0; border: 0;
   border-radius: var(--wl-radius-btn); background: transparent; cursor: pointer; }
-.w-bar-menu i { display: block; width: 26.88px; height: 3.072px; background: var(--wl-ink); }
+.w-bar-menu i { display: block; width: 23.04px; height: 2.56px; background: var(--wl-ink); }
 .w-bar-chapter { flex: none; display: grid; min-width: 153.6px; line-height: 1.15; white-space: nowrap; }
 .w-bar-of { font: 500 14.08px/1.15 var(--wl-font-label); color: var(--wl-muted); }
-.w-bar-title { font: 800 23.04px/1.15 var(--wl-font-ui); color: var(--wl-ink); }
+.w-bar-title { font: 800 20.48px/1.15 var(--wl-font-ui); color: var(--wl-ink); }
 .w-saved { flex: none; font: 500 14.08px/1.2 var(--wl-font-label); color: var(--wl-error); }
 .w-steps-bar { margin: 0 0 0 auto; padding: 0; list-style: none; display: flex; align-items: flex-start; }
-.w-step { flex: none; width: 71.68px; display: flex; flex-direction: column; align-items: center; gap: 5.76px; }
+.w-step { flex: none; width: 71.68px; display: flex; flex-direction: column; align-items: center; gap: 3.84px; }
 .w-step-disc { width: var(--wl-step-d); height: var(--wl-step-d); border-radius: 50%; display: grid; place-items: center;
   background: var(--wl-white); border: 1px solid var(--wl-line-strong); color: var(--wl-idle-ink); }
 .w-step[data-state="done"] .w-step-disc { border: 0; background: var(--wl-navy); color: var(--wl-white); }
-.w-step[data-state="current"] .w-step-disc { border: 0; box-shadow: 0 0 0 3.84px var(--wl-turquoise), 0 0 0 8.96px var(--wl-halo); color: var(--wl-teal-ink); }
+.w-step[data-state="current"] .w-step-disc { border: 0; box-shadow: 0 0 0 3.2px var(--wl-turquoise), 0 0 0 7.68px var(--wl-halo); color: var(--wl-teal-ink); }
 .w-step-label { font: 500 14.08px/normal var(--wl-font-ui); color: var(--wl-muted); white-space: nowrap; }
 .w-step[data-state="current"] .w-step-label { font-weight: 700; color: var(--wl-ink); }
-.w-step-link { flex: 1; min-width: 17.92px; height: 3.2px; margin-top: 19.84px; background: var(--wl-line-mid); }
+.w-step-link { flex: 1; min-width: 17.92px; height: 2.56px; margin-top: 16px; background: var(--wl-line-mid); }
 .w-step-link[data-state="done"] { background: var(--wl-navy); }
-/* Stage: white on the dark bar; done = white disc with an ink check, to come = translucent white disc */
-.w-stage[data-scene="stage"] .w-bar-rule { background: var(--wl-bar-on-dark-rule); }
-.w-stage[data-scene="stage"] .w-bar-menu i { background: var(--wl-white); }
-.w-stage[data-scene="stage"] .w-bar-of { color: var(--wl-bar-on-dark-text); }
-.w-stage[data-scene="stage"] .w-bar-title { color: var(--wl-white); }
-.w-stage[data-scene="stage"] .w-step-disc { background: var(--wl-bar-on-dark-disc); border-color: var(--wl-bar-on-dark-ring); color: var(--wl-bar-on-dark-icon); }
-.w-stage[data-scene="stage"] .w-step[data-state="done"] .w-step-disc { background: var(--wl-white); color: var(--wl-ink); }
-.w-stage[data-scene="stage"] .w-step[data-state="current"] .w-step-disc { background: var(--wl-white); color: var(--wl-teal-ink); }
-.w-stage[data-scene="stage"] .w-step-label { color: var(--wl-bar-on-dark-text); }
-.w-stage[data-scene="stage"] .w-step[data-state="current"] .w-step-label { color: var(--wl-white); }
-.w-stage[data-scene="stage"] .w-step-link { background: var(--wl-bar-on-dark-link); }
-.w-stage[data-scene="stage"] .w-step-link[data-state="done"] { background: var(--wl-white); }
+/* the dark bar: white on it; done = white disc with an ink check, to come = translucent white disc */
+.w-stage[data-bar="dark"] .w-bar-rule { background: var(--wl-bar-on-dark-rule); }
+.w-stage[data-bar="dark"] .w-bar-menu i { background: var(--wl-white); }
+.w-stage[data-bar="dark"] .w-bar-of { color: var(--wl-bar-on-dark-text); }
+.w-stage[data-bar="dark"] .w-bar-title { color: var(--wl-white); }
+.w-stage[data-bar="dark"] .w-step-disc { background: var(--wl-bar-on-dark-disc); border-color: var(--wl-bar-on-dark-ring); color: var(--wl-bar-on-dark-icon); }
+.w-stage[data-bar="dark"] .w-step[data-state="done"] .w-step-disc { background: var(--wl-white); color: var(--wl-ink); }
+.w-stage[data-bar="dark"] .w-step[data-state="current"] .w-step-disc { background: var(--wl-white); color: var(--wl-teal-ink); }
+.w-stage[data-bar="dark"] .w-step-label { color: var(--wl-bar-on-dark-text); }
+.w-stage[data-bar="dark"] .w-step[data-state="current"] .w-step-label { color: var(--wl-white); }
+.w-stage[data-bar="dark"] .w-step-link { background: var(--wl-bar-on-dark-link); }
+.w-stage[data-bar="dark"] .w-step-link[data-state="done"] { background: var(--wl-white); }
 
-/* ---------- main: y 97.28 to 720 (O1: the whole stage) ---------- */
+/* ---------- main: y 80.64 to 720, under the bar on every screen ---------- */
 .w-main { position: absolute; left: 0; top: var(--wl-bar-h); width: 100%; height: calc(720px - var(--wl-bar-h)); z-index: 1; overflow: hidden; }
-.w-stage[data-scene="title"] > .w-main { top: 0; height: 720px; }
 
 /* ---------- footer: Previous bottom-left, Next bottom-right ---------- */
 .w-footer { position: absolute; left: 23.04px; right: 23.04px; bottom: 17.92px; z-index: 4; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
@@ -123,7 +125,8 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-showme:hover { background: var(--wl-keypill-bg); }
 
 /* ---------- panel (the ivory sheet): hugs its content, centred between the bar and the footer ---------- */
-.w-sheet { position: absolute; top: 275.2px; transform: translateY(-50%); z-index: 2; display: flex; flex-direction: column; overflow: visible;
+/* (centred between the bar and the footer: half of main less half the footer's 72.32; 275.2 under the FX1 bar) */
+.w-sheet { position: absolute; top: calc((720px - var(--wl-bar-h)) / 2 - 36.16px); transform: translateY(-50%); z-index: 2; display: flex; flex-direction: column; overflow: visible;
   padding: 28.16px 30.72px; border-radius: var(--wl-radius-panel); background: var(--wl-ivory); box-shadow: var(--wl-panel-shadow); }
 .w-sheet-right { right: 30.72px; }
 .w-sheet-46 { width: 588.8px; }
@@ -161,7 +164,7 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-glass-kicker { display: flex; align-items: center; gap: 12.8px; color: var(--wl-turquoise); }
 .w-glass-label { font: 700 17.92px/normal var(--wl-font-ui); color: var(--wl-white); }
 .w-chip-dark { font: 600 14.72px/normal var(--wl-font-label); border-radius: 5.12px; padding: 2.56px 10.24px; background: var(--wl-turquoise); color: var(--wl-o1-ground); }
-.w-glass-top .w-instruction, .w-stop-q, .w-video-title { margin: 15.36px 0 0; font: 800 39.68px/1.15 var(--wl-font-ui); letter-spacing: -.64px; color: var(--wl-white); }
+.w-glass-top .w-instruction { margin: 15.36px 0 0; font: 800 39.68px/1.15 var(--wl-font-ui); letter-spacing: -.64px; color: var(--wl-white); }
 .w-gq { fill: var(--wl-turquoise); stroke: none; }
 /* S01: the character's quote, bottom left on the photo */
 .w-quote-glass { left: 43.52px; bottom: 102.4px; width: 512px; padding: 25.6px 30.72px; }
@@ -244,8 +247,7 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-eyebrow { display: inline-flex; align-items: center; gap: 8.96px; font: 700 16.64px/normal var(--wl-font-ui); color: var(--wl-teal-ink); }
 .w-focus-head .w-instruction { margin: 15.36px 0 0; font: 800 56.32px/1 var(--wl-font-ui); letter-spacing: -1.792px; color: var(--wl-ink); }
 
-/* ---------- O1 title (the only dark screen) ---------- */
-.w-o1-logo { position: absolute; left: 64px; top: 56.32px; width: 120px; height: auto; z-index: 2; }
+/* ---------- O1 title (dark, under the dark bar: FX2 C, the bar's logo replaces O1's own) ---------- */
 .w-o1-body { position: absolute; left: 64px; bottom: 102.4px; width: 742.4px; z-index: 2; }
 .w-title-program { font: 600 17.28px/normal var(--wl-font-label); letter-spacing: .06em; color: var(--wl-aqua-text); }
 .w-main[data-layout="title"] .w-instruction { margin: 15.36px 0 0; font: 800 69.12px/1.02 var(--wl-font-ui); letter-spacing: -2.304px; color: var(--wl-white); }
@@ -256,6 +258,21 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-start { margin: 0; display: inline-flex; align-items: center; gap: 10.24px; padding: 15.36px 33.28px; border: 0; border-radius: 8.96px; background: var(--wl-red);
   font: 700 23.04px/normal var(--wl-font-ui); color: var(--wl-white); cursor: pointer; }
 .w-start:hover { filter: brightness(.92); }
+
+/* ---------- FX2 G: END, the closing screen (the films' branded end card): centred on O1's dark photo ---------- */
+.w-end { position: absolute; left: 50%; top: calc((720px - var(--wl-bar-h)) / 2 - 36.16px); width: min(921.6px, calc(100% - 204.8px)); transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; text-align: center; }
+.w-end-logo { width: 112.64px; height: auto; margin-bottom: 25.6px; }
+.w-main[data-layout="end"] .w-instruction { margin: 0; font: 800 76.8px/1.02 var(--wl-font-ui); letter-spacing: -2.304px; color: var(--wl-white); }
+.w-end-accent { color: var(--wl-turquoise); }
+.w-end-sub { margin-top: 15.36px; font: 600 20.48px/1.35 var(--wl-font-label); letter-spacing: .02em; color: var(--wl-aqua-text); }
+.w-end-status { margin-top: 30.72px; display: flex; flex-direction: column; align-items: center; gap: 10.24px; }
+.w-end-chip { display: inline-flex; align-items: center; gap: 8.96px; padding: 6.4px 17.92px; border-radius: 7.68px; background: var(--wl-neutral-bg);
+  font: 700 19.2px/normal var(--wl-font-ui); color: var(--wl-ink); }
+.w-end-chip[data-passed="true"] { background: var(--wl-turquoise); color: var(--wl-o1-ground); }
+.w-end-hint { font: 400 18.56px/1.4 var(--wl-font-ui); color: var(--wl-glass-text); }
+.w-end-next { margin-top: 30.72px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12.8px 20.48px; }
+.w-end-next-line { font: 600 20.48px/1.35 var(--wl-font-ui); color: var(--wl-white); }
 
 /* ---------- O2 module map ---------- */
 .w-map { position: absolute; left: 0; right: 0; top: 241.92px; height: 153.6px; }
@@ -377,7 +394,7 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-btn-end { margin-left: auto; }
 /* FX1 D4 (S02): the head above the panel, the panel below it, the whole group centred between the bar
    and the footer; the help row of small links; Save as the primary filled navy button */
-.w-open { position: absolute; left: 50%; top: 275.2px; width: min(1075.2px, calc(100% - 204.8px)); transform: translate(-50%, -50%); z-index: 2; display: flex; flex-direction: column; gap: 20.48px; }
+.w-open { position: absolute; left: 50%; top: calc((720px - var(--wl-bar-h)) / 2 - 36.16px); width: min(1075.2px, calc(100% - 204.8px)); transform: translate(-50%, -50%); z-index: 2; display: flex; flex-direction: column; gap: 20.48px; }
 .w-open > .w-sheet { position: relative; left: auto; top: auto; width: auto; transform: none; }
 .w-open-head { padding: 0 30.72px; }
 .w-open-head .w-head-q { margin: 7.68px 0 0; }
@@ -398,27 +415,36 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-chain-arrow { align-self: center; margin-top: 22.72px; display: grid; color: var(--wl-navy); }
 .w-privacy { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 7.68px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
 
-/* ---------- V1 video (Stage: the film fills main) ---------- */
-/* FX1 C1: never cropped: the film is letterboxed inside main (contain) on the Stage ground */
-.w-video { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 0; display: block; width: 100%; height: 100%; object-fit: contain; background: var(--wl-stage-ground); }
-.w-video[data-started="false"] { opacity: 0; } /* before it plays: the chapter photo (the frames' ready state) */
-/* FX1 C3: the transcript open: the film shrinks to the left 60%, above the player bar; the transcript is
-   a readable light panel on the right (no overlay on the film) */
-.w-main[data-transcript="open"] .w-video { right: auto; bottom: auto; width: 60%; height: calc(100% - 174.08px); }
-.w-main[data-transcript="open"] .w-caption { left: 30%; max-width: calc(60% - 40.96px); bottom: 189.44px; font-size: 23.04px; }
-.w-main[data-transcript="open"] .w-bigplay { left: 30%; top: calc((100% - 174.08px) / 2); }
-.w-video-view, .w-stop-view { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-.w-video-view > *, .w-stop-view > * { pointer-events: auto; }
-.w-video-view[data-phase="playing"] .w-video-head, .w-video-view[data-phase="playing"] .w-bigplay { display: none; }
-.w-guiding { margin-top: 15.36px; font: 400 20.48px/1.4 var(--wl-font-ui); color: var(--wl-glass-text); }
+/* ---------- V1, V2 video (FX2 A: a page under the bar; the film in a bounded 16:9 frame) ---------- */
+/* the column (heading block, frame, player bar) and the side panel (transcript or stop) bottom-aligned
+   in one row, centred on the stage. Sizes in stage px from main's height:
+     --v-room   main below the column's top and its heading, less the player bar
+     closed     the frame about 60% of the stage width, at most as high as main allows (the bar may reach
+                the stage foot here: Previous and Next stay clear at its sides)
+     open/stop  about 55%, and the bar stays clear above Previous / Next (72.32 = 17.92 + 44 + 10.4) */
+.w-main[data-layout="video"] { --v-top: 17.92px; --v-head: 104.96px; --v-ctrl: 51.2px; --v-gap: 20.48px;
+  --v-room: calc(720px - var(--wl-bar-h) - var(--v-top) - var(--v-head) - var(--v-ctrl));
+  --v-w: min(calc(var(--w-stage-w, 1280px) * .6), calc((var(--v-room) - 17.92px) * 16 / 9)); }
+.w-main[data-layout="video"]:is([data-side="open"], [data-side="stop"]) { --v-w: min(calc(var(--w-stage-w, 1280px) * .55), calc((var(--v-room) - 72.32px) * 16 / 9)); }
+.w-player { position: absolute; left: 0; right: 0; top: var(--v-top); display: flex; justify-content: center; align-items: flex-end; gap: var(--v-gap); }
+.w-player-col { flex: none; width: var(--v-w); }
+/* the heading block: the instruction (h1), the meta line, "Watch for:" */
+.w-video-head { height: var(--v-head); }
+.w-video-head .w-instruction { margin: 0; font: 800 30.72px/1.15 var(--wl-font-ui); letter-spacing: -.512px; color: var(--wl-white); }
+.w-video-meta { margin-top: 6.4px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-on-glass); }
+.w-video-title { font-weight: 700; color: var(--wl-white); }
+.w-guiding { margin-top: 5.12px; font: 400 18.56px/1.35 var(--wl-font-ui); color: var(--wl-glass-text); }
 .w-guiding b { font-weight: 700; color: var(--wl-aqua-text); }
-.w-video-head .w-instruction { display: block; margin: 17.92px 0 0; font: 500 16.64px/normal var(--wl-font-label); letter-spacing: 0; color: var(--wl-on-glass); }
-.w-bigplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 115.2px; height: 115.2px; margin: 0; padding: 0 0 0 7.68px; border: 0; border-radius: 50%; display: grid; place-items: center;
-  background: var(--wl-white); box-shadow: 0 0 0 7.68px var(--wl-turquoise), 0 0 0 17.92px var(--wl-halo); color: var(--wl-teal-ink); cursor: pointer; }
-.w-caption { position: absolute; left: 50%; bottom: 181.76px; z-index: 3; width: max-content; max-width: 921.6px; transform: translateX(-50%); padding: 11.52px 25.6px; border-radius: 12.8px;
-  background: var(--wl-quote-glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font: 800 30.72px/1.25 var(--wl-font-ui); letter-spacing: -.384px; color: var(--wl-white); text-align: center; }
-.w-controls { position: absolute; left: 30.72px; right: 30.72px; bottom: 94.72px; z-index: 3; height: 64px; display: flex; align-items: center; gap: 20.48px; padding: 0 23.04px;
-  border-radius: 15.36px; background: var(--wl-quote-glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+/* the frame: never cropped (contain), the picture uncovered but for the caption and the ready Play disc */
+.w-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 15.36px 15.36px 0 0; background: var(--wl-o1-ground); }
+.w-video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; background: var(--wl-o1-ground); }
+.w-player[data-phase="playing"] .w-bigplay { display: none; }
+.w-bigplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 89.6px; height: 89.6px; margin: 0; padding: 0 0 0 6.4px; border: 0; border-radius: 50%; display: grid; place-items: center;
+  background: var(--wl-white); box-shadow: 0 0 0 6.4px var(--wl-turquoise), 0 0 0 15.36px var(--wl-halo); color: var(--wl-teal-ink); cursor: pointer; }
+.w-caption { position: absolute; left: 50%; bottom: 12.8px; z-index: 1; width: max-content; max-width: calc(100% - 51.2px); transform: translateX(-50%); padding: 6.4px 17.92px; border-radius: 10.24px;
+  background: var(--wl-quote-glass); font: 700 20.48px/1.3 var(--wl-font-ui); color: var(--wl-white); text-align: center; }
+/* the player bar: under the picture, attached to the frame, as wide */
+.w-controls { height: var(--v-ctrl); display: flex; align-items: center; gap: 17.92px; padding: 0 17.92px; border-radius: 0 0 15.36px 15.36px; background: var(--wl-o1-ground); }
 .w-play-btn, .w-tool { flex: none; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--wl-radius-btn); background: transparent; color: var(--wl-white); cursor: pointer; }
 .w-play-btn { width: 44px; margin: 0 -6.64px; }
 .w-tool { min-width: 44px; }
@@ -432,16 +458,34 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-seek-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2.56px; background: var(--wl-turquoise); }
 .w-seek-stop { position: absolute; top: -6.08px; width: 15.36px; height: 15.36px; margin-left: -7.68px; border-radius: 50%; background: var(--wl-white); box-shadow: 0 0 0 2.56px var(--wl-turquoise); }
 .w-seek-stop[data-done="true"] { background: var(--wl-turquoise); }
-.w-transcript { position: absolute; right: 30.72px; top: 15.36px; bottom: 174.08px; z-index: 3; width: calc(40% - 46.08px); display: flex; flex-direction: column; border-radius: var(--wl-radius-panel);
+.w-controls[data-stop="true"] { opacity: .75; }
+/* the side panel: about 40% of the stage (38%, within the stage less 2 x 35.84 gutters) */
+.w-transcript, .w-stop-view { flex: none; width: min(calc(var(--w-stage-w, 1280px) * .38), calc(var(--w-stage-w, 1280px) - 71.68px - var(--v-w) - var(--v-gap))); }
+/* the transcript: as high as the frame and the bar, scrolling inside */
+.w-transcript { height: calc(var(--v-w) * 9 / 16 + var(--v-ctrl)); display: flex; flex-direction: column; border-radius: var(--wl-radius-panel);
   background: var(--wl-ivory); box-shadow: var(--wl-panel-shadow); color: var(--wl-ink); }
-.w-transcript-head { margin: 0; padding: 17.92px 23.04px 7.68px; font: 800 23.04px/normal var(--wl-font-ui); }
-.w-transcript-list { flex: 1 1 auto; overflow-y: auto; padding: 0 12.8px 12.8px; font: 400 17.92px/1.5 var(--wl-font-ui); color: var(--wl-text-2); }
-.w-tline { margin: 0 0 4px; padding: 7.68px 10.24px; border-radius: 7.68px; }
+.w-transcript-head { margin: 0; padding: 15.36px 20.48px 6.4px; font: 800 20.48px/normal var(--wl-font-ui); }
+.w-transcript-list { flex: 1 1 auto; overflow-y: auto; padding: 0 10.24px 10.24px; font: 400 16.64px/1.45 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-tline { margin: 0 0 4px; padding: 6.4px 10.24px; border-radius: 7.68px; }
 .w-tline[data-active="true"] { background: var(--wl-keypill-bg); color: var(--wl-ink); }
 .w-tline-time { display: block; font: 500 14.08px/normal var(--wl-font-label); color: var(--wl-teal-ink); }
-.w-stop-card .w-showme { margin-top: 15.36px; }
-/* FX1 C2: at a stop the card (left) and the panel (right) stand above the player bar, which stays */
-.w-stop-view .w-stop-panel { top: 35.84px; transform: none; }
+/* the stop panel: in the transcript's place, its foot level with the bar's, as high as its content
+   (at most the column: heading, frame and bar) */
+.w-stop-view .w-stop-panel { position: relative; left: auto; right: auto; top: auto; width: 100%; max-height: calc(var(--v-head) + var(--v-w) * 9 / 16 + var(--v-ctrl)); transform: none;
+  padding: 20.48px 25.6px 23.04px; }
+.w-stop-view .w-stop-panel .w-band { margin: 0 -25.6px -23.04px; }
+.w-stop-view .w-band-row { padding: 0 25.6px 23.04px; }
+.w-stop-view .w-strip { padding: 12.8px 25.6px; }
+.w-stop-view .w-band-verdict { font-size: 20.48px; }
+.w-stop-view .w-band-text { font-size: 16.64px; line-height: 1.4; }
+.w-stop-kicker .w-glass-kicker { color: var(--wl-teal-ink); }
+.w-stop-kicker .w-glass-label { color: var(--wl-ink); }
+.w-stop-kicker .w-chip-dark { background: var(--wl-chip-bg); color: var(--wl-correct-head); }
+.w-stop-q { margin: 10.24px 0 15.36px; font: 800 24.32px/1.2 var(--wl-font-ui); letter-spacing: -.384px; color: var(--wl-ink); }
+.w-stop-view .w-ans-list { gap: 8.96px; }
+.w-stop-view .w-ans { padding: 8.96px 15.36px; gap: 12.8px; font-size: 17.92px; line-height: 1.3; }
+.w-stop-view .w-ans[data-result="correct"], .w-stop-view .w-ans[data-result="wrong"] { padding: 6.76px 13.16px; }
+.w-stop-tools { margin-top: 15.36px; justify-content: flex-end; }
 
 /* ================== styled by analogy (no frame yet; interaction and text unchanged) ================== */
 /* NL3 S14, S15 on Stage: the case card on the photo (a white figure card, top left, the S01 quote's
@@ -591,11 +635,16 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
   linear-gradient(var(--wl-navy), var(--wl-navy)) center / 26px 26px no-repeat; }
 
 /* S19 handoff (NL4: document view): head, steps + workbook preview | copy cards, the bottom row */
-.w-sheet-doc { padding: 16.64px 30.72px 28.16px; } /* the bottom stays the sheet's: the strip sits flush to the panel's foot */
+.w-sheet-doc { padding: 12.8px 30.72px 28.16px; } /* the bottom stays the sheet's: the strip sits flush to the panel's foot */
+/* FX2 E: tighter, so the panel with Open workbook in its own row and a strip stays within 41cqw */
 .w-sheet-doc .w-handoff-grid { gap: 17.92px; }
-.w-sheet-doc .w-copy-grid { gap: 7.68px; }
-.w-sheet-doc .w-copy-card { padding-top: 5.12px; padding-bottom: 6.4px; }
+.w-sheet-doc .w-copy-grid { gap: 5.12px; }
+.w-sheet-doc .w-copy-card { padding-top: 3.84px; padding-bottom: 5.12px; }
 .w-sheet-doc .w-handoff-right .w-label { margin-bottom: 3.84px; }
+.w-sheet-doc .w-strip { padding-top: 12.8px; padding-bottom: 12.8px; }
+.w-sheet-doc .w-handoff-head { margin-bottom: 3.84px; }
+.w-sheet-doc .w-handoff-bottom { margin-top: 6.4px; }
+.w-sheet-doc .w-handoff-open { margin-top: 6.4px; }
 .w-handoff-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15.36px; margin-bottom: 7.68px; }
 .w-handoff-head .w-label { margin: 0 0 2.56px; }
 .w-sheet .w-handoff-head .w-instruction { margin: 0; font-size: 28.8px; }
@@ -631,6 +680,8 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-copy-rows { margin: 0; }
 .w-copy-rows dd[data-empty="true"] { color: var(--wl-muted); }
 .w-handoff-bottom { margin-top: 8.96px; }
+/* FX2 E: Open workbook in its own row, the last of the content, right; nothing beside or over it */
+.w-handoff-open { margin-top: 10.24px; display: flex; justify-content: flex-end; }
 .w-return-line { flex: 1 1 auto; font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
 .w-col-handoff .w-handoff-bottom .w-privacy { margin: 0; }
 .w-sketch-list { margin: 0 0 5.12px; display: grid; gap: 1.28px; }
@@ -662,6 +713,33 @@ a.w-btn { text-decoration: none; }
 .w-sheet .w-head-q:has(+ .w-subline + .w-risk) { margin-bottom: 7.68px; }
 .w-sheet .w-risk + .w-risk-note { margin-top: 7.68px; display: flex; align-items: center; justify-content: space-between; gap: 15.36px; }
 .w-risk-note .w-link { margin-right: -10.24px; }
+/* FX2 D1 (S17): the case card (S06's raised situation card), then the five mistakes (S20B's cards) */
+.w-sheet-cases .w-head-q { margin-bottom: 12.8px; }
+.w-case-now { display: grid; gap: 6.4px; margin-bottom: 15.36px; padding: 14.08px 23.04px; border: 1px solid var(--wl-line); border-left: 5.12px solid var(--wl-navy); border-radius: var(--wl-radius-panel);
+  background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
+.w-case-now-text { font: 700 23.04px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-sheet-cases .w-ans { font-size: 18.56px; line-height: 1.25; }
+.w-sheet-cases .w-opt-sub { font-size: 15.36px; }
+/* FX2 D2 (S18A): the workbook rows (S19's preview look, larger): number, field and line, the card's select */
+.w-wb-fields { list-style: none; margin: 0; padding: 0; display: grid; gap: 8.96px; }
+.w-wb-field { display: grid; grid-template-columns: 35.84px minmax(0, 1fr) minmax(0, 1.25fr) 29.44px; align-items: center; gap: 15.36px; padding: 5.12px 15.36px;
+  border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
+.w-wb-n { width: 35.84px; height: 35.84px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-navy); font: 800 17.92px/1 var(--wl-font-ui); color: var(--wl-white); }
+.w-wb-name { display: grid; gap: 1.28px; min-width: 0; }
+.w-wb-label { font: 700 19.2px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-wb-sub { font: 400 15.36px/1.3 var(--wl-font-label); color: var(--wl-muted); }
+.w-field-select { width: 100%; min-height: 44px; margin: 0; padding: 6.4px 12.8px; border: 1px solid var(--wl-card-line); border-radius: var(--wl-radius-card); background: var(--wl-white);
+  font: 600 17.28px/1.3 var(--wl-font-ui); color: var(--wl-body-ink); cursor: pointer; }
+.w-field-select:hover:not(:disabled) { border-color: var(--wl-navy); }
+.w-field-select:disabled { opacity: 1; color: var(--wl-body-ink); cursor: default; }
+.w-wb-field .w-row-mark { visibility: hidden; }
+.w-wb-field[data-result="correct"] { border: 2.56px solid var(--wl-teal); padding: 3.84px 14.08px; }
+.w-wb-field[data-result="wrong"] { border: 2.56px solid var(--wl-error); padding: 3.84px 14.08px; }
+.w-wb-field[data-shown="true"] { border-style: dashed; }
+.w-wb-field:is([data-result="correct"], [data-result="wrong"]) .w-row-mark { visibility: visible; }
+.w-wb-field[data-result="correct"] .w-row-mark { border-color: var(--wl-teal); background: var(--wl-teal); }
+.w-wb-field[data-result="wrong"] .w-row-mark { border-color: var(--wl-error); background: var(--wl-error); }
+.w-sheet-fields .w-head-q { margin-bottom: 15.36px; }
 .w-check-q { flex: 1 1 auto; font: 600 18.56px/1.35 var(--wl-font-ui); color: var(--wl-ink); }
 .w-toggles { flex: none; display: flex; gap: 7.68px; }
 .w-toggle { min-width: 104px; min-height: 44px; padding: 0 17.92px; border: 1px solid var(--wl-line-strong); border-radius: 7.68px; background: var(--wl-white);
@@ -812,9 +890,9 @@ a.w-btn { text-decoration: none; }
   display: flex; align-items: baseline; justify-content: space-between; gap: 20.48px; }
 .w-task-head .w-instruction { margin: 0; font: 800 33.28px/normal var(--wl-font-ui); letter-spacing: -.64px; color: var(--wl-ink); }
 .w-task-sub { margin-top: 7.68px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
-/* NL4 S18A: a deck with the hint line AND the field chip: the chip and "Show me how" stay right of the
-   heading (as S09), so the deck never covers them */
-.w-main[data-layout="sort-deck"] .w-task-head.w-task-head-col:has(.w-head-chip) { display: flex; align-items: flex-start; }
+/* a deck with the hint line (S16): "Show me how" stays right of the heading (as S09), so the deck never
+   covers it (FX2: S18A, the screen this was for, left the deck; S16 now uses it) */
+.w-main[data-layout="sort-deck"] .w-task-head.w-task-head-col { display: flex; align-items: flex-start; }
 /* the off-panel feedback strip: the strip component, all corners rounded, the head inline, a card shadow */
 .w-float { position: absolute; z-index: 2; }
 .w-float .w-band { margin: 0; }
@@ -828,7 +906,6 @@ a.w-btn { text-decoration: none; }
    explain band on the deck's other side (S09); a wide deck for long cases (S17). The columns' top is
    set from the tallest card, strip and band (src/templates/sortdeck.js). */
 .w-main[data-layout="sort-deck"] { --deck-w: 435.2px; --deck-edge: max(51.2px, calc((100% - 1177.6px) / 2)); }
-.w-main[data-layout="sort-deck"]:has(.w-sdeck[data-size="wide"]) { --deck-w: 563.2px; }
 .w-float-beside { left: calc(50% + var(--deck-w) / 2 + 20.48px); right: var(--deck-edge); }
 .w-deck-band { position: absolute; top: 102.4px; left: var(--deck-edge); right: calc(50% + var(--deck-w) / 2 + 20.48px); }
 .w-deck-band .w-rules { margin: 0; padding: 12.8px 15.36px; }
@@ -837,12 +914,8 @@ a.w-btn { text-decoration: none; }
 .w-deck-band .w-rule-n { display: none; } /* the levels' order reads top down ("from open to closed") */
 .w-deck-band .w-rule-body { font-size: 15.36px; }
 .w-head-chip { align-self: center; flex: none; }
-/* four or five columns (S09, S16, S17): the placed cards a little closer, so three fit above the footer */
-.w-drops:is([data-count="4"], [data-count="5"]) .w-placed { margin-top: 8.96px; }
-/* five columns (S17): the S07 tile title size (20.48) for the column names, a little less padding */
-.w-drops[data-count="5"] { gap: 15.36px; }
-.w-drops[data-count="5"] .w-drop { padding: 15.36px 17.92px; }
-.w-drops[data-count="5"] .w-drop-title { font-size: 20.48px; line-height: 1.25; }
+/* four columns (S09, S16): a little closer, so each column is wider */
+.w-drops[data-count="4"] { gap: 15.36px; }
 
 /* the sort deck (S04): one card at a time, two offset cards behind it, the counter under it */
 .w-sdeck { position: absolute; left: 50%; top: 102.4px; width: var(--deck-w, 435.2px); transform: translateX(-50%); }
@@ -851,38 +924,39 @@ a.w-btn { text-decoration: none; }
 .w-deck-under { position: absolute; inset: 0; border: 1px solid var(--wl-line); border-radius: 15.36px; background: var(--wl-white); }
 .w-deck-under-2 { transform: translate(11.52px, 11.52px); }
 .w-deck-under-1 { transform: translate(5.76px, 5.76px); }
-.w-deck-card { position: relative; width: 100%; margin: 0; display: flex; align-items: center; gap: 15.36px; padding: 23.04px 25.6px; border: 2.56px solid var(--wl-navy);
+.w-deck-card { position: relative; width: 100%; margin: 0; display: flex; align-items: center; gap: 15.36px; padding: 15.36px 23.04px; border: 2.56px solid var(--wl-navy);
   border-radius: 15.36px; background: var(--wl-white); box-shadow: var(--wl-card-shadow); text-align: left; cursor: grab; touch-action: none; }
 .w-deck-card[aria-pressed="true"] { box-shadow: var(--wl-card-shadow), 0 0 0 3.84px var(--wl-press-ring); }
 .w-dragging { z-index: 20; cursor: grabbing; box-shadow: 0 25.6px 51.2px rgba(15, 42, 61, .22); }
 .w-grip { color: var(--wl-neutral-line); }
-.w-deck-text { font: 800 28.16px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
-.w-deck-count { margin-top: 20.48px; text-align: center; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+.w-deck-text { font: 800 23.04px/1.25 var(--wl-font-ui); color: var(--wl-ink); } /* FX2 B: the deck smaller, the columns get the room */
+.w-deck-count { margin-top: 12.8px; text-align: center; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
 /* drop columns: dashed, title and subtitle, fixed from the top (they grow down with the placed cards) */
 .w-drops { position: absolute; left: max(51.2px, calc((100% - 1177.6px) / 2)); right: max(51.2px, calc((100% - 1177.6px) / 2)); top: 314.88px;
   display: grid; gap: 20.48px; align-items: start; }
-.w-drop { min-height: 166.4px; padding: 17.92px 23.04px; border: 2.56px dashed var(--wl-dash); border-radius: 15.36px; background: var(--wl-drop-bg); }
+.w-drop { min-height: 166.4px; padding: 14.08px 17.92px; border: 2.56px dashed var(--wl-dash); border-radius: 15.36px; background: var(--wl-drop-bg); }
 .w-drop[data-armed="true"] { cursor: pointer; }
 .w-drop[data-over="true"], .w-drop[data-chosen="true"] { border-style: solid; border-color: var(--wl-navy); background: var(--wl-keypill-bg); }
-.w-drop-title { display: block; font: 800 28.16px/normal var(--wl-font-ui); color: var(--wl-ink); }
-.w-drop-sub { display: block; margin-top: 3.84px; font: 400 17.28px/normal var(--wl-font-label); color: var(--wl-muted); }
+.w-drop-title { display: block; font: 800 23.04px/1.2 var(--wl-font-ui); color: var(--wl-ink); }
+.w-drop-sub { display: block; margin-top: 2.56px; font: 400 15.36px/1.3 var(--wl-font-label); color: var(--wl-muted); }
 .w-drop-cards { list-style: none; margin: 0; padding: 0; }
-.w-placed { margin-top: 12.8px; display: flex; align-items: center; gap: 10.24px; padding: 7.68px 12.8px; border: 2.56px solid var(--wl-teal); border-radius: 10.24px; background: var(--wl-white);
-  font: 600 16px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
-.w-placed-disc { flex: none; width: 25.6px; height: 25.6px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-teal); color: var(--wl-white); }
+.w-placed { margin-top: 7.68px; display: flex; align-items: center; gap: 8.96px; padding: 5.12px 10.24px; border: 2.56px solid var(--wl-teal); border-radius: 10.24px; background: var(--wl-white);
+  font: 600 15.36px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+/* FX2 B: the card's own text, two lines at most; a dense column (it would reach Previous / Next): one line */
+.w-placed-text { min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+.w-drop[data-dense="true"] .w-placed { margin-top: 5.12px; padding-top: 2.56px; padding-bottom: 2.56px; }
+.w-drop[data-dense="true"] .w-placed-text { -webkit-line-clamp: 1; }
+.w-placed-disc { flex: none; width: 22.4px; height: 22.4px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-teal); color: var(--wl-white); }
 /* FX1 E2: a card placed but not checked yet (white, the card line, no mark); a card shown in its right
    place after the last attempt (the check, the whole chip a button for its explanation) */
 .w-placed[data-state="pending"] { border-color: var(--wl-line-strong); }
 .w-drop-cards { display: flex; flex-wrap: wrap; column-gap: 6.4px; }
-.w-drop-cards > .w-placed { flex: 1 1 100%; }
-.w-drop-cards > .w-placed-token { flex: none; margin-top: 8.96px; gap: 6.4px; padding: 3.84px 10.24px; }
-.w-placed-token .w-placed-disc { width: 20.48px; height: 20.48px; }
-.w-placed-explain { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 10.24px; width: calc(100% + 25.6px); min-height: 44px; margin: -7.68px -12.8px; padding: 7.68px 12.8px; cursor: pointer; }
+.w-drop-cards > .w-placed { flex: 1 1 100%; min-width: 0; }
+.w-placed-explain { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 8.96px; width: calc(100% + 20.48px); min-height: 44px; margin: 0 -10.24px; padding: 2.56px 10.24px; cursor: pointer; }
 .w-placed-explain:focus-visible { outline: var(--wl-focus); outline-offset: 4px; }
 .w-placed:has(.w-placed-explain) { border-style: dashed; }
 .w-drops[data-done="true"] .w-drop { cursor: default; padding-bottom: 12.8px; }
-/* a shown card's whole chip is its 44px explain button: the cards sit a little closer once done */
-.w-drops[data-done="true"]:is([data-count="4"], [data-count="5"]) .w-placed { margin-top: 6.4px; }
+/* a shown card's whole chip is its 44px explain button */
 .w-placed:has(.w-placed-explain) { padding-top: 0; padding-bottom: 0; }
 .w-placed:has(.w-placed-explain) .w-placed-explain { margin-top: 0; margin-bottom: 0; }
 

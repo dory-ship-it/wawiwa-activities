@@ -88,9 +88,9 @@ for (const size of ONLY.length ? [] : SIZE_ARG ? SIZES : [[1280, 720], [1920, 10
   expect(Math.abs(r.k - want) < 0.01 && r.left >= -0.5 && r.top >= -0.5 && r.left + r.sw <= w + 0.5 && r.top + r.sh <= h + 0.5, `${w}x${h}: stage scaled ${r.k.toFixed(3)} and inside the window`);
   expect(Math.abs(r.sw / r.k - stageW) < 1 && (stageW === 1600 || Math.abs(r.sw - w) < 2), `${w}x${h}: stage ${Math.round(r.sw / r.k)} wide, ${stageW < 1600 ? 'fills the window width' : 'capped at 1600, the rest letterboxed'}`);
   expect(!r.scroll, `${w}x${h}: no scrollbars`);
-  // the bar 97.28 high (rounded 97), main under it; Previous 23 px from the left, Next 23 px from the right, both 18 px over the foot
+  // the bar 80.64 high (FX2 C, rounded 81), main under it; Previous 23 px from the left, Next 23 px from the right, both 18 px over the foot
   const near = (a, b) => Math.abs(a - b) <= 1; // edges rounded one by one
-  expect(r.bar.join() === `0,0,${stageW},97` && r.main.join() === `0,97,${stageW},623` && near(r.prev[0], 23) && near(r.next[0] + r.next[2], stageW - 23)
+  expect(r.bar.join() === `0,0,${stageW},81` && r.main.join() === `0,81,${stageW},639` && near(r.prev[0], 23) && near(r.next[0] + r.next[2], stageW - 23)
     && near(r.prev[1] + r.prev[3], 702) && near(r.next[1] + r.next[3], 702),
     `${w}x${h}: shell in place (bar ${r.bar.join(',')}, main ${r.main.join(',')}, Previous ${r.prev.join(',')}, Next ${r.next.join(',')})`);
   expect(!r.removed.length, `${w}x${h}: no segmented bar, top bar, screen readout or minutes in the player${r.removed.length ? ' (' + r.removed.join(', ') + ')' : ''}`);
@@ -226,11 +226,12 @@ const STATES = [
   ['S16', 'checked, wrong back', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b', 'd', 'b', 'd', 'd', 'c']); await click(p, '[data-action="check"]'); }],
   ['S16', 'shown after attempt 2', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b', 'c', 'b', 'd', 'd', 'c']); await click(p, '[data-action="check"]'); await deck(p, ['c', 'b']); await click(p, '[data-action="check"]'); }],
   ['S16', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'd', 'b', 'd', 'd', 'c']); await click(p, '[data-action="check"]'); }],
-  ['S17', 'start', async (p) => p.keyboard.press('Shift')],
-  ['S17', 'longest case', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['3', '1', '5', '4']); }], // case e on the deck
-  ['S17', 'checked, wrong back', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['5', '1', '3', '4', '2']); await click(p, '[data-action="check"]'); }],
-  ['S17', 'shown after attempt 2', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['5', '1', '3', '4', '2']); await click(p, '[data-action="check"]'); await deck(p, ['1', '5']); await click(p, '[data-action="check"]'); }],
-  ['S17', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['3', '1', '5', '4', '2']); await click(p, '[data-action="check"]'); }],
+  // FX2 D1: S17 one case at a time, the mistakes as answer cards
+  ['S17', 'case 1', async (p) => p.keyboard.press('Shift')],
+  ['S17', 'case 1 wrong', async (p) => { await p.keyboard.press('Shift'); await click(p, '.w-opt[data-id="1"]'); }],
+  ['S17', 'case 1 revealed', async (p) => { await p.keyboard.press('Shift'); await click(p, '.w-opt[data-id="1"]'); await click(p, '.w-opt[data-id="2"]'); }],
+  ['S17', 'case 5 (longest) wrong', async (p) => { await p.keyboard.press('Shift'); await cases(p, ['3', '1', '5', '4']); await click(p, '.w-opt[data-id="5"]'); }],
+  ['S17', 'done', async (p) => { await p.keyboard.press('Shift'); await cases(p, ['3', '1', '5', '4']); await click(p, '.w-opt[data-id="2"]'); }],
   ['S17B', 'hint', async () => {}],
   ['S17B', 'one field, Save locked', async (p) => p.type('.w-input[data-store="L4_CASE_AIFIT"]', 'Sort notes by topic')],
   ['S17B', 'saved, full, long steps', async (p) => {
@@ -240,10 +241,11 @@ const STATES = [
     await click(p, '[data-action="save"]');
   }],
   // NL4: Chapters 5 and 6 (storyboard v3)
-  ['S18A', 'start', async (p) => p.keyboard.press('Shift')],
-  ['S18A', 'checked, wrong back', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b', 'b', 'c', 'd']); await click(p, '[data-action="check"]'); }],
-  ['S18A', 'shown after attempt 2', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b', 'b', 'c', 'd']); await click(p, '[data-action="check"]'); await deck(p, ['c']); await click(p, '[data-action="check"]'); }],
-  ['S18A', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'b', 'c', 'd']); await click(p, '[data-action="check"]'); }],
+  // FX2 D2: S18A the workbook rows with a select each (row: card)
+  ['S18A', 'rows', async () => {}],
+  ['S18A', 'checked, two wrong', async (p) => { await fields(p, { a: '1', b: '3', c: '2', d: '4' }); await click(p, '[data-action="check"]'); }],
+  ['S18A', 'shown after attempt 2', async (p) => { await fields(p, { a: '1', b: '3', c: '2', d: '4' }); await click(p, '[data-action="check"]'); await fields(p, { b: '4' }); await click(p, '[data-action="check"]'); }],
+  ['S18A', 'done', async (p) => { await fields(p, { a: '1', b: '2', c: '3', d: '4' }); await click(p, '[data-action="check"]'); }],
   ['S18', 'hint', async () => {}],
   ['S18', 'wrong (longest line)', async (p) => click(p, '.w-opt[data-id="a"]')],
   ['S18', 'right', async (p) => click(p, '.w-opt[data-id="b"]')],
@@ -277,6 +279,9 @@ const STATES = [
   ['S22', 'takeaway', async (p) => click(p, '.w-takeaway[data-id="b"]')],
   ['S22', 'finish confirm', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); }],
   ['S22', 'finished', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); await click(p, '[data-action="finish"]'); }],
+  // FX2 G: the closing screen, passed and not passed yet
+  ['END', 'passed', async (p) => { await attempt(p, { L4_S21_1: 'c|c', L4_S21_2: 'b|c', L4_S21_3: 'a|c', L4_S21_4: 'd|c', L4_S21_5: '5,6|c' }, { n: 1, s: 100, p: 1 }); await p.evaluate(() => window.__l4.go('END')); }],
+  ['END', 'not passed yet', async (p) => { await attempt(p, { L4_S21_1: 'a|w' }, { n: 1, s: 0, p: 0 }); await p.evaluate(() => window.__l4.go('END')); }],
 ];
 // NL4: every note the S19 copy cards show, at its field's maxlength
 async function fullNotes(p) {
@@ -292,6 +297,10 @@ async function attempt(p, answers, k) {
 async function flag(p, f, t) { await click(p, `.w-flag-card[data-flag="${f}"]`); await click(p, `.w-target[data-target="${t}"]`); }
 // S05b: click a label, then its place, per pair
 async function labels(p, pairs) { for (const [l, t] of pairs) { await click(p, `.w-label-card[data-label="${l}"]`); await click(p, `.w-target[data-target="${t}"]`); } }
+// FX2 D1 (S17): the right mistake for each case given, then "Next case"
+async function cases(p, picks) { for (const k of picks) { await click(p, `.w-opt[data-id="${k}"]`); await click(p, '[data-action="nextCase"]'); } }
+// FX2 D2 (S18A): a card chosen in each row given ({ row: card })
+async function fields(p, rows) { for (const [r, c] of Object.entries(rows)) await p.select(`select[data-row="${r}"]`, c); }
 // the sort deck: click the card, then a column, once per column given
 async function deck(p, cols) { for (const col of cols) { await click(p, '[data-action="card"]'); await click(p, `.w-drop[data-column="${col}"]`); } }
 // links that open a new tab: keep the test inside the module (the tab itself is checked in walk.mjs)

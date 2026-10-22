@@ -6,16 +6,17 @@
 //           (S02 case, S08B sketch, S12B metric, S17B notes), one line per part (the full text for screen
 //           readers and in the copy), each with Copy and the workbook field it goes into (a chip). A card
 //           with nothing filled shows "Not filled in" and its Copy is disabled.
-//   bottom  the return line (bold, always shown), the coach line and "Open workbook": a real link to the
+//   bottom  the return line (bold, always shown) and the coach line; then, in its own row at the end of
+//           the content (FX2 E), "Open workbook": a real link to the
 //           EXISTING workbook (content links, new tab, rel noopener noreferrer). Opening it unlocks Next
 //           (the flag "o" in suspend data, so a reload or LMS resume keeps it) and the band says so.
 // Copy: navigator.clipboard first; when it is blocked (an LMS iframe without clipboard permission) the
 // card's text is selected and the button says "Press Ctrl+C" (the selection copies with the keys).
 // The ghost hand shows the first Copy once (it points beside it and taps nothing). Nothing is tracked.
-import { h, resolveLink } from '../util.js?v=27c63b76';
-import { glyph, icon } from '../icons.js?v=27c63b76';
-import { layout, sheet, privacyLine, ruleLabel } from './stage.js?v=27c63b76';
-import { scaleOf } from '../ghost.js?v=27c63b76';
+import { h, resolveLink } from '../util.js?v=13d5742a';
+import { glyph, icon } from '../icons.js?v=13d5742a';
+import { layout, sheet, privacyLine, ruleLabel } from './stage.js?v=13d5742a';
+import { scaleOf } from '../ghost.js?v=13d5742a';
 
 const COPIED_MS = 2000;
 
@@ -66,7 +67,9 @@ export const handoff = {
         const range = document.createRange();
         range.selectNodeContents(list);
         sel.addRange(range);
-        say(ui.copyFallback);
+        // FX2 H2: the full line ("Press Ctrl+C (Cmd+C on Mac)") in the strip; the button only its keys, so
+        // the card keeps its width (the full line in the button squeezed the field chip)
+        say(ui.copyKeys);
         zones.setFeedback({ state: 'notice', text: ui.copyFallback + '.' });
       };
       btn.addEventListener('click', () => {
@@ -83,7 +86,9 @@ export const handoff = {
     const coach = privacyLine(screen.privacy);
     const open = h('a', { class: 'w-btn w-btn-primary w-open-wb', href, target: '_blank', rel: screen.handoff.rel, dataset: { action: 'open' } },
       h('span', {}, ui.buttons.open), glyph('g-arrow', { size: 19.2 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')'));
-    const bottom = h('div', { class: 'w-actionbar w-handoff-bottom' }, h('p', { class: 'w-return-line' }, screen.returnLine), coach.el, open);
+    // FX2 E: Open workbook in its own row at the end of the panel's content, under the return line
+    const bottom = [h('div', { class: 'w-actionbar w-handoff-bottom' }, h('p', { class: 'w-return-line' }, screen.returnLine), coach.el),
+      h('div', { class: 'w-handoff-open' }, open)];
 
     layout(ctx, 'focus', sheet('focus w-col-handoff w-sheet-doc', head,
       h('div', { class: 'w-handoff-grid', dataset: { interaction: '' } }, left, right), bottom, zones.band));

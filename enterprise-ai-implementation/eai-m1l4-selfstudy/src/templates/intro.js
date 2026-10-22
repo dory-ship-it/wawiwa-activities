@@ -1,7 +1,8 @@
 // Intro and Chapter 1 presentation templates, "Hybrid cinematic" look (NL1), frames in
 // planning/design-reference/hybrid-cinematic/screens-intro-ch2.html:
-//   title      (O1)  the only dark screen: O1's photo under its veil, no bar or footer. Logo top left;
-//                    programme and lesson line, h1, the quote with a turquoise mark, "Start the lesson".
+//   title      (O1)  dark: O1's photo under its veil, the dark bar over it (FX2 C: its logo is the
+//                    screen's), no footer; programme and lesson line, h1, the quote with a turquoise mark,
+//                    "Start the lesson".
 //   moduleMap  (O2)  Focus: "Where we are" and h1; five lesson stations on a line (ARIA tabs: arrow
 //                    keys move, Enter or Space opens, roving tabindex), each a disc (done = navy check,
 //                    today = turquoise ring with its number and a "Today" chip, to come = outline) with
@@ -23,11 +24,11 @@
 //                    term in bold, its line after it) with a check or a cross mark.
 // Title, module map, goals and key idea are presentation screens (screen.presentation): the engine
 // marks them done on arrival, so Next never locks. All text comes from the content.
-import { h } from '../util.js?v=27c63b76';
-import { glyph } from '../icons.js?v=27c63b76';
-import { scaleOf } from '../ghost.js?v=27c63b76';
-import { letter } from '../tracking/index.js?v=27c63b76';
-import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst, buildUp } from './stage.js?v=27c63b76';
+import { h } from '../util.js?v=13d5742a';
+import { glyph } from '../icons.js?v=13d5742a';
+import { scaleOf } from '../ghost.js?v=13d5742a';
+import { letter } from '../tracking/index.js?v=13d5742a';
+import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst, buildUp } from './stage.js?v=13d5742a';
 
 /* ---------- title (O1) ---------- */
 export const title = {
@@ -39,7 +40,6 @@ export const title = {
     // the quote mark is drawn, so the typographic marks around the content's quote are left out
     const quote = String(screen.quote || '').replace(/^[“"]+|[”"]+$/g, '');
     layout(ctx, 'title',
-      h('img', { class: 'w-o1-logo', src: 'assets/logo/wawiwa-logo.png', alt: ui.logoAlt, width: '271', height: '102' }),
       h('section', { class: 'w-o1-body' },
         h('p', { class: 'w-title-program' }, [screen.program, screen.kicker].filter(Boolean).join(' · ')),
         zones.instruction,

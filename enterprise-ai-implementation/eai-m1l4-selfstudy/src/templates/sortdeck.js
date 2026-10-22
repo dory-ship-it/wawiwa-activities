@@ -1,4 +1,5 @@
-// Sort deck (NL2, frames S04; NL3 S09, S16, S17), on the Focus wash, no panel:
+// Sort deck (NL2, frames S04; NL3 S09, S16; FX2: S17 and S18A left it for the decision template), on
+// the Focus wash, no panel:
 //   head     the instruction (h1) left; right the field chip (S09) and "Show me how"; the hint as the
 //            line under the heading when the content shows it (S16)
 //   deck     ONE card at a time, centred, with up to two offset cards behind it (the cards still to
@@ -21,14 +22,14 @@
 // drags it down, stopping above the columns; "Show me how" replays it.
 // Tracking: one matching interaction at the first Check; the response records each card's FIRST
 // column ("1.a,2.b,..."), correct only if every first placement was right. Later Checks are retries.
-import { h, fmt } from '../util.js?v=27c63b76';
-import { glyph } from '../icons.js?v=27c63b76';
-import { layout, explainBand } from './stage.js?v=27c63b76';
-import { dragDrop } from '../drag.js?v=27c63b76';
-import { checkButton } from './decision.js?v=27c63b76';
+import { h, fmt } from '../util.js?v=13d5742a';
+import { glyph } from '../icons.js?v=13d5742a';
+import { layout, explainBand } from './stage.js?v=13d5742a';
+import { dragDrop } from '../drag.js?v=13d5742a';
+import { checkButton } from './decision.js?v=13d5742a';
 
 const keyOf = (c) => String(c.id ?? c.n);
-const COLS_TOP = 314.88, GAP = 12.8; // stage px in main (the frames' 32.2cqw)
+const COLS_TOP = 222.72, GAP = 15.36; // stage px in main (FX2 B: higher than the frames' 32.2cqw, the columns hold the cards' text)
 
 export const sortDeck = {
   mount(ctx) {
@@ -62,7 +63,7 @@ export const sortDeck = {
     const counter = h('p', { class: 'w-deck-count', 'aria-hidden': 'true' });
     const live = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
     const help = h('span', { class: 'w-sr-only', id: helpId }, fmt(ui.drag.help, { n: cols.length }));
-    const deck = h('div', { class: 'w-sdeck', dataset: { interaction: '', size: screen.deckSize || null } }, stack, counter, help, live);
+    const deck = h('div', { class: 'w-sdeck', dataset: { interaction: '' } }, stack, counter, help, live);
     const float = h('div', { class: 'w-float w-float-beside' }, zones.band);
     const band = screen.band ? h('div', { class: 'w-deck-band' }, explainBand(screen.band)) : null;
     const check = checkButton(ui, ui.buttons.check, () => doCheck());
@@ -123,32 +124,37 @@ export const sortDeck = {
     place();
     if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(() => { if (!done || ctx.revisit) place(); });
 
-    // a placed card with its text; or (screen.placedLabel, S17: long cases under five columns) a short
-    // name, "Case 1", with the case's text for screen readers (R2's S17 markers did the same).
+    // a placed card shows its own text, small, up to two lines (FX2 B: it replaces the "Card n" token).
     // state: 'pending' (placed, not checked yet: no mark), 'right' (teal border, check), 'shown' (moved
-    // there after the last attempt: the check, and a button that shows its explanation)
-    // While the learner sorts (any number of cards may land in one column) a placed card is a small
-    // token, "Card 2" (S17's "Case n" markers), with its text for screen readers; when the screen is done
-    // every card shows in full in its right column (the frames' placed card).
+    // there after the last attempt: the check, and a button that shows its explanation).
+    // Any number of cards may land in one column: a column that would reach Previous / Next turns dense
+    // (one line per card, the rest of the text cut with an ellipsis; the whole text for screen readers).
     const chips = {};
-    function chip(c, state, full) {
-      const k = cards.indexOf(c) + 1;
-      const short = screen.placedLabel || (!full && 'cardChip');
-      const label = short ? [h('span', { 'aria-hidden': 'true' }, fmt(ui.progress[short], { i: k })), h('span', { class: 'w-sr-only' }, c.text)] : h('span', {}, c.text);
+    function chip(c, state) {
+      const label = h('span', { class: 'w-placed-text' }, c.text);
       const disc = state === 'pending' ? null : h('span', { class: 'w-placed-disc', 'aria-hidden': 'true' }, glyph('g-check-b', { size: 15.36 }));
       const body = state === 'shown'
         ? h('button', { class: 'w-placed-explain', type: 'button', dataset: { action: 'explain' }, onclick: () => zones.setFeedback({ state: 'neutral', verdict: ui.feedback.revealedPlaces, text: c.feedback.correct }) }, disc, label)
         : [disc, label];
-      return h('li', { class: 'w-placed' + (short && !screen.placedLabel ? ' w-placed-token' : ''), dataset: { state, card: keyOf(c) } }, body);
+      return h('li', { class: 'w-placed', dataset: { state, card: keyOf(c) } }, body);
     }
-    function put(c, colId, state, full = false) {
+    function put(c, colId, state) {
       const key = keyOf(c);
       chips[key]?.remove();
-      chips[key] = chip(c, state, full);
+      chips[key] = chip(c, state);
       cols.find((x) => x.id === colId).placed.append(chips[key]);
+      fitColumns();
     }
-    // done: every card in full, in card order within its column
-    const showAll = () => cards.forEach((c) => put(c, c.column, chips[keyOf(c)]?.dataset.state === 'shown' ? 'shown' : 'right', true));
+    // a column's foot stays clear of Previous / Next (72.32 = the footer's 17.92 + 44 + a 10.4 gap)
+    function fitColumns() {
+      const limit = zones.main.offsetHeight - 72.32;
+      cols.forEach((x) => {
+        delete x.el.dataset.dense;
+        if (colRow.offsetTop + x.el.offsetTop + x.el.offsetHeight > limit) x.el.dataset.dense = 'true';
+      });
+    }
+    // done: every card in its right column, in card order within it
+    const showAll = () => cards.forEach((c) => put(c, c.column, chips[keyOf(c)]?.dataset.state === 'shown' ? 'shown' : 'right'));
 
     function show() {
       const left = queue.length - qi; // this card and the ones still to come
@@ -217,7 +223,7 @@ export const sortDeck = {
 
     show();
     if (ctx.revisit) {
-      cards.forEach((c) => put(c, c.column, 'right', true));
+      cards.forEach((c) => put(c, c.column, 'right'));
       zones.setFeedback({ state: 'correct', text: ui.feedback.allPlaced });
       finish(false);
     }

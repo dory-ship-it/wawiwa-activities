@@ -26,12 +26,15 @@ export function screenViews(s, content) {
   // NL4 S20: the context line, the three questions (and the fix line); S20B: the five mistakes with their definitions, the note
   if (s.variant === 'selfcheck') return [[s.id, [...stageText(s.stage), ...s.rows.map((r) => r.text), s.fixLine]]];
   if (s.variant === 'risk') return [[s.id, [s.hint, ...s.options.flatMap((o) => [o.label, o.sub]), s.strip]]];
-  // NL4 S21R, its fullest state (not passed, all five missed): the chip, its line, each missed item's stem, line and link
+  // NL4 S21R, its fullest state (not passed, all five missed): the chip, its line, each missed item's
+  // stem and line (FX2 H1: the short stem; the "Review Chapter N" links are buttons, excluded as everywhere)
   if (s.template === 'result') {
     const check = content.screens.find((x) => x.id === s.from);
     return [[`${s.id} passed`, [s.passed.chip, s.passed.text]],
-      [`${s.id} not passed`, [s.notPassed.chip, s.notPassed.text, ...s.missed.flatMap((m) => { const it = check.items.find((x) => x.id === m.item); return [it.stem || it.instruction, m.text, s.reviewLabel.replace('{n}', m.chapter)]; })]]];
+      [`${s.id} not passed`, [s.notPassed.chip, s.notPassed.text, ...s.missed.flatMap((m) => { const it = check.items.find((x) => x.id === m.item); return [m.stem || it.stem || it.instruction, m.text]; })]]];
   }
+  // FX2 G END: the line under the big line, the status chip and its hint, the next-step line (logo, h1, link excluded)
+  if (s.template === 'end') return [[`${s.id} passed`, [s.sub, s.passed.chip, s.next]], [`${s.id} not passed`, [s.sub, s.notPassed.chip, s.notPassed.hint, s.next]]];
   // R2 templates
   if (s.variant === 'fill') return [[s.id, [s.situation.text, ...s.fieldRows.flatMap((f) => [f.label, f.value]), ...s.options.map((o) => o.label)]]];
   if (s.variant === 'metric') return [[s.id, [...bandText(s.band), s.field.label, ...s.options.map((o) => o.label), s.slotsTitle, ...s.slots.map((x) => x.label)]]];
@@ -67,11 +70,12 @@ export function screenViews(s, content) {
   // NL2 templates
   // sort deck: every placed card stays on screen in its column, with the current card on the deck
   // (NL3: with the field chip, the explain band and the hint line when the screen shows them)
-  // (S17, placedLabel: a placed card shows as "Case 1", so the longest case on the deck counts, and the short names)
-  if (s.template === 'sortDeck') {
-    const cardText = s.placedLabel ? [s.cards.map((c) => c.text).sort((a, b) => words(b) - words(a))[0], ...s.cards.map((c, i) => content.ui.progress[s.placedLabel].replace('{i}', i + 1))] : s.cards.map((c) => c.text);
-    return [[s.id, [s.header, ...bandText(s.band), s.hintShown ? s.hint : '', ...s.columns.flatMap((c) => [c.label, c.sub]), ...cardText]]];
-  }
+  // (FX2 B: a placed card shows its own text)
+  if (s.template === 'sortDeck') return [[s.id, [s.header, ...bandText(s.band), s.hintShown ? s.hint : '', ...s.columns.flatMap((c) => [c.label, c.sub]), ...s.cards.map((c) => c.text)]]];
+  // FX2 D1 S17: one case at a time, with the hint and the five mistakes (name and definition)
+  if (s.variant === 'cases') return s.cards.map((c) => [`${s.id} case ${c.id}`, [s.hint, c.text, ...s.options.flatMap((o) => [o.label, o.sub])]]);
+  // FX2 D2 S18A: the case chip, the hint, the four fields with their lines, every card chosen
+  if (s.variant === 'fields') return [[s.id, [s.header, s.hint, ...s.columns.flatMap((c) => [c.label, c.sub]), ...s.cards.map((c) => c.text)]]];
   if (s.template === 'keyParts') {
     const base = [s.label, s.text, ...s.parts.flatMap((p) => [p.title, p.text])];
     return [[s.id, base], [`${s.id} case on`, [...base, ...s.parts.flatMap((p) => [s.caseLabel, p.case])]]];

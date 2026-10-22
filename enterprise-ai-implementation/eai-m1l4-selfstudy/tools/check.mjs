@@ -135,6 +135,7 @@ const PAIRS = [
   ['wl-teal', 'wl-white', 3, 'correct border (UI)'],
   ['wl-error', 'wl-white', 3, 'wrong border (UI)'],
   ['wl-turquoise', 'wl-white', 2, 'current-step ring (decorative; the label is bold and the state is in aria-current)'],
+  ['wl-turquoise', 'wl-o1-ground', 3, 'FX2 G END: "complete" in the brand accent on the dark photo (76.8px, large text)'],
 ];
 console.log('\n  contrast (text / background, ratio, needed, use)');
 for (const [fg, bg, need, use] of PAIRS) {
@@ -142,8 +143,9 @@ for (const [fg, bg, need, use] of PAIRS) {
   const line = `${('--' + fg).padEnd(14)} on ${('--' + bg).padEnd(16)} ${r.toFixed(2).padStart(5)}:1  >= ${need}  ${use}`;
   r >= need ? ok(line) : fail(line);
 }
-// turquoise is never text on a light ground (it is the glass card's icon colour, and a ring)
-const turquoiseText = [...frameCss.matchAll(/([^{}]+)\{([^}]*[^-]color:\s*var\(--wl-turquoise\)[^}]*)\}/g)].map((m) => m[1].trim()).filter((sel) => !/glass|\.w-tr\[/.test(sel));
+// turquoise is never text on a light ground (it is the glass card's icon colour, and a ring; FX2 G: the
+// END keyword on the dark photo, large text, the pair above)
+const turquoiseText = [...frameCss.matchAll(/([^{}]+)\{([^}]*[^-]color:\s*var\(--wl-turquoise\)[^}]*)\}/g)].map((m) => m[1].trim()).filter((sel) => !/glass|\.w-tr\[|\.w-end-accent/.test(sel));
 turquoiseText.length ? fail('--wl-turquoise used as text colour in frame.css: ' + turquoiseText.join(', ')) : ok('--wl-turquoise is text colour only on dark glass');
 console.log('');
 
@@ -223,7 +225,8 @@ for (const [s, t, stop] of interactions) {
 // option letters in on-screen order; sort = "card.column" pairs; diagram = hotspot letters; tiles = numbers.
 function keyOf(s, t, stop) {
   const letters = (opts) => opts.map((o, i) => (o.correct ? String.fromCharCode(97 + i) : null)).filter(Boolean).join(',');
-  if (s.template === 'sort' || s.template === 'sortDeck') return s.cards.map((c) => `${c.id ?? c.n}.${c.column}`).join(',');
+  // (FX2 D: S17 cases and S18A fields keep the sort's matching pattern, "card.column")
+  if (s.template === 'sort' || s.template === 'sortDeck' || s.variant === 'cases' || s.variant === 'fields') return s.cards.map((c) => `${c.id ?? c.n}.${c.column}`).join(',');
   if (s.template === 'bpmn' && s.variant === 'label') return s.labels.map((l) => `${l.code}.${l.target}`).join(',');
   if (s.variant === 'tiles') return s.tiles.filter((x) => x.correct).map((x) => String(x.n)).join(',');
   // NL3 flags: the map's flagged fields in number order; the line's flags as one-character code.step

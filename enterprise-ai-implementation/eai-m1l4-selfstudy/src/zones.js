@@ -2,16 +2,16 @@
 // in stage px (the stage is 720 high, 1280 to 1600 wide, scaled as a whole):
 //   scene   the whole stage, behind everything: the chapter photo below the bar (Stage mode, push-in
 //           once), the blurred photo under a stone veil (Focus mode), or O1's photo under its veil
-//   bar     y 0 to 97.28, every screen but O1: logo | menu button | chapter name; right, the
-//           chapter's steps (disc + verb; done / current / next)
-//   main    y 97.28 to 720, the screen's own layout (O1: the whole stage)
-//   footer  Previous bottom-left, Next bottom-right, floating over main (O1: none)
+//   bar     y 0 to 80.64, every screen (FX2 C: O1 and END too): logo | menu button | chapter name;
+//           right, the chapter's steps (disc + verb; done / current / next)
+//   main    y 80.64 to 720, the screen's own layout
+//   footer  Previous bottom-left, Next bottom-right, floating over main (O1: none; END: Previous only)
 // Parts a template places inside its layout: the instruction h1 (tabindex -1, focus lands here on
 // every new screen) and the band: the hint row (hint text, the band's tool such as Check or Resume)
 // and the feedback strip (aria-live polite) flush to the bottom edges of the panel it sits in.
 // No learner-facing text here: every string arrives from the content JSON.
-import { h, fmt, reducedMotion } from './util.js?v=27c63b76';
-import { glyph, icon } from './icons.js?v=27c63b76';
+import { h, fmt, reducedMotion } from './util.js?v=13d5742a';
+import { glyph, icon } from './icons.js?v=13d5742a';
 
 const TONE = { correct: 'correct', neutral: 'neutral', wrong: 'wrong', notice: 'neutral', guess: 'neutral', partial: 'neutral', pause: 'neutral' };
 const LEAD = { correct: 'g-ok-disc', wrong: 'g-no-disc', neutral: 'guess' };
@@ -25,9 +25,13 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
   /* ---- scene ---- */
   const scene = h('div', { class: 'w-scene', 'aria-hidden': 'true' });
   let lastScene = '';
-  // mode: 'stage' | 'focus' | 'title'; photo: { src, position } from the content (chapter or screen)
+  // mode: 'stage' | 'focus' | 'title' (O1) | 'end' (FX2 END: O1's photo and veil, the footer shown) |
+  // 'plain' (FX2 A: the video, the dark Stage ground with no photo, so nothing distracts from the film);
+  // photo: { src, position } from the content (chapter or screen). The bar is on every screen: dark
+  // over a photo, light on the Focus wash.
   function setScene(mode, photo) {
     stage.dataset.scene = mode;
+    stage.dataset.bar = mode === 'focus' ? 'light' : 'dark';
     const key = mode + '|' + (photo?.src || '');
     if (key === lastScene) return; // the same photo in the same mode stays still (push-in once)
     lastScene = key;
@@ -37,7 +41,8 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
       return el;
     };
     if (mode === 'focus') scene.replaceChildren(layer('w-wash-photo'), h('div', { class: 'w-wash-veil' }));
-    else if (mode === 'title') scene.replaceChildren(layer('w-scene-photo w-scene-full w-push'), h('div', { class: 'w-o1-veil' }));
+    else if (mode === 'plain') scene.replaceChildren(); // FX2 A (Noy): the video on a clean ground, no photo
+    else if (mode === 'title' || mode === 'end') scene.replaceChildren(layer('w-scene-photo w-scene-full w-push'), h('div', { class: 'w-o1-veil' }));
     else scene.replaceChildren(layer('w-scene-photo w-push'));
   }
 
@@ -63,7 +68,7 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
     const items = [];
     model.steps.forEach((s, i) => {
       if (i) items.push(h('li', { class: 'w-step-link', 'aria-hidden': 'true', dataset: { state: s.state === 'next' ? 'next' : 'done' } }));
-      const disc = h('span', { class: 'w-step-disc' }, s.state === 'done' ? glyph('g-check', { size: 21.76 }) : glyph(s.icon, { size: s.state === 'current' ? 23.04 : 21.76 }));
+      const disc = h('span', { class: 'w-step-disc' }, s.state === 'done' ? glyph('g-check', { size: 18.56 }) : glyph(s.icon, { size: s.state === 'current' ? 19.84 : 18.56 }));
       items.push(h('li', { class: 'w-step', dataset: { state: s.state }, 'aria-current': s.state === 'current' ? 'step' : null },
         disc, h('span', { class: 'w-step-label' }, s.verb), h('span', { class: 'w-sr-only' }, ', ' + ui.rail.stepStatus[s.state])));
     });

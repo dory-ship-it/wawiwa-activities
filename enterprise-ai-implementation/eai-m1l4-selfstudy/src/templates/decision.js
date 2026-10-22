@@ -28,16 +28,21 @@
 //                     Not yet toggles; after all three, a fix line when any is Not yet; Next.
 //   risk       (S20B) neutral, read then pick (S17's definitions): five answer cards, each its name and
 //                     one-line definition; any one; the fix in the strip, the note line, "Reopen workbook".
+//   FX2 D (fewer drags):
+//   cases      (S17)  one case at a time ("Case 1 of 5"), the five mistakes as answer cards (S20B's look),
+//                     two attempts per case, then the reveal; "Next case"; one matching interaction.
+//   fields     (S18A) the workbook rows (S19 preview look), a select of the cards in each; Check after all,
+//                     two attempts, then the reveal; one matching interaction.
 //   close      (S22)  Stage: the bridge line on the case card over the chapter photo; the panel right, two
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=27c63b76';
-import { glyph, icon } from '../icons.js?v=27c63b76';
-import { attachTip } from '../tooltip.js?v=27c63b76';
-import { letter } from '../tracking/index.js?v=27c63b76';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture } from './stage.js?v=27c63b76';
-import { targetSteps } from '../ghost.js?v=27c63b76';
+import { h, fmt, resolveLink } from '../util.js?v=13d5742a';
+import { glyph, icon } from '../icons.js?v=13d5742a';
+import { attachTip } from '../tooltip.js?v=13d5742a';
+import { letter } from '../tracking/index.js?v=13d5742a';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=13d5742a';
+import { targetSteps } from '../ghost.js?v=13d5742a';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -48,7 +53,7 @@ export const decision = {
   scene: (screen) => (isStage(screen) || screen.scene === 'stage' ? 'stage' : 'focus'),
   mount(ctx) {
     const variant = ctx.screen.variant;
-    const run = { single, multi, pair, rounds, fill, metric, selfcheck, risk, close }[variant];
+    const run = { single, multi, pair, rounds, fill, metric, selfcheck, risk, cases, fields, close }[variant];
     if (!run) throw new Error('decision: unknown variant ' + variant);
     return run(ctx) || { unmount() {} };
   },
@@ -556,6 +561,161 @@ function risk(ctx) {
   else if (ctx.revisit) ctx.unlockNext({ focus: false });
 }
 
+/* ---------- cases (S17, FX2 D1): one case at a time, pick the mistake it shows ---------- */
+// The heading with "Show me how" (the choice sweep), the case card ("Case 1 of 5", its dots, the case),
+// the five mistakes as answer cards (name and one-line definition, as S20B). Two attempts per case:
+// wrong = the cross and the case's line; the second wrong = the right card marked and explained
+// (revealed). "Next case" in the strip; Next unlocks after the last case.
+// Tracking: the one matching interaction of the old sort (same id, same pattern): when the last case
+// is done, its response is each case's FIRST pick ("a.3,b.1,..."), correct only if every first pick
+// was right; when any case took a second pick, one retry follows with the final picks.
+function cases(ctx) {
+  const { screen, ui, zones } = ctx;
+  const list = screen.cards;
+  const trackingId = screen.tracking[0].id;
+  const max = screen.attempts || 2;
+  const { group, btns } = options(ctx, 'radio', { list: screen.options, cols: 3 }); // two rows: the panel stays within 41cqw
+  group.classList.add('w-risk');
+  const kicker = h('p', { class: 'w-sit-kicker' });
+  const dots = progressDots(list.length, (i, n) => fmt(ui.progress.caseOf, { i, n }));
+  const text = h('p', { class: 'w-case-now-text' });
+  const card = h('div', { class: 'w-case-now' }, h('div', { class: 'w-sit-head' }, kicker, dots.el), text);
+  layout(ctx, 'focus', sheet('focus w-sheet-cases', headRow(ctx, choiceGhost(ctx)), card, group, zones.band));
+  zones.setHintVisible(true);
+  const first = {}, last = {};
+  let r = 0, tries = 0, solved = false, chosen = -1;
+  const show = (k) => {
+    r = k; tries = 0; solved = false; chosen = -1;
+    kicker.textContent = fmt(ui.progress.caseOf, { i: k + 1, n: list.length });
+    dots.set(k, k);
+    text.textContent = list[k].text;
+    btns.forEach((b) => { paint(b, '', ui); b.removeAttribute('aria-disabled'); });
+    zones.setAttempts(1, max);
+    zones.setFeedback({ state: 'hint', text: screen.hint });
+  };
+  const right = (k) => screen.options.findIndex((o) => o.id === list[k].column);
+  function done(k, i, revealed, focus) {
+    solved = true;
+    lock(btns);
+    const c = list[k];
+    if (k < list.length - 1) {
+      const go = rightStrip(ctx, c.feedback.correct, revealed, { actions: [{ id: 'nextCase', label: ui.buttons.nextCase, onClick: () => { show(k + 1); btns[0].focus(); } }] });
+      if (focus) go.focus();
+      return;
+    }
+    dots.set(list.length, list.length);
+    rightStrip(ctx, c.feedback.correct, revealed);
+    // the interaction, once, when the last case is done (a revisit sends nothing)
+    if (!ctx.revisit) {
+      const key = (x) => String(x.id ?? x.n);
+      ctx.answer({ trackingId, response: list.map((x) => `${key(x)}.${first[key(x)]}`).join(','), result: list.every((x) => first[key(x)] === x.column) ? 'correct' : 'wrong' });
+      if (list.some((x) => last[key(x)] !== first[key(x)])) {
+        ctx.answer({ trackingId, response: list.map((x) => `${key(x)}.${last[key(x)]}`).join(','), result: list.every((x) => last[key(x)] === x.column) ? 'correct' : 'wrong' });
+      }
+    }
+    ctx.complete();
+    ctx.unlockNext({ focus });
+  }
+  btns.forEach((b, i) => b.addEventListener('click', () => {
+    if (solved || i === chosen) return;
+    chosen = i;
+    tries += 1;
+    const c = list[r], key = String(c.id ?? c.n), pick = screen.options[i].id;
+    if (!(key in first)) first[key] = pick;
+    last[key] = pick;
+    if (pick === c.column) { btns.forEach((x, j) => paint(x, j === i ? 'correct' : '', ui)); done(r, i, false, true); return; }
+    if (tries >= max) {
+      const k = right(r);
+      btns.forEach((x, j) => paint(x, j === k ? 'correct' : j === i ? 'wrong' : '', ui));
+      done(r, k, true, true);
+      return;
+    }
+    btns.forEach((x, j) => paint(x, j === i ? 'wrong' : '', ui));
+    zones.setAttempts(tries + 1, max);
+    zones.setFeedback({ state: 'wrong', text: c.feedback.wrong });
+  }));
+  show(0);
+  if (ctx.revisit) { show(list.length - 1); const k = right(r); paint(btns[k], 'correct', ui); zones.setAttempts(null); done(r, k, false, false); }
+}
+
+/* ---------- fields (S18A, FX2 D2): the workbook rows, a card chosen for each ---------- */
+// The heading with the case chip, the hint line, then the workbook rows (the S19 preview's look): the
+// field's number, its name and line, and a select listing the cards. Check unlocks when every row has a
+// card ("check after all"): right rows get the teal border and check, wrong ones the cross and the
+// first wrong row's line in the strip; attempt 2 the same; after it the right cards are set in the
+// rows still wrong (shown), and Next unlocks.
+// Tracking: the matching interaction of the old sort (same id, same pattern "card.field"): each card's
+// field = the row it was chosen in (the first such row; none = empty). First Check = the answer, the
+// second = a retry.
+function fields(ctx) {
+  const { screen, ui, zones } = ctx;
+  const cardsList = screen.cards;
+  const trackingId = screen.tracking[0].id;
+  const max = ctx.revisit ? 0 : screen.attempts || 2;
+  const key = (c) => String(c.id ?? c.n);
+  let tries = 0, done = false;
+  const rows = screen.columns.map((col) => {
+    const sel = h('select', { class: 'w-field-select', dataset: { row: col.id }, 'aria-label': col.label + ': ' + col.sub },
+      h('option', { value: '' }, ui.chooseCard), cardsList.map((c) => h('option', { value: key(c) }, c.text)));
+    const mark = h('span', { class: 'w-opt-mark w-row-mark', 'aria-hidden': 'true' });
+    const state = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
+    const el = h('li', { class: 'w-wb-field', dataset: { row: col.id } },
+      h('b', { class: 'w-wb-n', 'aria-hidden': 'true' }, col.n ? String(col.n) : glyph('g-cross', { size: 14.08 })), // "Not AS-IS": no field number
+      h('span', { class: 'w-wb-name' }, h('span', { class: 'w-wb-label' }, col.label), h('span', { class: 'w-wb-sub' }, col.sub)),
+      sel, mark, state);
+    return { col, sel, el, mark, state };
+  });
+  const check = checkButton(ui, ui.buttons.check, () => doCheck());
+  const head = h('div', { class: 'w-head-row w-head-q' }, zones.instruction, h('span', { class: 'w-head-tools' }, screen.header ? h('span', { class: 'w-field-chip' }, screen.header) : null));
+  layout(ctx, 'focus', sheet('focus w-sheet-fields', head,
+    h('ol', { class: 'w-wb-fields', dataset: { interaction: '' } }, rows.map((x) => x.el)), zones.band));
+  zones.setHintVisible(true); // the hint on the band's row, beside the attempt marker and Check
+  zones.setFeedback({ state: 'hint', text: screen.hint });
+  if (!ctx.revisit) { zones.setTool(check); zones.setAttempts(1, max); }
+  const ready = () => { check.disabled = done || rows.some((x) => !x.sel.value); };
+  const setRow = (x, res) => {
+    x.el.dataset.result = res;
+    paintAnswer(x.el, res, ui);
+    x.state.textContent = res === 'correct' ? ui.feedback.correctPrefix : res === 'wrong' ? ui.feedback.wrongPrefix : '';
+  };
+  rows.forEach((x) => x.sel.addEventListener('change', () => { if (x.el.dataset.result === 'wrong') setRow(x, ''); ready(); }));
+  const cardOf = (x) => cardsList.find((c) => key(c) === x.sel.value);
+  const response = () => cardsList.map((c) => `${key(c)}.${rows.find((x) => x.sel.value === key(c))?.col.id || ''}`).join(',');
+  function doCheck() {
+    if (done || rows.some((x) => !x.sel.value)) return;
+    tries += 1;
+    const wrong = rows.filter((x) => cardOf(x)?.column !== x.col.id);
+    rows.forEach((x) => setRow(x, wrong.includes(x) ? 'wrong' : 'correct'));
+    ctx.answer({ trackingId, response: response(), result: wrong.length ? 'wrong' : 'correct' });
+    if (!wrong.length) { zones.setFeedback({ state: 'correct', text: ui.feedback.allPlaced }); finish(true); return; }
+    // the line of the card that belongs in the first wrong row
+    const owner = (x) => cardsList.find((c) => c.column === x.col.id);
+    if (tries >= max) {
+      wrong.forEach((x) => { x.sel.value = key(owner(x)); setRow(x, 'correct'); x.el.dataset.shown = 'true'; });
+      zones.setFeedback({ state: 'neutral', verdict: ui.feedback.revealedPlaces, text: owner(wrong[0]).feedback.correct });
+      finish(true);
+      return;
+    }
+    zones.setAttempts(tries + 1, max);
+    zones.setFeedback({ state: 'wrong', text: owner(wrong[0]).feedback.wrong });
+    check.disabled = true; // a changed row unlocks it again
+    wrong[0].sel.focus();
+  }
+  function finish(focus) {
+    done = true;
+    rows.forEach((x) => { x.sel.disabled = true; });
+    zones.setTool();
+    zones.setAttempts(null);
+    ctx.complete();
+    ctx.unlockNext({ focus });
+  }
+  if (ctx.revisit) {
+    rows.forEach((x) => { x.sel.value = key(cardsList.find((c) => c.column === x.col.id)); setRow(x, 'correct'); });
+    zones.setFeedback({ state: 'correct', text: ui.feedback.allPlaced });
+    finish(false);
+  }
+}
+
 /* ---------- close (S22), Focus by analogy, two steps ---------- */
 function close(ctx) {
   const { screen, ui, zones, content } = ctx;
@@ -578,18 +738,18 @@ function close(ctx) {
   zones.setFeedback({ state: 'hint', text: screen.hint });
 
   let confirm = false;
+  // FX2 G: Next stays locked until Finish lesson, then opens the closing screen (END)
   function toStep2(focus) {
     step1.hidden = true;
     step2.hidden = false;
-    ctx.lockNext(ui.footer.locked.last);
+    ctx.lockNext(ui.footer.locked.finish);
     zones.setFeedback({ state: 'hint', text: screen.hint });
     if (focus) homework.focus();
   }
   function done(focus) {
     finish.setAttribute('aria-disabled', 'true');
     zones.setFeedback({ state: 'neutral', text: ui.finished });
-    ctx.lockNext(ui.footer.locked.last);
-    if (focus) finish.focus();
+    ctx.unlockNext({ focus });
   }
   cards.forEach((b, i) => b.addEventListener('click', () => {
     cards.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));

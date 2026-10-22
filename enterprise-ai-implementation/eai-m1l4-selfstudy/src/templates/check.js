@@ -8,11 +8,11 @@
 // answers reset and (shuffleOnRetake) items 1 to 4 show their options in a new order, one per attempt
 // (item 5's tiles keep the HR map's line order). Responses are the options' ids, so a shuffled
 // option reports the same letter as before. A revisit shows the result line (resultCard).
-import { h, fmt } from '../util.js?v=27c63b76';
-import { glyph } from '../icons.js?v=27c63b76';
-import { checkButton } from './decision.js?v=27c63b76';
-import { letter } from '../tracking/index.js?v=27c63b76';
-import { layout, sheet, progressDots, arrowNav } from './stage.js?v=27c63b76';
+import { h, fmt } from '../util.js?v=13d5742a';
+import { glyph } from '../icons.js?v=13d5742a';
+import { checkButton } from './decision.js?v=13d5742a';
+import { letter } from '../tracking/index.js?v=13d5742a';
+import { layout, sheet, progressDots, arrowNav } from './stage.js?v=13d5742a';
 
 export const check = {
   mount(ctx) {

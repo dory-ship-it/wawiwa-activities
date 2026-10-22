@@ -11,7 +11,7 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "S12B", "W4", "S13", "S14", "S15", "K4", "S16", "S17", "S17B", "S18A", "S18", "S18B", "S19", "S20", "S20B", "S21", "S21R", "S22"],
+    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "S12B", "W4", "S13", "S14", "S15", "K4", "S16", "S17", "S17B", "S18A", "S18", "S18B", "S19", "S20", "S20B", "S21", "S21R", "S22", "END"],
     "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] }
   },
 
@@ -28,6 +28,7 @@
       "nextRound": "Next round",
       "nextSituation": "Next situation",
       "nextQuestion": "Next question",
+      "nextCase": "Next case",
       "openHomework": "Open homework",
       "openHomework1": "Open Homework 1",
       "downloadRecord": "Download my lesson record",
@@ -53,7 +54,9 @@
     },
     "attempts": { "label": "Attempt {i} of {n}" },
     "ghost": { "pickOne": "Pick one", "pickTwo": "Pick two" },
-    "copyFallback": "Press Ctrl+C",
+    "chooseCard": "Choose a card",
+    "copyFallback": "Press Ctrl+C (Cmd+C on Mac)",
+    "copyKeys": "Ctrl+C",
     "caseCard": "Your case",
     "header": "Lesson 4 · Process Modeling and Workflow Mapping",
     "warmup": { "guess": "Your guess", "prompt": "Make your best guess." },
@@ -82,6 +85,8 @@
         "pair": "Next, locked until both situations are answered",
         "tiles": "Next, locked until you open all eight fields and answer the question",
         "rounds": "Next, locked until all three rounds are answered",
+        "cases": "Next, locked until you answer all five cases",
+        "fields": "Next, locked until every field has its card and is checked",
         "video": "Next, locked until the video ends and every stop is answered",
         "fill": "Next, locked until you choose the right line for Field 7 or use both attempts",
         "metric": "Next, locked until you choose the strongest metric or use both attempts",
@@ -93,10 +98,11 @@
         "check": "Next, locked until you finish the knowledge check",
         "close": "Next, locked until you pick a takeaway",
         "last": "Next, locked: this is the last screen of the lesson",
+        "finish": "Next, locked until you finish the lesson",
         "default": "Next, locked until you finish this screen"
       }
     },
-    "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "caseChip": "Case {i}", "cardChip": "Card {i}", "question": "Question {i} of {n}", "deck": "{i} of {n}", "situation": "Situation {i} of {n}", "opened": "{i}/{n}" },
+    "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "question": "Question {i} of {n}", "deck": "{i} of {n}", "situation": "Situation {i} of {n}", "caseOf": "Case {i} of {n}", "opened": "{i}/{n}" },
     "drag": {
       "help": "Drag the card to a column, or press 1 to {n} to choose a column and Enter to drop it. Escape cancels.",
       "helpPlaces": "Drag the label to a place on the diagram, or press 1 to {n} to choose a place and Enter to drop it. Escape cancels.",
@@ -110,7 +116,7 @@
       "chosen": "{target} chosen. Press Enter to drop.",
       "cancelled": "Cancelled."
     },
-    "finished": "Lesson finished. Your result is saved. You can close this window.",
+    "finished": "Lesson finished. Your result is saved.",
     "record": {
       "fileName": "lesson-4-record.html",
       "heading": "Lesson record",
@@ -280,7 +286,7 @@
     { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 20, "screens": ["W3", "V2", "S09", "S10", "S11", "S12", "S12B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch4", "n": 4, "title": "Critical eye", "photo": { "src": "assets/img/l4/o1-lanes-office.jpg", "position": "60% 50%", "temp": true }, "minutes": 25, "screens": ["W4", "S13", "S14", "S15", "K4", "S16", "S17", "S17B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch5", "n": 5, "title": "Build yours", "photo": { "src": "assets/img/l4/w1-new-computer-same-mess.jpg", "position": "30% 50%", "temp": true }, "minutes": 57, "screens": ["S18A", "S18", "S18B", "S19", "S20", "S20B"], "inSlice": true, "pauseMarker": null },
-    { "id": "ch6", "n": 6, "title": "Wrap-up", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 15, "screens": ["S21", "S21R", "S22"], "inSlice": true, "pauseMarker": null }
+    { "id": "ch6", "n": 6, "title": "Wrap-up", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 15, "screens": ["S21", "S21R", "S22", "END"], "inSlice": true, "pauseMarker": null }
   ],
 
   "screens": [
@@ -1576,7 +1582,7 @@
         { "n": 5, "text": "Answer where the map says 'unclear'", "column": "d",
           "feedback": { "correct": "Poor fit: you cannot build on unknown foundations. This needs diagnosis, not more technology.",
             "wrong": "Check what the map actually knows before anything is built on it." } },
-        { "n": 6, "text": "Summarize a question before escalation", "column": "c",
+        { "n": 6, "text": "Summarize before escalating", "column": "c",
           "feedback": { "correct": "Good fit, handoff with delay or loss: AI documents it, so the HR manager gets the history.",
             "wrong": "Think about what the HR manager receives today when a question is passed on." } }
       ],
@@ -1596,14 +1602,15 @@
     {
       "id": "S17",
       "chapter": "ch4",
-      "template": "sortDeck",
+      "template": "decision",
+      "variant": "cases",
       "attempts": 2,
       "step": { "verb": "Sort", "icon": "sort" },
       "minutes": 5,
-      "instruction": "Read the five mistakes, then drag each case to the one it shows.",
-      "hint": "Drag the card to a column. Or press 1 to 5 to choose a column, then Enter.",
-      "layout": "sort-deck",
-      "columns": [
+      "instruction": "Read each case, then pick the mistake it shows.",
+      "hint": "Two tries per case.",
+      "layout": "focus",
+      "options": [
         { "id": "1", "label": "Ideal, not actual", "sub": "maps how it should work, not a normal day" },
         { "id": "2", "label": "No clear goal", "sub": "drawn with no question to answer" },
         { "id": "3", "label": "Rushed mapping", "sub": "hard fields skipped to finish fast" },
@@ -1627,19 +1634,17 @@
           "feedback": { "correct": "Without a question, nobody can say which process or boundaries matter. The map grows and decides nothing.",
             "wrong": "The map may be accurate and complete. Ask what it was drawn to decide." } }
       ],
-      "advance": "after-all-placed",
+      "advance": "after-all-cases",
       "tracking": [
         { "id": "L4_S17_1", "type": "matching", "correctResponse": "a.3,b.1,c.5,d.4,e.2", "scored": false, "bloom": "Analyze", "result": "graded" }
       ],
       "sources": ["s34", "s16", "s17", "s21", "s6", "Cases constructed (FL12); D is a fictional later change"],
       "hintPilotCopy": true,
-      "ghost": { "type": "drag", "showMe": false },
-      "deckSize": "wide",
+      "ghost": { "type": "choice", "target": "options-sweep", "showMe": true },
       "wordLimit": {
         "max": 72,
-        "why": "storyboard v3 decision (S17 \"read, then sort\": five columns with their one-line definitions, no separate K5 screen): the definitions stay on screen; one case at a time on the deck, the placed ones as \"Case n\""
-      },
-      "placedLabel": "caseChip"
+        "why": "storyboard v3 decision (S17 \"read, then sort\": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards"
+      }
     },
 
     {
@@ -1693,21 +1698,20 @@
     {
       "id": "S18A",
       "chapter": "ch5",
-      "template": "sortDeck",
+      "template": "decision",
+      "variant": "fields",
       "attempts": 2,
       "step": { "verb": "Sort", "icon": "sort" },
       "minutes": 4,
-      "instruction": "Drag each card to its field.",
+      "instruction": "Choose the card for each field.",
       "hint": "Same eight fields, different case.",
-      "hintShown": true,
-      "layout": "sort-deck",
+      "layout": "focus",
       "header": "Lesson 1 case: sales call summaries",
-      "wordLimit": { "max": 60, "why": "storyboard v3 Ch5-6 (S18A as S04: the header chip, the hint line and four columns with their subtitles, all four cards placed; text as approved)" },
-      "ghost": { "type": "drag", "showMe": false },
+      "wordLimit": { "max": 60, "why": "storyboard v3 Ch5-6 (S18A: the header chip, the hint line and four fields with their subtitles, all four cards chosen; text as approved; FX2 D2: workbook rows with a select)" },
       "columns": [
-        { "id": "a", "label": "Field 2: Trigger", "sub": "What starts it" },
-        { "id": "b", "label": "Field 3: Steps", "sub": "Who does what" },
-        { "id": "c", "label": "Field 7: Gaps", "sub": "What is missing or unclear" },
+        { "id": "a", "n": 2, "label": "Field 2: Trigger", "sub": "What starts it" },
+        { "id": "b", "n": 3, "label": "Field 3: Steps", "sub": "Who does what" },
+        { "id": "c", "n": 7, "label": "Field 7: Gaps", "sub": "What is missing or unclear" },
         { "id": "d", "label": "Not AS-IS", "sub": "Not true today" }
       ],
       "cards": [
@@ -1724,7 +1728,7 @@
           "feedback": { "correct": "Kept out. Your Homework 2 AI step is a future idea too. It stays off your AS-IS map.",
             "wrong": "Does this happen on a normal day today, or is it an idea for later?" } }
       ],
-      "advance": "after-all-placed",
+      "advance": "after-check",
       "tracking": [
         { "id": "L4_S18A_1", "type": "matching", "correctResponse": "1.a,2.b,3.c,4.d", "scored": false, "bloom": "Apply", "result": "graded" }
       ],
@@ -1824,7 +1828,7 @@
       "copyCards": {
         "label": "Copy your notes into the workbook",
         "cards": [
-          { "id": "case", "from": "S02", "chip": "Field 1 · Process name" },
+          { "id": "case", "label": "Your case", "from": "S02", "chip": "Field 1 · Process name" },
           { "id": "sketch", "label": "Your sketch from Chapter 2", "from": "S08B", "chip": "Fields 2 and 3" },
           { "id": "metric", "label": "Your metric from Chapter 3", "from": "S12B", "chip": "Field 8" },
           { "id": "notes", "label": "Your notes from Chapter 4", "from": "S17B", "chip": "Not on the map: for Lesson 5", "off": true }
@@ -2006,16 +2010,16 @@
       "minutes": 2,
       "instruction": "{x} of {n} on first try ({p} of 100). Pass mark: 80.",
       "from": "S21",
-      "wordLimit": { "max": 120, "why": "storyboard v3 Ch5-6 S21R, worst case (all five items missed): each missed item's stem, its line and its review link; open question in review/nl4/REPORT.md" },
+      "wordLimit": { "max": 60, "why": "storyboard v3 Ch5-6 S21R, worst case (all five items missed): the chip and its line, each missed item's one-line stem and its line (the review links are buttons, not counted); FX2 H1 (Noy, 22 Oct 2026)" },
       "passed": { "chip": "Passed", "text": "You can map a process and judge where AI fits." },
       "notPassed": { "chip": "Not passed yet", "text": "Review what you missed, then retake the whole check." },
       "reviewLabel": "Review Chapter {n}",
       "missed": [
-        { "item": "i1", "text": "Revisit what a handoff must record.", "chapter": 4, "screen": "S14" },
-        { "item": "i2", "text": "Revisit the three good fits for AI.", "chapter": 4, "screen": "K4" },
-        { "item": "i3", "text": "Revisit baseline, target and date.", "chapter": 3, "screen": "S11" },
-        { "item": "i4", "text": "Revisit why 'unclear' belongs in Field 7.", "chapter": 3, "screen": "S10" },
-        { "item": "i5", "text": "Revisit the full HR map, line by line.", "chapter": 3, "screen": "S12" }
+        { "item": "i1", "stem": "Field 4 handoff", "text": "Revisit what a handoff must record.", "chapter": 4, "screen": "S14" },
+        { "item": "i2", "stem": "First AI step", "text": "Revisit the three good fits for AI.", "chapter": 4, "screen": "K4" },
+        { "item": "i3", "stem": "Report baseline", "text": "Revisit baseline, target and date.", "chapter": 3, "screen": "S11" },
+        { "item": "i4", "stem": "Field 7 unknowns", "text": "Revisit why 'unclear' belongs in Field 7.", "chapter": 3, "screen": "S10" },
+        { "item": "i5", "stem": "HR map errors", "text": "Revisit the full HR map, line by line.", "chapter": 3, "screen": "S12" }
       ],
       "ringAlt": "{p} of 100",
       "ringAltPilotCopy": true,
@@ -2058,6 +2062,24 @@
       ],
       "suspend": ["homework", "download"],
       "sources": ["s45", "s41", "s46", "s42", "s32"]
+    },
+    {
+      "id": "END",
+      "chapter": "ch6",
+      "template": "end",
+      "step": { "verb": "Finish", "icon": "start", "join": true },
+      "presentation": true,
+      "minutes": 0,
+      "instruction": "Lesson complete",
+      "accent": "complete",
+      "sub": "Process Modeling and Workflow Mapping · Module 1",
+      "passed": { "chip": "Passed" },
+      "notPassed": { "chip": "Not passed yet", "hint": "You can retake the knowledge check in Wrap-up at any time." },
+      "next": "Next: Lesson 6, in your own time.",
+      "homework": { "href": "@links.homework" },
+      "advance": "none",
+      "tracking": [],
+      "sources": ["FX2 G (22 Oct 2026): the films' branded end card (design-decisions-log); the homework link is S22's"]
     }
   ]
 }

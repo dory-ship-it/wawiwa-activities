@@ -4,13 +4,13 @@
 //           in the middle, the pass mark as a tick on the ring
 //   right   the score line as the heading ("4 of 5 on first try (80 of 100). Pass mark: 80."), the
 //           Passed / Not passed yet chip and its line; below 80 the items missed on first try, each its
-//           stem, one line and a "Review Chapter N" link (it opens that screen with "Back to the check"
+//           one-line stem (FX2 H1: the content's short stem), one line and a "Review Chapter N" link (it opens that screen with "Back to the check"
 //           in the footer), then "Retake now" (the whole check, at once)
 // Next is open either way (a presentation screen): below 80 the learner may finish as failed and come
 // back to retake. Nothing is tracked here: the attempt's score went out when S21 ended (ctx.checkDone).
-import { h, fmt } from '../util.js?v=27c63b76';
-import { glyph, icon } from '../icons.js?v=27c63b76';
-import { layout, sheet } from './stage.js?v=27c63b76';
+import { h, fmt } from '../util.js?v=13d5742a';
+import { glyph, icon } from '../icons.js?v=13d5742a';
+import { layout, sheet } from './stage.js?v=13d5742a';
 
 const R = 64, C = 2 * Math.PI * R; // the ring, in its 160 x 160 box
 
@@ -49,7 +49,7 @@ export const result = {
         parts.push(h('ul', { class: 'w-missed' }, missed.map((m) => {
           const it = check.items.find((x) => x.id === m.item);
           return h('li', { class: 'w-missed-item', dataset: { item: m.item } },
-            h('div', { class: 'w-missed-text' }, h('p', { class: 'w-missed-stem' }, it.stem || it.instruction), h('p', { class: 'w-missed-line' }, m.text)),
+            h('div', { class: 'w-missed-text' }, h('p', { class: 'w-missed-stem' }, m.stem || it.stem || it.instruction), h('p', { class: 'w-missed-line' }, m.text)),
             h('button', { class: 'w-link w-review-link', type: 'button', dataset: { action: 'review', screen: m.screen }, onclick: () => ctx.reviewGo(m.screen) },
               h('span', {}, fmt(screen.reviewLabel, { n: m.chapter })), glyph('g-arrow', { size: 19.2 })));
         })));

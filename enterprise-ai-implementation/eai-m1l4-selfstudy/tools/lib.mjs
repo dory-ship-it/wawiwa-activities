@@ -18,6 +18,10 @@ export function chromePath() {
 //   underFooter  painted boxes of the screen (or its band) under Previous or Next (NL3)
 //   tallPanels   panels higher than 41cqw, 524.8 px (NL3, storyboard v3 critical detail 1)
 //   clipped      text cut off inside its own box
+//   textOverlaps FX2 F: two visible text runs over each other, anywhere on the stage (intentional layers
+//                whitelisted with their reason)
+//   textClipped  FX2 F: any element with text of its own, no scroller, whose content runs past its box
+//                (designed truncation whitelisted with its reason)
 //   bandOverflow band text running outside the band
 //   contrast     every visible text run: colour on its effective background, ratio and need
 //                (4.5:1, or 3:1 for large text: 24px, or 18.66px bold); lowContrast = the failures.
@@ -140,6 +144,45 @@ export function measureLayout() {
   let bandOverflow = false;
   if (bandOn) for (const t of textRuns(band)) if (t.top < B.top - 0.5 || t.bottom > B.bottom + 0.5 || t.left < B.left - 0.5 || t.right > B.right + 0.5) bandOverflow = true;
 
+  // FX2 F: text over text, anywhere on the stage (or in the open menu / dialog): two visible text runs
+  // of different text nodes whose boxes intersect. A run's box is its glyphs' content area, which
+  // reaches past a tight line box (line-height 1.0 to 1.2), so each box is trimmed by 22% of its height
+  // top and bottom (and 1 px at the sides) before the test: neighbouring lines of one paragraph never
+  // meet, a word drawn over another still does. Intentional layers are skipped:
+  const LAYERS = [
+    ['.w-ghost', 'the ghost hand and its chip pass over the content on purpose (a demo, gone at the first key)'],
+    ['.w-tip', 'the glossary tooltip sits over the text it explains while it is open'],
+  ];
+  const layered = (el) => LAYERS.some(([sel]) => el.closest(sel));
+  const runs = textRuns(overlay || stage).filter((t) => !layered(t.node.parentElement) && (!overlay || overlay.contains(t.node.parentElement)))
+    .map((t) => ({ ...t, top: t.top + 0.22 * t.h, bottom: t.bottom - 0.22 * t.h, left: t.left + 1, right: t.right - 1 }));
+  const textOverlaps = [];
+  for (let i = 0; i < runs.length; i++) {
+    for (let j = i + 1; j < runs.length; j++) {
+      const a = runs[i], b = runs[j];
+      if (a.node === b.node || a.node.parentElement.contains(b.node) || b.node.parentElement.contains(a.node)) continue;
+      if (a.bottom > b.top && a.top < b.bottom && a.right > b.left && a.left < b.right) textOverlaps.push(`"${a.what.slice(5)}" x "${b.what.slice(5)}"`);
+    }
+  }
+  // FX2 F: clipped text: an element holding text of its own (no scroller: overflow auto / scroll is a
+  // scroller) whose content runs past its box. Truncation by design is whitelisted, each with its reason:
+  const TRUNCATED = [
+    ['.w-copy-title, .w-sketch-row dd, .w-shown span', 'S17B / S19: the learner\'s own text, one or two lines by design; the full text is in the copy and for screen readers'],
+    ['.w-case-slim span', 'the "Your case" card: the learner\'s own case title on one line (60 characters allowed), the full title in the field above it'],
+    ['.w-wb-rows span','S19: the workbook preview\'s field names, a thumbnail of the page (role img with its own label)'],
+    ['.w-drop[data-dense="true"] .w-placed-text', 'the sort deck: a column that would reach Previous / Next shows one line per card, the full text for screen readers'],
+  ];
+  const ownText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.nodeValue.trim());
+  const textClipped = [...(overlay || stage).querySelectorAll('*')].filter((el) => {
+    if (!ownText(el) || !visible(el) || el.closest('svg, select, textarea, input, .w-sr-only') || layered(el)) return false;
+    if (overlay && !overlay.contains(el)) return false;
+    if (TRUNCATED.some(([sel]) => el.matches(sel))) return false;
+    const cs = getComputedStyle(el);
+    if (cs.display === 'inline' || cs.display === 'contents' || /auto|scroll/.test(cs.overflowX + cs.overflowY)) return false;
+    const slack = cs.overflowY === 'visible' ? Math.max(1, 0.2 * parseFloat(cs.fontSize)) : 1;
+    return el.scrollHeight > el.clientHeight + slack || el.scrollWidth > el.clientWidth + 1;
+  }).map((el) => `${name(el)} "${el.textContent.trim().slice(0, 24)}"`);
+
   // contrast of every visible text run in the stage (on its effective background)
   const parse = (c) => { const m = c.match(/[\d.]+/g); return m ? { r: +m[0], g: +m[1], b: +m[2], a: m[3] === undefined ? 1 : +m[3] } : null; };
   const over = (top, under) => ({ r: top.r * top.a + under.r * (1 - top.a), g: top.g * top.a + under.g * (1 - top.a), b: top.b * top.a + under.b * (1 - top.a), a: 1 });
@@ -178,7 +221,7 @@ export function measureLayout() {
     .map((el) => ({ el, b: box(el.getBoundingClientRect()) }))
     .filter(({ b }) => b.w < 43.5 || b.h < 43.5).map(({ el, b }) => `${name(el)} ${Math.round(b.w)}x${Math.round(b.h)}`);
 
-  return { overlaps, outside, underFooter, tallPanels, clipped, bandOverflow, bandWidth, contrast: Object.fromEntries(contrast), lowContrast, small, smallTargets, wide };
+  return { overlaps, outside, underFooter, tallPanels, clipped, textOverlaps, textClipped, bandOverflow, bandWidth, contrast: Object.fromEntries(contrast), lowContrast, small, smallTargets, wide };
 }
 
 // One line verdict for a measureLayout result: [ok, detail]
@@ -189,6 +232,8 @@ export function layoutVerdict(m) {
   if (m.underFooter && m.underFooter.length) bad.push('under Previous / Next: ' + [...new Set(m.underFooter)].join(', '));
   if (m.tallPanels && m.tallPanels.length) bad.push('panel over 41cqw (524.8px): ' + m.tallPanels.join(', ') + 'px');
   if (m.clipped.length) bad.push('clipped: ' + m.clipped.join(', '));
+  if (m.textOverlaps && m.textOverlaps.length) bad.push('text over text: ' + [...new Set(m.textOverlaps)].join('; '));
+  if (m.textClipped && m.textClipped.length) bad.push('text cut off: ' + [...new Set(m.textClipped)].join('; '));
   if (m.bandOverflow) bad.push('band text overflows the band');
   if (m.bandWidth && (Math.abs(m.bandWidth.band - m.bandWidth.area) > 1 || Math.abs(m.bandWidth.left) > 1 || Math.abs(m.bandWidth.gap) > 1))
     bad.push(`band ${m.bandWidth.band}px vs its panel ${m.bandWidth.area}px, offset ${m.bandWidth.left}, bottom gap ${m.bandWidth.gap}`);
