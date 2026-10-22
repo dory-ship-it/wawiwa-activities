@@ -29,6 +29,13 @@ const SHOTS = [
   // Chapter 3
   ['W3', 'start', async () => {}],
   ['W3', 'guess', async (p) => click(p, '.w-guess[data-id="c"]')],
+  ['V2', 'ready', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); }],
+  ['V2', 'stop-1-wrong', async (p) => {
+    await p.waitForFunction(() => document.querySelector('.w-video').readyState >= 1);
+    await p.evaluate(() => { const v = document.querySelector('.w-video'); v.muted = true; v.playbackRate = 16; v.play(); });
+    await p.waitForSelector('.w-stop-view:not([hidden])', { timeout: 60000 });
+    await click(p, '.w-stop-view .w-opt[data-id="a"]');
+  }],
   ['S09', 'start', async () => {}],
   ['S09', 'wrong', async (p) => { await deck(p, ['b']); }],
   ['S09', 'right', async (p) => { await deck(p, ['a']); }],
@@ -90,7 +97,7 @@ for (const [id, state, act] of SHOTS) {
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
   await page.setViewport({ width: size[0], height: size[1], deviceScaleFactor: 1 });
   await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
-  await page.goto(`${BASE}index.html?reset=1&screen=${id}`, { waitUntil: 'networkidle0' });
+  await page.goto(`${BASE}index.html?reset=1&screen=${id}`, { waitUntil: /^V\d/.test(id) ? 'load' : 'networkidle0' }); // a film keeps a range request open
   await page.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
   await page.keyboard.press('Shift'); // any key stops a ghost hand
   await act(page);
