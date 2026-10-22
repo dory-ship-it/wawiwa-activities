@@ -4,10 +4,10 @@
 // line (red over 25) in a panel on hover, focus or click, and a link back to the review page.
 // Review-only strings live here, not in the content: this folder is not part of the SCORM package.
 // Hidden inside an iframe (the thumbnails on review.html carry their own labels).
-import { h } from '../util.js?v=1e11956b';
-import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=1e11956b';
+import { h } from '../util.js?v=27c63b76';
+import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=27c63b76';
 
-const CSS = new URL('./review.css?v=1e11956b', import.meta.url).href;
+const CSS = new URL('./review.css?v=27c63b76', import.meta.url).href;
 
 export function createToolbar(lesson) {
   if (window.self !== window.top) return { show() {} };
