@@ -431,6 +431,7 @@ class Lesson {
     const ci = groups.findIndex((g) => g.ids.includes(this.current));
     this.zones.setBar({
       chapter: chapter.title,
+      of: fmt(this.ui.rail.chapterOf, { n: this.chapters.indexOf(chapter) + 1, total: this.chapters.length }),
       steps: groups.map((g, i) => ({ verb: g.verb, icon: g.icon,
         state: i === ci ? 'current' : i < ci || g.ids.every((sid) => done.has(sid)) ? 'done' : 'next' })),
     });

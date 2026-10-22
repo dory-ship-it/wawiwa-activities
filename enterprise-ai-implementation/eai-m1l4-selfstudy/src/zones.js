@@ -44,7 +44,10 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
   /* ---- top bar ---- */
   const menuBtn = h('button', { class: 'w-bar-menu', type: 'button', 'aria-label': ui.rail.openMenu, 'aria-haspopup': 'dialog', 'aria-expanded': 'false',
     onclick: () => onMenu(menuBtn) }, h('i'), h('i'), h('i'));
-  const chapterName = h('p', { class: 'w-bar-chapter' });
+  // FX1 (Kit 13): "Chapter N of 7" (small) above the chapter name
+  const chapterOf = h('span', { class: 'w-bar-of' });
+  const chapterTitle = h('span', { class: 'w-bar-title' });
+  const chapterName = h('p', { class: 'w-bar-chapter' }, chapterOf, chapterTitle);
   const steps = h('ol', { class: 'w-steps-bar', 'aria-label': ui.rail.steps });
   const savedText = h('span', { class: 'w-saved-text' });
   const saved = h('span', { class: 'w-saved', role: 'status', hidden: true }, savedText);
@@ -52,9 +55,11 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
     h('img', { class: 'w-bar-logo', src: 'assets/logo/wawiwa-logo.png', alt: ui.logoAlt, width: '271', height: '102' }),
     h('span', { class: 'w-bar-rule', 'aria-hidden': 'true' }), menuBtn, chapterName, saved, steps);
 
-  // model: { chapter: title, steps: [{ verb, icon, state: done | current | next }] }
+  // model: { chapter: title, of: "Chapter 2 of 7", steps: [{ verb, icon, state: done | current | next }] }
   function setBar(model) {
-    chapterName.textContent = model.chapter || '';
+    chapterOf.textContent = model.of || '';
+    chapterOf.hidden = !model.of;
+    chapterTitle.textContent = model.chapter || '';
     const items = [];
     model.steps.forEach((s, i) => {
       if (i) items.push(h('li', { class: 'w-step-link', 'aria-hidden': 'true', dataset: { state: s.state === 'next' ? 'next' : 'done' } }));

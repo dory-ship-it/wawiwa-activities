@@ -3,7 +3,7 @@
 Copy of the Cowork Project doc `claude/L4-visual-direction.md` (the source of truth; this copy is for Claude Code).
 
 ## Modes
-- STAGE: full-bleed cinematic photo below the top bar, with one light ivory panel holding the work. Story/decision screens with a character, warm-ups, the video and O1. O1 is the ONLY dark screen.
+- STAGE: full-bleed cinematic photo, running behind the dark translucent top bar (FX1, Kit 13), with one light ivory panel holding the work. Story/decision screens with a character, warm-ups, the video and O1. O1 is the ONLY dark screen.
 - FOCUS: stone ground with a "photo wash": the chapter's photo, heavily blurred under a stone veil. Key ideas, sort/label practice, input screens and the final check.
 - BAND mode: dropped for the pilot.
 - Each chapter gets its identity from its own photo, not from a colour.
@@ -30,11 +30,13 @@ Copy of the Cowork Project doc `claude/L4-visual-direction.md` (the source of tr
 - Cinematic editorial photo, natural colour, 16:9, shallow depth of field; cool daylight plus one warm light; no logos, text, glow, or looking at camera; negative space where the panel sits (right on Stage).
 - Current images are TEMPORARY stills; final images come from the media track. Keep image paths in content JSON so they can be swapped.
 
-## Top bar (replaces the left rail)
-- One light bar on every screen, height ~97 px (7.6cqw), stone background, 1 px bottom line.
-- Left: logo | menu button | chapter name (800).
-- Right: the chapter's steps as circles joined by a line, verb label under each. Done: navy disc with white check, line navy. Current: white disc, turquoise ring plus halo, icon in teal ink, bold label. Next: white disc, #CFC8BB border, grey icon.
-- No "Chapter X of 7", no progress line. On Stage screens the photo starts BELOW the bar.
+## Top bar (replaces the left rail; FX1: exactly as `theme-kit13-topbar.html`, Round 5 Kit 13)
+- Height ~97 px (7.6cqw) on every screen but O1; padding 0 1.8cqw, gap 1.2cqw.
+- Left: logo (6.6cqw) | 1 px divider (3cqw) | menu button (three 2.1cqw lines) | "Chapter N of 7" (Roboto 500 1.1cqw) above the chapter name (800 1.8cqw), line-height 1.15, min-width 12cqw.
+- Right: the chapter's steps, each 5.6cqw wide: a 3.2cqw disc, the verb under it (500 1.1cqw; current 700); connectors .25cqw high, min 1.4cqw, 1.55cqw from the top.
+- FOCUS screens: the light bar, rgba(247,245,241,.97), 1 px #E2DED6 bottom line, divider #D5CFC4, ink menu and name, "Chapter N of 7" #55626C. Done: navy disc, white check, navy connector. Current: white disc, turquoise ring .3cqw plus halo .7cqw rgba(90,179,170,.25), teal-ink icon, bold ink label. Next: white disc, 1 px #CFC8BB, icon #6A7680, connector #D5CFC4.
+- STAGE screens: the photo runs BEHIND the bar (it starts at the top of the stage); the bar is dark translucent over it, rgba(12,28,40,.42) with a 14 px backdrop blur, no bottom line; divider rgba(255,255,255,.25); white menu, white name, "Chapter N of 7" and labels rgba(255,255,255,.82), the current label white. Done: white disc with an ink check, white connector. Current: as on Focus. Next: translucent white disc rgba(255,255,255,.12), 1 px rgba(255,255,255,.4), icon rgba(255,255,255,.75), connector rgba(255,255,255,.3).
+- No progress line. (FX1 replaces "the photo starts below the bar" and "no Chapter X of 7".)
 - Steps per chapter: Intro = Start, Overview, Goals, Decide, Write. Why map = Guess, Watch, Learn, Decide. Toolkit = Guess, Learn, Sort, Learn, Label, Decide, Explore, Decide, Sketch. (Steps come from content JSON.)
 
 ## Side menu

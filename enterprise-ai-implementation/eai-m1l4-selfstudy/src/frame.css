@@ -35,22 +35,26 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 
 /* ---------- scene: Stage photo, Focus wash, O1 ---------- */
 .w-scene { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-.w-scene-photo { position: absolute; left: 0; right: 0; top: var(--wl-bar-h); bottom: 0; background-size: cover; background-repeat: no-repeat; }
+/* FX1 (Kit 13): the Stage photo runs behind the bar (the bar is dark translucent over it) */
+.w-scene-photo { position: absolute; inset: 0; background-size: cover; background-repeat: no-repeat; }
 .w-scene-full { top: 0; }
 .w-o1-veil { position: absolute; inset: 0; background: var(--wl-o1-veil); }
 .w-wash-photo { position: absolute; inset: -38.4px; background-size: cover; background-repeat: no-repeat; filter: blur(17.92px) saturate(.8); }
 .w-wash-veil { position: absolute; inset: 0; background: var(--wl-wash-veil); }
 
-/* ---------- top bar: y 0 to 97.28 ---------- */
+/* ---------- top bar: y 0 to 97.28 (FX1: theme-kit13-topbar.html, Round 5 Kit 13; its cqw x 12.8) ---------- */
 .w-bar { position: absolute; left: 0; top: 0; width: 100%; height: var(--wl-bar-h); z-index: 4; display: flex; align-items: center; gap: 15.36px; padding: 0 23.04px;
-  background: var(--wl-stone); border-bottom: 1px solid var(--wl-line); }
+  background: var(--wl-bar-focus-bg); border-bottom: 1px solid var(--wl-line); }
+.w-stage[data-scene="stage"] > .w-bar { background: var(--wl-bar-stage-bg); border-bottom: 0; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
 .w-stage[data-scene="title"] > .w-bar, .w-stage[data-scene="title"] > .w-footer { display: none; }
 .w-bar-logo { flex: none; width: 84.48px; height: auto; }
 .w-bar-rule { flex: none; width: 1px; height: 38.4px; background: var(--wl-line-mid); }
 .w-bar-menu { flex: none; width: 44px; height: 44px; margin: 0 -0.88px; display: grid; place-content: center; gap: 4.864px; padding: 0; border: 0;
   border-radius: var(--wl-radius-btn); background: transparent; cursor: pointer; }
 .w-bar-menu i { display: block; width: 26.88px; height: 3.072px; background: var(--wl-ink); }
-.w-bar-chapter { flex: none; font: 800 23.04px/normal var(--wl-font-ui); color: var(--wl-ink); white-space: nowrap; }
+.w-bar-chapter { flex: none; display: grid; min-width: 153.6px; line-height: 1.15; white-space: nowrap; }
+.w-bar-of { font: 500 14.08px/1.15 var(--wl-font-label); color: var(--wl-muted); }
+.w-bar-title { font: 800 23.04px/1.15 var(--wl-font-ui); color: var(--wl-ink); }
 .w-saved { flex: none; font: 500 14.08px/1.2 var(--wl-font-label); color: var(--wl-error); }
 .w-steps-bar { margin: 0 0 0 auto; padding: 0; list-style: none; display: flex; align-items: flex-start; }
 .w-step { flex: none; width: 71.68px; display: flex; flex-direction: column; align-items: center; gap: 5.76px; }
@@ -62,6 +66,18 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-step[data-state="current"] .w-step-label { font-weight: 700; color: var(--wl-ink); }
 .w-step-link { flex: 1; min-width: 17.92px; height: 3.2px; margin-top: 19.84px; background: var(--wl-line-mid); }
 .w-step-link[data-state="done"] { background: var(--wl-navy); }
+/* Stage: white on the dark bar; done = white disc with an ink check, to come = translucent white disc */
+.w-stage[data-scene="stage"] .w-bar-rule { background: var(--wl-bar-on-dark-rule); }
+.w-stage[data-scene="stage"] .w-bar-menu i { background: var(--wl-white); }
+.w-stage[data-scene="stage"] .w-bar-of { color: var(--wl-bar-on-dark-text); }
+.w-stage[data-scene="stage"] .w-bar-title { color: var(--wl-white); }
+.w-stage[data-scene="stage"] .w-step-disc { background: var(--wl-bar-on-dark-disc); border-color: var(--wl-bar-on-dark-ring); color: var(--wl-bar-on-dark-icon); }
+.w-stage[data-scene="stage"] .w-step[data-state="done"] .w-step-disc { background: var(--wl-white); color: var(--wl-ink); }
+.w-stage[data-scene="stage"] .w-step[data-state="current"] .w-step-disc { background: var(--wl-white); color: var(--wl-teal-ink); }
+.w-stage[data-scene="stage"] .w-step-label { color: var(--wl-bar-on-dark-text); }
+.w-stage[data-scene="stage"] .w-step[data-state="current"] .w-step-label { color: var(--wl-white); }
+.w-stage[data-scene="stage"] .w-step-link { background: var(--wl-bar-on-dark-link); }
+.w-stage[data-scene="stage"] .w-step-link[data-state="done"] { background: var(--wl-white); }
 
 /* ---------- main: y 97.28 to 720 (O1: the whole stage) ---------- */
 .w-main { position: absolute; left: 0; top: var(--wl-bar-h); width: 100%; height: calc(720px - var(--wl-bar-h)); z-index: 1; overflow: hidden; }

@@ -250,7 +250,7 @@ const opts = (page) => page.evaluate(() => Object.fromEntries([...document.query
 const events = (page) => page.evaluate(() => window.__l4.tracking.events);
 // the top bar (NL1): the chapter's name and its steps; the chapters' status from the progress model
 const bar = (page) => page.evaluate(() => ({
-  chapter: document.querySelector('.w-bar-chapter').textContent,
+  chapter: document.querySelector('.w-bar-title').textContent, of: document.querySelector('.w-bar-of').textContent,
   steps: [...document.querySelectorAll('.w-step')].map((s) => s.dataset.state + (s.getAttribute('aria-current') ? '*' : '') + ':' + s.querySelector('.w-step-label').textContent),
   status: window.__l4.progress().chapters.map((x) => x.status), pct: window.__l4.progress().percent,
 }));
@@ -342,6 +342,10 @@ const stepsOf = (c) => CH[c].screens.map((id) => S[id].step.verb);
 expect(rl.chapter === CH.ch0.title && rl.steps.join() === stepsOf('ch0').map((v, i) => (i < 3 ? 'done:' : i === 3 ? 'current*:' : 'next:') + v).join()
   && rl.status.join() === 'current,locked,locked,locked,locked,locked,locked' && rl.pct === 3,
   `top bar at S01: "${rl.chapter}", steps ${rl.steps.join(' ')} (aria-current on the current step); chapters ${rl.status.join(' ')}, ${rl.pct}%`);
+// FX1 (Kit 13): "Chapter 1 of 7" above the name; on Stage the photo runs behind the dark bar
+const kit = await page.evaluate(() => { const b = getComputedStyle(document.querySelector('.w-bar')); const p = document.querySelector('.w-scene-photo').getBoundingClientRect(); return { bg: b.backgroundColor, top: p.top }; });
+expect(rl.of === 'Chapter 1 of 7' && kit.bg === 'rgba(12, 28, 40, 0.42)' && kit.top <= 0,
+  `top bar (Kit 13) on Stage: "${rl.of}" above the name, the bar ${kit.bg} over the photo (photo top ${Math.round(kit.top)})`);
 
 // menu: open, trap, Escape
 await tabTo(page, '.w-bar-menu', { back: true });
@@ -541,8 +545,8 @@ console.log('\nchapter 2 (keyboard)');
 await expectNewScreen(page, 'W2', 'S03 Next (no pause marker: one Next moves on)');
 await expectBand(page, 'W2 before action', { state: 'hint', text: S.W2.hint, unlocked: false, lockedWhy: UI.footer.locked.warmup });
 rl = await bar(page);
-expect(rl.chapter === CH.ch2.title && rl.steps.map((s) => s.split(':')[1]).join() === 'Guess,Learn,Sort,Learn,Label,Decide,Explore,Decide,Sketch' && rl.steps[0].startsWith('current*'),
-  `top bar in chapter 2: "${rl.chapter}", steps ${rl.steps.join(' ')}`);
+expect(rl.chapter === CH.ch2.title && rl.of === 'Chapter 3 of 7' && rl.steps.map((s) => s.split(':')[1]).join() === 'Guess,Learn,Sort,Learn,Label,Decide,Explore,Decide,Sketch' && rl.steps[0].startsWith('current*'),
+  `top bar in chapter 2: "${rl.of}" "${rl.chapter}", steps ${rl.steps.join(' ')}`);
 expect(await page.evaluate(() => document.querySelector('.w-warmup-panel').textContent).then((t) => t.includes(S.W2.instruction) && t.includes(S.W2.panel.chip)),
   'W2: the question on the glass card with "Not scored"');
 await expectLayout(page, 'W2 hint');
