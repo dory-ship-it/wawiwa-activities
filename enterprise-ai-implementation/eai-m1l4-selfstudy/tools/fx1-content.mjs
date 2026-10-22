@@ -55,6 +55,15 @@ if (group === 'input') {
   editScreen('S17B', (s) => (s.includes('"privacy":') ? s : s.replace(/("bottom": \{ "kind": "note")/, '"privacy": { "kind": "privacy", "icon": "shield", "text": "Leave out names and identifying details." },\n        $1')));
 }
 
+if (group === 'C') {
+  // C4: one instruction: "Watch for: <question>" (the guiding line) + "The video stops n times to ask you."
+  editScreen('V1', (s) => s.replace('"instruction": "Watch the video. Answer the two questions when it stops."', '"instruction": "The video stops 2 times to ask you."'));
+  editScreen('V2', (s) => s.replace('"instruction": "Watch the video. Answer the three questions when it stops."', '"instruction": "The video stops 3 times to ask you."'));
+  addAfterTemplate('V2', 'guidingLabel', '"guidingLabel": "Watch for:",');
+  // B1 at the stops: the sweep over the answers, "Show me how" on the stop card
+  ['V1', 'V2'].forEach((id) => editScreen(id, (s) => s.replace('"ghost": { "type": "stop", "target": "gutter-low" }', '"ghost": { "type": "stop", "target": "options-sweep", "showMe": true }')));
+}
+
 JSON.parse(t); // still valid JSON
 writeFileSync(FILE, t.replace(/\n/g, EOL), 'utf8');
 console.log('fx1-content', group, 'done');

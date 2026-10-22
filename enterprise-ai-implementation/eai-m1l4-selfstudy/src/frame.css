@@ -377,15 +377,21 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-privacy { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 7.68px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
 
 /* ---------- V1 video (Stage: the film fills main) ---------- */
-.w-video { position: absolute; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; object-fit: cover; background: transparent; }
+/* FX1 C1: never cropped: the film is letterboxed inside main (contain) on the Stage ground */
+.w-video { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 0; display: block; width: 100%; height: 100%; object-fit: contain; background: var(--wl-stage-ground); }
 .w-video[data-started="false"] { opacity: 0; } /* before it plays: the chapter photo (the frames' ready state) */
+/* FX1 C3: the transcript open: the film shrinks to the left 60%, above the player bar; the transcript is
+   a readable light panel on the right (no overlay on the film) */
+.w-main[data-transcript="open"] .w-video { right: auto; bottom: auto; width: 60%; height: calc(100% - 174.08px); }
+.w-main[data-transcript="open"] .w-caption { left: 30%; max-width: calc(60% - 40.96px); bottom: 189.44px; font-size: 23.04px; }
+.w-main[data-transcript="open"] .w-bigplay { left: 30%; top: calc((100% - 174.08px) / 2); }
 .w-video-view, .w-stop-view { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .w-video-view > *, .w-stop-view > * { pointer-events: auto; }
 .w-video-view[data-phase="playing"] .w-video-head, .w-video-view[data-phase="playing"] .w-bigplay { display: none; }
 .w-guiding { margin-top: 15.36px; font: 400 20.48px/1.4 var(--wl-font-ui); color: var(--wl-glass-text); }
 .w-guiding b { font-weight: 700; color: var(--wl-aqua-text); }
 .w-video-head .w-instruction { display: block; margin: 17.92px 0 0; font: 500 16.64px/normal var(--wl-font-label); letter-spacing: 0; color: var(--wl-on-glass); }
-.w-bigplay { position: absolute; right: 281.6px; top: 209.92px; width: 115.2px; height: 115.2px; margin: 0; padding: 0 0 0 7.68px; border: 0; border-radius: 50%; display: grid; place-items: center;
+.w-bigplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 115.2px; height: 115.2px; margin: 0; padding: 0 0 0 7.68px; border: 0; border-radius: 50%; display: grid; place-items: center;
   background: var(--wl-white); box-shadow: 0 0 0 7.68px var(--wl-turquoise), 0 0 0 17.92px var(--wl-halo); color: var(--wl-teal-ink); cursor: pointer; }
 .w-caption { position: absolute; left: 50%; bottom: 181.76px; z-index: 3; width: max-content; max-width: 921.6px; transform: translateX(-50%); padding: 11.52px 25.6px; border-radius: 12.8px;
   background: var(--wl-quote-glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font: 800 30.72px/1.25 var(--wl-font-ui); letter-spacing: -.384px; color: var(--wl-white); text-align: center; }
@@ -404,14 +410,16 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-seek-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2.56px; background: var(--wl-turquoise); }
 .w-seek-stop { position: absolute; top: -6.08px; width: 15.36px; height: 15.36px; margin-left: -7.68px; border-radius: 50%; background: var(--wl-white); box-shadow: 0 0 0 2.56px var(--wl-turquoise); }
 .w-seek-stop[data-done="true"] { background: var(--wl-turquoise); }
-.w-transcript { position: absolute; right: 30.72px; top: 35.84px; bottom: 176.64px; z-index: 3; width: 384px; display: flex; flex-direction: column; border-radius: 15.36px;
-  background: var(--wl-quote-glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: var(--wl-white); }
-.w-transcript-head { margin: 0; padding: 15.36px 20.48px 7.68px; font: 700 17.92px/normal var(--wl-font-ui); }
-.w-transcript-list { flex: 1 1 auto; overflow-y: auto; padding: 0 10.24px 10.24px; font: 400 15.36px/1.5 var(--wl-font-label); color: var(--wl-on-glass); }
+.w-transcript { position: absolute; right: 30.72px; top: 15.36px; bottom: 174.08px; z-index: 3; width: calc(40% - 46.08px); display: flex; flex-direction: column; border-radius: var(--wl-radius-panel);
+  background: var(--wl-ivory); box-shadow: var(--wl-panel-shadow); color: var(--wl-ink); }
+.w-transcript-head { margin: 0; padding: 17.92px 23.04px 7.68px; font: 800 23.04px/normal var(--wl-font-ui); }
+.w-transcript-list { flex: 1 1 auto; overflow-y: auto; padding: 0 12.8px 12.8px; font: 400 17.92px/1.5 var(--wl-font-ui); color: var(--wl-text-2); }
 .w-tline { margin: 0 0 4px; padding: 7.68px 10.24px; border-radius: 7.68px; }
-.w-tline[data-active="true"] { background: var(--wl-halo); color: var(--wl-white); }
-.w-tline-time { display: block; font-weight: 500; color: var(--wl-aqua-text); }
+.w-tline[data-active="true"] { background: var(--wl-keypill-bg); color: var(--wl-ink); }
+.w-tline-time { display: block; font: 500 14.08px/normal var(--wl-font-label); color: var(--wl-teal-ink); }
 .w-stop-card .w-showme { margin-top: 15.36px; }
+/* FX1 C2: at a stop the card (left) and the panel (right) stand above the player bar, which stays */
+.w-stop-view .w-stop-panel { top: 35.84px; transform: none; }
 
 /* ================== styled by analogy (no frame yet; interaction and text unchanged) ================== */
 /* NL3 S14, S15 on Stage: the case card on the photo (a white figure card, top left, the S01 quote's

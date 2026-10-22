@@ -77,7 +77,7 @@ export const video = {
     const readyCard = h('section', { class: 'w-glass w-glass-top w-video-head' },
       glassKicker('watch', v.kicker, media.length), h('p', { class: 'w-video-title' }, screen.title), guiding, zones.instruction);
     const bigPlay = h('button', { class: 'w-bigplay', type: 'button', 'aria-label': v.play, dataset: { action: 'bigplay' } }, glyph('watch', { size: 64 }));
-    const playView = h('div', { class: 'w-video-view', dataset: { transcript: 'closed', phase: 'ready' } }, readyCard, bigPlay, caption, transcript, controls);
+    const playView = h('div', { class: 'w-video-view', dataset: { transcript: 'closed', phase: 'ready' } }, readyCard, bigPlay, caption, transcript);
 
     /* ---- stop view ---- */
     const stopQ = h('h2', { class: 'w-stop-q', id: nextId('w-stop-q'), tabindex: '-1' });
@@ -90,7 +90,10 @@ export const video = {
     let ghost = null; // the ghost hand of the open stop (type "stop": it slides down the panel's gutter)
     const stopView = h('div', { class: 'w-stop-view', hidden: true }, stopCard, stopPanel);
 
-    layout(ctx, 'video', vid, playView, stopView);
+    // FX1 C: the player bar stays on screen at a stop too (inert there: seeking waits for the answer);
+    // the stop's card and panel sit above it, nothing overlaps it
+    layout(ctx, 'video', vid, playView, stopView, controls);
+    zones.main.dataset.transcript = 'closed';
 
     /* ---- time, slider, captions, transcript ---- */
     // forward seeking stops at the furthest point already watched (and never passes an open stop);
@@ -172,6 +175,7 @@ export const video = {
       flip(trBtn);
       transcript.hidden = trBtn.getAttribute('aria-pressed') !== 'true';
       playView.dataset.transcript = transcript.hidden ? 'closed' : 'open';
+      zones.main.dataset.transcript = playView.dataset.transcript; // FX1 C3: the film shrinks to the left
       render();
     });
 
@@ -215,10 +219,12 @@ export const video = {
       setResume(true);
       playView.hidden = true;
       stopView.hidden = false;
+      controls.inert = true;
+      controls.dataset.stop = 'true';
       stopQ.focus({ preventScroll: true });
       if (screen.ghost) {
-        // the target the content names (V1, V2: down the panel's left gutter, on no answer)
-        ghost = ctx.ghost({ type: screen.ghost.type, steps: () => targetSteps(stopView, screen.ghost.target) });
+        // FX1 B1: the sweep over the answers with "Pick one" (the content's target), "Show me how" on the card
+        ghost = ctx.ghost({ type: screen.ghost.type, chip: ui.ghost.pickOne, steps: () => targetSteps(stopView, screen.ghost.target) });
         if (screen.ghost.showMe) stopCard.append(ghost.button);
       }
     }
@@ -229,6 +235,8 @@ export const video = {
       zones.setTool();
       stopView.hidden = true;
       playView.hidden = false;
+      controls.inert = false;
+      delete controls.dataset.stop;
       render();
       vid.play().catch(() => {});
       playBtn.focus();

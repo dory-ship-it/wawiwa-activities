@@ -21,6 +21,11 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const SKETCH = (p) => p.evaluate(() => { Object.assign(window.__l4.state.f, { L4_CASE_TRIGGER: 'A rep finishes a sales call', L4_CASE_STEPS: 'Rep types notes by hand; the manager reads them two days later and asks follow-up questions by phone', L4_CASE_OUTPUT: 'A call summary, to the sales manager' }); });
 const deck = async (p, cols) => { for (const c of cols) { await click(p, '[data-action="card"]'); await click(p, `.w-drop[data-column="${c}"]`); } };
 const flag = async (p, f, t) => { await click(p, `.w-flag-card[data-flag="${f}"]`); await click(p, `.w-target[data-target="${t}"]`); };
+const toStop = async (p) => {
+  await p.waitForFunction(() => document.querySelector('.w-video').readyState >= 1);
+  await p.evaluate(() => { const v = document.querySelector('.w-video'); v.muted = true; v.playbackRate = 16; v.play(); });
+  await p.waitForSelector('.w-stop-view:not([hidden])', { timeout: 60000 });
+};
 const ghost = async (p, ms = 1400) => { if (await p.$('[data-action="showMe"]')) { await click(p, '[data-action="showMe"]'); await wait(ms); } };
 
 export const SHOTS = [
@@ -30,6 +35,12 @@ export const SHOTS = [
   ['S01', 'show-me-how', async (p) => ghost(p, 1900)],
   ['S02', 'start', async () => {}],
   ['V1', 'ready', async (p) => { await p.waitForFunction(() => document.querySelector('.w-video')?.readyState >= 1); }],
+  ['V2', 'stop-1', async (p) => { await toStop(p); }],
+  ['V2', 'transcript-open', async (p) => {
+    await p.waitForFunction(() => document.querySelector('.w-video').readyState >= 2 && document.querySelectorAll('.w-tline').length > 0);
+    await p.evaluate(() => { const v = document.querySelector('.w-video'); v.muted = true; v.playbackRate = 8; return v.play().then(() => new Promise((r) => setTimeout(r, 2200))).then(() => v.pause()); });
+    await click(p, '.w-tr');
+  }],
   ['K2', 'start', async () => {}],
   ['S04', 'checked', async (p) => { await deck(p, ['a', 'c', 'a', 'b', 'a']); await click(p, '[data-action="check"]'); }],
   ['S04', 'revealed', async (p) => { await deck(p, ['a', 'c', 'a', 'b', 'a']); await click(p, '[data-action="check"]'); await deck(p, ['a', 'b']); await click(p, '[data-action="check"]'); }],
