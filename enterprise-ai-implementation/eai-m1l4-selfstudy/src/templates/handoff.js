@@ -8,10 +8,10 @@
 //           the privacy line and Save. Empty Save = the hint as a notice; saved = the field's answer on
 //           the tracking bus (fill-in, neutral), the band's saved line, Next.
 // Opened and back are flags in suspend data, so a reload or LMS resume comes back to the right state.
-import { h, fmt, resolveLink } from '../util.js';
-import { icon, glyph } from '../icons.js';
-import { layout, sheet, privacyLine } from './stage.js';
-import { field } from './input.js';
+import { h, fmt, resolveLink } from '../util.js?v=1e11956b';
+import { icon, glyph } from '../icons.js?v=1e11956b';
+import { layout, sheet, privacyLine } from './stage.js?v=1e11956b';
+import { field } from './input.js?v=1e11956b';
 
 export const handoff = {
   mount(ctx) {

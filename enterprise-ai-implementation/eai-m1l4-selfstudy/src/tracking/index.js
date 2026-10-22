@@ -12,9 +12,9 @@
 // text for fill-in (max 250). result: correct | wrong | neutral.
 // persist(): the encoded state to suspend_data and the screen to lesson_location (SCORM) on every
 // change. ?debug=1 logs every call to the console (calls keeps them for the tests).
-import { encode } from '../state.js';
-import { findAPI, createScorm12 } from './scorm12.js';
-import { createLocal } from './local.js';
+import { encode } from '../state.js?v=1e11956b';
+import { findAPI, createScorm12 } from './scorm12.js?v=1e11956b';
+import { createLocal } from './local.js?v=1e11956b';
 
 export function createTracking({ debug = false, force = null, off = false } = {}) {
   const events = [];

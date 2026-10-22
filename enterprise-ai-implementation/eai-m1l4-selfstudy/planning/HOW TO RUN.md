@@ -43,6 +43,7 @@ To look at the page yourself: in a terminal in the lesson folder run `npm run se
 
 ## When to push
 - After you have looked at a phase and are happy, push it yourself (`git push`). Pushing publishes to GitHub Pages; the preview link becomes `https://dory-ship-it.github.io/wawiwa-activities/enterprise-ai-implementation/eai-m1l4-selfstudy/`.
+- Every link to the code carries a version (`?v=...`, a hash of the code), so a push is never shown from a browser's cache; the content file is asked fresh on every load. After any change to `src/`, `index.html` or `review.html`, run `npm run stamp` before committing; `npm run check` fails while the stamp is stale. (GitHub Pages itself takes a minute or two to publish a push.)
 - Safe to push P0 to P3 for preview (nothing is linked from Rise or Blossom yet). Do not upload the SCORM zip to Blossom until SCORM Cloud passes.
 - Never commit `dist/`, video frames or model files (the `.gitignore` from P0 covers them).
 

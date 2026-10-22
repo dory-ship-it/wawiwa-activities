@@ -17,10 +17,12 @@ const OUT = join(ROOT, 'dist', 'eai-m1l4-selfstudy-scorm12.zip');
 const content = JSON.parse(readFileSync(join(ROOT, 'content', 'l4-slice.json'), 'utf8'));
 const files = new Set();
 const missing = [];
-const read = (p) => readFileSync(join(ROOT, p), 'utf8');
+// a link's version stamp (tools/stamp.mjs, "?v=...") is part of the URL, not of the file name
+const file = (p) => p.split('?')[0];
+const read = (p) => readFileSync(join(ROOT, file(p)), 'utf8');
 const REVIEW_ONLY = /^(review\.html$|src\/review\/)/;
 const add = (p) => {
-  p = posix.normalize(p.replace(/\\/g, '/'));
+  p = posix.normalize(file(p).replace(/\\/g, '/'));
   if (files.has(p) || REVIEW_ONLY.test(p)) return false;
   if (!existsSync(join(ROOT, p)) || !statSync(join(ROOT, p)).isFile()) { missing.push(p); return false; }
   files.add(p);

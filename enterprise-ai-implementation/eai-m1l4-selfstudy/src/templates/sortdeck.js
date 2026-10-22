@@ -21,11 +21,11 @@
 // drags it down, stopping above the columns; "Show me how" replays it.
 // Tracking: one matching interaction at the first Check; the response records each card's FIRST
 // column ("1.a,2.b,..."), correct only if every first placement was right. Later Checks are retries.
-import { h, fmt } from '../util.js';
-import { glyph } from '../icons.js';
-import { layout, explainBand } from './stage.js';
-import { dragDrop } from '../drag.js';
-import { checkButton } from './decision.js';
+import { h, fmt } from '../util.js?v=1e11956b';
+import { glyph } from '../icons.js?v=1e11956b';
+import { layout, explainBand } from './stage.js?v=1e11956b';
+import { dragDrop } from '../drag.js?v=1e11956b';
+import { checkButton } from './decision.js?v=1e11956b';
 
 const keyOf = (c) => String(c.id ?? c.n);
 const COLS_TOP = 314.88, GAP = 12.8; // stage px in main (the frames' 32.2cqw)

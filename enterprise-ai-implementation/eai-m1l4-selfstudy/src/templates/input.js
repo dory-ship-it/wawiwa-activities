@@ -12,11 +12,11 @@
 //                              a field marked optional may stay empty (S12B Date)
 //   all filled              -> values stored under each field's store key, one fill-in answer per
 //                              field on the tracking bus, feedback.saved, Next unlocks
-import { h, fmt, nextId, resolveLink } from '../util.js';
-import { glyph } from '../icons.js';
-import { attachTip } from '../tooltip.js';
-import { layout, sheet, contextLine, privacyLine, showMe, splitFirst } from './stage.js';
-import { scaleOf } from '../ghost.js';
+import { h, fmt, nextId, resolveLink } from '../util.js?v=1e11956b';
+import { glyph } from '../icons.js?v=1e11956b';
+import { attachTip } from '../tooltip.js?v=1e11956b';
+import { layout, sheet, contextLine, privacyLine, showMe, splitFirst } from './stage.js?v=1e11956b';
+import { scaleOf } from '../ghost.js?v=1e11956b';
 
 const COUNTER_ANNOUNCE_AT = 230;
 

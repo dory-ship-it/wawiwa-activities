@@ -5,11 +5,11 @@
 // band. ONLY THE FIRST ATTEMPT COUNTS: the engine keeps it per interaction id (later tries go out as
 // retries), and the result card counts first attempts: "x of 5 on first try. Pass mark: 4 of 5."
 // The score (0 to 100) and passed / failed are set at Finish (S22), from the same first attempts.
-import { h, fmt } from '../util.js';
-import { glyph } from '../icons.js';
-import { checkButton } from './decision.js';
-import { letter } from '../tracking/index.js';
-import { layout, sheet, progressDots, arrowNav } from './stage.js';
+import { h, fmt } from '../util.js?v=1e11956b';
+import { glyph } from '../icons.js?v=1e11956b';
+import { checkButton } from './decision.js?v=1e11956b';
+import { letter } from '../tracking/index.js?v=1e11956b';
+import { layout, sheet, progressDots, arrowNav } from './stage.js?v=1e11956b';
 
 export const check = {
   mount(ctx) {

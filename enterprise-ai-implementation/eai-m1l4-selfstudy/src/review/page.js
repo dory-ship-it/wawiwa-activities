@@ -3,12 +3,12 @@
 // index.html?screen=ID&review=1 at 1280 x 720, scaled to 25%), loaded only when it nears the viewport.
 // Under each: id, template, word count (red over 45). A click opens the screen full size in review
 // mode in a new tab. Filters: All, one chapter, Over word limit. Review-only strings live here.
-import { h } from '../util.js';
-import { reviewOrder } from '../engine.js';
-import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js';
+import { h } from '../util.js?v=1e11956b';
+import { reviewOrder } from '../engine.js?v=1e11956b';
+import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=1e11956b';
 
 const root = document.getElementById('review');
-const res = await fetch(new URL('../../content/l4-slice.json', import.meta.url));
+const res = await fetch(new URL('../../content/l4-slice.json', import.meta.url), { cache: 'no-cache' }); // asked fresh on every load
 const content = await res.json();
 const screens = Object.fromEntries(content.screens.map((s) => [s.id, s]));
 const order = reviewOrder(content);

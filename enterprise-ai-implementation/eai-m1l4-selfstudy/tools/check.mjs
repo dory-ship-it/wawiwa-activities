@@ -20,6 +20,7 @@
 //     screen.photo) exist; every screen of a chapter names its step (verb + a glyph icon); a WARNING
 //     lists every temp image (not a failure)
 // 14. fonts load offline: no Google Fonts anywhere, every @font-face file exists (Roboto 700 too)
+// 15. version stamp: every link to the code and content carries the current ?v= (tools/stamp.mjs)
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -342,6 +343,22 @@ const lacking = need.filter((n) => !have.includes(n));
 google.length || missingFace.length || lacking.length
   ? fail(`fonts: ${google.length ? 'Google Fonts in ' + google.map((f) => relative(ROOT, f)).join(', ') + '; ' : ''}${missingFace.length ? 'missing files ' + missingFace.map((x) => relative(ROOT, x.file)).join(', ') + '; ' : ''}${lacking.length ? 'no @font-face for ' + lacking.join(', ') : ''}`)
   : ok(`fonts self-hosted, no Google Fonts: ${have.join(', ')}`);
+
+/* 15. version stamp (FX1): every link to the lesson's code and content carries the current ?v= (a hash
+   of those files), so a push is never served from a browser's cache; stale or missing: npm run stamp */
+{
+  const { stampedFiles, linksOf, currentVersion } = await import('./stamp.mjs');
+  const want = '?v=' + currentVersion();
+  const bad = stampedFiles().flatMap((f) => linksOf(read(f)).filter((l) => l.stamp !== want).map((l) => `${relative(ROOT, f)}: ${l.path}${l.stamp || ' (no stamp)'}`));
+  const n = stampedFiles().reduce((s, f) => s + linksOf(read(f)).length, 0);
+  bad.length ? fail(`version stamp stale or missing (run npm run stamp; want ${want}): ${bad.slice(0, 5).join(', ')}${bad.length > 5 ? ` and ${bad.length - 5} more` : ''}`)
+    : ok(`version stamp ${want} on all ${n} links (pages, imports)`);
+  // the content is not stamped: every fetch of it must ask the server again (cache: 'no-cache')
+  const fetches = stampedFiles().flatMap((f) => [...read(f).matchAll(/fetch\(new URL\([^)]*l4-slice\.json[^)]*\)\)?[^;]*/g)].map((m) => [relative(ROOT, f), m[0]]));
+  const cached = fetches.filter(([, s]) => !s.includes("cache: 'no-cache'"));
+  cached.length || !fetches.length ? fail('content fetch without cache: \'no-cache\': ' + (cached.map(([f]) => f).join(', ') || 'none found'))
+    : ok(`the content is fetched fresh (cache: 'no-cache') in ${fetches.map(([f]) => f).join(', ')}`);
+}
 
 finish();
 function finish() {

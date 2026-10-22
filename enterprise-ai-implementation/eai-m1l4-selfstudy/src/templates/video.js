@@ -15,11 +15,11 @@
 // media.duration, stops[].t. Swapping the real film in is a change of those paths and times only.
 // Seeking forward never passes the part already watched or the next unanswered stop (the slider
 // clamps, a polite note says why).
-import { h, fmt, nextId } from '../util.js';
-import { glyph } from '../icons.js';
-import { letter } from '../tracking/index.js';
-import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js';
-import { targetSteps } from '../ghost.js';
+import { h, fmt, nextId } from '../util.js?v=1e11956b';
+import { glyph } from '../icons.js?v=1e11956b';
+import { letter } from '../tracking/index.js?v=1e11956b';
+import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=1e11956b';
+import { targetSteps } from '../ghost.js?v=1e11956b';
 
 const SEEK_STEP = 5, SEEK_PAGE = 15, AT_STOP = 0.05, AT_END = 0.3;
 const mmss = (t) => { const s = Math.max(0, Math.floor(t)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };

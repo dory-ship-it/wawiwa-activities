@@ -8,24 +8,24 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt } from './util.js';
-import { createZones } from './zones.js';
-import { createMenu, openDialog } from './menu.js';
-import { initTooltips, applyTerms } from './tooltip.js';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js';
-import { decision } from './templates/decision.js';
-import { input } from './templates/input.js';
-import { sort } from './templates/sort.js';
-import { sortDeck } from './templates/sortdeck.js';
-import { bpmn } from './templates/bpmn.js';
-import { flags } from './templates/flags.js';
-import { explorer } from './templates/explorer.js';
-import { video } from './templates/video.js';
-import { handoff } from './templates/handoff.js';
-import { check } from './templates/check.js';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js';
-import { createGhost, stopGhost } from './ghost.js';
-import { createTracking } from './tracking/index.js';
+import { h, fmt } from './util.js?v=1e11956b';
+import { createZones } from './zones.js?v=1e11956b';
+import { createMenu, openDialog } from './menu.js?v=1e11956b';
+import { initTooltips, applyTerms } from './tooltip.js?v=1e11956b';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=1e11956b';
+import { decision } from './templates/decision.js?v=1e11956b';
+import { input } from './templates/input.js?v=1e11956b';
+import { sort } from './templates/sort.js?v=1e11956b';
+import { sortDeck } from './templates/sortdeck.js?v=1e11956b';
+import { bpmn } from './templates/bpmn.js?v=1e11956b';
+import { flags } from './templates/flags.js?v=1e11956b';
+import { explorer } from './templates/explorer.js?v=1e11956b';
+import { video } from './templates/video.js?v=1e11956b';
+import { handoff } from './templates/handoff.js?v=1e11956b';
+import { check } from './templates/check.js?v=1e11956b';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=1e11956b';
+import { createGhost, stopGhost } from './ghost.js?v=1e11956b';
+import { createTracking } from './tracking/index.js?v=1e11956b';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -36,7 +36,8 @@ const MAX_TEXT = 250;     // fill-in responses are trimmed and capped (SCORM 1.2
 const TEMPLATES = { decision, input, sort, sortDeck, bpmn, flags, explorer, video, handoff, check, title, moduleMap, goals, warmup, concept, keyParts, keyColumns };
 
 export async function boot(root) {
-  const res = await fetch(new URL('../content/l4-slice.json', import.meta.url));
+  // no-cache: the browser asks the server every time whether the content changed (tools/stamp.mjs)
+  const res = await fetch(new URL('../content/l4-slice.json', import.meta.url), { cache: 'no-cache' });
   if (!res.ok) throw new Error('content/l4-slice.json HTTP ' + res.status);
   const content = await res.json();
   try {
@@ -148,7 +149,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=1e11956b').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }

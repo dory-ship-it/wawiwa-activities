@@ -10,10 +10,10 @@
 // screen.header label sits above the columns.
 // Tracking: one matching interaction when the last card is placed; the response records each
 // card's FIRST column ("1.a,2.b,..."), correct only if every first placement was.
-import { h } from '../util.js';
-import { icon } from '../icons.js';
-import { attachTip } from '../tooltip.js';
-import { layout, sheet, arrowNav, ruleLabel } from './stage.js';
+import { h } from '../util.js?v=1e11956b';
+import { icon } from '../icons.js?v=1e11956b';
+import { attachTip } from '../tooltip.js?v=1e11956b';
+import { layout, sheet, arrowNav, ruleLabel } from './stage.js?v=1e11956b';
 
 const keyOf = (c) => String(c.id ?? c.n);
 
