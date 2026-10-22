@@ -148,19 +148,22 @@ if (group === 'c') {
   const s14 = S('S14');
   Object.assign(s14, { scene: 'stage', minutes: 3,
     band: { term: 'Handoff', text: 'the moment responsibility passes from one role to another.' },
-    visual: { kind: 'handoff', from: 'HR staff', to: 'HR manager', away: 'Away' } });
+    visual: { kind: 'handoff', from: 'HR staff', to: 'HR manager', away: 'Away',
+      alt: 'Handoff: the question passes from the HR staff lane to the HR manager lane, which is greyed out: the HR manager is away.', altPilotCopy: true } });
   s14.stage.top.text = 'A question exceeds policy. It goes to the HR manager, who is away.';
   const fb14 = { a: 'A rule nobody follows today hides the real gap. Record four things: from whom, to whom, what passes, and what if the receiver is away.',
     c: 'Never assume the receiver knows the history. Record from whom, to whom, what passes, and what if the receiver is away.',
     d: 'That tool does not exist today. Record what does: from whom, to whom, what passes, and what if the receiver is away.' };
   s14.options.forEach((o) => { if (fb14[o.id]) o.feedback = fb14[o.id]; });
   delete s14.terms; delete s14.image; s14.layout = 'stage-decision';
+  s14.wordLimit = { max: 54, why: 'storyboard v3 (S14: the handoff band and the handoff visual join the situation and four answers; keep the approved text word for word)' };
 
   // ---- S15 on Stage: the bottleneck band, the new eyebrow, the short hint
   const s15 = S('S15');
   Object.assign(s15, { scene: 'stage', minutes: 3, hint: 'Before speed, ask why.', band: { term: 'Bottleneck', text: 'a step limited by the slowest resource.' } });
   s15.stage.top.eyebrow = 'New case: course feedback, from your Lesson 1 booklet';
   delete s15.terms; delete s15.image; s15.layout = 'stage-decision';
+  s15.wordLimit = { max: 56, why: 'storyboard v3 (S15: the bottleneck band and the longer eyebrow join the case line and three answers; keep the approved text word for word)' };
 }
 
 if (group === 'd') {

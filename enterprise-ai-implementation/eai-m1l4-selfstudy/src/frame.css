@@ -355,12 +355,21 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-stop-card .w-showme { margin-top: 15.36px; }
 
 /* ================== styled by analogy (no frame yet; interaction and text unchanged) ================== */
-/* FT2 to FT4: the memo at the panel's top */
-.w-memo { margin: 0 0 4px; padding-bottom: 12.8px; border-bottom: 1px solid var(--wl-line); }
-.w-memo-head { font: 600 14.72px/normal var(--wl-font-label); letter-spacing: .04em; color: var(--wl-teal-ink); }
-.w-memo-line { margin-top: 6.4px; font: 400 19.2px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
-.w-memo-q { margin-top: 6.4px; font: 700 23.04px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
-.w-sheet-memo .w-ans { align-items: flex-start; font-size: 18.56px; line-height: 1.4; }
+/* NL3 S14, S15 on Stage: the case card on the photo (a white figure card, top left, the S01 quote's
+   width), the panel right at 50%; S14's handoff visual: two lanes as BPMN step boxes, the receiver's
+   greyed out (K1's grey) with a neutral "Away" chip */
+.w-sheet-50 { width: 640px; }
+.w-case-card { position: absolute; z-index: 2; left: 43.52px; top: 35.84px; width: 512px; margin: 0; display: grid; gap: 15.36px; padding: 23.04px 25.6px;
+  border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
+.w-case-card .w-rules { margin: 0; }
+.w-case-card .w-label { margin: 0 0 -7.68px; }
+.w-case-line { font: 600 22.4px/1.45 var(--wl-font-ui); color: var(--wl-ink); }
+.w-hv { display: flex; align-items: center; gap: 10.24px; margin-top: 7.68px; }
+.w-hv-box { position: relative; flex: 1 1 0; min-height: 64px; display: grid; place-items: center; padding: 10.24px; border: 2.432px solid var(--wl-teal-ink); border-radius: 7.68px;
+  background: var(--wl-white); font: 600 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); text-align: center; }
+.w-hv-away { border-style: dashed; border-color: var(--wl-grey-line); background: var(--wl-stone); color: var(--wl-grey-ink); }
+.w-hv-chip { position: absolute; top: -13.44px; right: 10.24px; padding: 2.56px 10.24px; border-radius: 5.12px; background: var(--wl-neutral-bg); font: 600 14.72px/normal var(--wl-font-label); color: var(--wl-text-2); }
+.w-hv-arrow { flex: none; color: var(--wl-navy); }
 
 /* progress dots (S04 cards, S08 rounds, S21 items) */
 .w-dots { display: flex; gap: 8px; }
@@ -421,7 +430,7 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-round-line { font: 600 21.76px/1.35 var(--wl-font-ui); color: var(--wl-ink); }
 
 /* S10 fill */
-.w-fill, .w-metric, .w-bounds { display: flex; flex-direction: column; gap: 12.8px; }
+.w-fill, .w-metric { display: flex; flex-direction: column; gap: 12.8px; }
 .w-field-rows { display: flex; flex-direction: column; gap: 6.4px; }
 .w-field-row { min-height: 48px; display: flex; align-items: center; gap: 12.8px; padding: 6.4px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
 .w-field-name { flex: none; font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
@@ -444,16 +453,6 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-slot[data-on="true"] .w-slot-mark { color: var(--wl-teal-ink); }
 .w-slot[data-on="false"] { background: var(--wl-stone); color: var(--wl-text-2); }
 
-/* S13 bounds */
-.w-steps-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 7.68px; }
-.w-step-chip { padding: 5.12px 12.8px; border-radius: 5.12px; background: var(--wl-white); border: 1px solid var(--wl-line); font: 600 16.64px/1.4 var(--wl-font-ui); color: var(--wl-ink); }
-.w-steps-arrow { color: var(--wl-idle-ink); }
-.w-options-bounds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15.36px; }
-.w-opt-bounds { flex-direction: column; align-items: stretch; gap: 10.24px; padding: 15.36px 52px 15.36px 15.36px; }
-.w-bound { display: flex; gap: 8.96px; align-items: flex-start; font: 600 17.92px/1.35 var(--wl-font-ui); color: var(--wl-body-ink); }
-.w-bound b { font-weight: 800; color: var(--wl-navy); }
-.w-bound-icon { color: var(--wl-navy); margin-top: 2px; }
-.w-opt-bounds .w-ans-mark { position: absolute; top: 12.8px; right: 12.8px; }
 
 /* S18 safety step 2 */
 .w-safety-form { gap: 10.24px; }
@@ -719,15 +718,19 @@ a.w-btn { text-decoration: none; }
 .w-map-text b { font-weight: 700; color: var(--wl-ink); }
 .w-map-field .w-step-n { margin-top: 1.28px; }
 .w-map-field .w-target-placed { right: 7.68px; top: -14.08px; }
-/* S13: the five steps of the process line, a drop slot above each */
-.w-line-card { padding: 20.48px 17.92px; }
-.w-line { display: flex; align-items: flex-end; gap: 7.68px; }
-.w-line-cell { flex: 1 1 0; min-width: 0; display: grid; gap: 10.24px; }
-.w-line-slot { position: relative; height: 51.2px; display: grid; place-items: center; }
+/* S13: the five steps of the process line across the board, a drop slot above each (level); the
+   flags side by side under it, the strip beside them */
+.w-board-flags[data-variant="line"] .w-line-card { width: auto; }
+.w-board-flags[data-variant="line"] .w-flag-side { position: static; margin-top: 20.48px; grid-template-columns: 563.2px minmax(0, 1fr); align-items: start; gap: 20.48px; }
+.w-board-flags[data-variant="line"] .w-flag-tray { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.w-line-card { padding: 20.48px 23.04px; }
+.w-line { display: flex; align-items: stretch; gap: 10.24px; }
+.w-line-cell { flex: 1 1 0; min-width: 0; display: grid; grid-template-rows: 51.2px 1fr; gap: 10.24px; }
+.w-line-slot { position: relative; display: grid; place-items: center; }
 .w-line-slot .w-target-chip, .w-line-slot .w-target-placed { position: static; transform: none; }
-.w-line-step { min-height: 107.52px; display: grid; gap: 7.68px; align-content: start; padding: 10.24px 12.8px; border: 2.432px solid var(--wl-teal-ink); border-radius: 7.68px;
+.w-line-step { display: grid; gap: 7.68px; align-content: start; padding: 10.24px 12.8px; border: 2.432px solid var(--wl-teal-ink); border-radius: 7.68px;
   background: var(--wl-white); font: 600 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
-.w-line-arrow { flex: none; display: grid; margin-bottom: 42.24px; color: var(--wl-navy); }
+.w-line-arrow { flex: none; display: flex; align-items: center; padding-top: 61.44px; color: var(--wl-navy); } /* level with the step boxes, under the slots */
 
 /* ---------- side menu (frame "O2 Side menu open") ---------- */
 .w-menu-overlay { position: absolute; inset: 0; z-index: 30; }

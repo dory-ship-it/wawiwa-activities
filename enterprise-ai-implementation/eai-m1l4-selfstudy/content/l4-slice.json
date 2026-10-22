@@ -11,7 +11,7 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "S12B", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
+    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "S12B", "W4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
     "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] }
   },
 
@@ -25,9 +25,6 @@
       "back": "I'm back",
       "play": "Play video",
       "replay": "Replay segment",
-      "skipChallenge": "Skip challenge",
-      "jumpToTask": "Jump to the last task",
-      "fullChapter": "Take the full chapter",
       "nextRound": "Next round",
       "nextSituation": "Next situation",
       "nextQuestion": "Next question",
@@ -67,8 +64,6 @@
       "locked": {
         "single": "Next, locked until you choose the right answer",
         "warmup": "Next, locked until you make a guess",
-        "challenge": "Next, locked until you answer or skip the challenge",
-        "route": "Next, locked until you pick one of the two options",
         "multi": "Next, locked until both answers are correct",
         "input": "Next, locked until you save",
         "sort": "Next, locked until every card is in its column",
@@ -81,7 +76,7 @@
         "fill": "Next, locked until you choose the right line for Field 7",
         "metric": "Next, locked until you choose the strongest metric",
         "map": "Next, locked until both risk flags are on the right fields",
-        "bounds": "Next, locked until you choose the right start and end",
+        "line": "Next, locked until the Start and End flags are on the right steps",
         "safety": "Next, locked until you choose what to write and save your case title",
         "handoff": "Next, locked until you are back from the workbook and your metric is saved",
         "selfcheck": "Next, locked until you answer all three questions",
@@ -92,7 +87,6 @@
         "default": "Next, locked until you finish this screen"
       }
     },
-    "memo": { "header": "Fast track · Chapter {n}" },
     "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "case": "Case {i} of {n}", "question": "Question {i} of {n}", "deck": "{i} of {n}", "situation": "Situation {i} of {n}", "opened": "{i}/{n}" },
     "drag": {
       "help": "Drag the card to a column, or press 1 to {n} to choose a column and Enter to drop it. Escape cancels.",
@@ -273,9 +267,7 @@
     { "id": "ch1", "n": 1, "title": "Why map", "photo": { "src": "assets/img/l4/w1-new-computer-same-mess.jpg", "position": "30% 50%", "temp": true }, "minutes": 11, "screens": ["W1", "V1", "K1", "S03"], "inSlice": true, "pauseMarker": null },
     { "id": "ch2", "n": 2, "title": "Toolkit", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 28, "screens": ["W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 20, "screens": ["W3", "V2", "S09", "S10", "S11", "S12", "S12B"], "inSlice": true, "pauseMarker": null },
-    { "id": "ch4", "n": 4, "title": "Critical eye", "photo": { "src": "assets/img/l4/o1-lanes-office.jpg", "position": "60% 50%", "temp": true }, "minutes": 26, "screens": ["FT4", "S13", "S14", "S15", "S16", "S17"], "inSlice": true,
-      "fastTrack": { "card": "FT4", "landing": "S17" },
-      "pauseMarker": null },
+    { "id": "ch4", "n": 4, "title": "Critical eye", "photo": { "src": "assets/img/l4/o1-lanes-office.jpg", "position": "60% 50%", "temp": true }, "minutes": 23, "screens": ["W4", "S13", "S14", "S15", "S16", "S17"], "inSlice": true, "pauseMarker": null },
     { "id": "ch5", "n": 5, "title": "Build yours", "photo": { "src": "assets/img/l4/w1-new-computer-same-mess.jpg", "position": "30% 50%", "temp": true }, "minutes": 82, "screens": ["S18A", "S18", "S19", "S20"], "inSlice": true,
       "sliceNote": "S18A and S18 come later; the slice enters Chapter 5 at S19.",
       "pauseMarker": null },
@@ -1319,68 +1311,73 @@
     },
 
     {
-      "id": "FT4",
+      "id": "W4",
       "chapter": "ch4",
-      "template": "decision",
-      "step": { "verb": "Decide", "icon": "decide" },
-      "variant": "challenge",
+      "template": "warmup",
+      "step": { "verb": "Guess", "icon": "guess" },
       "minutes": 1,
-      "instruction": "Answer one question, or skip the challenge.",
-      "hint": "Answer if you can already judge where AI fits. Skipping costs nothing.",
-      "layout": "memo",
-      "image": { "src": "assets/img/ft4.jpg", "alt": "A staff member reading through a case file at a desk", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "45% 40%" },
-      "stage": {
-        "top": { "kind": "line", "icon": "lightning", "text": "Optional challenge. Right on the first try? Skip to this chapter's last task." },
-        "middle": { "kind": "question", "text": "Which decision needs clear human judgment, not AI?" },
-        "bottom": { "kind": "options", "arrange": "row", "link": "skipChallenge" }
-      },
+      "instruction": "Which decision needs clear human judgment, not AI?",
+      "hint": "Pick the answer you expect. A guess cannot be wrong.",
+      "hintPilotCopy": true,
+      "layout": "warmup",
+      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "foot": "Chapter 4 · Critical eye" },
       "options": [
-        { "id": "a", "label": "Deciding whether a customer is eligible", "correct": true,
-          "feedback": "Right on the first try: you can jump to the last task of this chapter, or take the full chapter." },
-        { "id": "b", "label": "Summarizing a long request in three lines", "correct": false,
-          "feedback": "Free text into a short summary is a good fit, with a person checking. The full chapter starts now." },
-        { "id": "c", "label": "Tagging a request by its topic", "correct": false,
-          "feedback": "Tagging is a low-risk classification, a good fit. Look for rights or money at stake. The full chapter starts now." }
+        { "id": "a", "label": "Deciding whether a customer is eligible" },
+        { "id": "b", "label": "Summarizing a long request in three lines" },
+        { "id": "c", "label": "Tagging a request by its topic" }
       ],
-      "attempts": 1,
-      "routing": {
-        "correctFirstTry": { "choices": [ { "button": "jumpToTask", "to": "S17", "route": "skip" }, { "button": "fullChapter", "to": "S13", "route": "full" } ] },
-        "wrong": { "to": "S13", "route": "full" },
-        "skipped": { "to": "S13", "route": "full" }
-      },
-      "tracking": [
-        { "id": "L4_FT4_1", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Apply", "result": "graded" }
-      ],
-      "suspend": ["route"],
-      "sources": ["s24", "s32", "s33", "HW2 section 8 (eligibility)"]
+      "feedback": { "verdict": "Hold that thought.", "text": "This chapter shows where AI fits, and where a person must decide." },
+      "advance": "after-any",
+      "tracking": [{ "id": "L4_W4_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Understand", "result": "neutral" }],
+      "sources": ["planning/STORYBOARD-V3.md Ch4 W4 (replaces FT4)", "s24", "s32"]
     },
 
     {
       "id": "S13",
       "chapter": "ch4",
-      "template": "decision",
+      "template": "flags",
+      "variant": "line",
       "step": { "verb": "Start", "icon": "start" },
-      "variant": "bounds",
-      "minutes": 4,
-      "instruction": "Set where the HR process starts and ends.",
+      "minutes": 3,
+      "instruction": "Drag the Start flag and the End flag onto the HR process line.",
       "hint": "Look for what starts it from outside, and who picks up the result.",
-      "layout": "wide",
-      "strip": "Receiving, checking, answer or escalation",
-      "startLabel": "Start:",
-      "endLabel": "End:",
-      "options": [
-        { "id": "a", "start": "HR staff open the inbox.", "end": "the topic is checked.", "correct": false,
-          "feedback": "WhatsApp and in-person questions never reach the inbox, and nobody receives anything at the end. Most of the process sits outside." },
-        { "id": "b", "start": "an employee sends a question.", "end": "the question reaches the HR manager.", "correct": false,
-          "feedback": "Escalation passes the work on. The employee is still waiting, so the process has not delivered its output yet." },
-        { "id": "c", "start": "an employee sends a question.", "end": "the employee gets an answer.", "correct": true,
-          "feedback": "The map opens at the external trigger and closes when the employee gets an answer, even after an escalation." }
+      "layout": "flags",
+      "dragHelp": "helpSteps",
+      "dropLabel": "Drop here",
+      "line": [
+        { "n": 1, "text": "Employee sends a question" },
+        { "n": 2, "text": "HR staff open the inbox" },
+        { "n": 3, "text": "HR staff check the topic" },
+        { "n": 4, "text": "Question reaches the HR manager" },
+        { "n": 5, "text": "Employee gets an answer" }
       ],
-      "advance": "after-correct",
-      "tracking": [
-        { "id": "L4_S13_1", "type": "choice", "correctResponse": "c", "scored": false, "bloom": "Apply", "result": "graded" }
+      "flags": [
+        {
+          "id": "start",
+          "code": "s",
+          "text": "Start",
+          "target": "1",
+          "feedback": {
+            "2": "WhatsApp and in-person questions never reach the inbox. The process starts earlier, outside HR.",
+            "other": "Start where work enters from outside; end where someone picks up the result."
+          }
+        },
+        {
+          "id": "end",
+          "code": "e",
+          "text": "End",
+          "target": "5",
+          "feedback": {
+            "3": "Nobody receives anything when the topic is checked. Follow the question to its result.",
+            "4": "Escalation passes the work on. The employee is still waiting, so the process has not delivered its output yet.",
+            "other": "Start where work enters from outside; end where someone picks up the result."
+          }
+        }
       ],
-      "sources": ["s21", "s10", "HR canon Fields 2, 3"]
+      "feedbackCorrect": "The map opens at the external trigger and closes when the employee gets an answer, even after an escalation.",
+      "advance": "after-all-placed",
+      "tracking": [{ "id": "L4_S13_1", "type": "matching", "correctResponse": "s.1,e.5", "scored": false, "bloom": "Apply", "result": "graded" }],
+      "sources": ["planning/STORYBOARD-V3.md Ch4 S13", "s21", "s10", "HR canon Fields 2, 3"]
     },
 
     {
@@ -1389,31 +1386,53 @@
       "template": "decision",
       "step": { "verb": "Decide", "icon": "decide" },
       "variant": "single",
-      "minutes": 4,
+      "minutes": 3,
       "instruction": "Choose what the map must record at this handoff.",
       "hint": "Think about the moment responsibility changes hands.",
-      "layout": "editorial",
-      "terms": ["Handoff"],
-      "image": { "src": "assets/img/s14.jpg", "alt": "An empty desk at the end of the day, a stack of papers waiting on it", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "50% 50%" },
+      "layout": "stage-decision",
       "stage": {
         "top": { "kind": "line", "text": "A question exceeds policy. It goes to the HR manager, who is away." },
         "bottom": { "kind": "options", "arrange": "stack" }
       },
       "options": [
-        { "id": "a", "label": "A rule naming a backup manager", "correct": false,
-          "feedback": "Your AS-IS map now shows a rule nobody follows today. The real gap disappears before anyone has measured it." },
-        { "id": "b", "label": "From whom, to whom, what passes, if unavailable", "correct": true,
-          "feedback": "Field 4 now shows sender, receiver, what passes, and the unavailable case. Here nothing covers it, so Field 7 records it." },
-        { "id": "c", "label": "Nothing: the manager knows the history", "correct": false,
-          "feedback": "The map now assumes the receiver knows what happened before. When the manager is away, the question has no path." },
-        { "id": "d", "label": "An AI agent to reroute questions", "correct": false,
-          "feedback": "The map now describes a tool that does not exist. Lesson 5 would start from a plan, not from today." }
+        {
+          "id": "a",
+          "label": "A rule naming a backup manager",
+          "correct": false,
+          "feedback": "A rule nobody follows today hides the real gap. Record four things: from whom, to whom, what passes, and what if the receiver is away."
+        },
+        {
+          "id": "b",
+          "label": "From whom, to whom, what passes, if unavailable",
+          "correct": true,
+          "feedback": "Field 4 now shows sender, receiver, what passes, and the unavailable case. Here nothing covers it, so Field 7 records it."
+        },
+        {
+          "id": "c",
+          "label": "Nothing: the manager knows the history",
+          "correct": false,
+          "feedback": "Never assume the receiver knows the history. Record from whom, to whom, what passes, and what if the receiver is away."
+        },
+        {
+          "id": "d",
+          "label": "An AI agent to reroute questions",
+          "correct": false,
+          "feedback": "That tool does not exist today. Record what does: from whom, to whom, what passes, and what if the receiver is away."
+        }
       ],
       "advance": "after-correct",
       "tracking": [
         { "id": "L4_S14_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Analyze", "result": "graded" }
       ],
-      "sources": ["s27", "s16", "HR canon Fields 4, 7", "'Away' is constructed"]
+      "sources": ["s27", "s16", "HR canon Fields 4, 7", "'Away' is constructed"],
+      "scene": "stage",
+      "band": { "term": "Handoff", "text": "the moment responsibility passes from one role to another." },
+      "visual": { "kind": "handoff", "from": "HR staff", "to": "HR manager", "away": "Away",
+        "alt": "Handoff: the question passes from the HR staff lane to the HR manager lane, which is greyed out: the HR manager is away.", "altPilotCopy": true },
+      "wordLimit": {
+        "max": 54,
+        "why": "storyboard v3 (S14: the handoff band and the handoff visual join the situation and four answers; keep the approved text word for word)"
+      }
     },
 
     {
@@ -1422,14 +1441,17 @@
       "template": "decision",
       "step": { "verb": "Decide", "icon": "decide" },
       "variant": "single",
-      "minutes": 4,
+      "minutes": 3,
       "instruction": "Choose the first question to ask about this bottleneck.",
-      "hint": "A bottleneck is a step limited by the slowest resource. Before speed, ask why.",
-      "layout": "editorial",
-      "terms": ["Bottleneck"],
-      "image": { "src": "assets/img/s15.jpg", "alt": "A coordinator reading a tall stack of printed course feedback by hand", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "45% 50%" },
+      "hint": "Before speed, ask why.",
+      "layout": "stage-decision",
       "stage": {
-        "top": { "kind": "line", "eyebrow": "Lesson 1 case: course feedback", "text": "One step: the coordinator prints and reads all feedback by hand, 3 to 4 hours per course.", "highlight": "3 to 4 hours" },
+        "top": {
+          "kind": "line",
+          "eyebrow": "New case: course feedback, from your Lesson 1 booklet",
+          "text": "One step: the coordinator prints and reads all feedback by hand, 3 to 4 hours per course.",
+          "highlight": "3 to 4 hours"
+        },
         "bottom": { "kind": "options", "arrange": "stack" }
       },
       "options": [
@@ -1444,7 +1466,13 @@
       "tracking": [
         { "id": "L4_S15_1", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Apply", "result": "graded" }
       ],
-      "sources": ["s28", "s29", "s30", "s6", "L1 booklet Case 4"]
+      "sources": ["s28", "s29", "s30", "s6", "L1 booklet Case 4"],
+      "scene": "stage",
+      "band": { "term": "Bottleneck", "text": "a step limited by the slowest resource." },
+      "wordLimit": {
+        "max": 56,
+        "why": "storyboard v3 (S15: the bottleneck band and the longer eyebrow join the case line and three answers; keep the approved text word for word)"
+      }
     },
 
     {

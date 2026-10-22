@@ -33,7 +33,6 @@ export function screenViews(s, content) {
   // R2 templates
   if (s.variant === 'fill') return [[s.id, [s.situation.text, ...s.fieldRows.flatMap((f) => [f.label, f.value]), ...s.options.map((o) => o.label)]]];
   if (s.variant === 'metric') return [[s.id, [...bandText(s.band), s.field.label, ...s.options.map((o) => o.label), s.slotsTitle, ...s.slots.map((x) => x.label)]]];
-  if (s.variant === 'bounds') return [[s.id, [s.strip, ...s.options.flatMap((o) => [s.startLabel, o.start, s.endLabel, o.end])]]];
   // R3 templates
   if (s.variant === 'safety') return [[`${s.id} step1`, [s.stage.top.text, ...s.options.map((o) => o.label)]],
     [`${s.id} step2`, [s.stage.top.text, s.step2.field.label, s.step2.privacy.text, s.step2.checkbox]]];
@@ -81,7 +80,9 @@ export function screenViews(s, content) {
   if (s.variant === 'pair') return s.situations.map((x, k) => [`${s.id} ${x.id}`, [x.hint, s.answerLabel, x.text, ...x.options.flatMap((o) => [o.label, o.sub]),
     ...s.situations.slice(0, k).flatMap((d) => [d.doneLabel, d.options.find((o) => o.correct).label])]]);
   if (s.variant === 'rounds') return s.rounds.map((r) => [`${s.id} ${r.id}`, [s.rules.label, ...s.rules.items, r.badge, r.line, s.hint, ...s.options.map((o) => o.label)]]);
-  return [[s.id, [...stageText(s.stage), ...(s.options || []).map((o) => o.label), ...fieldText(s.fields), ...(s.cases || []).map((c) => c.label)]]];
+  // (NL3 S14, S15: with the explain band and S14's handoff visual on the case card)
+  const visual = s.visual ? [s.visual.from, s.visual.to, s.visual.away] : [];
+  return [[s.id, [...bandText(s.band), ...visual, ...stageText(s.stage), ...(s.options || []).map((o) => o.label), ...fieldText(s.fields), ...(s.cases || []).map((c) => c.label)]]];
 }
 
 // Every hint, feedback line and pause marker on screen s (pause marker: its chapter's, on the last

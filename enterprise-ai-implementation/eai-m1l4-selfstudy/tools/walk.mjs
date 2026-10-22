@@ -925,27 +925,68 @@ expect(mf.L4_CASE_BASELINE === METRIC_PARTS.baseline && mf.L4_CASE_TARGET === ME
 await expectLayout(page, 'S12B saved');
 await press(page, 'Enter');
 
-// FT4
-await expectNewScreen(page, 'FT4', 'S12 Next');
-await expectLayout(page, 'FT4');
-await shotR2(page, 'ft4.png');
-await tabTo(page, '.w-opt[data-id="c"]');
+// W4 warm-up (NL3: replaces FT4 and its routing)
+await expectNewScreen(page, 'W4', 'S12B Next (no pause marker)');
+rl = await bar(page);
+expect(rl.status[3] === 'done' && rl.status[4] === 'current' && rl.chapter === CH.ch4.title && rl.steps.map((s) => s.split(':')[1]).join() === stepsOf('ch4').join(),
+  `after chapter 3: HR demo ${rl.status[3]}, Critical eye ${rl.status[4]}, steps ${rl.steps.join(' ')}`);
+await expectBand(page, 'W4 before action', { state: 'hint', text: S.W4.hint, unlocked: false, lockedWhy: UI.footer.locked.warmup });
+await expectLayout(page, 'W4 hint');
+await tabTo(page, '.w-guess[data-id="a"]');
 await press(page, 'Enter');
-await expectBand(page, 'FT4 wrong (c)', { state: 'wrong', text: opt('FT4', 'c').feedback, unlocked: true });
+await expectBand(page, 'W4 guess a', { state: 'guess', verdict: S.W4.feedback.verdict, text: S.W4.feedback.text, unlocked: true });
 await press(page, 'Enter');
 
-// S13, S14, S15: one question each, wrong then right
-for (const [id, wrongId, moves, rightId] of [['S13', 'a', ['ArrowRight', 2], 'c'], ['S14', 'd', ['ArrowUp', 2], 'b'], ['S15', 'b', ['ArrowUp', 1], 'a']]) {
+// S13 the Start and End flags by keyboard: Start on step 2 (wrong, its own line), then step 1; End on
+// step 4 (wrong, its own line), then step 5
+await expectNewScreen(page, 'S13', 'W4 Next');
+const flagOf = (id) => S.S13.flags.find((f) => f.id === id);
+await expectBand(page, 'S13 before action', { state: 'hint', text: S.S13.hint, unlocked: false, lockedWhy: UI.footer.locked.line });
+const s13 = await page.evaluate(() => ({ steps: [...document.querySelectorAll('.w-line-step')].map((s) => s.textContent).join('|'), slots: document.querySelectorAll('.w-line-slot .w-target-chip').length,
+  flags: [...document.querySelectorAll('.w-flag-card')].map((c) => c.getAttribute('aria-label')).join() }));
+expect(s13.steps === S.S13.line.map((x) => x.n + x.text).join('|') && s13.slots === 5 && s13.flags === 'Start,End', `S13: the five steps with a "${S.S13.dropLabel}" slot each, the flags ${s13.flags}`);
+await tabTo(page, '.w-flag-card[data-flag="start"]');
+await press(page, '2');
+expect(await page.evaluate(() => document.querySelector('.w-board > .w-sr-only[aria-live]').textContent) === UI.drag.chosen.replace('{target}', UI.drag.stepName.replace('{n}', 2).replace('{text}', S.S13.line[1].text)),
+  'S13 key 2: "Step 2, HR staff open the inbox chosen" announced');
+await press(page, 'Enter');
+await expectBand(page, 'S13 Start on step 2', { state: 'wrong', text: flagOf('start').feedback[2], unlocked: false });
+await expectLayout(page, 'S13 wrong');
+await press(page, '1');
+await press(page, 'Enter');
+await expectBand(page, 'S13 Start on step 1', { state: 'correct', text: '', unlocked: false });
+expect(await isActive(page, '.w-flag-card[data-flag="end"]') && await page.evaluate(() => document.querySelector('.w-target[data-target="1"] .w-target-placed')?.textContent === 'Start'),
+  'S13 Start placed: step 1 shows the Start flag with a check ("Correct." in the strip), focus on the End flag');
+await press(page, '4');
+await press(page, 'Enter');
+await expectBand(page, 'S13 End on step 4', { state: 'wrong', text: flagOf('end').feedback[4], unlocked: false });
+await press(page, '2');
+await press(page, 'Enter');
+expect(await page.evaluate(() => document.querySelector('.w-board > .w-sr-only[aria-live]').textContent) === UI.drag.chosen.replace('{target}', UI.drag.stepName.replace('{n}', 2).replace('{text}', S.S13.line[1].text))
+  && (await band(page)).text === flagOf('end').feedback.other, 'S13 End on step 2: the general line (no line of its own for that step)');
+await press(page, '5');
+await press(page, 'Enter');
+await expectBand(page, 'S13 both flags placed', { state: 'correct', verdict: '', text: S.S13.feedbackCorrect, unlocked: true });
+expect(await isActive(page, '.w-next'), 'S13 done: Next unlocked and focused');
+await expectLayout(page, 'S13 done');
+await press(page, 'Enter');
+
+// S14, S15 on Stage: the case card (band, situation, S14's visual), the panel right; wrong then right
+for (const [id, wrongId, moves, rightId] of [['S14', 'd', ['ArrowUp', 2], 'b'], ['S15', 'b', ['ArrowUp', 1], 'a']]) {
   await expectNewScreen(page, id, `${id} reached`);
+  const st = await page.evaluate(() => ({ scene: document.querySelector('.w-stage').dataset.scene, band: document.querySelector('.w-case-card .w-rules').textContent, line: document.querySelector('.w-case-line').textContent,
+    vis: document.querySelector('.w-hv')?.getAttribute('aria-label') || '', eyebrow: document.querySelector('.w-case-card .w-label')?.textContent || '' }));
+  expect(st.scene === 'stage' && st.band === `${S[id].band.term}: ${S[id].band.text}` && st.line === S[id].stage.top.text && st.vis === (S[id].visual?.alt || '') && st.eyebrow === (S[id].stage.top.eyebrow || ''),
+    `${id} Stage: the case card with "${st.band}"${st.eyebrow ? ', the eyebrow' : ''}, the situation${st.vis ? ', the handoff visual (role img)' : ''}`);
+  await expectBand(page, `${id} before action`, { state: 'hint', text: S[id].hint, unlocked: false, lockedWhy: UI.footer.locked.single });
   await tabTo(page, `.w-opt[data-id="${wrongId}"]`);
   await press(page, 'Enter');
   await expectBand(page, `${id} ${wrongId}`, { state: 'wrong', text: opt(id, wrongId).feedback, unlocked: false });
   await expectLayout(page, `${id} wrong`);
-  if (id !== 'S14') await shotR2(page, id.toLowerCase() + '.png');
   await press(page, moves[0], moves[1]);
   await press(page, 'Enter');
   await expectBand(page, `${id} ${rightId}`, { state: 'correct', text: opt(id, rightId).feedback, unlocked: true });
-  if (id === 'S14') { await expectLayout(page, 'S14 right'); await shotR2(page, 's14.png'); }
+  await expectLayout(page, `${id} right`);
   await press(page, 'Enter');
 }
 
@@ -1146,10 +1187,10 @@ await expectLayout(page, 'S22 finished');
 await shotR3(page, 's22-finish.png');
 
 // revisits: read-only, the right state shown, Next unlocked (S22: finished, the last screen)
-for (const id of ['W2', 'S04', 'S05b', 'S06', 'S07', 'S08', 'S08B', 'W3', 'V2', 'S09', 'S10', 'S11', 'S12', 'S12B', 'S13', 'S14', 'S15', 'S16', 'S17', 'S18A', 'S18', 'S19', 'S20', 'S21', 'S22']) {
+for (const id of ['W2', 'S04', 'S05b', 'S06', 'S07', 'S08', 'S08B', 'W3', 'V2', 'S09', 'S10', 'S11', 'S12', 'S12B', 'W4', 'S13', 'S14', 'S15', 'S16', 'S17', 'S18A', 'S18', 'S19', 'S20', 'S21', 'S22']) {
   await page.evaluate((x) => window.__l4.go(x), id);
   const b = S[id].template === 'video' ? null : await band(page), n = await nextState(page);
-  const want = { W2: 'guess', W3: 'guess', S12B: 'neutral', S08B: 'neutral', S18: 'neutral', S19: 'neutral', S20: 'neutral', S21: 'idle', S22: 'neutral' }[id] || 'correct';
+  const want = { W2: 'guess', W3: 'guess', W4: 'guess', S12B: 'neutral', S08B: 'neutral', S18: 'neutral', S19: 'neutral', S20: 'neutral', S21: 'idle', S22: 'neutral' }[id] || 'correct';
   const nextOk = id === 'S22' ? n.locked && n.label === UI.footer.locked.last : !n.locked;
   expect((!b || b.state === want) && nextOk, `${id} revisit: the earlier state comes back${b ? ' (band ' + b.state + ')' : ' (stops answered, seek free)'}, ${id === 'S22' ? 'finished, Next stays locked (last screen)' : 'Next unlocked'}`);
 }
@@ -1182,7 +1223,7 @@ await expectNewScreen(page, 'S18A', 'menu: Enter on the completed chapter 5 open
 
 const ev = await events(page);
 const first = (id) => ev.filter((e) => e.kind === 'answer' && e.trackingId === id);
-const IDS_CH34 = ['L4_W3_1', 'L4_V2_1', 'L4_V2_2', 'L4_V2_3', 'L4_S09_1', 'L4_S10_1', 'L4_S11_1', 'L4_S12_1', 'L4_S12B_1', 'L4_S12B_2', 'L4_S12B_3', 'L4_FT4_1', 'L4_S13_1', 'L4_S14_1', 'L4_S15_1', 'L4_S16_1', 'L4_S17_1'];
+const IDS_CH34 = ['L4_W3_1', 'L4_V2_1', 'L4_V2_2', 'L4_V2_3', 'L4_S09_1', 'L4_S10_1', 'L4_S11_1', 'L4_S12_1', 'L4_S12B_1', 'L4_S12B_2', 'L4_S12B_3', 'L4_W4_1', 'L4_S13_1', 'L4_S14_1', 'L4_S15_1', 'L4_S16_1', 'L4_S17_1'];
 const IDS_CH56 = ['L4_S18A_1', 'L4_S18_1', 'L4_S18_2', 'L4_S19_1', 'L4_S20_1', 'L4_S20_2', 'L4_S20_3', 'L4_S20_4', 'L4_S21_1', 'L4_S21_2', 'L4_S21_3', 'L4_S21_4', 'L4_S21_5', 'L4_S22_1'];
 const IDS_CH2 = ['L4_W2_1', 'L4_S04_1', 'L4_S05B_1', 'L4_S06_1', 'L4_S06_2', 'L4_S07_1', 'L4_S08_1', 'L4_S08_2', 'L4_S08_3', 'L4_S08B_1', 'L4_S08B_2', 'L4_S08B_3'];
 const IDS = ['L4_S01_1', 'L4_S02_1', 'L4_S02_2', 'L4_W1_1', 'L4_S03_1', ...IDS_CH2, ...IDS_CH34, ...IDS_CH56, 'L4_V1_1', 'L4_V1_2'];
@@ -1197,7 +1238,7 @@ const ch2 = IDS_CH2.map((id) => `${id}=${f[id].response}/${f[id].result}/${f[id]
 const ch34 = IDS_CH34.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
 expect(ch34 === 'L4_W3_1=c/neutral L4_V2_1=a/wrong L4_V2_2=b/wrong L4_V2_3=a/wrong L4_S09_1=1.b,2.a,3.b,4.c,5.d,6.d/wrong L4_S10_1=d/wrong L4_S11_1=a/wrong '
   + `L4_S12_1=3,7/wrong L4_S12B_1=${METRIC_PARTS.baseline}/neutral L4_S12B_2=${METRIC_PARTS.target}/neutral L4_S12B_3=${METRIC_PARTS.date}/neutral `
-  + 'L4_FT4_1=c/wrong L4_S13_1=a/wrong L4_S14_1=d/wrong L4_S15_1=b/wrong L4_S16_1=1.a,2.b,3.b,4.d,5.d,6.c/wrong L4_S17_1=a.5,b.1,c.5,d.4,e.2/wrong',
+  + 'L4_W4_1=a/neutral L4_S13_1=s.2,e.4/wrong L4_S14_1=d/wrong L4_S15_1=b/wrong L4_S16_1=1.a,2.b,3.b,4.d,5.d,6.c/wrong L4_S17_1=a.5,b.1,c.5,d.4,e.2/wrong',
   `bus, chapters 3 and 4 first attempts: ${ch34}`);
 const ch56 = IDS_CH56.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
 expect(ch56 === `L4_S18A_1=1.b,2.b,3.c,4.d/wrong L4_S18_1=a/wrong L4_S18_2=${TITLE}/neutral L4_S19_1=${METRIC}/neutral L4_S20_1=b/neutral L4_S20_2=a/neutral L4_S20_3=b/neutral `
@@ -1206,7 +1247,7 @@ expect(ch2 === 'L4_W2_1=a/neutral/choice L4_S04_1=1.b,2.b,3.a,4.b,5.c/wrong/matc
   + `L4_S07_1=7/wrong/choice L4_S08_1=a/wrong/choice L4_S08_2=c/correct/choice L4_S08_3=a/correct/choice L4_S08B_1=${SKETCH.trigger}/neutral/fill-in L4_S08B_2=${SKETCH.steps}/neutral/fill-in L4_S08B_3=${SKETCH.output}/neutral/fill-in`, `bus, chapter 2 first attempts: ${ch2}`);
 const retries = ev.filter((e) => e.kind === 'retry').map((e) => `${e.trackingId}=${e.response}/${e.result}`);
 expect(retries.join() === 'L4_S01_1=b/correct,L4_W1_1=b/neutral,L4_V1_1=b/correct,L4_V1_2=a/correct,L4_S03_1=b,d/correct,L4_S06_1=a/correct,L4_S06_2=b/correct,L4_S07_1=8/correct,L4_S08_1=b/correct'
-  + ',L4_V2_1=b/correct,L4_V2_2=a/correct,L4_V2_3=b/correct,L4_S10_1=c/correct,L4_S11_1=d/correct,L4_S13_1=c/correct,L4_S14_1=b/correct,L4_S15_1=a/correct'
+  + ',L4_V2_1=b/correct,L4_V2_2=a/correct,L4_V2_3=b/correct,L4_S10_1=c/correct,L4_S11_1=d/correct,L4_S14_1=b/correct,L4_S15_1=a/correct'
   + ',L4_S18_1=b/correct,L4_S20_1=a/neutral,L4_S21_1=c/correct',
   `bus: retries as retry events (${retries.join(', ')})`);
 expect(!page.errors.length, 'main path: no console errors' + (page.errors.length ? ': ' + page.errors.join(' | ') : ''));
@@ -1369,7 +1410,7 @@ async function flagDrag(id, flagId, wrongT, rightT, wrongText, rightText) {
   const drag = async (to) => {
     const a = await centre(`.w-flag-card[data-flag="${flagId}"]`), b = to ? await centre(`.w-target[data-target="${to}"]`) : null;
     await p.mouse.move(a.x, a.y); await p.mouse.down();
-    const end = b || { x: a.x, y: a.y + 300 };
+    const end = b || { x: a.x, y: a.y + 120 }; // below the flag: no target there (S12: the side column, S13: under the tray)
     for (let i = 1; i <= 10; i++) await p.mouse.move(a.x + (end.x - a.x) * i / 10, a.y + (end.y - a.y) * i / 10);
     const over = to ? await p.evaluate((t) => document.querySelector(`.w-target[data-target="${t}"]`).dataset.over, to) : null;
     await p.mouse.up();
@@ -1388,6 +1429,7 @@ async function flagDrag(id, flagId, wrongT, rightT, wrongText, rightText) {
   await p.close();
 }
 await flagDrag('S12', 'r2', '8', '7', S.S12.map[7].feedback, S.S12.map[6].feedback);
+await flagDrag('S13', 'end', '3', '5', S.S13.flags[1].feedback[3], '');
 
 /* ---------- S03 both wrong: "Not quite." ---------- */
 console.log('\nS03 both wrong');
@@ -1406,39 +1448,10 @@ console.log('\nS03 both wrong');
   await p.close();
 }
 
-/* ---------- fast-track side paths ---------- */
-console.log('\nfast-track paths (FT3 and FT4; FT1 and FT2 are now the W1 and W2 warm-ups)');
-async function ft1Path(name, keys, { to, route, answer, card = 'FT1', skipped = null }) {
-  const p = await open('?reset=1&screen=' + card);
-  await expectNewScreen(p, card, `${name}: start`);
-  await keys(p);
-  const r = await p.evaluate((c) => ({ id: window.__l4.current, route: window.__l4.state.r[c], ev: window.__l4.tracking.events, done: [...window.__l4.doneSet()] }), card);
-  const answers = r.ev.filter((e) => e.kind === 'answer').map((e) => e.trackingId + '=' + e.response + '/' + e.result);
-  expect(r.id === to && r.route === route && answers.join() === (answer || ''), `${name}: lands on ${r.id}, route "${r.route}", answer events [${answers.join(', ')}]`);
-  if (skipped) expect(skipped.every((id) => r.done.includes(id)), `${name}: the skipped screens count as done (${skipped.join(', ')})`);
-  await expectNewScreen(p, to, name);
-  expect(!p.errors.length, `${name}: no console errors` + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
-  await p.close();
-}
-for (const [card, key, jump, jumpTo, skipped, full, fullTo] of [
-  ['FT4', 'a', 'jumpToTask', 'S17', ['S13', 'S14', 'S15', 'S16'], 'fullChapter', 'S13']]) {
-  await ft1Path(`${card} right, "${UI.buttons[jump]}"`, async (p) => {
-    await tabTo(p, `.w-opt[data-id="${key}"]`);
-    await press(p, 'Enter');
-    await expectBand(p, `${card} right first try`, { state: 'correct', text: opt(card, key).feedback, unlocked: false, actions: [jump, full], lockedWhy: UI.footer.locked.route });
-    await press(p, 'Enter');
-  }, { card, to: jumpTo, route: 'skip', answer: `L4_${card}_1=${key}/correct`, skipped });
-  await ft1Path(`${card} right, "${UI.buttons[full]}"`, async (p) => {
-    await tabTo(p, `.w-opt[data-id="${key}"]`);
-    await press(p, 'Enter');
-    await tabTo(p, `[data-action="${full}"]`);
-    await press(p, 'Enter');
-  }, { card, to: fullTo, route: 'full', answer: `L4_${card}_1=${key}/correct` });
-  await ft1Path(`${card} "Skip challenge"`, async (p) => {
-    await tabTo(p, '[data-action="skipChallenge"]');
-    await press(p, 'Enter');
-  }, { card, to: fullTo, route: 'full', answer: '' });
-}
+/* ---------- NL3: no fast-track cards left (FT1 to FT4 are the W1 to W4 warm-ups) ---------- */
+console.log('\nno fast-track cards');
+expect(!C.screens.some((s) => s.variant === 'challenge' || s.routing) && !C.chapters.some((c) => c.fastTrack) && !C.lesson.slice.some((id) => /^FT/.test(id)),
+  'no fast-track card, routing or chapter fast track left in the content (W1 to W4 replace FT1 to FT4)');
 
 /* ---------- S21 all first answers wrong: retries never raise the score; S22 confirms once, failed ---------- */
 console.log('\nS21 first attempts wrong, S22 finish without download');

@@ -3,14 +3,14 @@
 //                     the panel right: context line, the instruction as heading, three answer cards
 //                     (radio marker), the feedback strip flush to the panel's foot. Click = answer; wrong
 //                     = retry; Next unlocks only after the right one. Ghost hand: below the panel.
-//                     S14 and S15 (a statement instead of a character): the same panel, Focus.
+//                     NL3 S14 and S15 (a situation instead of a character; scene "stage"), by analogy:
+//                     the case card on the photo, top left (a white figure card: the explain band, the
+//                     eyebrow, the situation line, S14's handoff visual), the panel right (50%): the
+//                     heading, the answers (four in 2 x 2), the hint, the strip.
 //   multi      (S03)  Focus: context line, heading, four answer cards 2 x 2 (rounded-square marker),
 //                     the hint and Check under them (Check locked until two are picked), the strip.
 //                     One strip per attempt: "One of two." (neutral) or "Not quite." with the first
 //                     wrong card's line; both right = the closing line. Ghost hand: the left gutter.
-//   Styled by analogy (no frame yet; interaction and text unchanged), each in a Focus panel:
-//   challenge  (FT2 to FT4)  the memo's header, line and question, the instruction, three answer cards,
-//                     Skip as the band's tool before an answer, the route buttons in the strip after.
 //   NL2 (the Chapter 2 frames), each in a Focus panel:
 //   pair       (S06)  one situation at a time in a raised figure card, the solved one as a small done card
 //                     on the left; "Next situation" in the strip after a right answer.
@@ -18,8 +18,8 @@
 //                     right the three rules; "Next round" in the strip after a right answer.
 //   fill       (S10)  situation line, the field rows (a pre-filled row, the active row whose slot
 //                     takes the chosen line), 2 x 2 answer cards.
-//   metric     (S11)  the field row, four answers, then "Checkable later?" with three slots.
-//   bounds     (S13)  a strip of the process steps, three Start / End cards in a row.
+//   metric     (S11)  NL3: the explain band on top (three parts of a metric), the heading with the
+//                     field chip, four answers, then "Checkable later?" with three slots.
 //   safety     (S18)  step 1 three answers; once right, step 2 in the same panel: the case title (from
 //                     S02, 250 max), the privacy line, a checkbox and Save.
 //   selfcheck  (S20)  two steps, all neutral: three question rows with Yes / Not yet toggles (Next
@@ -28,7 +28,7 @@
 //                     Open homework (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
 import { h, fmt, resolveLink } from '../util.js';
-import { icon, glyph } from '../icons.js';
+import { glyph } from '../icons.js';
 import { attachTip } from '../tooltip.js';
 import { letter } from '../tracking/index.js';
 import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand } from './stage.js';
@@ -36,13 +36,15 @@ import { field } from './input.js';
 import { targetSteps } from '../ghost.js';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
+const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
 
 export const decision = {
-  // S01 (a character speaks) is a Stage screen; every other decision screen is Focus
-  scene: (screen) => (isStage(screen) ? 'stage' : 'focus'),
+  // S01 (a character speaks) and NL3's S14, S15 (a situation on a case card) are Stage screens; every
+  // other decision screen is Focus
+  scene: (screen) => (isStage(screen) || isCase(screen) ? 'stage' : 'focus'),
   mount(ctx) {
     const variant = ctx.screen.variant;
-    const run = { single, challenge, multi, pair, rounds, fill, metric, bounds, safety, selfcheck, close }[variant];
+    const run = { single, multi, pair, rounds, fill, metric, safety, selfcheck, close }[variant];
     if (!run) throw new Error('decision: unknown variant ' + variant);
     return run(ctx) || { unmount() {} };
   },
@@ -86,8 +88,23 @@ export const checkButton = (ui, label, onclick) => h('button', { class: 'w-btn w
 function single(ctx) {
   const { screen, ui, zones, content } = ctx;
   const top = screen.stage.top;
-  const { group, btns } = options(ctx, 'radio');
-  if (isStage(screen)) {
+  // four answers on a Stage panel sit 2 x 2 (S14), so the panel stays within 41cqw
+  const { group, btns } = options(ctx, 'radio', { cols: isCase(screen) && screen.options.length === 4 ? 2 : 1 });
+  // a statement line (S14, S15) whose optional highlight (the hours in S15) is set in bold inside it
+  const k = top.highlight ? top.text.indexOf(top.highlight) : -1;
+  const statement = k < 0 ? top.text : [top.text.slice(0, k), h('b', { class: 'w-figure' }, top.highlight), top.text.slice(k + top.highlight.length)];
+  if (isCase(screen)) {
+    const v = screen.visual;
+    layout(ctx, 'stage-decision',
+      h('figure', { class: 'w-case-card' },
+        screen.band ? explainBand(screen.band) : null,
+        top.eyebrow ? ruleLabel(top.eyebrow) : null,
+        h('p', { class: 'w-case-line' }, statement),
+        v ? h('div', { class: 'w-hv', role: 'img', 'aria-label': v.alt },
+          h('span', { class: 'w-hv-box' }, v.from), glyph('g-arrow-long', { size: 38.4, className: 'w-hv-arrow' }),
+          h('span', { class: 'w-hv-box w-hv-away' }, v.to, h('span', { class: 'w-hv-chip' }, v.away))) : null),
+      h('section', { class: 'w-sheet w-sheet-right w-sheet-50' }, zones.instruction, group, zones.band));
+  } else if (isStage(screen)) {
     // the character's last line is the quote on the photo; the panel's context line is the content's
     // context (S01: in the third person), or else the character's lines before the quote
     const ch = content.characters[top.character];
@@ -100,9 +117,6 @@ function single(ctx) {
         h('figcaption', { class: 'w-attrib' }, attribution)),
       h('section', { class: 'w-sheet w-sheet-right w-sheet-46' }, contextLine(top.context ?? bubbles.slice(0, -1).join(' ')), zones.instruction, group, zones.band));
   } else {
-    // a statement line (S14, S15) whose optional highlight (the hours in S15) is set in bold inside it
-    const k = top.highlight ? top.text.indexOf(top.highlight) : -1;
-    const statement = k < 0 ? top.text : [top.text.slice(0, k), h('b', { class: 'w-figure' }, top.highlight), top.text.slice(k + top.highlight.length)];
     layout(ctx, 'focus',
       sheet('focus', top.eyebrow ? ruleLabel(top.eyebrow) : null, contextLine(top.text, statement), zones.instruction, group, zones.band));
   }
@@ -134,59 +148,6 @@ function single(ctx) {
   }));
 
   if (ctx.revisit) solve(screen.options.findIndex((o) => o.correct), false);
-}
-
-/* ---------- challenge (FT2 to FT4), Focus by analogy ---------- */
-function challenge(ctx) {
-  const { screen, ui, zones } = ctx;
-  const { group, btns } = options(ctx, 'radio', { cols: 3 });
-  const trackingId = screen.tracking[0].id;
-  const routing = screen.routing;
-  const header = fmt(ui.memo.header, { n: ctx.chapter?.n ?? '' });
-  let answered = false;
-
-  const skip = h('button', { class: 'w-link', type: 'button', dataset: { action: screen.stage.bottom.link }, onclick: () => go(routing.skipped) }, ui.buttons[screen.stage.bottom.link]);
-
-  layout(ctx, 'focus',
-    sheet('focus w-sheet-memo',
-      h('article', { class: 'w-memo', 'aria-label': header },
-        h('p', { class: 'w-memo-head' }, header),
-        h('p', { class: 'w-memo-line' }, screen.stage.top.text),
-        h('p', { class: 'w-memo-q' }, screen.stage.middle.text)),
-      zones.instruction,
-      group,
-      zones.band));
-  zones.setFeedback({ state: 'hint', text: screen.hint });
-  zones.setTool(skip);
-
-  function go(r) { ctx.setRoute(r.route); ctx.complete(); ctx.goTo(r.to); }
-
-  function outcome(i, focus) {
-    answered = true;
-    const o = screen.options[i];
-    btns.forEach((b, j) => paint(b, j === i ? (o.correct ? 'correct' : 'wrong') : '', ui));
-    lock(btns);
-    zones.setTool(); // Skip is gone once answered
-    if (o.correct) {
-      const first = zones.setFeedback({ state: 'correct', text: o.feedback,
-        actions: routing.correctFirstTry.choices.map((c) => ({ id: c.button, label: ui.buttons[c.button], onClick: () => go(c) })) });
-      ctx.lockNext(ui.footer.locked.route);
-      if (focus) first.focus();
-    } else {
-      zones.setFeedback({ state: 'wrong', text: o.feedback });
-      ctx.unlockNext({ focus, onNext: () => go(routing.wrong) });
-    }
-  }
-
-  btns.forEach((btn, i) => btn.addEventListener('click', () => {
-    if (answered) return; // one attempt (screen.attempts)
-    ctx.answer({ trackingId, response: letter(i), result: screen.options[i].correct ? 'correct' : 'wrong' });
-    outcome(i, true);
-  }));
-
-  // revisit after an answer: show it again with its routes (a skipped challenge stays open)
-  const first = ctx.firstAnswer(trackingId);
-  if (first) outcome(first.response.charCodeAt(0) - 97, false);
 }
 
 /* ---------- multi (S03), Focus ---------- */
@@ -447,24 +408,6 @@ function metric(ctx) {
       zones.band));
   zones.setFeedback({ state: 'hint', text: screen.hint });
   oneQuestion(ctx, btns, { onChoose: (i) => setSlots(screen.options[i]) });
-}
-
-/* ---------- bounds (S13), Focus by analogy ---------- */
-function bounds(ctx) {
-  const { screen, zones } = ctx;
-  const steps = screen.strip.split(', ');
-  const strip = h('p', { class: 'w-steps-strip' }, steps.map((s, i) => [
-    i ? [h('span', { class: 'w-sr-only' }, ', '), glyph('g-arrow', { size: 19.2, className: 'w-steps-arrow' })] : null,
-    h('span', { class: 'w-step-chip' }, s)]));
-  const btns = screen.options.map((o, i) => h('button', { class: 'w-opt w-ans w-opt-bounds', type: 'button', dataset: { id: o.id, letter: letter(i) } },
-    h('span', { class: 'w-opt-mark w-ans-mark' }),
-    h('span', { class: 'w-bound' }, glyph('start', { size: 23.04, className: 'w-bound-icon' }), h('span', {}, h('b', {}, screen.startLabel), ' ', o.start)),
-    h('span', { class: 'w-bound w-bound-end' }, icon('finish', { size: 23.04, className: 'w-bound-icon' }), h('span', {}, h('b', {}, screen.endLabel), ' ', o.end))));
-  const group = h('div', { class: 'w-options w-ans-list w-options-bounds', role: 'group', 'aria-labelledby': 'w-instruction' }, btns);
-  arrowNav(group);
-  layout(ctx, 'focus', sheet('focus', zones.instruction, h('div', { class: 'w-bounds', dataset: { interaction: '' } }, strip, group), zones.band));
-  zones.setFeedback({ state: 'hint', text: screen.hint });
-  oneQuestion(ctx, btns);
 }
 
 // the panel of the R3 screens that had an image column (S18, S22): a Focus panel by analogy (the
