@@ -1683,19 +1683,21 @@
     {
       "id": "S18A",
       "chapter": "ch5",
-      "template": "sort",
+      "template": "sortDeck",
+      "attempts": 2,
       "step": { "verb": "Sort", "icon": "sort" },
-      "mode": "tray",
-      "minutes": 6,
-      "instruction": "Map three fields of a case that is not HR.",
-      "hint": "Same eight fields, different case. Select a card, then a column.",
-      "layout": "wide",
+      "minutes": 4,
+      "instruction": "Drag each card to its field.",
+      "hint": "Same eight fields, different case.",
+      "hintShown": true,
+      "layout": "sort-deck",
       "header": "Lesson 1 case: sales call summaries",
+      "ghost": { "type": "drag", "showMe": false },
       "columns": [
-        { "id": "a", "label": "Field 2: Trigger", "icon": "play", "term": "Trigger" },
-        { "id": "b", "label": "Field 3: Steps", "icon": "stairs", "term": "Steps" },
-        { "id": "c", "label": "Field 7: Gaps", "icon": "help-circle", "term": "Gaps" },
-        { "id": "d", "label": "Not AS-IS", "icon": "x-square" }
+        { "id": "a", "label": "Field 2: Trigger", "sub": "What starts it" },
+        { "id": "b", "label": "Field 3: Steps", "sub": "Who does what" },
+        { "id": "c", "label": "Field 7: Gaps", "sub": "What is missing or unclear" },
+        { "id": "d", "label": "Not AS-IS", "sub": "Not true today" }
       ],
       "cards": [
         { "n": 1, "text": "A sales call ends", "column": "a",
@@ -1722,13 +1724,15 @@
       "id": "S18",
       "chapter": "ch5",
       "template": "decision",
+      "attempts": 2,
       "step": { "verb": "Decide", "icon": "decide" },
-      "variant": "safety",
-      "minutes": 4,
-      "instruction": "Choose what you write in the workbook. Then check your case title.",
+      "variant": "single",
+      "scene": "stage",
+      "minutes": 2,
+      "instruction": "Choose what you write in the workbook.",
       "hint": "Before you write anything, remove names and identifying details.",
-      "layout": "editorial",
-      "image": { "src": "assets/img/s18.jpg", "alt": "Someone writing up notes on a laptop and in a notebook", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "50% 50%" },
+      "layout": "stage-decision",
+      "ghost": { "type": "choice", "target": "options-sweep" },
       "stage": {
         "top": { "kind": "line", "text": "The workbook has a live AI coach that reads what you type." },
         "bottom": { "kind": "options", "arrange": "stack" }
@@ -1741,24 +1745,43 @@
         { "id": "c", "label": "Your real map, with Field 5 left empty", "correct": false,
           "feedback": "Names can sit in any field, not only Field 5. Steps and handoffs still identify people." }
       ],
-      "step2": {
-        "field": { "id": "caseTitle", "label": "Case title, generalized", "placeholder": "", "maxLength": 60, "multiline": false, "store": "L4_CASE_TITLE", "trackingId": "L4_S18_2" },
-        "privacy": { "icon": "shield", "text": "Leave out names and identifying details." },
-        "checkbox": "I removed names and identifying details from my notes.",
-        "feedback": {
-          "unticked": "Tick the box once your notes have no names or identifying details.",
-          "saved": "Saved. This title goes on your workbook and your lesson record.",
-          "empty": "Add your case title before you save."
-        },
-        "emptyPilotCopy": true
+      "advance": "after-correct",
+      "tracking": [
+        { "id": "L4_S18_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Apply", "result": "graded" }
+      ],
+      "sources": ["s44 (generalized, de-identified version; Lesson 3 rule)", "s14", "decisions 1, 2", "planning/STORYBOARD-V3-CH5-6.md S18"]
+    },
+
+    {
+      "id": "S18B",
+      "chapter": "ch5",
+      "template": "input",
+      "lockedNext": "Save to continue",
+      "caseCard": true,
+      "step": { "verb": "Write", "icon": "write" },
+      "minutes": 2,
+      "instruction": "Check your case title, then save it.",
+      "hint": "A general name, e.g. Sales call summaries. No client or person names.",
+      "stage": {
+        "top": { "kind": "line", "text": "Your case title from the start of the lesson:" },
+        "bottom": { "kind": "privacy", "icon": "shield", "text": "Leave out names and identifying details.", "action": "save" }
+      },
+      "fields": [
+        { "id": "caseTitle", "label": "Case title, generalized", "placeholder": "", "maxLength": 60, "multiline": false, "demo": "Sales call summaries", "store": "L4_CASE_TITLE", "trackingId": "L4_S18_2" }
+      ],
+      "checkbox": "I removed names and identifying details from my notes.",
+      "saveWhenFilled": true,
+      "feedback": {
+        "unticked": "Tick the box once your notes have no names or identifying details.",
+        "empty": "Add your case title before you save.",
+        "saved": "Saved. Next: open the workbook. You come back here for a self-check."
       },
       "advance": "after-save",
       "tracking": [
-        { "id": "L4_S18_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Apply", "result": "graded" },
         { "id": "L4_S18_2", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" }
       ],
       "suspend": ["checkbox"],
-      "sources": ["s44 (generalized, de-identified version; Lesson 3 rule)", "s14", "decisions 1, 2"]
+      "sources": ["planning/STORYBOARD-V3-CH5-6.md S18B (split from S18)", "s44"]
     },
 
     {
