@@ -165,7 +165,7 @@ const STATES = [
     await click(p, '.w-opt[data-id="a"]');
   }],
   ['S08B', 'hint', async () => {}],
-  ['S08B', 'empty save', async (p) => click(p, '[data-action="save"]')],
+  ['S08B', 'one part, Save locked', async (p) => p.type('.w-input[data-store="L4_CASE_TRIGGER"]', 'A sales call ends')],
   ['S08B', 'saved, full', async (p) => {
     await p.type('.w-input[data-store="L4_CASE_TRIGGER"]', 'A request form arrives from a sales rep after every customer call, by email');
     await p.type('.w-input[data-store="L4_CASE_STEPS"]', 'The rep writes notes by hand, the team lead checks them, the sales manager reads them two days later and asks follow-up questions by phone');
@@ -199,7 +199,7 @@ const STATES = [
   ['S12', 'shown after attempt 2', async (p) => { await flag(p, 'r1', '3'); await flag(p, 'r2', '7'); await click(p, '[data-action="check"]'); await flag(p, 'r1', '2'); await click(p, '[data-action="check"]'); }],
   ['S12', 'both right', async (p) => { await flag(p, 'r1', '4'); await flag(p, 'r2', '7'); await click(p, '[data-action="check"]'); }],
   ['S12B', 'hint', async () => {}],
-  ['S12B', 'empty save', async (p) => click(p, '[data-action="save"]')],
+  ['S12B', 'Baseline only, Save locked', async (p) => p.type('.w-input[data-store="L4_CASE_BASELINE"]', 'About 2 days')],
   ['S12B', 'saved, full', async (p) => {
     await p.type('.w-input[data-store="L4_CASE_BASELINE"]', 'About two working days from the call to a summary in the CRM, by our own count');
     await p.type('.w-input[data-store="L4_CASE_TARGET"]', 'The same working day for nine summaries out of ten, checked on a weekly sample');
@@ -232,61 +232,62 @@ const STATES = [
   ['S17', 'shown after attempt 2', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['5', '1', '3', '4', '2']); await click(p, '[data-action="check"]'); await deck(p, ['1', '5']); await click(p, '[data-action="check"]'); }],
   ['S17', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['3', '1', '5', '4', '2']); await click(p, '[data-action="check"]'); }],
   ['S17B', 'hint', async () => {}],
-  ['S17B', 'empty save', async (p) => click(p, '[data-action="save"]')],
+  ['S17B', 'one field, Save locked', async (p) => p.type('.w-input[data-store="L4_CASE_AIFIT"]', 'Sort notes by topic')],
   ['S17B', 'saved, full, long steps', async (p) => {
     await p.evaluate(() => { window.__l4.state.f.L4_CASE_STEPS = 'Steps and who does them '.repeat(11).slice(0, 250); window.__l4.go('S17B'); });
     await p.type('.w-input[data-store="L4_CASE_AIFIT"]', 'Sort the incoming call notes by topic and by account before the sales manager reads them');
     await p.type('.w-input[data-store="L4_CASE_HUMAN"]', 'Approve a discount or an exception for a key account, with the account history');
     await click(p, '[data-action="save"]');
   }],
-  // R3: Chapters 5 and 6
-  ['S18A', 'wrong', async (p) => { await click(p, '.w-tray-card[data-card="4"]'); await click(p, '.w-sort-target[data-column="b"]'); }],
-  ['S18A', 'done', async (p) => { for (const [c, col] of [['1', 'a'], ['2', 'b'], ['3', 'c'], ['4', 'd']]) { await click(p, `.w-tray-card[data-card="${c}"]`); await click(p, `.w-sort-target[data-column="${col}"]`); } }],
-  ['S18', 'wrong', async (p) => click(p, '.w-opt[data-id="c"]')],
-  ['S18', 'step 2 unticked', async (p) => { await click(p, '.w-opt[data-id="b"]'); await p.type('.w-input', 'Sales call summaries'); await click(p, '[data-action="save"]'); }],
-  ['S18', 'saved', async (p) => { await click(p, '.w-opt[data-id="b"]'); await p.type('.w-input', 'Sales call summaries'); await click(p, '.w-checkbox'); await click(p, '[data-action="save"]'); }],
-  ['S19', 'brief', async () => {}],
-  ['S19', 'brief, full sketch and notes', async (p) => {
-    await p.evaluate(() => { const f = window.__l4.state.f; f.L4_CASE_TRIGGER = 'Trigger text '.repeat(10).slice(0, 120); f.L4_CASE_STEPS = 'Steps and who does them '.repeat(11).slice(0, 250); f.L4_CASE_OUTPUT = 'Output text '.repeat(11).slice(0, 120);
-      f.L4_CASE_AIFIT = 'Could fit AI '.repeat(8).slice(0, 100); f.L4_CASE_HUMAN = 'Stays with a person '.repeat(6).slice(0, 100); window.__l4.go('S19'); });
-  }],
-  ['S19', 'opened, full sketch and notes', async (p) => {
-    await p.evaluate(() => { const f = window.__l4.state.f; f.L4_CASE_TRIGGER = 'Trigger text '.repeat(10).slice(0, 120); f.L4_CASE_STEPS = 'Steps and who does them '.repeat(11).slice(0, 250); f.L4_CASE_OUTPUT = 'Output text '.repeat(11).slice(0, 120);
-      f.L4_CASE_AIFIT = 'Could fit AI '.repeat(8).slice(0, 100); f.L4_CASE_HUMAN = 'Stays with a person '.repeat(6).slice(0, 100); window.__l4.state.g.S19 = { o: 1 }; window.__l4.go('S19'); });
-    await noNewTab(p, '[data-action="open"]'); await click(p, '[data-action="open"]');
-  }],
-  ['S19', 'return, metric from S12B (full)', async (p) => {
-    await p.evaluate(() => { Object.assign(window.__l4.state.f, { L4_CASE_BASELINE: 'b'.repeat(80), L4_CASE_TARGET: 't'.repeat(80), L4_CASE_DATE: 'd'.repeat(40) }); window.__l4.state.g.S19 = { o: 1, b: 1 }; window.__l4.go('S19'); });
-  }],
-  ['S19', 'opened', async (p) => { await noNewTab(p, '[data-action="open"]'); await click(p, '[data-action="open"]'); }],
-  ['S19', 'return, saved', async (p) => {
-    await noNewTab(p, '[data-action="open"]'); await click(p, '[data-action="open"]'); await click(p, '[data-action="back"]');
-    await p.type('.w-input', 'Share of HR time on repeat questions: about 35% now, 20% within three months, checked against a weekly sample of requests.');
-    await click(p, '[data-action="save"]');
+  // NL4: Chapters 5 and 6 (storyboard v3)
+  ['S18A', 'start', async (p) => p.keyboard.press('Shift')],
+  ['S18A', 'checked, wrong back', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b', 'b', 'c', 'd']); await click(p, '[data-action="check"]'); }],
+  ['S18A', 'shown after attempt 2', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b', 'b', 'c', 'd']); await click(p, '[data-action="check"]'); await deck(p, ['c']); await click(p, '[data-action="check"]'); }],
+  ['S18A', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'b', 'c', 'd']); await click(p, '[data-action="check"]'); }],
+  ['S18', 'hint', async () => {}],
+  ['S18', 'wrong (longest line)', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['S18', 'right', async (p) => click(p, '.w-opt[data-id="b"]')],
+  ['S18B', 'hint, long title', async (p) => { await p.evaluate(() => { window.__l4.state.f.L4_CASE_TITLE = 'Summaries of sales calls for key accounts in the north region'.slice(0, 60); window.__l4.go('S18B'); }); }],
+  ['S18B', 'unticked', async (p) => { await p.type('.w-input', 'Sales call summaries'); await click(p, '[data-action="save"]'); }],
+  ['S18B', 'saved', async (p) => { await p.type('.w-input', 'Sales call summaries'); await click(p, '.w-checkbox'); await click(p, '[data-action="save"]'); }],
+  ['S19', 'brief, nothing written', async () => {}],
+  ['S19', 'brief, every note full', async (p) => { await fullNotes(p); }],
+  ['S19', 'opened, every note full', async (p) => { await fullNotes(p); await noNewTab(p, '[data-action="open"]'); await click(p, '[data-action="open"]'); }],
+  ['S19', 'copy blocked, every note full', async (p) => {
+    await fullNotes(p);
+    await p.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.reject(new Error('blocked')) } }));
+    await click(p, '[data-action="copy"][data-card="sketch"]'); await new Promise((r) => setTimeout(r, 200));
   }],
   ['S20', 'row answered', async (p) => click(p, '.w-check-row[data-row="q1"] [data-choice="notYet"]')],
-  ['S20', 'step 2 chip', async (p) => {
-    for (const q of ['q1', 'q2', 'q3']) await click(p, `.w-check-row[data-row="${q}"] [data-choice="yes"]`);
-    await click(p, '.w-next'); await click(p, '.w-chip[data-chip="automating"]');
-  }],
-  ['S20', 'step 2 with goal reminder', async (p) => {
-    await p.evaluate(() => { window.__l4.state.f.L4_GOAL_FOCUS = 'e'; window.__l4.go('S20'); });
-    for (const q of ['q1', 'q2', 'q3']) await click(p, `.w-check-row[data-row="${q}"] [data-choice="yes"]`);
-    await click(p, '.w-next'); await click(p, '.w-chip[data-chip="automating"]');
-  }],
+  ['S20', 'all answered, fix line', async (p) => { for (const [q, c] of [['q1', 'yes'], ['q2', 'notYet'], ['q3', 'yes']]) await click(p, `.w-check-row[data-row="${q}"] [data-choice="${c}"]`); }],
+  ['S20B', 'hint', async () => {}],
+  ['S20B', 'picked (longest fix)', async (p) => click(p, '.w-opt[data-id="automating"]')],
   ['S21', 'item 1 wrong', async (p) => click(p, '.w-kc-opt[data-id="b"]')],
   ['S21', 'item 5 one of two', async (p) => {
     for (const k of ['c', 'b', 'a', 'd']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
     await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="1"]'); await click(p, '[data-action="check"]');
   }],
-  ['S21', 'result', async (p) => {
+  ['S21', 'done', async (p) => {
     for (const k of ['c', 'b', 'a', 'd']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
     await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="6"]'); await click(p, '[data-action="check"]');
   }],
+  ['S21R', 'not passed, all five missed', async (p) => { await attempt(p, { L4_S21_1: 'a|w', L4_S21_2: 'a|w', L4_S21_3: 'b|w', L4_S21_4: 'a|w', L4_S21_5: '5,7|w' }, { n: 1, s: 0, p: 0 }); }],
+  ['S21R', 'passed', async (p) => { await attempt(p, { L4_S21_1: 'c|c', L4_S21_2: 'b|c', L4_S21_3: 'a|c', L4_S21_4: 'd|c', L4_S21_5: '4,6|w' }, { n: 2, s: 80, p: 1 }); }],
+  ['S14', 'back to the check', async (p) => { await attempt(p, { L4_S21_1: 'a|w' }, { n: 1, s: 0, p: 0 }); await click(p, '[data-action="review"][data-screen="S14"]'); }],
   ['S22', 'takeaway', async (p) => click(p, '.w-takeaway[data-id="b"]')],
   ['S22', 'finish confirm', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); }],
   ['S22', 'finished', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); await click(p, '[data-action="finish"]'); }],
 ];
+// NL4: every note the S19 copy cards show, at its field's maxlength
+async function fullNotes(p) {
+  await p.evaluate(() => { const f = window.__l4.state.f; Object.assign(f, { L4_CASE_TITLE: 't'.repeat(60), L4_CASE_PROBLEM: 'The problem today '.repeat(14).slice(0, 250),
+    L4_CASE_TRIGGER: 'Trigger text '.repeat(10).slice(0, 120), L4_CASE_STEPS: 'Steps and who does them '.repeat(11).slice(0, 250), L4_CASE_OUTPUT: 'Output text '.repeat(11).slice(0, 120),
+    L4_CASE_BASELINE: 'b'.repeat(80), L4_CASE_TARGET: 't'.repeat(80), L4_CASE_DATE: 'd'.repeat(40), L4_CASE_AIFIT: 'Could fit AI '.repeat(8).slice(0, 100), L4_CASE_HUMAN: 'Stays with a person '.repeat(6).slice(0, 100) }); window.__l4.go('S19'); });
+}
+// NL4: an attempt of the check (first answers, the attempt state), then S21R
+async function attempt(p, answers, k) {
+  await p.evaluate((a, kk) => { const s = window.__l4.state; Object.assign(s.a, a); s.k = kk; s.d.push('S21'); window.__l4.go('S21R'); }, answers, k);
+}
 // the flags (S12, S13): click a flag, then its target
 async function flag(p, f, t) { await click(p, `.w-flag-card[data-flag="${f}"]`); await click(p, `.w-target[data-target="${t}"]`); }
 // S05b: click a label, then its place, per pair
