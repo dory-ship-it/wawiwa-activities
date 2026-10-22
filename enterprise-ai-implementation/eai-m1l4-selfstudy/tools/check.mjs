@@ -2,7 +2,8 @@
 // Usage: npm run check   (exit code 1 on any failure)
 //  1. content JSON parses
 //  2. every screen id in lesson.slice exists in screens[]
-//  3. no em dash (U+2014) or en dash (U+2013) in content or src (or index.html)
+//  3. no em dash (U+2014) or en dash (U+2013) in content or src (or index.html); 3b. no mojibake:
+//     no character of U+0590 to U+05FF in content/ or src/ (a code page 1255 write once broke it)
 //  4. every icon name used in content exists in src/icons.js
 //  5. the Next button (white on --wl-red) font token is at least 18.66px and bold
 //  6. contrast of every text/background pair in the token table (4.5:1 text, 3:1 large text and UI)
@@ -53,6 +54,19 @@ for (const f of dashFiles) {
   });
 }
 if (!dashHits) ok(`no em or en dash in content, index.html and ${srcFiles.length} src files`);
+
+/* 3b. no mojibake (NL2 wrote the content once through code page 1255): no character of the Hebrew
+   block U+0590 to U+05FF, and none of the sequences it leaves ("ג€" for curly quotes,
+   "ֲ" before a middle dot), in content/ and src/ (text files read as UTF-8) */
+const TEXT = /\.(json|js|mjs|css|html|md|vtt|txt|svg)$/i;
+const textFiles = [...walk(join(ROOT, 'content')), ...srcFiles].filter((p) => TEXT.test(p));
+let mojiHits = 0;
+for (const f of textFiles) {
+  read(f).split('\n').forEach((line, i) => {
+    if (/[֐-׿]/.test(line) || line.includes('ג€') || line.includes('ֲ')) { mojiHits++; fail(`mojibake (U+0590 to U+05FF) in ${relative(ROOT, f)}:${i + 1}`); }
+  });
+}
+if (!mojiHits) ok(`no mojibake (U+0590 to U+05FF) in ${textFiles.length} text files under content/ and src/`);
 
 /* 4. icon names */
 const { ICON_NAMES } = await import('../src/icons.js');
