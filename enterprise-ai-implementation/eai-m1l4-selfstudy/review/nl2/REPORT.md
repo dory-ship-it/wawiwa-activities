@@ -1,7 +1,7 @@
 # EAI L4 NL2: Chapter 2 "Toolkit" on storyboard v3 (21 to 22 Oct 2026)
 
 **Precondition.** HEAD was `ca9211a` (NL1, pushed). The only untracked file was `planning/CH2-SPEC.md`: committed first as `aacb65f` "EAI L4: Ch2 spec". Nothing else was modified.
-During the run a new untracked file appeared that this run did not create: `planning/STORYBOARD-V3-CH5-6.md`. It is untouched and not committed (yours to commit).
+During the run a new untracked file appeared that this run did not create: `planning/STORYBOARD-V3-CH5-6.md`. This run left it untouched (it is now in `ee05139`, see below).
 
 **Commits** (local, by explicit paths, not pushed; nothing under `video/` or `assets/video/` changed):
 
@@ -12,7 +12,10 @@ During the run a new untracked file appeared that this run did not create: `plan
 | `71bb138` | (c) S05a BPMN key idea, S05b labels onto the diagram |
 | `5634d81` | (d) S06, S07, S08, S08B; the sketch on S19 and in the lesson record |
 | `fc6ac6c` | NL1 fixes: S01 context line, O2 line |
-| (last) | tests, tools, SCORM 1.2 matching codes, this report and the compare pairs |
+| `ee05139` | **Not mine:** a commit made outside this run (message ","), which took my last uncommitted work (tests, tools, the SCORM 1.2 matching codes, a draft of this report, the compare pairs with their -ref / -built parts) and the untracked `planning/STORYBOARD-V3-CH5-6.md`. The branch is level with origin, so it was pushed. This run pushed nothing. |
+| (last) | this report, final version |
+
+**Another change in this checkout that is not mine:** `tools/test-fit.mjs` gained a retry for loads that time out (commented "NL3"). It was not committed by this run. The passing fit run below used it.
 
 **Chapter 2 now:** W2, K2, S04, S05a, S05b, S06, S07, S08, S08B. The bar shows Guess · Learn · Sort · Learn · Label · Decide · Explore · Decide · Sketch. Minutes as in the spec (28 for the chapter, was 22).
 
@@ -100,7 +103,7 @@ The pairs were checked by eye; S04 (frame 27) was also measured by numbers (`nod
 ## 5. Checks (after the last code change)
 
 - `npm run check`: passed. Allowances (warnings, each with its reason): O2 55, S02 61, K2 68 (HR case on), S04 50, S05a 58, S08 56, S19 48.
-- `npm run test:fit`: FIT_RESULT
+- `npm run test:fit`: passed (1248 ok). Every state at six window sizes, including the new Chapter 2 states, S08B with long text and S19 with a full sketch. A first run crashed mid-way ("Target closed", no failures before it) while the walk ran beside it; the run alone passed.
 - `npm run walk`: passed (470 ok). New in the walk:
   - the bar's nine Chapter 2 steps;
   - S04 by keyboard: 2 chooses, Escape cancels, a wrong drop returns, the right drop places, the ghost hand stops on a key;
@@ -137,4 +140,4 @@ The pairs were checked by eye; S04 (frame 27) was also measured by numbers (`nod
 4. **S05b keyboard names** of the three places ("Place 2: the diamond after Check the topic"…) describe the shapes for screen-reader users. OK, or too much of a hint?
 5. **Pilot copy** to review: the S04 / S05b hints, the drag announcements, the S08B empty-Save line.
 
-Weekly usage (from the app, all models): before 4%, after AFTER%.
+Weekly usage (from the app, all models): before 4%, after 7%.
