@@ -29,7 +29,16 @@ const pairs = new Map(); // every text/background pair seen, for the report
 
 // Each page in its own browser context, closed with the page: after about a thousand pages in one
 // browser the shared media loading stalled (the V1 film stopped buffering mid-way at 2560x1080).
-async function open(query, [w, h] = [1280, 720]) {
+// NL3: after a few hundred pages one load sometimes never settles (S15 at 1024x576 waited 30 s for
+// the fonts; alone it loads at once). Such a load is tried once more in a fresh context.
+async function open(query, size = [1280, 720]) {
+  try { return await openOnce(query, size); } catch (e) {
+    if (e.name !== 'TimeoutError') throw e;
+    console.log(`  note ${query} ${size.join('x')}: load timed out, tried once more`);
+    return openOnce(query, size);
+  }
+}
+async function openOnce(query, [w, h]) {
   const context = await browser.createBrowserContext();
   const page = await context.newPage();
   const closePage = page.close.bind(page);
@@ -39,9 +48,11 @@ async function open(query, [w, h] = [1280, 720]) {
   page.on('pageerror', (e) => page.errors.push('pageerror: ' + e.message));
   await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
   await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
-  await page.goto(BASE + query, { waitUntil: /screen=V\d/.test(query) ? 'load' : 'networkidle0' }); // a film keeps a range request open
-  await page.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
-  await page.evaluate(() => document.fonts.ready);
+  try {
+    await page.goto(BASE + query, { waitUntil: /screen=V\d/.test(query) ? 'load' : 'networkidle0' }); // a film keeps a range request open
+    await page.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
+    await page.evaluate(() => document.fonts.ready);
+  } catch (e) { await page.close(); throw e; }
   return page;
 }
 async function measure(page, what) {
