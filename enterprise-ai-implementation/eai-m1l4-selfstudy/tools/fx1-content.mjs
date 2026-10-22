@@ -64,6 +64,15 @@ if (group === 'C') {
   ['V1', 'V2'].forEach((id) => editScreen(id, (s) => s.replace('"ghost": { "type": "stop", "target": "gutter-low" }', '"ghost": { "type": "stop", "target": "options-sweep", "showMe": true }')));
 }
 
+if (group === 'E4') {
+  // S06: each answer's mini preview, and an optional still per situation (temp stills from the chapter photos)
+  editScreen('S06', (s) => (s.includes('"preview":') ? s : s
+    .replaceAll('"label": "Field template",', '"label": "Field template", "preview": "table",')
+    .replaceAll('"label": "BPMN diagram",', '"label": "BPMN diagram", "preview": "lanes",')
+    .replace('"doneLabel": "Situation 1",', '"doneLabel": "Situation 1",\n          "image": { "src": "assets/img/l4/s01-dana-phone.jpg", "alt": "A manager at her desk, working through her own requests", "prompt": "assets/img/prompts/S06-s1-own-process.md", "temp": true, "position": "40% 40%" },')
+    .replace('"doneLabel": "Situation 2",', '"doneLabel": "Situation 2",\n          "image": { "src": "assets/img/l4/o1-lanes-office.jpg", "alt": "An open office with several teams at their desks", "prompt": "assets/img/prompts/S06-s2-process-team.md", "temp": true, "position": "50% 50%" },')));
+}
+
 JSON.parse(t); // still valid JSON
 writeFileSync(FILE, t.replace(/\n/g, EOL), 'utf8');
 console.log('fx1-content', group, 'done');

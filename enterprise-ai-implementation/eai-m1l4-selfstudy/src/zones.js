@@ -93,7 +93,8 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
   const refresh = () => {
     const hintShown = !!bHint.textContent && band.dataset.hint !== 'off';
     bHint.classList.toggle('w-sr-only', band.dataset.hint === 'off');
-    row.hidden = !hintShown && !bTool.children.length && bTries.hidden;
+    // (a template may place the attempt marker elsewhere, e.g. S06's situation card: then it is not the row's)
+    row.hidden = !hintShown && !bTool.children.length && (bTries.hidden || bTries.parentElement !== row);
     band.dataset.empty = String(row.hidden && band.dataset.strip === 'off');
   };
 
@@ -186,10 +187,11 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
     main.replaceChildren();
     main.removeAttribute('data-layout');
     delete band.dataset.hint;
+    if (bTries.parentElement !== row) row.insertBefore(bTries, bTool); // back in the band row for the next screen
     setAttempts(null);
     setTool();
     setFeedback({ state: 'hint', text: '' });
   }
 
-  return { scene, bar, main, footer, logo, instruction, band, menuBtn, nextBtn, prevBtn, setScene, setFeedback, setTool, setHintVisible, setAttempts, setNext, setPrev, setBar, setSaved, clearScreen };
+  return { scene, bar, main, footer, logo, instruction, band, attempts: bTries, menuBtn, nextBtn, prevBtn, setScene, setFeedback, setTool, setHintVisible, setAttempts, setNext, setPrev, setBar, setSaved, clearScreen };
 }

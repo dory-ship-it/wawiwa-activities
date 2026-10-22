@@ -28,10 +28,10 @@
 //                     Open homework (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
 import { h, fmt, resolveLink } from '../util.js';
-import { glyph } from '../icons.js';
+import { glyph, icon } from '../icons.js';
 import { attachTip } from '../tooltip.js';
 import { letter } from '../tracking/index.js';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand } from './stage.js';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture } from './stage.js';
 import { field } from './input.js';
 import { targetSteps } from '../ghost.js';
 
@@ -280,19 +280,38 @@ function pair(ctx) {
   const doneCard = (s, o) => h('div', { class: 'w-sit-done', role: 'group', 'aria-label': s.doneLabel },
     h('span', { class: 'w-sit-kicker' }, s.doneLabel),
     h('span', { class: 'w-sit-done-answer' }, h('span', { class: 'w-placed-disc', 'aria-hidden': 'true' }, glyph('g-check-b', { size: 15.36 })), o.label));
+  // FX1 E4: a visual fork: the situation on top (its optional temp still beside it), a path drawn from
+  // it that splits into two branches, one into each answer card; each answer card has a mini preview of
+  // its format in HTML/CSS (option.preview: "table" = eight short rows; "lanes" = three lanes with a
+  // diamond). The situation, the path and the answers build up on entry (none with reduced motion).
+  const fork = () => {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'w-sit-fork draw');
+    svg.setAttribute('viewBox', '0 0 1000 40');
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.innerHTML = '<path d="M500 0V16H250V40"/><path d="M500 16H750V40"/>';
+    return svg;
+  };
+  const preview = (kind) => (kind === 'lanes'
+    ? h('span', { class: 'w-mini w-mini-lanes', 'aria-hidden': 'true' }, h('i'), h('i'), h('i'), h('b', { class: 'w-mini-dia' }))
+    : h('span', { class: 'w-mini w-mini-table', 'aria-hidden': 'true' }, Array.from({ length: 8 }, () => h('i'))));
   function show(k, { focus = false, enter = false } = {}) {
     const s = list[k];
     const textId = 'w-situation-' + s.id;
     const btns = s.options.map((o, i) => h('button', { class: 'w-opt w-ans w-ans-two', type: 'button', dataset: { id: o.id, letter: letter(i) } },
-      h('span', { class: 'w-opt-mark w-ans-mark' }),
+      h('span', { class: 'w-opt-mark w-ans-mark' }), o.preview ? preview(o.preview) : null,
       h('span', { class: 'w-opt-label' }, h('b', {}, o.label), h('span', {}, o.sub))));
     const group = h('div', { class: 'w-options w-ans-list w-ans-cols-2', role: 'group', 'aria-labelledby': textId }, btns);
     arrowNav(group);
+    const still = s.image?.src ? picture(s.image, 'w-sit-still') : null;
+    const top = h('div', { class: 'w-sit-top' }, still, h('b', { class: 'w-sit-text', id: textId }, s.text));
+    const path = fork();
     const card = h('section', { class: 'w-situation-now' + (enter ? ' w-sit-in' : '') },
-      h('span', { class: 'w-sit-kicker' }, fmt(ui.progress.situation, { i: k + 1, n: list.length })),
-      h('b', { class: 'w-sit-text', id: textId }, s.text),
-      h('span', { class: 'w-sit-kicker' }, screen.answerLabel), group);
+      h('div', { class: 'w-sit-head' }, h('span', { class: 'w-sit-kicker' }, fmt(ui.progress.situation, { i: k + 1, n: list.length })), zones.attempts),
+      top, path, group);
     row.replaceChildren(...list.slice(0, k).map((x) => doneCard(x, x.options.find((o) => o.correct))), card);
+    if (!ctx.revisit && !k) buildUp([top, [path, 'in'], ...btns], { start: 150, step: 200 });
     hintText.textContent = s.hint;
     zones.setFeedback({ state: 'hint', text: s.hint });
     const q = rowQuestion(ctx, btns, s.options, {
@@ -320,23 +339,36 @@ function pair(ctx) {
 // The explain band on top of the panel (the three AS-IS rules, numbered); left: the round counter, the
 // instruction, the map line in a figure card with its field chip, the hint; right: the three rules
 // as answers. "Next round" in the strip after a right answer, Next after round 3.
+// FX1 E6: less text. The three rules are three icon cards in a row at the top (the rule's short name
+// from screen.rules, the option's full label for screen readers); they are the answers. The map line
+// sits in a "map strip" below them (map icon, the field chip, the line). On an answer the broken
+// rule's card lights up (teal ring) and the strip shows its one line. The hint and the attempt marker
+// share the band's row.
 function rounds(ctx) {
   const { screen, ui, zones } = ctx;
   const list = screen.rounds;
   const badge = h('span', { class: 'w-field-chip' });
   const line = h('p', { class: 'w-round-line' });
   const counter = h('p', { class: 'w-round-count' });
-  const { group, btns } = options(ctx, 'radio', { interaction: false });
+  const btns = screen.options.map((o, i) => h('button', { class: 'w-opt w-rule-card', type: 'button', dataset: { id: o.id, letter: letter(i) } },
+    h('span', { class: 'w-rule-icon', 'aria-hidden': 'true' }, icon(o.icon, { size: 30.72 })),
+    h('span', { class: 'w-rule-name', 'aria-hidden': 'true' }, screen.rules.items[i] || o.label), h('span', { class: 'w-sr-only' }, o.label),
+    h('span', { class: 'w-opt-mark w-rule-mark' })));
+  const group = h('div', { class: 'w-options w-rule-cards', role: 'group', 'aria-labelledby': 'w-instruction' }, btns);
+  arrowNav(group);
   let r = 0;
 
   layout(ctx, 'focus',
     sheet('focus',
-      explainBand(screen.rules),
+      h('div', { class: 'w-round-top' }, counter, choiceGhost(ctx)?.button),
+      zones.instruction,
       h('div', { class: 'w-rounds', dataset: { interaction: '' } },
-        h('div', { class: 'w-round-left' }, h('div', { class: 'w-round-top' }, counter, choiceGhost(ctx)?.button), zones.instruction, h('div', { class: 'w-round-card' }, badge, line), h('p', { class: 'w-round-hint' }, screen.hint)),
-        group),
+        group,
+        h('figure', { class: 'w-map-strip' }, h('span', { class: 'w-map-strip-icon', 'aria-hidden': 'true' }, glyph('overview', { size: 28.16 })),
+          h('div', { class: 'w-map-strip-body' }, badge, line))),
       zones.band));
-  zones.setHintVisible(false); // the hint is shown in the left column
+  zones.setHintVisible(true); // the hint on the band's row, beside the attempt marker
+  const light = (i) => btns.forEach((b, j) => { b.dataset.lit = String(j === i); });
 
   const q = rowQuestion(ctx, btns, screen.options, {
     trackingId: () => list[r].trackingId,
@@ -344,6 +376,7 @@ function rounds(ctx) {
     feedbackOf: (o) => list[r].feedback[o.id],
     onRight: (i, focus, revealed) => {
       const fb = list[r].feedback[screen.options[i].id];
+      light(i);
       if (r < list.length - 1) {
         const go = rightStrip(ctx, fb, revealed, { actions: [{ id: 'nextRound', label: ui.buttons.nextRound, onClick: () => { show(r + 1); btns[0].focus(); } }] });
         if (focus) go.focus();
@@ -360,6 +393,7 @@ function rounds(ctx) {
     badge.textContent = list[k].badge;
     line.textContent = '“' + list[k].line + '”'; // the map line as a quote (the frames' curly marks)
     counter.textContent = fmt(ui.progress.round, { i: k + 1, n: list.length });
+    light(-1);
     q.reset();
     zones.setFeedback({ state: 'hint', text: screen.hint });
   }

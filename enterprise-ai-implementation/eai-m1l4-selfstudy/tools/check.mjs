@@ -305,6 +305,7 @@ if (tempMedia.length) {
 const slots = content.screens.flatMap((s) => [
   ...(s.image ? [[s.id, s.image]] : []),
   ...(s.cases || []).map((c) => [`${s.id} ${c.id}`, c.image]),
+  ...(s.situations || []).filter((x) => x.image).map((x) => [`${s.id} ${x.id}`, x.image]), // FX1 E4: S06's stills
 ]);
 let imgFails = 0;
 const temps = [];

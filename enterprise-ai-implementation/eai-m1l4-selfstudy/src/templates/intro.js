@@ -303,13 +303,19 @@ export const keyParts = {
     });
     const row = [];
     cards.forEach((c, i) => row.push(i ? glyph('g-arrow-long', { size: 38.4, className: 'w-parts-arrow' }) : null, c));
+    // FX1 E1: the toggle under the cards, full width (an outline button with a soft turquoise ring that
+    // pulses twice, once, after the build-up: card, then arrow, one by one). Next stays unlocked.
     layout(ctx, 'concept',
       h('div', { class: 'w-focus-head' },
         h('p', { class: 'w-key-label' }, glyph('learn', { size: 23.04 }), h('span', {}, screen.label)),
         zones.instruction,
-        h('p', { class: 'w-concept-text' }, screen.text),
-        toggle),
-      h('div', { class: 'w-parts' }, row));
+        h('p', { class: 'w-concept-text' }, screen.text)),
+      h('div', { class: 'w-parts-wrap' }, h('div', { class: 'w-parts' }, row), toggle));
+    if (!ctx.revisit) {
+      const t = buildUp(row.filter(Boolean), { start: 150, step: 200 });
+      toggle.classList.add('w-pulse-twice');
+      toggle.style.setProperty('--b-delay', t + 'ms');
+    }
     return { unmount() {} };
   },
 };
