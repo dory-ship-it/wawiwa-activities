@@ -68,6 +68,16 @@ export function measureLayout() {
       || ['Top', 'Right', 'Bottom', 'Left'].some((side) => parseFloat(cs['border' + side + 'Width']) > 0);
     if (painted) boxes.push({ what: name(el), ...box(r) });
   }
+  // NL3: a text run inside a box with overflow hidden (an ellipsis line, S19's read-only parts) is
+  // painted only inside that box: the run is clipped to it (a run wholly outside is not painted)
+  // (only boxes inside main: main and the stage clip too, and "outside main" must still see an overrun)
+  const clipOf = (el) => {
+    for (let e = el; e && e !== main && !e.matches('.w-stage, .w-main') && e !== document.body; e = e.parentElement) {
+      const cs = getComputedStyle(e);
+      if (cs.overflowX === 'hidden' || cs.overflowY === 'hidden') return e.getBoundingClientRect();
+    }
+    return null;
+  };
   const textRuns = (root, skip) => {
     const out = [];
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -75,7 +85,11 @@ export function measureLayout() {
       if (!n.nodeValue.trim() || !visible(n.parentElement) || (skip && skip(n))) continue;
       const range = document.createRange();
       range.selectNodeContents(n);
-      for (const r of range.getClientRects()) if (r.width && r.height && !scrolledAway(n.parentElement, r)) out.push({ node: n, what: 'text:' + n.nodeValue.trim().slice(0, 24), ...box(r) });
+      const c = clipOf(n.parentElement);
+      for (const r0 of range.getClientRects()) {
+        const r = c ? DOMRect.fromRect({ x: Math.max(r0.left, c.left), y: Math.max(r0.top, c.top), width: Math.min(r0.right, c.right) - Math.max(r0.left, c.left), height: Math.min(r0.bottom, c.bottom) - Math.max(r0.top, c.top) }) : r0;
+        if (r.width > 0 && r.height > 0 && !scrolledAway(n.parentElement, r)) out.push({ node: n, what: 'text:' + n.nodeValue.trim().slice(0, 24), ...box(r) });
+      }
     }
     return out;
   };

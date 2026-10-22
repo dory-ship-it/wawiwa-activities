@@ -76,10 +76,11 @@ export function explainBand(b) {
 // Small label line (the panel's lead-in on screens styled by analogy)
 export const ruleLabel = (text, className = '') => h('p', { class: ('w-label ' + className).trim() }, h('span', {}, text));
 
-// Privacy line (the frames' lock + text) with an id inputs point aria-describedby at
+// Privacy line (the frames' lock + text) with an id inputs point aria-describedby at; a part of kind
+// "note" (NL3 S17B) is the same line without the lock
 export function privacyLine(part) {
   const id = nextId('w-privacy');
-  return { id, el: h('p', { class: 'w-privacy', id }, glyph('g-lock', { size: 19.2 }), h('span', {}, part.text)) };
+  return { id, el: h('p', { class: 'w-privacy', id }, part.kind === 'note' ? null : glyph('g-lock', { size: 19.2 }), h('span', {}, part.text)) };
 }
 
 // Progress dots (S04 cards, S08 rounds, S21 items): done = teal fill, current = teal ring, to come =

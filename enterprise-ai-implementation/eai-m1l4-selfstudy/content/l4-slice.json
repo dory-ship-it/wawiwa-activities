@@ -11,7 +11,7 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "S12B", "W4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
+    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "S12B", "W4", "S13", "S14", "S15", "K4", "S16", "S17", "S17B", "S18A", "S18", "S19", "S20", "S21", "S22"],
     "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] }
   },
 
@@ -87,7 +87,7 @@
         "default": "Next, locked until you finish this screen"
       }
     },
-    "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "case": "Case {i} of {n}", "question": "Question {i} of {n}", "deck": "{i} of {n}", "situation": "Situation {i} of {n}", "opened": "{i}/{n}" },
+    "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "caseChip": "Case {i}", "question": "Question {i} of {n}", "deck": "{i} of {n}", "situation": "Situation {i} of {n}", "opened": "{i}/{n}" },
     "drag": {
       "help": "Drag the card to a column, or press 1 to {n} to choose a column and Enter to drop it. Escape cancels.",
       "helpPlaces": "Drag the label to a place on the diagram, or press 1 to {n} to choose a place and Enter to drop it. Escape cancels.",
@@ -109,6 +109,7 @@
       "caseTitle": "Case title",
       "sketch": "Your sketch from Chapter 2",
       "metric": "Your success metric",
+      "notes": "Your notes from Chapters 3 and 4",
       "selfCheck": "Self-check",
       "risk": "Biggest risk",
       "score": "Knowledge check",
@@ -267,7 +268,7 @@
     { "id": "ch1", "n": 1, "title": "Why map", "photo": { "src": "assets/img/l4/w1-new-computer-same-mess.jpg", "position": "30% 50%", "temp": true }, "minutes": 11, "screens": ["W1", "V1", "K1", "S03"], "inSlice": true, "pauseMarker": null },
     { "id": "ch2", "n": 2, "title": "Toolkit", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 28, "screens": ["W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 20, "screens": ["W3", "V2", "S09", "S10", "S11", "S12", "S12B"], "inSlice": true, "pauseMarker": null },
-    { "id": "ch4", "n": 4, "title": "Critical eye", "photo": { "src": "assets/img/l4/o1-lanes-office.jpg", "position": "60% 50%", "temp": true }, "minutes": 23, "screens": ["W4", "S13", "S14", "S15", "S16", "S17"], "inSlice": true, "pauseMarker": null },
+    { "id": "ch4", "n": 4, "title": "Critical eye", "photo": { "src": "assets/img/l4/o1-lanes-office.jpg", "position": "60% 50%", "temp": true }, "minutes": 25, "screens": ["W4", "S13", "S14", "S15", "K4", "S16", "S17", "S17B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch5", "n": 5, "title": "Build yours", "photo": { "src": "assets/img/l4/w1-new-computer-same-mess.jpg", "position": "30% 50%", "temp": true }, "minutes": 82, "screens": ["S18A", "S18", "S19", "S20"], "inSlice": true,
       "sliceNote": "S18A and S18 come later; the slice enters Chapter 5 at S19.",
       "pauseMarker": null },
@@ -1476,21 +1477,56 @@
     },
 
     {
+      "id": "K4",
+      "chapter": "ch4",
+      "template": "keyColumns",
+      "step": { "verb": "Learn", "icon": "learn" },
+      "minutes": 2,
+      "presentation": true,
+      "label": "Key idea · Where AI fits",
+      "instruction": "Three good fits, and the rest",
+      "text": "AI fits three kinds of step. Everything else stays with a person, or gets fixed first.",
+      "layout": "concept",
+      "columns": [
+        {
+          "id": "good",
+          "kind": "lean",
+          "title": "Good fit",
+          "items": [
+            { "term": "Unstructured to structured", "text": "free text in, structured data out" },
+            { "term": "Low-risk decision points", "text": "small, reversible calls a person can watch" },
+            { "term": "Handoffs with delay or loss", "text": "AI documents what passes" }
+          ]
+        },
+        {
+          "id": "poor",
+          "kind": "mess",
+          "title": "Poor fit",
+          "items": [{ "term": "Rights or money at stake" }, { "term": "A disorganized process" }, { "term": "Steps the map marks \"unclear\"" }]
+        }
+      ],
+      "wordLimit": {
+        "max": 66,
+        "why": "storyboard v3 (K4: a new key idea, two columns with the three good fits and their lines; keep the approved text word for word); a presentation screen, read at the learner's pace"
+      },
+      "tracking": [],
+      "sources": ["planning/STORYBOARD-V3.md Ch4 K4", "s23", "s24", "s26"]
+    },
+
+    {
       "id": "S16",
       "chapter": "ch4",
-      "template": "sort",
+      "template": "sortDeck",
       "step": { "verb": "Sort", "icon": "sort" },
-      "mode": "tray",
-      "minutes": 6,
-      "instruction": "Sort each card: which good-fit kind, or poor fit?",
-      "hint": "Select a card, then a column.",
-      "layout": "wide",
-      "terms": ["good-fit kind"],
+      "minutes": 5,
+      "instruction": "Drag each card to a good-fit kind, or to Poor fit.",
+      "hint": "What goes in, and what is at stake?",
+      "layout": "sort-deck",
       "columns": [
-        { "id": "a", "label": "Unstructured to structured", "icon": "check-circle" },
-        { "id": "b", "label": "Low-risk decision", "icon": "check-circle" },
-        { "id": "c", "label": "Handoff delay or loss", "icon": "check-circle" },
-        { "id": "d", "label": "Poor fit", "icon": "hand" }
+        { "id": "a", "label": "Unstructured to structured" },
+        { "id": "b", "label": "Low-risk decision" },
+        { "id": "c", "label": "Handoff delay or loss" },
+        { "id": "d", "label": "Poor fit", "width": 1.8 }
       ],
       "cards": [
         { "n": 1, "text": "Tag free-text questions by topic", "column": "a",
@@ -1516,28 +1552,30 @@
       "tracking": [
         { "id": "L4_S16_1", "type": "matching", "correctResponse": "1.a,2.d,3.b,4.d,5.d,6.c", "scored": false, "bloom": "Analyze", "result": "graded" }
       ],
-      "sources": ["s23", "s24", "s26", "s32", "s33", "HW2 section 8"]
+      "sources": ["s23", "s24", "s26", "s32", "s33", "HW2 section 8"],
+      "hintShown": true,
+      "ghost": { "type": "drag", "showMe": false },
+      "wordLimit": {
+        "max": 50,
+        "why": "storyboard v3 (S16: the hint line under the heading and four columns with all six cards placed; keep the approved text word for word)"
+      }
     },
 
     {
       "id": "S17",
       "chapter": "ch4",
-      "template": "sort",
+      "template": "sortDeck",
       "step": { "verb": "Sort", "icon": "sort" },
-      "mode": "deck",
-      "minutes": 7,
-      "instruction": "Sort each case into the mistake it shows.",
-      "hint": "Read the case, then choose the bin that names its mistake.",
-      "layout": "wide",
-      "deckIcon": "document",
-      "deckLabel": "case",
-      "chipStyle": "marker",
+      "minutes": 5,
+      "instruction": "Read the five mistakes, then drag each case to the one it shows.",
+      "hint": "Drag the card to a column. Or press 1 to 5 to choose a column, then Enter.",
+      "layout": "sort-deck",
       "columns": [
-        { "id": "1", "label": "Ideal, not actual", "icon": "cloud", "term": "Ideal, not actual" },
-        { "id": "2", "label": "No clear goal", "icon": "compass" },
-        { "id": "3", "label": "Rushed mapping", "icon": "hourglass" },
-        { "id": "4", "label": "Not updated", "icon": "calendar" },
-        { "id": "5", "label": "Automating a broken process", "icon": "gear-broken" }
+        { "id": "1", "label": "Ideal, not actual", "sub": "maps how it should work, not a normal day" },
+        { "id": "2", "label": "No clear goal", "sub": "drawn with no question to answer" },
+        { "id": "3", "label": "Rushed mapping", "sub": "hard fields skipped to finish fast" },
+        { "id": "4", "label": "Not updated", "sub": "the process changed, the map did not" },
+        { "id": "5", "label": "Automating a broken process", "sub": "speeds up a process nobody fixed" }
       ],
       "cards": [
         { "id": "a", "text": "Fields 6 and 7 were left blank to finish the map quickly.", "column": "3",
@@ -1557,11 +1595,63 @@
             "wrong": "The map may be accurate and complete. Ask what it was drawn to decide." } }
       ],
       "advance": "after-all-placed",
-      "endOfChapter": true,
       "tracking": [
         { "id": "L4_S17_1", "type": "matching", "correctResponse": "a.3,b.1,c.5,d.4,e.2", "scored": false, "bloom": "Analyze", "result": "graded" }
       ],
-      "sources": ["s34", "s16", "s17", "s21", "s6", "Cases constructed (FL12); D is a fictional later change"]
+      "sources": ["s34", "s16", "s17", "s21", "s6", "Cases constructed (FL12); D is a fictional later change"],
+      "hintPilotCopy": true,
+      "ghost": { "type": "drag", "showMe": false },
+      "deckSize": "wide",
+      "wordLimit": {
+        "max": 72,
+        "why": "storyboard v3 decision (S17 \"read, then sort\": five columns with their one-line definitions, no separate K5 screen): the definitions stay on screen; one case at a time on the deck, the placed ones as \"Case n\""
+      },
+      "placedLabel": "caseChip"
+    },
+
+    {
+      "id": "S17B",
+      "chapter": "ch4",
+      "template": "input",
+      "step": { "verb": "Write", "icon": "write" },
+      "minutes": 3,
+      "instruction": "Name one step that could fit AI, and one that stays with a person.",
+      "arrange": "pair",
+      "stage": {
+        "top": { "kind": "line", "text": "Back to your own case. Your steps from Chapter 2:", "show": "L4_CASE_STEPS" },
+        "bottom": { "kind": "note", "text": "This note stays off your AS-IS map. Lesson 5 starts from it.", "action": "save" }
+      },
+      "fields": [
+        {
+          "id": "aifit",
+          "label": "Could fit AI",
+          "placeholder": "e.g. Sort requests by topic",
+          "maxLength": 100,
+          "store": "L4_CASE_AIFIT",
+          "trackingId": "L4_S17B_1"
+        },
+        {
+          "id": "human",
+          "label": "Stays with a person",
+          "placeholder": "e.g. Approve an exception",
+          "maxLength": 100,
+          "store": "L4_CASE_HUMAN",
+          "trackingId": "L4_S17B_2"
+        }
+      ],
+      "saveAlwaysEnabled": true,
+      "feedback": {
+        "saved": "Saved. It comes back in Chapter 5 and Lesson 5.",
+        "empty": "Add a few words to both fields. A rough version is enough; you can edit it later."
+      },
+      "feedbackPilotCopy": "empty (the storyboard gives no empty-Save line; modelled on S08B)",
+      "advance": "after-save",
+      "endOfChapter": true,
+      "tracking": [
+        { "id": "L4_S17B_1", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" },
+        { "id": "L4_S17B_2", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" }
+      ],
+      "sources": ["planning/STORYBOARD-V3.md Ch4 S17B", "s24", "s32"]
     },
 
     {
@@ -1654,7 +1744,10 @@
       "instruction": "Open the workbook and map your own case.",
       "hint": "Unknown? Write 'unclear'. The coach treats it as a valid answer.",
       "terms": ["AS-IS", "Success metric"],
-      "wordLimit": { "max": 48, "why": "CH2-SPEC 8: the read-only sketch from Chapter 2 (its heading and three part names) joins the S19 brief; the learner's own text is not counted" },
+      "wordLimit": {
+        "max": 62,
+        "why": "CH2-SPEC 8 and storyboard v3 S17B: the read-only sketch from Chapter 2 and the notes from Chapters 3 and 4 (their headings and part names) join the S19 brief; the learner's own text is not counted"
+      },
       "layout": "editorial",
       "image": { "src": "assets/img/s19.jpg", "alt": "A learner working through a case at a laptop in an open office", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "65% 50%" },
       "states": {
@@ -1679,7 +1772,8 @@
           },
           "sketch": { "label": "Your sketch from Chapter 2", "from": "S08B" },
           "openFeedback": "The workbook is open in a new tab. This module keeps your place.",
-          "showBackAfterOpen": true
+          "showBackAfterOpen": true,
+          "notes": { "label": "Your notes from Chapters 3 and 4", "from": "S17B" }
         },
         "return": {
           "stage": {

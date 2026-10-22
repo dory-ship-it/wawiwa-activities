@@ -28,11 +28,17 @@ export const handoff = {
     const open = h('a', { class: 'w-btn w-btn-action w-open', href, target: '_blank', rel: screen.handoff.rel, dataset: { action: 'open' } },
       h('span', {}, ui.buttons.open), glyph('g-arrow', { size: 19.2 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')'));
     const backBtn = h('button', { class: 'w-btn w-btn-ghost', type: 'button', dataset: { action: 'back' }, hidden: true }, ui.buttons.back);
-    // the steps, and beside them the learner's sketch from Chapter 2 (S08B, read-only), when the content asks for it
+    // the steps, and beside them what the learner wrote earlier, read-only, when the content asks for it:
+    // the Chapter 2 sketch (S08B) and, NL3, the notes from Chapters 3 and 4 (S17B); one line per part on
+    // screen (the part's name, then its text), the full text for screen readers and in the lesson record
+    const readOnly = (p) => {
+      if (!p) return [];
+      const fields = content.screens.find((s) => s.id === p.from)?.fields || [];
+      return [h('p', { class: 'w-label' }, h('span', {}, p.label)),
+        h('dl', { class: 'w-sketch-list', 'aria-label': p.label }, fields.map((f) => h('div', { class: 'w-sketch-row' }, h('dt', {}, f.label + ':'), ' ', h('dd', {}, ctx.store.get(f.store) || ui.record.empty))))];
+    };
     const sk = brief.sketch;
-    const sketchFields = sk ? (content.screens.find((s) => s.id === sk.from)?.fields || []) : [];
-    const sketch = sk ? h('section', { class: 'w-sketch', 'aria-label': sk.label }, h('p', { class: 'w-label' }, h('span', {}, sk.label)),
-      h('dl', { class: 'w-sketch-list' }, sketchFields.map((f) => h('div', { class: 'w-sketch-row' }, h('dt', {}, f.label), h('dd', {}, ctx.store.get(f.store) || ui.record.empty))))) : null;
+    const sketch = sk || brief.notes ? h('section', { class: 'w-sketch', 'aria-label': [sk?.label, brief.notes?.label].filter(Boolean).join(', ') }, readOnly(sk), readOnly(brief.notes)) : null;
     const briefTask = h('div', { class: 'w-handoff-task', dataset: { interaction: '' } }, sketch ? h('div', { class: 'w-brief-grid' }, steps, sketch) : steps,
       h('div', { class: 'w-actionbar' }, coach.el, h('div', { class: 'w-action' }, open, backBtn))); // Open workbook first (primary), then I'm back
     const briefView = h('div', { class: 'w-handoff-view' }, h('div', { class: 'w-handoff-head' }, title, chip), briefTask);

@@ -296,6 +296,16 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-case-toggle:hover { background: var(--wl-keypill-bg); }
 .w-case-toggle[aria-pressed="true"] { border-width: 2.56px; box-shadow: 0 0 0 3.84px var(--wl-press-ring); }
 
+/* ---------- NL3 K4 key idea, by analogy: K1's two figure cards side by side (no arrow), a list each ---------- */
+.w-figs-two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 25.6px; align-items: stretch; }
+.w-kcol { align-content: start; gap: 15.36px; padding: 23.04px 25.6px; }
+.w-kcol-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 12.8px; }
+.w-kcol-list li { display: flex; gap: 12.8px; align-items: flex-start; font: 400 20.48px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-kcol-list b { font-weight: 700; color: var(--wl-ink); }
+.w-kcol-mark { flex: none; width: 25.6px; height: 25.6px; margin-top: 2.56px; display: grid; place-items: center; border-radius: 50%; color: var(--wl-white); }
+.w-kcol[data-kind="lean"] .w-kcol-mark { background: var(--wl-teal); }
+.w-kcol[data-kind="mess"] .w-kcol-mark { background: var(--wl-grey-ink); }
+
 /* ---------- S02 input ---------- */
 .w-form-task { display: flex; flex-direction: column; }
 .w-fields { display: grid; grid-template-columns: 384px minmax(0, 1fr); gap: 25.6px; }
@@ -311,9 +321,11 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 /* S08B: three fields on a line, an arrow between each two */
 .w-fields-chain { gap: 15.36px; } /* the columns from each field's width (src/templates/input.js) */
 .w-fields-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.w-btn-end { margin-left: auto; }
 /* S17B: the learner's earlier text, read-only (the S19 sketch's stone box) */
-.w-shown { margin-top: 7.68px; padding: 10.24px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-stone);
-  font: 400 17.92px/1.4 var(--wl-font-ui); color: var(--wl-text-2); overflow-wrap: anywhere; }
+.w-shown { margin-top: 5.12px; padding: 6.4px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-stone);
+  font: 400 15.36px/1.35 var(--wl-font-ui); color: var(--wl-text-2); overflow-wrap: anywhere; }
+.w-shown span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; } /* two lines on screen (S19's sketch type), the full text for screen readers */
 .w-chain-arrow { align-self: center; margin-top: 22.72px; display: grid; color: var(--wl-navy); }
 .w-privacy { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 7.68px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
 
@@ -469,15 +481,18 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-handoff-title { font: 800 25.6px/1.25 var(--wl-font-ui); letter-spacing: -.3px; color: var(--wl-ink); }
 .w-time-chip { flex: none; padding: 2.56px 10.24px; border-radius: 5.12px; background: var(--wl-chip-bg); font: 600 14.72px/normal var(--wl-font-label); color: var(--wl-correct-head); }
 .w-handoff-task { display: flex; flex-direction: column; gap: 12.8px; }
-/* S19: the steps and, beside them, the Chapter 2 sketch, read-only (each part at most two lines on screen) */
+/* S19: the steps and, beside them, the Chapter 2 sketch and (NL3) the Chapter 3-4 notes, read-only: one
+   line per part on screen, its name then its text (cut with an ellipsis; the full text for screen readers) */
 .w-brief-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20.48px; align-items: start; }
-.w-sketch { padding: 10.24px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-stone); }
-.w-sketch-list { margin: 0; display: grid; gap: 6.4px; }
-.w-sketch-row dt { font: 600 15.36px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
-.w-sketch-row dd { margin: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
-  font: 400 15.36px/1.35 var(--wl-font-ui); color: var(--wl-text-2); overflow-wrap: anywhere; }
+.w-sketch { display: grid; gap: 2.56px; padding: 7.68px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-stone); }
+.w-sketch .w-label { margin: 0; }
+.w-sketch-list { margin: 0 0 5.12px; display: grid; gap: 1.28px; }
+.w-sketch-list:last-child { margin-bottom: 0; }
+.w-sketch-row { display: flex; gap: 5.12px; min-width: 0; font: 400 15.36px/1.35 var(--wl-font-ui); }
+.w-sketch-row dt { flex: none; font-weight: 600; color: var(--wl-ink); }
+.w-sketch-row dd { flex: 1 1 auto; min-width: 0; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--wl-text-2); }
 .w-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 6.4px; }
-.w-steps li { min-height: 44px; display: flex; align-items: center; gap: 12.8px; padding: 6.4px 12.8px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white);
+.w-steps li { min-height: 38.4px; /* NL3: from 44 and 6.4px padding (text, not targets), so S19 with the sketch and notes stays within 41cqw */ display: flex; align-items: center; gap: 12.8px; padding: 3.2px 12.8px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white);
   font: 600 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
 .w-step-n { flex: none; width: 30.72px; height: 30.72px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-navy); font: 800 15.36px/1 var(--wl-font-ui); color: var(--wl-white); }
 .w-handoff-task .w-actionbar { margin-top: 0; }
@@ -522,19 +537,16 @@ a.w-btn { text-decoration: none; }
 .w-close-actions { margin-top: 6.4px; display: flex; flex-wrap: wrap; gap: 10.24px; }
 .w-close-actions .w-btn[aria-disabled="true"] { border: 0; background: var(--wl-neutral-line); color: var(--wl-white); cursor: default; }
 
-/* sort (S04, S09, S16, S17, S18A): the deck or tray, dashed drop columns, placed cards */
+/* the old sort, tray mode only (S18A until NL4; its deck mode retired in NL3): dashed columns, the tray, chips */
 .w-sort { display: flex; flex-direction: column; gap: 15.36px; }
-.w-deck { display: flex; flex-direction: column; align-items: center; gap: 8.96px; }
 .w-sort-card { position: relative; width: auto; min-width: 560px; max-width: 760px; min-height: 60px; margin: 0; display: flex; align-items: center; gap: 12.8px; padding: 10.24px 48px 10.24px 19.2px;
   border: 1px solid var(--wl-card-line); border-radius: var(--wl-radius-card); background: var(--wl-white); box-shadow: var(--wl-card-shadow);
   font: 600 19.2px/1.35 var(--wl-font-ui); color: var(--wl-body-ink); text-align: left; cursor: pointer; }
 .w-sort-card:hover { border-color: var(--wl-navy); }
 .w-sort-card[aria-pressed="true"] { border: 3.2px solid var(--wl-navy); }
-.w-sort-card[data-done="true"] { visibility: hidden; }
 .w-sort-num { flex: none; width: 24px; font: 800 20.48px/1 var(--wl-font-ui); color: var(--wl-teal-ink); }
 .w-sort-card > .w-opt-mark { position: absolute; top: 50%; right: 12.8px; width: 24px; height: 24px; margin-top: -12px; border: 0; border-radius: 6.4px; background: var(--wl-navy); }
 .w-sort-card > .w-opt-mark:empty { display: none; }
-.w-sort-lead { flex: none; display: grid; color: var(--wl-navy); }
 .w-sort-cols { position: relative; display: grid; gap: 15.36px; }
 .w-sort-col { position: relative; display: flex; flex-direction: column; gap: 6.4px; padding: 6.4px 6.4px 8.96px; border: 2px dashed var(--wl-dash); border-radius: var(--wl-radius-card);
   background: var(--wl-white); transition: border-color .15s; }
@@ -549,8 +561,6 @@ a.w-btn { text-decoration: none; }
 .w-sort-target > .w-opt-mark:empty { display: none; }
 .w-sort-chips { list-style: none; margin: 0; padding: 0 2px; min-height: 40px; display: flex; flex-direction: column; gap: 6.4px; }
 .w-sort-chip { padding: 6.4px 10.24px; border: 2.56px solid var(--wl-teal); border-radius: var(--wl-radius-card); background: var(--wl-white); font: 600 16px/1.35 var(--wl-font-ui); color: var(--wl-ink); }
-.w-sort-marker { align-self: flex-start; display: flex; align-items: center; gap: 6px; color: var(--wl-navy); }
-.w-sort-marker .w-icon + .w-icon { color: var(--wl-teal-ink); }
 .w-tray { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8.96px 15.36px; }
 .w-tray-card { width: auto; min-width: 0; max-width: none; min-height: 48px; padding: 6.4px 40px 6.4px 12.8px; font-size: 16.64px; box-shadow: none; }
 .w-tray-card .w-sort-num { font-size: 17.92px; width: 18px; }
@@ -630,6 +640,12 @@ a.w-btn { text-decoration: none; }
 .w-deck-band .w-rule-n { display: none; } /* the levels' order reads top down ("from open to closed") */
 .w-deck-band .w-rule-body { font-size: 15.36px; }
 .w-head-chip { align-self: center; flex: none; }
+/* four or five columns (S09, S16, S17): the placed cards a little closer, so three fit above the footer */
+.w-drops:is([data-count="4"], [data-count="5"]) .w-placed { margin-top: 8.96px; }
+/* five columns (S17): the S07 tile title size (20.48) for the column names, a little less padding */
+.w-drops[data-count="5"] { gap: 15.36px; }
+.w-drops[data-count="5"] .w-drop { padding: 15.36px 17.92px; }
+.w-drops[data-count="5"] .w-drop-title { font-size: 20.48px; line-height: 1.25; }
 
 /* the sort deck (S04): one card at a time, two offset cards behind it, the counter under it */
 .w-sdeck { position: absolute; left: 50%; top: 102.4px; width: var(--deck-w, 435.2px); transform: translateX(-50%); }

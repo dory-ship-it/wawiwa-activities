@@ -42,7 +42,8 @@ export const sortDeck = {
       return { id: c.id, el, name: c.label, placed };
     });
     const colRow = h('div', { class: 'w-drops', dataset: { count: String(cols.length) } }, cols.map((x) => x.el));
-    colRow.style.gridTemplateColumns = `repeat(${cols.length}, minmax(0, 1fr))`;
+    // each column as wide as its width (default 1; S16's Poor fit holds three cards)
+    colRow.style.gridTemplateColumns = screen.columns.map((c) => `minmax(0, ${c.width || 1}fr)`).join(' ');
 
     /* ---- deck ---- */
     const text = h('span', { class: 'w-deck-text' });
@@ -110,7 +111,13 @@ export const sortDeck = {
     place();
     if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(() => { if (!done || ctx.revisit) place(); });
 
-    const chip = (c) => h('li', { class: 'w-placed' }, h('span', { class: 'w-placed-disc', 'aria-hidden': 'true' }, glyph('g-check-b', { size: 15.36 })), h('span', {}, c.text));
+    // a placed card with its text; or (screen.placedLabel, S17: long cases under five columns) a short
+    // name, "Case 1", with the case's text for screen readers (R2's S17 markers did the same)
+    const chip = (c) => {
+      const k = cards.indexOf(c) + 1;
+      const label = screen.placedLabel ? [h('span', { 'aria-hidden': 'true' }, fmt(ui.progress[screen.placedLabel], { i: k })), h('span', { class: 'w-sr-only' }, c.text)] : h('span', {}, c.text);
+      return h('li', { class: 'w-placed' }, h('span', { class: 'w-placed-disc', 'aria-hidden': 'true' }, glyph('g-check-b', { size: 15.36 })), label);
+    };
     function show() {
       const c = cards[i];
       text.textContent = c.text;

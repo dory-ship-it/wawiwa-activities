@@ -19,17 +19,15 @@ export function screenViews(s, content) {
   if (s.template === 'video') return [[s.id, [s.title, s.guidingQuestion]], ...(s.stops || []).map((st) => [`${s.id} ${st.id}`, [st.question, ...st.options.map((o) => o.label)]])];
   if (s.template === 'handoff') {
     // the brief's read-only sketch (S08B): its heading and the three part names (the learner's own text not counted)
-    const sketchText = (st) => (st.sketch ? [st.sketch.label, ...(content.screens.find((x) => x.id === st.sketch.from)?.fields || []).map((f) => f.label)] : []);
+    // (NL3: and the notes from Chapters 3 and 4, S17B, the same way)
+    const partText = (p) => (p ? [p.label, ...(content.screens.find((x) => x.id === p.from)?.fields || []).map((f) => f.label)] : []);
+    const sketchText = (st) => [...partText(st.sketch), ...partText(st.notes)];
     return Object.entries(s.states).map(([k, st]) => [`${s.id} ${k}`, [...stageText(st.stage), ...fieldText(st.fields), ...sketchText(st)]]);
   }
   if (s.variant === 'selfcheck') return s.steps.map((st) => [`${s.id} ${st.id}`, [...(st.rows || []).map((r) => r.text), ...(st.chips || []).map((c) => c.label), st.strip]]);
   // R1 templates, each in its fullest state
-  // sort: placed cards stay on screen as chips, so every card counts, unless the chips are markers
-  // without text (S17: one case on screen at a time); then the longest case counts
-  if (s.template === 'sort') {
-    const cardText = s.chipStyle === 'marker' ? [s.cards.map((c) => c.text).sort((a, b) => words(b) - words(a))[0]] : s.cards.map((c) => c.text);
-    return [[s.id, [s.header, ...s.columns.map((c) => c.label), ...cardText]]];
-  }
+  // sort (the tray, S18A): placed cards stay on screen as chips, so every card counts
+  if (s.template === 'sort') return [[s.id, [s.header, ...s.columns.map((c) => c.label), ...s.cards.map((c) => c.text)]]];
   // R2 templates
   if (s.variant === 'fill') return [[s.id, [s.situation.text, ...s.fieldRows.flatMap((f) => [f.label, f.value]), ...s.options.map((o) => o.label)]]];
   if (s.variant === 'metric') return [[s.id, [...bandText(s.band), s.field.label, ...s.options.map((o) => o.label), s.slotsTitle, ...s.slots.map((x) => x.label)]]];
@@ -66,11 +64,17 @@ export function screenViews(s, content) {
   // NL2 templates
   // sort deck: every placed card stays on screen in its column, with the current card on the deck
   // (NL3: with the field chip, the explain band and the hint line when the screen shows them)
-  if (s.template === 'sortDeck') return [[s.id, [s.header, ...bandText(s.band), s.hintShown ? s.hint : '', ...s.columns.flatMap((c) => [c.label, c.sub]), ...s.cards.map((c) => c.text)]]];
+  // (S17, placedLabel: a placed card shows as "Case 1", so the longest case on the deck counts, and the short names)
+  if (s.template === 'sortDeck') {
+    const cardText = s.placedLabel ? [s.cards.map((c) => c.text).sort((a, b) => words(b) - words(a))[0], ...s.cards.map((c, i) => content.ui.progress[s.placedLabel].replace('{i}', i + 1))] : s.cards.map((c) => c.text);
+    return [[s.id, [s.header, ...bandText(s.band), s.hintShown ? s.hint : '', ...s.columns.flatMap((c) => [c.label, c.sub]), ...cardText]]];
+  }
   if (s.template === 'keyParts') {
     const base = [s.label, s.text, ...s.parts.flatMap((p) => [p.title, p.text])];
     return [[s.id, base], [`${s.id} case on`, [...base, ...s.parts.flatMap((p) => [s.caseLabel, p.case])]]];
   }
+  // NL3 K4: the head and both columns
+  if (s.template === 'keyColumns') return [[s.id, [s.label, s.text, ...s.columns.flatMap((c) => [c.title, ...c.items.flatMap((it) => [it.term, it.text])])]]];
   // NL3 flags: the full map (every field) or the process line, and the flags (placed ones sit on their target)
   if (s.template === 'flags') {
     const flags = s.flags.map((f) => f.text || s.flagLabel);

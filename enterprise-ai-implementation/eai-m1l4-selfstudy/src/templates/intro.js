@@ -18,6 +18,9 @@
 //                    them, their line drawings draw on (1.2 s); the evidence line and source at the foot.
 //   keyParts   (K2)  Focus: the K1 head, three numbered figure cards on a line (arrows between); the case
 //                    toggle top right adds each card's case line.
+//   keyColumns (K4)  NL3, by analogy (no frame): the K1 head, two figure cards side by side, no arrow:
+//                    "Good fit" in teal ink, "Poor fit" in K1's grey; each lists its kinds of step (the
+//                    term in bold, its line after it) with a check or a cross mark.
 // Title, module map, goals and key idea are presentation screens (screen.presentation): the engine
 // marks them done on arrival, so Next never locks. All text comes from the content.
 import { h } from '../util.js';
@@ -217,6 +220,28 @@ export const concept = {
         h('p', { class: 'w-concept-text' }, screen.text)),
       h('div', { class: 'w-figs' }, figs[0], glyph('g-arrow-long', { size: 38.4, className: 'w-figs-arrow' }), figs.slice(1)),
       h('p', { class: 'w-evidence' }, h('span', {}, evHead ? [h('b', {}, evHead), ' '] : null, evRest), h('span', { class: 'w-evidence-source' }, ev.source)));
+    return { unmount() {} };
+  },
+};
+
+/* ---------- keyColumns (K4) ---------- */
+// The K1 head over two figure cards (K1's teal "lean" and grey "mess" kinds): the column's name as the
+// caption, then its items, each with a check (good fit) or a cross (poor fit) disc. Not tracked; a
+// presentation screen (Next never locked).
+export const keyColumns = {
+  mount(ctx) {
+    const { screen, zones } = ctx;
+    const cols = screen.columns.map((c) => h('figure', { class: 'w-fig w-kcol', dataset: { kind: c.kind, column: c.id } },
+      h('figcaption', { class: 'w-fig-caption' }, c.title),
+      h('ul', { class: 'w-kcol-list' }, c.items.map((it) => h('li', {},
+        h('span', { class: 'w-kcol-mark', 'aria-hidden': 'true' }, glyph(c.kind === 'lean' ? 'g-check-b' : 'g-cross', { size: 14.08 })),
+        h('span', {}, h('b', {}, it.term + (it.text ? ':' : '')), it.text ? ' ' + it.text : null))))));
+    layout(ctx, 'concept',
+      h('div', { class: 'w-focus-head' },
+        h('p', { class: 'w-key-label' }, glyph('learn', { size: 23.04 }), h('span', {}, screen.label)),
+        zones.instruction,
+        h('p', { class: 'w-concept-text' }, screen.text)),
+      h('div', { class: 'w-figs w-figs-two' }, cols));
     return { unmount() {} };
   },
 };

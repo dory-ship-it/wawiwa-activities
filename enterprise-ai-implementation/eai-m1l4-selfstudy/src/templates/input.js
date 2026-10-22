@@ -23,10 +23,11 @@ const COUNTER_ANNOUNCE_AT = 230;
 export const input = {
   mount(ctx) {
     const { screen, ui, zones } = ctx;
-    const privacy = privacyLine(screen.stage.bottom);
+    // the privacy line, or (S17B, kind "note") the screen's note in its place; none: Save sits at the right alone
+    const privacy = screen.stage.bottom ? privacyLine(screen.stage.bottom) : null;
     const announcer = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
-    const controls = screen.fields.map((f) => field(f, ctx, privacy.id, announcer));
-    const save = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'save' }, onclick: () => doSave() }, ui.buttons.save);
+    const controls = screen.fields.map((f) => field(f, ctx, privacy?.id, announcer));
+    const save = h('button', { class: 'w-btn w-btn-action' + (privacy ? '' : ' w-btn-end'), type: 'button', dataset: { action: 'save' }, onclick: () => doSave() }, ui.buttons.save);
     // the earlier homework in a new tab when content has its URL; the help line's question is a
     // button, its answer the tooltip (one string in the content, split at the question mark)
     const mid = screen.stage.middle || {};
@@ -50,7 +51,7 @@ export const input = {
     const fields = h('div', { class: 'w-fields' + (chain ? ' w-fields-chain' : screen.arrange === 'pair' ? ' w-fields-pair' : '') }, fieldEls, announcer);
     if (chain) fields.style.gridTemplateColumns = screen.fields.map((f) => `minmax(0, ${f.width || 1}fr)`).join(' auto ');
     // S17B: what the learner wrote before (read-only), under the context line
-    const shown = screen.stage.top?.show ? h('p', { class: 'w-shown' }, ctx.store.get(screen.stage.top.show) || ui.record.empty) : null;
+    const shown = screen.stage.top?.show ? h('p', { class: 'w-shown' }, h('span', {}, ctx.store.get(screen.stage.top.show) || ui.record.empty)) : null;
     layout(ctx, 'focus',
       sheet('focus',
         contextLine(screen.stage.top?.text),
@@ -58,7 +59,7 @@ export const input = {
         screen.hint ? [h('div', { class: 'w-head-row' }, zones.instruction, g && screen.ghost.showMe ? g.button : null), h('p', { class: 'w-subline' }, screen.hint)] : zones.instruction,
         h('div', { class: 'w-form-task', dataset: { interaction: '' } },
           fields,
-          h('div', { class: 'w-actionbar' }, hw, help, privacy.el, save)),
+          h('div', { class: 'w-actionbar' }, hw, help, privacy?.el, save)),
         zones.band));
 
     // the help answer as the button's glass tooltip (and its description), once the button is in place

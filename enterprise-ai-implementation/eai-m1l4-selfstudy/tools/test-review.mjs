@@ -111,7 +111,7 @@ console.log('\nreview mode: walk, toolbar, no writes');
 /* ---------- 3: any screen by id ---------- */
 {
   const outside = ORDER.filter((id) => !C.lesson.slice.includes(id));
-  const ids = ['S04', 'FT3', 'S22', ...outside];
+  const ids = ['S04', 'S13', 'S22', ...outside]; // NL3: S13 (the flags) in place of the gone FT3
   const got = [];
   for (const id of ids) {
     const p = await open(`/index.html?screen=${id}&review=1`);

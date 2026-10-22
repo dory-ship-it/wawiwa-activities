@@ -212,14 +212,23 @@ const STATES = [
   ['S15', 'hint', async () => {}],
   ['S15', 'wrong', async (p) => click(p, '.w-opt[data-id="b"]')],
   ['S15', 'right', async (p) => click(p, '.w-opt[data-id="a"]')],
-  ['S16', 'card selected', async (p) => click(p, '.w-tray-card[data-card="1"]')],
-  ['S16', 'wrong', async (p) => { await click(p, '.w-tray-card[data-card="2"]'); await click(p, '.w-sort-target[data-column="b"]'); }],
-  ['S16', 'done', async (p) => { for (const [c, col] of [['1', 'a'], ['2', 'd'], ['3', 'b'], ['4', 'd'], ['5', 'd'], ['6', 'c']]) { await click(p, `.w-tray-card[data-card="${c}"]`); await click(p, `.w-sort-target[data-column="${col}"]`); } }],
-  ['S17', 'start', async () => {}],
-  ['S17', 'wrong', async (p) => { await click(p, '[data-action="card"]'); await click(p, '.w-sort-target[data-column="5"]'); }],
-  ['S17', 'pause marker', async (p) => {
-    for (const col of ['3', '1', '5', '4', '2']) { await click(p, '[data-action="card"]'); await click(p, `.w-sort-target[data-column="${col}"]`); }
-    await click(p, '.w-next');
+  ['K4', 'key idea', async () => {}],
+  ['S16', 'start', async (p) => p.keyboard.press('Shift')],
+  ['S16', 'card picked up', async (p) => { await p.keyboard.press('Shift'); await click(p, '[data-action="card"]'); }],
+  ['S16', 'wrong', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b']); }],
+  ['S16', 'longest line', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'd']); }], // card 2's right line, the longest
+  ['S16', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'd', 'b', 'd', 'd', 'c']); }],
+  ['S17', 'start', async (p) => p.keyboard.press('Shift')],
+  ['S17', 'wrong', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['5']); }],
+  ['S17', 'longest case', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['3', '1', '5', '4']); }], // case e on the deck
+  ['S17', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['3', '1', '5', '4', '2']); }],
+  ['S17B', 'hint', async () => {}],
+  ['S17B', 'empty save', async (p) => click(p, '[data-action="save"]')],
+  ['S17B', 'saved, full, long steps', async (p) => {
+    await p.evaluate(() => { window.__l4.state.f.L4_CASE_STEPS = 'Steps and who does them '.repeat(11).slice(0, 250); window.__l4.go('S17B'); });
+    await p.type('.w-input[data-store="L4_CASE_AIFIT"]', 'Sort the incoming call notes by topic and by account before the sales manager reads them');
+    await p.type('.w-input[data-store="L4_CASE_HUMAN"]', 'Approve a discount or an exception for a key account, with the account history');
+    await click(p, '[data-action="save"]');
   }],
   // R3: Chapters 5 and 6
   ['S18A', 'wrong', async (p) => { await click(p, '.w-tray-card[data-card="4"]'); await click(p, '.w-sort-target[data-column="b"]'); }],
@@ -228,8 +237,14 @@ const STATES = [
   ['S18', 'step 2 unticked', async (p) => { await click(p, '.w-opt[data-id="b"]'); await p.type('.w-input', 'Sales call summaries'); await click(p, '[data-action="save"]'); }],
   ['S18', 'saved', async (p) => { await click(p, '.w-opt[data-id="b"]'); await p.type('.w-input', 'Sales call summaries'); await click(p, '.w-checkbox'); await click(p, '[data-action="save"]'); }],
   ['S19', 'brief', async () => {}],
-  ['S19', 'brief, full sketch', async (p) => {
-    await p.evaluate(() => { const f = window.__l4.state.f; f.L4_CASE_TRIGGER = 'Trigger text '.repeat(10).slice(0, 120); f.L4_CASE_STEPS = 'Steps and who does them '.repeat(11).slice(0, 250); f.L4_CASE_OUTPUT = 'Output text '.repeat(11).slice(0, 120); window.__l4.go('S19'); });
+  ['S19', 'brief, full sketch and notes', async (p) => {
+    await p.evaluate(() => { const f = window.__l4.state.f; f.L4_CASE_TRIGGER = 'Trigger text '.repeat(10).slice(0, 120); f.L4_CASE_STEPS = 'Steps and who does them '.repeat(11).slice(0, 250); f.L4_CASE_OUTPUT = 'Output text '.repeat(11).slice(0, 120);
+      f.L4_CASE_AIFIT = 'Could fit AI '.repeat(8).slice(0, 100); f.L4_CASE_HUMAN = 'Stays with a person '.repeat(6).slice(0, 100); window.__l4.go('S19'); });
+  }],
+  ['S19', 'opened, full sketch and notes', async (p) => {
+    await p.evaluate(() => { const f = window.__l4.state.f; f.L4_CASE_TRIGGER = 'Trigger text '.repeat(10).slice(0, 120); f.L4_CASE_STEPS = 'Steps and who does them '.repeat(11).slice(0, 250); f.L4_CASE_OUTPUT = 'Output text '.repeat(11).slice(0, 120);
+      f.L4_CASE_AIFIT = 'Could fit AI '.repeat(8).slice(0, 100); f.L4_CASE_HUMAN = 'Stays with a person '.repeat(6).slice(0, 100); window.__l4.state.g.S19 = { o: 1 }; window.__l4.go('S19'); });
+    await noNewTab(p, '[data-action="open"]'); await click(p, '[data-action="open"]');
   }],
   ['S19', 'return, metric from S12B (full)', async (p) => {
     await p.evaluate(() => { Object.assign(window.__l4.state.f, { L4_CASE_BASELINE: 'b'.repeat(80), L4_CASE_TARGET: 't'.repeat(80), L4_CASE_DATE: 'd'.repeat(40) }); window.__l4.state.g.S19 = { o: 1, b: 1 }; window.__l4.go('S19'); });

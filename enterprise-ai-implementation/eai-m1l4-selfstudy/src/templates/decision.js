@@ -584,7 +584,8 @@ function close(ctx) {
 }
 
 // The downloadable lesson record (S22): a small self-contained HTML page with the case title, the
-// Chapter 2 sketch, the metric, the self-check answers and the knowledge check score. Every label
+// Chapter 2 sketch, the Chapter 3-4 notes (NL3), the metric, the self-check answers and the knowledge
+// check score. Every label
 // comes from ui.record (the sketch's part names from S08B).
 function lessonRecord(ctx) {
   const { ui, content } = ctx;
@@ -597,7 +598,10 @@ function lessonRecord(ctx) {
   const rows = s20.steps[0].rows.map((q) => `<tr><td>${esc(q.text)}</td><td>${val(ans[q.id] && ui.buttons[ans[q.id]])}</td></tr>`).join('');
   const chip = s20.steps[1].chips.find((c) => c.id === ans.chip);
   // the Chapter 2 sketch (S08B): one row per part
-  const sketch = (content.screens.find((s) => s.id === 'S08B')?.fields || []).map((f) => `<tr><td>${esc(f.label)}</td><td>${val(ctx.store.get(f.store))}</td></tr>`).join('');
+  const rowsOf = (id) => (content.screens.find((s) => s.id === id)?.fields || []).map((f) => `<tr><td>${esc(f.label)}</td><td>${val(ctx.store.get(f.store))}</td></tr>`).join('');
+  const sketch = rowsOf('S08B');
+  // NL3: the notes from Chapters 3 and 4 (S17B): one step that could fit AI, one that stays with a person
+  const notes = rowsOf('S17B');
   const score = sc.raw === null ? r.empty : fmt(r.scoreLine, { x: sc.x, n: sc.n, p: sc.raw, pass: content.lesson.completion.passMark });
   return `<!DOCTYPE html><html lang="${esc(content.lesson.lang)}"><head><meta charset="UTF-8"><title>${esc(r.heading)}: ${esc(content.lesson.title)}</title>`
     + '<style>body{font:16px/1.5 Assistant,Arial,sans-serif;color:#16293A;max-width:720px;margin:40px auto;padding:0 20px}h1,h2{color:#255777}'
@@ -606,6 +610,7 @@ function lessonRecord(ctx) {
     + `<p>${esc(r.date)}: ${esc(new Date().toISOString().slice(0, 10))}</p>`
     + `<h2>${esc(r.caseTitle)}</h2><p>${val(ctx.store.get('L4_CASE_TITLE'))}</p>`
     + `<h2>${esc(r.sketch)}</h2><table>${sketch}</table>`
+    + `<h2>${esc(r.notes)}</h2><table>${notes}</table>`
     + `<h2>${esc(r.metric)}</h2><p>${val(ctx.store.get('L4_METRIC'))}</p>`
     + `<h2>${esc(r.selfCheck)}</h2><table>${rows}<tr><td>${esc(r.risk)}</td><td>${val(chip && chip.label)}</td></tr></table>`
     + `<h2>${esc(r.score)}</h2><p>${esc(score)}</p></body></html>`;

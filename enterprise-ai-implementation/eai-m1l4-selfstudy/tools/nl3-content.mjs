@@ -178,6 +178,7 @@ if (group === 'd') {
         { term: 'Low-risk decision points', text: 'small, reversible calls a person can watch' },
         { term: 'Handoffs with delay or loss', text: 'AI documents what passes' }] },
       { id: 'poor', kind: 'mess', title: 'Poor fit', items: [{ term: 'Rights or money at stake' }, { term: 'A disorganized process' }, { term: 'Steps the map marks "unclear"' }] }],
+    wordLimit: { max: 66, why: 'storyboard v3 (K4: a new key idea, two columns with the three good fits and their lines; keep the approved text word for word); a presentation screen, read at the learner\'s pace' },
     tracking: [], sources: ['planning/STORYBOARD-V3.md Ch4 K4', 's23', 's24', 's26'] });
   chAfter('ch4', 'S15', 'K4');
   sliceAfter('S15', 'K4');
@@ -187,23 +188,26 @@ if (group === 'd') {
   Object.assign(s16, { template: 'sortDeck',instruction: 'Drag each card to a good-fit kind, or to Poor fit.', hint: 'What goes in, and what is at stake?',
     hintShown: true, layout: 'sort-deck', ghost: { type: 'drag', showMe: false }, minutes: 5 });
   delete s16.mode; delete s16.terms; delete s16.hintPilotCopy;
-  s16.columns = s16.columns.map(({ id, label }) => ({ id, label }));
+  s16.wordLimit = { max: 50, why: 'storyboard v3 (S16: the hint line under the heading and four columns with all six cards placed; keep the approved text word for word)' };
+  // Poor fit holds three of the six cards: wider, so each stays on one line
+  s16.columns = s16.columns.map(({ id, label }) => (id === 'd' ? { id, label, width: 1.8 } : { id, label }));
 
   // ---- S17: read, then sort (five columns with their one-line definitions)
   const s17 = S('S17');
   const defs = { 1: 'maps how it should work, not a normal day', 2: 'drawn with no question to answer', 3: 'hard fields skipped to finish fast', 4: 'the process changed, the map did not', 5: 'speeds up a process nobody fixed' };
   Object.assign(s17, { template: 'sortDeck',instruction: 'Read the five mistakes, then drag each case to the one it shows.', hint: deckKeys(5), hintPilotCopy: true,
-    layout: 'sort-deck', ghost: { type: 'drag', showMe: false }, minutes: 5 });
-  for (const k of ['mode', 'deckIcon', 'deckLabel', 'chipStyle', 'endOfChapter']) delete s17[k];
+    layout: 'sort-deck', ghost: { type: 'drag', showMe: false }, minutes: 5, deckSize: 'wide', placedLabel: 'caseChip' });
+  for (const k of ['mode', 'deckIcon', 'deckLabel', 'chipStyle', 'endOfChapter', 'terms']) delete s17[k];
   s17.columns = s17.columns.map(({ id, label }) => ({ id, label, sub: defs[id] }));
-  s17.wordLimit = { max: 80, why: 'storyboard v3 decision (S17 "read, then sort": five columns with their one-line definitions, no separate K5 screen): the definitions stay on screen with the cases placed under them' };
+  s17.wordLimit = { max: 72, why: 'storyboard v3 decision (S17 "read, then sort": five columns with their one-line definitions, no separate K5 screen): the definitions stay on screen; one case at a time on the deck, the placed ones as "Case n"' };
 
   // ---- S17B: one step that could fit AI, one that stays with a person (shown on S19)
   put('S17', { id: 'S17B', chapter: 'ch4', template: 'input', step: { verb: 'Write', icon: 'write' }, minutes: 3,
     instruction: 'Name one step that could fit AI, and one that stays with a person.',
-    hint: 'This note stays off your AS-IS map. Lesson 5 starts from it.',
     arrange: 'pair',
-    stage: { top: { kind: 'line', text: 'Back to your own case. Your steps from Chapter 2:', show: 'L4_CASE_STEPS' } },
+    // the storyboard's note sits where the other inputs have the privacy line (beside Save)
+    stage: { top: { kind: 'line', text: 'Back to your own case. Your steps from Chapter 2:', show: 'L4_CASE_STEPS' },
+      bottom: { kind: 'note', text: 'This note stays off your AS-IS map. Lesson 5 starts from it.', action: 'save' } },
     fields: [
       { id: 'aifit', label: 'Could fit AI', placeholder: 'e.g. Sort requests by topic', maxLength: 100, store: 'L4_CASE_AIFIT', trackingId: 'L4_S17B_1' },
       { id: 'human', label: 'Stays with a person', placeholder: 'e.g. Approve an exception', maxLength: 100, store: 'L4_CASE_HUMAN', trackingId: 'L4_S17B_2' }],
@@ -217,6 +221,7 @@ if (group === 'd') {
   chAfter('ch4', 'S17', 'S17B');
   // S19: the notes, read-only, under the sketch
   S('S19').states.brief.notes = { label: 'Your notes from Chapters 3 and 4', from: 'S17B' };
+  S('S19').wordLimit = { max: 62, why: 'CH2-SPEC 8 and storyboard v3 S17B: the read-only sketch from Chapter 2 and the notes from Chapters 3 and 4 (their headings and part names) join the S19 brief; the learner\'s own text is not counted' };
 }
 
 // the screens in the slice's order (a re-run puts a screen whose anchor is gone at the front)

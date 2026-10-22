@@ -534,6 +534,7 @@ await press(page, 'Enter');
 
 const SKETCH = { trigger: 'A rep finishes a sales call', steps: 'Rep types notes by hand; the manager reads them two days later', output: 'A call summary, to the sales manager' };
 const METRIC_PARTS = { baseline: 'About 2 days from call to summary', target: 'Same day', date: 'within 3 months' };
+const NOTES = { aifit: 'Sort call notes by topic', human: 'Approve a discount for a key account' };
 /* ---------- Chapter 2 (NL2, storyboard v3): every interaction wrong then right, keyboard only ---------- */
 console.log('\nchapter 2 (keyboard)');
 // W2 warm-up: a neutral guess, as W1
@@ -990,49 +991,49 @@ for (const [id, wrongId, moves, rightId] of [['S14', 'd', ['ArrowUp', 2], 'b'], 
   await press(page, 'Enter');
 }
 
-// S16 sort, tray of six in two rows
-await expectNewScreen(page, 'S16', 'S15 Next');
-await trayPlace(page, '2', 'b');
-await expectBand(page, 'S16 card 2 in Low-risk', { state: 'wrong', text: card('S16', 2).feedback.wrong, unlocked: false });
-await expectLayout(page, 'S16 wrong');
-await shotR2(page, 's16.png');
-await trayPlace(page, '2', 'd', { reselect: false });
-for (const [c, col] of [['1', 'a'], ['3', 'b'], ['4', 'd'], ['5', 'd'], ['6', 'c']]) await trayPlace(page, c, col);
-await expectBand(page, 'S16 done', { state: 'correct', text: card('S16', 6).feedback.correct, unlocked: true });
+// K4 key idea: two columns, Next never locked, nothing tracked
+await expectNewScreen(page, 'K4', 'S15 Next');
+const k4 = await page.evaluate(() => ({ cols: [...document.querySelectorAll('.w-kcol')].map((c) => c.dataset.kind + ':' + c.querySelector('.w-fig-caption').textContent + ':' + c.querySelectorAll('li').length).join(),
+  items: [...document.querySelectorAll('.w-kcol li')].map((li) => li.textContent).join('|') }));
+const wantK4 = S.K4.columns.flatMap((c) => c.items.map((it) => it.term + (it.text ? ': ' + it.text : ''))).join('|');
+expect(k4.cols === 'lean:Good fit:3,mess:Poor fit:3' && k4.items === wantK4 && !(await nextState(page)).locked && !(await events(page)).some((e) => e.screen === 'K4'),
+  `K4: "Good fit" (teal) and "Poor fit" (grey), three items each from content, Next unlocked (presentation screen)`);
+await expectLayout(page, 'K4');
+await tabTo(page, '.w-next');
 await press(page, 'Enter');
 
-// S17 sort, one case at a time, five bins
+// S16, S17 sort decks (NL3): S16 with its hint under the heading, Poor fit wider; S17 read, then sort
+await expectNewScreen(page, 'S16', 'K4 Next');
+await deckRun(page, 'S16', { wrong: 'b' });
 await expectNewScreen(page, 'S17', 'S16 Next');
-const caseState = () => page.evaluate(() => ({ text: document.querySelector('.w-sort-text').textContent, dots: document.querySelector('.w-deck .w-dots').getAttribute('aria-label') }));
-let cs = await caseState();
-expect(cs.text === card('S17', 'a').text && cs.dots === 'Case 1 of 5', `S17 start: case A, "${cs.dots}"`);
-await tabTo(page, '[data-action="card"]');
-await press(page, ' ');
+await deckRun(page, 'S17', { wrong: '5' });
+
+// S17B the learner's notes: the Chapter 2 steps read-only, empty Save, both fields, Save
+await expectNewScreen(page, 'S17B', 'S17 Next');
+await expectBand(page, 'S17B before action', { state: 'hint', text: '', unlocked: false, lockedWhy: UI.footer.locked.input });
+const s17b = await page.evaluate(() => ({ shown: document.querySelector('.w-shown').textContent, note: document.querySelector('.w-actionbar .w-privacy').textContent, lock: !!document.querySelector('.w-actionbar .w-privacy svg'),
+  max: [...document.querySelectorAll('.w-input')].map((i) => i.maxLength).join(), inputs: document.querySelectorAll('.w-shown input, .w-shown textarea').length }));
+expect(s17b.shown === SKETCH.steps && s17b.note === S.S17B.stage.bottom.text && !s17b.lock && s17b.max === '100,100' && !s17b.inputs,
+  `S17B: the Chapter 2 steps read-only ("${s17b.shown}"), the note beside Save (no lock), two fields of 100`);
+await tabTo(page, '[data-action="save"]');
+await press(page, 'Enter');
+await expectBand(page, 'S17B empty Save', { state: 'notice', text: S.S17B.feedback.empty, unlocked: false });
+await tabTo(page, '.w-input[data-store="L4_CASE_AIFIT"]', { back: true });
+await page.keyboard.type(NOTES.aifit);
 await press(page, 'Tab');
-await press(page, 'ArrowRight', 4);
+await page.keyboard.type(NOTES.human);
+await tabTo(page, '[data-action="save"]');
 await press(page, 'Enter');
-await expectBand(page, 'S17 case A in Automating', { state: 'wrong', text: card('S17', 'a').feedback.wrong, unlocked: false });
-await press(page, 'Escape');
-await expectLayout(page, 'S17 wrong');
-await shotR2(page, 's17-wrong.png');
-await press(page, 'ArrowLeft', 2);
-await press(page, 'Enter');
-await expectBand(page, 'S17 case A in Rushed', { state: 'correct', text: card('S17', 'a').feedback.correct, unlocked: false });
-const BIN = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 };
-for (const k of ['b', 'c', 'd', 'e']) {
-  await press(page, ' ');
-  await press(page, 'Tab');
-  if (BIN[card('S17', k).column]) await press(page, 'ArrowRight', BIN[card('S17', k).column]);
-  await press(page, 'Enter');
-}
-await expectBand(page, 'S17 done', { state: 'correct', text: card('S17', 'e').feedback.correct, unlocked: true });
-expect(await page.evaluate(() => [...document.querySelectorAll('.w-sort-marker')].length) === 5, 'S17 done: a marker in each bin (case text for screen readers only)');
+await expectBand(page, 'S17B saved', { state: 'neutral', text: S.S17B.feedback.saved, unlocked: true });
+const nf = await page.evaluate(() => window.__l4.state.f);
+expect(nf.L4_CASE_AIFIT === NOTES.aifit && nf.L4_CASE_HUMAN === NOTES.human && await isActive(page, '.w-next'), 'S17B saved: stored under L4_CASE_AIFIT / _HUMAN, focus on Next');
+await expectLayout(page, 'S17B saved');
 await press(page, 'Enter');
 
 /* ---------- Chapters 5 and 6 (R3): handoff in a new tab and back, S21 first-attempt scoring, finish ---------- */
 console.log('\nchapters 5 and 6 (keyboard)');
 const METRIC = 'Share of HR time on repeat questions: about 35% now, 20% within three months.';
-await expectNewScreen(page, 'S18A', 'S17 Next');
+await expectNewScreen(page, 'S18A', 'S17B Next');
 rl = await bar(page);
 expect(rl.status.slice(0, 5).every((s) => s === 'done') && rl.status[5] === 'current', `after chapter 4: chapters 0 to 4 done, Build yours ${rl.status[5]}, ${rl.pct}%`);
 await trayPlace(page, '1', 'b');
@@ -1069,10 +1070,11 @@ await press(page, 'Enter');
 // S19: Open workbook opens the existing workbook in a NEW TAB; "I'm back" shows the return state
 await expectNewScreen(page, 'S19', 'S18 Next');
 await expectBand(page, 'S19 brief', { state: 'hint', text: S.S19.hint, unlocked: false, lockedWhy: UI.footer.locked.handoff });
-const s19sk = await page.evaluate(() => ({ label: document.querySelector('.w-sketch .w-label').textContent, rows: [...document.querySelectorAll('.w-sketch-row')].map((r) => r.querySelector('dt').textContent + '=' + r.querySelector('dd').textContent),
+const s19sk = await page.evaluate(() => ({ labels: [...document.querySelectorAll('.w-sketch .w-label')].map((l) => l.textContent).join('|'), rows: [...document.querySelectorAll('.w-sketch-row')].map((r) => r.querySelector('dt').textContent + r.querySelector('dd').textContent),
   inputs: document.querySelectorAll('.w-sketch input, .w-sketch textarea, .w-sketch button').length }));
-expect(s19sk.label === S.S19.states.brief.sketch.label && s19sk.rows.join('|') === `Trigger=${SKETCH.trigger}|Steps=${SKETCH.steps}|Output=${SKETCH.output}` && !s19sk.inputs,
-  `S19 brief: "${s19sk.label}" shows the S08B sketch read-only (${s19sk.rows.length} parts, no controls)`);
+expect(s19sk.labels === `${S.S19.states.brief.sketch.label}|${S.S19.states.brief.notes.label}` && !s19sk.inputs
+  && s19sk.rows.join('|') === `Trigger:${SKETCH.trigger}|Steps:${SKETCH.steps}|Output:${SKETCH.output}|Could fit AI:${NOTES.aifit}|Stays with a person:${NOTES.human}`,
+  `S19 brief: "${S.S19.states.brief.sketch.label}" (S08B) and "${S.S19.states.brief.notes.label}" (S17B), read-only, one line per part (${s19sk.rows.length} parts, no controls)`);
 const link = await page.evaluate(() => { const a = document.querySelector('[data-action="open"]'); return { href: a.href, target: a.target, rel: a.rel, back: document.querySelector('[data-action="back"]').hidden }; });
 expect(link.href === C.links.workbook && link.target === '_blank' && /noopener/.test(link.rel) && link.back,
   `S19 Open workbook: a link to the existing workbook (${link.href}), target _blank, rel "${link.rel}"; I'm back hidden until opened`);
@@ -1176,8 +1178,9 @@ await press(page, 'Enter');
 await expectBand(page, 'S22 download', { state: 'neutral', text: S.S22.step2.feedback.download, unlocked: false });
 let rec = '';
 for (let i = 0; i < 30 && !rec; i++) { await wait(200); try { rec = readFileSync(join(dlDir, UI.record.fileName), 'utf8'); } catch {} }
-expect(rec.includes(TITLE) && rec.includes(METRIC) && rec.includes(UI.record.sketch) && rec.includes(SKETCH.steps) && rec.includes(SKETCH.output) && rec.includes('4 of 5 on first try (80 of 100)') && rec.includes(S.S20.steps[1].chips[2].label) && rec.includes(UI.buttons.notYet),
-  `S22 lesson record downloaded (${UI.record.fileName}, ${rec.length} bytes): case title, Chapter 2 sketch, metric, self-check answers, score`);
+expect(rec.includes(TITLE) && rec.includes(METRIC) && rec.includes(UI.record.sketch) && rec.includes(SKETCH.steps) && rec.includes(SKETCH.output) && rec.includes('4 of 5 on first try (80 of 100)') && rec.includes(S.S20.steps[1].chips[2].label) && rec.includes(UI.buttons.notYet)
+  && rec.includes(UI.record.notes) && rec.includes(NOTES.aifit) && rec.includes(NOTES.human),
+  `S22 lesson record downloaded (${UI.record.fileName}, ${rec.length} bytes): case title, Chapter 2 sketch, Chapter 3-4 notes, metric, self-check answers, score`);
 await tabTo(page, '[data-action="finish"]');
 await press(page, 'Enter');
 await expectBand(page, 'S22 finished', { state: 'neutral', text: UI.finished, unlocked: false, lockedWhy: UI.footer.locked.last });
@@ -1187,10 +1190,10 @@ await expectLayout(page, 'S22 finished');
 await shotR3(page, 's22-finish.png');
 
 // revisits: read-only, the right state shown, Next unlocked (S22: finished, the last screen)
-for (const id of ['W2', 'S04', 'S05b', 'S06', 'S07', 'S08', 'S08B', 'W3', 'V2', 'S09', 'S10', 'S11', 'S12', 'S12B', 'W4', 'S13', 'S14', 'S15', 'S16', 'S17', 'S18A', 'S18', 'S19', 'S20', 'S21', 'S22']) {
+for (const id of ['W2', 'S04', 'S05b', 'S06', 'S07', 'S08', 'S08B', 'W3', 'V2', 'S09', 'S10', 'S11', 'S12', 'S12B', 'W4', 'S13', 'S14', 'S15', 'S16', 'S17', 'S17B', 'S18A', 'S18', 'S19', 'S20', 'S21', 'S22']) {
   await page.evaluate((x) => window.__l4.go(x), id);
   const b = S[id].template === 'video' ? null : await band(page), n = await nextState(page);
-  const want = { W2: 'guess', W3: 'guess', W4: 'guess', S12B: 'neutral', S08B: 'neutral', S18: 'neutral', S19: 'neutral', S20: 'neutral', S21: 'idle', S22: 'neutral' }[id] || 'correct';
+  const want = { W2: 'guess', W3: 'guess', W4: 'guess', S12B: 'neutral', S17B: 'neutral', S08B: 'neutral', S18: 'neutral', S19: 'neutral', S20: 'neutral', S21: 'idle', S22: 'neutral' }[id] || 'correct';
   const nextOk = id === 'S22' ? n.locked && n.label === UI.footer.locked.last : !n.locked;
   expect((!b || b.state === want) && nextOk, `${id} revisit: the earlier state comes back${b ? ' (band ' + b.state + ')' : ' (stops answered, seek free)'}, ${id === 'S22' ? 'finished, Next stays locked (last screen)' : 'Next unlocked'}`);
 }
@@ -1223,7 +1226,7 @@ await expectNewScreen(page, 'S18A', 'menu: Enter on the completed chapter 5 open
 
 const ev = await events(page);
 const first = (id) => ev.filter((e) => e.kind === 'answer' && e.trackingId === id);
-const IDS_CH34 = ['L4_W3_1', 'L4_V2_1', 'L4_V2_2', 'L4_V2_3', 'L4_S09_1', 'L4_S10_1', 'L4_S11_1', 'L4_S12_1', 'L4_S12B_1', 'L4_S12B_2', 'L4_S12B_3', 'L4_W4_1', 'L4_S13_1', 'L4_S14_1', 'L4_S15_1', 'L4_S16_1', 'L4_S17_1'];
+const IDS_CH34 = ['L4_W3_1', 'L4_V2_1', 'L4_V2_2', 'L4_V2_3', 'L4_S09_1', 'L4_S10_1', 'L4_S11_1', 'L4_S12_1', 'L4_S12B_1', 'L4_S12B_2', 'L4_S12B_3', 'L4_W4_1', 'L4_S13_1', 'L4_S14_1', 'L4_S15_1', 'L4_S16_1', 'L4_S17_1', 'L4_S17B_1', 'L4_S17B_2'];
 const IDS_CH56 = ['L4_S18A_1', 'L4_S18_1', 'L4_S18_2', 'L4_S19_1', 'L4_S20_1', 'L4_S20_2', 'L4_S20_3', 'L4_S20_4', 'L4_S21_1', 'L4_S21_2', 'L4_S21_3', 'L4_S21_4', 'L4_S21_5', 'L4_S22_1'];
 const IDS_CH2 = ['L4_W2_1', 'L4_S04_1', 'L4_S05B_1', 'L4_S06_1', 'L4_S06_2', 'L4_S07_1', 'L4_S08_1', 'L4_S08_2', 'L4_S08_3', 'L4_S08B_1', 'L4_S08B_2', 'L4_S08B_3'];
 const IDS = ['L4_S01_1', 'L4_S02_1', 'L4_S02_2', 'L4_W1_1', 'L4_S03_1', ...IDS_CH2, ...IDS_CH34, ...IDS_CH56, 'L4_V1_1', 'L4_V1_2'];
@@ -1238,7 +1241,8 @@ const ch2 = IDS_CH2.map((id) => `${id}=${f[id].response}/${f[id].result}/${f[id]
 const ch34 = IDS_CH34.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
 expect(ch34 === 'L4_W3_1=c/neutral L4_V2_1=a/wrong L4_V2_2=b/wrong L4_V2_3=a/wrong L4_S09_1=1.b,2.a,3.b,4.c,5.d,6.d/wrong L4_S10_1=d/wrong L4_S11_1=a/wrong '
   + `L4_S12_1=3,7/wrong L4_S12B_1=${METRIC_PARTS.baseline}/neutral L4_S12B_2=${METRIC_PARTS.target}/neutral L4_S12B_3=${METRIC_PARTS.date}/neutral `
-  + 'L4_W4_1=a/neutral L4_S13_1=s.2,e.4/wrong L4_S14_1=d/wrong L4_S15_1=b/wrong L4_S16_1=1.a,2.b,3.b,4.d,5.d,6.c/wrong L4_S17_1=a.5,b.1,c.5,d.4,e.2/wrong',
+  + 'L4_W4_1=a/neutral L4_S13_1=s.2,e.4/wrong L4_S14_1=d/wrong L4_S15_1=b/wrong L4_S16_1=1.b,2.d,3.b,4.d,5.d,6.c/wrong L4_S17_1=a.5,b.1,c.5,d.4,e.2/wrong '
+  + `L4_S17B_1=${NOTES.aifit}/neutral L4_S17B_2=${NOTES.human}/neutral`,
   `bus, chapters 3 and 4 first attempts: ${ch34}`);
 const ch56 = IDS_CH56.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
 expect(ch56 === `L4_S18A_1=1.b,2.b,3.c,4.d/wrong L4_S18_1=a/wrong L4_S18_2=${TITLE}/neutral L4_S19_1=${METRIC}/neutral L4_S20_1=b/neutral L4_S20_2=a/neutral L4_S20_3=b/neutral `
