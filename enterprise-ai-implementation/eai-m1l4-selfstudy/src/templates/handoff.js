@@ -1,105 +1,109 @@
-// Handoff template (S19), a Focus panel (styled by analogy; the screen's image waits for the media track).
-//   brief   the activity title with its time chip, the instruction, the learner's Chapter 2 sketch
-//           (S08B, read-only: Trigger, Steps, Output), four numbered steps, the coach
-//           line and "Open workbook": a real link to the EXISTING workbook (content links, new tab,
-//           rel noopener noreferrer). After it is opened the band says so and "I'm back" appears.
-//   return  "I'm back" switches to the return state: its title, the metric field (250 max, counter;
-//           NL3: an empty field starts from the S12B metric, editable),
-//           the privacy line and Save. Empty Save = the hint as a notice; saved = the field's answer on
-//           the tracking bus (fill-in, neutral), the band's saved line, Next.
-// Opened and back are flags in suspend data, so a reload or LMS resume comes back to the right state.
-import { h, fmt, resolveLink } from '../util.js?v=1e11956b';
-import { icon, glyph } from '../icons.js?v=1e11956b';
-import { layout, sheet, privacyLine } from './stage.js?v=1e11956b';
-import { field } from './input.js?v=1e11956b';
+// Handoff template (S19, rebuilt in NL4), a Focus panel in document view (styled by analogy):
+//   head    the eyebrow ("Your workbook") with the time chip, the instruction as the heading
+//   left    three numbered steps, the hint line, and a small preview of the workbook (the visual
+//           anchor): its eight field rows drawn in HTML/CSS, the fields the learner's notes go into marked
+//   right   "Copy your notes into the workbook": four read-only cards of what the learner wrote earlier
+//           (S02 case, S08B sketch, S12B metric, S17B notes), one line per part (the full text for screen
+//           readers and in the copy), each with Copy and the workbook field it goes into (a chip). A card
+//           with nothing filled shows "Not filled in" and its Copy is disabled.
+//   bottom  the return line (bold, always shown), the coach line and "Open workbook": a real link to the
+//           EXISTING workbook (content links, new tab, rel noopener noreferrer). Opening it unlocks Next
+//           (the flag "o" in suspend data, so a reload or LMS resume keeps it) and the band says so.
+// Copy: navigator.clipboard first; when it is blocked (an LMS iframe without clipboard permission) the
+// card's text is selected and the button says "Press Ctrl+C" (the selection copies with the keys).
+// The ghost hand shows the first Copy once (it points beside it and taps nothing). Nothing is tracked.
+import { h, resolveLink } from '../util.js?v=27c63b76';
+import { glyph, icon } from '../icons.js?v=27c63b76';
+import { layout, sheet, privacyLine, ruleLabel } from './stage.js?v=27c63b76';
+import { scaleOf } from '../ghost.js?v=27c63b76';
+
+const COPIED_MS = 2000;
 
 export const handoff = {
   mount(ctx) {
     const { screen, ui, zones, content } = ctx;
-    const brief = screen.states.brief, back = screen.states.return;
     const href = resolveLink(content, screen.handoff.href);
-    const top = brief.stage.top;
 
-    /* ---- brief ---- */
-    const title = h('p', { class: 'w-handoff-title' }, h('span', {}, top.text));
-    const chip = top.chip ? h('p', { class: 'w-time-chip' }, h('span', {}, top.chip.text)) : null;
-    const steps = h('ol', { class: 'w-steps' }, brief.stage.middle.items.map((s) => h('li', {}, h('span', { class: 'w-step-n', 'aria-hidden': 'true' }, String(s.n)), h('span', {}, s.text))));
-    const coach = privacyLine(brief.stage.bottom);
-    const open = h('a', { class: 'w-btn w-btn-action w-open', href, target: '_blank', rel: screen.handoff.rel, dataset: { action: 'open' } },
-      h('span', {}, ui.buttons.open), glyph('g-arrow', { size: 19.2 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')'));
-    const backBtn = h('button', { class: 'w-btn w-btn-ghost', type: 'button', dataset: { action: 'back' }, hidden: true }, ui.buttons.back);
-    // the steps, and beside them what the learner wrote earlier, read-only, when the content asks for it:
-    // the Chapter 2 sketch (S08B) and, NL3, the notes from Chapters 3 and 4 (S17B); one line per part on
-    // screen (the part's name, then its text), the full text for screen readers and in the lesson record
-    const readOnly = (p) => {
-      if (!p) return [];
-      const fields = content.screens.find((s) => s.id === p.from)?.fields || [];
-      return [h('p', { class: 'w-label' }, h('span', {}, p.label)),
-        h('dl', { class: 'w-sketch-list', 'aria-label': p.label }, fields.map((f) => h('div', { class: 'w-sketch-row' }, h('dt', {}, f.label + ':'), ' ', h('dd', {}, ctx.store.get(f.store) || ui.record.empty))))];
-    };
-    const sk = brief.sketch;
-    const sketch = sk || brief.notes ? h('section', { class: 'w-sketch', 'aria-label': [sk?.label, brief.notes?.label].filter(Boolean).join(', ') }, readOnly(sk), readOnly(brief.notes)) : null;
-    const briefTask = h('div', { class: 'w-handoff-task', dataset: { interaction: '' } }, sketch ? h('div', { class: 'w-brief-grid' }, steps, sketch) : steps,
-      h('div', { class: 'w-actionbar' }, coach.el, h('div', { class: 'w-action' }, open, backBtn))); // Open workbook first (primary), then I'm back
-    const briefView = h('div', { class: 'w-handoff-view' }, h('div', { class: 'w-handoff-head' }, title, chip), briefTask);
+    /* ---- head ---- */
+    const head = h('div', { class: 'w-handoff-head' },
+      h('div', {}, ruleLabel(screen.eyebrow), zones.instruction),
+      h('p', { class: 'w-time-chip' }, icon('clock', { size: 17.92 }), h('span', {}, screen.chip)));
 
-    /* ---- return ---- */
-    const rTitle = h('p', { class: 'w-handoff-title' }, h('span', {}, back.stage.top.text));
-    const privacy = privacyLine(back.stage.bottom);
-    const announcer = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
-    const f = back.fields[0];
-    const ctl = field(f, ctx, privacy.id, announcer);
-    // NL3: an empty metric starts from the learner's S12B metric (baseline and target, the date if
-    // given), still editable; nothing is stored until Save
-    const pre = f.prefill;
-    const part = (k) => ctx.store.get(pre?.from[k]).trim();
-    if (pre && !ctl.input.value && part('baseline') && part('target')) {
-      ctl.input.value = fmt(part('date') ? pre.format : pre.formatNoDate, { baseline: part('baseline'), target: part('target'), date: part('date') }).slice(0, f.maxLength);
-      ctl.input.dispatchEvent(new Event('input'));
-    }
-    const save = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'save' } }, ui.buttons.save);
-    const returnTask = h('div', { class: 'w-handoff-task w-form-task', dataset: { interaction: '' } }, ctl.el, announcer, h('div', { class: 'w-actionbar' }, privacy.el, save));
-    const returnView = h('div', { class: 'w-handoff-view', hidden: true }, h('div', { class: 'w-handoff-head' }, rTitle), returnTask);
+    /* ---- left: steps, hint, the workbook preview ---- */
+    const steps = h('ol', { class: 'w-steps' }, screen.steps.map((s) => h('li', {}, h('span', { class: 'w-step-n', 'aria-hidden': 'true' }, String(s.n)), h('span', {}, s.text))));
+    const pv = screen.preview;
+    const preview = h('figure', { class: 'w-wb-preview', role: 'img', 'aria-label': pv.alt },
+      h('span', { class: 'w-wb-icon', 'aria-hidden': 'true' }, icon('workbook', { size: 20.48 })),
+      h('ol', { class: 'w-wb-rows', 'aria-hidden': 'true' }, pv.fields.map((name, i) => h('li', { dataset: { notes: String(pv.fromNotes.includes(i + 1)) } },
+        h('b', {}, String(i + 1)), h('span', {}, name)))));
+    const left = h('div', { class: 'w-handoff-left' }, steps, h('p', { class: 'w-handoff-hint' }, screen.hint), preview);
 
-    layout(ctx, 'focus', sheet('focus w-col-handoff', zones.instruction, briefView, returnView));
-
-    const showBrief = () => {
-      briefView.hidden = false; returnView.hidden = true;
-      briefView.append(zones.band);
-      zones.setFeedback({ state: 'hint', text: screen.hint });
-      if (ctx.flags.get('o')) opened(false);
-    };
-    function opened(announce) {
-      backBtn.hidden = false;
-      if (announce) zones.setFeedback({ state: 'notice', text: brief.openFeedback });
-    }
-    function showReturn(focus) {
-      briefView.hidden = true; returnView.hidden = false;
-      returnView.append(zones.band);
-      zones.setFeedback({ state: 'notice', text: back.backFeedback });
-      if (focus) ctl.input.focus();
-    }
-    function saved(focus) {
-      zones.setFeedback({ state: 'neutral', tone: 'correct', text: back.savedFeedback });
-      ctx.unlockNext({ focus });
-    }
-
-    open.addEventListener('click', () => { ctx.flags.set('o', 1); opened(true); }); // the link itself opens the new tab
-    backBtn.addEventListener('click', () => { ctx.flags.set('b', 1); showReturn(true); });
-    save.addEventListener('click', () => {
-      const v = ctl.input.value.trim();
-      if (!v) { zones.setFeedback({ state: 'notice', text: back.emptyFeedback || screen.hint }); return; }
-      ctl.input.value = v;
-      ctl.input.dispatchEvent(new Event('input'));
-      ctx.store.set(f.store, v);
-      ctx.answer({ trackingId: f.trackingId, response: v, result: 'neutral' });
-      ctx.complete();
-      saved(true);
+    /* ---- right: the copy cards ---- */
+    const cc = screen.copyCards;
+    const cards = cc.cards.map((c) => {
+      const fields = content.screens.find((s) => s.id === c.from)?.fields || [];
+      const rows = fields.map((f) => ({ label: f.label, value: ctx.store.get(f.store).trim() }));
+      const filled = rows.filter((r) => r.value);
+      const copyText = filled.map((r) => `${r.label}: ${r.value}`).join('\n');
+      const name = c.label || rows.map((r) => r.label).join(', ');
+      const list = h('dl', { class: 'w-sketch-list w-copy-rows' }, rows.map((r) => h('div', { class: 'w-sketch-row' }, h('dt', {}, r.label + ':'), ' ',
+        h('dd', { dataset: { empty: String(!r.value) } }, r.value || ui.record.empty))));
+      const btnText = h('span', {}, ui.buttons.copy);
+      const btn = h('button', { class: 'w-btn w-btn-action w-copy-btn', type: 'button', dataset: { action: 'copy', card: c.id }, disabled: !filled.length,
+        'aria-label': ui.buttons.copy + ': ' + name }, btnText);
+      // the card's name (cards 2 to 4) and its field chip on the left, Copy on the right, then the parts
+      const el = h('section', { class: 'w-copy-card', dataset: { card: c.id }, 'aria-label': name },
+        h('div', { class: 'w-copy-head' },
+          h('div', { class: 'w-copy-id' }, c.label ? h('p', { class: 'w-copy-title' }, c.label) : null, h('span', { class: 'w-field-chip' + (c.off ? ' w-chip-off' : '') }, c.chip)),
+          btn),
+        list);
+      let timer = null;
+      const say = (text) => { btnText.textContent = text; clearTimeout(timer); timer = setTimeout(() => { btnText.textContent = ui.buttons.copy; }, COPIED_MS); };
+      // the fallback: select the card's rows so Ctrl+C copies them, and say so
+      const fallback = () => {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        const range = document.createRange();
+        range.selectNodeContents(list);
+        sel.addRange(range);
+        say(ui.copyFallback);
+        zones.setFeedback({ state: 'notice', text: ui.copyFallback + '.' });
+      };
+      btn.addEventListener('click', () => {
+        if (!copyText) return;
+        const cb = navigator.clipboard;
+        if (!cb || !window.isSecureContext) { fallback(); return; }
+        cb.writeText(copyText).then(() => say(ui.buttons.copied), fallback);
+      });
+      return { el, btn, copyText, stop: () => clearTimeout(timer) };
     });
+    const right = h('div', { class: 'w-handoff-right' }, ruleLabel(cc.label), h('div', { class: 'w-copy-grid' }, cards.map((c) => c.el)));
 
-    if (ctx.revisit) { showReturn(false); saved(false); }
-    else if (ctx.flags.get('b')) showReturn(false);
-    else showBrief();
-    return { unmount() {} };
+    /* ---- bottom: the return line, the coach line, Open workbook ---- */
+    const coach = privacyLine(screen.privacy);
+    const open = h('a', { class: 'w-btn w-btn-primary w-open-wb', href, target: '_blank', rel: screen.handoff.rel, dataset: { action: 'open' } },
+      h('span', {}, ui.buttons.open), glyph('g-arrow', { size: 19.2 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')'));
+    const bottom = h('div', { class: 'w-actionbar w-handoff-bottom' }, h('p', { class: 'w-return-line' }, screen.returnLine), coach.el, open);
+
+    layout(ctx, 'focus', sheet('focus w-col-handoff w-sheet-doc', head,
+      h('div', { class: 'w-handoff-grid', dataset: { interaction: '' } }, left, right), bottom, zones.band));
+    zones.setHintVisible(false); // the hint is the line in the left column: the band keeps it for screen readers
+    zones.setFeedback({ state: 'hint', text: screen.hint });
+
+    // the ghost hand: once, beside the first Copy that can copy (it points, it never presses)
+    const first = cards.find((c) => !c.btn.disabled);
+    if (!ctx.revisit && first) {
+      ctx.ghost({ type: screen.ghost?.type || 'copy',
+        steps: () => [{ point: () => { const r = first.btn.getBoundingClientRect(), k = scaleOf(first.btn); return { x: r.left - 14 * k, y: r.top + r.height / 2 }; }, sweep: true, hold: 1200 }] });
+    }
+
+    function opened(announce) {
+      ctx.complete();
+      ctx.unlockNext({ focus: false });
+      if (announce) zones.setFeedback({ state: 'notice', text: screen.openFeedback });
+    }
+    open.addEventListener('click', () => { ctx.flags.set('o', 1); opened(true); }); // the link itself opens the new tab
+    if (ctx.revisit || ctx.flags.get('o')) opened(false);
+    return { unmount() { cards.forEach((c) => c.stop()); } };
   },
 };

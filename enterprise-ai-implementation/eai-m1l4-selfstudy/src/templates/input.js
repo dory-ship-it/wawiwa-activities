@@ -1,4 +1,4 @@
-// Input template (S02, S08B; the S18 and S19 fields reuse the field builder), "Hybrid cinematic" look:
+// Input template (S02, S08B, S12B, S17B; NL4 S18B with its checkbox), "Hybrid cinematic" look:
 // a Focus panel. Context line, the heading with "Show me" beside it, the hint as the line under it,
 // the labelled fields side by side (maxlength and a live {n} / {max} counter, announced to screen
 // readers only from COUNTER_ANNOUNCE_AT characters on), then one row: "Open Homework 1" (new tab),
@@ -12,11 +12,11 @@
 //                              a field marked optional may stay empty (S12B Date)
 //   all filled              -> values stored under each field's store key, one fill-in answer per
 //                              field on the tracking bus, feedback.saved, Next unlocks
-import { h, fmt, nextId, resolveLink } from '../util.js?v=1e11956b';
-import { glyph } from '../icons.js?v=1e11956b';
-import { attachTip } from '../tooltip.js?v=1e11956b';
-import { layout, sheet, contextLine, privacyLine, showMe, splitFirst } from './stage.js?v=1e11956b';
-import { scaleOf } from '../ghost.js?v=1e11956b';
+import { h, fmt, nextId, resolveLink } from '../util.js?v=27c63b76';
+import { glyph } from '../icons.js?v=27c63b76';
+import { attachTip } from '../tooltip.js?v=27c63b76';
+import { layout, sheet, contextLine, privacyLine, showMe, splitFirst } from './stage.js?v=27c63b76';
+import { scaleOf } from '../ghost.js?v=27c63b76';
 
 const COUNTER_ANNOUNCE_AT = 230;
 
@@ -72,20 +72,31 @@ export const input = {
     const heading = [head, screen.hint ? h('p', { class: 'w-subline' }, screen.hint) : null];
     // G1: a privacy line beside the note (S17B: the note and the privacy line both stand before Save)
     const extra = screen.stage.privacy ? privacyLine(screen.stage.privacy) : null;
+    // NL4 (S18B): a checkbox inside the panel, under the field; Save asks for it (feedback.unticked)
+    const box = screen.checkbox ? h('input', { class: 'w-checkbox', type: 'checkbox', id: 'w-input-box' }) : null;
+    const boxLine = box ? h('label', { class: 'w-checkline w-input-check', for: box.id }, box, h('span', {}, screen.checkbox)) : null;
+    // NL4 E2: the slim "Your case" card at the top of the panel (the visual anchor of a form screen): the
+    // write icon and the saved case title, or "Your case" while there is none
+    const caseText = h('span', {});
+    const setCase = () => { caseText.textContent = ctx.store.get('L4_CASE_TITLE').trim() || ui.caseCard; };
+    const caseCard = screen.caseCard ? h('p', { class: 'w-case-slim' }, glyph('write', { size: 20.48 }), caseText) : null;
+    if (caseCard) setCase();
     // (S02: the two help links small on the left of the same row, so the panel and its strip stay
-    // between the bar and the footer)
+    // between the bar and the footer; S18B: the checkbox on the left of that row)
     const task = h('div', { class: 'w-form-task', dataset: { interaction: '' } },
       fields,
-      h('div', { class: 'w-actionbar' }, small ? h('div', { class: 'w-helprow' }, hw, help) : [hw, help], privacy?.el, extra?.el, save));
+      h('div', { class: 'w-actionbar' }, boxLine, small ? h('div', { class: 'w-helprow' }, hw, help) : [hw, help], privacy?.el, extra?.el, save));
     if (small) {
       // FX1 D4 (S02): the context line and the heading stand above the panel, on the wash; the panel
       // holds the fields, the small help row and the action bar, with more space between the groups
       layout(ctx, 'focus',
         h('div', { class: 'w-open' },
           h('div', { class: 'w-open-head' }, contextLine(screen.stage.top?.text), shown, heading),
-          sheet('focus w-sheet-open', task, zones.band)));
+          sheet('focus w-sheet-open', caseCard, task, zones.band))); // (the card at the panel's top right, beside the field labels)
     } else {
-      layout(ctx, 'focus', sheet('focus', contextLine(screen.stage.top?.text), shown, heading, task, zones.band));
+      // the card on the context line's row, at its right: the panel keeps its height
+      const top = caseCard ? h('div', { class: 'w-case-row' }, contextLine(screen.stage.top?.text), caseCard) : contextLine(screen.stage.top?.text);
+      layout(ctx, 'focus', sheet('focus', top, shown, heading, task, zones.band));
     }
     if (extra) controls.forEach((c) => c.input.setAttribute('aria-describedby', c.input.getAttribute('aria-describedby') + ' ' + extra.id));
     // Save enabled once every required field has text (S02)
@@ -102,10 +113,13 @@ export const input = {
 
     function doSave() {
       const values = controls.map((c) => c.input.value.trim());
+      if (box && !box.checked) { zones.setFeedback({ state: 'notice', text: screen.feedback.unticked }); box.focus(); return; }
       if (values.some((v, i) => !v && !screen.fields[i].optional)) { zones.setFeedback({ state: 'notice', text: screen.feedback.empty }); return; }
       controls.forEach((c, i) => { c.input.value = values[i]; c.input.dispatchEvent(new Event('input')); }); // show what was stored
       screen.fields.forEach((f, i) => ctx.store.set(f.store, values[i]));
+      if (box) ctx.flags.set('box', 1);
       screen.fields.forEach((f, i) => ctx.answer({ trackingId: f.trackingId, response: values[i], result: 'neutral' }));
+      if (caseCard) setCase();
       ctx.complete();
       showSaved(true);
     }
@@ -113,6 +127,7 @@ export const input = {
     // the hint is the line under the heading: the band keeps it for screen readers only
     zones.setHintVisible(false);
     zones.setFeedback({ state: 'hint', text: screen.hint });
+    if (box) box.checked = !!ctx.flags.get('box');
     if (ctx.revisit) showSaved(false); // saved text comes back in the fields; still editable
     return { unmount() {} };
   },

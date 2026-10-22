@@ -95,6 +95,8 @@ const G = {
   sort: [24, 1.9, '<rect x="3.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.2"/><path d="M10.5 7h3.5a3 3 0 0 1 3 3v1.5M15 9.5l2 2 2-2"/>'],
   label: [24, 1.9, '<path d="M3.5 12.5V4.5a1 1 0 0 1 1-1h8l8.5 8.5-9 9z"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/>'],
   explore: [24, 1.9, '<circle cx="10.5" cy="10.5" r="6"/><path d="M20 20l-5-5"/>'],
+  // NL4 (Chapter 6 "Check"): the check-circle icon above, drawn on the glyph grid and stroke
+  check: [24, 1.9, '<circle cx="12" cy="12" r="8.5"/><path d="M8.6 12.2l2.3 2.3 4.5-4.6"/>'],
   // the two player glyphs (same grid, stroke and caps); muted = the speaker with a cross
   'g-pause': [24, 1.9, '<path d="M9 6.5v11M15 6.5v11"/>'],
   'g-volume': [24, 1.9, '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>'],

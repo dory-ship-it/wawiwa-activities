@@ -18,24 +18,27 @@ const bandText = (b) => (!b ? [] : b.items ? [b.label, ...b.items.flatMap((x) =>
 export function screenViews(s, content) {
   if (s.template === 'video') return [[s.id, [s.title, s.guidingQuestion]], ...(s.stops || []).map((st) => [`${s.id} ${st.id}`, [st.question, ...st.options.map((o) => o.label)]])];
   if (s.template === 'handoff') {
-    // the brief's read-only sketch (S08B): its heading and the three part names (the learner's own text not counted)
-    // (NL3: and the notes from Chapters 3 and 4, S17B, the same way)
-    const partText = (p) => (p ? [p.label, ...(content.screens.find((x) => x.id === p.from)?.fields || []).map((f) => f.label)] : []);
-    const sketchText = (st) => [...partText(st.sketch), ...partText(st.notes)];
-    return Object.entries(s.states).map(([k, st]) => [`${s.id} ${k}`, [...stageText(st.stage), ...fieldText(st.fields), ...sketchText(st)]]);
+    // NL4 S19 (document view): the brief, the workbook preview's eight field names, the four copy cards
+    // (their names, part names and field chips; the learner's own text not counted), the return line
+    const partText = (c) => [c.label, c.chip, ...(content.screens.find((x) => x.id === c.from)?.fields || []).map((f) => f.label)];
+    return [[s.id, [s.eyebrow, s.chip, ...s.steps.map((x) => x.text), s.hint, ...s.preview.fields, s.copyCards.label, ...s.copyCards.cards.flatMap(partText), s.returnLine, s.privacy.text]]];
   }
-  if (s.variant === 'selfcheck') return s.steps.map((st) => [`${s.id} ${st.id}`, [...(st.rows || []).map((r) => r.text), ...(st.chips || []).map((c) => c.label), st.strip]]);
-  // R1 templates, each in its fullest state
-  // sort (the tray, S18A): placed cards stay on screen as chips, so every card counts
-  if (s.template === 'sort') return [[s.id, [s.header, ...s.columns.map((c) => c.label), ...s.cards.map((c) => c.text)]]];
+  // NL4 S20: the context line, the three questions (and the fix line); S20B: the five mistakes with their definitions, the note
+  if (s.variant === 'selfcheck') return [[s.id, [...stageText(s.stage), ...s.rows.map((r) => r.text), s.fixLine]]];
+  if (s.variant === 'risk') return [[s.id, [s.hint, ...s.options.flatMap((o) => [o.label, o.sub]), s.strip]]];
+  // NL4 S21R, its fullest state (not passed, all five missed): the chip, its line, each missed item's stem, line and link
+  if (s.template === 'result') {
+    const check = content.screens.find((x) => x.id === s.from);
+    return [[`${s.id} passed`, [s.passed.chip, s.passed.text]],
+      [`${s.id} not passed`, [s.notPassed.chip, s.notPassed.text, ...s.missed.flatMap((m) => { const it = check.items.find((x) => x.id === m.item); return [it.stem || it.instruction, m.text, s.reviewLabel.replace('{n}', m.chapter)]; })]]];
+  }
   // R2 templates
   if (s.variant === 'fill') return [[s.id, [s.situation.text, ...s.fieldRows.flatMap((f) => [f.label, f.value]), ...s.options.map((o) => o.label)]]];
   if (s.variant === 'metric') return [[s.id, [...bandText(s.band), s.field.label, ...s.options.map((o) => o.label), s.slotsTitle, ...s.slots.map((x) => x.label)]]];
   // R3 templates
-  if (s.variant === 'safety') return [[`${s.id} step1`, [s.stage.top.text, ...s.options.map((o) => o.label)]],
-    [`${s.id} step2`, [s.stage.top.text, s.step2.field.label, s.step2.privacy.text, s.step2.checkbox]]];
   if (s.template === 'check') return s.items.map((it) => [`${s.id} ${it.id}`, it.kind === 'tiles' ? it.tiles.flatMap((t) => [String(t.n), t.text]) : [it.stem, ...it.options.map((o) => o.label)]]);
-  if (s.variant === 'close') return [[`${s.id} step1`, s.options.map((o) => o.label)], [`${s.id} step2`, [s.step2.bridge.text, s.step2.homework.text]]];
+  // (NL4: the bridge line stays on the case card over the photo in both steps)
+  if (s.variant === 'close') return [[`${s.id} step1`, [s.step2.bridge.text, ...s.options.map((o) => o.label)]], [`${s.id} step2`, [s.step2.bridge.text, s.step2.homework.text]]];
   if (s.variant === 'pick') return s.tiles.map((t) => [`${s.id} tile ${t.n} open`, [...s.tiles.flatMap((x) => [String(x.n), x.title]), s.question, t.text]]);
   if (s.template === 'bpmn') {
     const dg = content.diagrams[s.diagram];
@@ -86,7 +89,8 @@ export function screenViews(s, content) {
   if (s.variant === 'rounds') return s.rounds.map((r) => [`${s.id} ${r.id}`, [s.rules.label, ...s.rules.items, r.badge, r.line, s.hint, ...s.options.map((o) => o.label)]]);
   // (NL3 S14, S15: with the explain band and S14's handoff visual on the case card)
   const visual = s.visual ? [s.visual.from, s.visual.to, s.visual.away] : [];
-  return [[s.id, [...bandText(s.band), ...visual, ...stageText(s.stage), ...(s.options || []).map((o) => o.label), ...fieldText(s.fields), ...(s.cases || []).map((c) => c.label)]]];
+  // (NL4: S18B's checkbox line; the "Your case" card shows the learner's own title, not counted)
+  return [[s.id, [...bandText(s.band), ...visual, ...stageText(s.stage), ...(s.options || []).map((o) => o.label), ...fieldText(s.fields), s.checkbox, ...(s.cases || []).map((c) => c.label)]]];
 }
 
 // Every hint, feedback line and pause marker on screen s (pause marker: its chapter's, on the last
@@ -102,8 +106,9 @@ export function screenFeedback(s, content) {
     [`${s.id} feedbackCorrect`, s.feedbackCorrect],
     ...(s.stops || []).flatMap((st) => st.options.map((o) => [`${s.id} ${st.id} option ${o.id}`, o.feedback])),
     ...Object.entries(s.states || {}).flatMap(([k, st]) => Object.entries(st).filter(([f, v]) => /Feedback$/.test(f) && typeof v === 'string').map(([f, v]) => [`${s.id} ${k}.${f}`, v])),
-    ...(s.steps || []).flatMap((st) => [...(st.rows || []).flatMap((r) => Object.entries(r.feedback).map(([k, v]) => [`${s.id} ${r.id} ${k}`, v])),
-      ...(st.chips || []).map((c) => [`${s.id} chip ${c.id}`, c.feedback])]),
+    ...(s.rows || []).flatMap((r) => Object.entries(r.feedback).map(([k, v]) => [`${s.id} ${r.id} ${k}`, v])),
+    [`${s.id} fixLine`, s.fixLine], [`${s.id} openFeedback`, s.openFeedback], [`${s.id} returnLine`, s.returnLine],
+    ...(s.template === 'result' ? [[`${s.id} passed`, s.passed.text], [`${s.id} notPassed`, s.notPassed.text], ...s.missed.map((m) => [`${s.id} missed ${m.item}`, m.text])] : []),
     [`${s.id} questionHint`, s.questionHint],
     ...(s.cards || []).flatMap((c) => Object.entries(c.feedback).map(([k, v]) => [`${s.id} card ${c.id ?? c.n} ${k}`, v])),
     ...(s.hotspots || []).map((x) => [`${s.id} hotspot ${x.id}`, x.feedback]),

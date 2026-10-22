@@ -11,7 +11,7 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "S12B", "W4", "S13", "S14", "S15", "K4", "S16", "S17", "S17B", "S18A", "S18", "S19", "S20", "S21", "S22"],
+    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "S12B", "W4", "S13", "S14", "S15", "K4", "S16", "S17", "S17B", "S18A", "S18", "S18B", "S19", "S20", "S20B", "S21", "S21R", "S22"],
     "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] }
   },
 
@@ -45,10 +45,16 @@
       "yes": "Yes",
       "notYet": "Not yet",
       "startLesson": "Start the lesson",
-      "showMe": "Show me how"
+      "showMe": "Show me how",
+      "copy": "Copy",
+      "copied": "Copied",
+      "retake": "Retake now",
+      "backToCheck": "Back to the check"
     },
     "attempts": { "label": "Attempt {i} of {n}" },
     "ghost": { "pickOne": "Pick one", "pickTwo": "Pick two" },
+    "copyFallback": "Press Ctrl+C",
+    "caseCard": "Your case",
     "header": "Lesson 4 · Process Modeling and Workflow Mapping",
     "warmup": { "guess": "Your guess", "prompt": "Make your best guess." },
     "moduleMap": { "today": "Today", "clickToOpen": "Click to open", "label": "Module 1 lessons", "status": { "done": "complete", "today": "today", "next": "not started" } },
@@ -81,8 +87,7 @@
         "metric": "Next, locked until you choose the strongest metric or use both attempts",
         "map": "Next, locked until both risk flags are placed and checked",
         "line": "Next, locked until the Start and End flags are placed and checked",
-        "safety": "Next, locked until you choose what to write and save your case title",
-        "handoff": "Next, locked until you are back from the workbook and your metric is saved",
+        "openWorkbook": "Next, locked until you open the workbook",
         "selfcheck": "Next, locked until you answer all three questions",
         "chips": "Next, locked until you pick your biggest risk",
         "check": "Next, locked until you finish the knowledge check",
@@ -112,12 +117,12 @@
       "date": "Date",
       "caseTitle": "Case title",
       "sketch": "Your sketch from Chapter 2",
-      "metric": "Your success metric",
-      "notes": "Your notes from Chapters 3 and 4",
+      "metric": "First metric (Chapter 3)",
+      "notes": "Your notes from Chapter 4",
       "selfCheck": "Self-check",
       "risk": "Biggest risk",
       "score": "Knowledge check",
-      "scoreLine": "{x} of {n} on first try ({p} of 100). Pass mark: {pass} of 100.",
+      "scoreLine": "{x} of {n} on first try ({p} of 100), attempt {a}. Pass mark: {pass} of 100.",
       "empty": "Not filled in"
     },
     "slot": { "on": "present", "off": "missing" },
@@ -274,10 +279,8 @@
     { "id": "ch2", "n": 2, "title": "Toolkit", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 28, "screens": ["W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 20, "screens": ["W3", "V2", "S09", "S10", "S11", "S12", "S12B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch4", "n": 4, "title": "Critical eye", "photo": { "src": "assets/img/l4/o1-lanes-office.jpg", "position": "60% 50%", "temp": true }, "minutes": 25, "screens": ["W4", "S13", "S14", "S15", "K4", "S16", "S17", "S17B"], "inSlice": true, "pauseMarker": null },
-    { "id": "ch5", "n": 5, "title": "Build yours", "photo": { "src": "assets/img/l4/w1-new-computer-same-mess.jpg", "position": "30% 50%", "temp": true }, "minutes": 82, "screens": ["S18A", "S18", "S19", "S20"], "inSlice": true,
-      "sliceNote": "S18A and S18 come later; the slice enters Chapter 5 at S19.",
-      "pauseMarker": null },
-    { "id": "ch6", "n": 6, "title": "Wrap-up", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 15, "screens": ["S21", "S22"], "inSlice": true, "pauseMarker": null }
+    { "id": "ch5", "n": 5, "title": "Build yours", "photo": { "src": "assets/img/l4/w1-new-computer-same-mess.jpg", "position": "30% 50%", "temp": true }, "minutes": 57, "screens": ["S18A", "S18", "S18B", "S19", "S20", "S20B"], "inSlice": true, "pauseMarker": null },
+    { "id": "ch6", "n": 6, "title": "Wrap-up", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 15, "screens": ["S21", "S21R", "S22"], "inSlice": true, "pauseMarker": null }
   ],
 
   "screens": [
@@ -391,6 +394,7 @@
       "id": "S02",
       "chapter": "ch0",
       "template": "input",
+      "caseCard": true,
       "lockedNext": "Save to continue",
       "headAbove": true,
       "step": { "verb": "Write", "icon": "write" },
@@ -913,6 +917,8 @@
       "id": "S08B",
       "chapter": "ch2",
       "template": "input",
+      "caseCard": true,
+      "lockedNext": "Save to continue",
       "step": { "verb": "Sketch", "icon": "sketch" },
       "minutes": 4,
       "instruction": "Sketch your own case in three parts.",
@@ -929,7 +935,7 @@
         { "id": "output", "label": "Output", "placeholder": "What comes out, and to whom", "maxLength": 120, "multiline": true,
           "demo": "A summary, to the sales manager", "store": "L4_CASE_OUTPUT", "trackingId": "L4_S08B_3" }
       ],
-      "saveAlwaysEnabled": true,
+      "saveWhenFilled": true,
       "feedback": {
         "saved": "Saved. Your sketch comes back in Chapter 5.",
         "empty": "Add a few words to all three parts. A rough version is enough; you can edit it later."
@@ -1289,6 +1295,8 @@
       "id": "S12B",
       "chapter": "ch3",
       "template": "input",
+      "caseCard": true,
+      "lockedNext": "Save to continue",
       "step": { "verb": "Write", "icon": "write" },
       "minutes": 2,
       "instruction": "Set one success metric for your case.",
@@ -1319,7 +1327,7 @@
           "optional": true
         }
       ],
-      "saveAlwaysEnabled": true,
+      "saveWhenFilled": true,
       "feedback": { "saved": "Saved. It comes back in Chapter 5, ready to refine.", "empty": "Add a number to Baseline and Target." },
       "advance": "after-save",
       "endOfChapter": true,
@@ -1638,6 +1646,8 @@
       "id": "S17B",
       "chapter": "ch4",
       "template": "input",
+      "caseCard": true,
+      "lockedNext": "Save to continue",
       "step": { "verb": "Write", "icon": "write" },
       "minutes": 3,
       "instruction": "Name one step that could fit AI, and one that stays with a person.",
@@ -1665,7 +1675,7 @@
           "trackingId": "L4_S17B_2"
         }
       ],
-      "saveAlwaysEnabled": true,
+      "saveWhenFilled": true,
       "feedback": {
         "saved": "Saved. It comes back in Chapter 5 and Lesson 5.",
         "empty": "Add a few words to both fields. A rough version is enough; you can edit it later."
@@ -1692,6 +1702,7 @@
       "hintShown": true,
       "layout": "sort-deck",
       "header": "Lesson 1 case: sales call summaries",
+      "wordLimit": { "max": 60, "why": "storyboard v3 Ch5-6 (S18A as S04: the header chip, the hint line and four columns with their subtitles, all four cards placed; text as approved)" },
       "ghost": { "type": "drag", "showMe": false },
       "columns": [
         { "id": "a", "label": "Field 2: Trigger", "sub": "What starts it" },
@@ -1788,148 +1799,122 @@
       "id": "S19",
       "chapter": "ch5",
       "template": "handoff",
-      "step": { "verb": "Write", "icon": "write" },
-      "minutes": 64,
-      "instruction": "Open the workbook and map your own case.",
-      "hint": "Unknown? Write 'unclear'. The coach treats it as a valid answer.",
-      "terms": ["AS-IS", "Success metric"],
+      "locked": "openWorkbook",
+      "step": { "verb": "Map", "icon": "overview" },
+      "minutes": 42,
+      "eyebrow": "Your workbook",
+      "chip": "About 40 min",
+      "instruction": "Map your own case in the workbook.",
+      "hint": "Unknown? Write 'unclear'. It is a valid answer.",
       "wordLimit": {
-        "max": 62,
-        "why": "CH2-SPEC 8 and storyboard v3 S17B: the read-only sketch from Chapter 2 and the notes from Chapters 3 and 4 (their headings and part names) join the S19 brief; the learner's own text is not counted"
+        "max": 125,
+        "why": "storyboard v3 Ch5-6 Q6 (accepted, document view, as S12): the brief, the four copy cards with their labels and field chips, the workbook's eight field names and the return line; the learner's own text is not counted"
       },
-      "layout": "editorial",
-      "image": { "src": "assets/img/s19.jpg", "alt": "A learner working through a case at a laptop in an open office", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "65% 50%" },
-      "states": {
-        "brief": {
-          "stage": {
-            "top": {
-              "kind": "title",
-              "icon": "workbook",
-              "text": "AS-IS Process Mapping for Your Own Use Case",
-              "chip": { "icon": "clock", "text": "~60 min" }
-            },
-            "middle": {
-              "kind": "steps",
-              "items": [
-                { "n": 1, "text": "Open Homework 1 and 2" },
-                { "n": 2, "text": "Fill eight fields as the process runs today" },
-                { "n": 3, "text": "Leave your Homework 2 AI step off the map" },
-                { "n": 4, "text": "Export your PDF" }
-              ]
-            },
-            "bottom": { "kind": "privacy", "icon": "shield", "text": "Coach on: roles, no names.", "action": "open" }
-          },
-          "sketch": { "label": "Your sketch from Chapter 2", "from": "S08B" },
-          "openFeedback": "The workbook is open in a new tab. This module keeps your place.",
-          "showBackAfterOpen": true,
-          "notes": { "label": "Your notes from Chapters 3 and 4", "from": "S17B" }
-        },
-        "return": {
-          "stage": {
-            "top": { "kind": "title", "icon": "workbook", "text": "Back from the workbook? Export your PDF, then check your map." },
-            "middle": { "kind": "fields", "arrange": "stack" },
-            "bottom": { "kind": "privacy", "icon": "shield", "text": "Leave out names and identifying details.", "action": "save" }
-          },
-          "backFeedback": "Next: three questions to check your map against.",
-          "fields": [
-            {
-              "id": "metric",
-              "label": "Your success metric: baseline and target",
-              "term": "Success metric",
-              "placeholder": "",
-              "maxLength": 250,
-              "multiline": true,
-              "store": "L4_METRIC",
-              "trackingId": "L4_S19_1",
-              "prefill": {
-                "from": { "baseline": "L4_CASE_BASELINE", "target": "L4_CASE_TARGET", "date": "L4_CASE_DATE" },
-                "format": "Baseline: {baseline}. Target: {target}, {date}.",
-                "formatNoDate": "Baseline: {baseline}. Target: {target}."
-              }
-            }
-          ],
-          "savedFeedback": "Saved to your lesson record.",
-          "emptyFeedback": null,
-          "prefillPilotCopy": "the metric line built from S12B"
-        }
+      "steps": [
+        { "n": 1, "text": "Fill eight fields as the process runs today" },
+        { "n": 2, "text": "Keep AI ideas off the map" },
+        { "n": 3, "text": "Export your PDF" }
+      ],
+      "preview": {
+        "alt": "The workbook: eight fields, from Process name to Success metric. Your notes go into Fields 1, 2, 3 and 8.",
+        "altPilotCopy": true,
+        "fields": ["Process name", "Trigger", "Steps and role owners", "Handoffs", "Sources, owners, sensitivity", "Existing controls", "Gaps and unclear points", "Success metric"],
+        "fromNotes": [1, 2, 3, 8]
       },
+      "copyCards": {
+        "label": "Copy your notes into the workbook",
+        "cards": [
+          { "id": "case", "from": "S02", "chip": "Field 1 · Process name" },
+          { "id": "sketch", "label": "Your sketch from Chapter 2", "from": "S08B", "chip": "Fields 2 and 3" },
+          { "id": "metric", "label": "Your metric from Chapter 3", "from": "S12B", "chip": "Field 8" },
+          { "id": "notes", "label": "Your notes from Chapter 4", "from": "S17B", "chip": "Not on the map: for Lesson 5", "off": true }
+        ]
+      },
+      "privacy": { "kind": "privacy", "icon": "shield", "text": "Coach on: roles, no names." },
+      "returnLine": "When you export your PDF, come back here and press Next.",
+      "openFeedback": "The workbook is open in a new tab. This lesson keeps your place.",
+      "ghost": { "type": "copy", "showMe": false },
       "handoff": {
         "activity": "eai-m1l4-class",
         "href": "@links.workbook",
         "newTab": true,
         "rel": "noopener noreferrer",
-        "liveCoach": "on (approved for EAI under Dor's DPA exception)"
+        "liveCoach": "on (Wawiwa policy: approved for real students since 2026-08-13)"
       },
-      "advance": "after-save",
-      "tracking": [
-        { "id": "L4_S19_1", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Create", "result": "neutral" }
-      ],
-      "suspend": ["opened", "returned"],
-      "sources": ["s35", "s14", "s19", "s37", "s43 items 1 and 4", "s44"]
+      "advance": "after-open",
+      "tracking": [],
+      "suspend": ["opened"],
+      "sources": ["planning/STORYBOARD-V3-CH5-6.md S19 (rebuilt) and Q2 (the workbook's fields, checked on eai-m1l4-class)", "s35", "s14", "s19", "s44"]
     },
 
     {
       "id": "S20",
       "chapter": "ch5",
       "template": "decision",
-      "step": { "verb": "Decide", "icon": "decide" },
+      "step": { "verb": "Review", "icon": "explore" },
       "variant": "selfcheck",
-      "minutes": 8,
-      "instruction": "Check your map against three questions. Then pick your biggest risk.",
-      "hint": "Answer honestly. 'Not yet' sends you back with one fix.",
-      "layout": "wide",
-      "terms": ["Ideal, not actual"],
-      "steps": [
-        {
-          "id": "step1",
-          "kind": "rows",
-          "choices": ["yes", "notYet"],
-          "rows": [
-            { "id": "q1", "icon": "person", "text": "Does every step name who exactly does it?", "trackingId": "L4_S20_1",
-              "feedback": { "yes": "Every step has an owner. Lesson 5 can place AI or a person next to each one.",
-                            "notYet": "A step without a role cannot be improved or monitored. Name the role, or write 'unclear' in Field 7." } },
-            { "id": "q2", "icon": "clock", "text": "Does Field 4 say what happens if the receiver is unavailable?", "trackingId": "L4_S20_2",
-              "feedback": { "yes": "Your handoffs cover the unavailable case. Delays now show up on the map, not in daily work.",
-                            "notYet": "A handoff with no plan stalls. Add what happens, or record it as a gap." } },
-            { "id": "q3", "icon": "ruler", "text": "Can a number show that the metric improved?", "trackingId": "L4_S20_3",
-              "feedback": { "yes": "You can check your change later: baseline now, target to check against.",
-                            "notYet": "Without a number, nobody can tell whether anything improved. Add a baseline, even estimated, and a target." } }
-          ],
-          "advance": "after-all-answered",
-          "link": "reopenWorkbook"
-        },
-        {
-          "id": "step2",
-          "kind": "chips",
-          "chips": [
-            { "id": "ideal", "label": "Ideal, not actual", "term": "Ideal, not actual", "feedback": "Reread Field 3 against a normal day, not the written procedure." },
-            { "id": "goal", "label": "No clear goal", "feedback": "Write one sentence on what this map must help decide." },
-            { "id": "rushed", "label": "Rushed mapping", "feedback": "Reopen Fields 6 and 7. Those are the ones skipped first." },
-            { "id": "updated", "label": "Not updated", "feedback": "Note the date on your map and what would trigger an update." },
-            { "id": "automating", "label": "Automating a broken process", "feedback": "Before Lesson 5, list which steps need fixing, not speeding up." }
-          ],
-          "strip": "Before Lesson 5: every field filled, metric measurable, no invented answers.",
-          "trackingId": "L4_S20_4",
-          "advance": "after-any",
-          "link": "reopenWorkbook"
-        }
+      "minutes": 5,
+      "instruction": "Check your map against three questions.",
+      "hint": "Answer honestly. 'Not yet' gives you one fix to make.",
+      "stage": { "top": { "kind": "line", "text": "Welcome back. Keep your PDF open." } },
+      "choices": ["yes", "notYet"],
+      "rows": [
+        { "id": "q1", "icon": "person", "text": "Does every step name who exactly does it?", "trackingId": "L4_S20_1",
+          "feedback": { "yes": "Every step has an owner. Lesson 5 can place AI or a person next to each one.",
+                        "notYet": "A step without a role cannot be improved or monitored. Name the role, or write 'unclear' in Field 7." } },
+        { "id": "q2", "icon": "clock", "text": "Does Field 4 say what happens if the receiver is unavailable?", "trackingId": "L4_S20_2",
+          "feedback": { "yes": "Your handoffs cover the unavailable case. Delays now show up on the map, not in daily work.",
+                        "notYet": "A handoff with no plan stalls. Add what happens, or record it as a gap." } },
+        { "id": "q3", "icon": "ruler", "text": "Can a number show that the metric improved?", "trackingId": "L4_S20_3",
+          "feedback": { "yes": "You can check your change later: baseline now, target to check against.",
+                        "notYet": "Without a number, nobody can tell whether anything improved. Add a baseline, even estimated, and a target." } }
       ],
-      "endOfChapter": true,
+      "fixLine": "Make the fix in the workbook, export again, then press Next.",
+      "link": "reopenWorkbook",
+      "advance": "after-all-answered",
       "tracking": [
         { "id": "L4_S20_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" },
         { "id": "L4_S20_2", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" },
-        { "id": "L4_S20_3", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" },
+        { "id": "L4_S20_3", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" }
+      ],
+      "sources": ["planning/STORYBOARD-V3-CH5-6.md S20", "s36", "s43 item 4", "s37"]
+    },
+
+    {
+      "id": "S20B",
+      "chapter": "ch5",
+      "template": "decision",
+      "locked": "chips",
+      "step": { "verb": "Review", "icon": "explore", "join": true },
+      "variant": "risk",
+      "minutes": 2,
+      "instruction": "Choose the mistake your map is most at risk of.",
+      "hint": "The five mistakes from Chapter 4. Any pick is fine.",
+      "wordLimit": { "max": 60, "why": "storyboard v3 Ch5-6 S20B (read then pick, as S17's definitions): the five mistakes with their one-line definitions, the hint line and the note; text as approved" },
+      "ghost": { "type": "choice", "target": "options-sweep" },
+      "options": [
+        { "id": "ideal", "label": "Ideal, not actual", "sub": "maps how it should work", "feedback": "Reread Field 3 against a normal day, not the written procedure." },
+        { "id": "goal", "label": "No clear goal", "sub": "no question to answer", "feedback": "Write one sentence on what this map must help decide." },
+        { "id": "rushed", "label": "Rushed mapping", "sub": "hard fields skipped", "feedback": "Reopen Fields 6 and 7. Those are the ones skipped first." },
+        { "id": "updated", "label": "Not updated", "sub": "the process changed, the map did not", "feedback": "Note the date on your map and what would trigger an update." },
+        { "id": "automating", "label": "Automating a broken process", "sub": "speeds up a process nobody fixed", "feedback": "Before Lesson 5, list which steps need fixing, not speeding up." }
+      ],
+      "strip": "Before Lesson 5: every field filled, metric measurable, no invented answers.",
+      "link": "reopenWorkbook",
+      "advance": "after-any",
+      "endOfChapter": true,
+      "tracking": [
         { "id": "L4_S20_4", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Evaluate", "result": "neutral" }
       ],
-      "sources": ["s36", "s43 item 4", "s34", "s37", "s38"]
+      "sources": ["planning/STORYBOARD-V3-CH5-6.md S20B (split from S20)", "s34", "s38"]
     },
 
     {
       "id": "S21",
       "chapter": "ch6",
       "template": "check",
-      "step": { "verb": "Decide", "icon": "decide" },
-      "minutes": 12,
+      "step": { "verb": "Check", "icon": "check" },
+      "minutes": 10,
       "instruction": "Choose one. Your first answer counts.",
       "hint": "Choose one. You can retry, but only the first answer counts.",
       "layout": "wide",
@@ -2001,6 +1986,7 @@
       "resultCard": "{x} of {n} on first try. Pass mark: {pass} of {n}.",
       "passItems": 4,
       "advance": "after-all-items",
+      "shuffleOnRetake": true,
       "tracking": [
         { "id": "L4_S21_1", "type": "choice", "correctResponse": "c", "scored": true, "bloom": "Analyze", "result": "graded" },
         { "id": "L4_S21_2", "type": "choice", "correctResponse": "b", "scored": true, "bloom": "Apply", "result": "graded" },
@@ -2012,16 +1998,43 @@
     },
 
     {
+      "id": "S21R",
+      "chapter": "ch6",
+      "template": "result",
+      "presentation": true,
+      "step": { "verb": "Check", "icon": "check", "join": true },
+      "minutes": 2,
+      "instruction": "{x} of {n} on first try ({p} of 100). Pass mark: 80.",
+      "from": "S21",
+      "wordLimit": { "max": 120, "why": "storyboard v3 Ch5-6 S21R, worst case (all five items missed): each missed item's stem, its line and its review link; open question in review/nl4/REPORT.md" },
+      "passed": { "chip": "Passed", "text": "You can map a process and judge where AI fits." },
+      "notPassed": { "chip": "Not passed yet", "text": "Review what you missed, then retake the whole check." },
+      "reviewLabel": "Review Chapter {n}",
+      "missed": [
+        { "item": "i1", "text": "Revisit what a handoff must record.", "chapter": 4, "screen": "S14" },
+        { "item": "i2", "text": "Revisit the three good fits for AI.", "chapter": 4, "screen": "K4" },
+        { "item": "i3", "text": "Revisit baseline, target and date.", "chapter": 3, "screen": "S11" },
+        { "item": "i4", "text": "Revisit why 'unclear' belongs in Field 7.", "chapter": 3, "screen": "S10" },
+        { "item": "i5", "text": "Revisit the full HR map, line by line.", "chapter": 3, "screen": "S12" }
+      ],
+      "ringAlt": "{p} of 100",
+      "ringAltPilotCopy": true,
+      "tracking": [],
+      "suspend": ["attempt", "lastScore", "passed"],
+      "sources": ["planning/STORYBOARD-V3-CH5-6.md S21R (new) and Q4, Q5"]
+    },
+
+    {
       "id": "S22",
       "chapter": "ch6",
       "template": "decision",
-      "step": { "verb": "Decide", "icon": "decide" },
+      "step": { "verb": "Finish", "icon": "start" },
+      "scene": "stage",
       "variant": "close",
       "minutes": 3,
       "instruction": "Pick the takeaway your map proves most. Then save your record.",
       "hint": "Without your full map, Lesson 5 cannot run for you.",
-      "layout": "editorial",
-      "image": { "src": "assets/img/s22.jpg", "alt": "A person closing a laptop at the end of the work, notes and a process sketch on the desk", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "50% 50%" },
+      "layout": "stage-decision",
       "options": [
         { "id": "a", "label": "Mapping is a condition, not bureaucracy", "icon": "key",
           "feedback": "Process mapping is a condition for change that lasts. Your map is now the raw material for Lesson 5." },
@@ -2031,10 +2044,10 @@
           "feedback": "Sometimes the right fix is to remove the step, not speed it up. Ask why it formed first." }
       ],
       "step2": {
-        "bridge": { "icon": "map", "text": "Lesson 5 marks on this exact map where AI enters, what it consumes, and where a person stays." },
+        "bridge": { "icon": "map", "text": "Lesson 5 starts from this map and your AI notes from Chapter 4." },
         "homework": { "icon": "calendar", "text": "Homework: complete your map and mark three AI points, using the three good-fit kinds.", "href": "@links.homework", "newTab": true },
         "feedback": {
-          "download": "Your record holds your case title, metric, self-check answers and score. Your map stays in the workbook PDF.",
+          "download": "Your record holds your case title, notes, metric, self-check answers and score. Your map stays in the workbook PDF.",
           "finishConfirm": "Finish without downloading? Your workbook PDF is not affected. Press Finish again to confirm."
         }
       },

@@ -581,9 +581,8 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-slot[data-on="false"] { background: var(--wl-stone); color: var(--wl-text-2); }
 
 
-/* S18 safety step 2 */
-.w-safety-form { gap: 3.84px; } /* NL3: 10.24 -> 3.84, with the action bar's 12.8 below, S18 saved stays within 41cqw */
-.w-safety-form .w-actionbar { margin-top: 12.8px; }
+/* NL4 S18B: the checkbox at the left of the input panel's action row */
+.w-input-check { margin-left: 9px; }
 .w-checkline { min-height: 44px; display: flex; align-items: center; gap: 10.24px; font: 600 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); cursor: pointer; }
 /* a 44 px target that draws a 26 px box, filled navy with a white check when ticked */
 .w-checkbox { flex: none; appearance: none; width: 44px; height: 44px; margin: 0 -9px; border: 0; border-radius: var(--wl-radius-btn); cursor: pointer;
@@ -591,17 +590,49 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-checkbox:checked { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 16px 16px no-repeat,
   linear-gradient(var(--wl-navy), var(--wl-navy)) center / 26px 26px no-repeat; }
 
-/* S19 handoff */
-.w-handoff-view { display: flex; flex-direction: column; }
-.w-handoff-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15.36px; margin-bottom: 12.8px; }
-.w-handoff-title { font: 800 25.6px/1.25 var(--wl-font-ui); letter-spacing: -.3px; color: var(--wl-ink); }
-.w-time-chip { flex: none; padding: 2.56px 10.24px; border-radius: 5.12px; background: var(--wl-chip-bg); font: 600 14.72px/normal var(--wl-font-label); color: var(--wl-correct-head); }
-.w-handoff-task { display: flex; flex-direction: column; gap: 12.8px; }
-/* S19: the steps and, beside them, the Chapter 2 sketch and (NL3) the Chapter 3-4 notes, read-only: one
-   line per part on screen, its name then its text (cut with an ellipsis; the full text for screen readers) */
-.w-brief-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20.48px; align-items: start; }
-.w-sketch { display: grid; gap: 2.56px; padding: 7.68px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-stone); }
-.w-sketch .w-label { margin: 0; }
+/* S19 handoff (NL4: document view): head, steps + workbook preview | copy cards, the bottom row */
+.w-sheet-doc { padding: 16.64px 30.72px 28.16px; } /* the bottom stays the sheet's: the strip sits flush to the panel's foot */
+.w-sheet-doc .w-handoff-grid { gap: 17.92px; }
+.w-sheet-doc .w-copy-grid { gap: 7.68px; }
+.w-sheet-doc .w-copy-card { padding-top: 5.12px; padding-bottom: 6.4px; }
+.w-sheet-doc .w-handoff-right .w-label { margin-bottom: 3.84px; }
+.w-handoff-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15.36px; margin-bottom: 7.68px; }
+.w-handoff-head .w-label { margin: 0 0 2.56px; }
+.w-sheet .w-handoff-head .w-instruction { margin: 0; font-size: 28.8px; }
+.w-time-chip { flex: none; display: inline-flex; align-items: center; gap: 6.4px; padding: 2.56px 10.24px; border-radius: 5.12px; background: var(--wl-chip-bg); font: 600 14.72px/normal var(--wl-font-label); color: var(--wl-correct-head); }
+.w-handoff-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.42fr); gap: 23.04px; align-items: start; }
+.w-handoff-left { display: flex; flex-direction: column; gap: 8.96px; }
+/* the steps as a plain numbered list here (no boxes), so the brief stays short */
+.w-handoff-left .w-steps { gap: 5.12px; }
+.w-handoff-left .w-steps li { min-height: 30.72px; padding: 0; border: 0; background: none; font-size: 16.64px; }
+.w-handoff-left .w-step-n { width: 26.88px; height: 26.88px; font-size: 14px; }
+.w-handoff-hint { font: 400 16.64px/1.35 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-handoff-right .w-label { margin: 0 0 6.4px; }
+/* the workbook preview: a small page with its eight field rows; the rows the notes go into marked */
+.w-wb-preview { position: relative; margin: 0; padding: 8.96px 12.8px 8.96px 46.08px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
+.w-wb-icon { position: absolute; left: 12.8px; top: 10.24px; color: var(--wl-navy); }
+.w-wb-rows { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: column; grid-template-rows: repeat(4, auto); gap: 3.84px 10.24px; }
+.w-wb-rows li { min-width: 0; display: flex; align-items: center; gap: 6.4px; padding: 1.28px 6.4px; border-radius: 5.12px; background: var(--wl-stone); font: 500 14px/1.25 var(--wl-font-label); color: var(--wl-muted); }
+.w-wb-rows b { flex: none; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-line); font: 700 14px/1 var(--wl-font-ui); color: var(--wl-ink); }
+.w-wb-rows span { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.w-wb-rows li[data-notes="true"] { background: var(--wl-keypill-bg); color: var(--wl-teal-ink); }
+.w-wb-rows li[data-notes="true"] b { background: var(--wl-navy); color: var(--wl-white); }
+/* the copy cards, 2 x 2: the card's name over its field chip, Copy on the right, then one line per part */
+.w-copy-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8.96px; }
+.w-copy-card { min-width: 0; display: flex; flex-direction: column; gap: 3.84px; padding: 7.68px 10.24px 8.96px 12.8px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
+.w-copy-head { display: flex; align-items: center; gap: 7.68px; }
+.w-copy-id { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2.56px; }
+.w-copy-title { max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 700 15.36px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-copy-id .w-field-chip { max-width: 100%; }
+.w-copy-rows .w-sketch-row { line-height: 1.25; }
+.w-chip-off { background: var(--wl-neutral-bg); color: var(--wl-grey-ink); }
+.w-copy-btn { margin-left: auto; padding: 3.84px 12.8px; font-size: 15.36px; }
+.w-copy-btn:disabled { padding: 3.84px 12.8px; }
+.w-copy-rows { margin: 0; }
+.w-copy-rows dd[data-empty="true"] { color: var(--wl-muted); }
+.w-handoff-bottom { margin-top: 8.96px; }
+.w-return-line { flex: 1 1 auto; font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-col-handoff .w-handoff-bottom .w-privacy { margin: 0; }
 .w-sketch-list { margin: 0 0 5.12px; display: grid; gap: 1.28px; }
 .w-sketch-list:last-child { margin-bottom: 0; }
 .w-sketch-row { display: flex; gap: 5.12px; min-width: 0; font: 400 15.36px/1.35 var(--wl-font-ui); }
@@ -611,21 +642,32 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-steps li { min-height: 38.4px; /* NL3: from 44 and 6.4px padding (text, not targets), so S19 with the sketch and notes stays within 41cqw */ display: flex; align-items: center; gap: 12.8px; padding: 3.2px 12.8px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white);
   font: 600 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
 .w-step-n { flex: none; width: 30.72px; height: 30.72px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-navy); font: 800 15.36px/1 var(--wl-font-ui); color: var(--wl-white); }
-.w-handoff-task .w-actionbar { margin-top: 0; }
-.w-action { display: flex; align-items: center; gap: 12.8px; }
-.w-col-handoff .w-privacy { margin-left: 0; margin-right: auto; }
 a.w-btn { text-decoration: none; }
 
-/* S20 self-check */
-.w-selfcheck { display: flex; flex-direction: column; gap: 8.96px; }
+/* S20 self-check (NL4: the three questions as a checklist figure, each row's mark ticks on Yes) */
+.w-selfcheck { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8.96px; }
 .w-check-row { display: flex; align-items: center; gap: 15.36px; padding: 10.24px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
+.w-check-mark { flex: none; width: 38.4px; height: 38.4px; display: grid; place-items: center; border: 2px solid var(--wl-line-strong); border-radius: 7.68px; background: var(--wl-stone); color: var(--wl-navy); }
+.w-check-row[data-answer="yes"] .w-check-mark { border-color: var(--wl-teal); background: var(--wl-teal); color: var(--wl-white); }
+.w-check-row[data-answer="notYet"] .w-check-mark { border-style: dashed; border-color: var(--wl-navy); background: var(--wl-white); }
+.w-check-row[data-answer="yes"] { border-color: var(--wl-teal); }
+.w-checklist .w-check-row { padding-top: 6.4px; padding-bottom: 6.4px; }
+.w-fix-line { margin-top: 8.96px; display: flex; align-items: center; gap: 10.24px; font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-fix-line svg { flex: none; color: var(--wl-navy); }
+/* S20B: the five mistakes, name and one-line definition */
+.w-opt-sub { display: block; margin-top: 2.56px; font: 400 16.64px/1.3 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-risk .w-ans { padding: 6.4px 15.36px; align-items: flex-start; }
+.w-options.w-risk { gap: 8.96px 15.36px; }
+.w-sheet .w-subline:has(+ .w-risk) { margin-bottom: 10.24px; }
+.w-sheet .w-head-q:has(+ .w-subline + .w-risk) { margin-bottom: 7.68px; }
+.w-sheet .w-risk + .w-risk-note { margin-top: 7.68px; display: flex; align-items: center; justify-content: space-between; gap: 15.36px; }
+.w-risk-note .w-link { margin-right: -10.24px; }
 .w-check-q { flex: 1 1 auto; font: 600 18.56px/1.35 var(--wl-font-ui); color: var(--wl-ink); }
 .w-toggles { flex: none; display: flex; gap: 7.68px; }
 .w-toggle { min-width: 104px; min-height: 44px; padding: 0 17.92px; border: 1px solid var(--wl-line-strong); border-radius: 7.68px; background: var(--wl-white);
   font: 700 16.64px/1 var(--wl-font-ui); color: var(--wl-navy); cursor: pointer; }
 .w-toggle:hover { border-color: var(--wl-navy); }
 .w-toggle[aria-pressed="true"] { border: 3.2px solid var(--wl-navy); }
-.w-selfcheck2 { display: flex; flex-direction: column; gap: 15.36px; }
 .w-chips { display: flex; flex-wrap: wrap; gap: 10.24px; }
 .w-chip { min-height: 48px; padding: 0 17.92px; border: 1px solid var(--wl-card-line); border-radius: var(--wl-radius-card); background: var(--wl-white); font: 600 17.92px/1.2 var(--wl-font-ui);
   color: var(--wl-body-ink); cursor: pointer; }
@@ -653,35 +695,56 @@ a.w-btn { text-decoration: none; }
 .w-close-actions { margin-top: 6.4px; display: flex; flex-wrap: wrap; gap: 10.24px; }
 .w-close-actions .w-btn[aria-disabled="true"] { border: 0; background: var(--wl-neutral-line); color: var(--wl-white); cursor: default; }
 
-/* the old sort, tray mode only (S18A until NL4; its deck mode retired in NL3): dashed columns, the tray, chips */
-.w-sort { display: flex; flex-direction: column; gap: 15.36px; }
-.w-sort-card { position: relative; width: auto; min-width: 560px; max-width: 760px; min-height: 60px; margin: 0; display: flex; align-items: center; gap: 12.8px; padding: 10.24px 48px 10.24px 19.2px;
-  border: 1px solid var(--wl-card-line); border-radius: var(--wl-radius-card); background: var(--wl-white); box-shadow: var(--wl-card-shadow);
-  font: 600 19.2px/1.35 var(--wl-font-ui); color: var(--wl-body-ink); text-align: left; cursor: pointer; }
-.w-sort-card:hover { border-color: var(--wl-navy); }
-.w-sort-card[aria-pressed="true"] { border: 3.2px solid var(--wl-navy); }
-.w-sort-num { flex: none; width: 24px; font: 800 20.48px/1 var(--wl-font-ui); color: var(--wl-teal-ink); }
-.w-sort-card > .w-opt-mark { position: absolute; top: 50%; right: 12.8px; width: 24px; height: 24px; margin-top: -12px; border: 0; border-radius: 6.4px; background: var(--wl-navy); }
-.w-sort-card > .w-opt-mark:empty { display: none; }
-.w-sort-cols { position: relative; display: grid; gap: 15.36px; }
-.w-sort-col { position: relative; display: flex; flex-direction: column; gap: 6.4px; padding: 6.4px 6.4px 8.96px; border: 2px dashed var(--wl-dash); border-radius: var(--wl-radius-card);
-  background: var(--wl-white); transition: border-color .15s; }
-.w-sort-col:has(> .w-sort-target:not([aria-disabled="true"])) { border-color: var(--wl-navy); cursor: pointer; }
-.w-sort-col:has(> .w-sort-target:not([aria-disabled="true"])):hover, .w-sort-col:has(> .w-sort-target:not([aria-disabled="true"]):focus-visible) { border-style: solid; background: var(--wl-keypill-bg); }
-.w-sort-col:has(> .w-sort-target[data-result="wrong"]) { border-style: solid; border-color: var(--wl-error); background: var(--wl-error-bg); }
-.w-sort-target { position: relative; min-height: 44px; margin: 0; display: flex; align-items: center; gap: 8.96px; padding: 0 36px 0 10.24px; border: 0; border-radius: 6.4px; background: transparent;
-  font: 700 17.92px/1.2 var(--wl-font-ui); color: var(--wl-ink); text-align: left; cursor: pointer; }
-.w-sort-target[aria-disabled="true"] { cursor: default; }
-.w-sort-target .w-sort-label { flex: 1 1 auto; }
-.w-sort-target > .w-opt-mark { position: absolute; right: 8px; top: 50%; width: 24px; height: 24px; margin-top: -12px; border: 0; background: var(--wl-error); }
-.w-sort-target > .w-opt-mark:empty { display: none; }
-.w-sort-chips { list-style: none; margin: 0; padding: 0 2px; min-height: 40px; display: flex; flex-direction: column; gap: 6.4px; }
-.w-sort-chip { padding: 6.4px 10.24px; border: 2.56px solid var(--wl-teal); border-radius: var(--wl-radius-card); background: var(--wl-white); font: 600 16px/1.35 var(--wl-font-ui); color: var(--wl-ink); }
-.w-tray { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8.96px 15.36px; }
-.w-tray-card { width: auto; min-width: 0; max-width: none; min-height: 48px; padding: 6.4px 40px 6.4px 12.8px; font-size: 16.64px; box-shadow: none; }
-.w-tray-card .w-sort-num { font-size: 17.92px; width: 18px; }
-.w-tray-card[data-placed="true"] { visibility: hidden; } /* the slot keeps its place: nothing in the tray moves */
-.w-sort-tray .w-sort-chip { padding: 4px 8.96px; font-size: 14.72px; }
+/* NL4 S21R check result: the score ring left, the verdict, the missed items and Retake right */
+.w-result-grid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 30.72px; align-items: start; }
+.w-ring { position: relative; width: 179.2px; height: 179.2px; margin: 0; }
+.w-ring-svg { display: block; width: 100%; height: 100%; }
+.w-ring-track { fill: none; stroke: var(--wl-line); stroke-width: 15px; }
+.w-ring-arc { fill: none; stroke: var(--wl-navy); stroke-width: 15px; stroke-linecap: round; }
+.w-ring[data-passed="true"] .w-ring-arc { stroke: var(--wl-teal); }
+.w-ring-tick { stroke: var(--wl-ink); stroke-width: 3px; }
+.w-ring-num { position: absolute; inset: 0; display: grid; place-items: center; font: 800 51.2px/1 var(--wl-font-ui); letter-spacing: -1px; color: var(--wl-ink); }
+.w-result-body { min-width: 0; display: flex; flex-direction: column; }
+.w-sheet .w-result-body .w-instruction { margin: 0 0 12.8px; font-size: 33.28px; }
+.w-result-verdict { display: flex; align-items: center; flex-wrap: wrap; gap: 7.68px 12.8px; }
+.w-result-chip { display: inline-flex; align-items: center; gap: 6.4px; padding: 3.84px 12.8px; border-radius: 5.12px; background: var(--wl-neutral-bg); font: 700 15.36px/normal var(--wl-font-label); color: var(--wl-ink); }
+.w-result-chip[data-passed="true"] { background: var(--wl-correct-bg); color: var(--wl-correct-head); }
+.w-result-line { font: 600 19.2px/1.35 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-missed { list-style: none; margin: 15.36px 0 0; padding: 0; display: grid; gap: 6.4px; }
+.w-missed-item { display: flex; align-items: center; gap: 12.8px; padding: 6.4px 6.4px 6.4px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
+.w-missed-text { flex: 1 1 auto; min-width: 0; }
+.w-missed-stem { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 600 15.36px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-missed-line { font: 400 15.36px/1.3 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-review-link { flex: none; }
+.w-result-actions { margin-top: 15.36px; }
+
+/* NL4 S22 on Stage: the bridge line on the case card over the photo, the panel right */
+.w-bridge { display: flex; align-items: flex-start; gap: 15.36px; color: var(--wl-navy); }
+.w-bridge svg { flex: none; margin-top: 3.2px; }
+.w-sheet.w-close-panel .w-instruction { font-size: 30.72px; letter-spacing: -.6px; }
+.w-close-panel .w-takeaways { grid-template-columns: minmax(0, 1fr); gap: 10.24px; }
+.w-close-panel .w-takeaway { padding: 10.24px 17.92px; }
+.w-close-panel .w-close-actions { flex-direction: column; align-items: stretch; }
+
+/* NL4: "Back to the check" in the footer, right of Previous */
+.w-backchip { margin: 0 auto 0 12.8px; display: inline-flex; align-items: center; gap: 6.4px; min-height: 44px; padding: 0 17.92px 0 12.8px; border: 1.92px solid var(--wl-navy); border-radius: 22px;
+  background: var(--wl-white); font: 700 16.64px/normal var(--wl-font-ui); color: var(--wl-navy); cursor: pointer; }
+.w-backchip[hidden] { display: none; }
+.w-backchip:hover { background: var(--wl-keypill-bg); }
+
+/* NL4 E2: the slim "Your case" card at the top of a form panel: on the context line's row, at its right
+   (S02, whose context line stands above the panel: the panel's top right, beside the field labels) */
+.w-case-row { display: flex; align-items: center; justify-content: space-between; gap: 20.48px; }
+.w-case-row .w-context { flex: 1 1 auto; min-width: 0; }
+.w-case-slim { flex: 0 1 auto; max-width: 45%; margin: 0; display: inline-flex; align-items: center; gap: 8.96px; padding: 2.56px 15.36px 2.56px 10.24px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card);
+  background: var(--wl-white); font: 700 16.64px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-sheet-open > .w-case-slim { position: absolute; top: 22.4px; right: 30.72px; max-width: 34%; } /* clear of "The problem today" */
+.w-case-slim svg { flex: none; color: var(--wl-teal-ink); }
+.w-case-slim span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+/* NL4 E2 (S03): the two video-case stills as small thumbnails above the cards */
+.w-case-thumbs { display: flex; gap: 15.36px; margin: -5.12px 0 15.36px; }
+.w-case-thumb { margin: 0; display: flex; align-items: center; gap: 10.24px; font: 600 15.36px/1.3 var(--wl-font-label); color: var(--wl-muted); }
+.w-case-thumb-img { flex: none; width: 96px; height: 54px; border-radius: 7.68px; object-fit: cover; box-shadow: var(--wl-card-shadow); }
 
 /* empty answer marks: a navy ring where shown; hidden on tiles until a state (S07, S12) */
 .w-opt-mark:empty { border-color: var(--wl-navy); }
@@ -749,6 +812,9 @@ a.w-btn { text-decoration: none; }
   display: flex; align-items: baseline; justify-content: space-between; gap: 20.48px; }
 .w-task-head .w-instruction { margin: 0; font: 800 33.28px/normal var(--wl-font-ui); letter-spacing: -.64px; color: var(--wl-ink); }
 .w-task-sub { margin-top: 7.68px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+/* NL4 S18A: a deck with the hint line AND the field chip: the chip and "Show me how" stay right of the
+   heading (as S09), so the deck never covers them */
+.w-main[data-layout="sort-deck"] .w-task-head.w-task-head-col:has(.w-head-chip) { display: flex; align-items: flex-start; }
 /* the off-panel feedback strip: the strip component, all corners rounded, the head inline, a card shadow */
 .w-float { position: absolute; z-index: 2; }
 .w-float .w-band { margin: 0; }
