@@ -15,6 +15,8 @@ export function chromePath() {
 //   bandWidth    NL1: the band is flush to its panel's edges: band width vs the panel's width, its left
 //                offset and the gap between their bottoms (all 0)
 //   outside      painted boxes of the screen outside the main area (would be clipped)
+//   underFooter  painted boxes of the screen (or its band) under Previous or Next (NL3)
+//   tallPanels   panels higher than 41cqw, 524.8 px (NL3, storyboard v3 critical detail 1)
 //   clipped      text cut off inside its own box
 //   bandOverflow band text running outside the band
 //   contrast     every visible text run: colour on its effective background, ratio and need
@@ -58,7 +60,6 @@ export function measureLayout() {
     if (el.closest('svg') && tag !== 'svg') continue;
     if (bandOn && (band.contains(el) || el.contains(band))) continue; // the band, and the panel it sits in
     if (el.matches('.w-video')) continue; // the film is the screen's backdrop (V1, V2), like the scene photo
-    if (el.closest('[data-under-strip]')) continue; // NL2 sort deck: the frames' strip covers the counter of a two-line card
     if (!visible(el)) continue;
     const r = el.getBoundingClientRect();
     if (r.width < 1 || r.height < 1 || scrolledAway(el, r)) continue;
@@ -78,11 +79,19 @@ export function measureLayout() {
     }
     return out;
   };
-  boxes.push(...textRuns(main, (n) => (bandOn && band.contains(n)) || !!n.parentElement.closest('[data-under-strip]')));
+  boxes.push(...textRuns(main, (n) => bandOn && band.contains(n)));
 
   const hit = (b, R) => b.bottom > R.top + 0.5 && b.top < R.bottom - 0.5 && b.right > R.left + 0.5 && b.left < R.right - 0.5;
   const overlaps = bandOn ? boxes.filter((b) => hit(b, B)).map((b) => b.what) : [];
   const outside = boxes.filter((b) => b.top < M.top - 0.5 || b.bottom > M.bottom + 0.5 || b.left < M.left - 0.5 || b.right > M.right + 0.5).map((b) => b.what);
+  // NL3: nothing of the screen (its band included) runs under Previous or Next: the footer floats over
+  // main, so a column that grows with its placed cards could reach it (the sort deck, S04 to S17)
+  const footBtns = overlay ? [] : [...document.querySelectorAll('.w-footer > button')].filter((el) => visible(el) && el.getClientRects().length).map((el) => box(el.getBoundingClientRect()));
+  const underFooter = [...boxes, ...(bandOn ? [{ what: 'band', ...B }] : [])].filter((b) => footBtns.some((F) => hit(b, F))).map((b) => b.what);
+  // NL3: a panel is as high as its content, at most 41cqw (524.8 stage px; storyboard v3 critical detail 1)
+  // (the old tray, S18A, is exempt until it moves to the sort deck in NL4)
+  const tallPanels = [...main.querySelectorAll('.w-sheet:not(.w-sheet-tray)')].filter((el) => visible(el) && el.getClientRects().length)
+    .map((el) => box(el.getBoundingClientRect()).h).filter((hgt) => hgt > 524.8 + 0.5).map((hgt) => Math.round(hgt));
 
   // equal gutters (NL1): a Focus panel sits centred in main at any stage width, the same gap left and
   // right (L / R from main's edges to the panel). Stage panels and the title are placed by design.
@@ -155,7 +164,7 @@ export function measureLayout() {
     .map((el) => ({ el, b: box(el.getBoundingClientRect()) }))
     .filter(({ b }) => b.w < 43.5 || b.h < 43.5).map(({ el, b }) => `${name(el)} ${Math.round(b.w)}x${Math.round(b.h)}`);
 
-  return { overlaps, outside, clipped, bandOverflow, bandWidth, contrast: Object.fromEntries(contrast), lowContrast, small, smallTargets, wide };
+  return { overlaps, outside, underFooter, tallPanels, clipped, bandOverflow, bandWidth, contrast: Object.fromEntries(contrast), lowContrast, small, smallTargets, wide };
 }
 
 // One line verdict for a measureLayout result: [ok, detail]
@@ -163,6 +172,8 @@ export function layoutVerdict(m) {
   const bad = [];
   if (m.overlaps.length) bad.push('over the band: ' + m.overlaps.join(', '));
   if (m.outside.length) bad.push('outside main: ' + m.outside.join(', '));
+  if (m.underFooter && m.underFooter.length) bad.push('under Previous / Next: ' + [...new Set(m.underFooter)].join(', '));
+  if (m.tallPanels && m.tallPanels.length) bad.push('panel over 41cqw (524.8px): ' + m.tallPanels.join(', ') + 'px');
   if (m.clipped.length) bad.push('clipped: ' + m.clipped.join(', '));
   if (m.bandOverflow) bad.push('band text overflows the band');
   if (m.bandWidth && (Math.abs(m.bandWidth.band - m.bandWidth.area) > 1 || Math.abs(m.bandWidth.left) > 1 || Math.abs(m.bandWidth.gap) > 1))

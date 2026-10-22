@@ -64,7 +64,7 @@ export const sort = {
     if (trayEl) arrowNav(trayEl, { selector: '.w-tray-card' });
 
     layout(ctx, 'focus',
-      sheet('focus w-sheet-wide',
+      sheet('focus w-sheet-wide' + (tray ? ' w-sheet-tray' : ''),
         screen.header ? ruleLabel(screen.header) : null,
         zones.instruction,
         h('div', { class: 'w-sort' + (tray ? ' w-sort-tray' : ''), dataset: { interaction: '' } },

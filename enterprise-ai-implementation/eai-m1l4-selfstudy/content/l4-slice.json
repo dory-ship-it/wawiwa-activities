@@ -11,7 +11,7 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "FT3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
+    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
     "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] }
   },
 
@@ -30,8 +30,6 @@
       "fullChapter": "Take the full chapter",
       "nextRound": "Next round",
       "nextSituation": "Next situation",
-      "jumpToMap": "Jump to the full HR map",
-      "watchDemo": "Watch the demo",
       "nextQuestion": "Next question",
       "openHomework": "Open homework",
       "openHomework1": "Open Homework 1",
@@ -100,6 +98,7 @@
       "help": "Drag the card to a column, or press 1 to {n} to choose a column and Enter to drop it. Escape cancels.",
       "helpPlaces": "Drag the label to a place on the diagram, or press 1 to {n} to choose a place and Enter to drop it. Escape cancels.",
       "picked": "Picked up: {item}. Choose a column, 1 to {n}, then press Enter, or click a column.",
+      "pickedPlace": "Picked up: {item}. Choose a place, 1 to {n}, then press Enter, or click a place.",
       "chosen": "{target} chosen. Press Enter to drop.",
       "cancelled": "Cancelled."
     },
@@ -268,9 +267,7 @@
     { "id": "ch0", "n": 0, "title": "Intro", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 12, "screens": ["O1", "O2", "O3", "S01", "S02"], "inSlice": true, "pauseMarker": null },
     { "id": "ch1", "n": 1, "title": "Why map", "photo": { "src": "assets/img/l4/w1-new-computer-same-mess.jpg", "position": "30% 50%", "temp": true }, "minutes": 11, "screens": ["W1", "V1", "K1", "S03"], "inSlice": true, "pauseMarker": null },
     { "id": "ch2", "n": 2, "title": "Toolkit", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 28, "screens": ["W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B"], "inSlice": true, "pauseMarker": null },
-    { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 19, "screens": ["FT3", "V2", "S09", "S10", "S11", "S12"], "inSlice": true,
-      "fastTrack": { "card": "FT3", "landing": "S12" },
-      "pauseMarker": null },
+    { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 18, "screens": ["W3", "V2", "S09", "S10", "S11", "S12"], "inSlice": true, "pauseMarker": null },
     { "id": "ch4", "n": 4, "title": "Critical eye", "photo": { "src": "assets/img/l4/o1-lanes-office.jpg", "position": "60% 50%", "temp": true }, "minutes": 26, "screens": ["FT4", "S13", "S14", "S15", "S16", "S17"], "inSlice": true,
       "fastTrack": { "card": "FT4", "landing": "S17" },
       "pauseMarker": null },
@@ -281,6 +278,28 @@
   ],
 
   "screens": [
+    {
+      "id": "W3",
+      "chapter": "ch3",
+      "template": "warmup",
+      "step": { "verb": "Guess", "icon": "guess" },
+      "minutes": 1,
+      "instruction": "An employee asks HR about their own salary. May that question go into a public AI tool?",
+      "hint": "Pick the answer you expect. A guess cannot be wrong.",
+      "hintPilotCopy": true,
+      "layout": "warmup",
+      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "foot": "Chapter 3 · HR demo" },
+      "options": [
+        { "id": "a", "label": "Yes, if the name is removed" },
+        { "id": "b", "label": "Only with the employee's consent" },
+        { "id": "c", "label": "No, it holds confidential details" }
+      ],
+      "feedback": { "verdict": "Hold that thought.", "text": "This chapter tags every source by how sensitive it is." },
+      "advance": "after-any",
+      "tracking": [{ "id": "L4_W3_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Understand", "result": "neutral" }],
+      "sources": ["planning/STORYBOARD-V3.md Ch3 W3 (replaces FT3)", "s22", "s44"]
+    },
+
     {
       "id": "O1",
       "chapter": "ch0",
@@ -756,9 +775,9 @@
       "ghost": { "type": "label", "showMe": true },
       "dropLabel": "Drop here",
       "targets": [
-        { "id": "a", "name": "Place 1: the HR manager's row", "rect": [10, 162, 580, 78], "chip": [552, 157] },
-        { "id": "b", "name": "Place 2: the diamond after Check the topic", "rect": [311, 98, 58, 58], "chip": [340, 93] },
-        { "id": "c", "name": "Place 3: the circle at Question sent", "rect": [123, 31, 44, 44], "chip": [145, 26] }
+        { "id": "a", "name": "Place 1: the bottom row, HR manager", "rect": [10, 162, 580, 78], "chip": [552, 157] },
+        { "id": "b", "name": "Place 2: after Check the topic, in the HR staff row", "rect": [311, 98, 58, 58], "chip": [340, 93] },
+        { "id": "c", "name": "Place 3: the first point of the Employee row, at Question sent", "rect": [123, 31, 44, 44], "chip": [145, 26] }
       ],
       "targetsNote": "rect [left, top, width, height] and chip [centre x, centre y] in diagram units (.1cqw), from the S05b frames",
       "labels": [
@@ -773,7 +792,9 @@
       "tracking": [
         { "id": "L4_S05B_1", "type": "matching", "correctResponse": "s.a,g.b,e.c", "scored": false, "bloom": "Remember", "result": "graded" }
       ],
-      "sources": ["planning/CH2-SPEC.md 4", "s12", "s13"]
+      "sources": ["planning/CH2-SPEC.md 4", "s12", "s13"],
+      "diagramAlt": "Process diagram of the HR case in three rows: Employee, HR staff, HR manager. Question sent, in the Employee row, starts it. HR staff check the topic. Then a decision, Within policy? Yes: HR staff answer. No: Escalate, in the HR manager row. Both paths end in the Employee row at Answer received.",
+      "diagramAltPilotCopy": true
     },
 
     {
@@ -934,48 +955,11 @@
     },
 
     {
-      "id": "FT3",
-      "chapter": "ch3",
-      "template": "decision",
-      "step": { "verb": "Decide", "icon": "decide" },
-      "variant": "challenge",
-      "minutes": 1,
-      "instruction": "Answer one question, or skip the challenge.",
-      "hint": "Answer if you can already map the HR case. Skipping costs nothing.",
-      "layout": "memo",
-      "image": { "src": "assets/img/ft3.jpg", "alt": "An HR team at work, a process map on a laptop and a sticky note for each step on the desk", "prompt": "assets/img/SOURCES.md", "temp": false, "position": "40% 50%" },
-      "stage": {
-        "top": { "kind": "line", "icon": "lightning", "text": "Optional challenge. Right on the first try? Skip to this chapter's last task." },
-        "middle": { "kind": "question", "text": "Which line breaks the AS-IS rules on the HR map?" },
-        "bottom": { "kind": "options", "arrange": "row", "link": "skipChallenge" }
-      },
-      "options": [
-        { "id": "a", "label": "Field 7: unclear how many answers were wrong", "correct": false,
-          "feedback": "'Unclear' is a valid diagnostic result. It stays. The full chapter starts now." },
-        { "id": "b", "label": "Field 6: no formal control", "correct": false,
-          "feedback": "'No formal control' records what really happens. It stays. The full chapter starts now." },
-        { "id": "c", "label": "Field 3: a chatbot answers routine questions", "correct": true,
-          "feedback": "Right on the first try: you can jump to the full HR map, or watch the demo." }
-      ],
-      "attempts": 1,
-      "routing": {
-        "correctFirstTry": { "choices": [ { "button": "jumpToMap", "to": "S12", "route": "skip" }, { "button": "watchDemo", "to": "V2", "route": "full" } ] },
-        "wrong": { "to": "V2", "route": "full" },
-        "skipped": { "to": "V2", "route": "full" }
-      },
-      "tracking": [
-        { "id": "L4_FT3_1", "type": "choice", "correctResponse": "c", "scored": false, "bloom": "Evaluate", "result": "graded" }
-      ],
-      "suspend": ["route"],
-      "sources": ["s16", "s18", "s19"]
-    },
-
-    {
       "id": "V2",
       "chapter": "ch3",
       "template": "video",
       "step": { "verb": "Watch", "icon": "watch" },
-      "minutes": 6,
+      "minutes": 5,
       "instruction": "Watch the video. Answer the three questions when it stops.",
       "instructionPilotCopy": true,
       "title": "Mapping the HR case",
@@ -1065,19 +1049,18 @@
     {
       "id": "S09",
       "chapter": "ch3",
-      "template": "sort",
+      "template": "sortDeck",
       "step": { "verb": "Sort", "icon": "sort" },
-      "mode": "tray",
       "minutes": 4,
-      "instruction": "Sort each card into its part of Field 5.",
-      "hint": "Select a card, then a column.",
-      "layout": "wide",
+      "instruction": "Drag each card to its part of Field 5.",
+      "hint": "Drag the card to a column. Or press 1 to 4 to choose a column, then Enter.",
+      "layout": "sort-deck",
       "header": "Field 5: sources, owners, sensitivity",
       "columns": [
-        { "id": "a", "label": "Source", "icon": "document" },
-        { "id": "b", "label": "Owner", "icon": "person", "term": "Owner" },
-        { "id": "c", "label": "Sensitivity", "icon": "tag", "term": "Sensitivity" },
-        { "id": "d", "label": "Not Field 5", "icon": "x-square" }
+        { "id": "a", "label": "Source" },
+        { "id": "b", "label": "Owner" },
+        { "id": "c", "label": "Sensitivity" },
+        { "id": "d", "label": "Not Field 5" }
       ],
       "cards": [
         { "n": 1, "text": "Vacation policy", "column": "a",
@@ -1103,7 +1086,23 @@
       "tracking": [
         { "id": "L4_S09_1", "type": "matching", "correctResponse": "1.a,2.a,3.b,4.c,5.d,6.d", "scored": false, "bloom": "Understand", "result": "graded" }
       ],
-      "sources": ["s14", "s18", "s20", "s22", "s44", "s16"]
+      "sources": ["s14", "s18", "s20", "s22", "s44", "s16"],
+      "hintPilotCopy": true,
+      "ghost": { "type": "drag", "showMe": false },
+      "band": {
+        "label": "Four sensitivity levels, from open to closed:",
+        "items": [
+          { "term": "PUBLIC", "text": "anyone may see it" },
+          { "term": "INTERNAL", "text": "staff only; approved company tools" },
+          { "term": "CONFIDENTIAL", "text": "named people only, never a public AI tool" },
+          { "term": "RESTRICTED", "text": "strictest access, no AI tool without approval" }
+        ]
+      },
+      "bandPilotCopy": "the four definitions (SME to confirm before the pilot)",
+      "wordLimit": {
+        "max": 60,
+        "why": "storyboard v3 (S09: the explain band with the four sensitivity levels joins the sort deck; keep the approved text word for word): 60 words with all six cards placed"
+      }
     },
 
     {
@@ -1113,7 +1112,7 @@
       "step": { "verb": "Decide", "icon": "decide" },
       "variant": "fill",
       "minutes": 2,
-      "instruction": "Fill Field 7 for the HR case.",
+      "instruction": "Choose what to write in Field 7.",
       "hint": "Write what is true on a normal day, even if it looks bad.",
       "layout": "wide",
       "terms": ["Existing controls", "Gaps"],
@@ -1149,7 +1148,7 @@
       "instruction": "Pick the strongest success metric.",
       "hint": "Ask: three months from now, could someone check it?",
       "layout": "wide",
-      "terms": ["Success metric", "Baseline", "Target", "Field 8"],
+      "terms": ["Success metric", "Field 8"],
       "field": { "label": "Field 8", "icon": "gauge" },
       "options": [
         { "id": "a", "label": "HR time on repeats: significant improvement within 3 months", "correct": false, "checks": { "baseline": false, "target": false, "date": true },
@@ -1167,7 +1166,20 @@
       "tracking": [
         { "id": "L4_S11_1", "type": "choice", "correctResponse": "d", "scored": false, "bloom": "Evaluate", "result": "graded" }
       ],
-      "sources": ["s4", "s19", "s20", "s37"]
+      "sources": ["s4", "s19", "s20", "s37"],
+      "band": {
+        "label": "A checkable metric has three parts:",
+        "chain": true,
+        "items": [
+          { "term": "Baseline", "text": "today's number, even estimated" },
+          { "term": "Target", "text": "a specific, realistic number" },
+          { "term": "Date", "text": "when you check it" }
+        ]
+      },
+      "wordLimit": {
+        "max": 64,
+        "why": "storyboard v3 (S11: the explain band, three parts of a checkable metric, joins the four answers and the slots; keep the approved text word for word)"
+      }
     },
 
     {

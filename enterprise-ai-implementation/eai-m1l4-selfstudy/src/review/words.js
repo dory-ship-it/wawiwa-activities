@@ -11,6 +11,8 @@ const sum = (list) => list.reduce((n, t) => n + words(t), 0);
 // on-screen text of one stage (top / middle / bottom), whatever the kind
 const stageText = (stage = {}) => Object.values(stage).flatMap((p) => [p.eyebrow, p.text, p.label, p.context, p.chip?.text, p.help?.text, ...(p.bubbles || []), ...(p.items || []).map((x) => x.text)]);
 const fieldText = (fields = []) => fields.flatMap((f) => [f.label, f.placeholder]);
+// an explain band (NL3): its label and items, or its one term and definition
+const bandText = (b) => (!b ? [] : b.items ? [b.label, ...b.items.flatMap((x) => (typeof x === 'object' ? [x.term, x.text] : [x]))] : [b.term, b.text]);
 
 // One entry per view the learner sees at once on screen s: [name, strings on screen]
 export function screenViews(s, content) {
@@ -30,7 +32,7 @@ export function screenViews(s, content) {
   }
   // R2 templates
   if (s.variant === 'fill') return [[s.id, [s.situation.text, ...s.fieldRows.flatMap((f) => [f.label, f.value]), ...s.options.map((o) => o.label)]]];
-  if (s.variant === 'metric') return [[s.id, [s.field.label, ...s.options.map((o) => o.label), s.slotsTitle, ...s.slots.map((x) => x.label)]]];
+  if (s.variant === 'metric') return [[s.id, [...bandText(s.band), s.field.label, ...s.options.map((o) => o.label), s.slotsTitle, ...s.slots.map((x) => x.label)]]];
   if (s.variant === 'bounds') return [[s.id, [s.strip, ...s.options.flatMap((o) => [s.startLabel, o.start, s.endLabel, o.end])]]];
   // R3 templates
   if (s.variant === 'safety') return [[`${s.id} step1`, [s.stage.top.text, ...s.options.map((o) => o.label)]],
@@ -64,7 +66,8 @@ export function screenViews(s, content) {
   if (s.template === 'concept') return [[s.id, [s.label, s.topic, s.text, ...s.figures.flatMap((f) => [f.chip, f.caption]), s.evidence.text, s.evidence.source]]];
   // NL2 templates
   // sort deck: every placed card stays on screen in its column, with the current card on the deck
-  if (s.template === 'sortDeck') return [[s.id, [...s.columns.flatMap((c) => [c.label, c.sub]), ...s.cards.map((c) => c.text)]]];
+  // (NL3: with the field chip, the explain band and the hint line when the screen shows them)
+  if (s.template === 'sortDeck') return [[s.id, [s.header, ...bandText(s.band), s.hintShown ? s.hint : '', ...s.columns.flatMap((c) => [c.label, c.sub]), ...s.cards.map((c) => c.text)]]];
   if (s.template === 'keyParts') {
     const base = [s.label, s.text, ...s.parts.flatMap((p) => [p.title, p.text])];
     return [[s.id, base], [`${s.id} case on`, [...base, ...s.parts.flatMap((p) => [s.caseLabel, p.case])]]];

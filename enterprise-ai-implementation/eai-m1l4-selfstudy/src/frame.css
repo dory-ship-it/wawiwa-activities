@@ -366,10 +366,10 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 
 /* S06 one situation at a time (NL2 frames): the hint line, the raised situation card, the done card */
 .w-sheet-sit > .w-instruction { margin-bottom: 0; }
-.w-hintline { margin: 10.24px 0 20.48px; display: flex; gap: 7.68px; align-items: center; font: 400 19.2px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-hintline { margin: 10.24px 0 17.92px; /* NL3: 20.48 -> 17.92, situation 2 with a two-line strip stays within 41cqw */ display: flex; gap: 7.68px; align-items: center; font: 400 19.2px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
 .w-hintline > svg { color: var(--wl-muted); }
 .w-sit-row { display: flex; gap: 20.48px; align-items: flex-start; }
-.w-situation-now { flex: 1; display: grid; gap: 15.36px; padding: 23.04px 25.6px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white);
+.w-situation-now { flex: 1; display: grid; gap: 10.24px; padding: 19.2px 25.6px; /* NL3: from 15.36 / 23.04, the panel within 41cqw with both situations right */ border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white);
   box-shadow: var(--wl-card-shadow); }
 .w-sit-kicker { font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
 .w-sit-text { font: 800 28.16px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
@@ -390,8 +390,26 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-rules-label { font: 700 19.2px/normal var(--wl-font-ui); color: var(--wl-teal-ink); white-space: nowrap; }
 .w-rule { display: inline-flex; align-items: center; gap: 7.68px; font: 700 19.2px/normal var(--wl-font-ui); color: var(--wl-ink); white-space: nowrap; }
 .w-rule-n { width: 28.16px; height: 28.16px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-navy); font: 800 14.08px/normal var(--wl-font-ui); color: var(--wl-white); }
+/* NL3, by analogy: the band with definitions (S09, S11): the label on its own line, the items in a grid,
+   each wrapping in its cell (S11: an arrow between them); one definition alone (S14, S15) is one line */
+.w-rules-grid { display: grid; gap: 10.24px; align-items: start; }
+.w-rules-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8.96px 20.48px; align-items: start; }
+.w-rules-items[data-chain="true"] { grid-template-columns: repeat(5, auto); justify-content: start; gap: 8.96px 12.8px; align-items: center; }
+.w-sheet .w-rules-grid { margin-bottom: 10.24px; padding: 8.96px 20.48px; gap: 5.12px; }
+/* S11 with its band: the metric task a little tighter, so the panel stays within 41cqw (the slots are
+   status, not targets) */
+.w-sheet:has(.w-rules-grid) .w-metric { gap: 10.24px; }
+.w-sheet:has(.w-rules-grid) .w-slot { min-height: 36px; }
+.w-rules-grid .w-rule { align-items: flex-start; white-space: normal; }
+.w-rules-grid .w-rule-n { flex: none; }
+.w-rule-body { font: 400 17.92px/1.35 var(--wl-font-ui); color: var(--wl-ink); }
+.w-rule-body b { font-weight: 700; }
+.w-rule-arrow { color: var(--wl-navy); }
+.w-rules-def { display: block; font: 400 19.2px/1.4 var(--wl-font-ui); color: var(--wl-ink); }
+.w-rules-def .w-rules-label { white-space: normal; }
 .w-rounds { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 30.72px; align-items: start; }
-.w-round-left { display: grid; gap: 15.36px; align-content: start; }
+.w-round-left { display: grid; gap: 12.8px; align-content: start; } /* NL3: 15.36 -> 12.8, with the rules band's margin, keeps the panel within 41cqw when "Next round" sits in the strip */
+.w-sheet > .w-rules:first-child:not(.w-rules-grid) { margin-bottom: 17.92px; }
 .w-round-count, .w-round-hint { font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
 .w-sheet .w-round-left .w-instruction { margin: 0; font-size: 33.28px; }
 .w-round-card { display: grid; gap: 10.24px; padding: 17.92px 20.48px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); }
@@ -606,10 +624,23 @@ a.w-btn { text-decoration: none; }
 .w-float .w-band-live { font: 400 18.56px/1.4 var(--wl-font-ui); color: var(--wl-fb-text); }
 .w-float .w-band-verdict { display: inline; font: 800 20.48px/normal var(--wl-font-ui); }
 .w-float .w-band-text { display: inline; margin: 0; font: inherit; color: inherit; }
-.w-float-deck { left: 50%; width: min(819.2px, calc(100% - 102.4px)); transform: translateX(-50%); top: 232.96px; }
+
+/* NL3 (S04, S09, S16, S17): the strip beside the deck (right), so it never covers the counter; the
+   explain band on the deck's other side (S09); a wide deck for long cases (S17). The columns' top is
+   set from the tallest card, strip and band (src/templates/sortdeck.js). */
+.w-main[data-layout="sort-deck"] { --deck-w: 435.2px; --deck-edge: max(51.2px, calc((100% - 1177.6px) / 2)); }
+.w-main[data-layout="sort-deck"]:has(.w-sdeck[data-size="wide"]) { --deck-w: 563.2px; }
+.w-float-beside { left: calc(50% + var(--deck-w) / 2 + 20.48px); right: var(--deck-edge); }
+.w-deck-band { position: absolute; top: 102.4px; left: var(--deck-edge); right: calc(50% + var(--deck-w) / 2 + 20.48px); }
+.w-deck-band .w-rules { margin: 0; padding: 12.8px 15.36px; }
+.w-deck-band .w-rules-label { font-size: 17.92px; white-space: normal; }
+.w-deck-band .w-rules-items { grid-template-columns: minmax(0, 1fr); gap: 6.4px; }
+.w-deck-band .w-rule-n { display: none; } /* the levels' order reads top down ("from open to closed") */
+.w-deck-band .w-rule-body { font-size: 15.36px; }
+.w-head-chip { align-self: center; flex: none; }
 
 /* the sort deck (S04): one card at a time, two offset cards behind it, the counter under it */
-.w-sdeck { position: absolute; left: 50%; top: 102.4px; width: 435.2px; transform: translateX(-50%); }
+.w-sdeck { position: absolute; left: 50%; top: 102.4px; width: var(--deck-w, 435.2px); transform: translateX(-50%); }
 .w-deck-stack { position: relative; }
 .w-deck-stack[data-done="true"] { visibility: hidden; }
 .w-deck-under { position: absolute; inset: 0; border: 1px solid var(--wl-line); border-radius: 15.36px; background: var(--wl-white); }

@@ -104,7 +104,9 @@ function keyIdea(ctx) {
 function labelTask(ctx) {
   const { screen, ui, content, zones } = ctx;
   const trackingId = screen.tracking[0].id;
-  const d = diagram(content.diagrams[screen.diagram]);
+  // the task's own description of the diagram (NL3): rows and places, no shape names (they are the answers)
+  const dg = content.diagrams[screen.diagram];
+  const d = diagram({ ...dg, alt: screen.diagramAlt || dg.alt });
   const first = {};
   let left = screen.labels.length;
 
@@ -122,7 +124,7 @@ function labelTask(ctx) {
     glyph('g-grip', { size: 12.8, className: 'w-grip' }), h('span', {}, l.text)));
   const tray = h('div', { class: 'w-label-tray', role: 'group', 'aria-labelledby': 'w-instruction' }, cards);
   const byCard = new Map(cards.map((c, i) => [c, screen.labels[i]]));
-  const dd = dragDrop({ ui, live, targets, nameOf: (c) => byCard.get(c).text, onDrop: (c, tid) => dropOn(c, tid) });
+  const dd = dragDrop({ ui, live, targets, nameOf: (c) => byCard.get(c).text, onDrop: (c, tid) => dropOn(c, tid), picked: ui.drag.pickedPlace });
   cards.forEach((c) => dd.add(c));
 
   // the ghost hand: it grabs the first label (its right part) and stops before the diagram

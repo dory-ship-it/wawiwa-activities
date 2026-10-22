@@ -31,7 +31,7 @@ import { h, fmt, resolveLink } from '../util.js';
 import { icon, glyph } from '../icons.js';
 import { attachTip } from '../tooltip.js';
 import { letter } from '../tracking/index.js';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer } from './stage.js';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand } from './stage.js';
 import { field } from './input.js';
 import { targetSteps } from '../ghost.js';
 
@@ -352,8 +352,7 @@ function rounds(ctx) {
 
   layout(ctx, 'focus',
     sheet('focus',
-      h('div', { class: 'w-rules' }, h('b', { class: 'w-rules-label' }, screen.rules.label),
-        screen.rules.items.map((t, i) => h('span', { class: 'w-rule' }, h('span', { class: 'w-rule-n', 'aria-hidden': 'true' }, String(i + 1)), t))),
+      explainBand(screen.rules),
       h('div', { class: 'w-rounds', dataset: { interaction: '' } },
         h('div', { class: 'w-round-left' }, counter, zones.instruction, h('div', { class: 'w-round-card' }, badge, line), h('p', { class: 'w-round-hint' }, screen.hint)),
         group),
@@ -437,10 +436,11 @@ function metric(ctx) {
     x.el.querySelector('.w-slot-mark').replaceChildren(glyph(on ? 'g-check-b' : 'g-cross', { size: 16 }));
     x.state.textContent = ' ' + (on ? ui.slot.on : ui.slot.off);
   });
+  // NL3: the explain band on top (S08's), so the field name moves beside the heading as its chip
   layout(ctx, 'focus',
     sheet('focus',
-      ruleLabel(screen.field.label),
-      zones.instruction,
+      screen.band ? [explainBand(screen.band), h('div', { class: 'w-head-row' }, zones.instruction, h('span', { class: 'w-field-chip w-head-chip' }, screen.field.label))]
+        : [ruleLabel(screen.field.label), zones.instruction],
       h('div', { class: 'w-metric', dataset: { interaction: '' } },
         group,
         h('div', { class: 'w-slots', 'aria-live': 'polite' }, h('p', { class: 'w-slots-title' }, screen.slotsTitle), h('ul', {}, slots.map((x) => x.el)))),

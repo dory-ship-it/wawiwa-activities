@@ -8,7 +8,8 @@
 //      flush to its panel's edges, nothing clipped, contrast of every text/background pair, no text
 //      under 14 px, targets 44 px
 //   3. the open menu and its dialogs: the same contrast, size and target checks
-// Usage: npm run test:fit
+// Usage: npm run test:fit                 everything
+//        node tools/test-fit.mjs S09 W3    only these screens' states (section 2), for a quick check
 // Chrome: set CHROME_PATH, or a stock Google Chrome / Chromium install is found on its own.
 import puppeteer from 'puppeteer-core';
 import { startServer } from './serve.mjs';
@@ -17,6 +18,7 @@ import { chromePath, measureLayout, layoutVerdict } from './lib.mjs';
 // every screen state at these sizes; 1366x650 to 2560x1080: browser windows with their bars, stage
 // widened (2560x1080 caps the stage at 1600 and letterboxes the rest)
 const SIZES = [[1280, 720], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 1080]];
+const ONLY = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const fails = [];
 const ok = (m) => console.log('  ok   ' + m);
 const fail = (m) => { fails.push(m); console.log('  FAIL ' + m); };
@@ -65,7 +67,7 @@ async function measure(page, what) {
 
 /* ---- 1. load, scale, shell ---- */
 console.log('\n1. load and fit');
-for (const size of [[1280, 720], [1920, 1080], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 900], [2560, 1080]]) {
+for (const size of ONLY.length ? [] : [[1280, 720], [1920, 1080], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 900], [2560, 1080]]) {
   const page = await open('?reset=1&screen=S01', size); // the shell (O1, the title, has no footer by design)
   const r = await page.evaluate(() => {
     const stage = document.querySelector('.w-stage');
@@ -163,9 +165,9 @@ const STATES = [
     await p.type('.w-input[data-store="L4_CASE_OUTPUT"]', 'A call summary in the CRM, to the sales manager and the account team');
     await click(p, '[data-action="save"]');
   }],
-  // R2: Chapters 3 and 4
-  ['FT3', 'idle', async () => {}],
-  ['FT3', 'correct + routes', async (p) => click(p, '.w-opt[data-id="c"]')],
+  // NL3: Chapters 3 and 4 (storyboard v3)
+  ['W3', 'hint', async () => {}],
+  ['W3', 'guess', async (p) => click(p, '.w-guess[data-id="c"]')],
   ['V2', 'play view', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); }],
   ['V2', 'stop 3, wrong', async (p) => {
     for (const k of ['b', 'a']) { await toStop(p); await click(p, `.w-stop-view .w-opt[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }
@@ -175,9 +177,10 @@ const STATES = [
     for (const k of ['b', 'a', 'b']) { await toStop(p); await click(p, `.w-stop-view .w-opt[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }
     await playUntil(p, () => document.querySelector('.w-next').dataset.locked === 'false', 'video end');
   }],
-  ['S09', 'start', async () => {}],
-  ['S09', 'wrong', async (p) => { await click(p, '.w-tray-card[data-card="4"]'); await click(p, '.w-sort-target[data-column="a"]'); }],
-  ['S09', 'done', async (p) => { for (const [c, col] of [['1', 'a'], ['2', 'a'], ['3', 'b'], ['4', 'c'], ['5', 'd'], ['6', 'd']]) { await click(p, `.w-tray-card[data-card="${c}"]`); await click(p, `.w-sort-target[data-column="${col}"]`); } }],
+  ['S09', 'start', async (p) => p.keyboard.press('Shift')],
+  ['S09', 'wrong', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b']); }],
+  ['S09', 'longest line', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'a', 'b', 'c']); }], // card 4's right line, the longest
+  ['S09', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'a', 'b', 'c', 'd', 'd']); }],
   ['S10', 'wrong', async (p) => click(p, '.w-opt[data-id="d"]')],
   ['S10', 'right', async (p) => click(p, '.w-opt[data-id="c"]')],
   ['S11', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
@@ -241,6 +244,8 @@ const STATES = [
   ['S22', 'finish confirm', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); }],
   ['S22', 'finished', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); await click(p, '[data-action="finish"]'); }],
 ];
+// the sort deck: click the card, then a column, once per column given
+async function deck(p, cols) { for (const col of cols) { await click(p, '[data-action="card"]'); await click(p, `.w-drop[data-column="${col}"]`); } }
 // links that open a new tab: keep the test inside the module (the tab itself is checked in walk.mjs)
 async function noNewTab(p, sel) { await p.evaluate((s) => document.querySelector(s).addEventListener('click', (e) => e.preventDefault(), { capture: true }), sel); }
 // the video player: no seeking ahead of what was watched, so play muted at 16x to the next stop
@@ -270,7 +275,7 @@ async function playUntil(p, done, what) {
 }
 const toStop = (p) => playUntil(p, () => !document.querySelector('.w-stop-view').hidden, 'video stop');
 for (const size of SIZES) {
-  for (const [id, state, act] of STATES) {
+  for (const [id, state, act] of STATES.filter(([id]) => !ONLY.length || ONLY.includes(id))) {
     const page = await open(`?reset=1&screen=${id}`, size);
     await act(page);
     await measure(page, `${id} ${state} ${size.join('x')}`);
@@ -281,7 +286,7 @@ for (const size of SIZES) {
 
 /* ---- 3. menu and dialogs ---- */
 console.log('\n3. menu and dialogs');
-for (const size of SIZES) {
+for (const size of ONLY.length ? [] : SIZES) {
   const page = await open('?reset=1&screen=S03', size);
   await click(page, '.w-bar-menu');
   await measure(page, `menu open ${size.join('x')}`);

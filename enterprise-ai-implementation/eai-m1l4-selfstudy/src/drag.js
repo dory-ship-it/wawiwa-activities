@@ -18,7 +18,9 @@ import { fmt, reducedMotion } from './util.js';
 const SLOP = 4; // window px before a press becomes a drag
 const BACK_MS = 300;
 
-export function dragDrop({ ui, live, targets, nameOf, onDrop }) {
+// picked: the announcement when a card is picked up (default ui.drag.picked, "choose a column";
+// places on a diagram or a map say ui.drag.pickedPlace)
+export function dragDrop({ ui, live, targets, nameOf, onDrop, picked: pickedLine = ui.drag.picked }) {
   let picked = null, chosen = null, drag = null;
   const say = (text) => { live.textContent = ''; live.textContent = text; };
   const stageScale = (el) => { const st = el.closest('.w-stage'); return st ? st.getBoundingClientRect().width / st.offsetWidth || 1 : 1; };
@@ -79,7 +81,7 @@ export function dragDrop({ ui, live, targets, nameOf, onDrop }) {
       if (card.inert || card.getAttribute('aria-disabled') === 'true') return;
       if (picked === card) { pick(null); say(ui.drag.cancelled); return; }
       pick(card);
-      say(fmt(ui.drag.picked, { item: nameOf(card), n: targets.length }));
+      say(fmt(pickedLine, { item: nameOf(card), n: targets.length }));
     });
     card.addEventListener('keydown', (e) => {
       if (card.inert || card.getAttribute('aria-disabled') === 'true') return;

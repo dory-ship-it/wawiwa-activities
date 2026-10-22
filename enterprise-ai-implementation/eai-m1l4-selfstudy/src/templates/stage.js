@@ -55,6 +55,24 @@ export function picture(image, className) {
   return img;
 }
 
+// The explain band (the S08 frames' rules band): a white rounded band, its teal label, then numbered
+// items. An item is a string (S08's three rules) or { term, text } (NL3: the term in bold, its
+// definition after it; such a band lays its items out in a grid, each wrapping inside its cell);
+// chain: true puts an arrow between the items (S11: Baseline, Target, Date). A band of a single
+// item without a label (S14, S15: one definition) is the term and its definition on one line.
+export function explainBand(b) {
+  if (!b.items) {
+    return h('p', { class: 'w-rules w-rules-def' }, h('b', { class: 'w-rules-label' }, b.term + ':'), ' ', h('span', {}, b.text));
+  }
+  const defs = b.items.some((x) => typeof x === 'object');
+  const items = b.items.map((x, i) => h('span', { class: 'w-rule' }, h('span', { class: 'w-rule-n', 'aria-hidden': 'true' }, String(i + 1)),
+    typeof x === 'object' ? h('span', { class: 'w-rule-body' }, h('b', {}, x.term + ':'), ' ', x.text) : x));
+  const row = [];
+  items.forEach((el, i) => row.push(i && b.chain ? glyph('g-arrow', { size: 19.2, className: 'w-rule-arrow' }) : null, el));
+  const list = defs ? h('div', { class: 'w-rules-items', dataset: { n: String(items.length), chain: b.chain ? 'true' : null } }, row) : row;
+  return h('div', { class: 'w-rules' + (defs ? ' w-rules-grid' : '') }, h('b', { class: 'w-rules-label' }, b.label), list);
+}
+
 // Small label line (the panel's lead-in on screens styled by analogy)
 export const ruleLabel = (text, className = '') => h('p', { class: ('w-label ' + className).trim() }, h('span', {}, text));
 
