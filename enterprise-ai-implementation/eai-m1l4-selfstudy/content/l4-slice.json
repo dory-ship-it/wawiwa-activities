@@ -74,7 +74,8 @@
         "multi": "Next, locked until both answers are correct",
         "input": "Next, locked until you save",
         "sort": "Next, locked until every card is in its column",
-        "diagram": "Next, locked until you find where the path splits and open all three parts",
+        "sortDeck": "Next, locked until every card is in its column",
+        "label": "Next, locked until every label is on the diagram",
         "pair": "Next, locked until both situations have the right format",
         "tiles": "Next, locked until you open all eight fields and answer the question",
         "rounds": "Next, locked until all three rounds are right",
@@ -761,16 +762,16 @@
       ],
       "targetsNote": "rect [left, top, width, height] and chip [centre x, centre y] in diagram units (.1cqw), from the S05b frames",
       "labels": [
-        { "id": "swimlane", "text": "Swimlane", "target": "a",
+        { "id": "swimlane", "code": "s", "text": "Swimlane", "target": "a",
           "feedback": { "correct": "Right: each row is one role. Escalations sit in the HR manager's lane.", "wrong": "A swimlane is a whole row, one per role." } },
-        { "id": "gateway", "text": "Gateway", "target": "b",
+        { "id": "gateway", "code": "g", "text": "Gateway", "target": "b",
           "feedback": { "correct": "Right: the diamond is a decision. Within policy, staff answer; beyond it, the manager does.", "wrong": "Look for the shape where the path splits in two." } },
-        { "id": "event", "text": "Event", "target": "c",
+        { "id": "event", "code": "e", "text": "Event", "target": "c",
           "feedback": { "correct": "Right: the circle marks where the process starts.", "wrong": "Look for the circle where the process starts." } }
       ],
       "advance": "after-all-placed",
       "tracking": [
-        { "id": "L4_S05B_1", "type": "matching", "correctResponse": "swimlane.a,gateway.b,event.c", "scored": false, "bloom": "Remember", "result": "graded" }
+        { "id": "L4_S05B_1", "type": "matching", "correctResponse": "s.a,g.b,e.c", "scored": false, "bloom": "Remember", "result": "graded" }
       ],
       "sources": ["planning/CH2-SPEC.md 4", "s12", "s13"]
     },

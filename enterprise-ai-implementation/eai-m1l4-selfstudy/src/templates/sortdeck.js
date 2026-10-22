@@ -41,9 +41,11 @@ export const sortDeck = {
     const helpId = 'w-deck-help';
     const card = h('button', { class: 'w-deck-card', type: 'button', 'aria-pressed': 'false', 'aria-describedby': helpId, dataset: { action: 'card' } },
       glyph('g-grip', { size: 12.8, className: 'w-grip' }), text);
-    const under = [h('i', { class: 'w-deck-under w-deck-under-2' }), h('i', { class: 'w-deck-under w-deck-under-1' })];
+    // the offset cards and the counter may sit under the feedback strip (a two-line card, as in the
+    // frames: the strip is fixed between the deck and the columns); the card says "Card n of 5" itself
+    const under = [h('i', { class: 'w-deck-under w-deck-under-2', dataset: { underStrip: '' } }), h('i', { class: 'w-deck-under w-deck-under-1', dataset: { underStrip: '' } })];
     const stack = h('div', { class: 'w-deck-stack' }, under, card);
-    const counter = h('p', { class: 'w-deck-count', 'aria-hidden': 'true' });
+    const counter = h('p', { class: 'w-deck-count', 'aria-hidden': 'true', dataset: { underStrip: '' } });
     const live = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
     const help = h('span', { class: 'w-sr-only', id: helpId }, fmt(ui.drag.help, { n: cols.length }));
 

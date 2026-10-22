@@ -58,6 +58,7 @@ export function measureLayout() {
     if (el.closest('svg') && tag !== 'svg') continue;
     if (bandOn && (band.contains(el) || el.contains(band))) continue; // the band, and the panel it sits in
     if (el.matches('.w-video')) continue; // the film is the screen's backdrop (V1, V2), like the scene photo
+    if (el.closest('[data-under-strip]')) continue; // NL2 sort deck: the frames' strip covers the counter of a two-line card
     if (!visible(el)) continue;
     const r = el.getBoundingClientRect();
     if (r.width < 1 || r.height < 1 || scrolledAway(el, r)) continue;
@@ -77,7 +78,7 @@ export function measureLayout() {
     }
     return out;
   };
-  boxes.push(...textRuns(main, (n) => bandOn && band.contains(n)));
+  boxes.push(...textRuns(main, (n) => (bandOn && band.contains(n)) || !!n.parentElement.closest('[data-under-strip]')));
 
   const hit = (b, R) => b.bottom > R.top + 0.5 && b.top < R.bottom - 0.5 && b.right > R.left + 0.5 && b.left < R.right - 0.5;
   const overlaps = bandOn ? boxes.filter((b) => hit(b, B)).map((b) => b.what) : [];

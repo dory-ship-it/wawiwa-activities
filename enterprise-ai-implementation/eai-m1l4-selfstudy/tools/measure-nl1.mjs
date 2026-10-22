@@ -1,6 +1,7 @@
-// NL1 helper: the boxes of the text runs in one reference frame and in the built screen, side by side
-// (stage px, rounded), so differences can be read as numbers. Usage:
-//   node tools/measure-nl1.mjs <frame number 1-23> "<query>" ["<js to run in the build first>"]
+// NL1 helper (NL2: any of the 45 frames): the boxes of the text runs in one reference frame and in
+// the built screen, side by side (stage px, rounded), so differences can be read as numbers. Usage:
+//   node tools/measure-nl1.mjs <frame number 1-45> "<query>" ["<js to run in the build first>"]
+// (tools/probe.mjs prints any expression on a built screen, after an optional setup script)
 import puppeteer from 'puppeteer-core';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';

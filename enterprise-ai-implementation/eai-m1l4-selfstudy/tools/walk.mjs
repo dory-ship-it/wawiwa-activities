@@ -331,8 +331,8 @@ await expectNewScreen(page, 'S01', 'O3 Next');
 await expectBand(page, 'S01 before action', { state: 'hint', text: S.S01.hint, unlocked: false, lockedWhy: UI.footer.locked.single });
 const img = await page.evaluate(() => ({ scene: document.querySelector('.w-stage').dataset.scene, photo: document.querySelector('.w-scene-photo')?.style.backgroundImage || '',
   quote: document.querySelector('.w-quote-glass .w-quote-1')?.textContent, attrib: document.querySelector('.w-quote-glass .w-attrib')?.textContent }));
-expect(img.scene === 'stage' && img.photo.includes(CH.ch0.photo.src) && img.quote === S.S01.stage.top.bubbles[1] && img.attrib === S.S01.stage.top.label + ' · ' + UI.fictionalBadge,
-  `S01 Stage: the chapter photo (${CH.ch0.photo.src}), Dana's quote on glass with "${img.attrib}"`);
+expect(img.scene === 'stage' && img.photo.includes(CH.ch0.photo.src) && img.quote === S.S01.stage.top.bubbles.at(-1) && await page.evaluate(() => document.querySelector('.w-sheet .w-context').textContent) === S.S01.stage.top.context && img.attrib === S.S01.stage.top.label + ' · ' + UI.fictionalBadge,
+  `S01 Stage: the chapter photo (${CH.ch0.photo.src}), Dana's quote on glass with "${img.attrib}", the context line in the third person`);
 await expectLayout(page, 'S01 hint');
 await shot(page, 's01-hint.png');
 
@@ -472,7 +472,7 @@ await press(page, 'Enter');
 // S03 and the top bar in chapter 1 (no skipping: V1 was watched)
 await expectNewScreen(page, 'S03', 'K1 Next');
 rl = await bar(page);
-expect(rl.chapter === CH.ch1.title && rl.steps.join() === stepsOf('ch1').map((v, i) => (i < 3 ? 'done:' : 'current*:') + v).join() && rl.status[0] === 'done' && rl.status[1] === 'current' && rl.pct === 11,
+expect(rl.chapter === CH.ch1.title && rl.steps.join() === stepsOf('ch1').map((v, i) => (i < 3 ? 'done:' : 'current*:') + v).join() && rl.status[0] === 'done' && rl.status[1] === 'current' && rl.pct === 10,
   `top bar in chapter 1: "${rl.chapter}", steps ${rl.steps.join(' ')}; ${CH.ch0.title} ${rl.status[0]}, ${CH.ch1.title} ${rl.status[1]}, ${rl.pct}%`);
 // the ghost hand on S03 never selects or checks anything, and tracks nothing
 const s03g = await page.evaluate(async () => {
@@ -532,144 +532,172 @@ await expectLayout(page, 'S03 correct');
 await shot(page, 's03-correct.png');
 await press(page, 'Enter');
 
-/* ---------- Chapter 2 (R1): FT2 wrong, then the full chapter, every interaction wrong then right ---------- */
+const SKETCH = { trigger: 'A rep finishes a sales call', steps: 'Rep types notes by hand; the manager reads them two days later', output: 'A call summary, to the sales manager' };
+/* ---------- Chapter 2 (NL2, storyboard v3): every interaction wrong then right, keyboard only ---------- */
 console.log('\nchapter 2 (keyboard)');
-await expectNewScreen(page, 'FT2', 'S03 Next (no pause marker: one Next moves on)');
-await expectBand(page, 'FT2 before action', { state: 'hint', text: S.FT2.hint, unlocked: false, lockedWhy: UI.footer.locked.challenge });
-const ft2 = await page.evaluate(() => ({ head: document.querySelector('.w-memo-head').textContent, line: document.querySelector('.w-memo-line').textContent,
-  q: document.querySelector('.w-memo-q').textContent, skip: [...document.querySelectorAll('.w-band-tool [data-action]')].map((b) => b.dataset.action).join() }));
-expect(ft2.head === UI.memo.header.replace('{n}', '2') && ft2.line === S.FT2.stage.top.text && ft2.q === S.FT2.stage.middle.text && ft2.skip === S.FT2.stage.bottom.link,
-  `FT2 memo (Focus panel, by analogy): header "${ft2.head}" (once), challenge text from content, Skip in the hint row`);
-await expectLayout(page, 'FT2 memo');
-await shotR1(page, 'ft2.png');
-await tabTo(page, '.w-opt[data-id="a"]');
+// W2 warm-up: a neutral guess, as W1
+await expectNewScreen(page, 'W2', 'S03 Next (no pause marker: one Next moves on)');
+await expectBand(page, 'W2 before action', { state: 'hint', text: S.W2.hint, unlocked: false, lockedWhy: UI.footer.locked.warmup });
+rl = await bar(page);
+expect(rl.chapter === CH.ch2.title && rl.steps.map((s) => s.split(':')[1]).join() === 'Guess,Learn,Sort,Learn,Label,Decide,Explore,Decide,Sketch' && rl.steps[0].startsWith('current*'),
+  `top bar in chapter 2: "${rl.chapter}", steps ${rl.steps.join(' ')}`);
+expect(await page.evaluate(() => document.querySelector('.w-warmup-panel').textContent).then((t) => t.includes(S.W2.instruction) && t.includes(S.W2.panel.chip)),
+  'W2: the question on the glass card with "Not scored"');
+await expectLayout(page, 'W2 hint');
+await tabTo(page, '.w-guess[data-id="a"]');
 await press(page, 'Enter');
-await expectBand(page, 'FT2 wrong (a)', { state: 'wrong', text: opt('FT2', 'a').feedback, unlocked: true });
-expect(await isActive(page, '.w-next'), 'FT2 wrong: Next unlocked and focused (the full chapter)');
+await expectBand(page, 'W2 guess a', { state: 'guess', verdict: S.W2.feedback.verdict, text: S.W2.feedback.text, unlocked: true });
+expect(await isActive(page, '.w-next'), 'W2 guess: focus on Next');
 await press(page, 'Enter');
 
-// S04 sort: select the card, then a column
-await expectNewScreen(page, 'S04', 'FT2 wrong, Next');
-await expectBand(page, 'S04 before action', { state: 'hint', text: S.S04.hint, unlocked: false, lockedWhy: UI.footer.locked.sort });
-const sortState = () => page.evaluate(() => ({ pressed: document.querySelector('[data-action="card"]').getAttribute('aria-pressed'), text: document.querySelector('.w-sort-text').textContent,
-  dots: document.querySelector('.w-deck .w-dots').getAttribute('aria-label'), off: [...document.querySelectorAll('.w-sort-target')].map((t) => t.getAttribute('aria-disabled') === 'true').join(),
-  chips: [...document.querySelectorAll('.w-sort-chips')].map((u) => u.children.length).join(), wrong: [...document.querySelectorAll('.w-sort-target')].map((t) => t.dataset.result || '-').join() }));
-let ss = await sortState();
-expect(ss.text === S.S04.cards[0].text && ss.dots === 'Card 1 of 5' && ss.pressed === 'false' && ss.off === 'true,true,true',
-  `S04 start: card 1 "${ss.text}", "${ss.dots}", columns wait for a selected card`);
+// K2 key idea: three parts, the HR case toggle (aria-pressed), Next never locked
+await expectNewScreen(page, 'K2', 'W2 Next');
+const k2 = () => page.evaluate(() => ({ pressed: document.querySelector('[data-action="caseToggle"]').getAttribute('aria-pressed'),
+  titles: [...document.querySelectorAll('.w-part-title')].map((x) => x.textContent).join(),
+  cases: [...document.querySelectorAll('.w-part-case')].map((x) => (x.hidden ? '' : x.querySelector('.w-part-case-text').textContent)).join() }));
+let kk = await k2();
+expect(kk.pressed === 'false' && kk.titles === S.K2.parts.map((p) => p.title).join() && kk.cases === ',,' && !(await nextState(page)).locked,
+  `K2: three parts (${kk.titles}), the HR case hidden, Next unlocked (presentation screen)`);
+await expectLayout(page, 'K2');
+await tabTo(page, '[data-action="caseToggle"]');
+await press(page, 'Enter');
+kk = await k2();
+expect(kk.pressed === 'true' && kk.cases === S.K2.parts.map((p) => p.case).join(), `K2 toggle: aria-pressed true, each card shows its HR case line (${kk.cases})`);
+await expectLayout(page, 'K2 HR case on');
+await tabTo(page, '.w-next');
+await press(page, 'Enter');
+
+// S04 sort deck: the ghost hand (first drag), then the keyboard: 1 to 3 chooses, Enter drops, Escape cancels
+await expectNewScreen(page, 'S04', 'K2 Next');
+await expectBand(page, 'S04 before action', { state: 'hint', text: S.S04.hint, unlocked: false, lockedWhy: UI.footer.locked.sortDeck });
+await page.waitForSelector('.w-ghost', { timeout: 3000 }).catch(() => {});
+const s04g = await page.evaluate(() => ({ hand: !!document.querySelector('.w-ghost'), showMe: !!document.querySelector('.w-task-head [data-action="showMe"]'), ev: window.__l4.tracking.events.filter((e) => e.trackingId === 'L4_S04_1').length }));
+await press(page, 'Shift');
+expect(s04g.hand && s04g.showMe && !s04g.ev && await page.evaluate(() => !document.querySelector('.w-ghost')), 'S04 ghost hand: shown on first use, "Show me" beside the heading, nothing tracked; a key stops it');
+const deckState = () => page.evaluate(() => ({ text: document.querySelector('.w-deck-text').textContent, count: document.querySelector('.w-deck-count').textContent,
+  placed: [...document.querySelectorAll('.w-drop-cards')].map((u) => u.children.length).join(), chosen: [...document.querySelectorAll('.w-drop')].map((d) => (d.dataset.chosen === 'true' ? 'x' : '-')).join(''),
+  pressed: document.querySelector('[data-action="card"]').getAttribute('aria-pressed'), live: document.querySelector('.w-sdeck [aria-live]').textContent }));
+let ds = await deckState();
+expect(ds.text === S.S04.cards[0].text && ds.count === '1 of 5' && ds.placed === '0,0,0', `S04 start: card 1 "${ds.text}", "${ds.count}", the columns empty`);
 await expectLayout(page, 'S04 start');
-await shotR1(page, 's04-start.png');
 await tabTo(page, '[data-action="card"]');
-await press(page, ' ');
-ss = await sortState();
-expect(ss.pressed === 'true' && ss.off === 'false,false,false', 'S04 Space selects the card (aria-pressed), the columns become active');
-await press(page, 'Tab');
-expect(await isActive(page, '.w-sort-target[data-column="a"]'), 'S04 Tab moves from the card to the first column');
-await press(page, 'ArrowRight');
+await press(page, '2');
+ds = await deckState();
+expect(ds.chosen === '-x-' && ds.pressed === 'true' && ds.live === UI.drag.chosen.replace('{target}', S.S04.columns[1].label), `S04 key 2: Steps chosen and announced ("${ds.live}")`);
+await press(page, 'Escape');
+ds = await deckState();
+expect(ds.chosen === '---' && ds.pressed === 'false' && ds.live === UI.drag.cancelled && await isActive(page, '[data-action="card"]'), 'S04 Escape cancels (announced), focus stays on the card');
+await press(page, '2');
 await press(page, 'Enter');
 await expectBand(page, 'S04 card 1 in Steps', { state: 'wrong', text: S.S04.cards[0].feedback.b, unlocked: false });
-ss = await sortState();
-expect(ss.pressed === 'true' && ss.wrong === '-,wrong,-' && ss.chips === '0,0,0', 'S04 wrong: the column gets the calm wrong mark, the card stays selected');
-await press(page, 'Escape'); // hide the column tip for the screenshot
+ds = await deckState();
+expect(ds.text === S.S04.cards[0].text && ds.placed === '0,0,0' && await isActive(page, '[data-action="card"]'), 'S04 wrong drop: the card returns to the deck, focus on it');
 await expectLayout(page, 'S04 wrong');
-await shotR1(page, 's04-wrong.png');
+await press(page, '1');
+await press(page, 'Enter');
+await expectBand(page, 'S04 card 1 in Trigger', { state: 'correct', verdict: '', text: S.S04.cards[0].feedback.correct, unlocked: false });
+ds = await deckState();
+expect(ds.text === S.S04.cards[1].text && ds.count === '2 of 5' && ds.placed === '1,0,0' && await isActive(page, '[data-action="card"]'), 'S04 right drop: the card stays in Trigger with a check, card 2 comes up and takes the focus');
+const COL = { a: 1, b: 2, c: 3 };
+for (const card of S.S04.cards.slice(1)) { await press(page, String(COL[card.column])); await press(page, 'Enter'); }
+ds = await deckState();
+await expectBand(page, 'S04 last card', { state: 'correct', verdict: '', text: S.S04.cards[4].feedback.correct, unlocked: true });
+expect(ds.placed === '2,2,1' && ds.count === '5 of 5' && await isActive(page, '.w-next'), `S04 done: placed per column ${ds.placed}, Next unlocked and focused`);
+await expectLayout(page, 'S04 done');
+await press(page, 'Enter');
+
+// S05a key idea: the BPMN diagram with three numbered markers and the key
+await expectNewScreen(page, 'S05a', 'S04 Next');
+const s05a = await page.evaluate(() => ({ markers: document.querySelectorAll('.w-bpmn-marker').length, key: [...document.querySelectorAll('.w-bpmn-key li p')].map((p) => p.textContent).join('|'),
+  gate: [...document.querySelectorAll('.w-bpmn-label')].map((x) => x.textContent).join(), alt: document.querySelector('.w-bpmn').getAttribute('aria-label') }));
+expect(s05a.markers === 3 && s05a.key === S.S05a.key.map((k) => k.text).join('|') && s05a.gate.includes('Within policy?') && s05a.alt === C.diagrams.hr.alt && !(await nextState(page)).locked,
+  'S05a: three markers, the key from content, the gateway "Within policy?", the diagram as an image with its description, Next unlocked');
+await expectLayout(page, 'S05a');
+await tabTo(page, '.w-next');
+await press(page, 'Enter');
+
+// S05b labels onto the diagram: Event wrong then right (it stays picked up), then the other two
+await expectNewScreen(page, 'S05b', 'S05a Next');
+await expectBand(page, 'S05b before action', { state: 'hint', text: S.S05b.hint, unlocked: false, lockedWhy: UI.footer.locked.label });
+await page.waitForSelector('.w-ghost', { timeout: 3000 }).catch(() => {});
+expect(await page.evaluate(() => !!document.querySelector('.w-ghost') && !!document.querySelector('.w-task-head [data-action="showMe"]')), 'S05b ghost hand: shown on the first label task, "Show me" beside the heading');
+await press(page, 'Shift');
+const lbl = (id) => S.S05b.labels.find((l) => l.id === id);
+await tabTo(page, '.w-label-card[data-label="event"]');
+await press(page, '1');
+await press(page, 'Enter');
+await expectBand(page, 'S05b Event on the lane', { state: 'wrong', text: lbl('event').feedback.wrong, unlocked: false });
+expect(await page.evaluate(() => document.querySelector('.w-label-card[data-label="event"]').getAttribute('aria-pressed') === 'true' && !document.querySelector('.w-label-card[data-label="event"]').hidden),
+  'S05b wrong drop: the label returns to the tray, still picked up (the frame\'s selected border)');
+await expectLayout(page, 'S05b wrong');
+await press(page, '3');
+await press(page, 'Enter');
+await expectBand(page, 'S05b Event on the start', { state: 'correct', verdict: '', text: lbl('event').feedback.correct, unlocked: false });
+expect(await page.evaluate(() => document.querySelector('.w-label-card[data-label="event"]').hidden && document.querySelector('.w-target[data-target="c"]').dataset.placed === 'true'
+  && document.querySelector('.w-target-placed').textContent === 'Event') && await isActive(page, '.w-label-card[data-label="swimlane"]'),
+  'S05b right drop: the target turns teal with the label and a check, the label leaves the tray, focus on the next label');
+await press(page, '1');
+await press(page, 'Enter');
+await press(page, '2');
+await press(page, 'Enter');
+await expectBand(page, 'S05b done', { state: 'correct', verdict: '', text: lbl('gateway').feedback.correct, unlocked: true });
+expect(await isActive(page, '.w-next'), 'S05b all placed: Next unlocked and focused');
+await expectLayout(page, 'S05b done');
+await press(page, 'Enter');
+
+// S06 one situation at a time: wrong then right, "Next situation", wrong then right
+await expectNewScreen(page, 'S06', 'S05b Next');
+const sit = (k, id) => S.S06.situations[k].options.find((o) => o.id === id);
+const sitState = () => page.evaluate(() => ({ kicker: document.querySelector('.w-situation-now .w-sit-kicker').textContent, done: document.querySelectorAll('.w-sit-done').length, hint: document.querySelector('.w-hintline').textContent }));
+let st6 = await sitState();
+expect(st6.kicker === 'Situation 1 of 2' && !st6.done && st6.hint === S.S06.situations[0].hint, `S06: "${st6.kicker}", its hint under the heading`);
+await expectBand(page, 'S06 before action', { state: 'hint', text: S.S06.situations[0].hint, unlocked: false, lockedWhy: UI.footer.locked.pair });
+await tabTo(page, '.w-opt[data-id="b"]');
+await press(page, 'Enter');
+await expectBand(page, 'S06 situation 1 b', { state: 'wrong', text: sit(0, 'b').feedback, unlocked: false });
 await press(page, 'ArrowLeft');
 await press(page, 'Enter');
-await expectBand(page, 'S04 card 1 in Trigger', { state: 'correct', text: S.S04.cards[0].feedback.correct, unlocked: false });
-ss = await sortState();
-expect(await isActive(page, '[data-action="card"]') && ss.text === S.S04.cards[1].text && ss.dots === 'Card 2 of 5' && ss.chips === '1,0,0' && ss.wrong === '-,-,-',
-  'S04 right: a chip in Trigger, card 2 comes up and takes the focus');
-const COL = { a: 0, b: 1, c: 2 };
-for (const card of S.S04.cards.slice(1)) {
-  await press(page, ' ');
-  await press(page, 'Tab');
-  if (COL[card.column]) await press(page, 'ArrowRight', COL[card.column]);
-  await press(page, 'Enter');
-}
-ss = await sortState();
-await expectBand(page, 'S04 last card', { state: 'correct', text: S.S04.cards[4].feedback.correct, unlocked: true });
-expect(ss.chips === '2,2,1' && await isActive(page, '.w-next'), `S04 done: chips per column ${ss.chips}, Next unlocked and focused`);
-await expectLayout(page, 'S04 done');
-await shotR1(page, 's04-done.png');
+await expectBand(page, 'S06 situation 1 a', { state: 'correct', text: sit(0, 'a').feedback, unlocked: false, actions: ['nextSituation'] });
+expect(await isActive(page, '[data-action="nextSituation"]'), `S06 situation 1 right: focus on "${UI.buttons.nextSituation}"`);
+await expectLayout(page, 'S06 situation 1 right');
 await press(page, 'Enter');
-
-// S05 explorer diagram: hotspots, then the legend
-await expectNewScreen(page, 'S05', 'S04 Next');
-await expectBand(page, 'S05 before action', { state: 'hint', text: S.S05.hint, unlocked: false, lockedWhy: UI.footer.locked.diagram });
-const spot = (id) => S.S05.hotspots.find((x) => x.id === id);
-await tabTo(page, '.w-lane-head');
+st6 = await sitState();
+expect(st6.kicker === 'Situation 2 of 2' && st6.done === 1 && st6.hint === S.S06.situations[1].hint && await isActive(page, '.w-situation-now .w-opt[data-id="a"]'),
+  'S06: situation 1 becomes a small done card, situation 2 comes in with its hint, focus on its first answer');
 await press(page, 'Enter');
-await expectBand(page, 'S05 lane band', { state: 'wrong', text: spot('lane').feedback, unlocked: false });
-await press(page, 'ArrowRight', 3);
-expect(await isActive(page, '.w-node-event'), 'S05 arrow keys move through the hotspots (to the start event)');
-await press(page, 'Enter');
-await expectBand(page, 'S05 start event', { state: 'wrong', text: spot('event').feedback, unlocked: false });
+await expectBand(page, 'S06 situation 2 a', { state: 'wrong', text: sit(1, 'a').feedback, unlocked: false });
+await expectLayout(page, 'S06 situation 2 wrong');
 await press(page, 'ArrowRight');
 await press(page, 'Enter');
-await expectBand(page, 'S05 step box', { state: 'wrong', text: spot('step').feedback, unlocked: false });
-await press(page, 'ArrowRight');
-expect(await isActive(page, '.w-node-gateway'), 'S05 ArrowRight reaches the gateway');
-await press(page, 'Enter');
-await expectBand(page, 'S05 gateway', { state: 'correct', text: spot('gateway').feedback, unlocked: false, lockedWhy: UI.footer.locked.diagram });
-expect(await page.evaluate(() => [...document.querySelectorAll('[data-hotspot]')].every((x) => x.getAttribute('aria-disabled') === 'true')
-  && document.querySelector('.w-node-gateway').dataset.result === 'correct'), 'S05 gateway found: marked right, every hotspot locked, Next still locked (legend)');
-await expectLayout(page, 'S05 gateway');
-await shotR1(page, 's05-gateway.png');
-await tabTo(page, '.w-legend-btn[data-legend="swimlanes"]');
-for (let k = 0; k < S.S05.legend.length; k++) { if (k) await press(page, 'Tab'); await press(page, 'Enter'); }
-const legend = await page.evaluate(() => [...document.querySelectorAll('.w-legend-item')].map((x) => ({ exp: x.querySelector('button').getAttribute('aria-expanded'), open: x.querySelector('.w-legend-text').dataset.open, text: x.querySelector('.w-legend-text').textContent })));
-expect(legend.every((x, k) => x.exp === 'true' && x.open === 'true' && x.text === S.S05.legend[k].text) && await isActive(page, '.w-next'),
-  'S05 legend: all three open in place with the glossary text, Next unlocked and focused');
-await expectBand(page, 'S05 done', { state: 'correct', text: spot('gateway').feedback, unlocked: true });
-await expectLayout(page, 'S05 chips');
-await shotR1(page, 's05-chips.png');
-await press(page, 'Enter');
-
-// S06 two situations: left first, then right
-await expectNewScreen(page, 'S06', 'S05 Next');
-await expectBand(page, 'S06 before action', { state: 'hint', text: S.S06.hint, unlocked: false, lockedWhy: UI.footer.locked.pair });
-const sides = () => page.evaluate(() => [...document.querySelectorAll('.w-situation')].map((x) => x.dataset.state + (x.inert ? '/inert' : '')).join());
-expect(await sides() === 'open,locked/inert', 'S06: the right situation is locked (inert) until the left one is right');
-const sit = (k, id) => S.S06.situations[k].options.find((o) => o.id === id);
-await tabTo(page, '.w-situation .w-opt[data-id="b"]');
-await press(page, 'Enter');
-await expectBand(page, 'S06 left b', { state: 'wrong', text: sit(0, 'b').feedback, unlocked: false });
-await press(page, 'ArrowUp');
-await press(page, 'Enter');
-await expectBand(page, 'S06 left a', { state: 'correct', text: sit(0, 'a').feedback, unlocked: false });
-expect(await sides() === 'open,open' && await isActive(page, '.w-situation + .w-situation .w-opt[data-id="a"]'), 'S06 left right: the right situation opens and takes the focus');
-await press(page, 'Enter');
-await expectBand(page, 'S06 right a', { state: 'wrong', text: sit(1, 'a').feedback, unlocked: false });
-await press(page, 'ArrowDown');
-await press(page, 'Enter');
-await expectBand(page, 'S06 right b', { state: 'correct', text: sit(1, 'b').feedback, unlocked: true });
+await expectBand(page, 'S06 situation 2 b', { state: 'correct', text: sit(1, 'b').feedback, unlocked: true });
 expect(await isActive(page, '.w-next'), 'S06 both right: Next unlocked and focused');
-await expectLayout(page, 'S06 done');
-await shotR1(page, 's06.png');
 await press(page, 'Enter');
 
-// S07 flip tiles, then the question
+// S07 eight tiles: open each (one at a time, the counter), then the question
 await expectNewScreen(page, 'S07', 'S06 Next');
 await expectBand(page, 'S07 before action', { state: 'hint', text: S.S07.hint, unlocked: false, lockedWhy: UI.footer.locked.tiles });
+await page.waitForSelector('.w-ghost', { timeout: 3000 }).catch(() => {});
+expect(await page.evaluate(() => !!document.querySelector('.w-ghost') && !document.querySelector('[data-action="showMe"]')), 'S07 ghost hand: shown once, no "Show me" (not a drag screen)');
+await press(page, 'Shift');
 const tileState = () => page.evaluate(() => ({ open: [...document.querySelectorAll('.w-tile')].filter((t) => t.dataset.open === 'true').map((t) => t.dataset.n).join(),
-  lock: !document.querySelector('.w-question-lock').hidden, lockLabel: document.querySelector('.w-question-lock').getAttribute('aria-label'),
-  q: document.querySelector('.w-question-text').hidden ? '' : document.querySelector('.w-question-text').textContent }));
+  done: [...document.querySelectorAll('.w-tile-disc')].filter((d) => d.querySelector('svg')).length, sub: document.querySelector('.w-task-sub').textContent, h1: document.querySelector('#w-instruction').textContent }));
 let ts = await tileState();
-expect(ts.lock && ts.lockLabel === S.S07.lockedLabel && !ts.q, `S07: question locked ("${ts.lockLabel}")`);
+expect(ts.sub === '0/8' && !ts.open, `S07: counter "${ts.sub}", every tile closed`);
 await tabTo(page, '.w-tile[data-n="1"]');
 for (let n = 1; n <= 8; n++) {
   await press(page, 'Enter');
   ts = await tileState();
-  if (ts.open !== String(n)) fail(`S07 tile ${n}: open tiles "${ts.open}", expected only ${n}`);
-  if (n === 7) { await expectLayout(page, 'S07 tile 7 open'); await shotR1(page, 's07-open-tile.png'); }
+  if (ts.open !== String(n) || (n < 8 && ts.sub !== `${n}/8`) || (n < 8 && ts.done !== n - 1)) fail(`S07 tile ${n}: open "${ts.open}", counter "${ts.sub}", done ${ts.done}`);
+  if (n === 3) await expectLayout(page, 'S07 three opened');
   if (n < 8) await press(page, 'ArrowRight');
 }
 ts = await tileState();
-expect(!ts.lock && ts.q === S.S07.question, `S07: one tile open at a time; after all eight the question shows ("${ts.q}")`);
-expect(await page.evaluate(() => document.querySelector('.w-question-text').tagName) === 'H2', 'S07: the question is an h2 in the instruction style');
+expect(ts.h1 === S.S07.question && ts.sub === S.S07.questionHint && ts.open === '8', `S07: after all eight the heading is the question ("${ts.h1}"), tile 8 stays open to read`);
 await expectBand(page, 'S07 question unlocked', { state: 'hint', text: S.S07.questionHint, unlocked: false });
+await press(page, 'Escape');
+ts = await tileState();
+expect(!ts.open && await page.evaluate(() => [...document.querySelectorAll('.w-tile-mark')].every((m) => getComputedStyle(m).display !== 'none')), 'S07 Escape closes the open tile; every tile shows its answer marker');
 await expectLayout(page, 'S07 question');
-await shotR1(page, 's07-question.png');
 await press(page, 'ArrowLeft');
 await press(page, 'Enter');
 await expectBand(page, 'S07 answer 7', { state: 'wrong', text: S.S07.tiles[6].feedback, unlocked: false });
@@ -680,20 +708,20 @@ expect(await isActive(page, '.w-next'), 'S07 right: Next unlocked and focused');
 await expectLayout(page, 'S07 correct');
 await press(page, 'Enter');
 
-// S08 three rounds
+// S08 three rounds under the rules band
 await expectNewScreen(page, 'S08', 'S07 Next');
 await expectBand(page, 'S08 before action', { state: 'hint', text: S.S08.hint, unlocked: false, lockedWhy: UI.footer.locked.rounds });
-const roundState = () => page.evaluate(() => ({ badge: document.querySelector('.w-field-badge').textContent, line: document.querySelector('.w-round-line').textContent, dots: document.querySelector('.w-rounds .w-dots').getAttribute('aria-label') }));
+expect(await page.evaluate(() => document.querySelector('.w-rules').textContent) === S.S08.rules.label + S.S08.rules.items.map((t, i) => (i + 1) + t).join(''), 'S08: the rules band from content');
+const roundState = () => page.evaluate(() => ({ badge: document.querySelector('.w-field-chip').textContent, line: document.querySelector('.w-round-line').textContent, count: document.querySelector('.w-round-count').textContent }));
 for (let k = 0; k < S.S08.rounds.length; k++) {
   const R = S.S08.rounds[k];
   const rs = await roundState();
-  expect(rs.badge === R.badge && rs.line === R.line && rs.dots === `Round ${k + 1} of 3`, `S08 round ${k + 1}: badge "${rs.badge}", line from content, "${rs.dots}"`);
+  expect(rs.badge === R.badge && rs.line === `“${R.line}”` && rs.count === `Round ${k + 1} of 3`, `S08 round ${k + 1}: chip "${rs.badge}", the line in quotes, "${rs.count}"`);
   if (k === 0) {
     await tabTo(page, '.w-opt[data-id="a"]');
     await press(page, 'Enter');
     await expectBand(page, 'S08 round 1 a', { state: 'wrong', text: R.feedback.a, unlocked: false });
     await expectLayout(page, 'S08 round 1 wrong');
-    await shotR1(page, 's08-round1-wrong.png');
     await press(page, 'ArrowDown');
   } else {
     expect(await isActive(page, '.w-opt[data-id="a"]'), `S08 round ${k + 1}: focus on the first rule`);
@@ -706,12 +734,34 @@ for (let k = 0; k < S.S08.rounds.length; k++) {
 }
 expect(await isActive(page, '.w-next'), 'S08 round 3 right: Next unlocked and focused');
 await expectLayout(page, 'S08 round 3 right');
-await shotR1(page, 's08-round3-right.png');
+await press(page, 'Enter');
+
+// S08B the case sketch: empty Save, then the three parts, Save
+await expectNewScreen(page, 'S08B', 'S08 Next');
+await expectBand(page, 'S08B before action', { state: 'hint', text: '', unlocked: false, lockedWhy: UI.footer.locked.input });
+await tabTo(page, '[data-action="save"]');
+await press(page, 'Enter');
+await expectBand(page, 'S08B empty Save', { state: 'notice', text: S.S08B.feedback.empty, unlocked: false });
+await tabTo(page, '.w-input[data-store="L4_CASE_TRIGGER"]', { back: true });
+await page.keyboard.type(SKETCH.trigger);
+await press(page, 'Tab');
+await page.keyboard.type(SKETCH.steps);
+await press(page, 'Tab');
+await page.keyboard.type(SKETCH.output);
+const s08b = await page.evaluate(() => ({ counters: [...document.querySelectorAll('.w-counter')].map((c) => c.textContent).join(), max: [...document.querySelectorAll('.w-input')].map((i) => i.maxLength).join(), arrows: document.querySelectorAll('.w-chain-arrow').length }));
+expect(s08b.max === '120,250,120' && s08b.arrows === 2 && s08b.counters === `${cnt(SKETCH.trigger.length, 120)},${cnt(SKETCH.steps.length, 250)},${cnt(SKETCH.output.length, 120)}`,
+  `S08B: three fields on a line with two arrows, maxlength 120 / 250 / 120, counters ${s08b.counters}`);
+await tabTo(page, '[data-action="save"]');
+await press(page, 'Enter');
+await expectBand(page, 'S08B saved', { state: 'neutral', text: S.S08B.feedback.saved, unlocked: true });
+const sk = await page.evaluate(() => window.__l4.state.f);
+expect(sk.L4_CASE_TRIGGER === SKETCH.trigger && sk.L4_CASE_STEPS === SKETCH.steps && sk.L4_CASE_OUTPUT === SKETCH.output && await isActive(page, '.w-next'), 'S08B saved: stored under L4_CASE_TRIGGER / _STEPS / _OUTPUT, focus on Next');
+await expectLayout(page, 'S08B saved');
 await press(page, 'Enter');
 
 /* ---------- Chapters 3 and 4 (R2): every interaction wrong then right, the V2 stops, seek blocked ---------- */
 console.log('\nchapters 3 and 4 (keyboard)');
-await expectNewScreen(page, 'FT3', 'S08 Next');
+await expectNewScreen(page, 'FT3', 'S08B Next (no pause marker)');
 rl = await bar(page);
 expect(rl.status[2] === 'done' && rl.status[3] === 'current' && rl.chapter === CH.ch3.title, `after chapter 2: Toolkit ${rl.status[2]}, HR demo ${rl.status[3]}, the bar shows "${rl.chapter}", ${rl.pct}%`);
 const ft3 = await page.evaluate(() => ({ head: document.querySelector('.w-memo-head').textContent, nums: document.querySelectorAll('.w-opt-num').length, img: document.querySelector('.w-photo-memo')?.getAttribute('src') }));
@@ -901,6 +951,10 @@ await press(page, 'Enter');
 // S19: Open workbook opens the existing workbook in a NEW TAB; "I'm back" shows the return state
 await expectNewScreen(page, 'S19', 'S18 Next');
 await expectBand(page, 'S19 brief', { state: 'hint', text: S.S19.hint, unlocked: false, lockedWhy: UI.footer.locked.handoff });
+const s19sk = await page.evaluate(() => ({ label: document.querySelector('.w-sketch .w-label').textContent, rows: [...document.querySelectorAll('.w-sketch-row')].map((r) => r.querySelector('dt').textContent + '=' + r.querySelector('dd').textContent),
+  inputs: document.querySelectorAll('.w-sketch input, .w-sketch textarea, .w-sketch button').length }));
+expect(s19sk.label === S.S19.states.brief.sketch.label && s19sk.rows.join('|') === `Trigger=${SKETCH.trigger}|Steps=${SKETCH.steps}|Output=${SKETCH.output}` && !s19sk.inputs,
+  `S19 brief: "${s19sk.label}" shows the S08B sketch read-only (${s19sk.rows.length} parts, no controls)`);
 const link = await page.evaluate(() => { const a = document.querySelector('[data-action="open"]'); return { href: a.href, target: a.target, rel: a.rel, back: document.querySelector('[data-action="back"]').hidden }; });
 expect(link.href === C.links.workbook && link.target === '_blank' && /noopener/.test(link.rel) && link.back,
   `S19 Open workbook: a link to the existing workbook (${link.href}), target _blank, rel "${link.rel}"; I'm back hidden until opened`);
@@ -998,8 +1052,8 @@ await press(page, 'Enter');
 await expectBand(page, 'S22 download', { state: 'neutral', text: S.S22.step2.feedback.download, unlocked: false });
 let rec = '';
 for (let i = 0; i < 30 && !rec; i++) { await wait(200); try { rec = readFileSync(join(dlDir, UI.record.fileName), 'utf8'); } catch {} }
-expect(rec.includes(TITLE) && rec.includes(METRIC) && rec.includes('4 of 5 on first try (80 of 100)') && rec.includes(S.S20.steps[1].chips[2].label) && rec.includes(UI.buttons.notYet),
-  `S22 lesson record downloaded (${UI.record.fileName}, ${rec.length} bytes): case title, metric, self-check answers, score`);
+expect(rec.includes(TITLE) && rec.includes(METRIC) && rec.includes(UI.record.sketch) && rec.includes(SKETCH.steps) && rec.includes(SKETCH.output) && rec.includes('4 of 5 on first try (80 of 100)') && rec.includes(S.S20.steps[1].chips[2].label) && rec.includes(UI.buttons.notYet),
+  `S22 lesson record downloaded (${UI.record.fileName}, ${rec.length} bytes): case title, Chapter 2 sketch, metric, self-check answers, score`);
 await tabTo(page, '[data-action="finish"]');
 await press(page, 'Enter');
 await expectBand(page, 'S22 finished', { state: 'neutral', text: UI.finished, unlocked: false, lockedWhy: UI.footer.locked.last });
@@ -1009,10 +1063,10 @@ await expectLayout(page, 'S22 finished');
 await shotR3(page, 's22-finish.png');
 
 // revisits: read-only, the right state shown, Next unlocked (S22: finished, the last screen)
-for (const id of ['S04', 'S05', 'S06', 'S07', 'S08', 'V2', 'S09', 'S10', 'S11', 'S12', 'S13', 'S14', 'S15', 'S16', 'S17', 'S18A', 'S18', 'S19', 'S20', 'S21', 'S22']) {
+for (const id of ['W2', 'S04', 'S05b', 'S06', 'S07', 'S08', 'S08B', 'V2', 'S09', 'S10', 'S11', 'S12', 'S13', 'S14', 'S15', 'S16', 'S17', 'S18A', 'S18', 'S19', 'S20', 'S21', 'S22']) {
   await page.evaluate((x) => window.__l4.go(x), id);
   const b = S[id].template === 'video' ? null : await band(page), n = await nextState(page);
-  const want = { S18: 'neutral', S19: 'neutral', S20: 'neutral', S21: 'idle', S22: 'neutral' }[id] || 'correct';
+  const want = { W2: 'guess', S08B: 'neutral', S18: 'neutral', S19: 'neutral', S20: 'neutral', S21: 'idle', S22: 'neutral' }[id] || 'correct';
   const nextOk = id === 'S22' ? n.locked && n.label === UI.footer.locked.last : !n.locked;
   expect((!b || b.state === want) && nextOk, `${id} revisit: the earlier state comes back${b ? ' (band ' + b.state + ')' : ' (stops answered, seek free)'}, ${id === 'S22' ? 'finished, Next stays locked (last screen)' : 'Next unlocked'}`);
 }
@@ -1047,7 +1101,8 @@ const ev = await events(page);
 const first = (id) => ev.filter((e) => e.kind === 'answer' && e.trackingId === id);
 const IDS_CH34 = ['L4_FT3_1', 'L4_V2_1', 'L4_V2_2', 'L4_V2_3', 'L4_S09_1', 'L4_S10_1', 'L4_S11_1', 'L4_S12_1', 'L4_FT4_1', 'L4_S13_1', 'L4_S14_1', 'L4_S15_1', 'L4_S16_1', 'L4_S17_1'];
 const IDS_CH56 = ['L4_S18A_1', 'L4_S18_1', 'L4_S18_2', 'L4_S19_1', 'L4_S20_1', 'L4_S20_2', 'L4_S20_3', 'L4_S20_4', 'L4_S21_1', 'L4_S21_2', 'L4_S21_3', 'L4_S21_4', 'L4_S21_5', 'L4_S22_1'];
-const IDS = ['L4_S01_1', 'L4_S02_1', 'L4_S02_2', 'L4_W1_1', 'L4_S03_1', 'L4_FT2_1', 'L4_S04_1', 'L4_S05_1', 'L4_S06_1', 'L4_S06_2', 'L4_S07_1', 'L4_S08_1', 'L4_S08_2', 'L4_S08_3', ...IDS_CH34, ...IDS_CH56, 'L4_V1_1', 'L4_V1_2'];
+const IDS_CH2 = ['L4_W2_1', 'L4_S04_1', 'L4_S05B_1', 'L4_S06_1', 'L4_S06_2', 'L4_S07_1', 'L4_S08_1', 'L4_S08_2', 'L4_S08_3', 'L4_S08B_1', 'L4_S08B_2', 'L4_S08B_3'];
+const IDS = ['L4_S01_1', 'L4_S02_1', 'L4_S02_2', 'L4_W1_1', 'L4_S03_1', ...IDS_CH2, ...IDS_CH34, ...IDS_CH56, 'L4_V1_1', 'L4_V1_2'];
 expect(IDS.every((id) => first(id).length === 1) && ev.filter((e) => e.kind === 'answer').length === IDS.length,
   `bus: exactly one first-attempt event per id (${IDS.map((id) => id + ' ' + first(id).length).join(', ')})`);
 const f = Object.fromEntries(IDS.map((id) => [id, first(id)[0]]));
@@ -1055,7 +1110,7 @@ expect(f.L4_S01_1.response === 'a' && f.L4_S01_1.result === 'wrong' && f.L4_S02_
   && f.L4_W1_1.response === 'a' && f.L4_W1_1.result === 'neutral' && f.L4_W1_1.type === 'choice' && f.L4_S03_1.response === 'a,b' && f.L4_S03_1.result === 'wrong'
   && f.L4_V1_1.response === 'a' && f.L4_V1_1.result === 'wrong' && f.L4_V1_2.response === 'b' && f.L4_V1_2.result === 'wrong',
   `bus: first responses ${IDS.slice(0, 5).map((id) => id + '=' + JSON.stringify(f[id].response.slice(0, 20)) + '/' + f[id].result).join(', ')}`);
-const ch2 = IDS.slice(5, 14).map((id) => `${id}=${f[id].response}/${f[id].result}/${f[id].type}`).join(' ');
+const ch2 = IDS_CH2.map((id) => `${id}=${f[id].response}/${f[id].result}/${f[id].type}`).join(' ');
 const ch34 = IDS_CH34.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
 expect(ch34 === 'L4_FT3_1=a/wrong L4_V2_1=a/wrong L4_V2_2=b/wrong L4_V2_3=a/wrong L4_S09_1=1.b,2.a,3.b,4.c,5.d,6.d/wrong L4_S10_1=d/wrong L4_S11_1=a/wrong '
   + 'L4_S12_1=3,4/wrong L4_FT4_1=c/wrong L4_S13_1=a/wrong L4_S14_1=d/wrong L4_S15_1=b/wrong L4_S16_1=1.a,2.b,3.b,4.d,5.d,6.c/wrong L4_S17_1=a.5,b.1,c.5,d.4,e.2/wrong',
@@ -1063,10 +1118,10 @@ expect(ch34 === 'L4_FT3_1=a/wrong L4_V2_1=a/wrong L4_V2_2=b/wrong L4_V2_3=a/wron
 const ch56 = IDS_CH56.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
 expect(ch56 === `L4_S18A_1=1.b,2.b,3.c,4.d/wrong L4_S18_1=a/wrong L4_S18_2=${TITLE}/neutral L4_S19_1=${METRIC}/neutral L4_S20_1=b/neutral L4_S20_2=a/neutral L4_S20_3=b/neutral `
   + 'L4_S20_4=c/neutral L4_S21_1=a/wrong L4_S21_2=b/correct L4_S21_3=a/correct L4_S21_4=d/correct L4_S21_5=5,6/correct L4_S22_1=a/neutral', `bus, chapters 5 and 6 first attempts: ${ch56}`);
-expect(ch2 === 'L4_FT2_1=a/wrong/choice L4_S04_1=1.b,2.b,3.a,4.b,5.c/wrong/matching L4_S05_1=b/wrong/choice L4_S06_1=b/wrong/choice L4_S06_2=a/wrong/choice '
-  + 'L4_S07_1=7/wrong/choice L4_S08_1=a/wrong/choice L4_S08_2=c/correct/choice L4_S08_3=a/correct/choice', `bus, chapter 2 first attempts: ${ch2}`);
+expect(ch2 === 'L4_W2_1=a/neutral/choice L4_S04_1=1.b,2.b,3.a,4.b,5.c/wrong/matching L4_S05B_1=s.a,g.b,e.a/wrong/matching L4_S06_1=b/wrong/choice L4_S06_2=a/wrong/choice '
+  + `L4_S07_1=7/wrong/choice L4_S08_1=a/wrong/choice L4_S08_2=c/correct/choice L4_S08_3=a/correct/choice L4_S08B_1=${SKETCH.trigger}/neutral/fill-in L4_S08B_2=${SKETCH.steps}/neutral/fill-in L4_S08B_3=${SKETCH.output}/neutral/fill-in`, `bus, chapter 2 first attempts: ${ch2}`);
 const retries = ev.filter((e) => e.kind === 'retry').map((e) => `${e.trackingId}=${e.response}/${e.result}`);
-expect(retries.join() === 'L4_S01_1=b/correct,L4_W1_1=b/neutral,L4_V1_1=b/correct,L4_V1_2=a/correct,L4_S03_1=b,d/correct,L4_S05_1=c/wrong,L4_S05_1=d/wrong,L4_S05_1=a/correct,L4_S06_1=a/correct,L4_S06_2=b/correct,L4_S07_1=8/correct,L4_S08_1=b/correct'
+expect(retries.join() === 'L4_S01_1=b/correct,L4_W1_1=b/neutral,L4_V1_1=b/correct,L4_V1_2=a/correct,L4_S03_1=b,d/correct,L4_S06_1=a/correct,L4_S06_2=b/correct,L4_S07_1=8/correct,L4_S08_1=b/correct'
   + ',L4_V2_1=b/correct,L4_V2_2=a/correct,L4_V2_3=b/correct,L4_S10_1=c/correct,L4_S11_1=d/correct,L4_S12_1=4,7/correct,L4_S13_1=c/correct,L4_S14_1=b/correct,L4_S15_1=a/correct'
   + ',L4_S18_1=b/correct,L4_S20_1=a/neutral,L4_S21_1=c/correct',
   `bus: retries as retry events (${retries.join(', ')})`);
@@ -1093,14 +1148,14 @@ async function scormChecks(p, ids) {
     || (t.correctResponse === null && r.pattern !== undefined) || !r.latency || !r.time || (t.result === 'neutral' && r.result !== 'neutral'); });
   expect(!bad.length, 'SCORM: every interaction carries type, response, result, latency, time, weighting (1 for the 5 scored), correct pattern from the content' + (bad.length ? ': ' + bad.map((r) => r.id).join(', ') : ''));
   const free = rows.filter((r) => r.type === 'fill-in');
-  expect(free.length === 4 && free.every((r) => r.response.length <= 250 && r.result === 'neutral'), `SCORM: ${free.length} fill-in responses (case title twice, problem, metric), at most 250 chars, neutral`);
+  expect(free.length === 7 && free.every((r) => r.response.length <= 250 && r.result === 'neutral'), `SCORM: ${free.length} fill-in responses (case title twice, problem, the three-part sketch, metric), at most 250 chars, neutral`);
   expect(d['cmi.core.lesson_status'] === 'passed' && d['cmi.core.score.raw'] === '80' && d['cmi.core.score.min'] === '0' && d['cmi.core.score.max'] === '100' && d['cmi.core.exit'] === '',
     `SCORM: lesson_status ${d['cmi.core.lesson_status']}, score.raw ${d['cmi.core.score.raw']} (0 to 100, from S21 first attempts), exit "${d['cmi.core.exit']}"`);
   expect(/^\d{4}:\d{2}:\d{2}\.\d{2}$/.test(d['cmi.core.session_time'] || '') && m.finished, `SCORM: session_time ${d['cmi.core.session_time']}, LMSFinish once`);
   const susp = d['cmi.suspend_data'] || '';
   const { decode, encode } = await import('../src/state.js');
   const full = decode(susp);
-  for (const k of Object.keys(full.f)) full.f[k] = 'x'.repeat(250);
+  for (const k of Object.keys(full.f)) full.f[k] = 'x'.repeat(250); // over each field's own maximum (S08B: 120 / 250 / 120): a safe upper bound
   const fullLen = encode(full).length;
   expect(susp.length < 4096 && fullLen < 4096, `SCORM: suspend_data ${susp.length} chars after the whole lesson; ${fullLen} with every free-text field at 250 (limit 4096)`);
   expect(d['cmi.core.lesson_location'] === full.s, `SCORM: lesson_location "${d['cmi.core.lesson_location']}" = the saved place`);
@@ -1165,6 +1220,58 @@ console.log('\nghost hand (motion)');
   await p.close();
 }
 
+/* ---------- NL2 drag and drop by pointer: S04 drag (a wrong drop returns), S05b click to pick up ---------- */
+console.log('\ndrag and drop (pointer)');
+{
+  const p = await open('?reset=1&screen=S04', { motion: true });
+  // the ghost hand (motion): it grabs the card and carries it down, then any pointer input stops it and the card is home
+  await p.waitForSelector('.w-ghost', { timeout: 3000 });
+  await wait(1000);
+  const mid = await p.evaluate(() => ({ moved: getComputedStyle(document.querySelector('[data-action="card"]')).transform !== 'none', ev: window.__l4.tracking.events.length }));
+  await p.mouse.click(700, 690);
+  await wait(100);
+  const after = await p.evaluate(() => ({ hand: !!document.querySelector('.w-ghost'), card: getComputedStyle(document.querySelector('[data-action="card"]')).transform }));
+  expect(mid.moved && !mid.ev && !after.hand && after.card === 'none', 'S04 ghost hand: it carries the card down; a pointer press stops it at once and the card is back, nothing tracked');
+  const centre = async (sel) => { const b = await (await p.$(sel)).boundingBox(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; };
+  const dragTo = async (sel, release = true) => {
+    const a = await centre('[data-action="card"]'), b = await centre(sel);
+    await p.mouse.move(a.x, a.y); await p.mouse.down();
+    for (let i = 1; i <= 10; i++) await p.mouse.move(a.x + (b.x - a.x) * i / 10, a.y + (b.y - a.y) * i / 10);
+    const over = await p.evaluate((s) => document.querySelector(s).dataset.over, sel);
+    if (release) await p.mouse.up();
+    return over;
+  };
+  const over = await dragTo('.w-drop[data-column="c"]');
+  await wait(400);
+  await expectBand(p, 'S04 card 1 dragged onto Output', { state: 'wrong', text: S.S04.cards[0].feedback.c, unlocked: false });
+  const back = await p.evaluate(() => ({ t: document.querySelector('[data-action="card"]').style.transform, text: document.querySelector('.w-deck-text').textContent, placed: document.querySelectorAll('.w-placed').length }));
+  expect(over === 'true' && !back.t && back.text === S.S04.cards[0].text && !back.placed, 'S04 pointer drag: the column under the card lights up; a wrong drop slides the card back to the deck');
+  await dragTo('.w-drop[data-column="a"]');
+  await expectBand(p, 'S04 card 1 dragged onto Trigger', { state: 'correct', verdict: '', text: S.S04.cards[0].feedback.correct, unlocked: false });
+  expect(await p.evaluate(() => document.querySelector('.w-drop[data-column="a"] .w-placed')?.textContent === document.querySelector('.w-drop[data-column="a"] .w-placed span:last-child').textContent
+    && document.querySelector('.w-deck-count').textContent === '2 of 5'), 'S04 pointer drag: a right drop stays in its column with a check, card 2 comes up');
+  // let go outside any column: the card slides back, nothing is answered
+  const a = await centre('[data-action="card"]');
+  await p.mouse.move(a.x, a.y); await p.mouse.down(); await p.mouse.move(a.x + 300, a.y + 10, { steps: 6 }); await p.mouse.up();
+  await wait(400);
+  expect(await p.evaluate(() => !document.querySelector('[data-action="card"]').style.transform && window.__l4.tracking.events.length === 0), 'S04 a drop outside the columns: the card returns, nothing tracked');
+  expect(!p.errors.length, 'S04 pointer: no console errors' + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
+  await p.close();
+}
+{
+  const p = await open('?reset=1&screen=S05b');
+  await p.keyboard.press('Shift');
+  await p.click('.w-label-card[data-label="gateway"]');
+  const picked = await p.evaluate(() => ({ pressed: document.querySelector('.w-label-card[data-label="gateway"]').getAttribute('aria-pressed'), armed: document.querySelector('.w-target').dataset.armed }));
+  await p.click('.w-target[data-target="b"]');
+  await expectBand(p, 'S05b click Gateway, click its target', { state: 'correct', verdict: '', text: S.S05b.labels[1].feedback.correct, unlocked: false });
+  expect(picked.pressed === 'true' && picked.armed === 'true' && await p.evaluate(() => document.querySelector('.w-target[data-target="b"]').dataset.placed === 'true'),
+    'S05b click alternative (no dragging): a click picks the label up, a click on a target drops it');
+  await expectLayout(p, 'S05b one placed');
+  expect(!p.errors.length, 'S05b pointer: no console errors' + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
+  await p.close();
+}
+
 /* ---------- S03 both wrong: "Not quite." ---------- */
 console.log('\nS03 both wrong');
 {
@@ -1183,7 +1290,7 @@ console.log('\nS03 both wrong');
 }
 
 /* ---------- fast-track side paths ---------- */
-console.log('\nfast-track paths (FT2 to FT4; FT1 is now the W1 warm-up)');
+console.log('\nfast-track paths (FT3 and FT4; FT1 and FT2 are now the W1 and W2 warm-ups)');
 async function ft1Path(name, keys, { to, route, answer, card = 'FT1', skipped = null }) {
   const p = await open('?reset=1&screen=' + card);
   await expectNewScreen(p, card, `${name}: start`);
@@ -1196,23 +1303,6 @@ async function ft1Path(name, keys, { to, route, answer, card = 'FT1', skipped = 
   expect(!p.errors.length, `${name}: no console errors` + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
   await p.close();
 }
-await ft1Path('FT2 right, "Jump to the last task"', async (p) => {
-  await tabTo(p, '.w-opt[data-id="b"]');
-  await press(p, 'Enter');
-  await expectBand(p, 'FT2 right first try', { state: 'correct', text: opt('FT2', 'b').feedback, unlocked: false, actions: ['jumpToTask', 'fullChapter'], lockedWhy: UI.footer.locked.route });
-  await expectLayout(p, 'FT2 routes');
-  await press(p, 'Enter');
-}, { card: 'FT2', to: 'S08', route: 'skip', answer: 'L4_FT2_1=b/correct', skipped: ['S04', 'S05', 'S06', 'S07'] });
-await ft1Path('FT2 right, "Take the full chapter"', async (p) => {
-  await tabTo(p, '.w-opt[data-id="b"]');
-  await press(p, 'Enter');
-  await tabTo(p, '[data-action="fullChapter"]');
-  await press(p, 'Enter');
-}, { card: 'FT2', to: 'S04', route: 'full', answer: 'L4_FT2_1=b/correct' });
-await ft1Path('FT2 "Skip challenge"', async (p) => {
-  await tabTo(p, '[data-action="skipChallenge"]');
-  await press(p, 'Enter');
-}, { card: 'FT2', to: 'S04', route: 'full', answer: '' });
 for (const [card, key, jump, jumpTo, skipped, full, fullTo] of [
   ['FT3', 'c', 'jumpToMap', 'S12', ['V2', 'S09', 'S10', 'S11'], 'watchDemo', 'V2'],
   ['FT4', 'a', 'jumpToTask', 'S17', ['S13', 'S14', 'S15', 'S16'], 'fullChapter', 'S13']]) {

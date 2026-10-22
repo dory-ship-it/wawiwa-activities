@@ -13,7 +13,8 @@
 // Geometry in diagram units (the frames' 0.1cqw: 600 x 254 units = 768 x 325.12 stage px): lane rows
 // 74 high from 16, node columns 97.5 apart from 145, step boxes 84 x 42, events r 14, gateway 22.
 // Tracking (label): one matching interaction when the last label is placed; the response records
-// each label's FIRST target ("swimlane.a,gateway.b,event.c"), correct only if every first drop was.
+// each label's FIRST target by the label's one-character code (SCORM 1.2 matching: "s.a,g.b,e.c"),
+// correct only if every first drop was.
 import { h, fmt } from '../util.js';
 import { glyph } from '../icons.js';
 import { layout } from './stage.js';
@@ -160,7 +161,7 @@ function labelTask(ctx) {
     place(l, targets.find((t) => t.id === tid));
     zones.setFeedback({ state: 'correct', verdict: '', text: l.feedback.correct });
     if (left) { tray.querySelector('.w-label-card:not([hidden])').focus({ preventScroll: true }); return 'placed'; }
-    ctx.answer({ trackingId, response: screen.labels.map((x) => `${x.id}.${first[x.id]}`).join(','), result: screen.labels.every((x) => first[x.id] === x.target) ? 'correct' : 'wrong' });
+    ctx.answer({ trackingId, response: screen.labels.map((x) => `${x.code}.${first[x.id]}`).join(','), result: screen.labels.every((x) => first[x.id] === x.target) ? 'correct' : 'wrong' });
     ctx.complete();
     ctx.unlockNext({ focus: true });
     return 'placed';
