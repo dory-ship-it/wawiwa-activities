@@ -277,9 +277,18 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-deliverable-text b { font-weight: 700; color: var(--wl-ink); }
 .w-deliverable-next { font-weight: 600; color: var(--wl-teal-ink); }
 .w-goals { top: 325.12px; margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20.48px; }
-.w-goal { position: relative; min-height: 160px; display: grid; align-content: start; gap: 15.36px; padding: 20.48px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel);
-  background: var(--wl-white); cursor: default; }
-.w-goal:hover, .w-goal:focus-visible { border: 2.56px solid var(--wl-navy); box-shadow: var(--wl-card-shadow); }
+.w-goal { position: relative; min-height: 92.16px; margin: 0; display: flex; align-items: center; gap: 12.8px; padding: 15.36px 17.92px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel);
+  background: var(--wl-white); text-align: left; cursor: pointer; }
+.w-goal:hover { border-color: var(--wl-navy); }
+/* FX1 D2: the open goal (the O2 station's selected look: navy border, card shadow) and its detail card */
+.w-goal[aria-selected="true"] { border: 2.56px solid var(--wl-navy); box-shadow: var(--wl-card-shadow); }
+.w-goal[aria-selected="true"] .w-goal-num { border-color: var(--wl-navy); color: var(--wl-navy); }
+.w-goal-num { flex: none; }
+.w-goal .w-goal-label { font-size: 17.92px; } /* two lines at most in a row of five tiles (the S10 field name size) */
+.w-goal-panel { top: 445.44px; width: min(1152px, calc(100% - 128px)); }
+.w-goal-panel .w-map-panel-text { text-align: left; }
+/* FX1 D1: O2's "Click to open" cue above the first station not open (the ghost chip's look) */
+.w-map-cue { position: absolute; top: -43.52px; padding: 3.2px 10.24px; border-radius: 6.4px; background: var(--wl-navy); font: 700 15.36px/normal var(--wl-font-ui); color: var(--wl-white); white-space: nowrap; }
 .w-goal-num { width: 40.96px; height: 40.96px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--wl-line-strong); background: var(--wl-white);
   font: 600 17.92px/normal var(--wl-font-ui); color: var(--wl-idle-ink); }
 .w-goal-label { font: 800 20.48px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
@@ -877,7 +886,14 @@ a.w-btn { text-decoration: none; }
   .w-stage .draw path, .w-stage .draw rect, .w-stage .draw circle { stroke-dasharray: 600; animation: w-draw var(--wl-dur-draw) ease-out both; }
   .w-strip-in { animation: w-fb-in var(--wl-dur-fb) cubic-bezier(.2, .8, .2, 1); }
   .w-bpmn-marker { animation: w-pop .35s var(--wl-ease-enter) both; } /* S05a: the markers one by one (delay per marker) */
+  /* FX1 B3: the build-up on entry, once (src/templates/stage.js buildUp: --b-delay per element) */
+  .w-build { animation: w-build-in .42s var(--wl-ease-enter) var(--b-delay, 0ms) both; }
+  .w-build-line { transform-origin: 0 50%; animation: w-line-in .6s ease-out var(--b-delay, 0ms) both; }
+  .w-pulse-once { animation: w-pulse-once 1.2s ease-in-out var(--b-delay, 0ms) 1 both; }
 }
+@keyframes w-build-in { from { opacity: 0; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
+@keyframes w-line-in { from { scale: 0 1; } to { scale: 1 1; } }
+@keyframes w-pulse-once { 0%, 100% { box-shadow: 0 0 0 0 var(--wl-halo); } 50% { box-shadow: 0 0 0 10.24px var(--wl-halo); } }
 @keyframes w-pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
 @keyframes w-push { from { transform: scale(1.08); } to { transform: scale(1); } }
 @keyframes w-draw { from { stroke-dashoffset: 600; } to { stroke-dashoffset: 0; } }

@@ -25,10 +25,9 @@
 // marks them done on arrival, so Next never locks. All text comes from the content.
 import { h } from '../util.js';
 import { glyph } from '../icons.js';
-import { attachTip } from '../tooltip.js';
 import { scaleOf } from '../ghost.js';
 import { letter } from '../tracking/index.js';
-import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst } from './stage.js';
+import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst, buildUp } from './stage.js';
 
 /* ---------- title (O1) ---------- */
 export const title = {
@@ -105,7 +104,11 @@ export const moduleMap = {
       tabs.forEach((x, n) => { x.tab.tabIndex = n === k ? 0 : -1; });
       tabs[k].tab.focus();
     });
-    tabs.forEach((x, i) => x.tab.addEventListener('click', () => open(i)));
+    // FX1 D1: the first station not open shows a small "Click to open" cue until any station is opened
+    const cueAt = tabs.findIndex((x) => x.st.status !== 'today' && !x.st.open);
+    const cue = cueAt >= 0 && !ctx.revisit ? h('span', { class: 'w-map-cue', 'aria-hidden': 'true' }, mm.clickToOpen) : null;
+    if (cue) tabs[cueAt].tab.prepend(cue);
+    tabs.forEach((x, i) => x.tab.addEventListener('click', () => { cue?.remove(); open(i); }));
     // stations not opened keep the selected one reachable by Tab when focus left the list
     list.addEventListener('focusout', (e) => { if (!list.contains(e.relatedTarget)) tabs.forEach((x, n) => { x.tab.tabIndex = n === openIndex() ? 0 : -1; }); });
 
@@ -125,28 +128,60 @@ export const moduleMap = {
       focusHead(screen.eyebrow, 'overview', zones.instruction, screen.line ? h('p', { class: 'w-concept-text' }, screen.line) : null),
       h('div', { class: 'w-map' }, list),
       panel);
+    // FX1 D1: the build-up, once: the line draws, the stations come in one by one, then the open card;
+    // "Today" gets one soft pulse (no ghost hand on O2)
+    if (!ctx.revisit) {
+      const t = buildUp([[lineDone, 'line'], [lineNext, 'line'], ...tabs.map((x) => x.tab), panel], { start: 100, step: 200 });
+      buildUp([[tabs[today].tab.querySelector('.w-map-today'), 'pulse'], cue], { start: t, step: 0 });
+    }
     return { unmount() {} };
   },
 };
 
 /* ---------- goals (O3) ---------- */
+// FX1 D2: the goal tiles are buttons (ARIA tabs, as O2's stations: arrow keys move, Enter or Space
+// opens); the selected goal's full wording shows in a detail card under the tiles, its caret under
+// the tile (O2's card). Tile 1 is open on arrival. No tooltip over the heading. Build-up once.
 export const goals = {
   mount(ctx) {
     const { screen, zones } = ctx;
     const d = screen.deliverable;
     const [lead, rest] = splitFirst(d.text);
-    const tiles = screen.goals.map((g, i) => h('li', { class: 'w-goal', tabindex: '0', dataset: { goal: g.id } },
+    const panelId = 'w-goal-panel';
+    const caret = h('i', { class: 'w-map-caret', 'aria-hidden': 'true' });
+    const panelText = h('p', { class: 'w-map-panel-text' });
+    const panel = h('section', { class: 'w-map-panel w-goal-panel', id: panelId, role: 'tabpanel', tabindex: '0' }, caret, panelText);
+    const tiles = screen.goals.map((g, i) => h('button', { class: 'w-goal', type: 'button', role: 'tab', id: 'w-goal-tab-' + g.id, 'aria-selected': 'false', 'aria-controls': panelId, tabindex: '-1', dataset: { goal: g.id } },
       h('span', { class: 'w-goal-num', 'aria-hidden': 'true' }, String(i + 1)), h('b', { class: 'w-goal-label' }, g.label)));
-    layout(ctx, 'goals',
-      focusHead(screen.eyebrow, 'goals', zones.instruction),
-      h('section', { class: 'w-deliverable', 'aria-label': d.label || null },
-        h('span', { class: 'w-deliverable-icon' }, glyph(d.icon || 'write', { size: 28.16 })),
-        h('p', { class: 'w-deliverable-text' }, d.label ? h('span', { class: 'w-sr-only' }, d.label + ': ') : null,
-          h('b', {}, lead), rest ? [' ', h('span', { class: 'w-deliverable-next' }, rest)] : null)),
-      h('ul', { class: 'w-goals' }, tiles));
-    // the full goal on hover or keyboard focus (a glass tooltip above the tile), and for screen
-    // readers through aria-describedby
-    tiles.forEach((li, i) => attachTip(li, screen.goals[i].text, { side: 'above', width: 332.8 }));
+    const list = h('div', { class: 'w-goals', role: 'tablist', 'aria-labelledby': 'w-instruction' }, tiles);
+    function open(i, focus = false) {
+      tiles.forEach((t, j) => { t.setAttribute('aria-selected', String(i === j)); t.tabIndex = i === j ? 0 : -1; });
+      panel.setAttribute('aria-labelledby', tiles[i].id);
+      panel.dataset.goal = screen.goals[i].id;
+      panelText.textContent = screen.goals[i].text;
+      // the caret under the open tile (positions read once the tiles are laid out)
+      requestAnimationFrame(() => { caret.style.left = tiles[i].offsetLeft + tiles[i].offsetWidth / 2 - 11.52 + 'px'; });
+      if (focus) tiles[i].focus();
+    }
+    list.addEventListener('keydown', (e) => {
+      const i = tiles.indexOf(document.activeElement);
+      if (i < 0) return;
+      const j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tiles.length - 1 }[e.key];
+      if (j === undefined) return;
+      e.preventDefault();
+      const k = (j + tiles.length) % tiles.length;
+      tiles.forEach((t, n) => { t.tabIndex = n === k ? 0 : -1; });
+      tiles[k].focus();
+    });
+    list.addEventListener('focusout', (e) => { if (!list.contains(e.relatedTarget)) tiles.forEach((t) => { t.tabIndex = t.getAttribute('aria-selected') === 'true' ? 0 : -1; }); });
+    tiles.forEach((t, i) => t.addEventListener('click', () => open(i)));
+    const deliverable = h('section', { class: 'w-deliverable', 'aria-label': d.label || null },
+      h('span', { class: 'w-deliverable-icon' }, glyph(d.icon || 'write', { size: 28.16 })),
+      h('p', { class: 'w-deliverable-text' }, d.label ? h('span', { class: 'w-sr-only' }, d.label + ': ') : null,
+        h('b', {}, lead), rest ? [' ', h('span', { class: 'w-deliverable-next' }, rest)] : null));
+    layout(ctx, 'goals', focusHead(screen.eyebrow, 'goals', zones.instruction), deliverable, list, panel);
+    open(0);
+    if (!ctx.revisit) buildUp([deliverable, ...tiles, panel], { start: 100, step: 180 });
     return { unmount() {} };
   },
 };

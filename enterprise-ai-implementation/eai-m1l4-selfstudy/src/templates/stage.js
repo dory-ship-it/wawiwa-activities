@@ -96,6 +96,21 @@ export function progressDots(n, labelOf) {
   return { el, set };
 }
 
+// FX1 B3: a presentation screen builds up on entry, once (not on a revisit): each element comes in
+// `step` ms after the one before it (150 to 250), from `start`; a line ("line") draws from the left; a
+// "pulse" element gets one soft ring. None with reduced motion (frame.css). Returns the time after the last.
+export function buildUp(items, { start = 0, step = 200 } = {}) {
+  let t = start;
+  items.filter(Boolean).forEach((it) => {
+    const [el, kind] = Array.isArray(it) ? it : [it, 'in'];
+    if (!el) return;
+    el.classList.add(kind === 'line' ? 'w-build-line' : kind === 'pulse' ? 'w-pulse-once' : 'w-build');
+    el.style.setProperty('--b-delay', t + 'ms');
+    t += kind === 'line' ? 300 : step;
+  });
+  return t;
+}
+
 // Arrow keys move focus inside an option group (Tab still reaches every option): Left/Up back,
 // Right/Down on.
 // cols > 1: a grid, Up/Down move by a row.
