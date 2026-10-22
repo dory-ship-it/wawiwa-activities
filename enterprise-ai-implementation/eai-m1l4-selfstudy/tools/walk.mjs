@@ -533,6 +533,7 @@ await shot(page, 's03-correct.png');
 await press(page, 'Enter');
 
 const SKETCH = { trigger: 'A rep finishes a sales call', steps: 'Rep types notes by hand; the manager reads them two days later', output: 'A call summary, to the sales manager' };
+const METRIC_PARTS = { baseline: 'About 2 days from call to summary', target: 'Same day', date: 'within 3 months' };
 /* ---------- Chapter 2 (NL2, storyboard v3): every interaction wrong then right, keyboard only ---------- */
 console.log('\nchapter 2 (keyboard)');
 // W2 warm-up: a neutral guess, as W1
@@ -637,7 +638,7 @@ expect(!S.S05b.targets.some((t) => SHAPES.test(t.name)) && !SHAPES.test(s05bName
   `S05b: the three places and the diagram's description name positions, no shapes ("${S.S05b.targets.map((t) => t.name).join('", "')}")`);
 await tabTo(page, '.w-label-card[data-label="event"]');
 await press(page, '1');
-expect(await page.evaluate(() => document.querySelector('.w-board [aria-live]').textContent) === UI.drag.chosen.replace('{target}', S.S05b.targets[0].name), 'S05b key 1: the place is announced by its position');
+expect(await page.evaluate(() => document.querySelector('.w-board > .w-sr-only[aria-live]').textContent) === UI.drag.chosen.replace('{target}', S.S05b.targets[0].name), 'S05b key 1: the place is announced by its position');
 await press(page, 'Enter');
 await expectBand(page, 'S05b Event on the lane', { state: 'wrong', text: lbl('event').feedback.wrong, unlocked: false });
 expect(await page.evaluate(() => document.querySelector('.w-label-card[data-label="event"]').getAttribute('aria-pressed') === 'true' && !document.querySelector('.w-label-card[data-label="event"]').hidden),
@@ -866,25 +867,62 @@ await expectBand(page, 'S11 d', { state: 'correct', text: opt('S11', 'd').feedba
 expect(await slotState() === 'true,true,true', 'S11 d: all three slots light up');
 await press(page, 'Enter');
 
-// S12 tiles + panel, select two, Check
+// S12 the full map, two risk flags by keyboard: flag 1 on Field 3 (wrong, it stays picked up), then
+// on Field 4; flag 2 on Field 7
 await expectNewScreen(page, 'S12', 'S11 Next');
-const tileAns = (n) => S.S12.tiles.find((t) => t.n === n);
-expect(await page.evaluate(() => document.querySelector('.w-pick-text').textContent) === tileAns(3).text, 'S12: Field 3 is open in the panel at the start');
-await tabTo(page, '.w-pick-tile[data-n="4"]');
-await press(page, ' ');
-expect(await page.evaluate(() => document.querySelector('.w-pick-text').textContent) === tileAns(4).text, 'S12: a tile opens its text in the panel and is selected');
-await press(page, 'ArrowLeft');
-await press(page, ' ');
-await tabTo(page, '[data-action="check"]');
+const fieldOf = (n) => S.S12.map.find((t) => t.n === n);
+await expectBand(page, 'S12 before action', { state: 'hint', text: S.S12.hint, unlocked: false, lockedWhy: UI.footer.locked.map });
+const s12 = await page.evaluate(() => ({ context: document.querySelector('.w-task-head .w-context').textContent, fields: [...document.querySelectorAll('.w-map-field')].map((f) => f.dataset.target + ':' + f.querySelector('b').textContent).join(),
+  flags: [...document.querySelectorAll('.w-flag-card')].map((c) => c.getAttribute('aria-label')).join('|') }));
+expect(s12.context === S.S12.context && s12.fields === S.S12.map.map((f) => f.n + ':' + f.title).join() && s12.flags === 'Risk flag 1 of 2|Risk flag 2 of 2',
+  `S12: "${s12.context}", the eight fields in reading order, two flags ("${s12.flags}")`);
+await tabTo(page, '.w-flag-card[data-flag="r1"]');
+await press(page, '3');
+expect(await page.evaluate(() => document.querySelector('.w-board > .w-sr-only[aria-live]').textContent) === UI.drag.chosen.replace('{target}', UI.drag.fieldName.replace('{n}', 3).replace('{title}', 'Steps')), 'S12 key 3: "Field 3, Steps chosen" announced');
 await press(page, 'Enter');
-await expectBand(page, 'S12 Check 3 + 4', { state: 'partial', verdict: UI.feedback.oneOfTwo, text: tileAns(3).feedback, unlocked: false });
-await expectLayout(page, 'S12 one of two');
-await shotR2(page, 's12-one-of-two.png');
-await tabTo(page, '.w-pick-tile[data-n="7"]');
-await press(page, ' ');
-await tabTo(page, '[data-action="check"]');
+await expectBand(page, 'S12 flag 1 on Field 3', { state: 'wrong', text: fieldOf(3).feedback, unlocked: false });
+expect(await page.evaluate(() => document.querySelector('.w-flag-card[data-flag="r1"]').getAttribute('aria-pressed') === 'true' && !document.querySelector('.w-map-field[data-placed]')),
+  'S12 wrong drop: the flag returns, still picked up; no field flagged');
+await expectLayout(page, 'S12 wrong');
+await press(page, '4');
 await press(page, 'Enter');
-await expectBand(page, 'S12 Check 4 + 7', { state: 'correct', text: tileAns(4).feedback + ' ' + tileAns(7).feedback, unlocked: true });
+await expectBand(page, 'S12 flag 1 on Field 4', { state: 'correct', verdict: '', text: fieldOf(4).feedback, unlocked: false });
+expect(await page.evaluate(() => document.querySelector('.w-map-field[data-target="4"]').dataset.placed === 'true' && document.querySelector('.w-flag-card[data-flag="r1"]').hidden) && await isActive(page, '.w-flag-card[data-flag="r2"]'),
+  'S12 right drop: Field 4 turns teal with the flag and a check, the flag leaves the tray, focus on the second flag');
+await press(page, '7');
+await press(page, 'Enter');
+await expectBand(page, 'S12 both flags placed', { state: 'correct', verdict: '', text: S.S12.feedbackCorrect, unlocked: true });
+expect(await isActive(page, '.w-next'), 'S12 both flags placed: Next unlocked and focused');
+await expectLayout(page, 'S12 done');
+await press(page, 'Enter');
+
+// S12B the learner's own metric: empty Save, Baseline and Target only (Date may stay empty), then all three
+await expectNewScreen(page, 'S12B', 'S12 Next');
+await expectBand(page, 'S12B before action', { state: 'hint', text: S.S12B.hint, unlocked: false, lockedWhy: UI.footer.locked.input });
+const s12b = await page.evaluate(() => ({ max: [...document.querySelectorAll('.w-input')].map((i) => i.maxLength + (i.tagName === 'INPUT' ? 'i' : 't')).join(), sub: document.querySelector('.w-subline').textContent,
+  ctx: document.querySelector('.w-sheet .w-context').textContent, arrows: document.querySelectorAll('.w-chain-arrow').length }));
+expect(s12b.max === '80i,80i,40i' && s12b.sub === S.S12B.hint && s12b.ctx === S.S12B.stage.top.text && s12b.arrows === 2,
+  `S12B: "${s12b.ctx}", the hint under the heading, Baseline / Target / Date on one line (maxlength ${s12b.max})`);
+await tabTo(page, '[data-action="save"]');
+await press(page, 'Enter');
+await expectBand(page, 'S12B empty Save', { state: 'notice', text: S.S12B.feedback.empty, unlocked: false });
+await tabTo(page, '.w-input[data-store="L4_CASE_BASELINE"]', { back: true });
+await page.keyboard.type(METRIC_PARTS.baseline);
+await tabTo(page, '[data-action="save"]');
+await press(page, 'Enter');
+await expectBand(page, 'S12B Save with Target empty', { state: 'notice', text: S.S12B.feedback.empty, unlocked: false });
+await tabTo(page, '.w-input[data-store="L4_CASE_TARGET"]', { back: true });
+await page.keyboard.type(METRIC_PARTS.target);
+await press(page, 'Tab');
+await page.keyboard.type(METRIC_PARTS.date);
+await expectLayout(page, 'S12B typed');
+await tabTo(page, '[data-action="save"]');
+await press(page, 'Enter');
+await expectBand(page, 'S12B saved', { state: 'neutral', text: S.S12B.feedback.saved, unlocked: true });
+const mf = await page.evaluate(() => window.__l4.state.f);
+expect(mf.L4_CASE_BASELINE === METRIC_PARTS.baseline && mf.L4_CASE_TARGET === METRIC_PARTS.target && mf.L4_CASE_DATE === METRIC_PARTS.date && await isActive(page, '.w-next'),
+  'S12B saved: stored under L4_CASE_BASELINE / _TARGET / _DATE, focus on Next');
+await expectLayout(page, 'S12B saved');
 await press(page, 'Enter');
 
 // FT4
@@ -1007,6 +1045,12 @@ await tabTo(page, '[data-action="back"]', { back: true });
 await press(page, 'Enter');
 await expectBand(page, "S19 I'm back", { state: 'notice', text: S.S19.states.return.backFeedback, unlocked: false });
 expect(await isActive(page, '.w-input') && await page.evaluate(() => window.__l4.state.g.S19?.o === 1 && window.__l4.state.g.S19?.b === 1), 'S19 return state: the metric field takes the focus, opened and back kept in suspend data');
+// NL3: the metric field starts from the S12B metric, editable, nothing stored before Save
+const pre = S.S19.states.return.fields[0].prefill;
+const want19 = pre.format.replace('{baseline}', METRIC_PARTS.baseline).replace('{target}', METRIC_PARTS.target).replace('{date}', METRIC_PARTS.date);
+const got19 = await page.evaluate(() => ({ v: document.querySelector('.w-input').value, stored: window.__l4.state.f.L4_METRIC ?? '' }));
+expect(got19.v === want19 && !got19.stored, `S19: the metric field starts from S12B ("${got19.v}"), not stored yet`);
+await page.keyboard.down('Control'); await press(page, 'a'); await page.keyboard.up('Control'); await press(page, 'Backspace');
 await tabTo(page, '[data-action="save"]');
 await press(page, 'Enter');
 await expectBand(page, 'S19 empty Save', { state: 'notice', text: S.S19.hint, unlocked: false });
@@ -1102,10 +1146,10 @@ await expectLayout(page, 'S22 finished');
 await shotR3(page, 's22-finish.png');
 
 // revisits: read-only, the right state shown, Next unlocked (S22: finished, the last screen)
-for (const id of ['W2', 'S04', 'S05b', 'S06', 'S07', 'S08', 'S08B', 'W3', 'V2', 'S09', 'S10', 'S11', 'S12', 'S13', 'S14', 'S15', 'S16', 'S17', 'S18A', 'S18', 'S19', 'S20', 'S21', 'S22']) {
+for (const id of ['W2', 'S04', 'S05b', 'S06', 'S07', 'S08', 'S08B', 'W3', 'V2', 'S09', 'S10', 'S11', 'S12', 'S12B', 'S13', 'S14', 'S15', 'S16', 'S17', 'S18A', 'S18', 'S19', 'S20', 'S21', 'S22']) {
   await page.evaluate((x) => window.__l4.go(x), id);
   const b = S[id].template === 'video' ? null : await band(page), n = await nextState(page);
-  const want = { W2: 'guess', W3: 'guess', S08B: 'neutral', S18: 'neutral', S19: 'neutral', S20: 'neutral', S21: 'idle', S22: 'neutral' }[id] || 'correct';
+  const want = { W2: 'guess', W3: 'guess', S12B: 'neutral', S08B: 'neutral', S18: 'neutral', S19: 'neutral', S20: 'neutral', S21: 'idle', S22: 'neutral' }[id] || 'correct';
   const nextOk = id === 'S22' ? n.locked && n.label === UI.footer.locked.last : !n.locked;
   expect((!b || b.state === want) && nextOk, `${id} revisit: the earlier state comes back${b ? ' (band ' + b.state + ')' : ' (stops answered, seek free)'}, ${id === 'S22' ? 'finished, Next stays locked (last screen)' : 'Next unlocked'}`);
 }
@@ -1138,7 +1182,7 @@ await expectNewScreen(page, 'S18A', 'menu: Enter on the completed chapter 5 open
 
 const ev = await events(page);
 const first = (id) => ev.filter((e) => e.kind === 'answer' && e.trackingId === id);
-const IDS_CH34 = ['L4_W3_1', 'L4_V2_1', 'L4_V2_2', 'L4_V2_3', 'L4_S09_1', 'L4_S10_1', 'L4_S11_1', 'L4_S12_1', 'L4_FT4_1', 'L4_S13_1', 'L4_S14_1', 'L4_S15_1', 'L4_S16_1', 'L4_S17_1'];
+const IDS_CH34 = ['L4_W3_1', 'L4_V2_1', 'L4_V2_2', 'L4_V2_3', 'L4_S09_1', 'L4_S10_1', 'L4_S11_1', 'L4_S12_1', 'L4_S12B_1', 'L4_S12B_2', 'L4_S12B_3', 'L4_FT4_1', 'L4_S13_1', 'L4_S14_1', 'L4_S15_1', 'L4_S16_1', 'L4_S17_1'];
 const IDS_CH56 = ['L4_S18A_1', 'L4_S18_1', 'L4_S18_2', 'L4_S19_1', 'L4_S20_1', 'L4_S20_2', 'L4_S20_3', 'L4_S20_4', 'L4_S21_1', 'L4_S21_2', 'L4_S21_3', 'L4_S21_4', 'L4_S21_5', 'L4_S22_1'];
 const IDS_CH2 = ['L4_W2_1', 'L4_S04_1', 'L4_S05B_1', 'L4_S06_1', 'L4_S06_2', 'L4_S07_1', 'L4_S08_1', 'L4_S08_2', 'L4_S08_3', 'L4_S08B_1', 'L4_S08B_2', 'L4_S08B_3'];
 const IDS = ['L4_S01_1', 'L4_S02_1', 'L4_S02_2', 'L4_W1_1', 'L4_S03_1', ...IDS_CH2, ...IDS_CH34, ...IDS_CH56, 'L4_V1_1', 'L4_V1_2'];
@@ -1152,7 +1196,8 @@ expect(f.L4_S01_1.response === 'a' && f.L4_S01_1.result === 'wrong' && f.L4_S02_
 const ch2 = IDS_CH2.map((id) => `${id}=${f[id].response}/${f[id].result}/${f[id].type}`).join(' ');
 const ch34 = IDS_CH34.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
 expect(ch34 === 'L4_W3_1=c/neutral L4_V2_1=a/wrong L4_V2_2=b/wrong L4_V2_3=a/wrong L4_S09_1=1.b,2.a,3.b,4.c,5.d,6.d/wrong L4_S10_1=d/wrong L4_S11_1=a/wrong '
-  + 'L4_S12_1=3,4/wrong L4_FT4_1=c/wrong L4_S13_1=a/wrong L4_S14_1=d/wrong L4_S15_1=b/wrong L4_S16_1=1.a,2.b,3.b,4.d,5.d,6.c/wrong L4_S17_1=a.5,b.1,c.5,d.4,e.2/wrong',
+  + `L4_S12_1=3,7/wrong L4_S12B_1=${METRIC_PARTS.baseline}/neutral L4_S12B_2=${METRIC_PARTS.target}/neutral L4_S12B_3=${METRIC_PARTS.date}/neutral `
+  + 'L4_FT4_1=c/wrong L4_S13_1=a/wrong L4_S14_1=d/wrong L4_S15_1=b/wrong L4_S16_1=1.a,2.b,3.b,4.d,5.d,6.c/wrong L4_S17_1=a.5,b.1,c.5,d.4,e.2/wrong',
   `bus, chapters 3 and 4 first attempts: ${ch34}`);
 const ch56 = IDS_CH56.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
 expect(ch56 === `L4_S18A_1=1.b,2.b,3.c,4.d/wrong L4_S18_1=a/wrong L4_S18_2=${TITLE}/neutral L4_S19_1=${METRIC}/neutral L4_S20_1=b/neutral L4_S20_2=a/neutral L4_S20_3=b/neutral `
@@ -1161,7 +1206,7 @@ expect(ch2 === 'L4_W2_1=a/neutral/choice L4_S04_1=1.b,2.b,3.a,4.b,5.c/wrong/matc
   + `L4_S07_1=7/wrong/choice L4_S08_1=a/wrong/choice L4_S08_2=c/correct/choice L4_S08_3=a/correct/choice L4_S08B_1=${SKETCH.trigger}/neutral/fill-in L4_S08B_2=${SKETCH.steps}/neutral/fill-in L4_S08B_3=${SKETCH.output}/neutral/fill-in`, `bus, chapter 2 first attempts: ${ch2}`);
 const retries = ev.filter((e) => e.kind === 'retry').map((e) => `${e.trackingId}=${e.response}/${e.result}`);
 expect(retries.join() === 'L4_S01_1=b/correct,L4_W1_1=b/neutral,L4_V1_1=b/correct,L4_V1_2=a/correct,L4_S03_1=b,d/correct,L4_S06_1=a/correct,L4_S06_2=b/correct,L4_S07_1=8/correct,L4_S08_1=b/correct'
-  + ',L4_V2_1=b/correct,L4_V2_2=a/correct,L4_V2_3=b/correct,L4_S10_1=c/correct,L4_S11_1=d/correct,L4_S12_1=4,7/correct,L4_S13_1=c/correct,L4_S14_1=b/correct,L4_S15_1=a/correct'
+  + ',L4_V2_1=b/correct,L4_V2_2=a/correct,L4_V2_3=b/correct,L4_S10_1=c/correct,L4_S11_1=d/correct,L4_S13_1=c/correct,L4_S14_1=b/correct,L4_S15_1=a/correct'
   + ',L4_S18_1=b/correct,L4_S20_1=a/neutral,L4_S21_1=c/correct',
   `bus: retries as retry events (${retries.join(', ')})`);
 expect(!page.errors.length, 'main path: no console errors' + (page.errors.length ? ': ' + page.errors.join(' | ') : ''));
@@ -1187,16 +1232,22 @@ async function scormChecks(p, ids) {
     || (t.correctResponse === null && r.pattern !== undefined) || !r.latency || !r.time || (t.result === 'neutral' && r.result !== 'neutral'); });
   expect(!bad.length, 'SCORM: every interaction carries type, response, result, latency, time, weighting (1 for the 5 scored), correct pattern from the content' + (bad.length ? ': ' + bad.map((r) => r.id).join(', ') : ''));
   const free = rows.filter((r) => r.type === 'fill-in');
-  expect(free.length === 7 && free.every((r) => r.response.length <= 250 && r.result === 'neutral'), `SCORM: ${free.length} fill-in responses (case title twice, problem, the three-part sketch, metric), at most 250 chars, neutral`);
+  const wantFree = ids.filter((id) => metaOf(id)?.type === 'fill-in').length;
+  expect(free.length === wantFree && free.every((r) => r.response.length <= 250 && r.result === 'neutral'),
+    `SCORM: ${free.length} fill-in responses (case title twice, problem, the three-part sketch, the S12B metric, the S17B notes, the S19 metric), at most 250 chars, neutral`);
   expect(d['cmi.core.lesson_status'] === 'passed' && d['cmi.core.score.raw'] === '80' && d['cmi.core.score.min'] === '0' && d['cmi.core.score.max'] === '100' && d['cmi.core.exit'] === '',
     `SCORM: lesson_status ${d['cmi.core.lesson_status']}, score.raw ${d['cmi.core.score.raw']} (0 to 100, from S21 first attempts), exit "${d['cmi.core.exit']}"`);
   expect(/^\d{4}:\d{2}:\d{2}\.\d{2}$/.test(d['cmi.core.session_time'] || '') && m.finished, `SCORM: session_time ${d['cmi.core.session_time']}, LMSFinish once`);
   const susp = d['cmi.suspend_data'] || '';
   const { decode, encode } = await import('../src/state.js');
   const full = decode(susp);
-  for (const k of Object.keys(full.f)) full.f[k] = 'x'.repeat(250); // over each field's own maximum (S08B: 120 / 250 / 120): a safe upper bound
+  // every free-text field full: each store key at its own field's maxlength (NL3: S02's title and
+  // problem, the three-part sketch, the S12B metric, the S17B notes, the S19 metric)
+  const maxOf = {};
+  for (const s of C.screens) for (const f of [...(s.fields || []), ...Object.values(s.states || {}).flatMap((st) => st.fields || []), ...(s.step2?.field ? [s.step2.field] : [])]) if (f.store) maxOf[f.store] = Math.max(maxOf[f.store] || 0, f.maxLength);
+  for (const k of Object.keys(maxOf)) full.f[k] = 'x'.repeat(maxOf[k]);
   const fullLen = encode(full).length;
-  expect(susp.length < 4096 && fullLen < 4096, `SCORM: suspend_data ${susp.length} chars after the whole lesson; ${fullLen} with every free-text field at 250 (limit 4096)`);
+  expect(susp.length < 4096 && fullLen < 4096, `SCORM: suspend_data ${susp.length} chars after the whole lesson; ${fullLen} with all ${Object.keys(maxOf).length} free-text fields full (each at its maxlength; limit 4096)`);
   expect(d['cmi.core.lesson_location'] === full.s, `SCORM: lesson_location "${d['cmi.core.lesson_location']}" = the saved place`);
 
   console.log('\nSCORM relaunch (entry=resume)');
@@ -1310,6 +1361,33 @@ console.log('\ndrag and drop (pointer)');
   expect(!p.errors.length, 'S05b pointer: no console errors' + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
   await p.close();
 }
+
+/* ---------- NL3 flags by pointer: S12 (fields) and S13 (steps), drag a flag; a drop outside returns it ---------- */
+async function flagDrag(id, flagId, wrongT, rightT, wrongText, rightText) {
+  const p = await open(`?reset=1&screen=${id}`, { motion: true });
+  const centre = async (sel) => { const b = await (await p.$(sel)).boundingBox(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; };
+  const drag = async (to) => {
+    const a = await centre(`.w-flag-card[data-flag="${flagId}"]`), b = to ? await centre(`.w-target[data-target="${to}"]`) : null;
+    await p.mouse.move(a.x, a.y); await p.mouse.down();
+    const end = b || { x: a.x, y: a.y + 300 };
+    for (let i = 1; i <= 10; i++) await p.mouse.move(a.x + (end.x - a.x) * i / 10, a.y + (end.y - a.y) * i / 10);
+    const over = to ? await p.evaluate((t) => document.querySelector(`.w-target[data-target="${t}"]`).dataset.over, to) : null;
+    await p.mouse.up();
+    await wait(400);
+    return over;
+  };
+  await drag(null);
+  expect(await p.evaluate((f) => !document.querySelector(`.w-flag-card[data-flag="${f}"]`).style.transform && !window.__l4.tracking.events.length, flagId), `${id} pointer: a drop outside the targets returns the flag, nothing tracked`);
+  const over = await drag(wrongT);
+  await expectBand(p, `${id} flag dragged onto ${wrongT}`, { state: 'wrong', text: wrongText, unlocked: false });
+  expect(over === 'true' && await p.evaluate((f) => !document.querySelector(`.w-flag-card[data-flag="${f}"]`).style.transform, flagId), `${id} pointer: the target under the flag lights up; a wrong drop slides the flag back`);
+  await drag(rightT);
+  expect(await p.evaluate((t) => document.querySelector(`.w-target[data-target="${t}"]`).dataset.placed === 'true', rightT), `${id} pointer: a right drop places the flag (${rightText ? 'its line in the strip' : 'the verdict in the strip'})`);
+  await expectLayout(p, `${id} one flag placed by pointer`);
+  expect(!p.errors.length, `${id} pointer: no console errors` + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
+  await p.close();
+}
+await flagDrag('S12', 'r2', '8', '7', S.S12.map[7].feedback, S.S12.map[6].feedback);
 
 /* ---------- S03 both wrong: "Not quite." ---------- */
 console.log('\nS03 both wrong');

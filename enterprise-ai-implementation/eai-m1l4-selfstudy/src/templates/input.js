@@ -4,8 +4,12 @@
 // readers only from COUNTER_ANNOUNCE_AT characters on), then one row: "Open Homework 1" (new tab),
 // the help question as a button with its answer in a glass tooltip, the privacy line and Save; the
 // feedback strip at the panel's foot. S08B (arrange "chain", no hint): the heading alone, the three
-// fields on one line with arrows between them, the privacy line and Save. Save is always enabled:
-//   any field empty on Save -> feedback.empty in the neutral strip (its first sentence as the head)
+// fields on one line with arrows between them (each as wide as its field's width, default 1), the
+// privacy line and Save. NL3 S12B: the chain with its hint line; S17B (arrange "pair"): the two fields
+// side by side, the learner's Chapter 2 steps read-only under the context line (stage.top.show).
+// Save is always enabled:
+//   a required field empty  -> feedback.empty in the neutral strip (its first sentence as the head);
+//                              a field marked optional may stay empty (S12B Date)
 //   all filled              -> values stored under each field's store key, one fill-in answer per
 //                              field on the tracking bus, feedback.saved, Next unlocks
 import { h, fmt, nextId, resolveLink } from '../util.js';
@@ -43,12 +47,17 @@ export const input = {
     // S08B (arrange "chain"): the fields on one line with an arrow between each two
     const chain = screen.arrange === 'chain';
     const fieldEls = chain ? controls.flatMap((c, i) => [i ? h('span', { class: 'w-chain-arrow', 'aria-hidden': 'true' }, glyph('g-arrow', { size: 30.72 })) : null, c.el]) : controls.map((c) => c.el);
+    const fields = h('div', { class: 'w-fields' + (chain ? ' w-fields-chain' : screen.arrange === 'pair' ? ' w-fields-pair' : '') }, fieldEls, announcer);
+    if (chain) fields.style.gridTemplateColumns = screen.fields.map((f) => `minmax(0, ${f.width || 1}fr)`).join(' auto ');
+    // S17B: what the learner wrote before (read-only), under the context line
+    const shown = screen.stage.top?.show ? h('p', { class: 'w-shown' }, ctx.store.get(screen.stage.top.show) || ui.record.empty) : null;
     layout(ctx, 'focus',
       sheet('focus',
         contextLine(screen.stage.top?.text),
+        shown,
         screen.hint ? [h('div', { class: 'w-head-row' }, zones.instruction, g && screen.ghost.showMe ? g.button : null), h('p', { class: 'w-subline' }, screen.hint)] : zones.instruction,
         h('div', { class: 'w-form-task', dataset: { interaction: '' } },
-          h('div', { class: 'w-fields' + (chain ? ' w-fields-chain' : '') }, fieldEls, announcer),
+          fields,
           h('div', { class: 'w-actionbar' }, hw, help, privacy.el, save)),
         zones.band));
 
@@ -62,7 +71,7 @@ export const input = {
 
     function doSave() {
       const values = controls.map((c) => c.input.value.trim());
-      if (values.some((v) => !v)) { zones.setFeedback({ state: 'notice', text: screen.feedback.empty }); return; }
+      if (values.some((v, i) => !v && !screen.fields[i].optional)) { zones.setFeedback({ state: 'notice', text: screen.feedback.empty }); return; }
       controls.forEach((c, i) => { c.input.value = values[i]; c.input.dispatchEvent(new Event('input')); }); // show what was stored
       screen.fields.forEach((f, i) => ctx.store.set(f.store, values[i]));
       screen.fields.forEach((f, i) => ctx.answer({ trackingId: f.trackingId, response: values[i], result: 'neutral' }));

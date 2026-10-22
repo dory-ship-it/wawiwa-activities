@@ -75,7 +75,7 @@ if (group === 'a') {
 if (group === 'b') {
   // ---- S12: the full map with two risk flags (tracking unchanged: L4_S12_1 "4,7")
   const old = S('S12');
-  put('S11', { id: 'S12', chapter: 'ch3', template: 'flags', variant: 'map', step: { verb: 'Label', icon: 'label' }, minutes: 3,
+  if (old.template !== 'flags') put('S11', { id: 'S12', chapter: 'ch3', template: 'flags', variant: 'map', step: { verb: 'Label', icon: 'label' }, minutes: 3,
     instruction: 'Drag the two risk flags onto the fields that show the handoff risk.',
     hint: 'Follow the question after it leaves the first staffer.',
     context: 'Your HR map is complete: all eight fields from this chapter.',
@@ -94,7 +94,7 @@ if (group === 'b') {
     arrange: 'chain',
     stage: { top: { kind: 'line', text: 'Back to your own case.' }, bottom: { kind: 'privacy', icon: 'shield', text: 'Leave out names and identifying details.', action: 'save' } },
     fields: [
-      { id: 'baseline', label: 'Baseline', placeholder: 'Today, e.g. about 2 days to a summary', maxLength: 80, store: 'L4_CASE_BASELINE', trackingId: 'L4_S12B_1' },
+      { id: 'baseline', label: 'Baseline', placeholder: 'Today, e.g. about 2 days to a summary', maxLength: 80, store: 'L4_CASE_BASELINE', trackingId: 'L4_S12B_1', width: 1.6 },
       { id: 'target', label: 'Target', placeholder: 'e.g. same day', maxLength: 80, store: 'L4_CASE_TARGET', trackingId: 'L4_S12B_2' },
       { id: 'date', label: 'Date', placeholder: 'e.g. within 3 months', maxLength: 40, store: 'L4_CASE_DATE', trackingId: 'L4_S12B_3', optional: true }],
     saveAlwaysEnabled: true,
@@ -216,6 +216,8 @@ if (group === 'd') {
   S('S19').states.brief.notes = { label: 'Your notes from Chapters 3 and 4', from: 'S17B' };
 }
 
+// the screens in the slice's order (a re-run puts a screen whose anchor is gone at the front)
+C.screens.sort((a, b) => C.lesson.slice.indexOf(a.id) - C.lesson.slice.indexOf(b.id));
 // a chapter's minutes are its screens' minutes (they weigh the progress in the menu)
 for (const c of ['ch3', 'ch4'].map(ch)) c.minutes = c.screens.reduce((n, id) => n + (S(id)?.minutes || 0), 0);
 

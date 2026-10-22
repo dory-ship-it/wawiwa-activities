@@ -185,9 +185,19 @@ const STATES = [
   ['S10', 'right', async (p) => click(p, '.w-opt[data-id="c"]')],
   ['S11', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
   ['S11', 'right', async (p) => click(p, '.w-opt[data-id="d"]')],
-  ['S12', 'one of two', async (p) => { await click(p, '.w-pick-tile[data-n="4"]'); await click(p, '.w-pick-tile[data-n="3"]'); await click(p, '[data-action="check"]'); }],
-  ['S12', 'correct', async (p) => { await click(p, '.w-pick-tile[data-n="4"]'); await click(p, '.w-pick-tile[data-n="7"]'); await click(p, '[data-action="check"]'); }],
-  ['S12', 'pause marker', async (p) => { await click(p, '.w-pick-tile[data-n="4"]'); await click(p, '.w-pick-tile[data-n="7"]'); await click(p, '[data-action="check"]'); await click(p, '.w-next'); }],
+  ['S12', 'start', async () => {}],
+  ['S12', 'flag picked up', async (p) => click(p, '.w-flag-card[data-flag="r1"]')],
+  ['S12', 'wrong (field 3)', async (p) => flag(p, 'r1', '3')],
+  ['S12', 'one placed', async (p) => flag(p, 'r1', '4')],
+  ['S12', 'both placed', async (p) => { await flag(p, 'r1', '4'); await flag(p, 'r2', '7'); }],
+  ['S12B', 'hint', async () => {}],
+  ['S12B', 'empty save', async (p) => click(p, '[data-action="save"]')],
+  ['S12B', 'saved, full', async (p) => {
+    await p.type('.w-input[data-store="L4_CASE_BASELINE"]', 'About two working days from the call to a summary in the CRM, by our own count');
+    await p.type('.w-input[data-store="L4_CASE_TARGET"]', 'The same working day for nine summaries out of ten, checked on a weekly sample');
+    await p.type('.w-input[data-store="L4_CASE_DATE"]', 'Within three months of the pilot start');
+    await click(p, '[data-action="save"]');
+  }],
   ['FT4', 'idle', async () => {}],
   ['FT4', 'wrong', async (p) => click(p, '.w-opt[data-id="c"]')],
   ['S13', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
@@ -214,6 +224,9 @@ const STATES = [
   ['S19', 'brief', async () => {}],
   ['S19', 'brief, full sketch', async (p) => {
     await p.evaluate(() => { const f = window.__l4.state.f; f.L4_CASE_TRIGGER = 'Trigger text '.repeat(10).slice(0, 120); f.L4_CASE_STEPS = 'Steps and who does them '.repeat(11).slice(0, 250); f.L4_CASE_OUTPUT = 'Output text '.repeat(11).slice(0, 120); window.__l4.go('S19'); });
+  }],
+  ['S19', 'return, metric from S12B (full)', async (p) => {
+    await p.evaluate(() => { Object.assign(window.__l4.state.f, { L4_CASE_BASELINE: 'b'.repeat(80), L4_CASE_TARGET: 't'.repeat(80), L4_CASE_DATE: 'd'.repeat(40) }); window.__l4.state.g.S19 = { o: 1, b: 1 }; window.__l4.go('S19'); });
   }],
   ['S19', 'opened', async (p) => { await noNewTab(p, '[data-action="open"]'); await click(p, '[data-action="open"]'); }],
   ['S19', 'return, saved', async (p) => {
@@ -244,6 +257,8 @@ const STATES = [
   ['S22', 'finish confirm', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); }],
   ['S22', 'finished', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); await click(p, '[data-action="finish"]'); }],
 ];
+// the flags (S12, S13): click a flag, then its target
+async function flag(p, f, t) { await click(p, `.w-flag-card[data-flag="${f}"]`); await click(p, `.w-target[data-target="${t}"]`); }
 // the sort deck: click the card, then a column, once per column given
 async function deck(p, cols) { for (const col of cols) { await click(p, '[data-action="card"]'); await click(p, `.w-drop[data-column="${col}"]`); } }
 // links that open a new tab: keep the test inside the module (the tab itself is checked in walk.mjs)

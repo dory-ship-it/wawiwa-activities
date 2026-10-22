@@ -3,11 +3,12 @@
 //           (S08B, read-only: Trigger, Steps, Output), four numbered steps, the coach
 //           line and "Open workbook": a real link to the EXISTING workbook (content links, new tab,
 //           rel noopener noreferrer). After it is opened the band says so and "I'm back" appears.
-//   return  "I'm back" switches to the return state: its title, the metric field (250 max, counter),
+//   return  "I'm back" switches to the return state: its title, the metric field (250 max, counter;
+//           NL3: an empty field starts from the S12B metric, editable),
 //           the privacy line and Save. Empty Save = the hint as a notice; saved = the field's answer on
 //           the tracking bus (fill-in, neutral), the band's saved line, Next.
 // Opened and back are flags in suspend data, so a reload or LMS resume comes back to the right state.
-import { h, resolveLink } from '../util.js';
+import { h, fmt, resolveLink } from '../util.js';
 import { icon, glyph } from '../icons.js';
 import { layout, sheet, privacyLine } from './stage.js';
 import { field } from './input.js';
@@ -42,6 +43,14 @@ export const handoff = {
     const announcer = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
     const f = back.fields[0];
     const ctl = field(f, ctx, privacy.id, announcer);
+    // NL3: an empty metric starts from the learner's S12B metric (baseline and target, the date if
+    // given), still editable; nothing is stored until Save
+    const pre = f.prefill;
+    const part = (k) => ctx.store.get(pre?.from[k]).trim();
+    if (pre && !ctl.input.value && part('baseline') && part('target')) {
+      ctl.input.value = fmt(part('date') ? pre.format : pre.formatNoDate, { baseline: part('baseline'), target: part('target'), date: part('date') }).slice(0, f.maxLength);
+      ctl.input.dispatchEvent(new Event('input'));
+    }
     const save = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'save' } }, ui.buttons.save);
     const returnTask = h('div', { class: 'w-handoff-task w-form-task', dataset: { interaction: '' } }, ctl.el, announcer, h('div', { class: 'w-actionbar' }, privacy.el, save));
     const returnView = h('div', { class: 'w-handoff-view', hidden: true }, h('div', { class: 'w-handoff-head' }, rTitle), returnTask);

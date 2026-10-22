@@ -1,29 +1,18 @@
-// Explorer template, a Focus panel (styled by analogy with the frames). Variants (the S05 diagram
-// explorer is gone: NL2 splits it into S05a and S05b, src/templates/bpmn.js):
+// Explorer template. One variant (the S05 diagram explorer is gone: NL2 splits it into S05a and S05b,
+// src/templates/bpmn.js; NL3 moves S12 to the flags template, src/templates/flags.js):
 //   tiles   (S07)  NL2: on the Focus wash, a 4 x 2 grid of tiles that open in place; after all eight the
 //                  heading becomes the question and the tiles answer it (one question, wrong = retry).
-//   pick    (S12)  eight field tiles left (40%), the question and a reading panel right (60%). A tile
-//                  click opens its text in the panel (check mark once read) and selects it (two at most);
-//                  Check in the band; one band per attempt: verdict + the first wrong tile's line, no
-//                  paging; right = both key lines, Next.
 // Tracking: tiles = the field number of the first answer. Retries as retry events.
-import { h, fmt, nextId } from '../util.js';
+import { h, fmt } from '../util.js';
 import { glyph } from '../icons.js';
-import { checkButton } from './decision.js';
-import { layout, sheet, arrowNav, paintAnswer } from './stage.js';
+import { layout, arrowNav, paintAnswer } from './stage.js';
 
 export const explorer = {
   mount(ctx) {
-    const run = { tiles, pick }[ctx.screen.variant];
+    const run = { tiles }[ctx.screen.variant];
     if (!run) throw new Error('explorer: unknown variant ' + ctx.screen.variant);
     return run(ctx) || { unmount() {} };
   },
-};
-
-const mark = (el, result, ui) => {
-  el.dataset.result = result;
-  const m = el.querySelector(':scope > .w-opt-mark');
-  if (m) m.replaceChildren(result === 'correct' ? glyph('g-check-b', { size: 16, label: ui.feedback.correctPrefix }) : result === 'wrong' ? glyph('g-cross', { size: 14.08, label: ui.feedback.wrongPrefix }) : '');
 };
 
 /* ---------- tiles (S07), on the Focus wash, no panel ---------- */
@@ -116,85 +105,4 @@ function tiles(ctx) {
     zones.setFeedback({ state: 'correct', text: list[k].t.feedback });
     ctx.unlockNext({ focus: false });
   }
-}
-
-/* ---------- pick (S12) ---------- */
-function pick(ctx) {
-  const { screen, ui, zones } = ctx;
-  const need = screen.select;
-  const trackingId = screen.tracking[0].id;
-  const keys = screen.tiles.map((t, i) => (t.correct ? i : -1)).filter((i) => i >= 0);
-  const selected = new Set();
-  let solved = false, marked = false;
-
-  const question = h('h2', { class: 'w-question-text w-pick-q', id: nextId('w-pick-q') }, screen.question);
-  const panelText = h('p', { class: 'w-pick-text', 'aria-live': 'polite' });
-  const list = screen.tiles.map((t) => {
-    const seen = h('span', { class: 'w-tile-seen', 'aria-hidden': 'true' });
-    const btn = h('button', { class: 'w-opt w-pick-tile', type: 'button', 'aria-pressed': 'false', dataset: { n: String(t.n) } },
-      h('span', { class: 'w-tile-num', 'aria-hidden': 'true' }, String(t.n)), h('span', { class: 'w-opt-label' }, t.title), seen, h('span', { class: 'w-opt-mark' }));
-    return { t, btn, seen };
-  });
-  const grid = h('div', { class: 'w-pick-tiles', role: 'group', 'aria-labelledby': question.id }, list.map((x) => x.btn));
-  arrowNav(grid, { selector: '.w-pick-tile', cols: 2 });
-  const check = checkButton(ui, ui.buttons.check, () => doCheck());
-
-  layout(ctx, 'focus',
-    sheet('focus w-sheet-wide',
-      zones.instruction,
-      h('div', { class: 'w-pick', dataset: { interaction: '' } }, grid, h('div', { class: 'w-pick-side' }, question, h('div', { class: 'w-pick-panel' }, panelText))),
-      zones.band));
-  zones.setFeedback({ state: 'hint', text: screen.hint });
-  zones.setTool(check);
-
-  const open = (x) => {
-    list.forEach((y) => { y.btn.dataset.open = String(y === x); });
-    panelText.textContent = x.t.text;
-    x.btn.dataset.seen = 'true';
-    x.seen.replaceChildren(glyph('g-check-b', { size: 16 }));
-  };
-  const paintOne = (x, result) => mark(x.btn, result, ui);
-  function update() {
-    list.forEach((x, i) => {
-      x.btn.setAttribute('aria-pressed', String(selected.has(i)));
-      if (!marked || !x.btn.dataset.result) paintOne(x, '');
-    });
-    check.disabled = selected.size !== need;
-  }
-  list.forEach((x, i) => x.btn.addEventListener('click', () => {
-    open(x);
-    if (solved) return;
-    if (marked) { marked = false; list.forEach((y) => paintOne(y, '')); }
-    if (selected.has(i)) selected.delete(i); else if (selected.size < need) selected.add(i);
-    update();
-  }));
-
-  function solve(focus) {
-    solved = true;
-    selected.clear();
-    keys.forEach((i) => selected.add(i));
-    list.forEach((x, i) => { x.btn.setAttribute('aria-pressed', String(keys.includes(i))); paintOne(x, keys.includes(i) ? 'correct' : ''); });
-    zones.setTool();
-    zones.setFeedback({ state: 'correct', text: keys.map((i) => screen.tiles[i].feedback).join(' ') });
-    ctx.unlockNext({ focus });
-  }
-  function doCheck() {
-    if (solved || selected.size !== need) return;
-    const chosen = [...selected].sort((a, b) => a - b);
-    const rightCount = chosen.filter((i) => keys.includes(i)).length;
-    const right = rightCount === keys.length;
-    ctx.answer({ trackingId, response: chosen.map((i) => String(screen.tiles[i].n)).join(','), result: right ? 'correct' : 'wrong' });
-    if (right) { ctx.complete(); solve(true); return; }
-    chosen.forEach((i) => paintOne(list[i], screen.tiles[i].correct ? 'correct' : 'wrong'));
-    const wrong = chosen.filter((i) => !screen.tiles[i].correct);
-    wrong.forEach((i) => selected.delete(i));
-    marked = true;
-    update();
-    zones.setFeedback({ state: rightCount === 1 && keys.length === 2 ? 'partial' : 'wrong', verdict: rightCount === 1 && keys.length === 2 ? ui.feedback.oneOfTwo : ui.feedback.wrongPrefix, text: screen.tiles[wrong[0]].feedback });
-    list[wrong[0]].btn.focus();
-  }
-
-  const firstOpen = list.find((x) => x.t.n === screen.openFirst);
-  if (firstOpen) open(firstOpen);
-  if (ctx.revisit) solve(false);
 }

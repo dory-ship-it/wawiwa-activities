@@ -11,7 +11,7 @@
     "dir": "ltr",
     "contentVersion": "slice-0.1 (storyboard v2)",
     "pilot": true,
-    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
+    "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "S12B", "FT4", "S13", "S14", "S15", "S16", "S17", "S18A", "S18", "S19", "S20", "S21", "S22"],
     "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] }
   },
 
@@ -80,7 +80,7 @@
         "video": "Next, locked until the video ends and every stop is answered",
         "fill": "Next, locked until you choose the right line for Field 7",
         "metric": "Next, locked until you choose the strongest metric",
-        "pick": "Next, locked until both answers are correct",
+        "map": "Next, locked until both risk flags are on the right fields",
         "bounds": "Next, locked until you choose the right start and end",
         "safety": "Next, locked until you choose what to write and save your case title",
         "handoff": "Next, locked until you are back from the workbook and your metric is saved",
@@ -99,6 +99,11 @@
       "helpPlaces": "Drag the label to a place on the diagram, or press 1 to {n} to choose a place and Enter to drop it. Escape cancels.",
       "picked": "Picked up: {item}. Choose a column, 1 to {n}, then press Enter, or click a column.",
       "pickedPlace": "Picked up: {item}. Choose a place, 1 to {n}, then press Enter, or click a place.",
+      "helpFields": "Drag the flag to a field, or press 1 to {n} to choose a field and Enter to drop it. Escape cancels.",
+      "helpSteps": "Drag the flag to a step, or press 1 to {n} to choose a step and Enter to drop it. Escape cancels.",
+      "fieldName": "Field {n}, {title}",
+      "stepName": "Step {n}, {text}",
+      "flagName": "{item} {i} of {n}",
       "chosen": "{target} chosen. Press Enter to drop.",
       "cancelled": "Cancelled."
     },
@@ -267,7 +272,7 @@
     { "id": "ch0", "n": 0, "title": "Intro", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 12, "screens": ["O1", "O2", "O3", "S01", "S02"], "inSlice": true, "pauseMarker": null },
     { "id": "ch1", "n": 1, "title": "Why map", "photo": { "src": "assets/img/l4/w1-new-computer-same-mess.jpg", "position": "30% 50%", "temp": true }, "minutes": 11, "screens": ["W1", "V1", "K1", "S03"], "inSlice": true, "pauseMarker": null },
     { "id": "ch2", "n": 2, "title": "Toolkit", "photo": { "src": "assets/img/l4/s04-three-channels.jpg", "position": "50% 50%", "temp": true }, "minutes": 28, "screens": ["W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B"], "inSlice": true, "pauseMarker": null },
-    { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 18, "screens": ["W3", "V2", "S09", "S10", "S11", "S12"], "inSlice": true, "pauseMarker": null },
+    { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/s01-dana-phone.jpg", "position": "22% 50%", "temp": true }, "minutes": 20, "screens": ["W3", "V2", "S09", "S10", "S11", "S12", "S12B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch4", "n": 4, "title": "Critical eye", "photo": { "src": "assets/img/l4/o1-lanes-office.jpg", "position": "60% 50%", "temp": true }, "minutes": 26, "screens": ["FT4", "S13", "S14", "S15", "S16", "S17"], "inSlice": true,
       "fastTrack": { "card": "FT4", "landing": "S17" },
       "pauseMarker": null },
@@ -278,28 +283,6 @@
   ],
 
   "screens": [
-    {
-      "id": "W3",
-      "chapter": "ch3",
-      "template": "warmup",
-      "step": { "verb": "Guess", "icon": "guess" },
-      "minutes": 1,
-      "instruction": "An employee asks HR about their own salary. May that question go into a public AI tool?",
-      "hint": "Pick the answer you expect. A guess cannot be wrong.",
-      "hintPilotCopy": true,
-      "layout": "warmup",
-      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "foot": "Chapter 3 · HR demo" },
-      "options": [
-        { "id": "a", "label": "Yes, if the name is removed" },
-        { "id": "b", "label": "Only with the employee's consent" },
-        { "id": "c", "label": "No, it holds confidential details" }
-      ],
-      "feedback": { "verdict": "Hold that thought.", "text": "This chapter tags every source by how sensitive it is." },
-      "advance": "after-any",
-      "tracking": [{ "id": "L4_W3_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Understand", "result": "neutral" }],
-      "sources": ["planning/STORYBOARD-V3.md Ch3 W3 (replaces FT3)", "s22", "s44"]
-    },
-
     {
       "id": "O1",
       "chapter": "ch0",
@@ -934,7 +917,7 @@
         { "id": "trigger", "label": "Trigger", "placeholder": "What starts it? e.g. A request form arrives", "maxLength": 120, "multiline": true,
           "store": "L4_CASE_TRIGGER", "trackingId": "L4_S08B_1" },
         { "id": "steps", "label": "Steps", "placeholder": "The main steps, and who does them", "maxLength": 250, "multiline": true,
-          "store": "L4_CASE_STEPS", "trackingId": "L4_S08B_2" },
+          "store": "L4_CASE_STEPS", "trackingId": "L4_S08B_2", "width": 1.3 },
         { "id": "output", "label": "Output", "placeholder": "What comes out, and to whom", "maxLength": 120, "multiline": true,
           "store": "L4_CASE_OUTPUT", "trackingId": "L4_S08B_3" }
       ],
@@ -952,6 +935,28 @@
         { "id": "L4_S08B_3", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" }
       ],
       "sources": ["planning/CH2-SPEC.md 8"]
+    },
+
+    {
+      "id": "W3",
+      "chapter": "ch3",
+      "template": "warmup",
+      "step": { "verb": "Guess", "icon": "guess" },
+      "minutes": 1,
+      "instruction": "An employee asks HR about their own salary. May that question go into a public AI tool?",
+      "hint": "Pick the answer you expect. A guess cannot be wrong.",
+      "hintPilotCopy": true,
+      "layout": "warmup",
+      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "foot": "Chapter 3 · HR demo" },
+      "options": [
+        { "id": "a", "label": "Yes, if the name is removed" },
+        { "id": "b", "label": "Only with the employee's consent" },
+        { "id": "c", "label": "No, it holds confidential details" }
+      ],
+      "feedback": { "verdict": "Hold that thought.", "text": "This chapter tags every source by how sensitive it is." },
+      "advance": "after-any",
+      "tracking": [{ "id": "L4_W3_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Understand", "result": "neutral" }],
+      "sources": ["planning/STORYBOARD-V3.md Ch3 W3 (replaces FT3)", "s22", "s44"]
     },
 
     {
@@ -1185,40 +1190,132 @@
     {
       "id": "S12",
       "chapter": "ch3",
-      "template": "explorer",
-      "step": { "verb": "Explore", "icon": "explore" },
-      "variant": "pick",
+      "template": "flags",
+      "variant": "map",
+      "step": { "verb": "Label", "icon": "label" },
       "minutes": 3,
-      "instruction": "Open any field, then answer the question.",
-      "hint": "Open any field to read it. Then select two and press Check.",
-      "layout": "wide",
-      "question": "Which two fields together show the risk at the HR handoff?",
-      "select": 2,
-      "openFirst": 3,
-      "tiles": [
-        { "n": 1, "title": "Name", "text": "Answering employees' repeat questions to HR", "correct": false,
-          "feedback": "This field does not follow the question once it leaves the first staffer." },
-        { "n": 2, "title": "Trigger", "text": "A question by WhatsApp, email, or in person", "correct": false,
-          "feedback": "This field does not follow the question once it leaves the first staffer." },
-        { "n": 3, "title": "Steps", "text": "Receiving the request (employee) to checking the topic (HR staff) to answer or escalation (HR staff / manager)", "correct": false,
-          "feedback": "Field 3 shows who does each step, not the moment between them or what can go wrong there." },
-        { "n": 4, "title": "Handoffs", "text": "From HR staff to HR manager when policy is exceeded", "correct": true,
-          "feedback": "Field 4 shows the question moving from HR staff to the HR manager." },
-        { "n": 5, "title": "Sources", "text": "Vacation, pension, expense, overtime policy. Owner: HR manager. Tag: INTERNAL", "correct": false,
-          "feedback": "This field does not follow the question once it leaves the first staffer." },
-        { "n": 6, "title": "Controls", "text": "No formal control: depends on the staffer's personal judgment", "correct": false,
-          "feedback": "Field 6 is about how answers get checked. It says nothing about the handoff." },
-        { "n": 7, "title": "Gaps", "text": "Unclear how many wrong answers were given; no single handoff channel", "correct": true,
-          "feedback": "Field 7 adds the risk: no single channel for that handoff." },
-        { "n": 8, "title": "Metric", "text": "Baseline ~35% of HR time on repeat questions. Target 20% within 3 months", "correct": false,
-          "feedback": "This field does not follow the question once it leaves the first staffer." }
+      "instruction": "Drag the two risk flags onto the fields that show the handoff risk.",
+      "hint": "Follow the question after it leaves the first staffer.",
+      "context": "Your HR map is complete: all eight fields from this chapter.",
+      "layout": "flags",
+      "dragHelp": "helpFields",
+      "flagLabel": "Risk flag",
+      "flagLabelPilotCopy": true,
+      "flags": [{ "id": "r1" }, { "id": "r2" }],
+      "map": [
+        {
+          "n": 1,
+          "title": "Name",
+          "text": "Answering employees' repeat questions to HR",
+          "correct": false,
+          "feedback": "This field does not follow the question once it leaves the first staffer."
+        },
+        {
+          "n": 2,
+          "title": "Trigger",
+          "text": "A question by WhatsApp, email, or in person",
+          "correct": false,
+          "feedback": "This field does not follow the question once it leaves the first staffer."
+        },
+        {
+          "n": 3,
+          "title": "Steps",
+          "text": "Receiving the request (employee) to checking the topic (HR staff) to answer or escalation (HR staff / manager)",
+          "correct": false,
+          "feedback": "Field 3 shows who does each step, not the moment between them or what can go wrong there."
+        },
+        {
+          "n": 4,
+          "title": "Handoffs",
+          "text": "From HR staff to HR manager when policy is exceeded",
+          "correct": true,
+          "feedback": "Field 4 shows the question moving from HR staff to the HR manager."
+        },
+        {
+          "n": 5,
+          "title": "Sources",
+          "text": "Vacation, pension, expense, overtime policy. Owner: HR manager. Tag: INTERNAL",
+          "correct": false,
+          "feedback": "This field does not follow the question once it leaves the first staffer."
+        },
+        {
+          "n": 6,
+          "title": "Controls",
+          "text": "No formal control: depends on the staffer's personal judgment",
+          "correct": false,
+          "feedback": "Field 6 is about how answers get checked. It says nothing about the handoff."
+        },
+        {
+          "n": 7,
+          "title": "Gaps",
+          "text": "Unclear how many wrong answers were given; no single handoff channel",
+          "correct": true,
+          "feedback": "Field 7 adds the risk: no single channel for that handoff."
+        },
+        {
+          "n": 8,
+          "title": "Metric",
+          "text": "Baseline ~35% of HR time on repeat questions. Target 20% within 3 months",
+          "correct": false,
+          "feedback": "This field does not follow the question once it leaves the first staffer."
+        }
       ],
-      "advance": "after-correct",
-      "endOfChapter": true,
+      "feedbackCorrect": "Field 4 shows the question moving from HR staff to the HR manager. Field 7 adds the risk: no single channel for that handoff.",
+      "wordLimit": {
+        "max": 120,
+        "why": "storyboard v3 (S12: over 45 words, document view): the full HR map shows all eight filled fields at once, read as a document"
+      },
+      "advance": "after-all-placed",
       "tracking": [
         { "id": "L4_S12_1", "type": "choice", "multiple": true, "correctResponse": "4,7", "scored": false, "bloom": "Analyze", "result": "graded" }
       ],
       "sources": ["s20", "s17 to s19", "s27", "s43 item 2"]
+    },
+
+    {
+      "id": "S12B",
+      "chapter": "ch3",
+      "template": "input",
+      "step": { "verb": "Write", "icon": "write" },
+      "minutes": 2,
+      "instruction": "Set one success metric for your case.",
+      "hint": "A rough number is fine. You refine it in Chapter 5.",
+      "arrange": "chain",
+      "stage": {
+        "top": { "kind": "line", "text": "Back to your own case." },
+        "bottom": { "kind": "privacy", "icon": "shield", "text": "Leave out names and identifying details.", "action": "save" }
+      },
+      "fields": [
+        {
+          "id": "baseline",
+          "label": "Baseline",
+          "placeholder": "Today, e.g. about 2 days to a summary",
+          "maxLength": 80,
+          "store": "L4_CASE_BASELINE",
+          "trackingId": "L4_S12B_1",
+          "width": 1.6
+        },
+        { "id": "target", "label": "Target", "placeholder": "e.g. same day", "maxLength": 80, "store": "L4_CASE_TARGET", "trackingId": "L4_S12B_2" },
+        {
+          "id": "date",
+          "label": "Date",
+          "placeholder": "e.g. within 3 months",
+          "maxLength": 40,
+          "store": "L4_CASE_DATE",
+          "trackingId": "L4_S12B_3",
+          "optional": true
+        }
+      ],
+      "saveAlwaysEnabled": true,
+      "feedback": { "saved": "Saved. It comes back in Chapter 5, ready to refine.", "empty": "Add a number to Baseline and Target." },
+      "advance": "after-save",
+      "endOfChapter": true,
+      "tracking": [
+        { "id": "L4_S12B_1", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" },
+        { "id": "L4_S12B_2", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" },
+        { "id": "L4_S12B_3", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" }
+      ],
+      "sources": ["planning/STORYBOARD-V3.md Ch3 S12B", "s37"]
     },
 
     {
@@ -1535,13 +1632,21 @@
       "states": {
         "brief": {
           "stage": {
-            "top": { "kind": "title", "icon": "workbook", "text": "AS-IS Process Mapping for Your Own Use Case", "chip": { "icon": "clock", "text": "~60 min" } },
-            "middle": { "kind": "steps", "items": [
-              { "n": 1, "text": "Open Homework 1 and 2" },
-              { "n": 2, "text": "Fill eight fields as the process runs today" },
-              { "n": 3, "text": "Leave your Homework 2 AI step off the map" },
-              { "n": 4, "text": "Export your PDF" }
-            ] },
+            "top": {
+              "kind": "title",
+              "icon": "workbook",
+              "text": "AS-IS Process Mapping for Your Own Use Case",
+              "chip": { "icon": "clock", "text": "~60 min" }
+            },
+            "middle": {
+              "kind": "steps",
+              "items": [
+                { "n": 1, "text": "Open Homework 1 and 2" },
+                { "n": 2, "text": "Fill eight fields as the process runs today" },
+                { "n": 3, "text": "Leave your Homework 2 AI step off the map" },
+                { "n": 4, "text": "Export your PDF" }
+              ]
+            },
             "bottom": { "kind": "privacy", "icon": "shield", "text": "Coach on: roles, no names.", "action": "open" }
           },
           "sketch": { "label": "Your sketch from Chapter 2", "from": "S08B" },
@@ -1556,11 +1661,25 @@
           },
           "backFeedback": "Next: three questions to check your map against.",
           "fields": [
-            { "id": "metric", "label": "Your success metric: baseline and target", "term": "Success metric", "placeholder": "", "maxLength": 250, "multiline": true,
-              "store": "L4_METRIC", "trackingId": "L4_S19_1" }
+            {
+              "id": "metric",
+              "label": "Your success metric: baseline and target",
+              "term": "Success metric",
+              "placeholder": "",
+              "maxLength": 250,
+              "multiline": true,
+              "store": "L4_METRIC",
+              "trackingId": "L4_S19_1",
+              "prefill": {
+                "from": { "baseline": "L4_CASE_BASELINE", "target": "L4_CASE_TARGET", "date": "L4_CASE_DATE" },
+                "format": "Baseline: {baseline}. Target: {target}, {date}.",
+                "formatNoDate": "Baseline: {baseline}. Target: {target}."
+              }
+            }
           ],
           "savedFeedback": "Saved to your lesson record.",
-          "emptyFeedback": null
+          "emptyFeedback": null,
+          "prefillPilotCopy": "the metric line built from S12B"
         }
       },
       "handoff": {

@@ -309,7 +309,11 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-counter { justify-self: end; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
 .w-actionbar { display: flex; align-items: center; gap: 15.36px; margin-top: 15.36px; }
 /* S08B: three fields on a line, an arrow between each two */
-.w-fields-chain { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.3fr) auto minmax(0, 1fr); gap: 15.36px; }
+.w-fields-chain { gap: 15.36px; } /* the columns from each field's width (src/templates/input.js) */
+.w-fields-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* S17B: the learner's earlier text, read-only (the S19 sketch's stone box) */
+.w-shown { margin-top: 7.68px; padding: 10.24px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-stone);
+  font: 400 17.92px/1.4 var(--wl-font-ui); color: var(--wl-text-2); overflow-wrap: anywhere; }
 .w-chain-arrow { align-self: center; margin-top: 22.72px; display: grid; color: var(--wl-navy); }
 .w-privacy { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 7.68px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
 
@@ -583,14 +587,10 @@ a.w-btn { text-decoration: none; }
 .w-tile[data-result="correct"] .w-opt-mark { border-color: var(--wl-teal); background: var(--wl-teal); }
 .w-tile[data-result="wrong"] .w-opt-mark { border-color: var(--wl-error); background: var(--wl-error); }
 .w-float-tiles { left: 50%; width: min(819.2px, calc(100% - 102.4px)); transform: translateX(-50%); top: 448px; }
-/* the field number and the seen mark of the S12 and S21 tiles */
+/* the field number of the S21 tiles */
 .w-tile-num { font: 800 20.48px/1 var(--wl-font-ui); color: var(--wl-teal-ink); }
-.w-tile-seen { position: absolute; top: 10px; right: 10px; display: grid; color: var(--wl-teal-ink); }
-.w-question-text { margin: 0; font: 800 25.6px/1.25 var(--wl-font-ui); letter-spacing: -.4px; color: var(--wl-ink); }
 
-/* pick (S12) and the S21 tiles: field tiles left, the question and a reading panel right */
-.w-pick { display: grid; grid-template-columns: 420px minmax(0, 1fr); gap: 25.6px; }
-.w-pick-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8.96px 10.24px; align-content: start; }
+/* the S21 tiles (the S12 pick panel went to the flags template in NL3) */
 .w-pick-tile { position: relative; min-height: 52px; display: flex; align-items: center; gap: 10.24px; padding: 6.4px 38px 6.4px 12.8px; border: 1px solid var(--wl-card-line);
   border-radius: var(--wl-radius-card); background: var(--wl-white); font: 600 16.64px/1.25 var(--wl-font-ui); color: var(--wl-body-ink); }
 .w-pick-tile:not([data-result="correct"]):not([data-result="wrong"]):not([aria-disabled="true"]):hover { border-color: var(--wl-navy); }
@@ -598,16 +598,9 @@ a.w-btn { text-decoration: none; }
 .w-pick-tile[data-result="correct"] { border: 3.2px solid var(--wl-teal); }
 .w-pick-tile[data-result="wrong"] { border: 3.2px solid var(--wl-error); }
 .w-pick-tile .w-tile-num { font-size: 17.92px; }
-.w-pick-tile .w-tile-seen { top: 6px; right: 8px; }
 .w-pick-tile .w-opt-mark { position: absolute; right: 8px; bottom: 6px; width: 22px; height: 22px; border: 0; }
 .w-pick-tile[data-result="correct"] .w-opt-mark { background: var(--wl-teal); }
 .w-pick-tile[data-result="wrong"] .w-opt-mark { background: var(--wl-error); }
-.w-pick-tile[data-open="true"] { box-shadow: inset 0 -3px 0 var(--wl-navy); }
-.w-pick-tile[data-result="correct"] .w-tile-seen, .w-pick-tile[data-result="wrong"] .w-tile-seen { display: none; }
-.w-pick-side { display: flex; flex-direction: column; gap: 12.8px; }
-.w-pick-q { text-align: left; }
-.w-pick-panel { min-height: 120px; padding: 15.36px 20.48px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
-.w-pick-text { font: 400 18.56px/1.45 var(--wl-font-ui); color: var(--wl-ink); }
 .w-figure { font-weight: 800; color: var(--wl-ink); }
 
 /* ---------- NL2: practice on the Focus wash without a panel (S04, S05b, S07) ---------- */
@@ -708,6 +701,33 @@ a.w-btn { text-decoration: none; }
   font: 800 25.6px/normal var(--wl-font-ui); color: var(--wl-ink); text-align: left; cursor: grab; touch-action: none; }
 .w-label-card[aria-pressed="true"] { border: 2.56px solid var(--wl-navy); box-shadow: var(--wl-card-shadow); }
 .w-float-tray { left: 819.2px; right: 0; top: 250.88px; }
+
+/* NL3 flags (S12 map, S13 line), by analogy with S05b: the figure card left (the S05b diagram's
+   768px), the flags right (S05b's label cards with a flag), the strip under them; the drop targets
+   are S05b's (dashed; over = navy; placed = solid teal with the flag chip and its check) */
+.w-board-flags { left: max(51.2px, calc((100% - 1177.6px) / 2)); right: max(51.2px, calc((100% - 1177.6px) / 2)); top: 120.32px; }
+.w-map-card, .w-line-card { width: 768px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); }
+.w-flag-side { position: absolute; left: 819.2px; right: 0; top: 0; display: grid; gap: 15.36px; align-content: start; }
+.w-flag-side .w-label-tray, .w-flag-side .w-float { position: static; }
+.w-flag-icon { color: var(--wl-navy); }
+.w-target .w-target-placed { position: absolute; transform: none; }
+/* S12: the eight fields in two columns, each field a drop target */
+.w-map-card { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8.96px 15.36px; padding: 15.36px; }
+.w-map-col { display: grid; gap: 8.96px; align-content: start; }
+.w-map-field { position: relative; display: flex; gap: 10.24px; align-items: flex-start; min-height: 44px; padding: 7.68px 12.8px 8.96px; }
+.w-map-text { display: grid; gap: 1.28px; font: 400 15.36px/1.35 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-map-text b { font-weight: 700; color: var(--wl-ink); }
+.w-map-field .w-step-n { margin-top: 1.28px; }
+.w-map-field .w-target-placed { right: 7.68px; top: -14.08px; }
+/* S13: the five steps of the process line, a drop slot above each */
+.w-line-card { padding: 20.48px 17.92px; }
+.w-line { display: flex; align-items: flex-end; gap: 7.68px; }
+.w-line-cell { flex: 1 1 0; min-width: 0; display: grid; gap: 10.24px; }
+.w-line-slot { position: relative; height: 51.2px; display: grid; place-items: center; }
+.w-line-slot .w-target-chip, .w-line-slot .w-target-placed { position: static; transform: none; }
+.w-line-step { min-height: 107.52px; display: grid; gap: 7.68px; align-content: start; padding: 10.24px 12.8px; border: 2.432px solid var(--wl-teal-ink); border-radius: 7.68px;
+  background: var(--wl-white); font: 600 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-line-arrow { flex: none; display: grid; margin-bottom: 42.24px; color: var(--wl-navy); }
 
 /* ---------- side menu (frame "O2 Side menu open") ---------- */
 .w-menu-overlay { position: absolute; inset: 0; z-index: 30; }

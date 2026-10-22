@@ -72,6 +72,11 @@ export function screenViews(s, content) {
     const base = [s.label, s.text, ...s.parts.flatMap((p) => [p.title, p.text])];
     return [[s.id, base], [`${s.id} case on`, [...base, ...s.parts.flatMap((p) => [s.caseLabel, p.case])]]];
   }
+  // NL3 flags: the full map (every field) or the process line, and the flags (placed ones sit on their target)
+  if (s.template === 'flags') {
+    const flags = s.flags.map((f) => f.text || s.flagLabel);
+    return [[s.id, s.variant === 'map' ? [s.context, ...s.map.flatMap((f) => [String(f.n), f.title, f.text]), ...flags] : [...s.line.flatMap((x) => [String(x.n), x.text]), ...flags]]];
+  }
   // NL2: one situation at a time (the solved ones as done cards), the rounds with their rules band
   if (s.variant === 'pair') return s.situations.map((x, k) => [`${s.id} ${x.id}`, [x.hint, s.answerLabel, x.text, ...x.options.flatMap((o) => [o.label, o.sub]),
     ...s.situations.slice(0, k).flatMap((d) => [d.doneLabel, d.options.find((o) => o.correct).label])]]);
@@ -99,6 +104,8 @@ export function screenFeedback(s, content) {
     ...(s.hotspots || []).map((x) => [`${s.id} hotspot ${x.id}`, x.feedback]),
     ...(s.legend || []).map((g) => [`${s.id} legend ${g.id}`, g.text]),
     ...(s.tiles || []).map((t) => [`${s.id} tile ${t.n}`, t.feedback]),
+    ...(Array.isArray(s.map) ? s.map : []).map((f) => [`${s.id} field ${f.n}`, f.feedback]),
+    ...(s.flags || []).flatMap((f) => Object.entries(f.feedback || {}).map(([k, v]) => [`${s.id} flag ${f.id} ${k}`, v])),
     ...(s.situations || []).flatMap((x) => x.options.map((o) => [`${s.id} ${x.id} option ${o.id}`, o.feedback])),
     ...(s.rounds || []).flatMap((r) => Object.entries(r.feedback).map(([k, v]) => [`${s.id} ${r.id} option ${k}`, v])),
     ...Object.entries(s.step2?.feedback || {}).map(([k, v]) => [`${s.id} step2.${k}`, v]),
