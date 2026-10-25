@@ -62,8 +62,6 @@ Situation line, heading, answers, and the band (hint, attempts, Show me how, fee
 check passed (59) · test:fit --sizes=1280x720,1600x900 passed (568) · walk passed (588) · test:scorm passed (509) · test:review passed (20). New checks cover: steps differ per chapter, version b IDs, the S18A lettered list, S18 one panel, S21 retake on version b and attempt 3 back on a, review rows 1-7 and the version label, and no truncated S19 field or card names.
 
 ## Open questions
-1. S18A: is the lettered list left of the rows OK? (Above them does not fit the panel limit.)
-2. S19: are one-line learner notes OK, or should the cards drop something to make room for two lines?
-3. Focus look: panel-less screens (O2, O3, K1, K2, S05a, K4, S02 head, S04/S05b/S07/S09/S12/S13/S16 heads) now have white text on the darker photo. Is that the intended look?
+None. Noy approved all three deviations (25 Oct 2026): the S18A list left of the rows, one-line learner notes in S19, and white text on the dark Focus wash on panel-less screens.
 
 Weekly usage (all models) after: 19%.
