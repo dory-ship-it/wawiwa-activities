@@ -173,6 +173,10 @@ header::before{
 /* <<< WAWIWA LOGO <<< */
 </style>
 <style id="wawiwa-print-fix">@media print{@page{margin:0 !important}body{padding:12mm !important;box-sizing:border-box}}</style>
+<style>/* >>> BLANK PDF >>> */
+.w-blank-tag{display:none}
+@media print{.w-blank-tag{display:block;margin:0 0 10px;font:600 12px/1.4 sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#2E6E76}}
+/* <<< BLANK PDF <<< */</style>
 </head>
 <body>
 <header>
@@ -229,7 +233,8 @@ header::before{
     </div>
   </div>
 
-  <div class="btnrow"><button onclick="copyAll()">Copy my mapping</button><button class="ghost" onclick="window.print()">Print / Save as PDF</button><span class="badge" id="copied"></span></div>
+  <div class="btnrow"><button onclick="copyAll()">Copy my mapping</button><button class="ghost" onclick="window.print()">Print / Save as PDF</button>
+    <button class="ghost" id="mkblank" type="button">Print blank / Save as PDF</button><span class="badge" id="copied"></span></div>
 </div>
 <script>
   var cards=[].slice.call(document.querySelectorAll('.card.req'));
@@ -239,6 +244,69 @@ header::before{
   function copyAll(){var o=[];cards.forEach(function(c){o.push('== '+c.querySelector('h2').textContent.replace(/\s+/g,' ').trim()+' ==');[].slice.call(c.querySelectorAll('label')).forEach(function(l){var f=l.nextElementSibling;if(f&&(f.tagName==='INPUT'||f.tagName==='TEXTAREA'||f.tagName==='SELECT'))o.push(l.textContent+': '+(f.value||''));});o.push('');});var t=o.join('\n');var n=document.getElementById('copied');if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){n.textContent='Copied to clipboard.';},function(){fb(t,n);});}else fb(t,n);}
   function fb(t,n){var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy');n.textContent='Copied.';}catch(e){n.textContent='Select all and copy.';}document.body.removeChild(x);}
   refresh();
+</script>
+<script>
+/* >>> BLANK PDF >>> */
+/* the blank template: every field back to its authored default, the page's
+   own input/change listener recomputes what it derives from them, the
+   browser prints, and on afterprint every value comes back. Nothing is
+   saved anywhere in between (these pages do not autosave). */
+(function(){
+  'use strict';
+  function fields(){
+    return [].slice.call(document.querySelectorAll('input,textarea,select')).filter(function(e){
+      return !/^(button|submit|reset|hidden|file|image)$/.test(e.type||'');
+    });
+  }
+  function nudge(list){
+    list.forEach(function(e){
+      e.dispatchEvent(new Event('input',{bubbles:true}));
+      e.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+  }
+  function blankPrint(){
+    var list=fields();
+    var saved=list.map(function(e){
+      if(e.tagName==='SELECT') return [].map.call(e.options,function(o){ return o.selected; });
+      if(e.type==='checkbox'||e.type==='radio') return e.checked;
+      return e.value;
+    });
+    list.forEach(function(e){
+      if(e.tagName==='SELECT') [].forEach.call(e.options,function(o){ o.selected=o.defaultSelected; });
+      else if(e.type==='checkbox'||e.type==='radio') e.checked=e.defaultChecked;
+      else e.value=e.defaultValue;
+    });
+    nudge(list);
+    var tag=document.createElement('p');
+    tag.className='w-blank-tag';
+    tag.textContent='Blank template';
+    var head=document.querySelector('header, .masthead');
+    if(head&&head.parentNode) head.parentNode.insertBefore(tag, head.nextSibling);
+    else document.body.insertBefore(tag, document.body.firstChild);
+    var done=false;
+    function restore(){
+      if(done) return; done=true;
+      list.forEach(function(e,i){
+        if(e.tagName==='SELECT') [].forEach.call(e.options,function(o,k){ o.selected=saved[i][k]; });
+        else if(e.type==='checkbox'||e.type==='radio') e.checked=saved[i];
+        else e.value=saved[i];
+      });
+      nudge(list);
+      if(tag.parentNode) tag.parentNode.removeChild(tag);
+      window.removeEventListener('afterprint',restore);
+      ['pointerdown','keydown','focusin'].forEach(function(t){ document.removeEventListener(t,restore,true); });
+    }
+    window.addEventListener('afterprint',restore);
+    /* a browser that never fires afterprint: the first touch afterwards restores */
+    setTimeout(function(){
+      ['pointerdown','keydown','focusin'].forEach(function(t){ document.addEventListener(t,restore,true); });
+    },0);
+    window.print();
+  }
+  var b=document.getElementById('mkblank');
+  if(b) b.addEventListener('click', blankPrint);
+})();
+/* <<< BLANK PDF <<< */
 </script>
 </body>
 </html>

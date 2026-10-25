@@ -236,6 +236,10 @@
 /* <<< WAWIWA LOGO <<< */
 </style>
 <style id="wawiwa-print-fix">@media print{@page{margin:0 !important}body{padding:12mm !important;box-sizing:border-box}}</style>
+<style>/* >>> BLANK PDF >>> */
+.w-blank-tag{display:none}
+@media print{.w-blank-tag{display:block;margin:0 0 10px;font:600 12px/1.4 sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#2E6E76}}
+/* <<< BLANK PDF <<< */</style>
 </head>
 <body>
 <div class="container">
@@ -250,6 +254,7 @@
 <div class="instructions"><h2>How this works</h2><p>After Lesson 3 you grow your opportunity register to 15 cards and pressure-test it with two AI checks.</p><div class="meta-row"><span><b>Time:</b> 75 min</span><span><b>Deliverable:</b> 15 total opportunity cards, classification + sensitivity notes</span><span><b>Grading:</b> feeds the capstone (not graded alone)</span></div></div><div class="callout"><b>Rubric reminder.</b> Every card must name a <b>Pain Owner</b> (the role who actually feels the pain), distinct from the Owner / Sponsor who funds the work. Cards without a Pain Owner are graded <b>Weak</b>.</div><div class="section-title"><span class="n">1</span>Add 5 more opportunity cards</div><p class="guidance">Use pains from your second-department mapping. The Pain Owner field is required — empty cells are highlighted.</p><table class="build"><thead><tr><th>Pain / opportunity</th><th>Pain Owner</th><th>Sponsor</th><th>Solution category</th><th>Notes</th><th></th></tr></thead><tbody id="l3_cards" class=" req-watch"><tr class="tmpl" style="display:none"><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Assisted">Assisted</option><option value="Automated">Automated</option><option value="Augmented">Augmented</option><option value="Autonomous">Autonomous</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Assisted">Assisted</option><option value="Automated">Automated</option><option value="Augmented">Augmented</option><option value="Autonomous">Autonomous</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Assisted">Assisted</option><option value="Automated">Automated</option><option value="Augmented">Augmented</option><option value="Autonomous">Autonomous</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Assisted">Assisted</option><option value="Automated">Automated</option><option value="Augmented">Augmented</option><option value="Autonomous">Autonomous</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Assisted">Assisted</option><option value="Automated">Automated</option><option value="Augmented">Augmented</option><option value="Autonomous">Autonomous</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Assisted">Assisted</option><option value="Automated">Automated</option><option value="Augmented">Augmented</option><option value="Autonomous">Autonomous</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr></tbody></table><button class="addbtn" onclick="addRow('l3_cards')">+ Add row</button><div class="section-title"><span class="n">2</span>AI classification check</div><div class="prompt"><div class="prompt-head"><span class="ai">AI prompt</span><span class="ttl">Classify the register</span><button class="copy" onclick="copyPrompt(this)">Copy</button></div><pre>Here are my 15 opportunity cards. Classify each into one of four solution categories: Assisted, Automated, Augmented, Autonomous. For each, give one sentence of reasoning. List any card where you are uncertain.</pre><div class="why">Compare with your manual classification and note disagreements below.</div></div><label class="fl">Disagreements between the AI and your manual classification</label><textarea class="ta" data-print="p_l3_class" placeholder=""></textarea><span class="print-only" id="p_l3_class">—</span><div class="section-title"><span class="n">3</span>AI sensitivity-flag check</div><div class="prompt"><div class="prompt-head"><span class="ai">AI prompt</span><span class="ttl">Data-sensitivity scan</span><button class="copy" onclick="copyPrompt(this)">Copy</button></div><pre>Scan these interview transcripts and opportunity cards for data-sensitivity concerns: personal data, financial records, legal or HR content, or anything that should not leave the organization. For each card, flag the sensitivity level and what control it would need.</pre><div class="why">Update any card where the AI surfaces a concern you missed.</div></div><label class="fl">Cards you updated after the sensitivity scan</label><textarea class="ta" data-print="p_l3_sens" placeholder=""></textarea><span class="print-only" id="p_l3_sens">—</span><div class="checklist"><h3>Bring to class tomorrow</h3><div class="chkbar"><i></i></div><label class="chk"><input type="checkbox">15 total opportunity cards</label><label class="chk"><input type="checkbox">Every card has a Pain Owner</label><label class="chk"><input type="checkbox">AI classification run, disagreements noted</label><label class="chk"><input type="checkbox">AI sensitivity scan run, cards updated</label></div>
 <div class="controls">
   <button class="btn btn-print" onclick="savePDF()">⬇ Save as PDF / Submit</button>
+  <button class="btn btn-clear" id="mkblank" type="button">Print blank / Save as PDF</button>
   <button class="btn btn-clear" onclick="clearAll()">Clear all</button>
 </div>
 <div class="foot">Wawiwa Tech · Enterprise AI Implementation Specialist · Module 2 Home Practice. Fill in, then Save as PDF and submit in your LMS.</div>
@@ -305,6 +310,69 @@ function clearAll(){if(!confirm('Clear all your entries on this page?'))return;
   document.querySelectorAll('[data-print]').forEach(mirror);updateChecklist();roiCalc();}
 window.addEventListener('DOMContentLoaded',function(){updateChecklist();roiCalc();
   document.querySelectorAll('[data-print]').forEach(mirror);});
+</script>
+<script>
+/* >>> BLANK PDF >>> */
+/* the blank template: every field back to its authored default, the page's
+   own input/change listener recomputes what it derives from them, the
+   browser prints, and on afterprint every value comes back. Nothing is
+   saved anywhere in between (these pages do not autosave). */
+(function(){
+  'use strict';
+  function fields(){
+    return [].slice.call(document.querySelectorAll('input,textarea,select')).filter(function(e){
+      return !/^(button|submit|reset|hidden|file|image)$/.test(e.type||'');
+    });
+  }
+  function nudge(list){
+    list.forEach(function(e){
+      e.dispatchEvent(new Event('input',{bubbles:true}));
+      e.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+  }
+  function blankPrint(){
+    var list=fields();
+    var saved=list.map(function(e){
+      if(e.tagName==='SELECT') return [].map.call(e.options,function(o){ return o.selected; });
+      if(e.type==='checkbox'||e.type==='radio') return e.checked;
+      return e.value;
+    });
+    list.forEach(function(e){
+      if(e.tagName==='SELECT') [].forEach.call(e.options,function(o){ o.selected=o.defaultSelected; });
+      else if(e.type==='checkbox'||e.type==='radio') e.checked=e.defaultChecked;
+      else e.value=e.defaultValue;
+    });
+    nudge(list);
+    var tag=document.createElement('p');
+    tag.className='w-blank-tag';
+    tag.textContent='Blank template';
+    var head=document.querySelector('header, .masthead');
+    if(head&&head.parentNode) head.parentNode.insertBefore(tag, head.nextSibling);
+    else document.body.insertBefore(tag, document.body.firstChild);
+    var done=false;
+    function restore(){
+      if(done) return; done=true;
+      list.forEach(function(e,i){
+        if(e.tagName==='SELECT') [].forEach.call(e.options,function(o,k){ o.selected=saved[i][k]; });
+        else if(e.type==='checkbox'||e.type==='radio') e.checked=saved[i];
+        else e.value=saved[i];
+      });
+      nudge(list);
+      if(tag.parentNode) tag.parentNode.removeChild(tag);
+      window.removeEventListener('afterprint',restore);
+      ['pointerdown','keydown','focusin'].forEach(function(t){ document.removeEventListener(t,restore,true); });
+    }
+    window.addEventListener('afterprint',restore);
+    /* a browser that never fires afterprint: the first touch afterwards restores */
+    setTimeout(function(){
+      ['pointerdown','keydown','focusin'].forEach(function(t){ document.addEventListener(t,restore,true); });
+    },0);
+    window.print();
+  }
+  var b=document.getElementById('mkblank');
+  if(b) b.addEventListener('click', blankPrint);
+})();
+/* <<< BLANK PDF <<< */
 </script>
 </body>
 </html>
