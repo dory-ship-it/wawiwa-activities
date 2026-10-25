@@ -236,6 +236,10 @@
 /* <<< WAWIWA LOGO <<< */
 </style>
 <style id="wawiwa-print-fix">@media print{@page{margin:0 !important}body{padding:12mm !important;box-sizing:border-box}}</style>
+<style>/* >>> BLANK PDF >>> */
+.w-blank-tag{display:none}
+@media print{.w-blank-tag{display:block;margin:0 0 10px;font:600 12px/1.4 sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#2E6E76}}
+/* <<< BLANK PDF <<< */</style>
 </head>
 <body>
 <div class="container">
@@ -250,6 +254,7 @@
 <div class="instructions"><h2>How this works</h2><p>After Lesson 4 you turn the register into a defensible Top 5 shortlist with written justifications.</p><div class="meta-row"><span><b>Time:</b> 60 min</span><span><b>Deliverable:</b> Top 5 shortlist + a justification for each</span><span><b>Grading:</b> feeds the capstone (not graded alone)</span></div></div><div class="section-title"><span class="n">1</span>Select your Top 5</div><p class="guidance">At least one must be a Quick Win and at least one must be Strategic. Write why each earns its place and its position.</p><table class="build"><thead><tr><th>#</th><th>Opportunity</th><th>Type</th><th>Justification (why this, why here, dependencies)</th><th></th></tr></thead><tbody id="l4_short" class=""><tr class="tmpl" style="display:none"><td><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Quick Win">Quick Win</option><option value="Strategic">Strategic</option><option value="Foundational">Foundational</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Quick Win">Quick Win</option><option value="Strategic">Strategic</option><option value="Foundational">Foundational</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Quick Win">Quick Win</option><option value="Strategic">Strategic</option><option value="Foundational">Foundational</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Quick Win">Quick Win</option><option value="Strategic">Strategic</option><option value="Foundational">Foundational</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Quick Win">Quick Win</option><option value="Strategic">Strategic</option><option value="Foundational">Foundational</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Quick Win">Quick Win</option><option value="Strategic">Strategic</option><option value="Foundational">Foundational</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Remove">&times;</button></td></tr></tbody></table><button class="addbtn" onclick="addRow('l4_short')">+ Add row</button><div class="callout"><b>Self-check.</b> If your shortlist looks too neat — all Quick Wins, all from one department, all one solution category — look harder. Real engagements always have at least one item that should be there but is not.</div><label class="fl">The one item that should be on the list but almost was not</label><div class="guidance">Name it and say why it is easy to miss.</div><textarea class="ta" data-print="p_l4_missing" placeholder=""></textarea><span class="print-only" id="p_l4_missing">—</span><div class="checklist"><h3>Bring to class tomorrow</h3><div class="chkbar"><i></i></div><label class="chk"><input type="checkbox">Top 5 selected</label><label class="chk"><input type="checkbox">At least one Quick Win and one Strategic</label><label class="chk"><input type="checkbox">A written justification for each</label><label class="chk"><input type="checkbox">Checked the shortlist is not too neat</label></div>
 <div class="controls">
   <button class="btn btn-print" onclick="savePDF()">⬇ Save as PDF / Submit</button>
+  <button class="btn btn-clear" id="mkblank" type="button">Print blank / Save as PDF</button>
   <button class="btn btn-clear" onclick="clearAll()">Clear all</button>
 </div>
 <div class="foot">Wawiwa Tech · Enterprise AI Implementation Specialist · Module 2 Home Practice. Fill in, then Save as PDF and submit in your LMS.</div>
@@ -305,6 +310,69 @@ function clearAll(){if(!confirm('Clear all your entries on this page?'))return;
   document.querySelectorAll('[data-print]').forEach(mirror);updateChecklist();roiCalc();}
 window.addEventListener('DOMContentLoaded',function(){updateChecklist();roiCalc();
   document.querySelectorAll('[data-print]').forEach(mirror);});
+</script>
+<script>
+/* >>> BLANK PDF >>> */
+/* the blank template: every field back to its authored default, the page's
+   own input/change listener recomputes what it derives from them, the
+   browser prints, and on afterprint every value comes back. Nothing is
+   saved anywhere in between (these pages do not autosave). */
+(function(){
+  'use strict';
+  function fields(){
+    return [].slice.call(document.querySelectorAll('input,textarea,select')).filter(function(e){
+      return !/^(button|submit|reset|hidden|file|image)$/.test(e.type||'');
+    });
+  }
+  function nudge(list){
+    list.forEach(function(e){
+      e.dispatchEvent(new Event('input',{bubbles:true}));
+      e.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+  }
+  function blankPrint(){
+    var list=fields();
+    var saved=list.map(function(e){
+      if(e.tagName==='SELECT') return [].map.call(e.options,function(o){ return o.selected; });
+      if(e.type==='checkbox'||e.type==='radio') return e.checked;
+      return e.value;
+    });
+    list.forEach(function(e){
+      if(e.tagName==='SELECT') [].forEach.call(e.options,function(o){ o.selected=o.defaultSelected; });
+      else if(e.type==='checkbox'||e.type==='radio') e.checked=e.defaultChecked;
+      else e.value=e.defaultValue;
+    });
+    nudge(list);
+    var tag=document.createElement('p');
+    tag.className='w-blank-tag';
+    tag.textContent='Blank template';
+    var head=document.querySelector('header, .masthead');
+    if(head&&head.parentNode) head.parentNode.insertBefore(tag, head.nextSibling);
+    else document.body.insertBefore(tag, document.body.firstChild);
+    var done=false;
+    function restore(){
+      if(done) return; done=true;
+      list.forEach(function(e,i){
+        if(e.tagName==='SELECT') [].forEach.call(e.options,function(o,k){ o.selected=saved[i][k]; });
+        else if(e.type==='checkbox'||e.type==='radio') e.checked=saved[i];
+        else e.value=saved[i];
+      });
+      nudge(list);
+      if(tag.parentNode) tag.parentNode.removeChild(tag);
+      window.removeEventListener('afterprint',restore);
+      ['pointerdown','keydown','focusin'].forEach(function(t){ document.removeEventListener(t,restore,true); });
+    }
+    window.addEventListener('afterprint',restore);
+    /* a browser that never fires afterprint: the first touch afterwards restores */
+    setTimeout(function(){
+      ['pointerdown','keydown','focusin'].forEach(function(t){ document.addEventListener(t,restore,true); });
+    },0);
+    window.print();
+  }
+  var b=document.getElementById('mkblank');
+  if(b) b.addEventListener('click', blankPrint);
+})();
+/* <<< BLANK PDF <<< */
 </script>
 </body>
 </html>

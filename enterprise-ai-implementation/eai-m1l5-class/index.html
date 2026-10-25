@@ -1529,6 +1529,11 @@ body.mission-active #activity-root { padding: 0; }
   text-overflow: ellipsis;
 }
 .m-hud { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+/* the blank-template button in the HUD: compact, never wraps its label */
+.mission-active .m-blank-pdf { padding: 7px 14px; font-size: 0.82rem; white-space: nowrap; }
+/* with the extra button, the brandline shrinks (ellipsis) before the bar
+   wraps, so the HUD stays on one row at embed width; narrow screens wrap */
+.m-topbar-blank .m-brandline { flex: 1 1 260px; }
 
 .m-chip {
   display: flex;
@@ -5406,18 +5411,91 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }
     });
 
-    (data.sections || []).forEach(function (section) {
-      pageBreak(16);
+    // an empty box to write or draw in by hand (the blank template); a
+    // ruled box when lines > 0, a plain frame for a diagram (lines = 0)
+    function writingBox(x, w, h, lines) {
+      pageBreak(h + 2);
+      doc.setDrawColor(LINE[0], LINE[1], LINE[2]);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(x, y, w, h, 1.5, 1.5, 'S');
+      if (lines > 0) {
+        var step = h / lines;
+        doc.setLineWidth(0.2);
+        for (var i = 1; i < lines; i++) {
+          doc.line(x + 3, y + i * step, x + w - 3, y + i * step);
+        }
+      }
+      y += h + 4;
+    }
+
+    // a heading with the red tick (sections, blank-template attachment slots)
+    function sectionHeading(title, size) {
       doc.setFillColor(RED[0], RED[1], RED[2]);
       doc.rect(MARGIN, y - 3.2, 7, 1.4, 'F');
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
+      doc.setFontSize(size);
       doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
-      doc.text(clean(section.title), MARGIN, y + 2.4);
-      y += 9;
+      var lines = doc.splitTextToSize(clean(title), CONTENT_W);
+      doc.text(lines, MARGIN, y + 2.4);
+      y += 9 + (lines.length - 1) * 5.4;
+    }
+
+    // a plain paragraph in the content column (section instructions)
+    function paragraph(text, x, w) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9.5);
+      doc.setTextColor(INK[0], INK[1], INK[2]);
+      String(text).split('\n').forEach(function (para) {
+        var lines = doc.splitTextToSize(clean(para), w);
+        for (var i = 0; i < lines.length; i++) {
+          pageBreak(5);
+          doc.text(lines[i], x, y);
+          y += 4.6;
+        }
+      });
+      y += 2;
+    }
+
+    // blank-template slots for attached diagrams: the caption, the authored
+    // instruction, and an empty frame to draw in
+    (data.attachmentSlots || []).forEach(function (slot) {
+      pageBreak(80);
+      sectionHeading(slot.title, 11);
+      if (slot.instruction) paragraph(slot.instruction, MARGIN, CONTENT_W);
+      writingBox(MARGIN, CONTENT_W, 90, 0);
+    });
+
+    // a blank-template card keeps its heading, instructions and writing
+    // box on one page: measure the whole card before starting it
+    function blankCardHeight(card) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      var h = doc.splitTextToSize(clean(card.title), CONTENT_W - 7.5).length * 5 + 2.5;
+      doc.setFontSize(9.5);
+      (card.rows || []).forEach(function (row) {
+        if (row.label) h += 4.6;
+        h += doc.splitTextToSize(clean(row.value), CONTENT_W - 7.5).length * 4.6 + 1.4;
+      });
+      return h + card.writeLines * 7.5 + 6;
+    }
+
+    (data.sections || []).forEach(function (section) {
+      // a blank-template section heading never sits alone at a page foot:
+      // it moves with its instruction and its first card
+      var first = (section.cards || [])[0];
+      var keep = 16;
+      if (first && first.writeLines) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+        keep += (section.intro ? doc.splitTextToSize(clean(section.intro), CONTENT_W).length * 4.6 + 2 : 0)
+          + blankCardHeight(first);
+      }
+      pageBreak(keep);
+      sectionHeading(section.title, 12);
+      if (section.intro) paragraph(section.intro, MARGIN, CONTENT_W);
 
       (section.cards || []).forEach(function (card) {
-        pageBreak(14);
+        pageBreak(card.writeLines ? blankCardHeight(card) : 14);
         var x = MARGIN;
         if (card.num !== undefined && card.num !== null) {
           doc.setFillColor(RED[0], RED[1], RED[2]);
@@ -5432,13 +5510,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         doc.setFontSize(10.5);
         doc.setTextColor(INK[0], INK[1], INK[2]);
         var tagW = card.tag ? doc.getTextWidth(card.tag) + 9 : 0;
-        var headLines = doc.splitTextToSize(clean(card.title), CONTENT_W - (x - MARGIN) - tagW);
-        doc.text(headLines, x, y + 2);
+        // an untitled card (a blank-template info card) has no heading line
+        var headLines = card.title
+          ? doc.splitTextToSize(clean(card.title), CONTENT_W - (x - MARGIN) - tagW) : [];
+        if (headLines.length) doc.text(headLines, x, y + 2);
         if (card.tag) {
           drawChip(doc, PAGE_W - MARGIN - tagW + 3, y - 2,
             clean(card.tag), TAG_RGB[card.tag] || SLATE);
         }
-        y += headLines.length * 5 + 2.5;
+        if (headLines.length) y += headLines.length * 5 + 2.5;
 
         (card.rows || []).forEach(function (row) {
           var rowX = MARGIN + 7.5;
@@ -5464,6 +5544,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           y += 1.4;
         });
 
+        if (card.writeLines) {
+          writingBox(MARGIN + 7.5, CONTENT_W - 7.5, card.writeLines * 7.5, card.writeLines);
+          y += 2;
+          return;
+        }
+
         doc.setDrawColor(LINE[0], LINE[1], LINE[2]);
         doc.setLineWidth(0.25);
         if (y + 4 <= BOTTOM) doc.line(MARGIN, y, PAGE_W - MARGIN, y);
@@ -5476,10 +5562,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return doc;
   }
 
-  function fileName(activity, slug) {
+  function fileName(activity, slug, kind) {
     var id = ((activity.meta || {}).id || 'activity').replace(/[^a-z0-9-]/gi, '-');
     var part = slug ? '-' + String(slug).replace(/[^a-z0-9-]/gi, '-') : '';
-    return 'Wawiwa-' + id + part + '-report.pdf';
+    return 'Wawiwa-' + id + part + '-' + (kind || 'report') + '.pdf';
   }
 
   /* the one public entry: draw and download. Works inside an iframe embed;
@@ -5489,7 +5575,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (!jsPdfCtor()) { window.print(); return; } // vendored lib missing: last resort
     var doc = buildDoc(activity, data || {});
     try {
-      doc.save(fileName(activity, data && data.fileSlug));
+      doc.save(fileName(activity, data && data.fileSlug, data && data.fileKind));
     } catch (e) {
       try { window.open(doc.output('bloburl'), '_blank'); } catch (e2) { /* blocked twice: give up quietly */ }
     }
@@ -5519,8 +5605,79 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return { sections: sections };
   }
 
+  /* the blank template (instructors asked for it, NewTech, 22 Oct 2026):
+     the same branded PDF built from the SPEC ALONE, never from state, so it
+     carries no student answer, no tag, no score, and no coach reply, and it
+     works before Start. Headings, the intro, the PII notice, each section's
+     instruction, each field's label + instructions, and an empty ruled box
+     per field; read-only card sections ride as information. A "cases"
+     workbook numbers fields per case, every other spec runs one count. */
+  function blankData(activity) {
+    var intro = activity.intro || {};
+    var notice = (activity.safety || {}).student_notice;
+    var perCase = !!(activity.meta && activity.meta.layout === 'cases');
+    var sections = [];
+    var number = 0;
+
+    var about = [];
+    if (intro.headline || intro.body) {
+      about.push({ title: intro.headline || '', rows: intro.body ? [{ value: intro.body }] : [] });
+    }
+    if (notice) {
+      about.push({ title: 'Before you start: no personal data.', rows: [{ value: notice }] });
+    }
+    if (about.length) sections.push({ title: 'About this activity', cards: about });
+
+    (activity.sections || []).forEach(function (section) {
+      if (section.type === 'card') {
+        var rows = [];
+        if (section.body) rows.push({ value: section.body });
+        if ((section.bullets || []).length) {
+          rows.push({ value: section.bullets.map(function (b) { return '- ' + b; }).join('\n') });
+        }
+        if (section.footer) rows.push({ value: section.footer });
+        sections.push({ title: section.title, cards: [{ title: '', rows: rows }] });
+        return;
+      }
+      var items = section.type === 'fields' ? (section.fields || [])
+        : (section.type === 'ordered_points' ? (section.prompts || []) : []);
+      if (!items.length) return;
+      if (perCase) number = 0;
+      sections.push({
+        title: section.title,
+        intro: (section.instruction || '').trim(),
+        cards: items.map(function (item) {
+          number += 1;
+          var help = (item.help || '').trim();
+          return {
+            num: number,
+            title: item.label,
+            rows: help ? [{ label: 'Instructions', value: help }] : [],
+            writeLines: section.type === 'ordered_points' ? 3 : 6
+          };
+        })
+      });
+    });
+
+    return {
+      title: 'Blank template  ·  ' + ((activity.meta || {}).title || ''),
+      fileSlug: 'blank',
+      fileKind: 'template',
+      attachmentSlots: (activity.attachments || []).map(function (att) {
+        return { title: att.title, instruction: att.instruction };
+      }),
+      sections: sections
+    };
+  }
+
+  function saveBlank(activity) {
+    saveReport(activity, blankData(activity));
+  }
+
   window.PracticeExport = {
     saveReport: saveReport,
+    saveBlank: saveBlank,
+    blankData: blankData,
     genericData: genericData,
     _clean: clean,
     _fileName: fileName
@@ -8027,9 +8184,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       });
     }
 
-    state.shell = M.buildShell(rootNode, activity, state.multiCase
+    // the blank template sits in the top bar, so it is there on every stop,
+    // before Start too; it reads the spec only, never the student's work
+    var blankBtn = el('button', 'btn btn-ghost m-blank-pdf');
+    blankBtn.type = 'button';
+    blankBtn.appendChild(C.svgEl(C.SVG.download, 'btn-icon'));
+    blankBtn.appendChild(el('span', null, 'Download blank PDF'));
+    blankBtn.addEventListener('click', function () {
+      window.PracticeExport.saveBlank(activity);
+    });
+
+    var hudOpts = state.multiCase
       ? { total: workStops(state.stops).length, progressLabel: 'Cases completed' }
-      : { total: state.items.length });
+      : { total: state.items.length };
+    hudOpts.extras = [blankBtn];
+    state.shell = M.buildShell(rootNode, activity, hudOpts);
+    state.shell.hud.node.classList.add('m-topbar-blank');
     var stage = M.buildStage(state.shell.main);
     state.shell.main.classList.add('m-main-rail');
 

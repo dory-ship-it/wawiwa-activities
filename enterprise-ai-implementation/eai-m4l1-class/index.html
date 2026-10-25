@@ -260,6 +260,7 @@
   <div class="row" style="justify-content:flex-start">
     <button class="path" id="mkpath">Build my personal path</button>
     <button class="pdf" id="mkpdf">Save as PDF</button>
+    <button class="pdf" id="mkblank">Download blank PDF</button>
   </div>
   <div id="pathout" hidden></div>
 </div>
@@ -741,6 +742,9 @@ return {Doc:Doc,serialise:serialise,COL:COL,noUrl:noUrl};
 
 /* ---------- read the page into an ordered list of blocks, then lay it out ---------- */
 function pdfText(el){ return String((el&&el.textContent)||'').replace(/\s+/g,' ').trim(); }
+/* >>> BLANK PDF >>> */
+var PDF_BLANK=false;
+/* <<< BLANK PDF <<< */
 function pdfBuild(){
   var d=new WPDF.Doc(), M=ACT.meta||{};
   var prog=M.program||'', mod=M.module||'', les=M.lesson||'';
@@ -750,6 +754,7 @@ function pdfBuild(){
   d.rule(1.8,WPDF.COL.teal,0,10);
   var h1=document.querySelector('.wrap h1');
   d.text(pdfText(h1)||M.title||'Practice',{size:19,bold:true,col:'navy',lead:24,after:12});
+  if(PDF_BLANK) d.text('Blank template',{size:9.5,bold:true,col:'tealtx',after:10}); /* BLANK PDF */
 
   var wrap=document.querySelector('.wrap'), kids=wrap?wrap.children:[], i, firstLead=true;
   function chkList(ul){
@@ -758,8 +763,8 @@ function pdfBuild(){
       var li=items[k], cb=li.querySelector('input[type=checkbox]');
       if(!cb) continue;
       var sp=cb.parentNode.querySelector('span'), sel=li.querySelector('select');
-      var mark=cb.checked?'[x] ':'[ ] ';
-      var extra=sel?('  —  '+sel.value):'';
+      var mark=(cb.checked&&!PDF_BLANK)?'[x] ':'[ ] ';
+      var extra=sel?('  —  '+(PDF_BLANK?'____________':sel.value)):'';
       d.text(mark+pdfText(sp)+extra,{size:9.8,col:'ink',indent:10,lead:13.2,after:0.5});
     }
     d.y-=4;
@@ -768,7 +773,7 @@ function pdfBuild(){
     var items=ul.querySelectorAll('li'),k;
     for(k=0;k<items.length;k++){
       var li=items[k], q=li.querySelector('.ynq'), r=li.querySelector('input[type=radio]:checked');
-      var st=r?(r.value==='yes'?'Yes':'No'):'not answered';
+      var st=PDF_BLANK?'Yes / No':(r?(r.value==='yes'?'Yes':'No'):'not answered');
       d.text(pdfText(q)+'  —  '+st,{size:9.8,col:'ink',indent:10,lead:13.2,after:0.5});
     }
     d.y-=4;
@@ -779,10 +784,18 @@ function pdfBuild(){
       d.text('·  '+pdfText(items[k]),{size:9.6,col:'mut',indent:10,lead:12.8,after:1});
     d.y-=3;
   }
+  /* >>> BLANK PDF >>> */
+  function blankLines(ta){
+    var n=Math.max(4,Math.min(10,(parseInt(ta.getAttribute('rows'),10)||3)+1)),j;
+    for(j=0;j<n;j++){ d.room(22); d.y-=22; d.line(d.x0+12,d.y,d.cw-12,0.6,WPDF.COL.rule); }
+    d.y-=10;
+  }
+  /* <<< BLANK PDF <<< */
   function answer(ta){
-    d.reserve(40);
+    d.reserve(PDF_BLANK?130:40);
     var lab=ta.id?document.querySelector('label[for="'+ta.id+'"]'):null;
     d.text(lab?pdfText(lab):'Your answer',{size:8.6,bold:true,col:'mut',before:3,after:2});
+    if(PDF_BLANK){ blankLines(ta); return; }
     var v=String(ta.value||'').replace(/[ \t]+\n/g,'\n').trim();
     if(v) d.text(v,{size:10.2,col:'ink',indent:12,lead:13.6,after:7,bar:true});
     else d.text('Not answered.',{size:10.2,col:'mut',indent:12,lead:13.6,after:7,bar:true});
@@ -821,7 +834,7 @@ function pdfBuild(){
   }
   function pathPanel(){
     var po=document.getElementById('pathout');
-    if(!po||po.hidden||!pdfText(po)) return;
+    if(PDF_BLANK||!po||po.hidden||!pdfText(po)) return;
     d.reserve(70);
     d.rule(1.8,WPDF.COL.navy,12,7);
     d.text('Your personal path',{size:14,bold:true,col:'navy',lead:18,after:5,keep:true});
@@ -918,6 +931,32 @@ document.getElementById('mkpdf').addEventListener('click', function(){
   }catch(err2){ started=false; }
   if(!started||pdfDownloadBlocked()) pdfStandalone();
 });
+/* >>> BLANK PDF >>> */
+/* the blank template: the same file, built with PDF_BLANK on, so it carries
+   no answer, no tick, no choice and no personal path. Works at any time. */
+document.getElementById('mkblank').addEventListener('click', function(){
+  var bytes;
+  PDF_BLANK=true;
+  try{ bytes=pdfBuild(); }
+  catch(err){ PDF_BLANK=false; pdfStandalone(); return; }
+  PDF_BLANK=false;
+  var started=false;
+  try{
+    var url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    var a=document.createElement('a');
+    a.href=url; a.download=pdfFileName().replace(/\.pdf$/,' - Blank template.pdf'); a.rel='noopener';
+    a.style.cssText='position:fixed;left:-9999px;top:0;width:1px;height:1px';
+    document.body.appendChild(a);
+    a.click();
+    started=true;
+    setTimeout(function(){
+      try{ a.parentNode.removeChild(a); }catch(e){}
+      try{ URL.revokeObjectURL(url); }catch(e){}
+    },5000);
+  }catch(err2){ started=false; }
+  if(!started||pdfDownloadBlocked()) pdfStandalone();
+});
+/* <<< BLANK PDF <<< */
 })();
 </script>
 
