@@ -273,8 +273,16 @@ const STATES = [
     for (const k of ['c', 'b', 'a', 'd']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
     await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="6"]'); await click(p, '[data-action="check"]');
   }],
+  // FX3: a retake shows version b (its options shuffled): the longest stem, then the eight sales-map lines with a wrong pick
+  ['S21', 'retake, item 1b wrong', async (p) => { await p.evaluate(() => { window.__l4.state.k = { n: 2, s: 40, p: 0 }; window.__l4.go('S21'); }); await click(p, '.w-kc-opt[data-id="a"]'); }],
+  ['S21', 'retake, item 5b one of two', async (p) => {
+    await p.evaluate(() => { window.__l4.state.k = { n: 2, s: 40, p: 0 }; window.__l4.go('S21'); });
+    for (const k of ['b', 'b', 'a', 'd']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="3"]'); await click(p, '.w-kc-tile[data-n="7"]'); await click(p, '[data-action="check"]');
+  }],
   ['S21R', 'not passed, all five missed', async (p) => { await attempt(p, { L4_S21_1: 'a|w', L4_S21_2: 'a|w', L4_S21_3: 'b|w', L4_S21_4: 'a|w', L4_S21_5: '5,7|w' }, { n: 1, s: 0, p: 0 }); }],
-  ['S21R', 'passed', async (p) => { await attempt(p, { L4_S21_1: 'c|c', L4_S21_2: 'b|c', L4_S21_3: 'a|c', L4_S21_4: 'd|c', L4_S21_5: '4,6|w' }, { n: 2, s: 80, p: 1 }); }],
+  ['S21R', 'version b, all five missed', async (p) => { await attempt(p, { L4_S21_1b: 'a|w', L4_S21_2b: 'a|w', L4_S21_3b: 'b|w', L4_S21_4b: 'a|w', L4_S21_5b: '5,7|w' }, { n: 2, s: 0, p: 0 }); }],
+  ['S21R', 'passed', async (p) => { await attempt(p, { L4_S21_1b: 'b|c', L4_S21_2b: 'b|c', L4_S21_3b: 'a|c', L4_S21_4b: 'd|c', L4_S21_5b: '3,6|w' }, { n: 2, s: 80, p: 1 }); }],
   ['S14', 'back to the check', async (p) => { await attempt(p, { L4_S21_1: 'a|w' }, { n: 1, s: 0, p: 0 }); await click(p, '[data-action="review"][data-screen="S14"]'); }],
   ['S22', 'takeaway', async (p) => click(p, '.w-takeaway[data-id="b"]')],
   ['S22', 'finish confirm', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); }],

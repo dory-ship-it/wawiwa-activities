@@ -15,6 +15,7 @@ import { inflateRawSync } from 'node:zlib';
 import { startServer, ROOT } from './serve.mjs';
 import { chromePath } from './lib.mjs';
 import { screenWords } from '../src/review/words.js';
+import { chapterNo } from '../src/util.js';
 
 const C = JSON.parse(readFileSync(join(ROOT, 'content', 'l4-slice.json'), 'utf8'));
 const S = Object.fromEntries(C.screens.map((s) => [s.id, s]));
@@ -72,7 +73,7 @@ console.log('\nreview mode: walk, toolbar, no writes');
     walked.push(b.current);
     const w = screenWords(S[b.current], C);
     const ch = C.chapters.find((c) => c.id === S[b.current].chapter);
-    const want = { id: b.current, tpl: S[b.current].template + (S[b.current].variant ? ' / ' + S[b.current].variant : ''), chap: `Ch ${ch.n} · ${ch.title}`, over: String(w.over) };
+    const want = { id: b.current, tpl: S[b.current].template + (S[b.current].variant ? ' / ' + S[b.current].variant : ''), chap: `Ch ${chapterNo(C, ch.id)} · ${ch.title}`, over: String(w.over) };
     if (b.id !== want.id || b.tpl !== want.tpl || b.chap !== want.chap || !b.words.startsWith(w.max + ' words') || b.over !== want.over || b.href !== 'review.html#' + b.current
       || (w.over && b.red !== 'rgb(204, 0, 0)')) toolbarFails.push(`${b.current}: ${JSON.stringify(b)}`);
     if (b.locked !== 'false') locked.push(b.current);
@@ -133,6 +134,10 @@ console.log('\nreview.html');
     `${cards.length} cards in review order, each opens index.html?screen=ID&review=1 in a new tab`);
   const wrong = cards.filter((c) => { const w = screenWords(S[c.id], C); return !c.words.startsWith(w.max + ' w') || c.over !== String(w.over || w.longFeedback > 0); });
   expect(!wrong.length, 'word counts under the thumbnails match src/review/words.js' + (wrong.length ? ': ' + wrong.map((c) => c.id).join(', ') : ''));
+  // FX3: the chapter rows numbered 1 to 7 from the chapters' order, the content version in the header
+  const heads = await p.evaluate(() => ({ rows: [...document.querySelectorAll('.rv-chapter-head')].map((x) => x.firstChild.textContent), sum: document.querySelector('.rv-summary').textContent }));
+  expect(heads.rows.join('|') === C.chapters.map((c) => `Chapter ${chapterNo(C, c.id)} · ${c.title}`).join('|') && heads.sum.endsWith(`content ${C.lesson.contentVersion}`),
+    `review.html rows: ${heads.rows.join(', ')}; header "...${heads.sum.slice(-45)}"`);
   const loadedEarly = await p.evaluate(() => document.querySelectorAll('.rv-frame iframe[src]').length);
   expect(loadedEarly < cards.length, `thumbnails load lazily (${loadedEarly} of ${cards.length} on arrival)`);
   // scroll through the page, then every thumbnail must show its own screen

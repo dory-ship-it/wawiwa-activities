@@ -8,18 +8,22 @@
 // answers reset and (shuffleOnRetake) items 1 to 4 show their options in a new order, one per attempt
 // (item 5's tiles keep the HR map's line order). Responses are the options' ids, so a shuffled
 // option reports the same letter as before. A revisit shows the result line (resultCard).
-import { h, fmt } from '../util.js?v=13d5742a';
-import { glyph } from '../icons.js?v=13d5742a';
-import { checkButton } from './decision.js?v=13d5742a';
-import { letter } from '../tracking/index.js?v=13d5742a';
-import { layout, sheet, progressDots, arrowNav } from './stage.js?v=13d5742a';
+// FX3: version b of every item on a retake (its own interaction ids, L4_S21_1b ...), a again after that.
+import { h, fmt } from '../util.js?v=d9c03a25';
+import { glyph } from '../icons.js?v=d9c03a25';
+import { checkButton } from './decision.js?v=d9c03a25';
+import { letter } from '../tracking/index.js?v=d9c03a25';
+import { layout, sheet, progressDots, arrowNav } from './stage.js?v=d9c03a25';
 
 export const check = {
   mount(ctx) {
     const { screen, ui, zones } = ctx;
+    // FX3: each item has a second version (it.b: its own stem or instruction, options or tiles, and
+    // trackingId); the first attempt shows version a, a retake version b, then a, b, ... (ctx.checkVersion)
     // a retake shows items 1 to 4 with their options in another order (never the first attempt's)
     const attempt = ctx.attempt();
-    const items = screen.shuffleOnRetake && attempt > 1 ? screen.items.map((it, k) => (it.options ? { ...it, options: shuffled(it.options, attempt * 7 + k) } : it)) : screen.items;
+    const versioned = screen.items.map((it) => (ctx.checkVersion() === 'b' && it.b ? { ...it, ...it.b } : it));
+    const items = screen.shuffleOnRetake && attempt > 1 ? versioned.map((it, k) => (it.options ? { ...it, options: shuffled(it.options, attempt * 7 + k) } : it)) : versioned;
     const dots = progressDots(items.length, (i, n) => fmt(ui.progress.question, { i, n }));
     const body = h('div', { class: 'w-kc-body', dataset: { interaction: '' } });
     layout(ctx, 'focus',

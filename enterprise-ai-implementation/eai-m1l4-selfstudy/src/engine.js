@@ -8,25 +8,25 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt } from './util.js?v=13d5742a';
-import { createZones } from './zones.js?v=13d5742a';
-import { createMenu, openDialog } from './menu.js?v=13d5742a';
-import { initTooltips, applyTerms } from './tooltip.js?v=13d5742a';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=13d5742a';
-import { decision } from './templates/decision.js?v=13d5742a';
-import { input } from './templates/input.js?v=13d5742a';
-import { sortDeck } from './templates/sortdeck.js?v=13d5742a';
-import { bpmn } from './templates/bpmn.js?v=13d5742a';
-import { flags } from './templates/flags.js?v=13d5742a';
-import { explorer } from './templates/explorer.js?v=13d5742a';
-import { video } from './templates/video.js?v=13d5742a';
-import { handoff } from './templates/handoff.js?v=13d5742a';
-import { check } from './templates/check.js?v=13d5742a';
-import { result } from './templates/result.js?v=13d5742a';
-import { end } from './templates/end.js?v=13d5742a';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=13d5742a';
-import { createGhost, stopGhost } from './ghost.js?v=13d5742a';
-import { createTracking } from './tracking/index.js?v=13d5742a';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=d9c03a25';
+import { createZones } from './zones.js?v=d9c03a25';
+import { createMenu, openDialog } from './menu.js?v=d9c03a25';
+import { initTooltips, applyTerms } from './tooltip.js?v=d9c03a25';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=d9c03a25';
+import { decision } from './templates/decision.js?v=d9c03a25';
+import { input } from './templates/input.js?v=d9c03a25';
+import { sortDeck } from './templates/sortdeck.js?v=d9c03a25';
+import { bpmn } from './templates/bpmn.js?v=d9c03a25';
+import { flags } from './templates/flags.js?v=d9c03a25';
+import { explorer } from './templates/explorer.js?v=d9c03a25';
+import { video } from './templates/video.js?v=d9c03a25';
+import { handoff } from './templates/handoff.js?v=d9c03a25';
+import { check } from './templates/check.js?v=d9c03a25';
+import { result } from './templates/result.js?v=d9c03a25';
+import { end } from './templates/end.js?v=d9c03a25';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=d9c03a25';
+import { createGhost, stopGhost } from './ghost.js?v=d9c03a25';
+import { createTracking } from './tracking/index.js?v=d9c03a25';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -40,7 +40,7 @@ export async function boot(root) {
   // no-cache: the browser asks the server every time whether the content changed (tools/stamp.mjs)
   const res = await fetch(new URL('../content/l4-slice.json', import.meta.url), { cache: 'no-cache' });
   if (!res.ok) throw new Error('content/l4-slice.json HTTP ' + res.status);
-  const content = await res.json();
+  const content = resolveChapterRefs(await res.json()); // FX3: "{ch5}" -> 6
   try {
     document.documentElement.lang = content.lesson.lang;
     document.documentElement.dir = content.lesson.dir;
@@ -154,7 +154,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=13d5742a').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=d9c03a25').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -226,6 +226,7 @@ class Lesson {
       // NL4 knowledge check attempts (S21, S21R): the attempt number, the state kept for it, the end of
       // an attempt, a retake, and a review link that comes back here
       attempt: () => this.state.k?.n || 1,
+      checkVersion: () => this.checkVersion(), // FX3: 'a' or 'b'
       checkState: () => ({ n: 1, s: null, p: 0, ...(this.state.k || {}) }),
       checkDone: () => this.checkDone(),
       retake: () => this.retakeCheck(),
@@ -257,10 +258,14 @@ class Lesson {
   }
 
   /* ---- score (S21) and the end of the lesson ---- */
+  // FX3: the knowledge check's version for this attempt: a on the first, b on a retake, then a, b, ...
+  checkVersion() { return (this.state.k?.n || 1) % 2 ? 'a' : 'b'; }
+
   // First attempts of the scored interactions only (lesson.completion.scoredScreens): x right of n,
-  // raw 0 to 100.
+  // raw 0 to 100. FX3: only this attempt's version (a tracking entry without a version is version a).
   score() {
-    const ids = this.content.lesson.completion.scoredScreens.flatMap((sid) => (this.screens[sid]?.tracking || []).filter((t) => t.scored).map((t) => t.id));
+    const v = this.checkVersion();
+    const ids = this.content.lesson.completion.scoredScreens.flatMap((sid) => (this.screens[sid]?.tracking || []).filter((t) => t.scored && (t.version || 'a') === v).map((t) => t.id));
     const x = ids.filter((tid) => this.firstAnswer(tid)?.result === 'correct').length;
     return { x, n: ids.length, raw: ids.length ? Math.round((100 * x) / ids.length) : null };
   }
@@ -481,7 +486,7 @@ class Lesson {
     const ci = groups.findIndex((g) => g.ids.includes(this.current));
     this.zones.setBar({
       chapter: chapter.title,
-      of: fmt(this.ui.rail.chapterOf, { n: this.chapters.indexOf(chapter) + 1, total: this.chapters.length }),
+      of: fmt(this.ui.rail.chapterOf, { n: chapterNo(this.content, chapter.id), total: this.chapters.length }),
       steps: groups.map((g, i) => ({ verb: g.verb, icon: g.icon,
         state: i === ci ? 'current' : i < ci || g.ids.every((sid) => done.has(sid)) ? 'done' : 'next' })),
     });
@@ -492,7 +497,7 @@ class Lesson {
     const m = this.ui.menu;
     return {
       chapters: p.chapters.map(({ c, status, clickable }) => ({
-        n: c.n, title: c.title, status, clickable, current: c.id === p.frontierChapter,
+        n: c.n, no: chapterNo(this.content, c.id), title: c.title, status, clickable, current: c.id === p.frontierChapter,
         label: fmt(m.chapterLabel, { title: c.title, status: this.ui.rail.status[status] }),
       })),
     };

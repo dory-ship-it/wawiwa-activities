@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=13d5742a';
-import { glyph, icon } from '../icons.js?v=13d5742a';
-import { attachTip } from '../tooltip.js?v=13d5742a';
-import { letter } from '../tracking/index.js?v=13d5742a';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=13d5742a';
-import { targetSteps } from '../ghost.js?v=13d5742a';
+import { h, fmt, resolveLink } from '../util.js?v=d9c03a25';
+import { glyph, icon } from '../icons.js?v=d9c03a25';
+import { attachTip } from '../tooltip.js?v=d9c03a25';
+import { letter } from '../tracking/index.js?v=d9c03a25';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=d9c03a25';
+import { targetSteps } from '../ghost.js?v=d9c03a25';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -126,7 +126,13 @@ function single(ctx) {
   // sit on the card over the photo (S01: the quote's glass card; S14, S15: the case card), as at a
   // video stop; the panel keeps its heading, the answers and the strip
   const tools = () => h('div', { class: 'w-card-tools' }, g ? g.button : null, zones.attempts);
-  if (isCase(screen)) {
+  if (isCase(screen) && screen.onePanel) {
+    // FX3 (S18): one panel on the photo for the whole question: the situation line, the heading, the
+    // answers, then the band (the hint, the attempt marker, "Show me how" as its tool, the feedback)
+    layout(ctx, 'stage-decision',
+      h('section', { class: 'w-sheet w-sheet-right w-sheet-50 w-sheet-one' }, contextLine(top.text, statement), zones.instruction, group, zones.band));
+    if (g) zones.setTool(g.button);
+  } else if (isCase(screen)) {
     const v = screen.visual;
     layout(ctx, 'stage-decision',
       h('figure', { class: 'w-case-card' },
@@ -639,7 +645,7 @@ function cases(ctx) {
 }
 
 /* ---------- fields (S18A, FX2 D2): the workbook rows, a card chosen for each ---------- */
-// The heading with the case chip, the hint line, then the workbook rows (the S19 preview's look): the
+// The heading with the case chip, the hint line, the four cards lettered A to D (FX3), then the workbook rows (the S19 preview's look): the
 // field's number, its name and line, and a select listing the cards. Check unlocks when every row has a
 // card ("check after all"): right rows get the teal border and check, wrong ones the cross and the
 // first wrong row's line in the strip; attempt 2 the same; after it the right cards are set in the
@@ -654,9 +660,14 @@ function fields(ctx) {
   const max = ctx.revisit ? 0 : screen.attempts || 2;
   const key = (c) => String(c.id ?? c.n);
   let tries = 0, done = false;
+  // FX3: the four cards as a visible lettered list (A to D, the S21 letter badges) above the rows; each
+  // select lists the same letter and text (the value stays the card's key, so tracking is unchanged)
+  const L = (i) => letter(i).toUpperCase();
+  const cardList = h('ol', { class: 'w-card-list' }, cardsList.map((c, i) => h('li', { class: 'w-card-item' },
+    h('span', { class: 'w-kc-letter', 'aria-hidden': 'true' }, L(i)), h('span', {}, h('span', { class: 'w-sr-only' }, L(i) + ' '), c.text))));
   const rows = screen.columns.map((col) => {
     const sel = h('select', { class: 'w-field-select', dataset: { row: col.id }, 'aria-label': col.label + ': ' + col.sub },
-      h('option', { value: '' }, ui.chooseCard), cardsList.map((c) => h('option', { value: key(c) }, c.text)));
+      h('option', { value: '' }, ui.chooseCard), cardsList.map((c, i) => h('option', { value: key(c) }, `${L(i)}. ${c.text}`)));
     const mark = h('span', { class: 'w-opt-mark w-row-mark', 'aria-hidden': 'true' });
     const state = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
     const el = h('li', { class: 'w-wb-field', dataset: { row: col.id } },
@@ -667,8 +678,9 @@ function fields(ctx) {
   });
   const check = checkButton(ui, ui.buttons.check, () => doCheck());
   const head = h('div', { class: 'w-head-row w-head-q' }, zones.instruction, h('span', { class: 'w-head-tools' }, screen.header ? h('span', { class: 'w-field-chip' }, screen.header) : null));
-  layout(ctx, 'focus', sheet('focus w-sheet-fields', head,
-    h('ol', { class: 'w-wb-fields', dataset: { interaction: '' } }, rows.map((x) => x.el)), zones.band));
+  // (the list in a column left of the rows, read first: above them the panel ran past its 41cqw limit)
+  layout(ctx, 'focus', sheet('focus w-sheet-fields', head, h('div', { class: 'w-fields-grid' }, cardList,
+    h('ol', { class: 'w-wb-fields', dataset: { interaction: '' } }, rows.map((x) => x.el))), zones.band));
   zones.setHintVisible(true); // the hint on the band's row, beside the attempt marker and Check
   zones.setFeedback({ state: 'hint', text: screen.hint });
   if (!ctx.revisit) { zones.setTool(check); zones.setAttempts(1, max); }

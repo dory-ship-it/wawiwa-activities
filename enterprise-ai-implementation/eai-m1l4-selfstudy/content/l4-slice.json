@@ -1,4 +1,5 @@
 {
+  "$chapterRefs": "FX3: a chapter number in any text is written {chN} (the chapter id) and shown as that chapter's place in chapters + 1 (Intro = 1 ... Wrap-up = 7), so no number is typed twice. S21R's review links take theirs from the screen they open.",
   "$comment": "EAI M1 L4 self-study, pilot slice content. ALL learner-facing text lives here (localization = swap this file). Design lives in src/. Screen text is verbatim from L4_Storyboard_v2.md (2026-10-15). Strings under ui.* marked pilotCopy:true are new UI copy not in the storyboard; Noy reviews them in P5. Schema: see planning/PRD.md section 5.",
   "schemaVersion": "1.0",
   "lesson": {
@@ -9,7 +10,7 @@
     "title": "Process Modeling and Workflow Mapping",
     "lang": "en",
     "dir": "ltr",
-    "contentVersion": "slice-0.1 (storyboard v2)",
+    "contentVersion": "FX3, 25 Oct 2026 (storyboard v3)",
     "pilot": true,
     "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "S12B", "W4", "S13", "S14", "S15", "K4", "S16", "S17", "S17B", "S18A", "S18", "S18B", "S19", "S20", "S20B", "S21", "S21R", "S22", "END"],
     "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] }
@@ -122,9 +123,9 @@
       "heading": "Lesson record",
       "date": "Date",
       "caseTitle": "Case title",
-      "sketch": "Your sketch from Chapter 2",
-      "metric": "First metric (Chapter 3)",
-      "notes": "Your notes from Chapter 4",
+      "sketch": "Your sketch from Chapter {ch2}",
+      "metric": "First metric (Chapter {ch3})",
+      "notes": "Your notes from Chapter {ch4}",
       "selfCheck": "Self-check",
       "risk": "Biggest risk",
       "score": "Knowledge check",
@@ -133,7 +134,6 @@
     },
     "slot": { "on": "present", "off": "missing" },
     "video": {
-      "meta": "Video · {length} · {n} stops",
       "kicker": "Video",
       "stopKicker": "Stop {i} of {n}",
       "ccChip": "CC",
@@ -422,7 +422,7 @@
       ],
       "saveWhenFilled": true,
       "feedback": {
-        "saved": "Saved. Your case comes back in Chapter 5, where you map it in eight fields.",
+        "saved": "Saved. Your case comes back in Chapter {ch5}, where you map it in eight fields.",
         "empty": "Add a few words to both fields. A rough version is enough; you can edit it later."
       },
       "advance": "after-save",
@@ -444,7 +444,7 @@
       "hintPilotCopy": true,
       "layout": "warmup",
       "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored",
-        "text": "A first guess, before the video. Guessing first helps you remember.", "foot": "Chapter 1 · Why map" },
+        "text": "A first guess, before the video. Guessing first helps you remember.", "foot": "Chapter {ch1} · Why map" },
       "options": [
         { "id": "a", "label": "It removes the steps nobody needs" },
         { "id": "b", "label": "It speeds up the inefficiency already there" },
@@ -464,7 +464,7 @@
       "template": "video",
       "step": { "verb": "Watch", "icon": "watch" },
       "minutes": 5,
-      "instruction": "The video stops 2 times to ask you.",
+      "instruction": "Watch the video. Answer the questions when it stops.",
       "instructionPilotCopy": true,
       "title": "Two cases, same lesson",
       "guidingLabel": "Watch for:",
@@ -649,7 +649,7 @@
       "hint": "Pick the answer you expect. A guess cannot be wrong.",
       "hintPilotCopy": true,
       "layout": "warmup",
-      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "foot": "Chapter 2 · Toolkit" },
+      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "foot": "Chapter {ch2} · Toolkit" },
       "options": [
         { "id": "a", "label": "The trigger" },
         { "id": "b", "label": "The first step" },
@@ -737,7 +737,7 @@
       "chapter": "ch2",
       "template": "bpmn",
       "variant": "key",
-      "step": { "verb": "Learn", "icon": "learn" },
+      "step": { "verb": "Read", "icon": "lanes" },
       "minutes": 2,
       "presentation": true,
       "label": "Key idea · BPMN",
@@ -879,7 +879,7 @@
       "chapter": "ch2",
       "template": "decision",
       "attempts": 2,
-      "step": { "verb": "Decide", "icon": "decide" },
+      "step": { "verb": "Spot", "icon": "eye" },
       "variant": "rounds",
       "minutes": 4,
       "instruction": "Find which AS-IS rule this map line breaks.",
@@ -930,7 +930,7 @@
       "instruction": "Sketch your own case in three parts.",
       "arrange": "chain",
       "stage": {
-        "top": { "kind": "line", "text": "A rough first try. You build the full map in Chapter 5." },
+        "top": { "kind": "line", "text": "A rough first try. You build the full map in Chapter {ch5}." },
         "bottom": { "kind": "privacy", "icon": "shield", "text": "Leave out names and identifying details.", "action": "save" }
       },
       "fields": [
@@ -943,7 +943,7 @@
       ],
       "saveWhenFilled": true,
       "feedback": {
-        "saved": "Saved. Your sketch comes back in Chapter 5.",
+        "saved": "Saved. Your sketch comes back in Chapter {ch5}.",
         "empty": "Add a few words to all three parts. A rough version is enough; you can edit it later."
       },
       "feedbackPilotCopy": "empty (the spec gives no empty-Save line; modelled on S02)",
@@ -967,7 +967,7 @@
       "hint": "Pick the answer you expect. A guess cannot be wrong.",
       "hintPilotCopy": true,
       "layout": "warmup",
-      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "foot": "Chapter 3 · HR demo" },
+      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "foot": "Chapter {ch3} · HR demo" },
       "options": [
         { "id": "a", "label": "Yes, if the name is removed" },
         { "id": "b", "label": "Only with the employee's consent" },
@@ -986,7 +986,7 @@
       "guidingLabel": "Watch for:",
       "step": { "verb": "Watch", "icon": "watch" },
       "minutes": 5,
-      "instruction": "The video stops 3 times to ask you.",
+      "instruction": "Watch the video. Answer the questions when it stops.",
       "instructionPilotCopy": true,
       "title": "Mapping the HR case",
       "guidingQuestion": "How do you turn about 90 messy requests a month into a map you can check later?",
@@ -1171,7 +1171,7 @@
       "chapter": "ch3",
       "template": "decision",
       "attempts": 2,
-      "step": { "verb": "Decide", "icon": "decide" },
+      "step": { "verb": "Measure", "icon": "gauge" },
       "variant": "metric",
       "minutes": 3,
       "instruction": "Pick the strongest success metric.",
@@ -1217,7 +1217,7 @@
       "template": "flags",
       "attempts": 2,
       "variant": "map",
-      "step": { "verb": "Label", "icon": "label" },
+      "step": { "verb": "Flag", "icon": "flag" },
       "minutes": 3,
       "instruction": "Drag the two risk flags onto the fields that show the handoff risk.",
       "hint": "Follow the question after it leaves the first staffer.",
@@ -1306,7 +1306,7 @@
       "step": { "verb": "Write", "icon": "write" },
       "minutes": 2,
       "instruction": "Set one success metric for your case.",
-      "hint": "A rough number is fine. You refine it in Chapter 5.",
+      "hint": "A rough number is fine. You refine it in Chapter {ch5}.",
       "arrange": "chain",
       "stage": {
         "top": { "kind": "line", "text": "Back to your own case." },
@@ -1334,7 +1334,7 @@
         }
       ],
       "saveWhenFilled": true,
-      "feedback": { "saved": "Saved. It comes back in Chapter 5, ready to refine.", "empty": "Add a number to Baseline and Target." },
+      "feedback": { "saved": "Saved. It comes back in Chapter {ch5}, ready to refine.", "empty": "Add a number to Baseline and Target." },
       "advance": "after-save",
       "endOfChapter": true,
       "tracking": [
@@ -1355,7 +1355,7 @@
       "hint": "Pick the answer you expect. A guess cannot be wrong.",
       "hintPilotCopy": true,
       "layout": "warmup",
-      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "foot": "Chapter 4 · Critical eye" },
+      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "foot": "Chapter {ch4} · Critical eye" },
       "options": [
         { "id": "a", "label": "Deciding whether a customer is eligible" },
         { "id": "b", "label": "Summarizing a long request in three lines" },
@@ -1373,7 +1373,7 @@
       "template": "flags",
       "attempts": 2,
       "variant": "line",
-      "step": { "verb": "Start", "icon": "start" },
+      "step": { "verb": "Scope", "icon": "start" },
       "minutes": 3,
       "instruction": "Drag the Start flag and the End flag onto the HR process line.",
       "hint": "Look for what starts it from outside, and who picks up the result.",
@@ -1421,7 +1421,7 @@
       "chapter": "ch4",
       "template": "decision",
       "attempts": 2,
-      "step": { "verb": "Decide", "icon": "decide" },
+      "step": { "verb": "Record", "icon": "document" },
       "variant": "single",
       "minutes": 3,
       "instruction": "Choose what the map must record at this handoff.",
@@ -1477,7 +1477,7 @@
       "chapter": "ch4",
       "template": "decision",
       "attempts": 2,
-      "step": { "verb": "Decide", "icon": "decide" },
+      "step": { "verb": "Ask", "icon": "decide" },
       "variant": "single",
       "minutes": 3,
       "instruction": "Choose the first question to ask about this bottleneck.",
@@ -1605,7 +1605,7 @@
       "template": "decision",
       "variant": "cases",
       "attempts": 2,
-      "step": { "verb": "Sort", "icon": "sort" },
+      "step": { "verb": "Spot", "icon": "eye" },
       "minutes": 5,
       "instruction": "Read each case, then pick the mistake it shows.",
       "hint": "Two tries per case.",
@@ -1658,7 +1658,7 @@
       "instruction": "Name one step that could fit AI, and one that stays with a person.",
       "arrange": "pair",
       "stage": {
-        "top": { "kind": "line", "text": "Back to your own case. Your steps from Chapter 2:", "show": "L4_CASE_STEPS" },
+        "top": { "kind": "line", "text": "Back to your own case. Your steps from Chapter {ch2}:", "show": "L4_CASE_STEPS" },
         "privacy": { "kind": "privacy", "icon": "shield", "text": "Leave out names and identifying details." },
         "bottom": { "kind": "note", "text": "This note stays off your AS-IS map. Lesson 5 starts from it.", "action": "save" }
       },
@@ -1682,7 +1682,7 @@
       ],
       "saveWhenFilled": true,
       "feedback": {
-        "saved": "Saved. It comes back in Chapter 5 and Lesson 5.",
+        "saved": "Saved. It comes back in Chapter {ch5} and Lesson 5.",
         "empty": "Add a few words to both fields. A rough version is enough; you can edit it later."
       },
       "feedbackPilotCopy": "empty (the storyboard gives no empty-Save line; modelled on S08B)",
@@ -1701,7 +1701,7 @@
       "template": "decision",
       "variant": "fields",
       "attempts": 2,
-      "step": { "verb": "Sort", "icon": "sort" },
+      "step": { "verb": "Match", "icon": "arrows" },
       "minutes": 4,
       "instruction": "Choose the card for each field.",
       "hint": "Same eight fields, different case.",
@@ -1747,6 +1747,7 @@
       "instruction": "Choose what you write in the workbook.",
       "hint": "Before you write anything, remove names and identifying details.",
       "layout": "stage-decision",
+      "onePanel": true,
       "ghost": { "type": "choice", "target": "options-sweep" },
       "stage": {
         "top": { "kind": "line", "text": "The workbook has a live AI coach that reads what you type." },
@@ -1829,9 +1830,9 @@
         "label": "Copy your notes into the workbook",
         "cards": [
           { "id": "case", "label": "Your case", "from": "S02", "chip": "Field 1 · Process name" },
-          { "id": "sketch", "label": "Your sketch from Chapter 2", "from": "S08B", "chip": "Fields 2 and 3" },
-          { "id": "metric", "label": "Your metric from Chapter 3", "from": "S12B", "chip": "Field 8" },
-          { "id": "notes", "label": "Your notes from Chapter 4", "from": "S17B", "chip": "Not on the map: for Lesson 5", "off": true }
+          { "id": "sketch", "label": "Your sketch from Chapter {ch2}", "from": "S08B", "chip": "Fields 2 and 3" },
+          { "id": "metric", "label": "Your metric from Chapter {ch3}", "from": "S12B", "chip": "Field 8" },
+          { "id": "notes", "label": "Your notes from Chapter {ch4}", "from": "S17B", "chip": "Not on the map: for Lesson 5", "off": true }
         ]
       },
       "privacy": { "kind": "privacy", "icon": "shield", "text": "Coach on: roles, no names." },
@@ -1893,7 +1894,7 @@
       "variant": "risk",
       "minutes": 2,
       "instruction": "Choose the mistake your map is most at risk of.",
-      "hint": "The five mistakes from Chapter 4. Any pick is fine.",
+      "hint": "The five mistakes from Chapter {ch4}. Any pick is fine.",
       "wordLimit": { "max": 60, "why": "storyboard v3 Ch5-6 S20B (read then pick, as S17's definitions): the five mistakes with their one-line definitions, the hint line and the note; text as approved" },
       "ghost": { "type": "choice", "target": "options-sweep" },
       "options": [
@@ -1922,6 +1923,7 @@
       "instruction": "Choose one. Your first answer counts.",
       "hint": "Choose one. You can retry, but only the first answer counts.",
       "layout": "wide",
+      "wordLimit": { "max": 55, "why": "FX3 S21 item 5b (approved text): the eight lines of the AI-drafted sales map, longer than the HR map's; the other items stay under 45" },
       "items": [
         { "id": "i1", "icon": "speech", "trackingId": "L4_S21_1",
           "stem": "Lesson 1 case: customer service. Field 4 says 'Rep to department.' What is missing?",
@@ -1934,7 +1936,19 @@
               "feedback": "From and to are there. Without what passes and the unavailable case, a request stalls between teams." },
             { "id": "d", "label": "Nothing more: the department sees the request", "correct": false,
               "feedback": "The receiver may not know what happened before. The map hides the most dangerous moment in the process." }
-          ] },
+          ],
+          "b": { "trackingId": "L4_S21_1b",
+            "stem": "Lesson 1 case: student inquiries. Field 4 says 'Coordinator to dean's office.' What is missing?",
+            "options": [
+              { "id": "a", "label": "A rule that coordinators forward within a day", "correct": false,
+                "feedback": "That adds a rule nobody follows today. Record the handoff as it really happens first." },
+              { "id": "b", "label": "What passes, and what if nobody is available", "correct": true,
+                "feedback": "From and to are there. Without what passes and the unavailable case, an inquiry stalls between offices." },
+              { "id": "c", "label": "An AI agent that forwards inquiries", "correct": false,
+                "feedback": "That tool does not exist today. The handoff itself stays as vague as before." },
+              { "id": "d", "label": "Nothing more: the dean's office knows the history", "correct": false,
+                "feedback": "Never assume the receiver knows what happened before. This is the most dangerous moment in the process." }
+            ] } },
         { "id": "i2", "icon": "speech", "trackingId": "L4_S21_2",
           "stem": "Lesson 1 case: student inquiries. Which step suits AI first?",
           "options": [
@@ -1946,7 +1960,19 @@
               "feedback": "Sensitive cases need judgment, and today nobody knows how they are handled. That is unclear, not ready." },
             { "id": "d", "label": "Answering by category before categories are counted", "correct": false,
               "feedback": "There is no breakdown of categories yet. A solution here stands on unknown foundations." }
-          ] },
+          ],
+          "b": { "trackingId": "L4_S21_2b",
+            "stem": "Lesson 1 case: customer service. Which step suits AI first?",
+            "options": [
+              { "id": "a", "label": "Approving refunds above a set amount", "correct": false,
+                "feedback": "Money is at stake and a wrong call is costly. That decision stays with a person." },
+              { "id": "b", "label": "Turning free-text complaints into a topic and urgency", "correct": true,
+                "feedback": "Unstructured text in, a structured label out, at low risk. A person still handles the hard cases." },
+              { "id": "c", "label": "Handling escalated, angry customers on its own", "correct": false,
+                "feedback": "Escalations need empathy and judgment. That is where quality dropped in the fintech case." },
+              { "id": "d", "label": "Rerouting requests before routing is mapped", "correct": false,
+                "feedback": "A disorganized process gets fixed first. AI on top would only speed up the disorder." }
+            ] } },
         { "id": "i3", "icon": "speech", "trackingId": "L4_S21_3",
           "stem": "Lesson 1 case: weekly report, 4 to 6 hours. Nothing is logged. Baseline?",
           "options": [
@@ -1958,7 +1984,19 @@
               "feedback": "Field 8 now shows where the team hopes to land and nothing about where it stands now." },
             { "id": "d", "label": "'Much faster reports' for now", "correct": false,
               "feedback": "That is a feeling, not a number. Nobody could check it later." }
-          ] },
+          ],
+          "b": { "trackingId": "L4_S21_3b",
+            "stem": "Lesson 1 case: course feedback. Reading takes 3 to 4 hours per course. Nobody times it. Baseline?",
+            "options": [
+              { "id": "a", "label": "About 3.5 hours per course, marked as estimated", "correct": true,
+                "feedback": "An estimated baseline beats none. You now have a starting number to check the target against." },
+              { "id": "b", "label": "Nothing until someone times it", "correct": false,
+                "feedback": "Field 8 stays empty. In three months, nobody can show whether anything changed." },
+              { "id": "c", "label": "The target, once a tool is chosen", "correct": false,
+                "feedback": "That shows where you hope to land, and nothing about where you stand now." },
+              { "id": "d", "label": "'Much less reading time' for now", "correct": false,
+                "feedback": "That is a feeling, not a number. Nobody could check it later." }
+            ] } },
         { "id": "i4", "icon": "speech", "trackingId": "L4_S21_4",
           "stem": "Lesson 1 case: customer service. Share of simple requests unknown. Where does this go?",
           "options": [
@@ -1970,7 +2008,19 @@
               "feedback": "A target with no baseline, while the real problem, that nobody knows the share, stays hidden." },
             { "id": "d", "label": "Field 7: 'unclear', to investigate first", "correct": true,
               "feedback": "A diagnostic result, not a weakness. It shows what to check before Lesson 5 and what not to build on yet." }
-          ] },
+          ],
+          "b": { "trackingId": "L4_S21_4b",
+            "stem": "Lesson 1 case: weekly report. Nobody knows who reads it. Where does this go?",
+            "options": [
+              { "id": "a", "label": "Field 3: add a step to survey readers", "correct": false,
+                "feedback": "That adds a step while mapping. The unknown itself stays off the map." },
+              { "id": "b", "label": "Field 6: the manager approves each report", "correct": false,
+                "feedback": "That records a control nobody reported. Lesson 5 would rely on a check that may not exist." },
+              { "id": "c", "label": "Field 8: target more readers", "correct": false,
+                "feedback": "A target with no baseline, while the real problem, that nobody knows the readers, stays hidden." },
+              { "id": "d", "label": "Field 7: 'unclear', to investigate first", "correct": true,
+                "feedback": "A diagnostic result, not a weakness. It shows what to check before Lesson 5." }
+            ] } },
         { "id": "i5", "kind": "tiles", "select": 2, "trackingId": "L4_S21_5",
           "instruction": "Find the two errors in this AI-drafted HR map.",
           "hint": "Select two, then press Check. Your first answer counts.",
@@ -1985,7 +2035,22 @@
               "feedback": "No one reviews answers today. The AI invented a control that sounds right, and Lesson 5 would rely on it." },
             { "n": 7, "text": "Errors uncounted; no handoff channel", "correct": false, "feedback": "This line matches the HR map. Compare each line with what the map really says." },
             { "n": 8, "text": "~35% to 20% in 3 months", "correct": false, "feedback": "This line matches the HR map. Compare each line with what the map really says." }
-          ] }
+          ],
+          "b": { "trackingId": "L4_S21_5b",
+            "instruction": "Find the two errors in this AI-drafted map.",
+            "hint": "Select two, then press Check. Your first answer counts.",
+            "tiles": [
+              { "n": 1, "text": "Sales call summaries", "correct": false, "feedback": "This line matches the case. Compare each line with what really happens today." },
+              { "n": 2, "text": "A sales call ends", "correct": false, "feedback": "This line matches the case. Compare each line with what really happens today." },
+              { "n": 3, "text": "AI drafts the summary; the rep approves it", "correct": true,
+                "feedback": "An AI step nobody runs today. The AS-IS map now shows a future tool, and the real step is lost." },
+              { "n": 4, "text": "Rep to sales manager, by email", "correct": false, "feedback": "This line matches the case. Compare each line with what really happens today." },
+              { "n": 5, "text": "CRM client notes, sales manager, PUBLIC", "correct": true,
+                "feedback": "Client notes are not public. Tagged PUBLIC, they could be pasted into any tool. Tag them CONFIDENTIAL." },
+              { "n": 6, "text": "No formal control", "correct": false, "feedback": "This line matches the case. Compare each line with what really happens today." },
+              { "n": 7, "text": "Unclear whether managers read the summaries", "correct": false, "feedback": "This line matches the case. Compare each line with what really happens today." },
+              { "n": 8, "text": "About 2 days now, same day in 3 months", "correct": false, "feedback": "This line matches the case. Compare each line with what really happens today." }
+            ] } }
       ],
       "resultCard": "{x} of {n} on first try. Pass mark: {pass} of {n}.",
       "passItems": 4,
@@ -1996,9 +2061,14 @@
         { "id": "L4_S21_2", "type": "choice", "correctResponse": "b", "scored": true, "bloom": "Apply", "result": "graded" },
         { "id": "L4_S21_3", "type": "choice", "correctResponse": "a", "scored": true, "bloom": "Apply", "result": "graded" },
         { "id": "L4_S21_4", "type": "choice", "correctResponse": "d", "scored": true, "bloom": "Analyze", "result": "graded" },
-        { "id": "L4_S21_5", "type": "choice", "multiple": true, "correctResponse": "5,6", "scored": true, "bloom": "Evaluate", "result": "graded" }
+        { "id": "L4_S21_5", "type": "choice", "multiple": true, "correctResponse": "5,6", "scored": true, "bloom": "Evaluate", "result": "graded" },
+        { "id": "L4_S21_1b", "version": "b", "type": "choice", "correctResponse": "b", "scored": true, "bloom": "Analyze", "result": "graded" },
+        { "id": "L4_S21_2b", "version": "b", "type": "choice", "correctResponse": "b", "scored": true, "bloom": "Apply", "result": "graded" },
+        { "id": "L4_S21_3b", "version": "b", "type": "choice", "correctResponse": "a", "scored": true, "bloom": "Apply", "result": "graded" },
+        { "id": "L4_S21_4b", "version": "b", "type": "choice", "correctResponse": "d", "scored": true, "bloom": "Analyze", "result": "graded" },
+        { "id": "L4_S21_5b", "version": "b", "type": "choice", "multiple": true, "correctResponse": "3,5", "scored": true, "bloom": "Evaluate", "result": "graded" }
       ],
-      "sources": ["s16", "s18", "s20", "s23", "s24", "s27", "s32", "s33", "s37", "s38", "s44", "L1 booklet Cases 2, 5, 6", "HW2 (fluent but wrong AI output)"]
+      "sources": ["s16", "s18", "s20", "s23", "s24", "s27", "s32", "s33", "s37", "s38", "s44", "L1 booklet Cases 2, 5, 6", "HW2 (fluent but wrong AI output)", "FX3 (25 Oct 2026): version b of every item, approved text; a on the first attempt, b on a retake, alternating"]
     },
 
     {
@@ -2006,7 +2076,7 @@
       "chapter": "ch6",
       "template": "result",
       "presentation": true,
-      "step": { "verb": "Check", "icon": "check", "join": true },
+      "step": { "verb": "Score", "icon": "gauge" },
       "minutes": 2,
       "instruction": "{x} of {n} on first try ({p} of 100). Pass mark: 80.",
       "from": "S21",
@@ -2015,11 +2085,11 @@
       "notPassed": { "chip": "Not passed yet", "text": "Review what you missed, then retake the whole check." },
       "reviewLabel": "Review Chapter {n}",
       "missed": [
-        { "item": "i1", "stem": "Field 4 handoff", "text": "Revisit what a handoff must record.", "chapter": 4, "screen": "S14" },
-        { "item": "i2", "stem": "First AI step", "text": "Revisit the three good fits for AI.", "chapter": 4, "screen": "K4" },
-        { "item": "i3", "stem": "Report baseline", "text": "Revisit baseline, target and date.", "chapter": 3, "screen": "S11" },
-        { "item": "i4", "stem": "Field 7 unknowns", "text": "Revisit why 'unclear' belongs in Field 7.", "chapter": 3, "screen": "S10" },
-        { "item": "i5", "stem": "HR map errors", "text": "Revisit the full HR map, line by line.", "chapter": 3, "screen": "S12" }
+        { "item": "i1", "stem": "Field 4 handoff", "text": "Revisit what a handoff must record.", "screen": "S14" },
+        { "item": "i2", "stem": "First AI step", "text": "Revisit the three good fits for AI.", "screen": "K4" },
+        { "item": "i3", "stem": "Report baseline", "stemB": "Feedback baseline", "text": "Revisit baseline, target and date.", "screen": "S11" },
+        { "item": "i4", "stem": "Field 7 unknowns", "text": "Revisit why 'unclear' belongs in Field 7.", "screen": "S10" },
+        { "item": "i5", "stem": "HR map errors", "stemB": "Sales map errors", "text": "Revisit the full HR map, line by line.", "screen": "S12" }
       ],
       "ringAlt": "{p} of 100",
       "ringAltPilotCopy": true,
@@ -2032,7 +2102,7 @@
       "id": "S22",
       "chapter": "ch6",
       "template": "decision",
-      "step": { "verb": "Finish", "icon": "start" },
+      "step": { "verb": "Reflect", "icon": "key" },
       "scene": "stage",
       "variant": "close",
       "minutes": 3,
@@ -2048,10 +2118,10 @@
           "feedback": "Sometimes the right fix is to remove the step, not speed it up. Ask why it formed first." }
       ],
       "step2": {
-        "bridge": { "icon": "map", "text": "Lesson 5 starts from this map and your AI notes from Chapter 4." },
+        "bridge": { "icon": "map", "text": "Lesson 5 starts from this map and your AI notes from Chapter {ch4}." },
         "homework": { "icon": "calendar", "text": "Homework: complete your map and mark three AI points, using the three good-fit kinds.", "href": "@links.homework", "newTab": true },
         "feedback": {
-          "download": "Your record holds your case title, notes, metric, self-check answers and score. Your map stays in the workbook PDF.",
+          "download": "Your record holds your case title, notes, metric, self-check answers and score. Your map stays in your workbook PDF. Bring it to Lesson 5.",
           "finishConfirm": "Finish without downloading? Your workbook PDF is not affected. Press Finish again to confirm."
         }
       },
@@ -2067,15 +2137,15 @@
       "id": "END",
       "chapter": "ch6",
       "template": "end",
-      "step": { "verb": "Finish", "icon": "start", "join": true },
+      "step": { "verb": "Finish", "icon": "finish" },
       "presentation": true,
       "minutes": 0,
       "instruction": "Lesson complete",
       "accent": "complete",
-      "sub": "Process Modeling and Workflow Mapping · Module 1",
+      "sub": "Process Modeling and Workflow Mapping · Module 1 · Lesson 4",
       "passed": { "chip": "Passed" },
       "notPassed": { "chip": "Not passed yet", "hint": "You can retake the knowledge check in Wrap-up at any time." },
-      "next": "Next: Lesson 6, in your own time.",
+      "next": "Next: Lesson 5 in class. Bring your map PDF.",
       "homework": { "href": "@links.homework" },
       "advance": "none",
       "tracking": [],

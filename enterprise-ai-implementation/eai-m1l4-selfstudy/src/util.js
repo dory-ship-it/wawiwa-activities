@@ -29,6 +29,21 @@ export function fmt(str, vars = {}) {
   return String(str ?? '').replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m));
 }
 
+// FX3: every chapter number on screen comes from one source, the chapter's place in content.chapters
+// (index + 1: Intro = 1 ... Wrap-up = 7). chapterNo(content, 'ch5') -> 6.
+export const chapterNo = (content, id) => content.chapters.findIndex((c) => c.id === id) + 1;
+// "{ch5}" in any content string -> that chapter's number, once on load (the lesson and review.html), so
+// no chapter number is typed in the text. An unknown chapter id stays as written.
+export function resolveChapterRefs(content) {
+  const fix = (v) => {
+    if (typeof v === 'string') return v.replace(/\{(ch\d+)\}/g, (m, id) => (chapterNo(content, id) ? String(chapterNo(content, id)) : m));
+    if (Array.isArray(v)) return v.map(fix);
+    if (v && typeof v === 'object') { for (const k of Object.keys(v)) v[k] = fix(v[k]); return v; }
+    return v;
+  };
+  return fix(content);
+}
+
 // '@links.workbook' -> the URL in content.links; anything else is returned as is.
 export function resolveLink(content, href) {
   if (typeof href !== 'string' || !href.startsWith('@links.')) return href;

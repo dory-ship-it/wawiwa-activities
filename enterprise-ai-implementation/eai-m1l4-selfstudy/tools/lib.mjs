@@ -167,9 +167,8 @@ export function measureLayout() {
   // FX2 F: clipped text: an element holding text of its own (no scroller: overflow auto / scroll is a
   // scroller) whose content runs past its box. Truncation by design is whitelisted, each with its reason:
   const TRUNCATED = [
-    ['.w-copy-title, .w-sketch-row dd, .w-shown span', 'S17B / S19: the learner\'s own text, one or two lines by design; the full text is in the copy and for screen readers'],
+    ['.w-sketch-row dd, .w-shown span', 'S17B / S19: the learner\'s own text, one or two lines by design; the full text is in the copy and for screen readers (FX3: the S19 card names and the workbook field names are never cut)'],
     ['.w-case-slim span', 'the "Your case" card: the learner\'s own case title on one line (60 characters allowed), the full title in the field above it'],
-    ['.w-wb-rows span','S19: the workbook preview\'s field names, a thumbnail of the page (role img with its own label)'],
     ['.w-drop[data-dense="true"] .w-placed-text', 'the sort deck: a column that would reach Previous / Next shows one line per card, the full text for screen readers'],
   ];
   const ownText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.nodeValue.trim());

@@ -127,6 +127,7 @@ const PAIRS = [
   ['wl-idle-ink', 'wl-white', 4.5, 'numbers of steps and stations to come'],
   ['wl-o1-ground', 'wl-turquoise', 4.5, 'Not scored, length and CC chips on glass'],
   ['wl-white', 'wl-o1-ground', 4.5, 'text on dark glass (the darkest ground it sits on)'],
+  ['wl-white', 'wl-wash-ground', 4.5, 'FX3: headings and lines straight on the dark Focus wash'],
   ['wl-white', 'wl-red', 3, 'Next label (large text: 18.7px bold), O1 Start (23px bold)'],
   ['wl-white', 'wl-navy', 3, 'check on navy (graphic)'],
   ['wl-white', 'wl-teal', 3, 'check on teal (graphic)'],
@@ -206,7 +207,8 @@ let metaFails = 0;
 const metaFail = (m) => { metaFails++; fail(m); };
 for (const [s, t, stop] of interactions) {
   const where = `${s.id} ${t?.id || '(no id)'}`;
-  if (!t || !/^L4_[A-Z0-9]+_\d+$/.test(t.id)) { metaFail(`${where}: missing or malformed id`); continue; }
+  // (FX3: a final "b" = an item's second version, S21)
+  if (!t || !/^L4_[A-Z0-9]+_\d+b?$/.test(t.id)) { metaFail(`${where}: missing or malformed id`); continue; }
   if (seen.has(t.id)) metaFail(`${where}: duplicate interaction id`);
   seen.add(t.id);
   if (!TYPES.includes(t.type)) metaFail(`${where}: type "${t.type}" not one of ${TYPES.join(', ')}`);
@@ -233,7 +235,7 @@ function keyOf(s, t, stop) {
   if (s.template === 'flags') return s.variant === 'map' ? s.map.filter((x) => x.correct).map((x) => String(x.n)).join(',') : s.flags.map((f) => `${f.code}.${f.target}`).join(',');
   if (s.variant === 'pair') return letters(s.situations.find((x) => x.trackingId === t.id)?.options || []);
   if (s.template === 'check') {
-    const it = s.items.find((x) => x.trackingId === t.id);
+    const it = s.items.flatMap((x) => [x, ...(x.b ? [{ ...x, ...x.b }] : [])]).find((x) => x.trackingId === t.id); // FX3: version b too
     if (!it) return '';
     return it.kind === 'tiles' ? it.tiles.filter((x) => x.correct).map((x) => String(x.n)).join(',') : letters(it.options);
   }
@@ -251,7 +253,7 @@ const refs = content.screens.flatMap((s) => [
   ...(s.steps || []).flatMap((st) => [...(st.rows || []).map((r) => [s.id, r.trackingId]), ...(st.trackingId ? [[s.id, st.trackingId]] : [])]),
   ...(s.situations || []).map((x) => [s.id, x.trackingId]),
   ...(s.rounds || []).map((r) => [s.id, r.trackingId]),
-  ...(s.items || []).map((it) => [s.id, it.trackingId]),
+  ...(s.items || []).flatMap((it) => [[s.id, it.trackingId], ...(it.b ? [[s.id, it.b.trackingId]] : [])]),
   ...(s.step2?.field ? [[s.id, s.step2.field.trackingId]] : []),
 ]);
 // the scored screens and the pass mark (S21: 5 scored items, pass 80 = 4 of 5)
@@ -326,10 +328,16 @@ const photos = [...content.chapters.map((c) => [c.id, c.photo]), ...content.scre
 const badPhotos = photos.filter(([, p]) => !p || !p.src || !existsSync(join(ROOT, p.src)));
 badPhotos.length ? badPhotos.forEach(([w]) => fail(`${w}: photo missing or its file missing`)) : ok(`${photos.length} scene photos exist (${photos.map(([w, p]) => w + ' ' + p.src.split('/').pop()).join(', ')})`);
 photos.filter(([, p]) => p && p.temp).forEach(([w, p]) => temps.push(`${w} photo: ${p.src}`));
-// every screen in a chapter names its step for the top bar: a verb and a glyph from icons.js
-const { isGlyph } = await import('../src/icons.js');
-const noStep = content.chapters.flatMap((c) => c.screens).filter((id) => { const s = content.screens.find((x) => x.id === id); return s && !(s.step && (s.step.join || (s.step.verb && isGlyph(s.step.icon)))); });
-noStep.length ? fail('screens without a step (verb + glyph icon): ' + noStep.join(', ')) : ok('every chapter screen names its step (verb + glyph icon)');
+// every screen in a chapter names its step for the top bar: a verb and an icon from icons.js (FX3: any
+// icon of the set, not only the glyphs); within a chapter no two steps share a verb or an icon
+const noStep = content.chapters.flatMap((c) => c.screens).filter((id) => { const s = content.screens.find((x) => x.id === id); return s && !(s.step && (s.step.join || (s.step.verb && ICON_NAMES.includes(s.step.icon)))); });
+noStep.length ? fail('screens without a step (verb + icon): ' + noStep.join(', ')) : ok('every chapter screen names its step (verb + icon)');
+const sameStep = content.chapters.flatMap((c) => {
+  const steps = c.screens.map((id) => content.screens.find((x) => x.id === id)?.step).filter((st) => st && !st.join);
+  const dup = (k) => steps.map((st) => st[k]).filter((v, i, a) => a.indexOf(v) !== i);
+  return [...dup('verb'), ...dup('icon')].map((v) => `${c.title}: ${v}`);
+});
+sameStep.length ? fail('steps repeated within a chapter: ' + sameStep.join(', ')) : ok('the steps of each chapter all differ (verb and icon)');
 if (temps.length) {
   console.log(`  WARNING ${temps.length} temp images in use (board references, replace before release):`);
   temps.forEach((t) => console.log('          ' + t));

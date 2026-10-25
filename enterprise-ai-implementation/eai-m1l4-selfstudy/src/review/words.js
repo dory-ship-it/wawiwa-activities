@@ -30,8 +30,10 @@ export function screenViews(s, content) {
   // stem and line (FX2 H1: the short stem; the "Review Chapter N" links are buttons, excluded as everywhere)
   if (s.template === 'result') {
     const check = content.screens.find((x) => x.id === s.from);
+    // (FX3: version b's short stems, stemB, counted as their own state)
+    const missedView = (b) => [s.notPassed.chip, s.notPassed.text, ...s.missed.flatMap((m) => { const it = check.items.find((x) => x.id === m.item); return [(b && m.stemB) || m.stem || it.stem || it.instruction, m.text]; })];
     return [[`${s.id} passed`, [s.passed.chip, s.passed.text]],
-      [`${s.id} not passed`, [s.notPassed.chip, s.notPassed.text, ...s.missed.flatMap((m) => { const it = check.items.find((x) => x.id === m.item); return [m.stem || it.stem || it.instruction, m.text]; })]]];
+      [`${s.id} not passed`, missedView(false)], [`${s.id} not passed, version b`, missedView(true)]];
   }
   // FX2 G END: the line under the big line, the status chip and its hint, the next-step line (logo, h1, link excluded)
   if (s.template === 'end') return [[`${s.id} passed`, [s.sub, s.passed.chip, s.next]], [`${s.id} not passed`, [s.sub, s.notPassed.chip, s.notPassed.hint, s.next]]];
@@ -39,7 +41,9 @@ export function screenViews(s, content) {
   if (s.variant === 'fill') return [[s.id, [s.situation.text, ...s.fieldRows.flatMap((f) => [f.label, f.value]), ...s.options.map((o) => o.label)]]];
   if (s.variant === 'metric') return [[s.id, [...bandText(s.band), s.field.label, ...s.options.map((o) => o.label), s.slotsTitle, ...s.slots.map((x) => x.label)]]];
   // R3 templates
-  if (s.template === 'check') return s.items.map((it) => [`${s.id} ${it.id}`, it.kind === 'tiles' ? it.tiles.flatMap((t) => [String(t.n), t.text]) : [it.stem, ...it.options.map((o) => o.label)]]);
+  // (FX3: each item's version b too)
+  if (s.template === 'check') return s.items.flatMap((it) => [it, ...(it.b ? [{ ...it, ...it.b, id: it.id + 'b' }] : [])])
+    .map((it) => [`${s.id} ${it.id}`, it.kind === 'tiles' ? it.tiles.flatMap((t) => [String(t.n), t.text]) : [it.stem, ...it.options.map((o) => o.label)]]);
   // (NL4: the bridge line stays on the case card over the photo in both steps)
   if (s.variant === 'close') return [[`${s.id} step1`, [s.step2.bridge.text, ...s.options.map((o) => o.label)]], [`${s.id} step2`, [s.step2.bridge.text, s.step2.homework.text]]];
   if (s.variant === 'pick') return s.tiles.map((t) => [`${s.id} tile ${t.n} open`, [...s.tiles.flatMap((x) => [String(x.n), x.title]), s.question, t.text]]);
@@ -123,7 +127,8 @@ export function screenFeedback(s, content) {
     ...(s.situations || []).flatMap((x) => x.options.map((o) => [`${s.id} ${x.id} option ${o.id}`, o.feedback])),
     ...(s.rounds || []).flatMap((r) => Object.entries(r.feedback).map(([k, v]) => [`${s.id} ${r.id} option ${k}`, v])),
     ...Object.entries(s.step2?.feedback || {}).map(([k, v]) => [`${s.id} step2.${k}`, v]),
-    ...(s.items || []).flatMap((it) => [...(it.options || []).map((o) => [`${s.id} ${it.id} option ${o.id}`, o.feedback]), ...(it.tiles || []).map((t) => [`${s.id} ${it.id} tile ${t.n}`, t.feedback])]),
+    ...(s.items || []).flatMap((it) => [it, ...(it.b ? [{ ...it, ...it.b, id: it.id + 'b' }] : [])]) // FX3: version b too
+      .flatMap((it) => [...(it.options || []).map((o) => [`${s.id} ${it.id} option ${o.id}`, o.feedback]), ...(it.tiles || []).map((t) => [`${s.id} ${it.id} tile ${t.n}`, t.feedback])]),
   ].filter(([, v]) => typeof v === 'string' && v);
 }
 

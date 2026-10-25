@@ -2,7 +2,7 @@
 // the Focus wash, no panel:
 //   head     the instruction (h1) left; right the field chip (S09) and "Show me how"; the hint as the
 //            line under the heading when the content shows it (S16)
-//   deck     ONE card at a time, centred, with up to two offset cards behind it (the cards still to
+//   deck     ONE card at a time, centred (FX3: left when there is no explain band), with up to two offset cards behind it (the cards still to
 //            come; they cover the card only) and the counter ("1 of 5") under it
 //   strip    the off-panel feedback strip, beside the deck on its right (NL3: the frames put it
 //            between the deck and the columns, where it covered the counter of a two-line card;
@@ -22,11 +22,11 @@
 // drags it down, stopping above the columns; "Show me how" replays it.
 // Tracking: one matching interaction at the first Check; the response records each card's FIRST
 // column ("1.a,2.b,..."), correct only if every first placement was right. Later Checks are retries.
-import { h, fmt } from '../util.js?v=13d5742a';
-import { glyph } from '../icons.js?v=13d5742a';
-import { layout, explainBand } from './stage.js?v=13d5742a';
-import { dragDrop } from '../drag.js?v=13d5742a';
-import { checkButton } from './decision.js?v=13d5742a';
+import { h, fmt } from '../util.js?v=d9c03a25';
+import { glyph } from '../icons.js?v=d9c03a25';
+import { layout, explainBand } from './stage.js?v=d9c03a25';
+import { dragDrop } from '../drag.js?v=d9c03a25';
+import { checkButton } from './decision.js?v=d9c03a25';
 
 const keyOf = (c) => String(c.id ?? c.n);
 const COLS_TOP = 222.72, GAP = 15.36; // stage px in main (FX2 B: higher than the frames' 32.2cqw, the columns hold the cards' text)
@@ -63,9 +63,11 @@ export const sortDeck = {
     const counter = h('p', { class: 'w-deck-count', 'aria-hidden': 'true' });
     const live = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
     const help = h('span', { class: 'w-sr-only', id: helpId }, fmt(ui.drag.help, { n: cols.length }));
-    const deck = h('div', { class: 'w-sdeck', dataset: { interaction: '' } }, stack, counter, help, live);
-    const float = h('div', { class: 'w-float w-float-beside' }, zones.band);
+    // FX3: with no explain band (S04, S16) the deck sits left, under the heading, and the strip takes the
+    // wide space beside it: fewer lines, so the columns come up close to the deck
     const band = screen.band ? h('div', { class: 'w-deck-band' }, explainBand(screen.band)) : null;
+    const deck = h('div', { class: 'w-sdeck' + (band ? '' : ' w-sdeck-left'), dataset: { interaction: '' } }, stack, counter, help, live);
+    const float = h('div', { class: 'w-float w-float-beside' + (band ? '' : ' w-float-wide') }, zones.band);
     const check = checkButton(ui, ui.buttons.check, () => doCheck());
 
     const cur = () => cards[queue[qi]];

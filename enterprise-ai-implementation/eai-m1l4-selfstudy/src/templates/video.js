@@ -1,6 +1,7 @@
 // Video template (V1, V2), "Hybrid cinematic" look. FX2 A: a page, not a full-bleed film: under the
 // Kit 13 bar, on a clean dark ground (no chapter photo, nothing to distract from the film),
-//   column   the heading block (the instruction as the h1, the meta line "title · Video · 2:54 · 2 stops",
+//   column   the heading block (the instruction as the h1, the meta line: the film's title only (FX3: no
+//            length, no number of stops; the player bar still shows the time),
 //            "Watch for: ..."), the film in a bounded 16:9 frame, and the player bar BELOW the picture,
 //            attached to the frame and as wide (play / pause, time, the track with one ringed disc per
 //            stop, CC, volume, transcript). One caption line block inside the picture, bottom centre.
@@ -18,11 +19,11 @@
 // media.duration, stops[].t. Swapping the real film in is a change of those paths and times only.
 // Seeking forward never passes the part already watched or the next unanswered stop (the slider
 // clamps, a polite note says why).
-import { h, fmt, nextId } from '../util.js?v=13d5742a';
-import { glyph } from '../icons.js?v=13d5742a';
-import { letter } from '../tracking/index.js?v=13d5742a';
-import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=13d5742a';
-import { targetSteps } from '../ghost.js?v=13d5742a';
+import { h, fmt, nextId } from '../util.js?v=d9c03a25';
+import { glyph } from '../icons.js?v=d9c03a25';
+import { letter } from '../tracking/index.js?v=d9c03a25';
+import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=d9c03a25';
+import { targetSteps } from '../ghost.js?v=d9c03a25';
 
 const SEEK_STEP = 5, SEEK_PAGE = 15, AT_STOP = 0.05, AT_END = 0.3;
 const mmss = (t) => { const s = Math.max(0, Math.floor(t)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -50,7 +51,7 @@ export const video = {
     let cues = [], ended = false, done = false, atStop = null, trWasOpen = false;
 
     /* ---- the heading block ---- */
-    const meta = h('p', { class: 'w-video-meta' }, h('span', { class: 'w-video-title' }, screen.title), ' · ', fmt(v.meta, { length: media.length, n: stops.length }));
+    const meta = h('p', { class: 'w-video-meta' }, h('span', { class: 'w-video-title' }, screen.title));
     const guiding = h('p', { class: 'w-guiding' }, h('b', {}, screen.guidingLabel || v.guiding), ' ', screen.guidingQuestion);
     const head = h('div', { class: 'w-video-head' }, zones.instruction, meta, guiding);
 

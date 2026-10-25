@@ -1,7 +1,7 @@
 // The chapters menu (createMenu, below) and the in-page dialog used for Help, the Start over confirm
 // and the resume prompt (never window.confirm).
-import { h, trapTab, focusables } from './util.js?v=13d5742a';
-import { glyph } from './icons.js?v=13d5742a';
+import { h, trapTab, focusables } from './util.js?v=d9c03a25';
+import { glyph } from './icons.js?v=d9c03a25';
 
 // In-page modal dialog. actions: [{ id, label, primary, cancel, onClick(close) }].
 // body: optional extra node under the text. inert: elements made inert while open. Returns { close, root }.
@@ -73,7 +73,7 @@ export function createMenu(stage, content, { zones, getMenu, onChapter, onStartO
       h('button', { class: 'w-chapter', type: 'button', dataset: { status: c.status, chapter: String(c.n) }, 'aria-label': c.label,
         'aria-current': c.current ? 'step' : null, 'aria-disabled': c.clickable ? null : 'true',
         onclick: () => { if (c.clickable) { close(false); onChapter(c.n); } } },
-      h('span', { class: 'w-menu-disc', 'aria-hidden': 'true' }, c.status === 'done' ? glyph('g-check', { size: 16.64 }) : String(c.n + 1)),
+      h('span', { class: 'w-menu-disc', 'aria-hidden': 'true' }, c.status === 'done' ? glyph('g-check', { size: 16.64 }) : String(c.no)),
       h('span', { class: 'w-chapter-title' }, c.title)))));
   }
 

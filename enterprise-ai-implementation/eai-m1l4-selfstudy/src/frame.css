@@ -40,14 +40,26 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 .w-scene-photo { position: absolute; inset: 0; background-size: cover; background-repeat: no-repeat; }
 .w-scene-full { top: 0; }
 .w-o1-veil { position: absolute; inset: 0; background: var(--wl-o1-veil); }
-.w-wash-photo { position: absolute; inset: -38.4px; background-size: cover; background-repeat: no-repeat; filter: blur(17.92px) saturate(.8); }
+/* FX3: less blur, so the photo reads as a place, under a dark veil in the bar's tone; the stage ground
+   is the veil's average tone, so the contrast check measures text on the wash against it */
+.w-stage[data-scene="focus"] { background: var(--wl-wash-ground); }
+.w-wash-photo { position: absolute; inset: -38.4px; background-size: cover; background-repeat: no-repeat; filter: blur(5.12px) saturate(.9); }
 .w-wash-veil { position: absolute; inset: 0; background: var(--wl-wash-veil); }
+/* FX3: text that sits straight on the dark wash (no panel or card under it) turns light: headings
+   white, lines, labels and the eyebrow the on-wash white */
+.w-stage[data-scene="focus"] :is(.w-task-head, .w-focus-head, .w-open-head) .w-instruction,
+.w-stage[data-scene="focus"] :is(.w-map-kicker, .w-evidence b, .w-bpmn-key b) { color: var(--wl-white); }
+.w-stage[data-scene="focus"] :is(.w-task-head, .w-focus-head, .w-open-head) :is(.w-context, .w-subline, .w-concept-text, .w-task-sub),
+.w-stage[data-scene="focus"] :is(.w-map-title, .w-evidence, .w-bpmn-key p, .w-sdeck .w-deck-count, .w-float .w-attempts) { color: var(--wl-on-wash); }
+.w-stage[data-scene="focus"] .w-focus-head .w-eyebrow { color: var(--wl-on-wash); }
+.w-stage[data-scene="focus"] .w-float .w-attempt-discs i { border-color: var(--wl-white); background: transparent; }
+.w-stage[data-scene="focus"] .w-float .w-attempt-discs i[data-used="true"] { background: var(--wl-white); }
 
 /* ---------- top bar: y 0 to 80.64 (FX1: theme-kit13-topbar.html, Round 5 Kit 13; its cqw x 12.8;
    FX2 C: on every screen, O1 and END included, and 17% lower: logo, chapter label and steps with it) ---------- */
 .w-bar { position: absolute; left: 0; top: 0; width: 100%; height: var(--wl-bar-h); z-index: 4; display: flex; align-items: center; gap: 13.44px; padding: 0 23.04px;
-  background: var(--wl-bar-focus-bg); border-bottom: 1px solid var(--wl-line); }
-/* the dark bar: Stage screens, and O1 / END over their dark photo */
+  background: var(--wl-bar-stage-bg); }
+/* the dark bar: every screen (FX3: Focus too), over the photo or the Focus wash */
 .w-stage[data-bar="dark"] > .w-bar { background: var(--wl-bar-stage-bg); border-bottom: 0; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
 .w-stage[data-scene="title"] > .w-footer { display: none; }
 .w-bar-logo { flex: none; width: 70.4px; height: auto; }
@@ -492,6 +504,10 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
    width), the panel right at 50%; S14's handoff visual: two lanes as BPMN step boxes, the receiver's
    greyed out (K1's grey) with a neutral "Away" chip */
 .w-sheet-50 { width: 640px; }
+/* FX3 S18: the whole question on one panel (situation line, heading, answers, band): wider and a
+   one-line heading, so it stays clear of the bar and of Previous / Next */
+.w-sheet-one { width: min(716.8px, calc(100% - 512px)); padding-top: 23.04px; }
+.w-sheet-one .w-instruction { margin: 10.24px 0 15.36px; font-size: 33.28px; }
 .w-case-card { position: absolute; z-index: 2; left: 43.52px; top: 35.84px; width: 512px; margin: 0; display: grid; gap: 15.36px; padding: 23.04px 25.6px;
   border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
 .w-case-card .w-rules { margin: 0; }
@@ -643,27 +659,26 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-sheet-doc .w-handoff-right .w-label { margin-bottom: 3.84px; }
 .w-sheet-doc .w-strip { padding-top: 12.8px; padding-bottom: 12.8px; }
 .w-sheet-doc .w-handoff-head { margin-bottom: 3.84px; }
-.w-sheet-doc .w-handoff-bottom { margin-top: 6.4px; }
-.w-sheet-doc .w-handoff-open { margin-top: 6.4px; }
 .w-handoff-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15.36px; margin-bottom: 7.68px; }
 .w-handoff-head .w-label { margin: 0 0 2.56px; }
 .w-sheet .w-handoff-head .w-instruction { margin: 0; font-size: 28.8px; }
 .w-time-chip { flex: none; display: inline-flex; align-items: center; gap: 6.4px; padding: 2.56px 10.24px; border-radius: 5.12px; background: var(--wl-chip-bg); font: 600 14.72px/normal var(--wl-font-label); color: var(--wl-correct-head); }
-.w-handoff-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.42fr); gap: 23.04px; align-items: start; }
-.w-handoff-left { display: flex; flex-direction: column; gap: 8.96px; }
+/* FX3: the brief column leads (a little wider: every workbook field name on one line), the copy cards secondary */
+.w-handoff-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 23.04px; align-items: start; }
+.w-handoff-left { display: flex; flex-direction: column; gap: 7.68px; }
 /* the steps as a plain numbered list here (no boxes), so the brief stays short */
-.w-handoff-left .w-steps { gap: 5.12px; }
-.w-handoff-left .w-steps li { min-height: 30.72px; padding: 0; border: 0; background: none; font-size: 16.64px; }
+.w-handoff-left .w-steps { gap: 3.84px; }
+.w-handoff-left .w-steps li { min-height: 28.16px; padding: 0; border: 0; background: none; font-size: 16.64px; }
 .w-handoff-left .w-step-n { width: 26.88px; height: 26.88px; font-size: 14px; }
 .w-handoff-hint { font: 400 16.64px/1.35 var(--wl-font-ui); color: var(--wl-text-2); }
 .w-handoff-right .w-label { margin: 0 0 6.4px; }
 /* the workbook preview: a small page with its eight field rows; the rows the notes go into marked */
 .w-wb-preview { position: relative; margin: 0; padding: 8.96px 12.8px 8.96px 46.08px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
 .w-wb-icon { position: absolute; left: 12.8px; top: 10.24px; color: var(--wl-navy); }
-.w-wb-rows { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: column; grid-template-rows: repeat(4, auto); gap: 3.84px 10.24px; }
+.w-wb-rows { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); grid-auto-flow: column; /* FX3: the longer names (5, 7) in the wider column */ grid-template-rows: repeat(4, auto); gap: 3.84px 10.24px; }
 .w-wb-rows li { min-width: 0; display: flex; align-items: center; gap: 6.4px; padding: 1.28px 6.4px; border-radius: 5.12px; background: var(--wl-stone); font: 500 14px/1.25 var(--wl-font-label); color: var(--wl-muted); }
 .w-wb-rows b { flex: none; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-line); font: 700 14px/1 var(--wl-font-ui); color: var(--wl-ink); }
-.w-wb-rows span { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.w-wb-rows span { flex: 1 1 auto; min-width: 0; } /* FX3: every field name in full (it may wrap), never cut */
 .w-wb-rows li[data-notes="true"] { background: var(--wl-keypill-bg); color: var(--wl-teal-ink); }
 .w-wb-rows li[data-notes="true"] b { background: var(--wl-navy); color: var(--wl-white); }
 /* the copy cards, 2 x 2: the card's name over its field chip, Copy on the right, then one line per part */
@@ -671,7 +686,7 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-copy-card { min-width: 0; display: flex; flex-direction: column; gap: 3.84px; padding: 7.68px 10.24px 8.96px 12.8px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
 .w-copy-head { display: flex; align-items: center; gap: 7.68px; }
 .w-copy-id { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2.56px; }
-.w-copy-title { max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 700 15.36px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-copy-title { max-width: 100%; font: 700 15.36px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
 .w-copy-id .w-field-chip { max-width: 100%; }
 .w-copy-rows .w-sketch-row { line-height: 1.25; }
 .w-chip-off { background: var(--wl-neutral-bg); color: var(--wl-grey-ink); }
@@ -679,11 +694,10 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-copy-btn:disabled { padding: 3.84px 12.8px; }
 .w-copy-rows { margin: 0; }
 .w-copy-rows dd[data-empty="true"] { color: var(--wl-muted); }
-.w-handoff-bottom { margin-top: 8.96px; }
-/* FX2 E: Open workbook in its own row, the last of the content, right; nothing beside or over it */
-.w-handoff-open { margin-top: 10.24px; display: flex; justify-content: flex-end; }
-.w-return-line { flex: 1 1 auto; font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
-.w-col-handoff .w-handoff-bottom .w-privacy { margin: 0; }
+/* FX3: Open workbook, the main action, under the brief, the coach line beside it; the return line under them */
+.w-handoff-open { margin-top: 2.56px; display: flex; flex-wrap: wrap; align-items: center; gap: 6.4px 17.92px; }
+.w-return-line { flex: 1 1 100%; font: 700 16.64px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-col-handoff .w-handoff-open .w-privacy { margin: 0; }
 .w-sketch-list { margin: 0 0 5.12px; display: grid; gap: 1.28px; }
 .w-sketch-list:last-child { margin-bottom: 0; }
 .w-sketch-row { display: flex; gap: 5.12px; min-width: 0; font: 400 15.36px/1.35 var(--wl-font-ui); }
@@ -740,6 +754,12 @@ a.w-btn { text-decoration: none; }
 .w-wb-field[data-result="correct"] .w-row-mark { border-color: var(--wl-teal); background: var(--wl-teal); }
 .w-wb-field[data-result="wrong"] .w-row-mark { border-color: var(--wl-error); background: var(--wl-error); }
 .w-sheet-fields .w-head-q { margin-bottom: 15.36px; }
+/* FX3 S18A: the four cards, lettered A to D, in a column left of the rows (read first) */
+.w-fields-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr); gap: 17.92px; align-items: start; }
+.w-card-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 7.68px; }
+.w-card-item { min-height: 50px; display: flex; align-items: center; gap: 10.24px; padding: 5.12px 12.8px; border: 1px solid var(--wl-card-line); border-radius: var(--wl-radius-card); background: var(--wl-white);
+  font: 600 17.28px/1.25 var(--wl-font-ui); color: var(--wl-body-ink); }
+.w-sheet-fields .w-wb-fields { gap: 7.68px; }
 .w-check-q { flex: 1 1 auto; font: 600 18.56px/1.35 var(--wl-font-ui); color: var(--wl-ink); }
 .w-toggles { flex: none; display: flex; gap: 7.68px; }
 .w-toggle { min-width: 104px; min-height: 44px; padding: 0 17.92px; border: 1px solid var(--wl-line-strong); border-radius: 7.68px; background: var(--wl-white);
@@ -907,6 +927,9 @@ a.w-btn { text-decoration: none; }
    set from the tallest card, strip and band (src/templates/sortdeck.js). */
 .w-main[data-layout="sort-deck"] { --deck-w: 435.2px; --deck-edge: max(51.2px, calc((100% - 1177.6px) / 2)); }
 .w-float-beside { left: calc(50% + var(--deck-w) / 2 + 20.48px); right: var(--deck-edge); }
+/* FX3 (S04, S16: no explain band): the deck left under the heading, the strip wide beside it */
+.w-sdeck.w-sdeck-left { left: var(--deck-edge); transform: none; }
+.w-float-beside.w-float-wide { left: calc(var(--deck-edge) + var(--deck-w) + 30.72px); }
 .w-deck-band { position: absolute; top: 102.4px; left: var(--deck-edge); right: calc(50% + var(--deck-w) / 2 + 20.48px); }
 .w-deck-band .w-rules { margin: 0; padding: 12.8px 15.36px; }
 .w-deck-band .w-rules-label { font-size: 17.92px; white-space: normal; }
@@ -941,7 +964,7 @@ a.w-btn { text-decoration: none; }
 .w-drop-sub { display: block; margin-top: 2.56px; font: 400 15.36px/1.3 var(--wl-font-label); color: var(--wl-muted); }
 .w-drop-cards { list-style: none; margin: 0; padding: 0; }
 .w-placed { margin-top: 7.68px; display: flex; align-items: center; gap: 8.96px; padding: 5.12px 10.24px; border: 2.56px solid var(--wl-teal); border-radius: 10.24px; background: var(--wl-white);
-  font: 600 15.36px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+  font: 600 17.28px/1.3 var(--wl-font-ui); color: var(--wl-ink); } /* FX3: 15.36 -> 17.28 px (dense columns stay the fallback) */
 /* FX2 B: the card's own text, two lines at most; a dense column (it would reach Previous / Next): one line */
 .w-placed-text { min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
 .w-drop[data-dense="true"] .w-placed { margin-top: 5.12px; padding-top: 2.56px; padding-bottom: 2.56px; }

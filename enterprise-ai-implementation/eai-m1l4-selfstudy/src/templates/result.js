@@ -8,9 +8,9 @@
 //           in the footer), then "Retake now" (the whole check, at once)
 // Next is open either way (a presentation screen): below 80 the learner may finish as failed and come
 // back to retake. Nothing is tracked here: the attempt's score went out when S21 ended (ctx.checkDone).
-import { h, fmt } from '../util.js?v=13d5742a';
-import { glyph, icon } from '../icons.js?v=13d5742a';
-import { layout, sheet } from './stage.js?v=13d5742a';
+import { h, fmt, chapterNo } from '../util.js?v=d9c03a25';
+import { glyph, icon } from '../icons.js?v=d9c03a25';
+import { layout, sheet } from './stage.js?v=d9c03a25';
 
 const R = 64, C = 2 * Math.PI * R; // the ring, in its 160 x 160 box
 
@@ -40,18 +40,21 @@ export const result = {
     const parts = [h('div', { class: 'w-result-verdict' }, chip, h('p', { class: 'w-result-line' }, verdict.text))];
 
     if (!passed) {
-      // the items missed on the first try of this attempt, in the check's order
+      // the items missed on the first try of this attempt, in the check's order (FX3: in this
+      // attempt's version, a or b: its interaction id and its short stem, stemB for version b)
+      const b = ctx.checkVersion() === 'b';
+      const itemOf = (m) => { const it = check.items.find((x) => x.id === m.item); return it && b && it.b ? { ...it, ...it.b } : it; };
       const missed = screen.missed.filter((m) => {
-        const it = check.items.find((x) => x.id === m.item);
+        const it = itemOf(m);
         return it && ctx.firstAnswer(it.trackingId)?.result !== 'correct';
       });
       if (missed.length) {
         parts.push(h('ul', { class: 'w-missed' }, missed.map((m) => {
-          const it = check.items.find((x) => x.id === m.item);
+          const it = itemOf(m);
           return h('li', { class: 'w-missed-item', dataset: { item: m.item } },
-            h('div', { class: 'w-missed-text' }, h('p', { class: 'w-missed-stem' }, m.stem || it.stem || it.instruction), h('p', { class: 'w-missed-line' }, m.text)),
+            h('div', { class: 'w-missed-text' }, h('p', { class: 'w-missed-stem' }, (b && m.stemB) || m.stem || it.stem || it.instruction), h('p', { class: 'w-missed-line' }, m.text)),
             h('button', { class: 'w-link w-review-link', type: 'button', dataset: { action: 'review', screen: m.screen }, onclick: () => ctx.reviewGo(m.screen) },
-              h('span', {}, fmt(screen.reviewLabel, { n: m.chapter })), glyph('g-arrow', { size: 19.2 })));
+              h('span', {}, fmt(screen.reviewLabel, { n: chapterNo(content, content.screens.find((s) => s.id === m.screen)?.chapter) })), glyph('g-arrow', { size: 19.2 })));
         })));
       }
       parts.push(h('div', { class: 'w-actionbar w-result-actions' },
