@@ -24,6 +24,9 @@
 // 16. the coach (CO1, offline): no network code and no proxy URL in src/coach; every slice screen has
 //     coach.kind with its opening line in ui.coach.lines; S21 locked with no tip; a copied tip is the
 //     screen's hint word for word, a drafted tip (tipDrafted) at most 20 words; the grounding pack exists
+// 17. the personal path (PP1): checkpoints, goals, both variants per adaptive screen, same template and
+//     item counts, keys match tracking, deck sources, banned wording, no S21 case (9 and 10 also count
+//     and key every variant)
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -184,15 +187,19 @@ bootOk ? ok('index.html boot fallback equals ui.boot') : fail('index.html boot f
 
 /* 9. word counts (the counting lives in src/review/words.js, shared with the review mode) */
 const { MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS, words, screenViews, screenFeedback } = await import('../src/review/words.js');
-// one entry per view the learner sees at once: [name, strings on screen]
-const views = content.screens.flatMap((s) => screenViews(s, content));
+// PP1: an adaptive screen counts once per level (core, then each variant merged over the screen, its
+// name marked [support] / [stretch]); a variant may carry its own wordLimit
+const { variantOf, LEVELS } = await import('../src/adapt.js');
+const levelsOf = (s) => [['', s], ...Object.keys(s.variants || {}).map((lv) => [lv, variantOf(s, lv)])];
+const tag = (name, lv) => (lv ? `${name} [${lv}]` : name);
+// one entry per view the learner sees at once: [name, strings on screen, the screen's wordLimit]
+const views = content.screens.flatMap((s) => levelsOf(s).flatMap(([lv, x]) => screenViews(x, content).map(([n, l]) => [tag(n, lv), l, x.wordLimit])));
 // a screen may carry wordLimit { max, why } (copy approved over the rule, planning to cut): it is
 // listed as a WARNING with its reason, and fails only above its own max
 let wordFails = 0;
 const overRule = [];
-for (const [name, list] of views) {
+for (const [name, list, lim] of views) {
   const n = list.reduce((sum, t) => sum + words(t), 0);
-  const lim = content.screens.find((s) => s.id === name.split(' ')[0])?.wordLimit;
   if (n > MAX_SCREEN_WORDS && lim && lim.why && n <= lim.max) { overRule.push(`${name}: ${n} words (allowance ${lim.max}: ${lim.why})`); continue; }
   if (n > MAX_SCREEN_WORDS) { wordFails++; fail(`${name}: ${n} on-screen words (max ${MAX_SCREEN_WORDS})`); }
 }
@@ -204,7 +211,7 @@ if (overRule.length) {
 const feedbackLines = [
   // a chapter's pause marker counts even when its last screen is not in content yet
   ...content.chapters.filter((c) => c.pauseMarker && !ids.has(c.screens[c.screens.length - 1])).map((c) => [`${c.id} pauseMarker`, c.pauseMarker]),
-  ...content.screens.flatMap((s) => screenFeedback(s, content)),
+  ...content.screens.flatMap((s) => levelsOf(s).flatMap(([lv, x]) => screenFeedback(x, content).map(([k, v]) => [tag(k, lv), v]))),
 ];
 const longFb = feedbackLines.filter(([, v]) => words(v) > MAX_FEEDBACK_WORDS);
 longFb.forEach(([k, v]) => fail(`${k}: ${words(v)} words (max ${MAX_FEEDBACK_WORDS})`));
@@ -408,6 +415,57 @@ google.length || missingFace.length || lacking.length
   bad.length ? fail('coach content: ' + bad.join('; '))
     : ok(`coach: every slice screen has its kind and tip (${slice.filter((s) => s.coach.tipDrafted).length} drafted, ${slice.filter((s) => s.coach.tip && !s.coach.tipDrafted).length} copied from the hint), S21 locked`);
   existsSync(join(ROOT, 'content', 'coach', 'grounding-pack.md')) ? ok('coach: content/coach/grounding-pack.md exists') : fail('coach: content/coach/grounding-pack.md missing');
+}
+
+/* 17. the personal path (PP1, src/adapt.js): the checkpoints count real graded items of the chapters
+   before them; every adaptive screen has a goal and both variants; a variant keeps the core's template,
+   layout and item count, its own key matches its tracking (same ids, types and Bloom), it cites deck
+   slides, and its text has no always / never, no "all / none of the above" and none of S21's cases */
+{
+  const bad = [];
+  const adapt = content.lesson.adapt;
+  const cps = adapt?.checkpoints || [];
+  const graded = new Map(interactions.map(([s, t]) => [t?.id, { s, t }]));
+  const order = (cid) => content.chapters.findIndex((c) => c.id === cid);
+  if (cps.length !== 2) bad.push('lesson.adapt.checkpoints must hold the two checkpoints');
+  for (const cp of cps) {
+    if (order(cp.chapter) < 0) bad.push(`${cp.key}: unknown chapter ${cp.chapter}`);
+    if (!/^L4_PATH_C\d$/.test(cp.trackingId || '')) bad.push(`${cp.key}: trackingId must be L4_PATH_Cn`);
+    if (!(cp.minAnswered > 0 && cp.minAnswered <= cp.items.length)) bad.push(`${cp.key}: minAnswered out of range`);
+    for (const id of cp.items) {
+      const g = graded.get(id);
+      if (!g || g.t.result !== 'graded') bad.push(`${cp.key}: ${id} is not a graded interaction`);
+      else if (order(g.s.chapter) >= order(cp.chapter)) bad.push(`${cp.key}: ${id} is not before ${cp.chapter}`);
+    }
+  }
+  const adaptive = content.screens.filter((s) => s.variants);
+  const inCp = (s) => cps.some((cp) => cp.chapter === s.chapter);
+  const BANNED = /\b(always|never)\b|(all|none) of the above/i;
+  // S21's cases and stems (the check stays the same for everyone, so practice never rehearses it)
+  const S21_CASES = /rep to department|dean's office|customer service|student inquir|weekly report|course feedback|sales call/i;
+  const strings = (v) => (typeof v === 'string' ? [v] : Array.isArray(v) ? v.flatMap(strings) : v && typeof v === 'object' ? Object.entries(v).filter(([k]) => k !== 'sources' && k !== 'pilotCopy').flatMap(([, x]) => strings(x)) : []);
+  const COUNTED = ['options', 'cards', 'map', 'flags', 'columns', 'slots', 'fieldRows'];
+  for (const s of adaptive) {
+    if (!/^g[1-5]$/.test(s.goal || '')) bad.push(`${s.id}: goal g1 to g5 missing`);
+    if (!inCp(s)) bad.push(`${s.id}: variants outside a checkpoint chapter`);
+    for (const lv of LEVELS.filter((l) => l !== 'core')) {
+      const v = s.variants[lv];
+      if (!v) { bad.push(`${s.id}: no ${lv} variant`); continue; }
+      const x = variantOf(s, lv);
+      const where = `${s.id} [${lv}]`;
+      for (const k of ['template', 'variant', 'layout', 'chapter', 'goal', 'instruction', 'id']) if (k in v) bad.push(`${where}: overrides ${k} (same template, layout and goal for every level)`);
+      for (const k of COUNTED) if (Array.isArray(s[k]) && (x[k] || []).length !== s[k].length) bad.push(`${where}: ${k} has ${(x[k] || []).length}, core ${s[k].length}`);
+      if (!Array.isArray(v.sources) || !v.sources.length || v.sources.some((src) => !/^s\d+$/.test(src))) bad.push(`${where}: sources must list deck slides (s1 to s46)`);
+      const tr = x.tracking || [];
+      if (tr.map((t) => `${t.id}|${t.type}|${t.bloom}|${t.scored}`).join() !== (s.tracking || []).map((t) => `${t.id}|${t.type}|${t.bloom}|${t.scored}`).join()) bad.push(`${where}: tracking ids, types, Bloom or scored differ from core`);
+      for (const t of tr.filter((t) => t.result === 'graded')) { const key = keyOf(x, t); if (t.correctResponse !== key) bad.push(`${where}: correctResponse "${t.correctResponse}" but the variant's key is "${key}"`); }
+      const text = strings(v);
+      text.filter((str) => BANNED.test(str)).forEach((str) => bad.push(`${where}: banned wording in "${str.slice(0, 50)}"`));
+      text.filter((str) => S21_CASES.test(str)).forEach((str) => bad.push(`${where}: an S21 case in "${str.slice(0, 50)}"`));
+    }
+  }
+  bad.length ? fail('personal path: ' + bad.join('; '))
+    : ok(`personal path: ${cps.map((cp) => `${cp.key} on ${cp.chapter} counts ${cp.items.length} (${cp.trackingId})`).join(', ')}; ${adaptive.length} adaptive screens (${adaptive.map((s) => s.id + ' ' + s.goal).join(', ')}), support and stretch each: same template and counts, keys match, deck sources, no banned wording or S21 case`);
 }
 
 finish();

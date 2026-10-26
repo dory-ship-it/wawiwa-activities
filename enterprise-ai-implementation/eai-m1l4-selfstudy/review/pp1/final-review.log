@@ -1,0 +1,44 @@
+﻿
+> eai-m1l4-selfstudy@0.1.0 test:review
+> node tools/test-review.mjs
+
+
+review mode: walk, toolbar, no writes
+  ok   normal run: the state with the S01 answer is in localStorage
+  ok   ?review=1 opens on O1, no resume prompt
+  ok   Next walks all 43 screens in chapter order (O1 O2 O3 S01 S02 W1 V1 K1 S03 W2 K2 S04 S05a S05b S06 S07 S08 S08B W3 V2 S09 S10 S11 S12 S12B W4 S13 S14 S15 K4 S16 S17 S17B S18A S18 S18B S19 S20 S20B S21 S21R S22 END)
+  ok   Next never locked in review mode
+  ok   toolbar on every screen: id, template, chapter, word count from src/review/words.js, red over 45, Overview link
+  ok   Previous walks back in order (S22 S21R S21 S20B)
+  ok   localStorage unchanged after the review walk (177 chars before and after)
+  ok   review walk: no console errors
+  ok   with a SCORM 1.2 API present, review mode makes 0 SCORM calls (events still on the bus: 1)
+  ok   ?screen=ID&review=1 opens S04, S13, S22 (every screen is in the slice today)
+
+review.html
+  ok   43 cards in review order, each opens index.html?screen=ID&review=1 in a new tab
+  ok   word counts under the thumbnails match src/review/words.js
+  ok   review.html rows: Chapter 1 · Intro, Chapter 2 · Why map, Chapter 3 · Toolkit, Chapter 4 · HR demo, Chapter 5 · Critical eye, Chapter 6 · Build yours, Chapter 7 · Wrap-up; header "...it · content FX3, 25 Oct 2026 (storyboard v3)"
+  ok   thumbnails load lazily (17 of 43 on arrival)
+  ok   every thumbnail renders its own screen (43 of 43), no boot error, no toolbar inside
+  ok   thumbnails are the 1280 x 720 stage at 25%
+  ok   coach row: O3:demo, S04:hint, S04:open, S04:tip, S04:thinking, S04:cap, S21:open, each in its state, nothing written
+  ok   "Over word limit" shows O2, S02, K2, S04, S05a, S08, S09, S11, S12, S14, S15, K4, S16, S17, S18A, S19, S20B, S21, S21R (expected O2, S02, K2, S04, S05a, S08, S09, S11, S12, S14, S15, K4, S16, S17, S18A, S19, S20B, S21, S21R)
+  ok   chapter filter "ch1" shows W1, V1, K1, S03
+  ok   review.html: no console errors
+
+Paths (PP1)
+  ok   "Paths" filter: hidden under All, then alone; rows Stretch / Core / Support x 8 screens (S09 S10 S11 S12 S14 S15 S16 S17), each opens index.html?screen=ID&level=LEVEL&review=1 in a new tab
+  ok   journey 1 marks 1.S09:stretch 2.S10:stretch 3.S11:stretch 4.S12:stretch 5.S14:stretch 6.S15:stretch 7.S16:stretch 8.S17:stretch
+  ok   journey 4 marks 1.S09:support 2.S10:support 3.S11:support 4.S12:support 5.S14:core 6.S15:core 7.S16:core 8.S17:core
+  ok   journey 5 marks 1.S09:support 2.S10:support 3.S11:support 4.S12:support 5.S14:support 6.S15:support 7.S16:support 8.S17:support
+  ok   the S11 thumbnails render their own level (stretch, core, support)
+  ok   Paths view: no console errors
+  ok   review.html#paths-3: the Paths view, journey 3, 8 screens marked
+  ok   toolbar on S11 stretch: "stretch · g4", 55 words
+
+package
+  ok   SCORM package: 61 files in imsmanifest.xml, none from review.html or src/review/, and none in the zip
+
+test:review passed
+review exit 0

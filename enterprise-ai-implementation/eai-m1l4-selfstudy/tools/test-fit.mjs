@@ -7,6 +7,9 @@
 //   2. every slice screen in every band state: the band never overlaps the screen's content, it is
 //      flush to its panel's edges, nothing clipped, contrast of every text/background pair, no text
 //      under 14 px, targets 44 px
+//   2b. PP1: the eight adaptive screens on each level (support, core, stretch via ?debug=1&level=) in
+//      their main states, the answers read from the variant shown; the same checks as 2 (a state that
+//      fails on the core screen too is listed as a WARNING: core is not PP1's to change)
 //   3. the open menu and its dialogs: the same contrast, size and target checks
 //   4. CO1, the coach on every slice screen: the launcher in the bar (56 x 56, y 0 to 80.64, the bar's
 //      parts still fit, nothing clipped), then the open panel at the left and the right dock: inside y 96
@@ -355,6 +358,69 @@ for (const size of COACH_ONLY ? [] : SIZES) {
     expect(!page.errors.length, `${id} ${state} ${size.join('x')}: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);
     await page.close();
   }
+}
+
+/* ---- 2b. PP1: every adaptive screen on each level (support, core, stretch; ?level= needs ?debug=1),
+   in its main states, the answers read from the variant shown ---- */
+console.log('\n2b. personal path: adaptive screens x levels');
+const { variantOf } = await import('../src/adapt.js');
+const ADAPTIVE = JSON.parse(readFileSync(join(ROOT, 'content', 'l4-slice.json'), 'utf8')).screens.filter((s) => s.variants);
+const shift = (p) => p.keyboard.press('Shift'); // any key stops a ghost hand
+const longest = (list, text) => [...list].sort((a, b) => text(b).length - text(a).length)[0];
+function levelStates(x) {
+  if (x.variant === 'cases') {
+    const picks = x.cards.map((c) => c.column);
+    const miss = (k) => x.options.find((o) => o.id !== picks[k]).id;
+    return [['case 1', shift], ['case 1 wrong', async (p) => { await shift(p); await click(p, `.w-opt[data-id="${miss(0)}"]`); }],
+      ['last case wrong', async (p) => { await shift(p); await cases(p, picks.slice(0, -1)); await click(p, `.w-opt[data-id="${miss(picks.length - 1)}"]`); }],
+      ['done', async (p) => { await shift(p); await cases(p, picks.slice(0, -1)); await click(p, `.w-opt[data-id="${picks[picks.length - 1]}"]`); }]];
+  }
+  if (x.template === 'decision') {
+    const right = x.options.find((o) => o.correct).id;
+    const wrongs = x.options.filter((o) => !o.correct).sort((a, b) => b.feedback.length - a.feedback.length).map((o) => o.id);
+    return [['hint', async () => {}], ['wrong (longest line)', async (p) => click(p, `.w-opt[data-id="${wrongs[0]}"]`)], ['right', async (p) => click(p, `.w-opt[data-id="${right}"]`)],
+      ['revealed after two wrong', async (p) => { await click(p, `.w-opt[data-id="${wrongs[0]}"]`); await click(p, `.w-opt[data-id="${wrongs[1]}"]`); }]];
+  }
+  if (x.template === 'sortDeck') {
+    const cols = x.cards.map((c) => c.column);
+    return [['start', shift], ['checked, wrong back', async (p) => { await shift(p); await deck(p, cols.map((c) => (c === 'a' ? 'b' : 'a'))); await click(p, '[data-action="check"]'); }],
+      ['done', async (p) => { await shift(p); await deck(p, cols); await click(p, '[data-action="check"]'); }]];
+  }
+  if (x.template === 'flags') {
+    const [t1, t2] = x.map.filter((f) => f.correct).map((f) => String(f.n));
+    const wrong = String(longest(x.map.filter((f) => !f.correct), (f) => f.feedback).n);
+    return [['start', async () => {}], ['checked, one back (longest line)', async (p) => { await flag(p, 'r1', t1); await flag(p, 'r2', wrong); await click(p, '[data-action="check"]'); }],
+      ['both right', async (p) => { await flag(p, 'r1', t1); await flag(p, 'r2', t2); await click(p, '[data-action="check"]'); }]];
+  }
+  return [];
+}
+// a state that already fails on the core screen (core is out of PP1's scope) is reported as a WARNING
+// on every level, with its detail; any other failure fails
+const knownCore = [];
+for (const size of COACH_ONLY ? [] : SIZES) {
+  for (const s of ADAPTIVE.filter((x) => !ONLY.length || ONLY.includes(x.id))) {
+    const byState = {};
+    for (const level of ['core', 'support', 'stretch']) {
+      for (const [state, act] of levelStates(variantOf(s, level))) {
+        const what = `${s.id} [${level}] ${state} ${size.join('x')}`;
+        const page = await open(`?reset=1&debug=1&level=${level}&screen=${s.id}`, size);
+        await act(page);
+        await page.mouse.move(0, 0);
+        const m = await page.evaluate(measureLayout);
+        for (const [k, v] of Object.entries(m.contrast)) if (!pairs.has(k)) pairs.set(k, v);
+        const [good, detail] = layoutVerdict(m);
+        if (level === 'core') byState[state] = good;
+        if (!good && byState[state] === false) knownCore.push(`${what}: ${detail}`);
+        else expect(good, `${what}: ${detail}`);
+        expect(!page.errors.length, `${what}: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);
+        await page.close();
+      }
+    }
+  }
+}
+if (knownCore.length) {
+  console.log(`  WARNING ${knownCore.length} states over a layout limit on the core screen too (out of PP1's scope, core untouched):`);
+  knownCore.forEach((t) => console.log('          ' + t));
 }
 
 /* ---- 3. menu and dialogs ---- */

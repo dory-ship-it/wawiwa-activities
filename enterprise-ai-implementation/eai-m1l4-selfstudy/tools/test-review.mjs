@@ -16,6 +16,7 @@ import { startServer, ROOT } from './serve.mjs';
 import { chromePath } from './lib.mjs';
 import { screenWords } from '../src/review/words.js';
 import { chapterNo } from '../src/util.js';
+import { JOURNEYS, variantOf } from '../src/adapt.js';
 
 const C = JSON.parse(readFileSync(join(ROOT, 'content', 'l4-slice.json'), 'utf8'));
 const S = Object.fromEntries(C.screens.map((s) => [s.id, s]));
@@ -177,6 +178,54 @@ console.log('\nreview.html');
   expect(ch1.join() === C.chapters.find((c) => c.id === 'ch1').screens.join(), `chapter filter "ch1" shows ${ch1.join(', ')}`);
   expect(!p.errors.length, 'review.html: no console errors' + (p.errors.length ? ': ' + p.errors.slice(0, 5).join(' | ') : ''));
   await p.close();
+}
+
+/* ---------- 4b: PP1, the Paths view and the toolbar's level ---------- */
+console.log('\nPaths (PP1)');
+{
+  const ADAPTIVE = C.lesson.slice.filter((id) => S[id].variants);
+  const p = await open('/review.html', { size: [1600, 900] });
+  await p.waitForSelector('.rv-chapter .rv-card');
+  const before = await p.evaluate(() => document.querySelector('.rv-paths').hidden);
+  await p.click('.rv-filter[data-kind="paths"]');
+  const view = await p.evaluate(() => ({ paths: !document.querySelector('.rv-paths').hidden, chapters: [...document.querySelectorAll('.rv-chapter')].filter((s) => !s.hidden).length,
+    coach: !document.querySelector('.rv-coach').hidden, cells: [...document.querySelectorAll('.rv-path-cell')].map((a) => ({ screen: a.dataset.screen, level: a.dataset.level, href: a.getAttribute('href'), target: a.target })) }));
+  const cellsOk = view.cells.length === 3 * ADAPTIVE.length && ['stretch', 'core', 'support'].every((lv, r) => view.cells.slice(r * ADAPTIVE.length, (r + 1) * ADAPTIVE.length).map((c) => c.screen + ':' + c.level).join() === ADAPTIVE.map((id) => id + ':' + lv).join())
+    && view.cells.every((c) => c.href === `index.html?screen=${c.screen}&level=${c.level}&review=1` && c.target === '_blank');
+  expect(before && view.paths && !view.chapters && !view.coach && cellsOk,
+    `"Paths" filter: hidden under All, then alone; rows Stretch / Core / Support x ${ADAPTIVE.length} screens (${ADAPTIVE.join(' ')}), each opens index.html?screen=ID&level=LEVEL&review=1 in a new tab`);
+  for (const j of ['1', '4', '5']) {
+    await p.click(`.rv-journeys [data-journey="${j}"]`);
+    const on = await p.evaluate(() => [...document.querySelectorAll('.rv-path-cell[data-on="true"]')].map((a) => `${a.querySelector('.rv-path-step').textContent}.${a.dataset.screen}:${a.dataset.level}`));
+    const levels = JOURNEYS[j];
+    const want = ADAPTIVE.map((id, i) => `${i + 1}.${id}:${levels[C.lesson.adapt.checkpoints.findIndex((cp) => cp.chapter === S[id].chapter)]}`);
+    on.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+    expect(on.join() === want.join(), `journey ${j} marks ${on.join(' ')}`);
+  }
+  // the thumbnails of the S11 column: each renders its own level (scroll the grid to load them)
+  await p.evaluate(() => document.querySelector('.rv-path-cell[data-screen="S11"]').scrollIntoView({ inline: 'center', block: 'center' }));
+  await p.waitForFunction(() => [...document.querySelectorAll('.rv-path-cell[data-screen="S11"] .rv-frame')].every((f) => f.dataset.state === 'loaded'), { timeout: 30000 }).catch(() => {});
+  const s11 = await p.evaluate(() => [...document.querySelectorAll('.rv-path-cell[data-screen="S11"]')].map((a) => {
+    const w = a.querySelector('iframe').contentWindow;
+    return { level: a.dataset.level, cur: w.__l4?.current, hint: w.document.querySelector('.w-stage')?.textContent || '' };
+  }));
+  const s11Bad = s11.filter((c) => c.cur !== 'S11' || !c.hint.includes(variantOf(S.S11, c.level).hint));
+  expect(s11.length === 3 && !s11Bad.length, `the S11 thumbnails render their own level (${s11.map((c) => c.level).join(', ')})${s11Bad.length ? ': ' + JSON.stringify(s11Bad.map((c) => c.level)) : ''}`);
+  expect(!p.errors.length, 'Paths view: no console errors' + (p.errors.length ? ': ' + p.errors.slice(0, 5).join(' | ') : ''));
+  await p.close();
+  // review.html#paths-3 opens the view with journey 3 marked
+  const q = await open('/review.html#paths-3', { size: [1600, 900] });
+  await q.waitForSelector('.rv-path-cell');
+  const deep = await q.evaluate(() => ({ paths: !document.querySelector('.rv-paths').hidden, pressed: document.querySelector('.rv-journeys [aria-pressed="true"]')?.dataset.journey, on: document.querySelectorAll('.rv-path-cell[data-on="true"]').length }));
+  expect(deep.paths && deep.pressed === '3' && deep.on === ADAPTIVE.length, `review.html#paths-3: the Paths view, journey ${deep.pressed}, ${deep.on} screens marked`);
+  await q.close();
+  // the toolbar names the level and goal on an adaptive screen, and counts the variant's words
+  const t = await open('/index.html?screen=S11&level=stretch&review=1');
+  await t.waitForFunction(() => window.__l4 && document.querySelector('.rv-bar'));
+  const b = await t.evaluate(() => ({ level: document.querySelector('.rv-level').textContent, hidden: document.querySelector('.rv-level').hidden, words: document.querySelector('.rv-words').textContent }));
+  const w = screenWords(variantOf(S.S11, 'stretch'), C);
+  expect(!b.hidden && b.level === 'stretch · g4' && b.words.startsWith(w.max + ' words'), `toolbar on S11 stretch: "${b.level}", ${b.words}`);
+  await t.close();
 }
 
 /* ---------- 5: the SCORM package has no review file ---------- */

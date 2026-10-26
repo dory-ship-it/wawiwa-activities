@@ -295,7 +295,9 @@ async function expectNewScreen(page, id, what, { heading = S[id].instruction } =
 
 /* ---------- main path ---------- */
 console.log(SCORM ? '\nmain path in an LMS (mock SCORM 1.2 API)' : '\nmain path (debug=1)');
-const page = await open('?reset=1&debug=1', { lms: SCORM ? {} : null });
+// PP1: the walk checks the core screens, so it pins the core level (?level=core, a debug QA switch); its
+// learner's answers alone would give support (2 of 9 right). The paths themselves: tools/test-adapt.mjs.
+const page = await open('?reset=1&debug=1&level=core', { lms: SCORM ? {} : null });
 if (SCORM) expect(await page.evaluate(() => window.__l4.tracking.mode) === 'scorm12', 'SCORM: the API is found, the scorm12 adapter runs');
 
 // O1 title (dark): the Kit 13 bar (FX2 C: on every screen; its logo is the screen's), no footer; "Start the lesson" goes on
@@ -1420,7 +1422,9 @@ const first = (id) => ev.filter((e) => e.kind === 'answer' && e.trackingId === i
 const IDS_CH34 = ['L4_W3_1', 'L4_V2_1', 'L4_V2_2', 'L4_V2_3', 'L4_S09_1', 'L4_S10_1', 'L4_S11_1', 'L4_S12_1', 'L4_S12B_1', 'L4_S12B_2', 'L4_S12B_3', 'L4_W4_1', 'L4_S13_1', 'L4_S14_1', 'L4_S15_1', 'L4_S16_1', 'L4_S17_1', 'L4_S17B_1', 'L4_S17B_2'];
 const IDS_CH56 = ['L4_S18A_1', 'L4_S18_1', 'L4_S18_2', 'L4_S20_1', 'L4_S20_2', 'L4_S20_3', 'L4_S20_4', 'L4_S21_1', 'L4_S21_2', 'L4_S21_3', 'L4_S21_4', 'L4_S21_5', 'L4_S22_1'];
 const IDS_CH2 = ['L4_W2_1', 'L4_S04_1', 'L4_S05B_1', 'L4_S06_1', 'L4_S06_2', 'L4_S07_1', 'L4_S08_1', 'L4_S08_2', 'L4_S08_3', 'L4_S08B_1', 'L4_S08B_2', 'L4_S08B_3'];
-const IDS = ['L4_S01_1', 'L4_S02_1', 'L4_S02_2', 'L4_W1_1', 'L4_S03_1', ...IDS_CH2, ...IDS_CH34, ...IDS_CH56, 'L4_V1_1', 'L4_V1_2'];
+// (PP1: the two neutral path interactions, written when Chapters 4 and 5 open)
+const IDS_PATH = ['L4_PATH_C4', 'L4_PATH_C5'];
+const IDS = ['L4_S01_1', 'L4_S02_1', 'L4_S02_2', 'L4_W1_1', 'L4_S03_1', ...IDS_CH2, ...IDS_CH34, ...IDS_CH56, 'L4_V1_1', 'L4_V1_2', ...IDS_PATH];
 expect(IDS.every((id) => first(id).length === 1) && ev.filter((e) => e.kind === 'answer').length === IDS.length,
   `bus: exactly one first-attempt event per id (${IDS.map((id) => id + ' ' + first(id).length).join(', ')})`);
 const f = Object.fromEntries(IDS.map((id) => [id, first(id)[0]]));
@@ -1435,6 +1439,8 @@ expect(ch34 === 'L4_W3_1=c/neutral L4_V2_1=a/wrong L4_V2_2=b/wrong L4_V2_3=a/wro
   + 'L4_W4_1=a/neutral L4_S13_1=s.2,e.4/wrong L4_S14_1=d/wrong L4_S15_1=b/wrong L4_S16_1=1.b,2.d,3.b,4.d,5.d,6.c/wrong L4_S17_1=a.5,b.1,c.5,d.4,e.2/wrong '
   + `L4_S17B_1=${NOTES.aifit}/neutral L4_S17B_2=${NOTES.human}/neutral`,
   `bus, chapters 3 and 4 first attempts: ${ch34}`);
+const path = IDS_PATH.map((id) => `${id}=${f[id].response}/${f[id].result}/${f[id].type}/${f[id].scored ? 'scored' : 'unscored'}`).join(' ');
+expect(path === 'L4_PATH_C4=core/neutral/fill-in/unscored L4_PATH_C5=core/neutral/fill-in/unscored', `bus, the personal path (pinned to core): ${path}`);
 const ch56 = IDS_CH56.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
 expect(ch56 === `L4_S18A_1=3.c,1.b,4.d,2.a/wrong L4_S18_1=a/wrong L4_S18_2=${TITLE}/neutral L4_S20_1=b/neutral L4_S20_2=a/neutral L4_S20_3=b/neutral `
   + 'L4_S20_4=c/neutral L4_S21_1=a/wrong L4_S21_2=b/correct L4_S21_3=a/correct L4_S21_4=d/correct L4_S21_5=5,6/correct L4_S22_1=a/neutral', `bus, chapters 5 and 6 first attempts: ${ch56}`);
@@ -1477,7 +1483,8 @@ async function scormRetake() {
   };
   await answerAll((o) => !o.correct);
   let m = await p.evaluate(() => window.__scormMock.report());
-  expect(m.data['cmi.core.score.raw'] === '0' && m.data['cmi.core.lesson_status'] === 'incomplete' && m.count === 5,
+  // (PP1: the jump to S21 passes both checkpoints, so the two path interactions come first: 2 + 5)
+  expect(m.data['cmi.core.score.raw'] === '0' && m.data['cmi.core.lesson_status'] === 'incomplete' && m.count === 7,
     `SCORM attempt 1 (0 of 5): score.raw ${m.data['cmi.core.score.raw']}, lesson_status ${m.data['cmi.core.lesson_status']}, ${m.count} interactions`);
   await p.evaluate(() => window.__l4.go('S22'));
   await p.click('.w-takeaway[data-id="a"]'); await p.click('.w-next'); await p.click('[data-action="finish"]'); await p.click('[data-action="finish"]');
@@ -1488,9 +1495,9 @@ async function scormRetake() {
   await answerAll((o) => o.correct, 'b');
   m = await p.evaluate(() => window.__scormMock.report());
   const ids = Array.from({ length: m.count }, (_, n) => m.data[`cmi.interactions.${n}.id`] + '=' + m.data[`cmi.interactions.${n}.result`]).join(',');
-  // attempt 1's five (version a), the S22 takeaway, attempt 2's five (version b: L4_S21_1b ...)
+  // the two path interactions, attempt 1's five (version a), the S22 takeaway, attempt 2's five (version b: L4_S21_1b ...)
   const s21 = ids.split(',').filter((x) => x.startsWith('L4_S21_'));
-  expect(m.data['cmi.core.score.raw'] === '100' && m.data['cmi.core.lesson_status'] === 'passed' && m.count === 11 && s21.length === 10
+  expect(m.data['cmi.core.score.raw'] === '100' && m.data['cmi.core.lesson_status'] === 'passed' && m.count === 13 && s21.length === 10
     && s21.slice(0, 5).every((x) => /^L4_S21_\d=/.test(x)) && s21.slice(5).every((x) => /^L4_S21_\db=correct$/.test(x)) && !m.errors.length,
     `SCORM retake (5 of 5): score.raw ${m.data['cmi.core.score.raw']} (the latest attempt), lesson_status ${m.data['cmi.core.lesson_status']}, ${m.count} interactions (${ids})`);
   const susp = m.data['cmi.suspend_data'] || '';
@@ -1512,6 +1519,11 @@ async function scormChecks(p, ids) {
   const metaOf = (id) => C.screens.flatMap((s) => [...(s.tracking || []), ...(s.stops || []).map((x) => x.tracking)]).find((t) => t.id === id);
   const once = rows.length === ids.length && new Set(rows.map((r) => r.id)).size === ids.length && ids.every((id) => rows.some((r) => r.id === id));
   expect(once, `SCORM: ${rows.length} interactions, each id written once (${ids.length} in the lesson)`);
+  // PP1: the two path interactions (not in any screen's tracking): fill-in, the level word, neutral, weighting 0, no pattern
+  const pathRows = rows.filter((r) => /^L4_PATH_C\d$/.test(r.id));
+  expect(pathRows.length === 2 && pathRows.every((r) => r.type === 'fill-in' && r.response === 'core' && r.result === 'neutral' && r.weighting === '0' && r.pattern === undefined && r.latency && r.time),
+    `SCORM: the path interactions ${pathRows.map((r) => `${r.id} ${r.type} "${r.response}" ${r.result} weighting ${r.weighting}`).join(', ')}`);
+  rows.splice(0, rows.length, ...rows.filter((r) => !pathRows.includes(r)));
   const bad = rows.filter((r) => { const t = metaOf(r.id); return !t || r.type !== t.type || r.weighting !== (t.scored ? '1' : '0') || (t.correctResponse !== null && r.pattern !== String(t.correctResponse).toLowerCase())
     || (t.correctResponse === null && r.pattern !== undefined) || !r.latency || !r.time || (t.result === 'neutral' && r.result !== 'neutral'); });
   expect(!bad.length, 'SCORM: every interaction carries type, response, result, latency, time, weighting (1 for the 5 scored), correct pattern from the content' + (bad.length ? ': ' + bad.map((r) => r.id).join(', ') : ''));
@@ -1662,7 +1674,8 @@ async function flagDrag(id, flagId, wrongT, rightT, wrongText, rightText) {
     return over;
   };
   await drag(null);
-  expect(await p.evaluate((f) => !document.querySelector(`.w-flag-card[data-flag="${f}"]`).style.transform && !window.__l4.tracking.events.length, flagId), `${id} pointer: a drop outside the targets returns the flag, nothing tracked`);
+  // (PP1: opening S12 or S13 directly passes a checkpoint, whose L4_PATH interaction is not the drop's)
+  expect(await p.evaluate((f) => !document.querySelector(`.w-flag-card[data-flag="${f}"]`).style.transform && !window.__l4.tracking.events.filter((e) => !/^L4_PATH_/.test(e.trackingId || '')).length, flagId), `${id} pointer: a drop outside the targets returns the flag, nothing tracked`);
   // FX1 E2: a drop places the flag there as it is (its line comes at Check)
   const over = await drag(wrongT);
   await expectBand(p, `${id} flag dragged onto ${wrongT} (placed)`, { state: 'hint', text: S[id].hint, unlocked: false });

@@ -1,0 +1,93 @@
+﻿
+> eai-m1l4-selfstudy@0.1.0 test:adapt
+> node tools/test-adapt.mjs
+
+
+A. level logic (src/adapt.js)
+  ok   persona 1 (strong all through: 9/9, then 4/4) = stretch > stretch, journey 1
+  ok   persona 2 (strong, then slips: 8/9, then 2/4) = stretch > core, journey 2
+  ok   persona 3 (in the middle: 6/9, then 4/4) = core > core, journey 3
+  ok   persona 4 (unsure, then catches up: 3/9, then 2/4) = support > core, journey 4
+  ok   persona 5 (unsure all through: 2/9, then 1/4) = support > support, journey 5
+  ok   CP1 9 of 9 = stretch
+  ok   CP1 8 of 9 = stretch
+  ok   CP1 7 of 9 = core
+  ok   CP1 5 of 9 = core
+  ok   CP1 4 of 9 = support
+  ok   CP1 0 of 9 = support
+  ok   CP1 5 answered, all right = core (missing data)
+  ok   CP1 6 answered, 6 right = core (3 unanswered count as not correct)
+  ok   CP1 6 answered, 4 right = support
+  ok   CP1 nothing answered = core
+  ok   CP2 stretch, 4 of 4 = stretch
+  ok   CP2 stretch, 3 of 4 = stretch
+  ok   CP2 stretch, 2 of 4 = core
+  ok   CP2 stretch, 3 answered, 3 right = stretch
+  ok   CP2 stretch, 2 answered = core (missing data)
+  ok   CP2 support, 0 of 4 = support
+  ok   CP2 support, 1 of 4 = support
+  ok   CP2 support, 2 of 4 = core
+  ok   CP2 support, 3 answered, 0 right = support
+  ok   CP2 support, 2 answered, 0 right = core (missing data)
+  ok   CP2 core, 4 of 4 = core
+  ok   CP2 core, 0 of 4 = core
+  ok   tally: answered 3, correct 2 (a missing item is not answered)
+  ok   journeyOf: no journey for core > stretch or a missing level
+  ok   merge: objects key by key, arrays and values replace, null clears
+  ok   variantOf: core and a screen without variants are the screen itself; a variant drops the variants key
+  ok   three levels
+
+B. the five journeys, O1 to END, local mode
+  journey 1 (strong all through): stretch > stretch
+  ok   journey 1: the eight adaptive screens show S09 stretch, S10 stretch, S11 stretch, S12 stretch, S14 stretch, S15 stretch, S16 stretch, S17 stretch
+  ok   journey 1: L4_PATH_C4 = stretch, L4_PATH_C5 = stretch, once each, fill-in, neutral, unscored (2 sent)
+  ok   journey 1: state.p = {"c4":"stretch","c5":"stretch"}
+  ok   journey 1: the clicked answers went out with the shown variant's correct response
+  ok   journey 1: no screen, no S22 record and no END names a level or the path
+  ok   journey 1: longest suspend_data 481 characters (limit 4096)
+  ok   journey 1: no console errors
+  journey 2 (strong, then slips): stretch > core
+  ok   journey 2: the eight adaptive screens show S09 stretch, S10 stretch, S11 stretch, S12 stretch, S14 core, S15 core, S16 core, S17 core
+  ok   journey 2: L4_PATH_C4 = stretch, L4_PATH_C5 = core, once each, fill-in, neutral, unscored (2 sent)
+  ok   journey 2: state.p = {"c4":"stretch","c5":"core"}
+  ok   journey 2: the clicked answers went out with the shown variant's correct response
+  ok   journey 2: no screen, no S22 record and no END names a level or the path
+  ok   journey 2: longest suspend_data 472 characters (limit 4096)
+  ok   journey 2: no console errors
+  journey 3 (in the middle): core > core
+  ok   journey 3: the eight adaptive screens show S09 core, S10 core, S11 core, S12 core, S14 core, S15 core, S16 core, S17 core
+  ok   journey 3: L4_PATH_C4 = core, L4_PATH_C5 = core, once each, fill-in, neutral, unscored (2 sent)
+  ok   journey 3: state.p = {"c4":"core","c5":"core"}
+  ok   journey 3: the clicked answers went out with the shown variant's correct response
+  ok   journey 3: no screen, no S22 record and no END names a level or the path
+  ok   journey 3: longest suspend_data 475 characters (limit 4096)
+  ok   journey 3: no console errors
+  journey 4 (unsure, then catches up): support > core
+  ok   journey 4: the eight adaptive screens show S09 support, S10 support, S11 support, S12 support, S14 core, S15 core, S16 core, S17 core
+  ok   journey 4: L4_PATH_C4 = support, L4_PATH_C5 = core, once each, fill-in, neutral, unscored (2 sent)
+  ok   journey 4: state.p = {"c4":"support","c5":"core"}
+  ok   journey 4: the clicked answers went out with the shown variant's correct response
+  ok   journey 4: no screen, no S22 record and no END names a level or the path
+  ok   journey 4: longest suspend_data 472 characters (limit 4096)
+  ok   journey 4: no console errors
+  journey 5 (unsure all through): support > support
+  ok   journey 5: the eight adaptive screens show S09 support, S10 support, S11 support, S12 support, S14 support, S15 support, S16 support, S17 support
+  ok   journey 5: L4_PATH_C4 = support, L4_PATH_C5 = support, once each, fill-in, neutral, unscored (2 sent)
+  ok   journey 5: state.p = {"c4":"support","c5":"support"}
+  ok   journey 5: the clicked answers went out with the shown variant's correct response
+  ok   journey 5: no screen, no S22 record and no END names a level or the path
+  ok   journey 5: longest suspend_data 469 characters (limit 4096)
+  ok   journey 5: no console errors
+
+C. edges
+  ok   jump to S14 with 5 of 9 answered: L4_PATH_C4=core, L4_PATH_C5=core, S14 shows core
+  ok   6 of 9 answered, 4 right, entering W3: L4_PATH_C4 = support (only C4 so far: 1)
+  ok   resume at S11: the resume prompt, S11 again, stretch before and after, 0 L4_PATH sent on the new launch
+  ok   Back to Chapter 3 after the checkpoint, an S08 retry (retry), then forward: S09 still stretch, state.p.c4 stretch, no new L4_PATH
+  ok   S21R review link to S11 (Back to the check): stretch
+  ok   ?level=stretch&path=1 without debug or review: ignored, S11 shows core
+  ok   ?debug=1&path=4: S09 support, S16 core, L4_PATH support > core
+  ok   ?review=1&level=support: S17 support; review mode sets no level and sends no L4_PATH
+
+test:adapt passed
+adapt exit 0

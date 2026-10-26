@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=e712afe0';
-import { glyph, icon } from '../icons.js?v=e712afe0';
-import { attachTip } from '../tooltip.js?v=e712afe0';
-import { letter } from '../tracking/index.js?v=e712afe0';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=e712afe0';
-import { targetSteps } from '../ghost.js?v=e712afe0';
+import { h, fmt, resolveLink } from '../util.js?v=41429d1d';
+import { glyph, icon } from '../icons.js?v=41429d1d';
+import { attachTip } from '../tooltip.js?v=41429d1d';
+import { letter } from '../tracking/index.js?v=41429d1d';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=41429d1d';
+import { targetSteps } from '../ghost.js?v=41429d1d';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -476,6 +476,8 @@ function metric(ctx) {
   // NL3: the explain band on top (S08's), so the field name moves beside the heading as its chip
   layout(ctx, 'focus',
     sheet('focus',
+      // (PP1: a variant's case line, when it has one, above the band)
+      screen.context ? contextLine(screen.context) : null,
       // (S11: the heading on one line with the field chip and "Show me how" on its right; the row keeps
       // NL3's tighter margins, so the panel stays within 41cqw)
       screen.band ? [explainBand(screen.band), h('div', { class: 'w-head-row w-head-metric' }, zones.instruction, h('span', { class: 'w-head-tools' }, h('span', { class: 'w-field-chip w-head-chip' }, screen.field.label), g ? g.button : null))]

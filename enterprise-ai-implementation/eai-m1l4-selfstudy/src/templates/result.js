@@ -8,9 +8,9 @@
 //           in the footer), then "Retake now" (the whole check, at once)
 // Next is open either way (a presentation screen): below 80 the learner may finish as failed and come
 // back to retake. Nothing is tracked here: the attempt's score went out when S21 ended (ctx.checkDone).
-import { h, fmt, chapterNo } from '../util.js?v=e712afe0';
-import { glyph, icon } from '../icons.js?v=e712afe0';
-import { layout, sheet } from './stage.js?v=e712afe0';
+import { h, fmt, chapterNo } from '../util.js?v=41429d1d';
+import { glyph, icon } from '../icons.js?v=41429d1d';
+import { layout, sheet } from './stage.js?v=41429d1d';
 
 const R = 64, C = 2 * Math.PI * R; // the ring, in its 160 x 160 box
 

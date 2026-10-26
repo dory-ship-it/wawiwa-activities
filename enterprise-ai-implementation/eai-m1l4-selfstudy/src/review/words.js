@@ -39,7 +39,7 @@ export function screenViews(s, content) {
   if (s.template === 'end') return [[`${s.id} passed`, [s.sub, s.passed.chip, s.next]], [`${s.id} not passed`, [s.sub, s.notPassed.chip, s.notPassed.hint, s.next]]];
   // R2 templates
   if (s.variant === 'fill') return [[s.id, [s.situation.text, ...s.fieldRows.flatMap((f) => [f.label, f.value]), ...s.options.map((o) => o.label)]]];
-  if (s.variant === 'metric') return [[s.id, [...bandText(s.band), s.field.label, ...s.options.map((o) => o.label), s.slotsTitle, ...s.slots.map((x) => x.label)]]];
+  if (s.variant === 'metric') return [[s.id, [s.context, ...bandText(s.band), s.field.label, ...s.options.map((o) => o.label), s.slotsTitle, ...s.slots.map((x) => x.label)]]];
   // R3 templates
   // (FX3: each item's version b too)
   if (s.template === 'check') return s.items.flatMap((it) => [it, ...(it.b ? [{ ...it, ...it.b, id: it.id + 'b' }] : [])])

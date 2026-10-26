@@ -4,10 +4,11 @@
 // line (red over 25) in a panel on hover, focus or click, and a link back to the review page.
 // Review-only strings live here, not in the content: this folder is not part of the SCORM package.
 // Hidden inside an iframe (the thumbnails on review.html carry their own labels).
-import { h, chapterNo } from '../util.js?v=e712afe0';
-import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=e712afe0';
+// PP1: on an adaptive screen it names the level shown and the goal (review only; the learner never sees it).
+import { h, chapterNo } from '../util.js?v=41429d1d';
+import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=41429d1d';
 
-const CSS = new URL('./review.css?v=e712afe0', import.meta.url).href;
+const CSS = new URL('./review.css?v=41429d1d', import.meta.url).href;
 
 export function createToolbar(lesson) {
   if (window.self !== window.top) return { show() {} };
@@ -17,11 +18,12 @@ export function createToolbar(lesson) {
   const pos = h('span', { class: 'rv-pos' });
   const tpl = h('span', { class: 'rv-tpl' });
   const chap = h('span', { class: 'rv-chap' });
+  const lvl = h('span', { class: 'rv-level', hidden: true }); // PP1: the level shown and the goal
   const count = h('button', { class: 'rv-words', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'rv-words-panel' });
   const panel = h('div', { class: 'rv-panel', id: 'rv-words-panel' });
   const overview = h('a', { class: 'rv-overview', href: 'review.html' }, 'Overview');
   const bar = h('aside', { class: 'rv-bar', 'aria-label': 'Review toolbar', dataset: { review: '' } },
-    h('span', { class: 'rv-tag' }, 'Review'), id, pos, tpl, chap, h('span', { class: 'rv-words-wrap' }, count, panel), overview);
+    h('span', { class: 'rv-tag' }, 'Review'), id, pos, tpl, lvl, chap, h('span', { class: 'rv-words-wrap' }, count, panel), overview);
   count.addEventListener('click', () => count.setAttribute('aria-expanded', String(count.getAttribute('aria-expanded') !== 'true')));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') count.setAttribute('aria-expanded', 'false'); });
   document.body.append(bar);
@@ -29,16 +31,20 @@ export function createToolbar(lesson) {
   return {
     el: bar,
     show(screenId) {
-      const s = lesson.screens[screenId];
-      if (!s) return;
+      if (!lesson.screens[screenId]) return;
+      const s = lesson.view(screenId); // PP1: the variant on screen (?level=, ?path=; core otherwise)
+      const level = lesson.screens[screenId].variants ? lesson.levelFor(s.chapter) : null;
       const c = lesson.chapters.find((x) => x.id === s.chapter);
       const w = screenWords(s, lesson.content);
       const i = lesson.order.indexOf(screenId);
       bar.dataset.screen = screenId;
       bar.dataset.over = String(w.over || w.longFeedback > 0);
+      bar.dataset.level = level || '';
       id.textContent = screenId;
       pos.textContent = `${i + 1}/${lesson.order.length}`;
       tpl.textContent = s.template + (s.variant ? ' / ' + s.variant : '');
+      lvl.hidden = !level;
+      lvl.textContent = level ? `${level} · ${s.goal}` : '';
       chap.textContent = c ? `Ch ${chapterNo(lesson.content, c.id)} · ${c.title}` : 'No chapter';
       count.textContent = `${w.max} words` + (w.longFeedback ? ` · ${w.longFeedback} long line${w.longFeedback > 1 ? 's' : ''}` : '');
       count.dataset.over = String(w.over);

@@ -8,26 +8,27 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=e712afe0';
-import { createZones } from './zones.js?v=e712afe0';
-import { createMenu, openDialog } from './menu.js?v=e712afe0';
-import { initTooltips, applyTerms } from './tooltip.js?v=e712afe0';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=e712afe0';
-import { decision } from './templates/decision.js?v=e712afe0';
-import { input } from './templates/input.js?v=e712afe0';
-import { sortDeck } from './templates/sortdeck.js?v=e712afe0';
-import { bpmn } from './templates/bpmn.js?v=e712afe0';
-import { flags } from './templates/flags.js?v=e712afe0';
-import { explorer } from './templates/explorer.js?v=e712afe0';
-import { video } from './templates/video.js?v=e712afe0';
-import { handoff } from './templates/handoff.js?v=e712afe0';
-import { check } from './templates/check.js?v=e712afe0';
-import { result } from './templates/result.js?v=e712afe0';
-import { end } from './templates/end.js?v=e712afe0';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=e712afe0';
-import { createGhost, stopGhost } from './ghost.js?v=e712afe0';
-import { createTracking } from './tracking/index.js?v=e712afe0';
-import { createCoach } from './coach/coach.js?v=e712afe0';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=41429d1d';
+import { createZones } from './zones.js?v=41429d1d';
+import { createMenu, openDialog } from './menu.js?v=41429d1d';
+import { initTooltips, applyTerms } from './tooltip.js?v=41429d1d';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=41429d1d';
+import { decision } from './templates/decision.js?v=41429d1d';
+import { input } from './templates/input.js?v=41429d1d';
+import { sortDeck } from './templates/sortdeck.js?v=41429d1d';
+import { bpmn } from './templates/bpmn.js?v=41429d1d';
+import { flags } from './templates/flags.js?v=41429d1d';
+import { explorer } from './templates/explorer.js?v=41429d1d';
+import { video } from './templates/video.js?v=41429d1d';
+import { handoff } from './templates/handoff.js?v=41429d1d';
+import { check } from './templates/check.js?v=41429d1d';
+import { result } from './templates/result.js?v=41429d1d';
+import { end } from './templates/end.js?v=41429d1d';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=41429d1d';
+import { createGhost, stopGhost } from './ghost.js?v=41429d1d';
+import { createTracking } from './tracking/index.js?v=41429d1d';
+import { createCoach } from './coach/coach.js?v=41429d1d';
+import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=41429d1d';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -87,6 +88,11 @@ class Lesson {
     this.order = this.review ? reviewOrder(content) : this.slice;
     this.toolbar = null;
     this.tracking = createTracking({ debug: q.get('debug') === '1', force: q.get('tracking'), off: this.review });
+    // PP1 QA switches, only with ?review=1 or ?debug=1: ?level= forces one level on every adaptive
+    // screen, ?path=1..5 forces a journey (its two levels)
+    const qa = this.review || q.get('debug') === '1';
+    this.forced = { level: qa && LEVELS.includes(q.get('level')) ? q.get('level') : null, path: qa ? JOURNEYS[q.get('path')] || null : null };
+    this.checkpoints = content.lesson.adapt?.checkpoints || [];
 
     this.note = h('p', { class: 'w-small-note', hidden: true }, this.ui.smallScreenNote);
     this.stage = h('div', { class: 'w-stage' });
@@ -158,7 +164,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=e712afe0').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=41429d1d').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -185,8 +191,9 @@ class Lesson {
 
   /* ---- routing and screen lifecycle ---- */
   go(id, { focus = true } = {}) {
-    const screen = this.screens[id];
-    if (!screen) return;
+    if (!this.screens[id]) return;
+    this.reachCheckpoints(id);
+    const screen = this.view(id); // PP1: the variant of the learner's level (core when none)
     this.unmount();
     this.current = id;
     this.onNext = null;
@@ -362,9 +369,41 @@ class Lesson {
   }
 
   trackingMeta(screenId, trackingId) {
-    const s = this.screens[screenId];
+    const s = this.view(screenId); // PP1: the shown variant's correct response
     const all = [...(s.tracking || []), ...(s.stops || []).map((x) => x.tracking)];
     return all.find((t) => t && t.id === trackingId) || null;
+  }
+
+  /* ---- PP1 personal path (src/adapt.js): silent, never shown to the learner ---- */
+  // the screen as this learner sees it: its chapter's level picks the variant
+  view(id) {
+    const s = this.screens[id];
+    return s && s.variants ? variantOf(s, this.levelFor(s.chapter)) : s;
+  }
+
+  // a chapter's level: a QA switch first, then the frozen level, else core
+  levelFor(chapterId) {
+    const i = this.checkpoints.findIndex((cp) => cp.chapter === chapterId);
+    if (i < 0) return 'core';
+    return this.forced.level || this.forced.path?.[i] || this.state.p?.[this.checkpoints[i].key] || 'core';
+  }
+
+  // Entering a checkpoint's chapter (or any later one: a resume or a jump) sets its level once, from the
+  // first answers in state.a, and records it as one neutral, unscored interaction (L4_PATH_C4 / _C5).
+  // Its type is fill-in: SCORM 1.2 allows a choice response of single characters only ("a", "b,d"), and
+  // the level goes to the LMS as its word (support, core, stretch).
+  // Review mode sets nothing (its state is in memory; the QA switches choose the variant).
+  reachCheckpoints(id) {
+    if (this.review) return;
+    const ci = (cid) => this.chapters.findIndex((c) => c.id === cid);
+    const here = ci(this.screens[id].chapter);
+    this.checkpoints.forEach((cp, i) => {
+      if (here < ci(cp.chapter) || this.state.p?.[cp.key]) return;
+      const prev = i ? this.state.p?.[this.checkpoints[i - 1].key] || 'core' : null;
+      const level = this.forced.level || this.forced.path?.[i] || levelAt(cp, tally(cp.items, (tid) => this.firstAnswer(tid)), prev);
+      this.state.p = { ...(this.state.p || {}), [cp.key]: level };
+      this.tracking.emit({ kind: 'answer', trackingId: cp.trackingId, type: 'fill-in', response: level, result: 'neutral', latencyMs: 0, correctResponse: null, scored: false });
+    });
   }
 
   setRoute(screenId, route) {

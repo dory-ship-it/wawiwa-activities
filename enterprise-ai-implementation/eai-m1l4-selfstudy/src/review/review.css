@@ -13,6 +13,8 @@
 .rv-tag { padding: 2px 6px; border-radius: 4px; background: var(--wl-white); color: var(--wl-text-2); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
 .rv-id { font-weight: 700; }
 .rv-pos, .rv-chap { opacity: .85; }
+.rv-level { padding: 2px 6px; border-radius: 4px; background: var(--wl-white); color: var(--wl-navy); font-weight: 700; } /* PP1 */
+.rv-level[hidden] { display: none; }
 /* the panel hangs from the bar's right edge, so it stays in the window; it opens on hover, on focus
    and on click (click keeps it open while the mouse moves into it) */
 .rv-words-wrap { display: flex; }
@@ -81,3 +83,20 @@
 .rv-meta-words { font-weight: 700; }
 .rv-meta-words[data-over="true"] { color: var(--wl-error); }
 .rv-empty { margin: 32px 0; color: var(--wl-text-2); }
+
+/* ---------- PP1: the Paths view (three levels x the adaptive screens, a journey selector) ---------- */
+.rv-paths { margin-top: 20px; }
+.rv-paths[hidden] { display: none; }
+.rv-journeys { margin: 0 0 8px; justify-content: flex-start; }
+.rv-paths-note { margin: 0 0 12px; color: var(--wl-text-2); }
+.rv-paths-scroll { overflow-x: auto; padding-bottom: 8px; }
+.rv-paths-grid { display: grid; grid-template-columns: 72px repeat(var(--rv-cols), 256px); gap: 12px; align-items: start; width: max-content; }
+.rv-paths-col { font-weight: 700; color: var(--wl-navy); }
+.rv-paths-row { align-self: center; font: 800 16px/1.2 var(--wl-font-ui); color: var(--wl-navy); }
+.rv-path-cell { width: 256px; }
+.rv-frame-sm { width: 256px; height: 144px; }
+.rv-frame-sm iframe { transform: scale(.2); }
+.rv-path-cell[data-on="true"] { outline: 4px solid var(--wl-teal); outline-offset: 2px; }
+.rv-paths-grid:has(.rv-path-cell[data-on="true"]) .rv-path-cell[data-on="false"] { opacity: .45; }
+.rv-path-step { display: inline-grid; place-items: center; min-width: 22px; height: 22px; border-radius: 11px; background: var(--wl-navy); color: var(--wl-white); font-weight: 700; }
+.rv-path-step[hidden] { display: none; }
