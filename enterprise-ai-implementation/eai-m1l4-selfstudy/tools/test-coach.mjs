@@ -2,14 +2,18 @@
 //   1. static: src/coach has no network code (fetch, XMLHttpRequest, WebSocket, EventSource,
 //      sendBeacon, dynamic import, a URL) and transport.ask() answers { offline: true }; every slice
 //      screen has a coach block (S21 locked with no tip, a tip everywhere else); the grounding pack is there
-//   2. SCORM: with the mock 1.2 API, using the coach (open, dock switch by keyboard and by drag, close,
-//      Escape) makes no LMSSetValue and no LMSCommit call, and no network request at all
-//   3. S21 locked (60% launcher, lock badge, only the notice, no tip, no input); S21R unlocked
+//   2. SCORM: with the mock 1.2 API, using the coach (open: the opening line and the chip; the chip:
+//      the learner's question and the tip; dock switch by keyboard and by drag, close, Escape) makes no
+//      LMSSetValue and no LMSCommit call, and no network request at all
+//   3. S21 locked (60% launcher, lock badge, only the notice, no tip, no chip); S21R unlocked
 //   4. suspend_data with the dock set (g.cd = 'r'): under 4096 on a heavy state, and the dock
 //      comes back on resume
-//   5. nothing typed is kept: the input is disabled; review mode writes no dock and no hint letter
+//   5. nothing typed is kept: offline there is no input row (it stays disabled); review mode writes no
+//      dock and no demo letter
 //   6. where it opens: with no side picked, the left dock on every slice screen; a right dock the learner
 //      picks stays on later screens
+//   7. the demo on the goals screen: opens by itself with one line, closes, the hint stays; once; a key
+//      ends it; none with reduced motion
 import puppeteer from 'puppeteer-core';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -83,13 +87,19 @@ console.log('\n2. SCORM and network');
   const calls = () => p.evaluate(() => window.__scormMock.report().calls.filter((c) => c.startsWith('set ') || c === 'LMSCommit').length);
   const requests = [];
   p.on('request', (r) => requests.push(r.url()));
+  await p.keyboard.press('Shift'); // any key stops a ghost hand (its first play is saved: h)
+  // the screen's own saves are done, and their commit (the adapter commits at most every 2 s)
+  await settle(p); await p.evaluate(() => new Promise((r) => setTimeout(r, 2500)));
   const before = await calls();
   await p.click('.w-coach-launcher');
   await settle(p);
   const s1 = await panelState(p);
   const tip = C.screens.find((s) => s.id === 'S04').coach.tip;
-  expect(s1.open && s1.msgs.join('|') === [`coach:${UI.lines.practice}`, `notice:${UI.offline}`, `coach:${tip}`].join('|'),
-    `S04 open: "${UI.lines.practice}", the offline notice, the tip (${s1.msgs.length} messages)`);
+  const chip0 = await p.evaluate(() => { const c = document.querySelector('.w-coach-chip'); return !!c && !c.closest('[hidden]') && c.textContent; });
+  await p.click('.w-coach-chip'); await settle(p);
+  const s1b = await panelState(p);
+  expect(s1.open && s1.msgs.join('|') === `coach:${UI.lines.practice}` && chip0 === UI.tipChip && s1b.msgs.join('|') === [`coach:${UI.lines.practice}`, `you:${UI.tipChip}`, `coach:${tip}`].join('|') && !s1b.foot,
+    `S04 open: only "${UI.lines.practice}" and the chip "${chip0}"; the chip asks, the coach answers with the tip, the chip goes`);
   await p.focus('.w-coach-grip');
   await p.keyboard.press('ArrowRight');
   const kRight = (await panelState(p)).dock;
@@ -102,6 +112,7 @@ console.log('\n2. SCORM and network');
   await p.click('.w-coach-launcher'); await settle(p);
   await p.click('.w-coach-close');
   const after = await calls();
+  if (after !== before) console.log('       calls: ' + (await p.evaluate(() => window.__scormMock.report().calls.filter((c) => c.startsWith('set ') || c === 'LMSCommit'))).slice(before).join(' / ').slice(0, 600));
   const ownRequests = requests.filter((u) => !/\.(woff2|jpg|png|mp4|vtt)(\?|$)/.test(u));
   expect(kRight === 'r' && dragged === 'l' && !s2.open && s2.focus.includes('w-coach-launcher'), `dock: Arrow Right -> ${kRight}, drag left -> ${dragged}; Escape closes, focus on the launcher`);
   expect(after === before, `no LMSSetValue / LMSCommit while the coach is used (${before} before, ${after} after)`);
@@ -123,7 +134,7 @@ console.log('\n3. locked on the check');
   await p.evaluate(() => window.__l4.go('S21R')); await settle(p);
   const r = await p.evaluate(() => document.querySelector('.w-coach-launcher').dataset.locked);
   const s2 = await panelState(p);
-  expect(r === 'false' && s2.foot && s2.msgs[0] === `coach:${UI.lines.review}`, `S21R unlocked: "${UI.lines.review}" and the tip, input row back`);
+  expect(r === 'false' && s2.foot && s2.msgs.join('|') === `coach:${UI.lines.review}`, `S21R unlocked: "${UI.lines.review}" and the tip chip back`);
   await p.close();
 }
 
@@ -165,8 +176,9 @@ console.log('\n5. nothing kept');
 {
   const p = await open('?reset=1&screen=S02');
   await p.click('.w-coach-launcher'); await settle(p);
-  const i = await p.evaluate(() => { const el = document.querySelector('.w-coach-input'); return { disabled: el.disabled, ph: el.placeholder, send: document.querySelector('.w-coach-send').disabled, chips: document.querySelector('.w-coach-chips').hidden }; });
-  expect(i.disabled && i.send && i.chips && i.ph === UI.offlinePlaceholder, `input disabled ("${i.ph}"), send disabled, chips hidden`);
+  const i = await p.evaluate(() => { const el = document.querySelector('.w-coach-input'); const shown = (x) => !!x.getClientRects().length;
+    return { disabled: el.disabled, input: shown(el), privacy: shown(document.querySelector('.w-coach-privacy')), chip: shown(document.querySelector('.w-coach-chip')) }; });
+  expect(i.disabled && !i.input && !i.privacy && i.chip, `offline: no input row and no privacy line shown (the input stays disabled), only the chip`);
   await p.close();
   const r = await open('?review=1&screen=O2');
   await r.click('.w-coach-launcher'); await settle(r);
@@ -196,6 +208,38 @@ console.log('\n6. left by default');
   const picked = [];
   for (const id of ['S05a', 'S05b', 'S09', 'K4']) { await p.evaluate((x) => window.__l4.go(x), id); await settle(p); picked.push(await p.evaluate(() => document.querySelector('.w-coach-panel').dataset.dock)); }
   expect(picked.every((d) => d === 'r'), `the learner's right dock stays on S05a, S05b, S09, K4 (${picked.join(', ')})`);
+  await p.close();
+}
+/* ---- 7. the demo on the goals screen: once, short, any key ends it ---- */
+console.log('\n7. demo');
+{
+  const openMotion = async (q) => { const p = await open(q); await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]); await p.reload({ waitUntil: 'networkidle0' }); await p.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded'); return p; };
+  const look = (p) => p.evaluate(() => ({ open: !document.querySelector('.w-coach-panel').hidden, hint: !document.querySelector('.w-coach-hint').hidden,
+    msgs: [...document.querySelectorAll('.w-coach-panel .w-coach-msg')].map((m) => m.textContent.trim()).join('|'), h: window.__l4.state.h }));
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const demoOn = UI.demoOn;
+  let p = await openMotion(`?reset=1&screen=${demoOn}`);
+  const t0 = await look(p);
+  await wait(2400);
+  const t1 = await look(p);
+  await wait(3000);
+  const t2 = await look(p);
+  expect(!t0.open && t1.open && t1.msgs === UI.demo && !t2.open && t2.hint && t2.h.includes('a'), `${demoOn}: the coach opens by itself with "${UI.demo}", closes, then "${UI.hint}" stays (h ${t2.h})`);
+  await p.evaluate((x) => { window.__l4.go('S01'); window.__l4.go(x); }, demoOn);
+  await wait(2600);
+  expect(!(await look(p)).open, `${demoOn} again: no second demo`);
+  await p.close();
+  p = await openMotion(`?reset=1&screen=${demoOn}`);
+  await wait(2400);
+  await p.keyboard.press('Tab');
+  const k = await look(p);
+  expect(!k.open && k.hint, 'a key during the demo ends it at once; the hint stays');
+  expect(!p.errors.length, 'demo: no console errors' + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
+  await p.close();
+  p = await open(`?reset=1&screen=${demoOn}`); // reduced motion
+  await wait(2600);
+  const rm = await look(p);
+  expect(!rm.open && rm.hint, 'reduced motion: no demo, only the hint');
   await p.close();
 }
 await browser.close();

@@ -152,7 +152,7 @@ console.log('\nreview.html');
   const bad = frames.filter((f) => f.cur !== f.id || f.err || f.bar || !f.main);
   expect(!bad.length, `every thumbnail renders its own screen (${frames.length - bad.length} of ${frames.length}), no boot error, no toolbar inside` + (bad.length ? ': ' + JSON.stringify(bad.slice(0, 3)) : ''));
   expect(frames.every((f) => f.scale === 'matrix(0.25, 0, 0, 0.25, 0, 0)'), 'thumbnails are the 1280 x 720 stage at 25%');
-  // CO1: the coach row after the chapters: S04 closed + hint, open, thinking, cap; S21 locked
+  // CO1: the coach row after the chapters: O3 demo; S04 closed + hint, open, tip, thinking, cap; S21 locked
   await p.evaluate(() => document.querySelector('.rv-coach').scrollIntoView());
   await p.waitForFunction(() => [...document.querySelectorAll('.rv-coach .rv-frame')].every((f) => f.dataset.state === 'loaded'), { timeout: 30000 }).catch(() => {});
   const coach = await p.evaluate(() => [...document.querySelectorAll('.rv-coach .rv-card')].map((a) => {
@@ -162,10 +162,10 @@ console.log('\nreview.html');
       msgs: [...panel.querySelectorAll('.w-coach-msg')].map((m) => m.dataset.from).join(','), busy: panel.querySelector('.w-coach-log').getAttribute('aria-busy'),
       locked: d.querySelector('.w-coach-launcher').dataset.locked, cd: w.__l4?.state.g.cd, h: w.__l4?.state.h };
   }));
-  const want = { 'S04:hint': (c) => c.hint && !c.open, 'S04:open': (c) => c.open && c.msgs === 'coach,notice,coach', 'S04:thinking': (c) => c.open && c.busy === 'true' && c.msgs === 'coach,you,coach',
+  const want = { 'O3:demo': (c) => c.open && c.msgs === 'coach', 'S04:hint': (c) => c.hint && !c.open, 'S04:open': (c) => c.open && c.msgs === 'coach', 'S04:tip': (c) => c.open && c.msgs === 'coach,you,coach', 'S04:thinking': (c) => c.open && c.busy === 'true' && c.msgs === 'coach,you,coach',
     'S04:cap': (c) => c.open && c.msgs === 'coach,you,notice,coach', 'S21:open': (c) => c.open && c.locked === 'true' && c.msgs === 'notice' };
   const coachBad = coach.filter((c) => !want[c.key] || !want[c.key](c) || c.cur !== c.key.split(':')[0] || c.cd !== undefined || (c.h || '').includes('a')); // the coach's own writes: the dock, hint letter a
-  expect(coach.length === 5 && !coachBad.length, `coach row: ${coach.map((c) => c.key).join(', ')}, each in its state, nothing written${coachBad.length ? ': ' + JSON.stringify(coachBad) : ''}`);
+  expect(coach.length === 7 && !coachBad.length, `coach row: ${coach.map((c) => c.key).join(', ')}, each in its state, nothing written${coachBad.length ? ': ' + JSON.stringify(coachBad) : ''}`);
   // filters
   await p.evaluate(() => window.scrollTo(0, 0));
   await p.click('.rv-filter[data-kind="over"]');

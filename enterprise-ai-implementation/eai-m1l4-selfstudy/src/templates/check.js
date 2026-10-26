@@ -9,11 +9,11 @@
 // (item 5's tiles keep the HR map's line order). Responses are the options' ids, so a shuffled
 // option reports the same letter as before. A revisit shows the result line (resultCard).
 // FX3: version b of every item on a retake (its own interaction ids, L4_S21_1b ...), a again after that.
-import { h, fmt } from '../util.js?v=aad36f0b';
-import { glyph } from '../icons.js?v=aad36f0b';
-import { checkButton } from './decision.js?v=aad36f0b';
-import { letter } from '../tracking/index.js?v=aad36f0b';
-import { layout, sheet, progressDots, arrowNav } from './stage.js?v=aad36f0b';
+import { h, fmt } from '../util.js?v=bd7ed3c4';
+import { glyph } from '../icons.js?v=bd7ed3c4';
+import { checkButton } from './decision.js?v=bd7ed3c4';
+import { letter } from '../tracking/index.js?v=bd7ed3c4';
+import { layout, sheet, progressDots, arrowNav } from './stage.js?v=bd7ed3c4';
 
 export const check = {
   mount(ctx) {

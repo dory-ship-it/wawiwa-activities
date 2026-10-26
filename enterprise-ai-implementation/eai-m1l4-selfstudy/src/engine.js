@@ -8,26 +8,26 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=aad36f0b';
-import { createZones } from './zones.js?v=aad36f0b';
-import { createMenu, openDialog } from './menu.js?v=aad36f0b';
-import { initTooltips, applyTerms } from './tooltip.js?v=aad36f0b';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=aad36f0b';
-import { decision } from './templates/decision.js?v=aad36f0b';
-import { input } from './templates/input.js?v=aad36f0b';
-import { sortDeck } from './templates/sortdeck.js?v=aad36f0b';
-import { bpmn } from './templates/bpmn.js?v=aad36f0b';
-import { flags } from './templates/flags.js?v=aad36f0b';
-import { explorer } from './templates/explorer.js?v=aad36f0b';
-import { video } from './templates/video.js?v=aad36f0b';
-import { handoff } from './templates/handoff.js?v=aad36f0b';
-import { check } from './templates/check.js?v=aad36f0b';
-import { result } from './templates/result.js?v=aad36f0b';
-import { end } from './templates/end.js?v=aad36f0b';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=aad36f0b';
-import { createGhost, stopGhost } from './ghost.js?v=aad36f0b';
-import { createTracking } from './tracking/index.js?v=aad36f0b';
-import { createCoach } from './coach/coach.js?v=aad36f0b';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=bd7ed3c4';
+import { createZones } from './zones.js?v=bd7ed3c4';
+import { createMenu, openDialog } from './menu.js?v=bd7ed3c4';
+import { initTooltips, applyTerms } from './tooltip.js?v=bd7ed3c4';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=bd7ed3c4';
+import { decision } from './templates/decision.js?v=bd7ed3c4';
+import { input } from './templates/input.js?v=bd7ed3c4';
+import { sortDeck } from './templates/sortdeck.js?v=bd7ed3c4';
+import { bpmn } from './templates/bpmn.js?v=bd7ed3c4';
+import { flags } from './templates/flags.js?v=bd7ed3c4';
+import { explorer } from './templates/explorer.js?v=bd7ed3c4';
+import { video } from './templates/video.js?v=bd7ed3c4';
+import { handoff } from './templates/handoff.js?v=bd7ed3c4';
+import { check } from './templates/check.js?v=bd7ed3c4';
+import { result } from './templates/result.js?v=bd7ed3c4';
+import { end } from './templates/end.js?v=bd7ed3c4';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=bd7ed3c4';
+import { createGhost, stopGhost } from './ghost.js?v=bd7ed3c4';
+import { createTracking } from './tracking/index.js?v=bd7ed3c4';
+import { createCoach } from './coach/coach.js?v=bd7ed3c4';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -106,7 +106,7 @@ class Lesson {
     });
     // CO1: the Wawiwa AI Coach (offline tips), launcher in the bar on every screen; never tracked
     this.coach = createCoach(this.stage, content, { zones: this.zones, review: this.review, thumb: this.thumb, preview: q.get('coach'),
-      hintScreen: this.slice[1], getState: () => this.state });
+      demoScreen: content.ui.coach.demoOn, getState: () => this.state });
 
     // SCORM 1.2: the LMS holds the state (suspend_data, lesson_location); local mode: localStorage
     const lms = this.tracking.init();
@@ -158,7 +158,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=aad36f0b').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=bd7ed3c4').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }

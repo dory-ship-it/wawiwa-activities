@@ -208,8 +208,8 @@ export function measureLayout() {
     if (el.closest('[aria-disabled="true"], :disabled, [data-locked="true"]')) continue; // inactive control (WCAG 1.4.3)
     const cs = getComputedStyle(el);
     const size = parseFloat(cs.fontSize), weight = parseInt(cs.fontWeight, 10);
-    // CO1: the coach panel's two meta lines are 12 px in the approved design (run co1, Noy)
-    if (size < 14 && !el.closest('.w-coach-sub, .w-coach-privacy')) small.push(`${t.what} ${size}px`);
+    // CO1: the live coach's privacy line is 12 px in the approved design (run co1, Noy)
+    if (size < 14 && !el.closest('.w-coach-privacy')) small.push(`${t.what} ${size}px`);
     const fg = parse(cs.color), bg = bgOf(el);
     const r = ratio(fg.a < 1 ? over(fg, bg) : fg, bg);
     const large = size >= 24 || (size >= 18.66 && weight >= 700);

@@ -1843,7 +1843,7 @@ console.log('\ncoach (keyboard)');
   const CO = UI.coach;
   const coachState = (p) => p.evaluate(() => { const panel = document.querySelector('.w-coach-panel'); const b = document.querySelector('.w-coach-launcher');
     return { open: !panel.hidden, expanded: b.getAttribute('aria-expanded'), dock: panel.dataset.dock, msgs: [...panel.querySelectorAll('.w-coach-msg')].map((m) => m.textContent.trim()),
-      inPanel: panel.contains(document.activeElement), onLauncher: document.activeElement === b, sub: panel.querySelector('.w-coach-sub').textContent }; });
+      inPanel: panel.contains(document.activeElement), onLauncher: document.activeElement === b }; });
   for (const id of ['K1', 'W1', 'S04', 'S02', 'S22']) {
     const p = await open(`?reset=1&screen=${id}`);
     const line = CO.lines[S[id].coach.kind];
@@ -1851,9 +1851,16 @@ console.log('\ncoach (keyboard)');
     await press(p, 'Enter');
     await wait(30);
     const o = await coachState(p);
-    expect(o.open && o.expanded === 'true' && o.inPanel && o.msgs.join('|') === [line, CO.offline, S[id].coach.tip].join('|') && o.sub === `Chapter ${chapterNo(C, S[id].chapter)} · ${S[id].step.verb}`,
-      `${id} (${S[id].coach.kind}): Enter on the launcher opens the coach, focus inside; "${line}", the offline notice, the tip; "${o.sub}"`);
+    expect(o.open && o.expanded === 'true' && o.inPanel && o.msgs.join('|') === line,
+      `${id} (${S[id].coach.kind}): Enter on the launcher opens the coach, focus inside; only "${line}" and the chip`);
     await expectLayout(p, `${id} coach open`);
+    // the chip by keyboard: the learner's question, then the tip; the focus stays in the panel
+    await tabTo(p, '.w-coach-chip');
+    await press(p, 'Enter');
+    await wait(30);
+    const t = await coachState(p);
+    expect(t.msgs.join('|') === [line, CO.tipChip, S[id].coach.tip].join('|') && t.inPanel, `${id}: "${CO.tipChip}" asks, the coach answers with the screen's tip, focus in the panel`);
+    await expectLayout(p, `${id} coach tip`);
     await press(p, 'Escape');
     const c = await coachState(p);
     expect(!c.open && c.expanded === 'false' && c.onLauncher, `${id}: Escape closes the coach, focus back on the launcher`);

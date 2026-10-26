@@ -3,9 +3,9 @@
 // index.html?screen=ID&review=1 at 1280 x 720, scaled to 25%), loaded only when it nears the viewport.
 // Under each: id, template, word count (red over 45). A click opens the screen full size in review
 // mode in a new tab. Filters: All, one chapter, Over word limit. Review-only strings live here.
-import { h, chapterNo, resolveChapterRefs } from '../util.js?v=aad36f0b';
-import { reviewOrder } from '../engine.js?v=aad36f0b';
-import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=aad36f0b';
+import { h, chapterNo, resolveChapterRefs } from '../util.js?v=bd7ed3c4';
+import { reviewOrder } from '../engine.js?v=bd7ed3c4';
+import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=bd7ed3c4';
 
 const root = document.getElementById('review');
 const res = await fetch(new URL('../../content/l4-slice.json', import.meta.url), { cache: 'no-cache' }); // asked fresh on every load
@@ -55,8 +55,8 @@ const card = (id) => {
 
 // CO1: one row for the Wawiwa AI Coach (offline mode): its states on S04, and S21 locked, each a thumbnail
 // of index.html?screen=ID&review=1&coach=STATE (src/coach/coach.js; review mode writes nothing)
-const COACH = [['S04', 'hint', 'closed + first-use hint'], ['S04', 'open', 'open, offline tip'], ['S04', 'thinking', 'thinking (live run)'],
-  ['S04', 'cap', 'cap reached (live run)'], ['S21', 'open', 'locked on the check']];
+const COACH = [['O3', 'demo', 'the demo on the goals screen'], ['S04', 'hint', 'closed + hint'], ['S04', 'open', 'open: line and chip'], ['S04', 'tip', 'after the chip: the tip'],
+  ['S04', 'thinking', 'thinking (live run)'], ['S04', 'cap', 'cap reached (live run)'], ['S21', 'open', 'locked on the check']];
 const coachCard = ([id, state, label]) => {
   const url = `index.html?screen=${id}&review=1&coach=${state}`;
   const frame = h('div', { class: 'rv-frame', dataset: { state: 'waiting' } },

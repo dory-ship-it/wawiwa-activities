@@ -19,6 +19,10 @@ const openCoach = (p) => p.click('.w-coach-launcher');
 const side = (key) => async (p) => { await openCoach(p); await p.focus('.w-coach-grip'); await p.keyboard.press(key); await p.focus('.w-coach-panel'); };
 // the first-use hint shows on O2 only; on S04 it is shown as it would be there (test only)
 const hint = (p) => p.evaluate(() => { const c = window.__l4.coach; c.hint.style.left = c.launcher.offsetLeft + 'px'; c.hint.hidden = false; });
+// the chip: "What do I do here?", then the tip
+const tipAfterChip = async (p) => { await openCoach(p); await p.click('.w-coach-chip'); };
+// the goals screen's demo (motion on): the panel open by itself, about 2.4 s in
+const demo = async (p) => { await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]); await p.reload({ waitUntil: 'networkidle0' }); await wait(2300); };
 const passed = (p) => p.evaluate(() => { const s = window.__l4.state; Object.assign(s.a, { L4_S21_1: 'c|c', L4_S21_2: 'b|c', L4_S21_3: 'a|c', L4_S21_4: 'd|c', L4_S21_5: '5,6|c' }); s.k = { n: 1, s: 100, p: 1 }; s.d.push('S21'); window.__l4.go('END'); });
 
 const SHOTS = [
@@ -29,7 +33,9 @@ const SHOTS = [
   ['s19-open', 'S19', openCoach],
   ['s21-locked', 'S21', openCoach],
   ['end-open', 'END', async (p) => { await passed(p); await openCoach(p); }],
-  ['o2-first-use-hint', 'O2', null],
+  ['o3-demo', 'O3', demo],
+  ['s04-tip', 'S04', tipAfterChip],
+  ['o3-hint-after-demo', 'O3', null],
 ];
 const dir = resolve(ROOT, join('review', 'co1', 'screens'));
 mkdirSync(dir, { recursive: true });
