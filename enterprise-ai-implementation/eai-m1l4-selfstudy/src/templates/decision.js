@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=d9c03a25';
-import { glyph, icon } from '../icons.js?v=d9c03a25';
-import { attachTip } from '../tooltip.js?v=d9c03a25';
-import { letter } from '../tracking/index.js?v=d9c03a25';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=d9c03a25';
-import { targetSteps } from '../ghost.js?v=d9c03a25';
+import { h, fmt, resolveLink } from '../util.js?v=febfa1ab';
+import { glyph, icon } from '../icons.js?v=febfa1ab';
+import { attachTip } from '../tooltip.js?v=febfa1ab';
+import { letter } from '../tracking/index.js?v=febfa1ab';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=febfa1ab';
+import { targetSteps } from '../ghost.js?v=febfa1ab';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -795,8 +795,8 @@ function close(ctx) {
 
 // The downloadable lesson record (S22): a small self-contained HTML page with the case title, the
 // Chapter 2 sketch, the Chapter 4 notes (could fit AI / stays with a person), the first metric (S12B:
-// baseline, target, date; NL4), the self-check answers (S20) and the biggest risk (S20B), and the
-// knowledge check score with its attempt number (NL4). Every label comes from ui.record (the parts'
+// baseline, target, date; NL4), the self-check answers (S20) and the biggest risk (S20B), the S22
+// takeaway, and the knowledge check score with its attempt number (NL4). Every label comes from ui.record (the parts'
 // names from the screens' fields).
 function lessonRecord(ctx) {
   const { ui, content } = ctx;
@@ -809,6 +809,8 @@ function lessonRecord(ctx) {
   const val = (v) => esc(v || r.empty);
   const rows = s20.rows.map((q) => `<tr><td>${esc(q.text)}</td><td>${val(ans[q.id] && ui.buttons[ans[q.id]])}</td></tr>`).join('');
   const chip = s20b.options.find((c) => c.id === ctx.flagsOf('S20B').pick);
+  // the takeaway picked on S22 (QA 26 Oct 2026)
+  const take = ctx.screen.options.find((o) => o.id === ctx.flags.get('take'));
   // one row per part of a screen's fields (the S08B sketch, the S17B notes, the S12B metric)
   const rowsOf = (id) => (content.screens.find((s) => s.id === id)?.fields || []).map((f) => `<tr><td>${esc(f.label)}</td><td>${val(ctx.store.get(f.store))}</td></tr>`).join('');
   const sketch = rowsOf('S08B');
@@ -825,5 +827,6 @@ function lessonRecord(ctx) {
     + `<h2>${esc(r.notes)}</h2><table>${notes}</table>`
     + `<h2>${esc(r.metric)}</h2><table>${metric}</table>`
     + `<h2>${esc(r.selfCheck)}</h2><table>${rows}<tr><td>${esc(r.risk)}</td><td>${val(chip && chip.label)}</td></tr></table>`
+    + `<h2>${esc(r.takeaway)}</h2><p>${val(take && take.label)}</p>`
     + `<h2>${esc(r.score)}</h2><p>${esc(score)}</p></body></html>`;
 }

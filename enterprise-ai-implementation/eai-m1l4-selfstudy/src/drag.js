@@ -13,7 +13,7 @@
 //   target[data-over]    under the pointer  target[data-chosen]  chosen by key
 // onDrop(card, target) -> 'placed' (the template has moved the card), 'returned' (slide back, put
 // down) or 'kept' (slide back, still picked up).
-import { fmt, reducedMotion } from './util.js?v=d9c03a25';
+import { fmt, reducedMotion } from './util.js?v=febfa1ab';
 
 const SLOP = 4; // window px before a press becomes a drag
 const BACK_MS = 300;
@@ -48,7 +48,11 @@ export function dragDrop({ ui, live, targets, nameOf, onDrop, picked: pickedLine
     if (result === 'kept') pick(card); else pick(null);
     // the feedback strip (its own live region) says what happened: nothing more to announce here
   }
-  const hitAt = (x, y) => targets.find((t) => { const r = t.el.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom && !t.el.inert; }) || null;
+  const inRect = (el, x, y) => { const r = el.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; };
+  // a target's "Drop here" chip counts as the target too (S05b: the chip sits on the place's edge, half
+  // outside it; QA 26 Oct 2026, drops on it fell through to the diagram)
+  const dropChip = (t) => (t.chip && t.chip.classList.contains('w-target-chip') ? t.chip : null);
+  const hitAt = (x, y) => targets.find((t) => !t.el.inert && (inRect(t.el, x, y) || (dropChip(t) && inRect(dropChip(t), x, y)))) || null;
 
   function add(card) {
     card.addEventListener('pointerdown', (e) => {
@@ -103,6 +107,11 @@ export function dragDrop({ ui, live, targets, nameOf, onDrop, picked: pickedLine
       // Enter or Space with no target chosen: the button's click (pick up / put down)
     });
   }
-  targets.forEach((t) => t.el.addEventListener('click', () => { if (picked && !t.el.inert) drop(picked, t); }));
+  targets.forEach((t) => {
+    const onClick = () => { if (picked && !t.el.inert) drop(picked, t); };
+    t.el.addEventListener('click', onClick);
+    // a chip outside the target element takes the click as well (inside it, the click reaches the target anyway)
+    if (dropChip(t) && !t.el.contains(t.chip)) t.chip.addEventListener('click', onClick);
+  });
   return { add, pick, picked: () => picked, say };
 }

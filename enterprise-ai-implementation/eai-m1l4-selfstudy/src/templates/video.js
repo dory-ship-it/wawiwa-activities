@@ -19,11 +19,11 @@
 // media.duration, stops[].t. Swapping the real film in is a change of those paths and times only.
 // Seeking forward never passes the part already watched or the next unanswered stop (the slider
 // clamps, a polite note says why).
-import { h, fmt, nextId } from '../util.js?v=d9c03a25';
-import { glyph } from '../icons.js?v=d9c03a25';
-import { letter } from '../tracking/index.js?v=d9c03a25';
-import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=d9c03a25';
-import { targetSteps } from '../ghost.js?v=d9c03a25';
+import { h, fmt, nextId } from '../util.js?v=febfa1ab';
+import { glyph } from '../icons.js?v=febfa1ab';
+import { letter } from '../tracking/index.js?v=febfa1ab';
+import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=febfa1ab';
+import { targetSteps } from '../ghost.js?v=febfa1ab';
 
 const SEEK_STEP = 5, SEEK_PAGE = 15, AT_STOP = 0.05, AT_END = 0.3;
 const mmss = (t) => { const s = Math.max(0, Math.floor(t)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -216,6 +216,7 @@ export const video = {
         if (!o.correct) return;
         right = true;
         answered.add(s.id);
+        ctx.flags.set('stops', [...answered]);
         btns.forEach((x) => x.setAttribute('aria-disabled', 'true'));
         setResume(false);
         resume.focus();
@@ -253,6 +254,15 @@ export const video = {
       playBtn.focus();
     });
 
+    // coming back to an unfinished film (QA 26 Oct 2026): the stops already answered stay answered, and
+    // the film is cued at the last of them instead of 0:00 (Play starts there; seeking back stays free)
+    const lastDone = ctx.revisit ? null : stops.filter((s) => (ctx.flags.get('stops') || []).includes(s.id)).pop();
+    if (lastDone) {
+      stops.slice(0, stops.indexOf(lastDone) + 1).forEach((s) => answered.add(s.id));
+      reached = lastDone.t;
+      const cue = () => { vid.currentTime = lastDone.t; render(); };
+      if (vid.readyState >= 1) cue(); else vid.addEventListener('loadedmetadata', cue, { once: true });
+    }
     render();
     if (ctx.revisit) { stops.forEach((s) => answered.add(s.id)); done = true; ctx.unlockNext({ focus: false }); render(); }
     return { unmount() { vid.pause(); vid.removeAttribute('src'); vid.load(); delete zones.main.dataset.side; } };

@@ -1027,7 +1027,8 @@ a.w-btn { text-decoration: none; }
 .w-bpmn-zoom > .w-bpmn { transform: scale(var(--z)); transform-origin: 0 0; }
 .w-board-label .w-label-tray, .w-board-label .w-float-tray { left: calc(768px * var(--z) + 25.6px); }
 .w-board-label .w-target:not([data-placed]) { border-color: var(--wl-turquoise); }
-.w-board-label .w-target-chip { border-color: var(--wl-turquoise); color: var(--wl-teal-ink); }
+.w-board-label .w-target-chip { border-color: var(--wl-turquoise); color: var(--wl-teal-ink); pointer-events: auto; } /* the chip takes a click-to-drop too (src/drag.js) */
+.w-board-label .w-target[data-armed="true"] ~ .w-target-chip { cursor: pointer; }
 @media (prefers-reduced-motion: no-preference) {
   .w-board-label .w-target[data-armed="true"]:not([data-placed]) { animation: w-drop-pulse 1.6s ease-in-out infinite; }
 }

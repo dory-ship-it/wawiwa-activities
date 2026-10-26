@@ -128,6 +128,7 @@
       "notes": "Your notes from Chapter {ch4}",
       "selfCheck": "Self-check",
       "risk": "Biggest risk",
+      "takeaway": "Your takeaway",
       "score": "Knowledge check",
       "scoreLine": "{x} of {n} on first try ({p} of 100), attempt {a}. Pass mark: {pass} of 100.",
       "empty": "Not filled in"
@@ -227,7 +228,7 @@
     "Sensitivity": "One of four levels: PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED. It decides what may go to an AI tool.",
     "Existing controls": "Checks in place today; \"no formal control\" is valid.",
     "Gaps": "What is missing or unclear; \"unclear\" is allowed.",
-    "Field 8": "Guardrail: answer accuracy stays at or above 95% in a QA sample.",
+    "Field 8": "The success metric: a baseline, a target and a date. The full HR map also sets a guardrail for after the change: answers stay at least 95% accurate in a QA sample.",
     "Baseline": "The current state, even if estimated.",
     "Target": "Specific, realistic, checkable later.",
     "Handoff": "The moment responsibility passes from one role to another.",
@@ -254,7 +255,7 @@
   "diagrams": {
     "hr": {
       "$comment": "The HR process as a BPMN diagram (S05a, S05b). Geometry in src/templates/bpmn.js; edge labelAt = [dx, dy] from the edge's first node, in diagram units (.1cqw).",
-      "alt": "BPMN diagram of the HR case in three lanes: Employee, HR staff, HR manager. A circle in the Employee lane, Question sent, starts it. HR staff check the topic. A diamond asks Within policy? Yes: HR staff answer. No: Escalate, in the HR manager lane. Both paths end at a thick circle in the Employee lane, Answer received.",
+      "alt": "BPMN diagram of the HR case in three lanes: Employee, HR staff, HR manager. A circle in the Employee lane, Question sent, starts it. HR staff check the topic. A diamond asks Within policy? Yes: HR staff answer. No: the HR manager handles the escalation, in the HR manager lane. Both paths end at a thick circle in the Employee lane, Answer received.",
       "lanes": [
         { "id": "employee", "label": "Employee" },
         { "id": "staff", "label": "HR staff" },
@@ -265,7 +266,7 @@
         { "id": "check", "kind": "step", "lane": "staff", "col": 1, "label": "Check the topic" },
         { "id": "split", "kind": "gateway", "lane": "staff", "col": 2, "label": "Within policy?" },
         { "id": "answer", "kind": "step", "lane": "staff", "col": 3, "label": "Answer" },
-        { "id": "escalate", "kind": "step", "lane": "manager", "col": 3, "label": "Escalate" },
+        { "id": "escalate", "kind": "step", "lane": "manager", "col": 3, "label": "Handle escalation" },
         { "id": "end", "kind": "end", "lane": "employee", "col": 4, "label": "Answer received" }
       ],
       "edges": [
@@ -385,7 +386,7 @@
         { "id": "a", "label": "Shortlist three chatbot vendors", "icon": "list", "correct": false,
           "feedback": "Vendors will ask who answers what, through which channel, and what counts as a wrong answer. Today nobody can tell them." },
         { "id": "b", "label": "Map how a request flows today", "icon": "route", "correct": true,
-          "feedback": "Requests arrive by WhatsApp, email and in person, with no organized system. A chatbot would only speed up that disorder." },
+          "feedback": "Nobody has yet seen how requests arrive or who answers them. A chatbot on an unmapped flow only speeds up whatever is broken." },
         { "id": "c", "label": "Survey employees on what they want", "icon": "forms", "correct": false,
           "feedback": "Employees can tell you what they want. A wish list is not a description of today's work." }
       ],
@@ -586,8 +587,8 @@
       "figures": [
         { "kind": "mess", "label": "Without mapping", "chip": "faster tech", "caption": "Same mess, faster.",
           "alt": "Without mapping: a tangled line loops back and forth from start to end, with a fast-forward mark: the same mess, only faster." },
-        { "kind": "lean", "label": "With mapping", "caption": "Fewer steps first. Then speed up.",
-          "alt": "With mapping: a straight line from start to end through two step boxes, with a fast-forward mark: fewer steps first, then speed up." }
+        { "kind": "lean", "label": "With mapping", "caption": "Map, cut steps, then speed up.",
+          "alt": "With mapping: a straight line from start to end through two step boxes, with a fast-forward mark: the process is mapped, the steps not needed are cut, then it speeds up." }
       ],
       "evidence": { "icon": "chart", "text": "McKinsey, 2025: workflow redesign drives AI value most.", "source": "Hammer, HBR, 1990" },
       "tracking": [],
@@ -603,18 +604,18 @@
       "variant": "multi",
       "select": 2,
       "minutes": 3,
-      "instruction": "Select the two causes both cases point to.",
+      "instruction": "Select the two causes both cases teach you to prevent.",
       "hint": "Pick two cards, then press Check.",
       "terms": ["Success metric"],
       "layout": "work",
       "cases": [
         { "id": "case1", "label": "Video case: car company, 1980s", "video": "V1", "segment": 3,
           "image": { "src": "assets/img/s03-case1.jpg", "alt": "A manager looks over a crowded 1980s accounts payable office", "prompt": "assets/img/prompts/S03-video-case-1.md", "temp": false, "position": "50% 40%" } },
-        { "id": "case2", "label": "Video case: fintech, 2024", "video": "V1", "segment": 5,
+        { "id": "case2", "label": "Video case: fintech, 2024 to 2025", "video": "V1", "segment": 5,
           "image": { "src": "assets/img/s03-case2.jpg", "alt": "A customer service rep with a headset at a desk of screens", "prompt": "assets/img/prompts/S03-video-case-2.md", "temp": false, "position": "50% 40%" } }
       ],
       "stage": {
-        "top": { "kind": "line", "icon": "history", "text": "Four causes of AI project failure, from Lesson 1. Which two do both video cases point to?" },
+        "top": { "kind": "line", "icon": "history", "text": "Four causes of AI project failure, from Lesson 1. Which two do both video cases teach you to prevent?" },
         "middle": { "kind": "options", "arrange": "grid-2x2" },
         "bottom": { "kind": "action", "action": "check" }
       },
@@ -626,10 +627,10 @@
         { "id": "c", "label": "Unidentified end user", "icon": "user-question", "correct": false,
           "feedback": "Homework 1 asked you to name the specific role. That answer feeds your map; it is not built today." },
         { "id": "d", "label": "No success metric", "icon": "ruler", "correct": true, "term": "Success metric",
-          "feedback": "Both stories were judged by numbers. Today you set a baseline and a target: a number, not a feeling." }
+          "feedback": "Both changes were checked by numbers. Without one, nobody could tell they worked. Today you set a baseline and a target." }
       ],
       "feedbackPaging": false,
-      "feedbackCorrect": "Both cases changed once someone saw how the work really flowed; both were judged by numbers. Today you fix both: a map and a metric.",
+      "feedbackCorrect": "Both cases changed once someone saw how the work flowed, and both were checked by numbers. Today you build both: a map and a metric.",
       "ghost": { "type": "pickTwo", "target": "options-sweep" },
       "advance": "after-correct",
       "endOfChapter": true,
@@ -789,7 +790,7 @@
         { "id": "L4_S05B_1", "type": "matching", "correctResponse": "s.a,g.b,e.c", "scored": false, "bloom": "Remember", "result": "graded" }
       ],
       "sources": ["planning/CH2-SPEC.md 4", "s12", "s13"],
-      "diagramAlt": "Process diagram of the HR case in three rows: Employee, HR staff, HR manager. Question sent, in the Employee row, starts it. HR staff check the topic. Then a decision, Within policy? Yes: HR staff answer. No: Escalate, in the HR manager row. Both paths end in the Employee row at Answer received.",
+      "diagramAlt": "Process diagram of the HR case in three rows: Employee, HR staff, HR manager. Question sent, in the Employee row, starts it. HR staff check the topic. Then a decision, Within policy? Yes: HR staff answer. No: the HR manager handles the escalation, in the HR manager row. Both paths end in the Employee row at Answer received.",
       "diagramAltPilotCopy": true
     },
 
@@ -810,7 +811,7 @@
           "hint": "Ask how fast you need it and who will use it.", "doneLabel": "Situation 1",
           "image": { "src": "assets/img/s15.jpg", "alt": "A team lead going through her own stack of requests", "prompt": "assets/img/prompts/S06-s1-own-process.md", "temp": false, "position": "50% 35%" },
           "options": [
-            { "id": "a", "label": "Field template", "preview": "table", "sub": "Eight fields, filled in a table", "icon": "forms", "correct": true,
+            { "id": "a", "label": "Field template", "preview": "table", "sub": "A fixed set of fields, in a table", "icon": "forms", "correct": true,
               "feedback": "Fast to fill alone, enough for a first diagnosis. This is the tool you use for your own case." },
             { "id": "b", "label": "BPMN diagram", "preview": "lanes", "sub": "Lanes and symbols, drawn to a standard", "icon": "diagram", "correct": false,
               "feedback": "You would spend your time on drawing rules, while the decision you need waits." }
@@ -819,7 +820,7 @@
           "hint": "Ask who else needs to read this map.", "doneLabel": "Situation 2",
           "image": { "src": "assets/img/ft2.jpg", "alt": "A process diagram being drawn on a whiteboard", "prompt": "assets/img/prompts/S06-s2-process-team.md", "temp": false, "position": "50% 50%" },
           "options": [
-            { "id": "a", "label": "Field template", "preview": "table", "sub": "Eight fields, filled in a table", "icon": "forms", "correct": false,
+            { "id": "a", "label": "Field template", "preview": "table", "sub": "A fixed set of fields, in a table", "icon": "forms", "correct": false,
               "feedback": "Your fields make sense to you. Other teams and tools need a shared standard form to read them." },
             { "id": "b", "label": "BPMN diagram", "preview": "lanes", "sub": "Lanes and symbols, drawn to a standard", "icon": "diagram", "correct": true,
               "feedback": "A shared standard lets other tools, systems and process teams read the same map." }
@@ -906,7 +907,7 @@
             "c": "WhatsApp and in-person questions vanish from the map, and so does most of the disorder you came to find." } },
         { "id": "r3", "badge": "Handoffs", "line": "HR staff to HR manager, through a shared channel the mapper just added.", "correct": "a", "trackingId": "L4_S08_3",
           "feedback": {
-            "a": "The real gap, no single handoff channel, disappears from Fields 4 and 7 before anyone has measured it.",
+            "a": "The real gap, no single handoff channel, disappears from the Handoffs and Gaps fields before anyone has measured it.",
             "b": "No AI is mentioned. Ask who created this channel, and when.",
             "c": "No written procedure is cited. The mapper made this change during the mapping itself." } }
       ],
@@ -1245,7 +1246,7 @@
         {
           "n": 3,
           "title": "Steps",
-          "text": "Receiving the request (employee) to checking the topic (HR staff) to answer or escalation (HR staff / manager)",
+          "text": "Receiving the request (HR staff) to checking the topic (HR staff) to answer or escalation (HR staff / manager)",
           "correct": false,
           "feedback": "Field 3 shows who does each step, not the moment between them or what can go wrong there."
         },
@@ -1436,7 +1437,7 @@
           "id": "a",
           "label": "A rule naming a backup manager",
           "correct": false,
-          "feedback": "A rule nobody follows today hides the real gap. Record four things: from whom, to whom, what passes, and what if the receiver is away."
+          "feedback": "A rule nobody follows today hides the real gap. Ask what the map needs to show about the handoff itself."
         },
         {
           "id": "b",
@@ -1448,13 +1449,13 @@
           "id": "c",
           "label": "Nothing: the manager knows the history",
           "correct": false,
-          "feedback": "Never assume the receiver knows the history. Record from whom, to whom, what passes, and what if the receiver is away."
+          "feedback": "Never assume the receiver knows the history. What must travel with the question, and what if nobody is there to take it?"
         },
         {
           "id": "d",
           "label": "An AI agent to reroute questions",
           "correct": false,
-          "feedback": "That tool does not exist today. Record what does: from whom, to whom, what passes, and what if the receiver is away."
+          "feedback": "That tool does not exist today. Describe the handoff that does exist, as it runs now."
         }
       ],
       "advance": "after-correct",
@@ -1481,7 +1482,7 @@
       "variant": "single",
       "minutes": 3,
       "instruction": "Choose the first question to ask about this bottleneck.",
-      "hint": "Before speed, ask why.",
+      "hint": "Recall what the car company did with its slowest step.",
       "layout": "stage-decision",
       "stage": {
         "top": {
@@ -1582,7 +1583,7 @@
         { "n": 5, "text": "Answer where the map says 'unclear'", "column": "d",
           "feedback": { "correct": "Poor fit: you cannot build on unknown foundations. This needs diagnosis, not more technology.",
             "wrong": "Check what the map actually knows before anything is built on it." } },
-        { "n": 6, "text": "Summarize before escalating", "column": "c",
+        { "n": 6, "text": "Pass on the case history", "column": "c",
           "feedback": { "correct": "Good fit, handoff with delay or loss: AI documents it, so the HR manager gets the history.",
             "wrong": "Think about what the HR manager receives today when a question is passed on." } }
       ],
@@ -1618,7 +1619,7 @@
         { "id": "5", "label": "Automating a broken process", "sub": "speeds up a process nobody fixed" }
       ],
       "cards": [
-        { "id": "a", "text": "Fields 6 and 7 were left blank to finish the map quickly.", "column": "3",
+        { "id": "a", "text": "Fields 6 and 7 are blank: the map was due within the hour.", "column": "3",
           "feedback": { "correct": "Controls and gaps are where the findings live. Skipping them leaves Lesson 5 nothing to protect against.",
             "wrong": "The map has a goal and matches today. Look at which fields were never filled." } },
         { "id": "b", "text": "The map shows how HR intends requests to flow, not how they flow today.", "column": "1",
@@ -1630,7 +1631,7 @@
         { "id": "d", "text": "HR moved to one request form. The map still shows three channels.", "column": "4",
           "feedback": { "correct": "The map was right once. Lesson 5 would now build on a process that no longer exists.",
             "wrong": "Something changed after the map was drawn. Which mistake follows a change?" } },
-        { "id": "e", "text": "Someone mapped every HR task 'to have it documented', with no question to answer.", "column": "2",
+        { "id": "e", "text": "Someone mapped every HR task 'to have it documented'. Nobody said what it should decide.", "column": "2",
           "feedback": { "correct": "Without a question, nobody can say which process or boundaries matter. The map grows and decides nothing.",
             "wrong": "The map may be accurate and complete. Ask what it was drawn to decide." } }
       ],
@@ -1714,23 +1715,24 @@
         { "id": "c", "n": 7, "label": "Field 7: Gaps", "sub": "What is missing or unclear" },
         { "id": "d", "label": "Not AS-IS", "sub": "Not true today" }
       ],
+      "cardsOrderNote": "QA 26 Oct 2026: the cards are listed out of field order, so the letters A to D never match the rows top to bottom; n (and tracking) unchanged",
       "cards": [
-        { "n": 1, "text": "A sales call ends", "column": "a",
-          "feedback": { "correct": "Placed. A concrete event starts the work, as in HR, but here it repeats 8 to 12 times a day per rep.",
-            "wrong": "Ask what has to happen before any summary can be written." } },
-        { "n": 2, "text": "The rep updates the CRM, often late", "column": "b",
-          "feedback": { "correct": "Placed. The step and its owner, written as it really runs: often late, not as the rule says.",
-            "wrong": "This is work a role does. Where do steps and owners go?" } },
         { "n": 3, "text": "Unclear whether reps see a problem", "column": "c",
           "feedback": { "correct": "Placed. An honest unknown. It tells you what to ask before Lesson 5.",
             "wrong": "Nobody knows this yet. Which field holds what is missing or unclear?" } },
+        { "n": 1, "text": "A sales call ends", "column": "a",
+          "feedback": { "correct": "Placed. A concrete event starts the work, as in HR, but here it repeats 8 to 12 times a day per rep.",
+            "wrong": "Ask what has to happen before any summary can be written." } },
         { "n": 4, "text": "An AI tool drafts each call summary", "column": "d",
           "feedback": { "correct": "Kept out. Your Homework 2 AI step is a future idea too. It stays off your AS-IS map.",
-            "wrong": "Does this happen on a normal day today, or is it an idea for later?" } }
+            "wrong": "Does this happen on a normal day today, or is it an idea for later?" } },
+        { "n": 2, "text": "The rep updates the CRM, often late", "column": "b",
+          "feedback": { "correct": "Placed. The step and its owner, written as it really runs: often late, not as the rule says.",
+            "wrong": "This is work a role does. Where do steps and owners go?" } }
       ],
       "advance": "after-check",
       "tracking": [
-        { "id": "L4_S18A_1", "type": "matching", "correctResponse": "1.a,2.b,3.c,4.d", "scored": false, "bloom": "Apply", "result": "graded" }
+        { "id": "L4_S18A_1", "type": "matching", "correctResponse": "3.c,1.a,4.d,2.b", "scored": false, "bloom": "Apply", "result": "graded" }
       ],
       "sources": ["L1 booklet Case 3", "s14", "s16", "s19", "HW2 (model step)"]
     },
@@ -1977,7 +1979,7 @@
           "stem": "Lesson 1 case: weekly report, 4 to 6 hours. Nothing is logged. Baseline?",
           "options": [
             { "id": "a", "label": "About 5 hours, marked as estimated", "correct": true,
-              "feedback": "An estimated metric beats no metric. You now have a starting number to check the target against." },
+              "feedback": "You know the range, so estimate and mark it. An estimated metric beats no metric." },
             { "id": "b", "label": "Nothing until a time log exists", "correct": false,
               "feedback": "Field 8 stays empty. In three months, nobody can show whether anything changed." },
             { "id": "c", "label": "The target time, once it is set", "correct": false,
@@ -1989,7 +1991,7 @@
             "stem": "Lesson 1 case: course feedback. Reading takes 3 to 4 hours per course. Nobody times it. Baseline?",
             "options": [
               { "id": "a", "label": "About 3.5 hours per course, marked as estimated", "correct": true,
-                "feedback": "An estimated baseline beats none. You now have a starting number to check the target against." },
+                "feedback": "You know the range, so estimate and mark it. An estimated baseline beats none." },
               { "id": "b", "label": "Nothing until someone times it", "correct": false,
                 "feedback": "Field 8 stays empty. In three months, nobody can show whether anything changed." },
               { "id": "c", "label": "The target, once a tool is chosen", "correct": false,
@@ -2007,7 +2009,7 @@
             { "id": "c", "label": "Field 8: target fewer complex requests", "correct": false,
               "feedback": "A target with no baseline, while the real problem, that nobody knows the share, stays hidden." },
             { "id": "d", "label": "Field 7: 'unclear', to investigate first", "correct": true,
-              "feedback": "A diagnostic result, not a weakness. It shows what to check before Lesson 5 and what not to build on yet." }
+              "feedback": "Nobody can even estimate the share, so 'unclear' is the honest answer. It shows what to check before Lesson 5." }
           ],
           "b": { "trackingId": "L4_S21_4b",
             "stem": "Lesson 1 case: weekly report. Nobody knows who reads it. Where does this go?",
@@ -2019,7 +2021,7 @@
               { "id": "c", "label": "Field 8: target more readers", "correct": false,
                 "feedback": "A target with no baseline, while the real problem, that nobody knows the readers, stays hidden." },
               { "id": "d", "label": "Field 7: 'unclear', to investigate first", "correct": true,
-                "feedback": "A diagnostic result, not a weakness. It shows what to check before Lesson 5." }
+                "feedback": "Nobody can even estimate who reads it, so 'unclear' is the honest answer. It shows what to check before Lesson 5." }
             ] } },
         { "id": "i5", "kind": "tiles", "select": 2, "trackingId": "L4_S21_5",
           "instruction": "Find the two errors in this AI-drafted HR map.",
@@ -2121,7 +2123,7 @@
         "bridge": { "icon": "map", "text": "Lesson 5 starts from this map and your AI notes from Chapter {ch4}." },
         "homework": { "icon": "calendar", "text": "Homework: complete your map and mark three AI points, using the three good-fit kinds.", "href": "@links.homework", "newTab": true },
         "feedback": {
-          "download": "Your record holds your case title, notes, metric, self-check answers and score. Your map stays in your workbook PDF. Bring it to Lesson 5.",
+          "download": "Your record holds your case title, notes, metric, self-check answers, takeaway and score. Your map stays in your workbook PDF. Bring it to Lesson 5.",
           "finishConfirm": "Finish without downloading? Your workbook PDF is not affected. Press Finish again to confirm."
         }
       },

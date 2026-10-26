@@ -12,11 +12,11 @@
 //                              a field marked optional may stay empty (S12B Date)
 //   all filled              -> values stored under each field's store key, one fill-in answer per
 //                              field on the tracking bus, feedback.saved, Next unlocks
-import { h, fmt, nextId, resolveLink } from '../util.js?v=d9c03a25';
-import { glyph } from '../icons.js?v=d9c03a25';
-import { attachTip } from '../tooltip.js?v=d9c03a25';
-import { layout, sheet, contextLine, privacyLine, showMe, splitFirst } from './stage.js?v=d9c03a25';
-import { scaleOf } from '../ghost.js?v=d9c03a25';
+import { h, fmt, nextId, resolveLink } from '../util.js?v=febfa1ab';
+import { glyph } from '../icons.js?v=febfa1ab';
+import { attachTip } from '../tooltip.js?v=febfa1ab';
+import { layout, sheet, contextLine, privacyLine, showMe, splitFirst } from './stage.js?v=febfa1ab';
+import { scaleOf } from '../ghost.js?v=febfa1ab';
 
 const COUNTER_ANNOUNCE_AT = 230;
 
@@ -106,10 +106,19 @@ export const input = {
     // the help answer as the button's glass tooltip (and its description), once the button is in place
     if (help && answer) attachTip(help, answer, { side: 'below-left', width: 384 });
 
+    // "Saved." shows only while the fields hold what was stored: an edit brings the hint back, so a
+    // change waiting for Save never reads as saved (QA 26 Oct 2026)
+    let savedShown = false;
     const showSaved = (focus) => {
       zones.setFeedback({ state: 'neutral', tone: 'correct', text: screen.feedback.saved });
+      savedShown = true;
       ctx.unlockNext({ focus });
     };
+    controls.forEach((c, i) => c.input.addEventListener('input', () => {
+      if (!savedShown || c.input.value.trim() === ctx.store.get(screen.fields[i].store)) return;
+      savedShown = false;
+      zones.setFeedback({ state: 'hint', text: screen.hint });
+    }));
 
     function doSave() {
       const values = controls.map((c) => c.input.value.trim());
