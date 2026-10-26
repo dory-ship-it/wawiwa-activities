@@ -27,8 +27,8 @@
 // Timing: in ~150 ms, then per step a 450 ms move, a tap with a ripple, a short hold; out by 3 s.
 // Any pointer or key input stops it at once. prefers-reduced-motion: no motion, a static hand and
 // arrow at the first target for 3 s.
-import { h, reducedMotion } from './util.js?v=a6a1e898';
-import { glyph } from './icons.js?v=a6a1e898';
+import { h, reducedMotion } from './util.js?v=6ec78d4a';
+import { glyph } from './icons.js?v=6ec78d4a';
 
 const SETTLE = 600, IDLE = 8000, STATIC = 3000;
 const MOVE = 450, TAP = 140, HOLD = 260, IN = 150, OUT = 200;
@@ -160,7 +160,8 @@ function run(stage, list, restore, chipOf) {
   const ripple = h('span', { class: 'w-ghost-ripple' });
   // the chip shows only once the hand has reached its last step (QA1: travelling with the hand, it
   // covered the options' text on the way)
-  const chipEl = chip ? h('span', { class: 'w-ghost-chip', style: 'opacity: 0' }, chip) : null;
+  const chipEl = chip ? h('span', { class: 'w-ghost-chip' }, chip) : null;
+  if (chipEl) chipEl.style.opacity = '0'; // (CSSOM, not a style attribute: the page's CSP blocks those)
   const hand = h('div', { class: 'w-ghost', 'aria-hidden': 'true' }, ripple, glyph('g-hand', { size: HAND, className: 'w-ghost-hand' }), chipEl);
   let done = false;
   const anims = [];

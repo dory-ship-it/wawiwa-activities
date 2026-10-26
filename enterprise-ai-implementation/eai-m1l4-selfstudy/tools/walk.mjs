@@ -760,12 +760,13 @@ await tabTo(page, '.w-tile[data-n="1"]');
 for (let n = 1; n <= 8; n++) {
   await press(page, 'Enter');
   ts = await tileState();
-  if (ts.open !== String(n) || (n < 8 && ts.sub !== `${n}/8`) || (n < 8 && ts.done !== n - 1)) fail(`S07 tile ${n}: open "${ts.open}", counter "${ts.sub}", done ${ts.done}`);
+  // (QA1: the eighth tile closes with the others as the question comes)
+  if (ts.open !== (n < 8 ? String(n) : '') || (n < 8 && ts.sub !== `${n}/8`) || (n < 8 && ts.done !== n - 1)) fail(`S07 tile ${n}: open "${ts.open}", counter "${ts.sub}", done ${ts.done}`);
   if (n === 3) await expectLayout(page, 'S07 three opened');
   if (n < 8) await press(page, 'ArrowRight');
 }
 ts = await tileState();
-expect(ts.h1 === S.S07.question && ts.sub === S.S07.questionHint && ts.open === '8', `S07: after all eight the heading is the question ("${ts.h1}"), tile 8 stays open to read`);
+expect(ts.h1 === S.S07.question && ts.sub === S.S07.questionHint && ts.open === '', `S07: after all eight the heading is the question ("${ts.h1}"), every tile closed (QA1: the last one opened was often the answer)`);
 await expectBand(page, 'S07 question unlocked', { state: 'hint', text: S.S07.questionHint, unlocked: false });
 await press(page, 'Escape');
 ts = await tileState();
@@ -1357,17 +1358,14 @@ expect(rec.includes(TITLE) && rec.includes(UI.record.sketch) && rec.includes(SKE
   `S22 lesson record downloaded (${UI.record.fileName}, ${rec.length} bytes): case title, sketch, notes, first metric (Chapter 3), self-check, risk, score with the attempt`);
 await tabTo(page, '[data-action="finish"]');
 await press(page, 'Enter');
-await expectBand(page, 'S22 finished', { state: 'neutral', text: UI.finished, unlocked: true }); // FX2 G: Next opens END
+// QA1: one action finishes the lesson and opens END (FX2 G had Next open it after Finish)
+await expectNewScreen(page, 'END', 'S22 Finish');
 const fin = (await events(page)).filter((e) => e.kind === 'finish');
 expect(fin.length === 1 && fin[0].status === 'passed' && fin[0].score === 80, `S22 Finish (after the download, no confirm): lesson status ${fin[0]?.status}, score ${fin[0]?.score}`);
-await expectLayout(page, 'S22 finished');
 
 // FX2 G: END, the closing screen: the bar, the logo, "Lesson complete", the status chip (no score), the
 // next line and S22's homework link; Previous only; nothing tracked, the finish status unchanged
 const evBefore = (await events(page)).length;
-expect(await isActive(page, '.w-next'), 'S22 finished: focus on Next');
-await press(page, 'Enter');
-await expectNewScreen(page, 'END', 'S22 Next');
 const endS = await page.evaluate(() => ({ scene: document.querySelector('.w-stage').dataset.scene, bar: !!document.querySelector('.w-bar').getClientRects().length,
   logo: !!document.querySelector('.w-end-logo'), h1: document.querySelector('.w-instruction').textContent, accent: document.querySelector('.w-end-accent')?.textContent,
   sub: document.querySelector('.w-end-sub').textContent, chip: document.querySelector('.w-end-chip').textContent, hint: !!document.querySelector('.w-end-hint'),

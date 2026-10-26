@@ -22,8 +22,20 @@ Field 5: the four levels in the help, the check message and the grounding pack (
 ## 5. `assets/img/_originals/`
 Untracked (`git rm -r --cached`, 16 files), added to `.gitignore`, files kept locally. SOURCES.md says so; the copies committed before remain in the git history.
 
-## 6. Not changed (see the triage)
-V2 film still shows "Receive (employee)" (re-render) · V1 captions over the year labels · Practice Studio engine: a field loses its lock after a live "Light" (all workbooks) · 5 items, one miss = 80 · findings that match the source deck or earlier decisions (nine-field template, two slogans, three good fits, Save to continue, Next after Finish, warm-ups) · bugs 4, 11, 12 (tester's environment).
+## 6. Second round (Noy: "everything you can, as little covered as possible")
+- Bug 6, ghost hand: the "Pick one / Pick two" chip shows only once the hand has stopped (it no longer travels over the options); a single odd row sweeps through the gap after its first card; S05b's carried label stops at 30% of the way toward the diagram's lower part, clear of the end event (measured: no overlap; before, it covered the circle). The chip's opacity is set through the CSSOM (a style attribute is blocked by the page CSP).
+- Bug 7, captions: `media.captionPlaces` (V1, V2): a cue that overlaps a range shows at the top, top-left, top-right or bottom-left, clear of the film's own labels (read off both films every 2 s). V2 keeps its captions in the left 60% from 0:24, beside the film's AS-IS map panel (they covered its bottom rows). Left as is: V2 1:33 to 1:42 (the from / to / what passes chips repeat the caption's words; the lane diagram fills the top).
+- Bug 8, a stop or the transcript open: the h1 stays on one line (26.88 px) and "Watch for" (16.64 px) stays above the frame. The film's own AS-IS panel text cannot grow without a new film.
+- Bug 9: Finish lesson opens END at once. Bug 10: a takeaway already picked shows its line again. Bug 13: the next screen's photo is preloaded.
+- S07: the tiles close when the question comes (opened in order, Field 8, the answer, stayed open).
+- W3: mirrored after all. The man's face now shows (before, both faces were under the cards); the woman's still sits under the answers card. **W3: regenerate** stays the full fix.
+- V2 film re-rendered (`$env:FILM="v2"; node video/v1/render2.mjs full`): Steps "Receive" with the role HR staff; in the lanes, Receive in the HR staff lane and a "Question" box in the Employee lane (`film2.html` lanes: optional `trigger` and `firstLane`; V1 does not use lanes). Same length (168.323 s); VTT, cues and poster byte-identical; audio levels identical (mean -19.1 dB, max -4.0 dB). Stills: [screens/](screens/).
+- Workbook coach prompts (Practice-Studio): the tag is chosen first by a stated standard; no praise words with Light or Revise; the whole-canvas review holds each criterion to the per-field standard. The field lock itself is the shared engine's (all workbooks), unchanged.
+
+## 7. Not changed
+5 items, one miss = 80 (a decision) · findings that match the source deck or earlier decisions (nine-field template, two slogans, three good fits, Save to continue, warm-ups) · bugs 4, 11, 12 (tester's environment) · the film's own small AS-IS panel text.
+
+Note: commits 35deebf (14:50) and 77520c7 (15:26) were made and pushed from GitHub Desktop while this run was still working; 77520c7 holds the second round before its tests, with the ghost chip's style attribute (a CSP console error, fixed in the commit after it) and the old V2 film. The CO1 coach work in the same folder (src/coach/, content/coach/, the coach parts of l4-slice.json, frame.css, tokens.css, icons.js, engine.js) belongs to another session and is not in this run's commits.
 
 ## Tests (all green)
 check passed · test:fit --sizes=1280x720,1600x900 passed · walk passed · test:review passed · test:scorm passed.

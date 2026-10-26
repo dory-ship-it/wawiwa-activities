@@ -2,7 +2,7 @@
 // Kept in a file: the page's CSP allows only same-origin scripts, no inline code.
 // Boot error strings come from content ui.boot; if the content file itself cannot load,
 // from the <template id="boot-fallback"> copy in index.html (kept equal by tools/check.mjs).
-import { boot } from './engine.js?v=a6a1e898';
+import { boot } from './engine.js?v=6ec78d4a';
 
 boot(document.getElementById('app')).catch((err) => {
   const strings = err.ui && err.ui.boot ? err.ui.boot : fallbackStrings();
