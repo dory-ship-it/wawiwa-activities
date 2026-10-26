@@ -22,11 +22,11 @@
 // drags it down, stopping above the columns; "Show me how" replays it.
 // Tracking: one matching interaction at the first Check; the response records each card's FIRST
 // column ("1.a,2.b,..."), correct only if every first placement was right. Later Checks are retries.
-import { h, fmt } from '../util.js?v=bd7ed3c4';
-import { glyph } from '../icons.js?v=bd7ed3c4';
-import { layout, explainBand } from './stage.js?v=bd7ed3c4';
-import { dragDrop } from '../drag.js?v=bd7ed3c4';
-import { checkButton } from './decision.js?v=bd7ed3c4';
+import { h, fmt } from '../util.js?v=96dc38c7';
+import { glyph } from '../icons.js?v=96dc38c7';
+import { layout, explainBand } from './stage.js?v=96dc38c7';
+import { dragDrop } from '../drag.js?v=96dc38c7';
+import { checkButton } from './decision.js?v=96dc38c7';
 
 const keyOf = (c) => String(c.id ?? c.n);
 const COLS_TOP = 222.72, GAP = 15.36; // stage px in main (FX2 B: higher than the frames' 32.2cqw, the columns hold the cards' text)

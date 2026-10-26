@@ -6,7 +6,7 @@ Run co1, 26 Oct 2026. First build committed by Noy as c3cb97f; Noy's follow-ups 
 
 ## What was built
 - Launcher in the top bar after the chapter name on all 43 screens (O1 and END too): 56 px white disc, 3 px turquoise ring, the robot face 46 px (glyph `coach` in src/icons.js). Button, aria-label "Open the coach", aria-expanded, white focus ring on the dark bar.
-- Panel (src/coach/coach.js, src/frame.css): 340 wide, to content, max 536; opens on the left by the launcher (Noy: more intuitive), the learner can drag it right or use Arrow Left/Right on the grip (kept as state.g.cd = 'r'). Non-modal dialog "Wawiwa AI Coach", aria-live log, Escape closes and returns focus to the launcher, no slide or fade with reduced motion. Over main and the footer, under the menu and dialogs.
+- Panel (src/coach/coach.js, src/frame.css): 340 wide, 536 high, y 96 to 632, down to the foot of the page (Noy, follow-up; messages at the top, the chip at the bottom); opens on the left by the launcher (Noy: more intuitive), the learner can drag it right or use Arrow Left/Right on the grip (kept as state.g.cd = 'r'). Non-modal dialog "Wawiwa AI Coach", aria-live log, Escape closes and returns focus to the launcher, no slide or fade with reduced motion. Over main and the footer, under the menu and dialogs.
 - A clean chat (Noy, follow-up): the header is the title only; the panel shows the opening line for the screen type and one chip, "What do I do here?". The chip is the learner's message; the coach answers with the screen's tip, and the chip goes. No offline notice, no disabled input, no privacy line offline (those come back with the live coach).
 - Demo on O3 (Noy, follow-up), once: the launcher pulses twice, the panel opens by itself with "Hi, I'm your AI coach. Stuck on a screen? Open me here.", closes after about 2.6 s, then "Stuck? Ask me." + "Got it" stays under the launcher. Any key or click ends it at once. Reduced motion: the hint only. Recorded as letter 'a' in state.h.
 - S21 locked (60%, grey ring, lock badge, only the notice); unlocked again on S21R.
@@ -39,7 +39,7 @@ Run co1, 26 Oct 2026. First build committed by Noy as c3cb97f; Noy's follow-ups 
 - END: Bring your map PDF to Lesson 5. There you mark where AI enters your process.
 - S21: no tip.
 
-## Tests (full end run after the follow-ups, stamp bd7ed3c4, all passed)
+## Tests (full end run after the follow-ups, all passed; after the full-height panel: check, test:fit section 4, walk, test:coach, test:review again, stamp 96dc38c7)
 - check: passed (check 16: no network code or proxy URL, every screen's kind and tip, S21 locked, pack present).
 - test:fit --sizes=1280x720,1600x900: 1084 ok, 0 fail. Launcher on all 43 screens at both sizes; Chapter 3 (9 steps) fits at 1280. Open panel at both docks on every screen: y 96 to at most 632, opaque, on top, clear of the bar and Previous / Next.
 - walk: 618 ok, 0 fail. Coach on K1, W1, S04, S02, S22 by keyboard: open (line + chip), the chip by Enter (question + tip), Escape; grip arrows; resume keeps the dock.

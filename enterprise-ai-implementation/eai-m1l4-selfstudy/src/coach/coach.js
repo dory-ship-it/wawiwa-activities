@@ -2,7 +2,7 @@
 // that docks left or right inside the stage (stage px; the stage scales as a whole):
 //   launcher  in the bar right after the chapter name: a 56 px white disc, the robot face, 3 px turquoise
 //             ring; locked on the knowledge check (S21: 60% opacity, grey ring, a lock badge)
-//   panel     340 wide, as high as its content (at most 536), top 96, 24 from the left (dock l, the
+//   panel     340 wide, 536 high (Noy: to the foot of the page), top 96, 24 from the left (dock l, the
 //             default, by the launcher) or the right (dock r): y 96 to 632, so it never covers the bar or
 //             reaches Previous / Next. Above main and the footer, below the menu and dialogs. A non-modal
 //             dialog; Escape closes it and the focus goes back to the launcher. Drag it by the grip (it
@@ -21,9 +21,9 @@
 // Nothing the learner types is kept anywhere. Review mode (?review=1) writes nothing; ?coach=hint |
 // open | tip | right | thinking | cap | demo shows that state on load (the review page's coach row).
 // No learner-facing text here: every string arrives from content ui.coach.
-import { h, reducedMotion } from '../util.js?v=bd7ed3c4';
-import { glyph } from '../icons.js?v=bd7ed3c4';
-import { ask } from './transport.js?v=bd7ed3c4';
+import { h, reducedMotion } from '../util.js?v=96dc38c7';
+import { glyph } from '../icons.js?v=96dc38c7';
+import { ask } from './transport.js?v=96dc38c7';
 
 const HINT_CODE = 'a';
 const TOP = 96, BOTTOM = 632; // the panel's box in stage px
