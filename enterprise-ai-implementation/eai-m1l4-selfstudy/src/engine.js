@@ -8,25 +8,25 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=2d9f5392';
-import { createZones } from './zones.js?v=2d9f5392';
-import { createMenu, openDialog } from './menu.js?v=2d9f5392';
-import { initTooltips, applyTerms } from './tooltip.js?v=2d9f5392';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=2d9f5392';
-import { decision } from './templates/decision.js?v=2d9f5392';
-import { input } from './templates/input.js?v=2d9f5392';
-import { sortDeck } from './templates/sortdeck.js?v=2d9f5392';
-import { bpmn } from './templates/bpmn.js?v=2d9f5392';
-import { flags } from './templates/flags.js?v=2d9f5392';
-import { explorer } from './templates/explorer.js?v=2d9f5392';
-import { video } from './templates/video.js?v=2d9f5392';
-import { handoff } from './templates/handoff.js?v=2d9f5392';
-import { check } from './templates/check.js?v=2d9f5392';
-import { result } from './templates/result.js?v=2d9f5392';
-import { end } from './templates/end.js?v=2d9f5392';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=2d9f5392';
-import { createGhost, stopGhost } from './ghost.js?v=2d9f5392';
-import { createTracking } from './tracking/index.js?v=2d9f5392';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=a6a1e898';
+import { createZones } from './zones.js?v=a6a1e898';
+import { createMenu, openDialog } from './menu.js?v=a6a1e898';
+import { initTooltips, applyTerms } from './tooltip.js?v=a6a1e898';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=a6a1e898';
+import { decision } from './templates/decision.js?v=a6a1e898';
+import { input } from './templates/input.js?v=a6a1e898';
+import { sortDeck } from './templates/sortdeck.js?v=a6a1e898';
+import { bpmn } from './templates/bpmn.js?v=a6a1e898';
+import { flags } from './templates/flags.js?v=a6a1e898';
+import { explorer } from './templates/explorer.js?v=a6a1e898';
+import { video } from './templates/video.js?v=a6a1e898';
+import { handoff } from './templates/handoff.js?v=a6a1e898';
+import { check } from './templates/check.js?v=a6a1e898';
+import { result } from './templates/result.js?v=a6a1e898';
+import { end } from './templates/end.js?v=a6a1e898';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=a6a1e898';
+import { createGhost, stopGhost } from './ghost.js?v=a6a1e898';
+import { createTracking } from './tracking/index.js?v=a6a1e898';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -154,7 +154,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=2d9f5392').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=a6a1e898').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -202,6 +202,10 @@ class Lesson {
     // scene, chosen by the template; the photo is the screen's own (O1) or its chapter's
     const chapter = this.chapters.find((c) => c.id === screen.chapter);
     this.zones.setScene(tpl.scene ? tpl.scene(screen) : 'focus', screen.photo || chapter?.photo || null);
+    // QA1: the next screen's photo loads now, so it is there when that screen opens (no dark gap)
+    const after = this.screens[this.order[this.order.indexOf(id) + 1]];
+    const afterPhoto = after && (after.photo || this.chapters.find((c) => c.id === after.chapter)?.photo);
+    if (afterPhoto?.src && !this.thumb) new Image().src = afterPhoto.src;
     const done = this.doneSet();
     this.shownAt = performance.now();
     this.mounted = tpl.mount({

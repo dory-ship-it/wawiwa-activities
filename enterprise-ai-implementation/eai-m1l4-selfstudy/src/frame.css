@@ -448,6 +448,10 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-video-title { font-weight: 700; color: var(--wl-white); }
 .w-guiding { margin-top: 5.12px; font: 400 18.56px/1.35 var(--wl-font-ui); color: var(--wl-glass-text); }
 .w-guiding b { font-weight: 700; color: var(--wl-aqua-text); }
+/* QA1: in the narrower column (a stop or the transcript open) the heading block keeps its height: the
+   h1 on one line, a touch smaller, and "Watch for" smaller too, so neither slips under the frame */
+.w-main[data-layout="video"]:is([data-side="open"], [data-side="stop"]) .w-video-head .w-instruction { font-size: 26.88px; white-space: nowrap; }
+.w-main[data-layout="video"]:is([data-side="open"], [data-side="stop"]) .w-guiding { font-size: 16.64px; line-height: 1.3; }
 /* the frame: never cropped (contain), the picture uncovered but for the caption and the ready Play disc */
 .w-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 15.36px 15.36px 0 0; background: var(--wl-o1-ground); }
 .w-video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; background: var(--wl-o1-ground); }
@@ -456,6 +460,11 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
   background: var(--wl-white); box-shadow: 0 0 0 6.4px var(--wl-turquoise), 0 0 0 15.36px var(--wl-halo); color: var(--wl-teal-ink); cursor: pointer; }
 .w-caption { position: absolute; left: 50%; bottom: 12.8px; z-index: 1; width: max-content; max-width: calc(100% - 51.2px); transform: translateX(-50%); padding: 6.4px 17.92px; border-radius: 10.24px;
   background: var(--wl-quote-glass); font: 700 20.48px/1.3 var(--wl-font-ui); color: var(--wl-white); text-align: center; }
+/* QA1: off the film's own labels (media.captionPlaces): the top edge, or one side of the picture
+   (V2: the left 60%, beside the film's AS-IS map panel) */
+.w-caption[data-place^="top"] { top: 12.8px; bottom: auto; }
+.w-caption[data-place="top-left"], .w-caption[data-place="bottom-left"] { left: 30%; max-width: 56%; }
+.w-caption[data-place="top-right"] { left: 75%; max-width: 46%; }
 /* the player bar: under the picture, attached to the frame, as wide */
 .w-controls { height: var(--v-ctrl); display: flex; align-items: center; gap: 17.92px; padding: 0 17.92px; border-radius: 0 0 15.36px 15.36px; background: var(--wl-o1-ground); }
 .w-play-btn, .w-tool { flex: none; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--wl-radius-btn); background: transparent; color: var(--wl-white); cursor: pointer; }

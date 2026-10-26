@@ -633,7 +633,10 @@ const G = {
       root.append(r); return r;
     });
     const mk = (txt, x, y, w, hh) => { const b = h('div', 'abs', { left: x + 'px', top: y + 'px', width: w + 'px', height: hh + 'px', borderRadius: '14px', background: '#fff', color: 'var(--navy)', font: '800 22px/1.1 Assistant', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', boxShadow: '0 10px 22px rgba(0,0,0,.35)' }, txt); root.append(b); return b; };
-    const b1 = mk(g.steps[0], 130, top + 40, 150, 64), b2 = mk(g.steps[1], 300, top + lh + 40, 150, 64), b3 = mk(g.steps[2], 565, top + lh + 40, 165, lh + 64);
+    // QA1: firstLane puts the first step in its owner's lane (default 0); trigger (optional) is the box in
+    // lane 0 that starts the process, e.g. the employee's question above the HR staff's "Receive"
+    const b1 = mk(g.steps[0], 130, top + (g.firstLane || 0) * lh + 40, 150, 64), b2 = mk(g.steps[1], 300, top + lh + 40, 150, 64), b3 = mk(g.steps[2], 565, top + lh + 40, 165, lh + 64);
+    const b0 = g.trigger ? mk(g.trigger, 130, top + 40, 150, 64) : null;
     let svg = '<svg width="768" height="720" class="abs"><defs><marker id="la" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#EE3124"/></marker></defs>';
     svg += `<polygon id="gw" points="468,${top + lh + 72} 505,${top + lh + 38} 542,${top + lh + 72} 505,${top + lh + 106}" fill="#f2b544" opacity="0"/>`;
     svg += `<path id="ho" d="M505 ${top + lh + 106} L 505 ${top + 2 * lh + 72} L 556 ${top + 2 * lh + 72}" stroke="#EE3124" stroke-width="7" fill="none" marker-end="url(#la)" stroke-dasharray="220" stroke-dashoffset="220"/></svg>`;
@@ -647,7 +650,7 @@ const G = {
     return (t0) => {
       root.style.opacity = ramp(t0, g.a, g.a + 0.3) * (1 - ramp(t0, g.b - 0.3, g.b));
       lanes.forEach((r, i) => { const k = outCubic(ramp(t0, tLanes + i * 0.35, tLanes + i * 0.35 + 0.5)); r.style.opacity = k; r.style.transform = `translateX(${(1 - k) * -60}px)`; });
-      [b1, b2, b3].forEach((b, i) => { const s = g.a + 0.3 + i * 0.3; b.style.opacity = ramp(t0, s, s + 0.15); b.style.transform = `scale(${outBack(ramp(t0, s, s + 0.4))})`; });
+      [b0, b1, b2, b3].filter(Boolean).forEach((b, i) => { const s = g.a + 0.3 + i * 0.3; b.style.opacity = ramp(t0, s, s + 0.15); b.style.transform = `scale(${outBack(ramp(t0, s, s + 0.4))})`; });
       over.querySelector('#ho').setAttribute('opacity', 0);
       if (tGw != null) {
         over.querySelector('#gw').setAttribute('opacity', ramp(t0, tGw, tGw + 0.3));

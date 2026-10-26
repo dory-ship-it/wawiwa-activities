@@ -1,7 +1,7 @@
 // The chapters menu (createMenu, below) and the in-page dialog used for Help, the Start over confirm
 // and the resume prompt (never window.confirm).
-import { h, trapTab, focusables } from './util.js?v=2d9f5392';
-import { glyph } from './icons.js?v=2d9f5392';
+import { h, trapTab, focusables } from './util.js?v=a6a1e898';
+import { glyph } from './icons.js?v=a6a1e898';
 
 // In-page modal dialog. actions: [{ id, label, primary, cancel, onClick(close) }].
 // body: optional extra node under the text. inert: elements made inert while open. Returns { close, root }.

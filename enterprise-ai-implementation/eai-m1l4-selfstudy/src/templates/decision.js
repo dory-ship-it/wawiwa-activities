@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=2d9f5392';
-import { glyph, icon } from '../icons.js?v=2d9f5392';
-import { attachTip } from '../tooltip.js?v=2d9f5392';
-import { letter } from '../tracking/index.js?v=2d9f5392';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=2d9f5392';
-import { targetSteps } from '../ghost.js?v=2d9f5392';
+import { h, fmt, resolveLink } from '../util.js?v=a6a1e898';
+import { glyph, icon } from '../icons.js?v=a6a1e898';
+import { attachTip } from '../tooltip.js?v=a6a1e898';
+import { letter } from '../tracking/index.js?v=a6a1e898';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=a6a1e898';
+import { targetSteps } from '../ghost.js?v=a6a1e898';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -785,12 +785,17 @@ function close(ctx) {
     ctx.finishLesson();
     ctx.complete();
     done(true);
+    ctx.next(); // QA1: one action finishes the lesson and opens the closing screen (END)
   });
 
   const took = ctx.flags.get('take');
   if (took) cards.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.id === took)));
   if (ctx.finished()) { toStep2(false); done(false); }
-  else if (took) ctx.unlockNext({ focus: false, onNext: () => toStep2(true) });
+  else if (took) {
+    // QA1: back on the screen, the takeaway shows as picked with its line
+    zones.setFeedback({ state: 'neutral', text: screen.options.find((o) => o.id === took).feedback });
+    ctx.unlockNext({ focus: false, onNext: () => toStep2(true) });
+  }
 }
 
 // The downloadable lesson record (S22): a small self-contained HTML page with the case title, the

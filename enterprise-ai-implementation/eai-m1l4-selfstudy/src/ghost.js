@@ -27,8 +27,8 @@
 // Timing: in ~150 ms, then per step a 450 ms move, a tap with a ripple, a short hold; out by 3 s.
 // Any pointer or key input stops it at once. prefers-reduced-motion: no motion, a static hand and
 // arrow at the first target for 3 s.
-import { h, reducedMotion } from './util.js?v=2d9f5392';
-import { glyph } from './icons.js?v=2d9f5392';
+import { h, reducedMotion } from './util.js?v=a6a1e898';
+import { glyph } from './icons.js?v=a6a1e898';
 
 const SETTLE = 600, IDLE = 8000, STATIC = 3000;
 const MOVE = 450, TAP = 140, HOLD = 260, IN = 150, OUT = 200;
@@ -79,12 +79,16 @@ export function targetSteps(scope, target) {
     return rs.length ? { top: Math.min(...rs.map((r) => r.top)), bottom: Math.max(...rs.map((r) => r.bottom)) } : null;
   };
   const FROM_ABOVE = ['below-panel', 'gutter-left', 'gutter-low'];
-  // the sweep line: the right part of stacked options, the middle of a grid (between its columns)
+  // the sweep line: the right part of stacked options, the middle of a grid (between its columns), the
+  // gap after the first card of a single row (QA1: the middle of a row of three ran down a card's text)
   const sweepX = () => {
     const rs = opts().map((el) => el.getBoundingClientRect());
     if (!rs.length) return null;
     const l = Math.min(...rs.map((r) => r.left)), r = Math.max(...rs.map((x) => x.right));
-    return rs.some((x) => x.left > l + 1) ? (l + r) / 2 : r - GAP_INSET;
+    if (!rs.some((x) => x.left > l + 1)) return r - GAP_INSET;
+    const row = rs.every((x) => Math.abs(x.top - rs[0].top) < 2);
+    if (row && rs.length % 2) { const [a, b] = [...rs].sort((p, q) => p.left - q.left); return (a.right + b.left) / 2; }
+    return (l + r) / 2;
   };
   return (Array.isArray(target) ? target : [target]).flatMap((name) => {
     if (name === 'options-sweep') {
@@ -154,8 +158,10 @@ function run(stage, list, restore, chipOf) {
   const chip = typeof chipOf === 'function' ? chipOf() : chipOf; // (a function: the chip of the moment, S07)
   const targets = list.filter((s) => (s.el && s.el.isConnected) || (s.point && s.point()));
   const ripple = h('span', { class: 'w-ghost-ripple' });
-  const hand = h('div', { class: 'w-ghost', 'aria-hidden': 'true' }, ripple, glyph('g-hand', { size: HAND, className: 'w-ghost-hand' }),
-    chip ? h('span', { class: 'w-ghost-chip' }, chip) : null);
+  // the chip shows only once the hand has reached its last step (QA1: travelling with the hand, it
+  // covered the options' text on the way)
+  const chipEl = chip ? h('span', { class: 'w-ghost-chip', style: 'opacity: 0' }, chip) : null;
+  const hand = h('div', { class: 'w-ghost', 'aria-hidden': 'true' }, ripple, glyph('g-hand', { size: HAND, className: 'w-ghost-hand' }), chipEl);
   let done = false;
   const anims = [];
   const stop = () => {
@@ -186,6 +192,7 @@ function run(stage, list, restore, chipOf) {
 
   if (reducedMotion()) {
     hand.classList.add('w-ghost-static');
+    if (chipEl) chipEl.style.opacity = '1';
     hand.append(glyph('g-arrow', { size: 28.16, className: 'w-ghost-arrow' }));
     hand.style.transform = place(at(targets[0]));
     setTimeout(stop, STATIC);
@@ -217,6 +224,7 @@ function run(stage, list, restore, chipOf) {
         await anim(hand, [{ transform: place(to) + ' scale(1)' }, { transform: place(to) + ' scale(.88)' }, { transform: place(to) + ' scale(1)' }], { duration: TAP });
       }
       if (done) return;
+      if (chipEl && step === targets[targets.length - 1]) anim(chipEl, [{ opacity: 0 }, { opacity: 1 }], { duration: 150 });
       if (step.tap) step.tap();
       if (step.type) await typeInto(step.type.el, step.type.text, () => done);
       if (step.carry) carried = { el: step.carry, origin: to };

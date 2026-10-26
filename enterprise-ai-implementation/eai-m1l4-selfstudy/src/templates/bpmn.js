@@ -15,11 +15,11 @@
 // Tracking (label): one matching interaction when the last label is placed; the response records
 // each label's FIRST target by the label's one-character code (SCORM 1.2 matching: "s.a,g.b,e.c"),
 // correct only if every first drop was.
-import { h, fmt } from '../util.js?v=2d9f5392';
-import { glyph } from '../icons.js?v=2d9f5392';
-import { layout } from './stage.js?v=2d9f5392';
-import { dragDrop } from '../drag.js?v=2d9f5392';
-import { checkButton } from './decision.js?v=2d9f5392';
+import { h, fmt } from '../util.js?v=a6a1e898';
+import { glyph } from '../icons.js?v=a6a1e898';
+import { layout } from './stage.js?v=a6a1e898';
+import { dragDrop } from '../drag.js?v=a6a1e898';
+import { checkButton } from './decision.js?v=a6a1e898';
 
 const U = 1.28; // stage px per diagram unit
 const G = { W: 600, H: 254, PAD: 16, LANE: 74, HEAD: 96, X0: 145, PITCH: 97.5, STEP_W: 84, STEP_H: 42, R: 14, GATE: 22 };
@@ -144,10 +144,11 @@ function labelTask(ctx) {
       if (!c || !free.length) return [];
       const r = c.getBoundingClientRect();
       const grab = { x: r.left + 0.8 * r.width, y: r.top + 0.39 * r.height };
-      // toward the diagram's centre, stopping at 45% of the way (at the diagram's right edge, on no place)
+      // toward the diagram's lower part, stopping at 30% of the way (at the diagram's right edge, on no
+      // place; QA1: aimed at the centre, the label stopped over the end event "Answer received")
       const b = d.el.getBoundingClientRect();
-      const aim = { x: b.left + b.width * 0.62, y: b.top + b.height * 0.5 };
-      return [{ point: () => grab, carry: c, hold: 120 }, { point: () => ({ x: grab.x + (aim.x - grab.x) * 0.45, y: grab.y + (aim.y - grab.y) * 0.45 }), hold: 800 }];
+      const aim = { x: b.left + b.width * 0.62, y: b.bottom };
+      return [{ point: () => grab, carry: c, hold: 120 }, { point: () => ({ x: grab.x + (aim.x - grab.x) * 0.3, y: grab.y + (aim.y - grab.y) * 0.3 }), hold: 800 }];
     } }) : null;
 
   const check = checkButton(ui, ui.buttons.check, () => doCheck());

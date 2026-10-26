@@ -3,9 +3,9 @@
 //   tiles   (S07)  NL2: on the Focus wash, a 4 x 2 grid of tiles that open in place; after all eight the
 //                  heading becomes the question and the tiles answer it (one question, two attempts).
 // Tracking: tiles = the field number of the first answer. Retries as retry events.
-import { h, fmt } from '../util.js?v=2d9f5392';
-import { glyph } from '../icons.js?v=2d9f5392';
-import { layout, arrowNav, paintAnswer } from './stage.js?v=2d9f5392';
+import { h, fmt } from '../util.js?v=a6a1e898';
+import { glyph } from '../icons.js?v=a6a1e898';
+import { layout, arrowNav, paintAnswer } from './stage.js?v=a6a1e898';
 
 export const explorer = {
   mount(ctx) {
@@ -20,7 +20,7 @@ export const explorer = {
 // task icon, title. A tile opens in place (one at a time; Escape closes it): its title in teal ink
 // and its definition, the selected border; an opened tile keeps a done check in its disc. After all
 // eight the heading becomes the question, the counter line its hint, and every tile gets an answer
-// marker (the open one stays open to read). Wrong = retry, right = Next; the strip sits under the grid.
+// marker (QA1: all tiles close first). Wrong = retry, right = Next; the strip sits under the grid.
 // FX1 E5: no numbers on the tiles; the task icon bigger, in a soft round tile; an opened tile shows a
 // small done check in its corner; opening flips the tile to its back (none with reduced motion). The
 // question: two attempts (the attempt marker under the grid), then the right tile is marked and
@@ -96,7 +96,9 @@ function tiles(ctx) {
       flip(x, open);
       list.forEach(paintDisc);
       count();
-      if (visited.size === list.length) unlock(); // the last tile stays open to read; any click now answers
+      // QA1: the tiles close as the question comes (opened in order, the last one open was the answer,
+      // Field 8); any click now answers
+      if (visited.size === list.length) { list.forEach((y) => flip(y, false)); unlock(); }
       return;
     }
     if (solved || i === chosen) return;
