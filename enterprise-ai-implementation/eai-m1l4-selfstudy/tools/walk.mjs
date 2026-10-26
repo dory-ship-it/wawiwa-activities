@@ -1437,7 +1437,7 @@ expect(ch34 === 'L4_W3_1=c/neutral L4_V2_1=a/wrong L4_V2_2=b/wrong L4_V2_3=a/wro
   + `L4_S17B_1=${NOTES.aifit}/neutral L4_S17B_2=${NOTES.human}/neutral`,
   `bus, chapters 3 and 4 first attempts: ${ch34}`);
 const ch56 = IDS_CH56.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
-expect(ch56 === `L4_S18A_1=1.b,2.a,3.c,4.d/wrong L4_S18_1=a/wrong L4_S18_2=${TITLE}/neutral L4_S20_1=b/neutral L4_S20_2=a/neutral L4_S20_3=b/neutral `
+expect(ch56 === `L4_S18A_1=3.c,1.b,4.d,2.a/wrong L4_S18_1=a/wrong L4_S18_2=${TITLE}/neutral L4_S20_1=b/neutral L4_S20_2=a/neutral L4_S20_3=b/neutral `
   + 'L4_S20_4=c/neutral L4_S21_1=a/wrong L4_S21_2=b/correct L4_S21_3=a/correct L4_S21_4=d/correct L4_S21_5=5,6/correct L4_S22_1=a/neutral', `bus, chapters 5 and 6 first attempts: ${ch56}`);
 expect(ch2 === 'L4_W2_1=a/neutral/choice L4_S04_1=1.b,2.b,3.a,4.b,5.c/wrong/matching L4_S05B_1=s.b,g.c,e.a/wrong/matching L4_S06_1=b/wrong/choice L4_S06_2=a/wrong/choice '
   + `L4_S07_1=7/wrong/choice L4_S08_1=a/wrong/choice L4_S08_2=c/correct/choice L4_S08_3=a/correct/choice L4_S08B_1=${SKETCH.trigger}/neutral/fill-in L4_S08B_2=${SKETCH.steps}/neutral/fill-in L4_S08B_3=${SKETCH.output}/neutral/fill-in`, `bus, chapter 2 first attempts: ${ch2}`);
@@ -1448,7 +1448,7 @@ expect(retries.join() === 'L4_S01_1=b/correct,L4_W1_1=b/neutral,L4_V1_1=b/correc
   + ',L4_V2_1=b/correct,L4_V2_2=a/correct,L4_V2_3=b/correct,L4_S09_1=1.a,2.a,3.b,4.c,5.d,6.d/correct,L4_S10_1=c/correct,L4_S11_1=d/correct'
   + ',L4_S12_1=4,7/correct,L4_S13_1=s.1,e.5/correct,L4_S14_1=b/correct,L4_S15_1=a/correct'
   + ',L4_S16_1=1.a,2.d,3.b,4.d,5.d,6.c/correct,L4_S17_1=a.3,b.1,c.5,d.4,e.2/correct'
-  + ',L4_S18A_1=1.a,2.b,3.c,4.d/correct,L4_S18_1=b/correct,L4_S20_1=a/neutral,L4_S21_1=c/correct',
+  + ',L4_S18A_1=3.c,1.a,4.d,2.b/correct,L4_S18_1=b/correct,L4_S20_1=a/neutral,L4_S21_1=c/correct',
   `bus: retries as retry events (${retries.join(', ')})`);
 expect(!page.errors.length, 'main path: no console errors' + (page.errors.length ? ': ' + page.errors.join(' | ') : ''));
 if (SCORM) await scormChecks(page, IDS);

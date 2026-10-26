@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=febfa1ab';
-import { glyph, icon } from '../icons.js?v=febfa1ab';
-import { attachTip } from '../tooltip.js?v=febfa1ab';
-import { letter } from '../tracking/index.js?v=febfa1ab';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=febfa1ab';
-import { targetSteps } from '../ghost.js?v=febfa1ab';
+import { h, fmt, resolveLink } from '../util.js?v=2d9f5392';
+import { glyph, icon } from '../icons.js?v=2d9f5392';
+import { attachTip } from '../tooltip.js?v=2d9f5392';
+import { letter } from '../tracking/index.js?v=2d9f5392';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=2d9f5392';
+import { targetSteps } from '../ghost.js?v=2d9f5392';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -817,6 +817,15 @@ function lessonRecord(ctx) {
   const notes = rowsOf('S17B');
   const metric = rowsOf('S12B');
   const score = sc.raw === null ? r.empty : fmt(r.scoreLine, { x: sc.x, n: sc.n, p: sc.raw, a: ctx.attempt(), pass: content.lesson.completion.passMark });
+  // the check item by item (QA1): S21R's short name for each item (stemB on a version b retake) and its
+  // first answer in this attempt
+  const vb = ctx.checkVersion() === 'b';
+  const s21r = content.screens.find((s) => s.id === 'S21R');
+  const items = sc.raw === null ? '' : content.screens.find((s) => s.id === 'S21').items.map((it) => {
+    const m = s21r.missed.find((x) => x.item === it.id);
+    const res = ctx.firstAnswer(vb && it.b ? it.b.trackingId : it.trackingId)?.result;
+    return `<tr><td>${esc(vb && m.stemB ? m.stemB : m.stem)}</td><td>${esc(res === 'correct' ? r.itemRight : res ? r.itemMissed : r.empty)}</td></tr>`;
+  }).join('');
   return `<!DOCTYPE html><html lang="${esc(content.lesson.lang)}"><head><meta charset="UTF-8"><title>${esc(r.heading)}: ${esc(content.lesson.title)}</title>`
     + '<style>body{font:16px/1.5 Assistant,Arial,sans-serif;color:#16293A;max-width:720px;margin:40px auto;padding:0 20px}h1,h2{color:#255777}'
     + 'td{padding:6px 12px 6px 0;vertical-align:top;border-bottom:1px solid #E2DED6}table{border-collapse:collapse;width:100%}</style></head><body>'
@@ -828,5 +837,5 @@ function lessonRecord(ctx) {
     + `<h2>${esc(r.metric)}</h2><table>${metric}</table>`
     + `<h2>${esc(r.selfCheck)}</h2><table>${rows}<tr><td>${esc(r.risk)}</td><td>${val(chip && chip.label)}</td></tr></table>`
     + `<h2>${esc(r.takeaway)}</h2><p>${val(take && take.label)}</p>`
-    + `<h2>${esc(r.score)}</h2><p>${esc(score)}</p></body></html>`;
+    + `<h2>${esc(r.score)}</h2><p>${esc(score)}</p>${items ? `<table>${items}</table>` : ''}</body></html>`;
 }

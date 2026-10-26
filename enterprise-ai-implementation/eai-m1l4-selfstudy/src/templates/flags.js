@@ -13,11 +13,11 @@
 // Tracking: one interaction when the last flag is placed, from each flag's FIRST drop:
 //   choice (map)     the first fields, in number order ("4,7"), correct only if both were right
 //   matching (line)  the flag's one-character code and its first step ("s.1,e.5"), SCORM 1.2 matching
-import { h, fmt } from '../util.js?v=febfa1ab';
-import { glyph } from '../icons.js?v=febfa1ab';
-import { layout } from './stage.js?v=febfa1ab';
-import { dragDrop } from '../drag.js?v=febfa1ab';
-import { checkButton } from './decision.js?v=febfa1ab';
+import { h, fmt } from '../util.js?v=2d9f5392';
+import { glyph } from '../icons.js?v=2d9f5392';
+import { layout } from './stage.js?v=2d9f5392';
+import { dragDrop } from '../drag.js?v=2d9f5392';
+import { checkButton } from './decision.js?v=2d9f5392';
 
 export const flags = {
   mount(ctx) {

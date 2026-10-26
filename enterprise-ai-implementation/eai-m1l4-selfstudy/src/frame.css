@@ -39,6 +39,7 @@ em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
 /* FX1 (Kit 13): the Stage photo runs behind the bar (the bar is dark translucent over it) */
 .w-scene-photo { position: absolute; inset: 0; background-size: cover; background-repeat: no-repeat; }
 .w-scene-full { top: 0; }
+.w-scene-photo[data-mirror="true"], .w-wash-photo[data-mirror="true"] { scale: -1 1; } /* QA1: a screen's photo flipped (scale, so the push-in transform still runs) */
 .w-o1-veil { position: absolute; inset: 0; background: var(--wl-o1-veil); }
 /* FX3: less blur, so the photo reads as a place, under a dark veil in the bar's tone; the stage ground
    is the veil's average tone, so the contrast check measures text on the wash against it */

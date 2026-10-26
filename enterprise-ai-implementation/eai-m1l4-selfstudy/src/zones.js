@@ -10,8 +10,8 @@
 // every new screen) and the band: the hint row (hint text, the band's tool such as Check or Resume)
 // and the feedback strip (aria-live polite) flush to the bottom edges of the panel it sits in.
 // No learner-facing text here: every string arrives from the content JSON.
-import { h, fmt, reducedMotion } from './util.js?v=febfa1ab';
-import { glyph, icon } from './icons.js?v=febfa1ab';
+import { h, fmt, reducedMotion } from './util.js?v=2d9f5392';
+import { glyph, icon } from './icons.js?v=2d9f5392';
 
 const TONE = { correct: 'correct', neutral: 'neutral', wrong: 'wrong', notice: 'neutral', guess: 'neutral', partial: 'neutral', pause: 'neutral' };
 const LEAD = { correct: 'g-ok-disc', wrong: 'g-no-disc', neutral: 'guess' };
@@ -27,16 +27,17 @@ export function createZones(stage, content, { onMenu, onPrev, onNext }) {
   let lastScene = '';
   // mode: 'stage' | 'focus' | 'title' (O1) | 'end' (FX2 END: O1's photo and veil, the footer shown) |
   // 'plain' (FX2 A: the video, the dark Stage ground with no photo, so nothing distracts from the film);
-  // photo: { src, position } from the content (chapter or screen). The bar is on every screen, dark
-  // on every scene (FX3: the Focus wash too, now a dark veil in the bar's tone).
+  // photo: { src, position, mirror } from the content (chapter or screen; mirror: true flips it left to
+  // right, QA1: the people out from under a card). The bar is on every screen, dark on every scene
+  // (FX3: the Focus wash too, now a dark veil in the bar's tone).
   function setScene(mode, photo) {
     stage.dataset.scene = mode;
     stage.dataset.bar = 'dark';
-    const key = mode + '|' + (photo?.src || '');
+    const key = mode + '|' + (photo?.src || '') + (photo?.mirror ? '|mirror' : '');
     if (key === lastScene) return; // the same photo in the same mode stays still (push-in once)
     lastScene = key;
     const layer = (cls) => {
-      const el = h('div', { class: cls });
+      const el = h('div', { class: cls, dataset: photo?.mirror ? { mirror: 'true' } : {} });
       if (photo?.src) { el.style.backgroundImage = `url("${photo.src}")`; el.style.backgroundPosition = photo.position || '50% 50%'; }
       return el;
     };
