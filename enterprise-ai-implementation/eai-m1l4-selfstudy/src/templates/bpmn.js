@@ -15,11 +15,11 @@
 // Tracking (label): one matching interaction when the last label is placed; the response records
 // each label's FIRST target by the label's one-character code (SCORM 1.2 matching: "s.a,g.b,e.c"),
 // correct only if every first drop was.
-import { h, fmt } from '../util.js?v=96dc38c7';
-import { glyph } from '../icons.js?v=96dc38c7';
-import { layout } from './stage.js?v=96dc38c7';
-import { dragDrop } from '../drag.js?v=96dc38c7';
-import { checkButton } from './decision.js?v=96dc38c7';
+import { h, fmt } from '../util.js?v=e712afe0';
+import { glyph } from '../icons.js?v=e712afe0';
+import { layout } from './stage.js?v=e712afe0';
+import { dragDrop } from '../drag.js?v=e712afe0';
+import { checkButton } from './decision.js?v=e712afe0';
 
 const U = 1.28; // stage px per diagram unit
 const G = { W: 600, H: 254, PAD: 16, LANE: 74, HEAD: 96, X0: 145, PITCH: 97.5, STEP_W: 84, STEP_H: 42, R: 14, GATE: 22 };

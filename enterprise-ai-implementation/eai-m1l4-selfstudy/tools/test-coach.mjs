@@ -241,6 +241,18 @@ console.log('\n7. demo');
   const rm = await look(p);
   expect(!rm.open && rm.hint, 'reduced motion: no demo, only the hint');
   await p.close();
+  // QA2: a learner who opened the coach on an earlier screen gets no demo; a panel they left open stays theirs
+  p = await openMotion('?reset=1&screen=O2');
+  await p.click('.w-coach-launcher'); await settle(p);
+  const line = (await look(p)).msgs;
+  await p.evaluate((x) => window.__l4.go(x), demoOn);
+  await wait(2400);
+  const f1 = await look(p);
+  await wait(3000);
+  const f2 = await look(p);
+  expect(f1.open && f2.open && f1.msgs !== UI.demo && f2.msgs !== UI.demo && !f2.hint && f2.h.includes('a') && line,
+    `coach opened on O2: no demo on ${demoOn}, the panel stays open with the screen's own line, no hint (h ${f2.h})`);
+  await p.close();
 }
 await browser.close();
 server.close();

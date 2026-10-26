@@ -2,7 +2,7 @@
 // Shown on hover or keyboard focus, hidden on Escape, linked with aria-describedby.
 // One tip box per stage, positioned in stage px (the stage is scaled as a whole), in the frames'
 // quote-glass look (dark glass, white text, 30cqw wide at most).
-import { h, nextId } from './util.js?v=96dc38c7';
+import { h, nextId } from './util.js?v=e712afe0';
 
 let tipBox = null;
 let stageEl = null;

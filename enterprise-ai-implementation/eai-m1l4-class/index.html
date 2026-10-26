@@ -5981,7 +5981,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     toastNode.textContent = '';
     toastNode.appendChild(C.svgEl(GLYPH.medal, 'm-toast-medal'));
     toastNode.appendChild(el('div', 'm-toast-big', title));
-    if (points) toastNode.appendChild(el('div', 'm-toast-pts', '+' + points + ' Insight'));
+    if (points) toastNode.appendChild(el('div', 'm-toast-pts', (points > 0 ? '+' : '') + points + ' Insight'));
     toastNode.classList.add('m-toast-show');
     if (toastTimer) window.clearTimeout(toastTimer);
     toastTimer = window.setTimeout(function () {
@@ -7511,6 +7511,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     state.shell.hud.setPoints(pts);
     if (pts > (state.lastPts || 0) && state.booted) {
       M.toast('Field locked in', pts - (state.lastPts || 0));
+    } else if (pts < (state.lastPts || 0) && state.booted) {
+      // a Ready field went back (the live coach said Light or Revise, or an edit): say so, never drop points silently
+      M.toast('Field needs another look', pts - (state.lastPts || 0));
     }
     state.lastPts = pts;
 

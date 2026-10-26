@@ -9,7 +9,8 @@
 //             snaps to the nearer dock) or press Arrow Left / Right on the grip.
 //   demo      once, on the goals screen (ui.coach.demoOn): the launcher pulses, the panel opens by itself
 //             with one line, closes, and "Stuck? Ask me." stays beside the launcher with "Got it". Any key
-//             or click ends the demo at once. Reduced motion: only the "Stuck? Ask me." bubble.
+//             or click ends the demo at once. Reduced motion: only the "Stuck? Ask me." bubble. Never for
+//             a learner who already opened the coach on an earlier screen.
 // Offline only, kept short (Noy, 26 Oct 2026: no text that is not needed): the panel shows the screen
 // type's opening line and one chip, "What do I do here?"; the chip is the learner's message, and the coach
 // answers with the screen's tip (content: screen.coach.tip, copied from the screen's hint or drafted).
@@ -21,9 +22,9 @@
 // Nothing the learner types is kept anywhere. Review mode (?review=1) writes nothing; ?coach=hint |
 // open | tip | right | thinking | cap | demo shows that state on load (the review page's coach row).
 // No learner-facing text here: every string arrives from content ui.coach.
-import { h, reducedMotion } from '../util.js?v=96dc38c7';
-import { glyph } from '../icons.js?v=96dc38c7';
-import { ask } from './transport.js?v=96dc38c7';
+import { h, reducedMotion } from '../util.js?v=e712afe0';
+import { glyph } from '../icons.js?v=e712afe0';
+import { ask } from './transport.js?v=e712afe0';
 
 const HINT_CODE = 'a';
 const TOP = 96, BOTTOM = 632; // the panel's box in stage px
@@ -109,9 +110,18 @@ export function createCoach(stage, content, { zones, review = false, thumb = fal
     if (focus && !thumb) panel.focus({ preventScroll: true }); // the chip is gone: the dialog keeps the focus
   }
 
+  // the learner found the coach on their own: no demo for them later (QA2: the demo used to take over a
+  // panel the learner had opened on an earlier screen, then close it)
+  function markFound() {
+    if (review) return;
+    const st = getState();
+    if (!(st.h || '').includes(HINT_CODE)) st.h = (st.h || '') + HINT_CODE;
+  }
+
   function openPanel({ focus = true, mode = 'offline' } = {}) {
     stopDemo();
     hideHint();
+    markFound();
     open = true;
     panel.hidden = false;
     launcher.setAttribute('aria-expanded', 'true');
