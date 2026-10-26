@@ -15,7 +15,8 @@ const BASE = `http://127.0.0.1:${server.address().port}/`;
 const browser = await puppeteer.launch({ executablePath: chromePath(), headless: true, args: ['--no-first-run', '--hide-scrollbars'] });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const openCoach = (p) => p.click('.w-coach-launcher');
-const right = async (p) => { await openCoach(p); await p.focus('.w-coach-grip'); await p.keyboard.press('ArrowRight'); await p.focus('.w-coach-panel'); };
+// the right dock, picked on the grip (the panel opens on the left until the learner moves it)
+const side = (key) => async (p) => { await openCoach(p); await p.focus('.w-coach-grip'); await p.keyboard.press(key); await p.focus('.w-coach-panel'); };
 // the first-use hint shows on O2 only; on S04 it is shown as it would be there (test only)
 const hint = (p) => p.evaluate(() => { const c = window.__l4.coach; c.hint.style.left = c.launcher.offsetLeft + 'px'; c.hint.hidden = false; });
 const passed = (p) => p.evaluate(() => { const s = window.__l4.state; Object.assign(s.a, { L4_S21_1: 'c|c', L4_S21_2: 'b|c', L4_S21_3: 'a|c', L4_S21_4: 'd|c', L4_S21_5: '5,6|c' }); s.k = { n: 1, s: 100, p: 1 }; s.d.push('S21'); window.__l4.go('END'); });
@@ -23,7 +24,7 @@ const passed = (p) => p.evaluate(() => { const s = window.__l4.state; Object.ass
 const SHOTS = [
   ['s04-closed-hint', 'S04', hint],
   ['s04-open-left', 'S04', openCoach],
-  ['s04-open-right', 'S04', right],
+  ['s04-open-right', 'S04', side('ArrowRight')],
   ['s02-open', 'S02', openCoach],
   ['s19-open', 'S19', openCoach],
   ['s21-locked', 'S21', openCoach],

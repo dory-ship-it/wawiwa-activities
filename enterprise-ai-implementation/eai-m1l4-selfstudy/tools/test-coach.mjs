@@ -8,6 +8,8 @@
 //   4. suspend_data with the dock set (g.cd = 'r'): under 4096 on a heavy state, and the dock
 //      comes back on resume
 //   5. nothing typed is kept: the input is disabled; review mode writes no dock and no hint letter
+//   6. where it opens: with no side picked, the left dock on every slice screen; a right dock the learner
+//      picks stays on later screens
 import puppeteer from 'puppeteer-core';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -174,6 +176,28 @@ console.log('\n5. nothing kept');
   await r.close();
 }
 
+/* ---- 6. where it opens: on the left, by the launcher, on every screen until the learner moves it
+   (Noy, 26 Oct 2026: left is the more intuitive side); a right dock stays on later screens ---- */
+console.log('\n6. left by default');
+{
+  const notLeft = [];
+  for (const id of C.lesson.slice) {
+    const p = await open(`?reset=1&screen=${id}`);
+    await p.keyboard.press('Shift'); // any key stops a ghost hand
+    await p.click('.w-coach-launcher'); await settle(p);
+    const r = await p.evaluate(() => ({ dock: document.querySelector('.w-coach-panel').dataset.dock, cd: window.__l4.state.g.cd }));
+    if (r.dock !== 'l' || r.cd !== undefined) notLeft.push(`${id} ${r.dock}`);
+    await p.close();
+  }
+  expect(!notLeft.length, `no side picked: all ${C.lesson.slice.length} screens open the coach on the left${notLeft.length ? ' (not: ' + notLeft.join(', ') + ')' : ''}`);
+  const p = await open('?reset=1&screen=S04');
+  await p.click('.w-coach-launcher'); await settle(p);
+  await p.focus('.w-coach-grip'); await p.keyboard.press('ArrowRight');
+  const picked = [];
+  for (const id of ['S05a', 'S05b', 'S09', 'K4']) { await p.evaluate((x) => window.__l4.go(x), id); await settle(p); picked.push(await p.evaluate(() => document.querySelector('.w-coach-panel').dataset.dock)); }
+  expect(picked.every((d) => d === 'r'), `the learner's right dock stays on S05a, S05b, S09, K4 (${picked.join(', ')})`);
+  await p.close();
+}
 await browser.close();
 server.close();
 console.log(fails.length ? `\ntest:coach FAILED (${fails.length})` : '\ntest:coach passed');

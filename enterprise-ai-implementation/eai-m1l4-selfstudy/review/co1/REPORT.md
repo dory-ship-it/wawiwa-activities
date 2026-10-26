@@ -2,13 +2,13 @@ Weekly usage before: 23% (all models)
 
 # EAI L4 CO1: in-lesson AI coach, offline mode
 
-Run co1, 26 Oct 2026. Code committed by Noy as c3cb97f (not pushed). This report is the only new file.
+Run co1, 26 Oct 2026. Code committed by Noy as c3cb97f (not pushed). This report and the test:coach default-dock check are a run commit. Not pushed.
 
 ## What was built
 - Launcher in the top bar after the chapter name on all 43 screens (O1 and END too): 56 px white disc, 3 px turquoise ring, the robot face 46 px (glyph `coach` in src/icons.js). Button, aria-label "Open the coach", aria-expanded, white focus ring on the dark bar.
 - Panel (src/coach/coach.js, src/frame.css): 340 wide, to content, max 536; dock left (24, 96) or right; non-modal dialog "Wawiwa AI Coach"; messages in an aria-live log; Escape closes and returns focus to the launcher; no slide or fade with reduced motion. z-index 10: over main and the footer, under the menu (30) and dialogs (60).
 - Header, bubbles, notice, chips, input pill, send disc, privacy line and disabled look as specified; colours as new `--wl-coach-*` tokens.
-- Drag by the grip snaps to the nearer dock; Arrow Left/Right on the grip switch it; the dock is kept as state.g.cd = 'r'.
+- Drag by the grip snaps to the nearer dock; Arrow Left/Right on the grip switch it; the dock is kept as state.g.cd = 'r'. The panel opens on the left, by the launcher, until the learner moves it (Noy, 26 Oct: more intuitive; a best-side-per-screen default was tried and dropped).
 - Offline state on every screen: opening line by kind, then "Live coach is offline. Here is a tip:" and the tip; input disabled ("Tips only for now"), chips hidden.
 - S21 locked (60%, grey ring, lock badge, only the notice); unlocked again on S21R.
 - Thinking and cap states are built and shown only on the review page.
@@ -45,15 +45,14 @@ Run co1, 26 Oct 2026. Code committed by Noy as c3cb97f (not pushed). This report
 - check: passed (new check 16: no network code or proxy URL, every screen's kind and tip, S21 locked, pack present; coach contrast pairs 5.2:1 to 15.7:1).
 - test:fit --sizes=1280x720,1600x900: 1084 ok, 0 fail. Launcher on all 43 screens at both sizes; Chapter 3 (9 steps) fits at 1280. Open panel at both docks on every screen: y 96 to at most 632, opaque, on top, clear of the bar and Previous / Next.
 - walk: 608 ok, 0 fail. Coach on K1, W1, S04, S02, S22 by keyboard; Escape; grip Arrow Right/Left; resume keeps the right dock.
-- test:coach (new): 21 ok, 0 fail. No LMSSetValue/LMSCommit and no request while used; S21 locked, S21R unlocked; suspend_data 2630 of 4096 on a heavy state with cd (+15 chars); review mode writes nothing.
+- test:coach (new): 23 ok, 0 fail. All 43 screens open on the left with no side picked; a right dock stays on later screens. No LMSSetValue/LMSCommit and no request while used; S21 locked, S21R unlocked; suspend_data 2630 of 4096 on a heavy state with cd (+15 chars); review mode writes nothing.
 - test:scorm: 506 ok, 0 fail. test:review: 21 ok, 0 fail (the coach row's 5 states).
 
 ## Screens (review/co1/screens, main state)
 01 S04 closed + hint, 02 S04 open left (+1600x900), 03 S04 open right (+1600x900), 04 S02 open, 05 S19 open, 06 S21 locked, 07 END open, 08 O2 first-use hint.
 
 ## Open for Noy
-- Approve the 13 drafted tips and deviations 1 to 5.
-- At the left dock the panel covers the start of S04's heading and its card (opaque, as specified). Should the default dock be right on drag-and-drop screens?
+- Approve the 13 drafted tips and deviations 1 to 6.
 - Live run: swap ask() for the Practice Studio engine after Dor approves; turn on input and chips there.
 
-Weekly usage after: 24% (all models)
+Weekly usage after: 25% (all models)
