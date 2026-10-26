@@ -154,6 +154,9 @@ export function measureLayout() {
     ['.w-tip', 'the glossary tooltip sits over the text it explains while it is open'],
   ];
   const layered = (el) => LAYERS.some(([sel]) => el.closest(sel));
+  // CO1: opaque layers over the screen (the coach panel and its first-use hint): a text run under one is
+  // hidden by it, not drawn over (tools/test-coach.mjs and test-fit section 4 check they are opaque)
+  const OPAQUE = '.w-coach-panel, .w-coach-hint';
   const runs = textRuns(overlay || stage).filter((t) => !layered(t.node.parentElement) && (!overlay || overlay.contains(t.node.parentElement)))
     .map((t) => ({ ...t, top: t.top + 0.22 * t.h, bottom: t.bottom - 0.22 * t.h, left: t.left + 1, right: t.right - 1 }));
   const textOverlaps = [];
@@ -161,6 +164,7 @@ export function measureLayout() {
     for (let j = i + 1; j < runs.length; j++) {
       const a = runs[i], b = runs[j];
       if (a.node === b.node || a.node.parentElement.contains(b.node) || b.node.parentElement.contains(a.node)) continue;
+      if (a.node.parentElement.closest(OPAQUE) !== b.node.parentElement.closest(OPAQUE)) continue;
       if (a.bottom > b.top && a.top < b.bottom && a.right > b.left && a.left < b.right) textOverlaps.push(`"${a.what.slice(5)}" x "${b.what.slice(5)}"`);
     }
   }
@@ -204,7 +208,8 @@ export function measureLayout() {
     if (el.closest('[aria-disabled="true"], :disabled, [data-locked="true"]')) continue; // inactive control (WCAG 1.4.3)
     const cs = getComputedStyle(el);
     const size = parseFloat(cs.fontSize), weight = parseInt(cs.fontWeight, 10);
-    if (size < 14) small.push(`${t.what} ${size}px`);
+    // CO1: the coach panel's two meta lines are 12 px in the approved design (run co1, Noy)
+    if (size < 14 && !el.closest('.w-coach-sub, .w-coach-privacy')) small.push(`${t.what} ${size}px`);
     const fg = parse(cs.color), bg = bgOf(el);
     const r = ratio(fg.a < 1 ? over(fg, bg) : fg, bg);
     const large = size >= 24 || (size >= 18.66 && weight >= 700);

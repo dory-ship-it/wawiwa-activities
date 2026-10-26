@@ -8,25 +8,26 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=6ec78d4a';
-import { createZones } from './zones.js?v=6ec78d4a';
-import { createMenu, openDialog } from './menu.js?v=6ec78d4a';
-import { initTooltips, applyTerms } from './tooltip.js?v=6ec78d4a';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=6ec78d4a';
-import { decision } from './templates/decision.js?v=6ec78d4a';
-import { input } from './templates/input.js?v=6ec78d4a';
-import { sortDeck } from './templates/sortdeck.js?v=6ec78d4a';
-import { bpmn } from './templates/bpmn.js?v=6ec78d4a';
-import { flags } from './templates/flags.js?v=6ec78d4a';
-import { explorer } from './templates/explorer.js?v=6ec78d4a';
-import { video } from './templates/video.js?v=6ec78d4a';
-import { handoff } from './templates/handoff.js?v=6ec78d4a';
-import { check } from './templates/check.js?v=6ec78d4a';
-import { result } from './templates/result.js?v=6ec78d4a';
-import { end } from './templates/end.js?v=6ec78d4a';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=6ec78d4a';
-import { createGhost, stopGhost } from './ghost.js?v=6ec78d4a';
-import { createTracking } from './tracking/index.js?v=6ec78d4a';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=aad36f0b';
+import { createZones } from './zones.js?v=aad36f0b';
+import { createMenu, openDialog } from './menu.js?v=aad36f0b';
+import { initTooltips, applyTerms } from './tooltip.js?v=aad36f0b';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=aad36f0b';
+import { decision } from './templates/decision.js?v=aad36f0b';
+import { input } from './templates/input.js?v=aad36f0b';
+import { sortDeck } from './templates/sortdeck.js?v=aad36f0b';
+import { bpmn } from './templates/bpmn.js?v=aad36f0b';
+import { flags } from './templates/flags.js?v=aad36f0b';
+import { explorer } from './templates/explorer.js?v=aad36f0b';
+import { video } from './templates/video.js?v=aad36f0b';
+import { handoff } from './templates/handoff.js?v=aad36f0b';
+import { check } from './templates/check.js?v=aad36f0b';
+import { result } from './templates/result.js?v=aad36f0b';
+import { end } from './templates/end.js?v=aad36f0b';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=aad36f0b';
+import { createGhost, stopGhost } from './ghost.js?v=aad36f0b';
+import { createTracking } from './tracking/index.js?v=aad36f0b';
+import { createCoach } from './coach/coach.js?v=aad36f0b';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -103,6 +104,9 @@ class Lesson {
       onChapter: (n) => this.goChapter(n),
       onStartOver: () => this.startOver(),
     });
+    // CO1: the Wawiwa AI Coach (offline tips), launcher in the bar on every screen; never tracked
+    this.coach = createCoach(this.stage, content, { zones: this.zones, review: this.review, thumb: this.thumb, preview: q.get('coach'),
+      hintScreen: this.slice[1], getState: () => this.state });
 
     // SCORM 1.2: the LMS holds the state (suspend_data, lesson_location); local mode: localStorage
     const lms = this.tracking.init();
@@ -154,7 +158,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=6ec78d4a').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=aad36f0b').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -244,6 +248,7 @@ class Lesson {
     if (screen.presentation) { this.complete(id); this.zones.setNext(false); }
     applyTerms(this.zones.main, screen.terms, this.content.tooltips);
     this.renderBar();
+    this.coach.show(screen, chapter);
     if (this.toolbar) this.toolbar.show(id);
     if (focus && !this.thumb) this.zones.instruction.focus({ preventScroll: true });
   }

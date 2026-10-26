@@ -127,8 +127,8 @@ console.log('\nreview mode: walk, toolbar, no writes');
 console.log('\nreview.html');
 {
   const p = await open('/review.html', { size: [1600, 900] });
-  await p.waitForSelector('.rv-card');
-  const cards = await p.evaluate(() => [...document.querySelectorAll('.rv-card')].map((a) => ({ id: a.id, href: a.getAttribute('href'), target: a.target,
+  await p.waitForSelector('.rv-chapter .rv-card');
+  const cards = await p.evaluate(() => [...document.querySelectorAll('.rv-chapter .rv-card')].map((a) => ({ id: a.id, href: a.getAttribute('href'), target: a.target,
     words: a.querySelector('.rv-meta-words').textContent, over: a.dataset.over })));
   expect(cards.map((c) => c.id).join() === ORDER.join() && cards.every((c) => c.href === `index.html?screen=${c.id}&review=1` && c.target === '_blank'),
     `${cards.length} cards in review order, each opens index.html?screen=ID&review=1 in a new tab`);
@@ -143,7 +143,7 @@ console.log('\nreview.html');
   // scroll through the page, then every thumbnail must show its own screen
   for (let y = 0; y < 12; y++) { await p.evaluate(() => window.scrollBy(0, 700)); await wait(250); }
   await p.waitForFunction((n) => document.querySelectorAll('.rv-frame[data-state="loaded"]').length === n, { timeout: 60000 }, cards.length).catch(() => {});
-  const frames = await p.evaluate(() => [...document.querySelectorAll('.rv-card')].map((a) => {
+  const frames = await p.evaluate(() => [...document.querySelectorAll('.rv-chapter .rv-card')].map((a) => {
     const f = a.querySelector('iframe');
     let cur = null, err = null, bar = null, main = 0;
     try { const w = f.contentWindow; cur = w.__l4?.current; err = !w.document.getElementById('boot-error')?.hidden; bar = !!w.document.querySelector('.rv-bar'); main = w.document.querySelector('.w-main')?.children.length || 0; } catch (e) { err = e.message; }
@@ -152,14 +152,28 @@ console.log('\nreview.html');
   const bad = frames.filter((f) => f.cur !== f.id || f.err || f.bar || !f.main);
   expect(!bad.length, `every thumbnail renders its own screen (${frames.length - bad.length} of ${frames.length}), no boot error, no toolbar inside` + (bad.length ? ': ' + JSON.stringify(bad.slice(0, 3)) : ''));
   expect(frames.every((f) => f.scale === 'matrix(0.25, 0, 0, 0.25, 0, 0)'), 'thumbnails are the 1280 x 720 stage at 25%');
+  // CO1: the coach row after the chapters: S04 closed + hint, open, thinking, cap; S21 locked
+  await p.evaluate(() => document.querySelector('.rv-coach').scrollIntoView());
+  await p.waitForFunction(() => [...document.querySelectorAll('.rv-coach .rv-frame')].every((f) => f.dataset.state === 'loaded'), { timeout: 30000 }).catch(() => {});
+  const coach = await p.evaluate(() => [...document.querySelectorAll('.rv-coach .rv-card')].map((a) => {
+    const w = a.querySelector('iframe').contentWindow, d = w.document;
+    const panel = d.querySelector('.w-coach-panel');
+    return { key: a.dataset.screen + ':' + a.dataset.coach, cur: w.__l4?.current, hint: !d.querySelector('.w-coach-hint').hidden, open: !panel.hidden,
+      msgs: [...panel.querySelectorAll('.w-coach-msg')].map((m) => m.dataset.from).join(','), busy: panel.querySelector('.w-coach-log').getAttribute('aria-busy'),
+      locked: d.querySelector('.w-coach-launcher').dataset.locked, cd: w.__l4?.state.g.cd, h: w.__l4?.state.h };
+  }));
+  const want = { 'S04:hint': (c) => c.hint && !c.open, 'S04:open': (c) => c.open && c.msgs === 'coach,notice,coach', 'S04:thinking': (c) => c.open && c.busy === 'true' && c.msgs === 'coach,you,coach',
+    'S04:cap': (c) => c.open && c.msgs === 'coach,you,notice,coach', 'S21:open': (c) => c.open && c.locked === 'true' && c.msgs === 'notice' };
+  const coachBad = coach.filter((c) => !want[c.key] || !want[c.key](c) || c.cur !== c.key.split(':')[0] || c.cd !== undefined || (c.h || '').includes('a')); // the coach's own writes: the dock, hint letter a
+  expect(coach.length === 5 && !coachBad.length, `coach row: ${coach.map((c) => c.key).join(', ')}, each in its state, nothing written${coachBad.length ? ': ' + JSON.stringify(coachBad) : ''}`);
   // filters
   await p.evaluate(() => window.scrollTo(0, 0));
   await p.click('.rv-filter[data-kind="over"]');
-  const overShown = await p.evaluate(() => [...document.querySelectorAll('.rv-card')].filter((a) => !a.hidden).map((a) => a.id));
+  const overShown = await p.evaluate(() => [...document.querySelectorAll('.rv-chapter .rv-card')].filter((a) => !a.hidden).map((a) => a.id));
   const overWant = ORDER.filter((id) => { const w = screenWords(S[id], C); return w.over || w.longFeedback > 0; });
   expect(overShown.join() === overWant.join(), `"Over word limit" shows ${overShown.join(', ') || 'none'} (expected ${overWant.join(', ') || 'none'})`);
   await p.click('.rv-filter[data-kind="ch1"]');
-  const ch1 = await p.evaluate(() => [...document.querySelectorAll('.rv-card')].filter((a) => !a.hidden).map((a) => a.id));
+  const ch1 = await p.evaluate(() => [...document.querySelectorAll('.rv-chapter .rv-card')].filter((a) => !a.hidden).map((a) => a.id));
   expect(ch1.join() === C.chapters.find((c) => c.id === 'ch1').screens.join(), `chapter filter "ch1" shows ${ch1.join(', ')}`);
   expect(!p.errors.length, 'review.html: no console errors' + (p.errors.length ? ': ' + p.errors.slice(0, 5).join(' | ') : ''));
   await p.close();

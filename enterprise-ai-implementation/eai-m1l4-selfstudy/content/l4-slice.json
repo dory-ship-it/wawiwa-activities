@@ -200,6 +200,37 @@
       "lesson1Cases": "Lesson 1 cases",
       "goalsIntro": "By the end of this lesson, you will be able to:"
     },
+    "coach": {
+      "$comment": "CO1 (26 Oct 2026): the Wawiwa AI Coach, offline mode (src/coach/). Each screen has coach.kind (its opening line below) and coach.tip (its hint word for word, or a drafted tip marked tipDrafted for Noy). S21 is locked: no tip. reviewQuestion is the learner line on the review page only (thinking, cap).",
+      "open": "Open the coach",
+      "openLocked": "Open the coach. Paused during the check.",
+      "title": "Wawiwa AI Coach",
+      "sub": "Chapter {n} · {verb}",
+      "close": "Close the coach",
+      "grip": "Move the coach. Arrow keys switch sides.",
+      "dockedLeft": "Coach on the left.",
+      "dockedRight": "Coach on the right.",
+      "lines": {
+        "idea": "Questions about this idea? Ask me.",
+        "warmup": "Go with your gut. A guess can't be wrong.",
+        "practice": "Stuck? Ask me.",
+        "own": "Working on your own case? Ask me.",
+        "workbook": "The workbook has its own coach for each field.",
+        "review": "Want to go over a question? Ask me.",
+        "hello": "Hi, I'm here if you need me."
+      },
+      "offline": "Live coach is offline. Here is a tip:",
+      "offlinePlaceholder": "Tips only for now",
+      "inputLabel": "Ask the coach",
+      "send": "Send",
+      "privacy": "Don't share personal info. The coach can make mistakes.",
+      "locked": "No hints during the check. I'm back after you submit.",
+      "thinking": "The coach is thinking",
+      "cap": "That was your last live question for now.",
+      "hint": "Stuck? Ask me.",
+      "gotIt": "Got it",
+      "reviewQuestion": "Where do I start with this one?"
+    },
     "help": [
       "Read the heading on each screen: it tells you what to do.",
       "Feedback appears in the band under each task. Next unlocks after a right answer.",
@@ -295,6 +326,7 @@
   "screens": [
     {
       "id": "O1",
+      "coach": { "kind": "hello", "tip": "Today you map one process as it runs now, before any AI. Take it apart first.", "tipDrafted": true },
       "chapter": "ch0",
       "template": "title",
       "step": { "verb": "Start", "icon": "start" },
@@ -314,6 +346,7 @@
 
     {
       "id": "O2",
+      "coach": { "kind": "idea", "tip": "Open any lesson to see how it connects. Today's map is what Lesson 5 builds on.", "tipDrafted": true },
       "chapter": "ch0",
       "template": "moduleMap",
       "step": { "verb": "Overview", "icon": "overview" },
@@ -342,6 +375,7 @@
 
     {
       "id": "O3",
+      "coach": { "kind": "idea", "tip": "Your goal: an AS-IS map of your own case in eight fields, with one success metric.", "tipDrafted": true },
       "chapter": "ch0",
       "template": "goals",
       "step": { "verb": "Goals", "icon": "goals" },
@@ -365,6 +399,7 @@
 
     {
       "id": "S01",
+      "coach": { "kind": "practice", "tip": "Pick one. You can change your mind." },
       "chapter": "ch0",
       "template": "decision",
       "attempts": 2,
@@ -401,6 +436,7 @@
 
     {
       "id": "S02",
+      "coach": { "kind": "own", "tip": "Describe what happens today, not the solution you want." },
       "chapter": "ch0",
       "template": "input",
       "caseCard": true,
@@ -438,6 +474,7 @@
 
     {
       "id": "W1",
+      "coach": { "kind": "warmup", "tip": "Pick the answer you expect. A guess cannot be wrong." },
       "chapter": "ch1",
       "template": "warmup",
       "step": { "verb": "Guess", "icon": "guess" },
@@ -463,6 +500,7 @@
 
     {
       "id": "V1",
+      "coach": { "kind": "idea", "tip": "Watch for what separates a change that works from one you fix later.", "tipDrafted": true },
       "chapter": "ch1",
       "template": "video",
       "step": { "verb": "Watch", "icon": "watch" },
@@ -588,6 +626,7 @@
 
     {
       "id": "K1",
+      "coach": { "kind": "idea", "tip": "New technology on a broken process only speeds up the mess. Map the process, cut steps, then speed up.", "tipDrafted": true },
       "chapter": "ch1",
       "template": "concept",
       "step": { "verb": "Learn", "icon": "learn" },
@@ -610,6 +649,7 @@
 
     {
       "id": "S03",
+      "coach": { "kind": "practice", "tip": "Pick two cards, then press Check." },
       "chapter": "ch1",
       "template": "decision",
       "attempts": 2,
@@ -655,6 +695,7 @@
 
     {
       "id": "W2",
+      "coach": { "kind": "warmup", "tip": "Pick the answer you expect. A guess cannot be wrong." },
       "chapter": "ch2",
       "template": "warmup",
       "step": { "verb": "Guess", "icon": "guess" },
@@ -679,6 +720,7 @@
 
     {
       "id": "K2",
+      "coach": { "kind": "idea", "tip": "Every process has a trigger, steps and an output. Turn on the HR case to see each one.", "tipDrafted": true },
       "chapter": "ch2",
       "template": "keyParts",
       "step": { "verb": "Learn", "icon": "learn" },
@@ -702,6 +744,7 @@
 
     {
       "id": "S04",
+      "coach": { "kind": "practice", "tip": "Drag the card to a column. Or press 1 to 3 to choose a column, then Enter." },
       "chapter": "ch2",
       "template": "sortDeck",
       "attempts": 2,
@@ -748,6 +791,7 @@
 
     {
       "id": "S05a",
+      "coach": { "kind": "idea", "tip": "You only need three BPMN parts: swimlane for a role, gateway for a decision, event for a start or end.", "tipDrafted": true },
       "chapter": "ch2",
       "template": "bpmn",
       "variant": "key",
@@ -771,6 +815,7 @@
 
     {
       "id": "S05b",
+      "coach": { "kind": "practice", "tip": "Drag a label onto the diagram. Or press 1 to 3 to choose a place, then Enter." },
       "chapter": "ch2",
       "template": "bpmn",
       "attempts": 2,
@@ -809,6 +854,7 @@
 
     {
       "id": "S06",
+      "coach": { "kind": "practice", "tip": "Ask how fast you need it and who will use it." },
       "chapter": "ch2",
       "template": "decision",
       "attempts": 2,
@@ -849,6 +895,7 @@
 
     {
       "id": "S07",
+      "coach": { "kind": "practice", "tip": "Open each tile. The question unlocks after all eight." },
       "chapter": "ch2",
       "template": "explorer",
       "attempts": 2,
@@ -890,6 +937,7 @@
 
     {
       "id": "S08",
+      "coach": { "kind": "practice", "tip": "Compare the line with what really happens on a normal day." },
       "chapter": "ch2",
       "template": "decision",
       "attempts": 2,
@@ -935,6 +983,7 @@
 
     {
       "id": "S08B",
+      "coach": { "kind": "own", "tip": "Start with what triggers it, then the main steps and who does them. A rough first try is enough.", "tipDrafted": true },
       "chapter": "ch2",
       "template": "input",
       "caseCard": true,
@@ -973,6 +1022,7 @@
 
     {
       "id": "W3",
+      "coach": { "kind": "warmup", "tip": "Pick the answer you expect. A guess cannot be wrong." },
       "chapter": "ch3",
       "template": "warmup",
       "step": { "verb": "Guess", "icon": "guess" },
@@ -996,6 +1046,7 @@
 
     {
       "id": "V2",
+      "coach": { "kind": "idea", "tip": "Watch how about 90 messy requests a month become a map you can check later.", "tipDrafted": true },
       "chapter": "ch3",
       "template": "video",
       "guidingLabel": "Watch for:",
@@ -1100,6 +1151,7 @@
 
     {
       "id": "S09",
+      "coach": { "kind": "practice", "tip": "Drag the card to a column. Or press 1 to 4 to choose a column, then Enter." },
       "chapter": "ch3",
       "template": "sortDeck",
       "attempts": 2,
@@ -1160,6 +1212,7 @@
 
     {
       "id": "S10",
+      "coach": { "kind": "practice", "tip": "Write what is true on a normal day, even if it looks bad." },
       "chapter": "ch3",
       "template": "decision",
       "attempts": 2,
@@ -1194,6 +1247,7 @@
 
     {
       "id": "S11",
+      "coach": { "kind": "practice", "tip": "Ask: three months from now, could someone check it?" },
       "chapter": "ch3",
       "template": "decision",
       "attempts": 2,
@@ -1239,6 +1293,7 @@
 
     {
       "id": "S12",
+      "coach": { "kind": "practice", "tip": "Follow the question after it leaves the first staffer." },
       "chapter": "ch3",
       "template": "flags",
       "attempts": 2,
@@ -1325,6 +1380,7 @@
 
     {
       "id": "S12B",
+      "coach": { "kind": "own", "tip": "A rough number is fine. You refine it in Chapter {ch5}." },
       "chapter": "ch3",
       "template": "input",
       "caseCard": true,
@@ -1373,6 +1429,7 @@
 
     {
       "id": "W4",
+      "coach": { "kind": "warmup", "tip": "Pick the answer you expect. A guess cannot be wrong." },
       "chapter": "ch4",
       "template": "warmup",
       "step": { "verb": "Guess", "icon": "guess" },
@@ -1396,6 +1453,7 @@
 
     {
       "id": "S13",
+      "coach": { "kind": "practice", "tip": "Look for what starts it from outside, and who picks up the result." },
       "chapter": "ch4",
       "template": "flags",
       "attempts": 2,
@@ -1445,6 +1503,7 @@
 
     {
       "id": "S14",
+      "coach": { "kind": "practice", "tip": "Think about the moment responsibility changes hands." },
       "chapter": "ch4",
       "template": "decision",
       "attempts": 2,
@@ -1502,6 +1561,7 @@
 
     {
       "id": "S15",
+      "coach": { "kind": "practice", "tip": "Recall what the car company did with its slowest step." },
       "chapter": "ch4",
       "template": "decision",
       "attempts": 2,
@@ -1544,6 +1604,7 @@
 
     {
       "id": "K4",
+      "coach": { "kind": "idea", "tip": "For each step, ask what goes in and what is at stake. Money or rights at stake: a person decides.", "tipDrafted": true },
       "chapter": "ch4",
       "template": "keyColumns",
       "step": { "verb": "Learn", "icon": "learn" },
@@ -1581,6 +1642,7 @@
 
     {
       "id": "S16",
+      "coach": { "kind": "practice", "tip": "What goes in, and what is at stake?" },
       "chapter": "ch4",
       "template": "sortDeck",
       "attempts": 2,
@@ -1630,6 +1692,7 @@
 
     {
       "id": "S17",
+      "coach": { "kind": "practice", "tip": "Two tries per case." },
       "chapter": "ch4",
       "template": "decision",
       "variant": "cases",
@@ -1678,6 +1741,7 @@
 
     {
       "id": "S17B",
+      "coach": { "kind": "own", "tip": "Look at your own steps. Free text into structured data often fits AI; money or rights stay with a person.", "tipDrafted": true },
       "chapter": "ch4",
       "template": "input",
       "caseCard": true,
@@ -1726,6 +1790,7 @@
 
     {
       "id": "S18A",
+      "coach": { "kind": "practice", "tip": "Same eight fields, different case." },
       "chapter": "ch5",
       "template": "decision",
       "variant": "fields",
@@ -1767,6 +1832,7 @@
 
     {
       "id": "S18",
+      "coach": { "kind": "practice", "tip": "Before you write anything, remove names and identifying details." },
       "chapter": "ch5",
       "template": "decision",
       "attempts": 2,
@@ -1800,6 +1866,7 @@
 
     {
       "id": "S18B",
+      "coach": { "kind": "own", "tip": "A general name, e.g. Sales call summaries. No client or person names." },
       "chapter": "ch5",
       "template": "input",
       "lockedNext": "Save to continue",
@@ -1832,6 +1899,7 @@
 
     {
       "id": "S19",
+      "coach": { "kind": "workbook", "tip": "Unknown? Write 'unclear'. It is a valid answer." },
       "chapter": "ch5",
       "template": "handoff",
       "locked": "openWorkbook",
@@ -1884,6 +1952,7 @@
 
     {
       "id": "S20",
+      "coach": { "kind": "workbook", "tip": "Answer honestly. 'Not yet' gives you one fix to make." },
       "chapter": "ch5",
       "template": "decision",
       "step": { "verb": "Review", "icon": "explore" },
@@ -1917,6 +1986,7 @@
 
     {
       "id": "S20B",
+      "coach": { "kind": "own", "tip": "The five mistakes from Chapter {ch4}. Any pick is fine." },
       "chapter": "ch5",
       "template": "decision",
       "locked": "chips",
@@ -1946,6 +2016,7 @@
 
     {
       "id": "S21",
+      "coach": { "kind": "locked" },
       "chapter": "ch6",
       "template": "check",
       "step": { "verb": "Check", "icon": "check" },
@@ -2103,6 +2174,7 @@
 
     {
       "id": "S21R",
+      "coach": { "kind": "review", "tip": "Missed an item? Its Review link opens the chapter that teaches it.", "tipDrafted": true },
       "chapter": "ch6",
       "template": "result",
       "presentation": true,
@@ -2130,6 +2202,7 @@
 
     {
       "id": "S22",
+      "coach": { "kind": "review", "tip": "Without your full map, Lesson 5 cannot run for you." },
       "chapter": "ch6",
       "template": "decision",
       "step": { "verb": "Reflect", "icon": "key" },
@@ -2165,6 +2238,7 @@
     },
     {
       "id": "END",
+      "coach": { "kind": "hello", "tip": "Bring your map PDF to Lesson 5. There you mark where AI enters your process.", "tipDrafted": true },
       "chapter": "ch6",
       "template": "end",
       "step": { "verb": "Finish", "icon": "finish" },

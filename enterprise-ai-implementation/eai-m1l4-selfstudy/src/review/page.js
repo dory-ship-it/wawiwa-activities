@@ -3,9 +3,9 @@
 // index.html?screen=ID&review=1 at 1280 x 720, scaled to 25%), loaded only when it nears the viewport.
 // Under each: id, template, word count (red over 45). A click opens the screen full size in review
 // mode in a new tab. Filters: All, one chapter, Over word limit. Review-only strings live here.
-import { h, chapterNo, resolveChapterRefs } from '../util.js?v=6ec78d4a';
-import { reviewOrder } from '../engine.js?v=6ec78d4a';
-import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=6ec78d4a';
+import { h, chapterNo, resolveChapterRefs } from '../util.js?v=aad36f0b';
+import { reviewOrder } from '../engine.js?v=aad36f0b';
+import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=aad36f0b';
 
 const root = document.getElementById('review');
 const res = await fetch(new URL('../../content/l4-slice.json', import.meta.url), { cache: 'no-cache' }); // asked fresh on every load
@@ -53,6 +53,22 @@ const card = (id) => {
   return a;
 };
 
+// CO1: one row for the Wawiwa AI Coach (offline mode): its states on S04, and S21 locked, each a thumbnail
+// of index.html?screen=ID&review=1&coach=STATE (src/coach/coach.js; review mode writes nothing)
+const COACH = [['S04', 'hint', 'closed + first-use hint'], ['S04', 'open', 'open, offline tip'], ['S04', 'thinking', 'thinking (live run)'],
+  ['S04', 'cap', 'cap reached (live run)'], ['S21', 'open', 'locked on the check']];
+const coachCard = ([id, state, label]) => {
+  const url = `index.html?screen=${id}&review=1&coach=${state}`;
+  const frame = h('div', { class: 'rv-frame', dataset: { state: 'waiting' } },
+    h('iframe', { title: `${id} coach ${state} thumbnail`, 'data-src': url, tabindex: '-1', 'aria-hidden': 'true' }));
+  io.observe(frame);
+  return h('a', { class: 'rv-card', href: url, target: '_blank', rel: 'noopener', dataset: { coach: state, screen: id }, 'aria-label': `Coach on ${id}: ${label}. Opens full size in a new tab.` },
+    frame, h('span', { class: 'rv-meta' }, h('span', { class: 'rv-meta-id' }, id), h('span', { class: 'rv-meta-tpl' }, `coach · ${label}`)));
+};
+const coachRow = h('section', { class: 'rv-coach', 'aria-labelledby': 'rv-g-coach' },
+  h('h2', { class: 'rv-coach-head', id: 'rv-g-coach' }, 'Coach (CO1, offline)', h('span', {}, 'tips only; thinking and cap are built for the live run')),
+  h('div', { class: 'rv-row' }, COACH.map(coachCard)));
+
 const sections = groups.map((g) => h('section', { class: 'rv-chapter', dataset: { group: g.key }, 'aria-labelledby': 'rv-g-' + g.key },
   h('h2', { class: 'rv-chapter-head', id: 'rv-g-' + g.key }, g.label, h('span', {}, `${g.ids.length} screens` + (g.minutes ? ` · ${g.minutes} min` : ''))),
   h('div', { class: 'rv-row' }, g.ids.map(card))));
@@ -75,6 +91,7 @@ function apply(key) {
     sec.hidden = !shown;
   });
   empty.hidden = !(key === 'over' && !overCount);
+  coachRow.hidden = key !== 'all';
 }
 
 document.title = `L4 review · ${content.lesson.title}`;
@@ -84,7 +101,7 @@ root.append(
     h('p', { class: 'rv-summary' }, `${order.length} screens · ${groups.length} rows · `, h('b', { dataset: { over: String(overCount > 0) } }, `${overCount} over the word limit`),
       ` · content ${content.lesson.contentVersion}`),
     h('div', { class: 'rv-filters', role: 'group', 'aria-label': 'Filter screens' }, buttons)),
-  h('main', { class: 'rv-main' }, sections, empty));
+  h('main', { class: 'rv-main' }, sections, coachRow, empty));
 
 // review.html#S04 (the toolbar's Overview link): load and show that screen's card
 const target = cards.get(decodeURIComponent(location.hash.slice(1)));

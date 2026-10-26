@@ -1,0 +1,180 @@
+// CO1: the Wawiwa AI Coach (offline mode) on its own. Usage: npm run test:coach
+//   1. static: src/coach has no network code (fetch, XMLHttpRequest, WebSocket, EventSource,
+//      sendBeacon, dynamic import, a URL) and transport.ask() answers { offline: true }; every slice
+//      screen has a coach block (S21 locked with no tip, a tip everywhere else); the grounding pack is there
+//   2. SCORM: with the mock 1.2 API, using the coach (open, dock switch by keyboard and by drag, close,
+//      Escape) makes no LMSSetValue and no LMSCommit call, and no network request at all
+//   3. S21 locked (60% launcher, lock badge, only the notice, no tip, no input); S21R unlocked
+//   4. suspend_data with the dock set (g.cd = 'r'): under 4096 on a heavy state, and the dock
+//      comes back on resume
+//   5. nothing typed is kept: the input is disabled; review mode writes no dock and no hint letter
+import puppeteer from 'puppeteer-core';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { startServer, ROOT } from './serve.mjs';
+import { chromePath } from './lib.mjs';
+import { resolveChapterRefs } from '../src/util.js';
+
+const C = resolveChapterRefs(JSON.parse(readFileSync(join(ROOT, 'content', 'l4-slice.json'), 'utf8')));
+const UI = C.ui.coach;
+const MOCK = readFileSync(join(ROOT, 'tools', 'scorm-mock.js'), 'utf8');
+const fails = [];
+const ok = (m) => console.log('  ok   ' + m);
+const fail = (m) => { fails.push(m); console.log('  FAIL ' + m); };
+const expect = (cond, m) => (cond ? ok(m) : fail(m));
+
+/* ---- 1. static ---- */
+console.log('\n1. static');
+const coachDir = join(ROOT, 'src', 'coach');
+const files = readdirSync(coachDir).filter((f) => f.endsWith('.js'));
+const NET = /\bfetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|\bimport\s*\(|https?:\/\//;
+const netHits = files.filter((f) => NET.test(readFileSync(join(coachDir, f), 'utf8').replace(/\/\/.*$/gm, '')));
+expect(files.includes('transport.js') && !netHits.length, `src/coach (${files.join(', ')}): no fetch, XHR, WebSocket, EventSource, beacon, dynamic import or URL${netHits.length ? ' (in ' + netHits.join(', ') + ')' : ''}`);
+const { ask } = await import('../src/coach/transport.js');
+const answer = await ask({ screen: 'S04', kind: 'practice', question: 'test' });
+expect(answer && answer.offline === true && Object.keys(answer).length === 1, `transport.ask() answers ${JSON.stringify(answer)}`);
+const noBlock = C.lesson.slice.filter((id) => !C.screens.find((s) => s.id === id)?.coach?.kind);
+const S21 = C.screens.find((s) => s.id === 'S21');
+const noTip = C.screens.filter((s) => s.id !== 'S21' && !s.coach?.tip).map((s) => s.id);
+expect(!noBlock.length && S21.coach.kind === 'locked' && !S21.coach.tip && !noTip.length, `every slice screen has coach.kind; S21 locked with no tip; a tip on every other screen${noBlock.length || noTip.length ? ' (missing: ' + [...noBlock, ...noTip].join(', ') + ')' : ''}`);
+const copied = C.screens.filter((s) => s.coach?.tip && !s.coach.tipDrafted);
+const notWord = copied.filter((s) => s.coach.tip !== s.hint).map((s) => s.id);
+expect(!notWord.length, `${copied.length} tips are the screen's hint word for word${notWord.length ? ' (not: ' + notWord.join(', ') + ')' : ''}`);
+const drafted = C.screens.filter((s) => s.coach?.tipDrafted);
+const long = drafted.filter((s) => s.coach.tip.trim().split(/\s+/).length > 20 || /[–—]/.test(s.coach.tip)).map((s) => s.id);
+expect(!long.length, `${drafted.length} drafted tips: 20 words or fewer, no dashes${long.length ? ' (not: ' + long.join(', ') + ')' : ''}`);
+const unknownKind = C.screens.filter((s) => s.coach && s.coach.kind !== 'locked' && !UI.lines[s.coach.kind]).map((s) => s.id);
+expect(!unknownKind.length, `every coach.kind has its opening line in ui.coach.lines${unknownKind.length ? ' (not: ' + unknownKind.join(', ') + ')' : ''}`);
+expect(existsSync(join(ROOT, 'content', 'coach', 'grounding-pack.md')), 'content/coach/grounding-pack.md is there (not read at runtime)');
+const csp = readFileSync(join(ROOT, 'index.html'), 'utf8').match(/connect-src ([^;]+);/)?.[1];
+expect(csp === "'self'", `index.html CSP connect-src stays ${csp}`);
+
+/* ---- browser ---- */
+const server = await startServer(0);
+const BASE = `http://127.0.0.1:${server.address().port}/index.html`;
+const browser = await puppeteer.launch({ executablePath: chromePath(), headless: true, args: ['--no-first-run', '--disable-extensions', '--hide-scrollbars'] });
+async function open(query, { lms = null } = {}) {
+  const context = await browser.createBrowserContext();
+  const page = await context.newPage();
+  page.close = (closePage => async () => { await closePage().catch(() => {}); await context.close().catch(() => {}); })(page.close.bind(page));
+  if (lms) await page.evaluateOnNewDocument(`${MOCK}\n;window.installScormMock(${JSON.stringify(lms)});`);
+  page.errors = [];
+  page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warn') page.errors.push(m.type() + ': ' + m.text()); });
+  page.on('pageerror', (e) => page.errors.push('pageerror: ' + e.message));
+  await page.setViewport({ width: 1280, height: 720, deviceScaleFactor: 1 });
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+  await page.goto(BASE + query, { waitUntil: 'networkidle0' });
+  await page.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
+  return page;
+}
+const settle = (p) => p.evaluate(() => new Promise((r) => setTimeout(r, 30)));
+const panelState = (p) => p.evaluate(() => {
+  const panel = document.querySelector('.w-coach-panel');
+  return { open: !panel.hidden, dock: panel.dataset.dock, msgs: [...panel.querySelectorAll('.w-coach-msg')].map((m) => m.dataset.from + ':' + m.textContent.trim()),
+    foot: !panel.querySelector('.w-coach-foot').hidden, focus: document.activeElement?.className || '' };
+});
+
+/* ---- 2. SCORM: no API call, no request while the coach is used ---- */
+console.log('\n2. SCORM and network');
+{
+  const p = await open('?screen=S04', { lms: {} });
+  const calls = () => p.evaluate(() => window.__scormMock.report().calls.filter((c) => c.startsWith('set ') || c === 'LMSCommit').length);
+  const requests = [];
+  p.on('request', (r) => requests.push(r.url()));
+  const before = await calls();
+  await p.click('.w-coach-launcher');
+  await settle(p);
+  const s1 = await panelState(p);
+  const tip = C.screens.find((s) => s.id === 'S04').coach.tip;
+  expect(s1.open && s1.msgs.join('|') === [`coach:${UI.lines.practice}`, `notice:${UI.offline}`, `coach:${tip}`].join('|'),
+    `S04 open: "${UI.lines.practice}", the offline notice, the tip (${s1.msgs.length} messages)`);
+  await p.focus('.w-coach-grip');
+  await p.keyboard.press('ArrowRight');
+  const kRight = (await panelState(p)).dock;
+  // drag the grip to the left half: it snaps to the left dock
+  const g = await p.$eval('.w-coach-grip', (el) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+  await p.mouse.move(g.x, g.y); await p.mouse.down(); await p.mouse.move(g.x - 300, g.y + 40, { steps: 6 }); await p.mouse.move(g.x - 700, g.y + 40, { steps: 6 }); await p.mouse.up();
+  const dragged = (await panelState(p)).dock;
+  await p.keyboard.press('Escape');
+  const s2 = await panelState(p);
+  await p.click('.w-coach-launcher'); await settle(p);
+  await p.click('.w-coach-close');
+  const after = await calls();
+  const ownRequests = requests.filter((u) => !/\.(woff2|jpg|png|mp4|vtt)(\?|$)/.test(u));
+  expect(kRight === 'r' && dragged === 'l' && !s2.open && s2.focus.includes('w-coach-launcher'), `dock: Arrow Right -> ${kRight}, drag left -> ${dragged}; Escape closes, focus on the launcher`);
+  expect(after === before, `no LMSSetValue / LMSCommit while the coach is used (${before} before, ${after} after)`);
+  expect(!ownRequests.length, `no network request while the coach is used${ownRequests.length ? ': ' + ownRequests.join(', ') : ''}`);
+  expect(!p.errors.length, 'no console errors' + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
+  await p.close();
+}
+
+/* ---- 3. S21 locked, S21R unlocked ---- */
+console.log('\n3. locked on the check');
+{
+  const p = await open('?reset=1&screen=S21');
+  const l = await p.evaluate(() => { const b = document.querySelector('.w-coach-launcher'); const cs = getComputedStyle(b);
+    return { locked: b.dataset.locked, opacity: cs.opacity, ring: cs.borderTopColor, badge: !b.querySelector('.w-coach-lock').hidden, label: b.getAttribute('aria-label') }; });
+  await p.click('.w-coach-launcher'); await settle(p);
+  const s = await panelState(p);
+  expect(l.locked === 'true' && l.opacity === '0.6' && l.ring === 'rgb(138, 151, 159)' && l.badge && l.label === UI.openLocked, `S21 launcher locked: opacity ${l.opacity}, ring ${l.ring}, lock badge, "${l.label}"`);
+  expect(s.open && s.msgs.join('|') === `notice:${UI.locked}` && !s.foot, `S21 panel: only "${UI.locked}", no tip, no input`);
+  await p.evaluate(() => window.__l4.go('S21R')); await settle(p);
+  const r = await p.evaluate(() => document.querySelector('.w-coach-launcher').dataset.locked);
+  const s2 = await panelState(p);
+  expect(r === 'false' && s2.foot && s2.msgs[0] === `coach:${UI.lines.review}`, `S21R unlocked: "${UI.lines.review}" and the tip, input row back`);
+  await p.close();
+}
+
+/* ---- 4. suspend_data with the dock set, and resume ---- */
+console.log('\n4. suspend_data and resume');
+{
+  const p = await open('?screen=S04', { lms: {} });
+  await p.click('.w-coach-launcher'); await settle(p);
+  await p.focus('.w-coach-grip'); await p.keyboard.press('ArrowRight');
+  await p.evaluate(() => window.__l4.next()); // the lesson's own save carries the dock
+  const sd = await p.evaluate(() => window.__scormMock.report().data['cmi.suspend_data']);
+  // a heavy state: every screen done, every interaction answered, every stored field at its max length
+  const heavy = await p.evaluate(async () => {
+    const { encode } = await import(document.querySelector('script[type="module"]').src.replace(/main\.js.*/, 'state.js'));
+    const l = window.__l4, st = structuredClone(l.state);
+    st.d = [...l.slice];
+    for (const s of l.content.screens) {
+      for (const t of [...(s.tracking || []), ...(s.stops || []).map((x) => x.tracking).filter(Boolean)]) st.a[t.id] = (t.type === 'fill-in' ? '' : 'a,b') + '|c';
+      for (const f of s.fields || []) if (f.store) st.f[f.store] = 'x'.repeat(f.maxLength || 120);
+    }
+    st.k = { n: 3, s: 100, p: 1 }; st.fin = 'passed'; st.h = 'tvsyidloa';
+    const without = structuredClone(st); delete without.g.cd;
+    try { return { withCd: encode({ ...st, g: { ...st.g, cd: 'r' } }).length, without: encode(without).length }; } catch (e) { return { error: e.message }; }
+  });
+  expect(sd.includes('"cd":"r"') && sd.length < 4096, `suspend_data after the dock switch: ${sd.length} chars, holds "cd":"r"`);
+  expect(!heavy.error && heavy.withCd < 4096 && heavy.withCd - heavy.without <= 15, // ,"g":{"cd":"r"} at most
+    heavy.error ? `heavy state: ${heavy.error}` : `heavy state: ${heavy.withCd} chars with cd, ${heavy.without} without (+${heavy.withCd - heavy.without}), under 4096`);
+  await p.close();
+  const q = await open('', { lms: { 'cmi.core.entry': 'resume', 'cmi.suspend_data': sd } });
+  const resumeBtn = await q.$('.w-dialog [data-action="resume"]');
+  if (resumeBtn) await resumeBtn.click();
+  await q.click('.w-coach-launcher'); await settle(q);
+  expect((await panelState(q)).dock === 'r', 'relaunch with entry=resume: the coach opens on the right dock');
+  await q.close();
+}
+
+/* ---- 5. nothing typed is kept; review mode writes nothing ---- */
+console.log('\n5. nothing kept');
+{
+  const p = await open('?reset=1&screen=S02');
+  await p.click('.w-coach-launcher'); await settle(p);
+  const i = await p.evaluate(() => { const el = document.querySelector('.w-coach-input'); return { disabled: el.disabled, ph: el.placeholder, send: document.querySelector('.w-coach-send').disabled, chips: document.querySelector('.w-coach-chips').hidden }; });
+  expect(i.disabled && i.send && i.chips && i.ph === UI.offlinePlaceholder, `input disabled ("${i.ph}"), send disabled, chips hidden`);
+  await p.close();
+  const r = await open('?review=1&screen=O2');
+  await r.click('.w-coach-launcher'); await settle(r);
+  await r.focus('.w-coach-grip'); await r.keyboard.press('ArrowRight');
+  const st = await r.evaluate(() => ({ cd: window.__l4.state.g.cd, h: window.__l4.state.h, hint: document.querySelector('.w-coach-hint').hidden, ls: Object.keys(localStorage).length }));
+  expect(st.cd === undefined && !st.h.includes('a') && st.hint && st.ls === 0, `review mode: no dock, no hint letter, no first-use hint, localStorage empty (${st.ls} keys)`);
+  await r.close();
+}
+
+await browser.close();
+server.close();
+console.log(fails.length ? `\ntest:coach FAILED (${fails.length})` : '\ntest:coach passed');
+process.exit(fails.length ? 1 : 0);

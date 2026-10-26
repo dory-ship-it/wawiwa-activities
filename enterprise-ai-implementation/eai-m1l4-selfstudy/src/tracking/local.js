@@ -1,7 +1,7 @@
 // Local adapter (no LMS: GitHub Pages preview, local runs). Same interface as scorm12.js; the state
 // itself lives in localStorage (src/state.js). It only records the SCORM 1.2 calls that would have
 // been made (dev log lines, prefixed "local:"), so ?debug=1 doubles as a tracking review.
-import { timespan } from './scorm12.js?v=6ec78d4a';
+import { timespan } from './scorm12.js?v=aad36f0b';
 
 export function createLocal({ log = () => {} } = {}) {
   let n = 0;

@@ -21,6 +21,9 @@
 //     lists every temp image (not a failure)
 // 14. fonts load offline: no Google Fonts anywhere, every @font-face file exists (Roboto 700 too)
 // 15. version stamp: every link to the code and content carries the current ?v= (tools/stamp.mjs)
+// 16. the coach (CO1, offline): no network code and no proxy URL in src/coach; every slice screen has
+//     coach.kind with its opening line in ui.coach.lines; S21 locked with no tip; a copied tip is the
+//     screen's hint word for word, a drafted tip (tipDrafted) at most 20 words; the grounding pack exists
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -137,6 +140,15 @@ const PAIRS = [
   ['wl-error', 'wl-white', 3, 'wrong border (UI)'],
   ['wl-turquoise', 'wl-white', 2, 'current-step ring (decorative; the label is bold and the state is in aria-current)'],
   ['wl-turquoise', 'wl-o1-ground', 3, 'FX2 G END: "complete" in the brand accent on the dark photo (76.8px, large text)'],
+  ['wl-white', 'wl-coach-head', 4.5, 'CO1: "Wawiwa AI Coach" and the close mark on the panel header'],
+  ['wl-coach-sub', 'wl-coach-head', 4.5, 'CO1: "Chapter N · verb" under the coach title'],
+  ['wl-body-ink', 'wl-white', 4.5, 'CO1: coach bubble text'],
+  ['wl-white', 'wl-navy', 4.5, 'CO1: learner bubble text'],
+  ['wl-coach-notice', 'wl-coach-notice-bg', 4.5, 'CO1: notice bubble'],
+  ['wl-coach-chip', 'wl-white', 4.5, 'CO1: chip text'],
+  ['wl-coach-meta', 'wl-coach-ground', 4.5, 'CO1: the privacy line under the input'],
+  ['wl-ink', 'wl-white', 4.5, 'CO1: the first-use hint "Stuck? Ask me."'],
+  ['wl-navy', 'wl-white', 4.5, 'CO1: "Got it"'],
 ];
 console.log('\n  contrast (text / background, ratio, needed, use)');
 for (const [fg, bg, need, use] of PAIRS) {
@@ -369,6 +381,33 @@ google.length || missingFace.length || lacking.length
   const cached = fetches.filter(([, s]) => !s.includes("cache: 'no-cache'"));
   cached.length || !fetches.length ? fail('content fetch without cache: \'no-cache\': ' + (cached.map(([f]) => f).join(', ') || 'none found'))
     : ok(`the content is fetched fresh (cache: 'no-cache') in ${fetches.map(([f]) => f).join(', ')}`);
+}
+
+/* 16. the coach (CO1, offline mode) */
+{
+  const coachFiles = srcFiles.filter((f) => relative(ROOT, f).startsWith(join('src', 'coach')) && f.endsWith('.js'));
+  const NET = /\bfetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|\bimport\s*\(|https?:\/\//;
+  const net = coachFiles.filter((f) => NET.test(stripComments(read(f))));
+  const proxy = [...srcFiles, join(ROOT, 'index.html'), contentPath].filter((f) => /proxy|workers\.dev|\.lambda-url\./i.test(read(f)));
+  net.length || proxy.length || !coachFiles.some((f) => f.endsWith('transport.js'))
+    ? fail(`coach: network code in ${net.map((f) => relative(ROOT, f)).join(', ') || '-'}; proxy URL in ${proxy.map((f) => relative(ROOT, f)).join(', ') || '-'}`)
+    : ok(`coach: no network code in ${coachFiles.length} src/coach files (one transport, ask()), no proxy URL in src, index.html or content`);
+  const lines = content.ui.coach?.lines || {};
+  const slice = content.lesson.slice.map((id) => content.screens.find((s) => s.id === id));
+  const bad = [];
+  for (const s of slice) {
+    const c = s.coach;
+    if (!c || !c.kind) { bad.push(`${s.id} no coach.kind`); continue; }
+    if (c.kind === 'locked') { if (c.tip) bad.push(`${s.id} locked with a tip`); continue; }
+    if (!lines[c.kind]) bad.push(`${s.id} kind ${c.kind} has no opening line`);
+    if (!c.tip) bad.push(`${s.id} no tip`);
+    else if (c.tipDrafted) { if (words(c.tip) > 20) bad.push(`${s.id} drafted tip ${words(c.tip)} words`); }
+    else if (c.tip !== s.hint) bad.push(`${s.id} tip is not its hint word for word`);
+  }
+  if (slice.find((s) => s.id === 'S21')?.coach?.kind !== 'locked') bad.push('S21 not locked');
+  bad.length ? fail('coach content: ' + bad.join('; '))
+    : ok(`coach: every slice screen has its kind and tip (${slice.filter((s) => s.coach.tipDrafted).length} drafted, ${slice.filter((s) => s.coach.tip && !s.coach.tipDrafted).length} copied from the hint), S21 locked`);
+  existsSync(join(ROOT, 'content', 'coach', 'grounding-pack.md')) ? ok('coach: content/coach/grounding-pack.md exists') : fail('coach: content/coach/grounding-pack.md missing');
 }
 
 finish();

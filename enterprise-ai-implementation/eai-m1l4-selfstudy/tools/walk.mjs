@@ -3,7 +3,8 @@
 // no focus ring; its screenshot is s01-wrong.png). Covers the top bar's steps (NL1), the menu (open,
 // navigate, Escape), the Intro (O1 title, O2 module map tabs, O3 goals, S01, S02), Chapter 1 (W1 neutral
 // warm-up, V1 with its stops, K1 key idea, S03 wrong then right), the ghost hand (shown once, any key
-// stops it, it never selects or tracks), then every later chapter. Asserts on every state:
+// stops it, it never selects or tracks), then every later chapter; CO1: the coach on five screens (one
+// per kind), Escape, the dock switch and resume keeping the dock. Asserts on every state:
 //   the band equals the content JSON (state, verdict word, text, route buttons); Next locked (with
 //   the reason as its aria-label) before the right answer or the save, unlocked and focused after;
 //   focus lands on the instruction heading on each new screen; FT2 to FT4 routes land on the right screen;
@@ -1833,6 +1834,55 @@ console.log('\nS19 empty');
   expect(r.empty && r.text === UI.record.empty && r.disabled, `S19 with nothing written: every part reads "${r.text}", every Copy disabled`);
   await expectBand(p, 'S19 empty', { state: 'hint', text: S.S19.hint, unlocked: false, lockedWhy: UI.footer.locked.openWorkbook });
   await expectLayout(p, 'S19 empty');
+  await p.close();
+}
+
+/* ---------- CO1: the coach by keyboard, one screen per kind; Escape; the dock switch; resume keeps the dock ---------- */
+console.log('\ncoach (keyboard)');
+{
+  const CO = UI.coach;
+  const coachState = (p) => p.evaluate(() => { const panel = document.querySelector('.w-coach-panel'); const b = document.querySelector('.w-coach-launcher');
+    return { open: !panel.hidden, expanded: b.getAttribute('aria-expanded'), dock: panel.dataset.dock, msgs: [...panel.querySelectorAll('.w-coach-msg')].map((m) => m.textContent.trim()),
+      inPanel: panel.contains(document.activeElement), onLauncher: document.activeElement === b, sub: panel.querySelector('.w-coach-sub').textContent }; });
+  for (const id of ['K1', 'W1', 'S04', 'S02', 'S22']) {
+    const p = await open(`?reset=1&screen=${id}`);
+    const line = CO.lines[S[id].coach.kind];
+    await tabTo(p, '.w-coach-launcher', { back: true });
+    await press(p, 'Enter');
+    await wait(30);
+    const o = await coachState(p);
+    expect(o.open && o.expanded === 'true' && o.inPanel && o.msgs.join('|') === [line, CO.offline, S[id].coach.tip].join('|') && o.sub === `Chapter ${chapterNo(C, S[id].chapter)} · ${S[id].step.verb}`,
+      `${id} (${S[id].coach.kind}): Enter on the launcher opens the coach, focus inside; "${line}", the offline notice, the tip; "${o.sub}"`);
+    await expectLayout(p, `${id} coach open`);
+    await press(p, 'Escape');
+    const c = await coachState(p);
+    expect(!c.open && c.expanded === 'false' && c.onLauncher, `${id}: Escape closes the coach, focus back on the launcher`);
+    expect(!p.errors.length, `${id} coach: no console errors` + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
+    await p.close();
+  }
+  // the dock: Arrow Right on the grip, saved with the lesson's next save, back after a relaunch
+  const p = await open('?reset=1&screen=S04');
+  await tabTo(p, '.w-coach-launcher', { back: true });
+  await press(p, 'Enter');
+  await tabTo(p, '.w-coach-grip');
+  await press(p, 'ArrowRight');
+  const r1 = await coachState(p);
+  await press(p, 'ArrowLeft');
+  const l1 = await coachState(p);
+  await press(p, 'ArrowRight');
+  await press(p, 'Escape');
+  await p.evaluate(() => window.__l4.go('S05a'));
+  const saved = await p.evaluate(() => JSON.parse(localStorage.getItem('wawiwa.eai.l4.slice')).g.cd);
+  expect(r1.dock === 'r' && l1.dock === 'l' && saved === 'r', `grip: Arrow Right docks right, Arrow Left left; the dock goes out with the next save (g.cd ${saved})`);
+  await p.goto(BASE, { waitUntil: 'networkidle0' });
+  await p.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
+  await tabTo(p, '[data-action="resume"]');
+  await press(p, 'Enter');
+  await tabTo(p, '.w-coach-launcher', { back: true });
+  await press(p, 'Enter');
+  const rs = await coachState(p);
+  expect(rs.open && rs.dock === 'r', `resume (S05a): the coach opens on the right dock`);
+  expect(!p.errors.length, 'coach dock and resume: no console errors' + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
   await p.close();
 }
 

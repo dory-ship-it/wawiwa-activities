@@ -8,11 +8,18 @@
 //      flush to its panel's edges, nothing clipped, contrast of every text/background pair, no text
 //      under 14 px, targets 44 px
 //   3. the open menu and its dialogs: the same contrast, size and target checks
+//   4. CO1, the coach on every slice screen: the launcher in the bar (56 x 56, y 0 to 80.64, the bar's
+//      parts still fit, nothing clipped), then the open panel at the left and the right dock: inside y 96
+//      to 632 and 24 from its side, opaque and on top, clear of Previous / Next and the bar, and the
+//      screen's layout checks with it open
 // Usage: npm run test:fit                 everything
-//        node tools/test-fit.mjs S09 W3    only these screens' states (section 2), for a quick check
+//        node tools/test-fit.mjs S09 W3    only these screens' states (sections 2 and 4), for a quick check
+//        --coach                           section 4 only
 // Chrome: set CHROME_PATH, or a stock Google Chrome / Chromium install is found on its own.
 import puppeteer from 'puppeteer-core';
-import { startServer } from './serve.mjs';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { startServer, ROOT } from './serve.mjs';
 import { chromePath, measureLayout, layoutVerdict } from './lib.mjs';
 
 // every screen state at these sizes; 1366x650 to 2560x1080: browser windows with their bars, stage
@@ -21,6 +28,7 @@ import { chromePath, measureLayout, layoutVerdict } from './lib.mjs';
 const SIZE_ARG = process.argv.find((a) => a.startsWith('--sizes='));
 const SIZES = SIZE_ARG ? SIZE_ARG.slice(8).split(',').map((s) => s.split('x').map(Number)) : [[1280, 720], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 1080]];
 const ONLY = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+const COACH_ONLY = process.argv.includes('--coach'); // CO1: section 4 only
 const fails = [];
 const ok = (m) => console.log('  ok   ' + m);
 const fail = (m) => { fails.push(m); console.log('  FAIL ' + m); };
@@ -69,7 +77,7 @@ async function measure(page, what) {
 
 /* ---- 1. load, scale, shell ---- */
 console.log('\n1. load and fit');
-for (const size of ONLY.length ? [] : SIZE_ARG ? SIZES : [[1280, 720], [1920, 1080], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 900], [2560, 1080]]) {
+for (const size of ONLY.length || COACH_ONLY ? [] : SIZE_ARG ? SIZES : [[1280, 720], [1920, 1080], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 900], [2560, 1080]]) {
   const page = await open('?reset=1&screen=S01', size); // the shell (O1, the title, has no footer by design)
   const r = await page.evaluate(() => {
     const stage = document.querySelector('.w-stage');
@@ -339,7 +347,7 @@ async function playUntil(p, done, what) {
   throw new Error(`${what} not reached in 60 s: ${at}`);
 }
 const toStop = (p) => playUntil(p, () => !document.querySelector('.w-stop-view').hidden, 'video stop');
-for (const size of SIZES) {
+for (const size of COACH_ONLY ? [] : SIZES) {
   for (const [id, state, act] of STATES.filter(([id]) => !ONLY.length || ONLY.includes(id))) {
     const page = await open(`?reset=1&screen=${id}`, size);
     await act(page);
@@ -351,7 +359,7 @@ for (const size of SIZES) {
 
 /* ---- 3. menu and dialogs ---- */
 console.log('\n3. menu and dialogs');
-for (const size of ONLY.length ? [] : SIZES) {
+for (const size of ONLY.length || COACH_ONLY ? [] : SIZES) {
   const page = await open('?reset=1&screen=S03', size);
   await click(page, '.w-bar-menu');
   await measure(page, `menu open ${size.join('x')}`);
@@ -362,6 +370,51 @@ for (const size of ONLY.length ? [] : SIZES) {
   }
   expect(!page.errors.length, `menu ${size.join('x')}: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);
   await page.close();
+}
+
+/* ---- 4. CO1: the coach launcher on every screen, the open panel at both docks ---- */
+console.log('\n4. coach');
+const SLICE = JSON.parse(readFileSync(join(ROOT, 'content', 'l4-slice.json'), 'utf8')).lesson.slice;
+// stage-px boxes of the launcher, the bar's parts, the panel, Previous / Next; whether the panel is opaque
+// and on top (the element at five points of its box is its own)
+const coachBoxes = () => {
+  const s = document.querySelector('.w-stage').getBoundingClientRect(), k = s.height / 720;
+  const box = (el) => { if (!el || el.hidden || !el.getClientRects().length) return null; const r = el.getBoundingClientRect(); return { l: (r.left - s.left) / k, t: (r.top - s.top) / k, r: (r.right - s.left) / k, b: (r.bottom - s.top) / k }; };
+  const panel = document.querySelector('.w-coach-panel');
+  const P = panel.getBoundingClientRect();
+  const pts = [[.5, .5], [.1, .1], [.9, .1], [.1, .9], [.9, .9]].map(([x, y]) => document.elementFromPoint(P.left + x * P.width, P.top + y * P.height));
+  const bg = getComputedStyle(panel).backgroundColor;
+  const bar = document.querySelector('.w-bar');
+  return { stageW: s.width / k, launcher: box(document.querySelector('.w-coach-launcher')), chapter: box(document.querySelector('.w-bar-chapter')),
+    steps: [...document.querySelectorAll('.w-step')].map(box), bar: box(bar), barScroll: bar.scrollWidth > bar.clientWidth + 1,
+    panel: box(panel), onTop: pts.every((e) => e && panel.contains(e)), opaque: !/rgba\(.*,\s*0?\.\d+\)$/.test(bg) && bg !== 'transparent',
+    foot: [...document.querySelectorAll('.w-footer > button')].filter((b) => !b.hidden && b.getClientRects().length).map(box) };
+};
+const meet = (a, b) => a && b && a.r > b.l + 0.5 && a.l < b.r - 0.5 && a.b > b.t + 0.5 && a.t < b.b - 0.5;
+for (const size of SIZES) {
+  for (const id of SLICE.filter((x) => !ONLY.length || ONLY.includes(x))) {
+    const page = await open(`?reset=1&screen=${id}`, size);
+    const what = `${id} ${size.join('x')}`;
+    await page.keyboard.press('Shift'); // any key stops a ghost hand
+    const c = await page.evaluate(coachBoxes);
+    const L = c.launcher;
+    const w = L && Math.round(L.r - L.l), hg = L && Math.round(L.b - L.t);
+    const steps = c.steps.filter(Boolean);
+    expect(L && w === 56 && hg === 56 && L.t >= -0.5 && L.b <= 80.64 + 0.5 && L.l >= c.chapter.r + 17.5 && steps.every((st) => !meet(L, st)) && !c.barScroll && steps.every((st) => st.r <= c.stageW - 23 + 0.5),
+      `${what} launcher: ${w}x${hg} at x ${L && Math.round(L.l)}, in the bar, after the chapter name, clear of the ${steps.length} steps, the bar's parts fit`);
+    for (const dock of ['l', 'r']) {
+      await page.evaluate((d) => { const co = window.__l4.coach; if (!co.isOpen()) co.open({ focus: false }); co.setDock(d); }, dock);
+      await page.evaluate(() => new Promise((r) => setTimeout(r, 30)));
+      const o = await page.evaluate(coachBoxes);
+      const P = o.panel;
+      const side = dock === 'l' ? Math.abs(P.l - 24) < 1 : Math.abs(o.stageW - P.r - 24) < 1;
+      expect(P && P.t >= 96 - 0.5 && P.b <= 632 + 0.5 && Math.round(P.r - P.l) === 340 && side && o.onTop && o.opaque && !o.foot.some((F) => meet(P, F)) && !meet(P, o.bar),
+        `${what} panel ${dock === 'l' ? 'left' : 'right'}: x ${Math.round(P.l)} to ${Math.round(P.r)}, y ${Math.round(P.t)} to ${Math.round(P.b)}, opaque and on top, clear of the bar and Previous / Next`);
+      await measure(page, `${what} coach open ${dock === 'l' ? 'left' : 'right'}`);
+    }
+    expect(!page.errors.length, `${what} coach: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);
+    await page.close();
+  }
 }
 
 console.log('\n  text/background pairs rendered (ratio, needed):');

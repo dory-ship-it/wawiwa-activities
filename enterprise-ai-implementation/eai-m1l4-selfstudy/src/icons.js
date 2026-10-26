@@ -118,6 +118,9 @@ const G = {
   'g-grip': [[10, 16], 0, '<g fill="currentColor" stroke="none"><circle cx="2" cy="2" r="1.4"/><circle cx="8" cy="2" r="1.4"/><circle cx="2" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="2" cy="14" r="1.4"/><circle cx="8" cy="14" r="1.4"/></g>'],
   // the quote mark (filled, 40 x 30)
   'g-quote': [[40, 30], 0, '<path d="M0 30V17C0 7 6 1 16 0v6c-5 1-8 5-8 10h8v14zm22 0V17c0-10 6-16 16-17v6c-5 1-8 5-8 10h8v14z" class="w-gq"/>'],
+  // CO1: the Wawiwa AI Coach robot face, from the workbook's "Wawiwa AI Coach" card (its own colours,
+  // the only glyph that carries them; the card's short white written as the white token)
+  coach: [64, 0, '<rect x="14" y="18" width="36" height="30" rx="9" fill="#FFFFFF" stroke="#255777" stroke-width="2.5"/><rect x="20" y="25" width="24" height="14" rx="5" fill="#255777" stroke="none"/><circle cx="27" cy="32" r="3" fill="#5AB3AA" stroke="none"/><circle cx="37" cy="32" r="3" fill="#EE3124" stroke="none"/><path d="M28 36.5q4 2.6 8 0" fill="none" stroke="#5AB3AA" stroke-width="1.6" stroke-linecap="round"/><line x1="32" y1="10" x2="32" y2="18" stroke="#255777" stroke-width="2.5"/><circle cx="32" cy="9" r="3.2" fill="#EE3124" stroke="none"/><rect x="9" y="30" width="5" height="10" rx="2.5" fill="#3E868F" stroke="none"/><rect x="50" y="30" width="5" height="10" rx="2.5" fill="#3E868F" stroke="none"/><rect x="22" y="48" width="20" height="6" rx="3" fill="#255777" stroke="none"/>'],
 };
 
 export const ICON_NAMES = [...Object.keys(P), ...Object.keys(G)];
