@@ -2187,45 +2187,45 @@
           ]
         },
         "stretch": {
-          "pilotCopy": "the handoff (clerk to purchasing, contact away) and the finance manual are constructed from the car-company case",
+          "pilotCopy": "the handoff (service agent to the disputes team, contact away) and the playbook are constructed from the fintech case",
           "coach": {
             "kind": "practice",
             "tip": "Picture the contact away for a week. What would the next person need to know?",
             "tipDrafted": true
           },
-          "hint": "Ask: if this invoice stalls, could the map show you why?",
+          "hint": "Ask: if this dispute stalls, could the map show you why?",
           "stage": {
             "top": {
-              "text": "Three documents disagree. The clerk sends the invoice to purchasing, whose contact is away."
+              "text": "A customer disputes a charge. The agent sends it to disputes, whose contact is away."
             }
           },
           "visual": {
-            "from": "AP clerk",
-            "to": "Purchasing",
-            "alt": "Handoff: the invoice passes from the accounts-payable clerk to purchasing, which is greyed out: the contact is away."
+            "from": "Service agent",
+            "to": "Disputes team",
+            "alt": "Handoff: the dispute passes from the service agent to the disputes team, which is greyed out: the contact is away."
           },
           "options": [
             {
               "id": "a",
-              "label": "Clerk to purchasing, with the documents",
+              "label": "Agent to disputes, with the chat",
               "correct": false,
-              "feedback": "Sender, receiver and what passes are there. With the contact away, nobody can see where the invoice now waits."
+              "feedback": "Sender, receiver and what passes are there. With the contact away, nobody can see where the dispute now waits."
             },
             {
               "id": "b",
-              "label": "Clerk to purchasing, and if unavailable",
+              "label": "Agent to disputes, and if unavailable",
               "correct": false,
-              "feedback": "The away case is there, but not what passes. Purchasing gets an invoice without knowing what disagrees."
+              "feedback": "The away case is there, but not what passes. The disputes team starts without the customer's story."
             },
             {
               "id": "c",
-              "label": "Clerk to purchasing, as the manual says",
+              "label": "Agent to disputes, per the playbook",
               "correct": false,
-              "feedback": "The manual shows how it should run. If today differs, the map hides the real gap."
+              "feedback": "The playbook shows how it should run. If today differs, the map hides the real gap."
             },
             {
               "id": "d",
-              "label": "Clerk to purchasing: documents, if unavailable",
+              "label": "Agent to disputes: chat, if unavailable",
               "correct": true,
               "feedback": "Sender, receiver, what passes, and the away case. Nobody covers today, so Field 7 records that."
             }
@@ -2241,10 +2241,9 @@
             }
           ],
           "sources": [
-            "s16",
+            "s25",
+            "s26",
             "s27",
-            "s29",
-            "s30",
             "s34"
           ]
         }
@@ -2786,7 +2785,7 @@
             },
             {
               "id": "e",
-              "text": "Due in an hour, the AP map lists steps but no controls or gaps.",
+              "text": "Due in an hour, the fintech's map lists steps but no controls or gaps.",
               "column": "3",
               "feedback": {
                 "correct": "Controls and gaps are where the findings live. Skipping them leaves Lesson 5 nothing to protect against.",

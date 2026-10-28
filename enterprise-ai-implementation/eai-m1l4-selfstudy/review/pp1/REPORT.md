@@ -26,6 +26,7 @@ Weekly usage before: 27% (all models)
 ## Where stretch kept the HR case, and other content calls
 - **S12**: both levels keep the full HR map. It is the canon the chapter built, and S21R's "Revisit the full HR map" links there. Stretch is harder only through the hint (a self-question) and less directive field feedback. Its context line reads "The full HR map from this chapter's demo" because stretch learners did S09-S11 on accounts payable.
 - **S09 stretch** does fit the AP case (the card deck is text only).
+- **Stretch case balance** (Noy left it to me, 28 Oct): ch3 stretch stays on accounts payable (S09-S11 build one map, Fields 5, 7, 8). Ch4 stretch alternates: S14 moved to the fintech (service agent to the disputes team, contact away; constructed, see pilotCopy), S15 stays on the car company's own bottleneck, S16 fintech, S17 cases a-c AP and d-e fintech. A journey 1 learner meets AP in S09-S11, S15 and part of S17.
 - **S11 stretch** has no explain band: with the approved case line and the long option d, the panel ran 22px over the 41cqw limit. The band is the three-part rule, which the stretch hint holds back on purpose. The template's no-band layout puts the Field 8 label above the heading. The approved text is unchanged.
 - **Coach tip**: overridden only where the case changes (S10 stretch, S14 stretch), as screen content. The coach code is untouched.
 - **pilotCopy** on S09 / S10 / S11 / S14 / S17 stretch and S17 support (constructed details, estimated minutes): see VARIANTS.md.
@@ -41,7 +42,7 @@ Weekly usage before: 27% (all models)
 ## Open questions for Noy
 1. **L4_PATH type**: the work-order says type choice with the response support / core / stretch. SCORM 1.2 allows only single characters for choice (the mock rejected it), so I send type fill-in with the word. Keep this, or use choice with s / c / x?
 2. **S11 stretch without the explain band**: OK? The alternative is to shorten the approved answers.
-3. **Stretch cases**: S09 to S11 and S14, S15, S17 use accounts payable; S16 uses the fintech. A journey 1 learner meets AP six times. Is that wanted, or should part of it move to the fintech?
+3. **Stretch cases**: settled 28 Oct, see "Stretch case balance" above.
 4. **S14 support**: the options use "Sender, receiver" instead of "From whom, to whom", because the 2x2 grid fits only shorter lines. OK?
 5. **Walk**: the walk now pins `?level=core`, because its learner alone would land on support. Journeys are tested only in test:adapt. OK?
 
