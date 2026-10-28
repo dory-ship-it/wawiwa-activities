@@ -238,7 +238,7 @@ const V = {
       hint: 'What goes in, what is at stake, what is known?',
       cards: [
         // QA3: card 1 no longer a summary (card 6, the briefing, is one too: the two columns blurred)
-        { n: 1, text: 'Extract order numbers from chats', column: 'a', feedback: fb('Good fit, unstructured to structured: a free-text chat in, an order number out.', 'Look at what goes in and what comes out. Is a decision made here at all?') },
+        { n: 1, text: 'Extract order numbers', column: 'a', feedback: fb('Good fit, unstructured to structured: a free-text chat in, an order number out.', 'Look at what goes in and what comes out. Is a decision made here at all?') },
         { n: 2, text: 'Decide a disputed charge', column: 'd', feedback: fb("Poor fit: money at stake and hard to undo. Per reports, the fintech's quality dropped on disputes.", 'If this call is wrong, who carries the loss, and can it be undone?') },
         { n: 3, text: 'Route simple requests', column: 'b', feedback: fb('Good fit, a low-risk decision. Per reports, AI did as well as people on simple requests.', 'Ask how much one wrong route would cost, and how fast it would be caught.') },
         // QA3: not the car company again (V1 film, S17 b and c): the fintech's own disorder
