@@ -6,8 +6,10 @@
 //            come; they cover the card only) and the counter ("1 of 5") under it
 //   strip    the off-panel feedback strip, beside the deck on its right (NL3: the frames put it
 //            between the deck and the columns, where it covered the counter of a two-line card;
-//            critical detail 4 wants the counter always visible); above it the attempt marker and
-//            Check (FX1); an explain band (S09: the four sensitivity levels) on the deck's other side
+//            critical detail 4 wants the counter always visible); above it the attempt marker; an
+//            optional explain band on the deck's other side (QA3: S09 no longer has one)
+//   check    QA3: once the deck is empty, its place shows "All n cards placed." and Check (no longer in
+//            the strip's tool row: the learner looked for it where the cards were)
 //   columns  dashed drop columns (title + one-line subtitle or definition), fixed from the top
 //            (32.2cqw) so they grow downwards with the placed cards; lower only when the deck, the
 //            strip or the band would reach them (from the tallest card, strip and band of the screen,
@@ -22,11 +24,11 @@
 // drags it down, stopping above the columns; "Show me how" replays it.
 // Tracking: one matching interaction at the first Check; the response records each card's FIRST
 // column ("1.a,2.b,..."), correct only if every first placement was right. Later Checks are retries.
-import { h, fmt } from '../util.js?v=41429d1d';
-import { glyph } from '../icons.js?v=41429d1d';
-import { layout, explainBand } from './stage.js?v=41429d1d';
-import { dragDrop } from '../drag.js?v=41429d1d';
-import { checkButton } from './decision.js?v=41429d1d';
+import { h, fmt } from '../util.js?v=6b628c2e';
+import { glyph } from '../icons.js?v=6b628c2e';
+import { layout, explainBand } from './stage.js?v=6b628c2e';
+import { dragDrop } from '../drag.js?v=6b628c2e';
+import { checkButton } from './decision.js?v=6b628c2e';
 
 const keyOf = (c) => String(c.id ?? c.n);
 const COLS_TOP = 222.72, GAP = 15.36; // stage px in main (FX2 B: higher than the frames' 32.2cqw, the columns hold the cards' text)
@@ -66,9 +68,13 @@ export const sortDeck = {
     // FX3: with no explain band (S04, S16) the deck sits left, under the heading, and the strip takes the
     // wide space beside it: fewer lines, so the columns come up close to the deck
     const band = screen.band ? h('div', { class: 'w-deck-band' }, explainBand(screen.band)) : null;
-    const deck = h('div', { class: 'w-sdeck' + (band ? '' : ' w-sdeck-left'), dataset: { interaction: '' } }, stack, counter, help, live);
-    const float = h('div', { class: 'w-float w-float-beside' + (band ? '' : ' w-float-wide') }, zones.band);
     const check = checkButton(ui, ui.buttons.check, () => doCheck());
+    // QA3 (Noy: Check up in the strip was not intuitive): when the last card lands, the deck's place shows
+    // "All n cards placed." and Check, where the learner's eyes already are, just above the columns
+    const doneNote = h('p', { class: 'w-deck-done-note' });
+    const doneRow = h('div', { class: 'w-deck-check', hidden: true }, doneNote, check);
+    const deck = h('div', { class: 'w-sdeck' + (band ? '' : ' w-sdeck-left'), dataset: { interaction: '' } }, stack, counter, doneRow, help, live);
+    const float = h('div', { class: 'w-float w-float-beside' + (band ? '' : ' w-float-wide') }, zones.band);
 
     const cur = () => cards[queue[qi]];
     const dd = dragDrop({ ui, live, targets: cols, nameOf: () => cur().text, onDrop: (_, col) => dropOn(col) });
@@ -91,7 +97,7 @@ export const sortDeck = {
       band, deck, float, colRow);
     zones.setHintVisible(false); // the frame shows no hint line: the hint stays for screen readers (S16: the line under the heading)
     zones.setFeedback({ state: 'hint', text: screen.hint });
-    if (!ctx.revisit) { zones.setTool(check); zones.setAttempts(1, max); }
+    if (!ctx.revisit) zones.setAttempts(1, max);
 
     /* ---- the places of the strip and the columns, from the tallest card and the tallest strip ---- */
     function place() {
@@ -160,7 +166,13 @@ export const sortDeck = {
 
     function show() {
       const left = queue.length - qi; // this card and the ones still to come
-      if (left <= 0) { stack.dataset.done = 'true'; card.inert = true; counter.textContent = ''; return; }
+      if (left <= 0) {
+        stack.dataset.done = 'true'; card.inert = true; counter.textContent = '';
+        doneNote.textContent = fmt(ui.progress.deckDone, { n: cards.length });
+        doneRow.hidden = done || !!ctx.revisit;
+        return;
+      }
+      doneRow.hidden = true;
       stack.dataset.done = 'false';
       card.inert = false;
       const c = cur();
@@ -217,8 +229,8 @@ export const sortDeck = {
       done = true;
       stack.dataset.done = 'true';
       card.inert = true; // nothing left to drop (the columns stay reachable: a shown card explains itself)
+      doneRow.hidden = true;
       colRow.dataset.done = 'true';
-      zones.setTool();
       ctx.complete();
       ctx.unlockNext({ focus });
     }

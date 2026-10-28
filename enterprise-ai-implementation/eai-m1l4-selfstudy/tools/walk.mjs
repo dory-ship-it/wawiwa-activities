@@ -862,10 +862,11 @@ expect(v2Next.locked && v2Next.label === UI.footer.locked.video && !(await page.
 await videoRun(page, 'V2', { shotPlaying: 'v2-playing.png', shotWrong: 'v2-stop-wrong.png' });
 await press(page, 'Enter'); // Next
 
-// S09 sort deck (NL3) with the explain band beside the deck: card 1 wrong then right, the rest right
+// S09 sort deck (NL3; QA3: no field chip and no explain band, the hint line and column subtitles):
+// card 1 wrong then right, the rest right
 await expectNewScreen(page, 'S09', 'V2 Next');
 const card = (sid, k) => S[sid].cards.find((c) => String(c.id ?? c.n) === String(k));
-await deckRun(page, 'S09', { wrong: 'b', band: true });
+await deckRun(page, 'S09', { wrong: 'b' });
 
 // The sort deck by keyboard (S09, S16, S17; S04 has its own steps above): the band, the counter
 // never under the strip, the first card dropped on the wrong column (it returns, its line in the
@@ -897,7 +898,10 @@ async function deckRun(p, sid, { wrong, band: withBand = false }) {
   await press(p, 'Enter');
   await expectBand(p, `${sid} card 1 on ${wrong} (placed)`, { state: 'hint', text: Sx.hint, unlocked: false });
   for (const c of Sx.cards.slice(1)) { await press(p, COLS[c.column]); await press(p, 'Enter'); }
-  expect(await isActive(p, '[data-action="check"]'), `${sid} deck empty: focus on Check`);
+  // QA3: Check sits in the empty deck's place, with "All n cards placed." (not in the strip's tool row)
+  const dc = await p.evaluate(() => { const r = document.querySelector('.w-deck-check'); return { shown: !!r && !r.hidden, note: r?.querySelector('.w-deck-done-note')?.textContent, inDeck: !!r?.querySelector('[data-action="check"]') }; });
+  expect(await isActive(p, '[data-action="check"]') && dc.shown && dc.inDeck && dc.note === UI.progress.deckDone.replace('{n}', String(Sx.cards.length)),
+    `${sid} deck empty: "${dc.note}" and Check in the deck's place, focus on Check`);
   await press(p, 'Enter');
   await expectBand(p, `${sid} Check, card 1 on ${wrong}`, { state: 'wrong', text: c1.feedback[wrong] || c1.feedback.wrong, unlocked: false });
   const vis = await p.evaluate(() => {

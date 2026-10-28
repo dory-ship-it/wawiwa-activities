@@ -641,6 +641,7 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 
 /* S11 metric: the "Checkable later?" slots */
 .w-slots { display: flex; align-items: center; gap: 15.36px; }
+.w-slots[data-wait="true"] { visibility: hidden; } /* QA3: S11 stretch, the slots appear with the first answer */
 .w-slots-title { font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
 .w-slots ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 10.24px; }
 .w-slot { min-width: 132px; min-height: 44px; display: flex; align-items: center; gap: 7.68px; padding: 0 12.8px; border: 1px solid var(--wl-line-strong); border-radius: var(--wl-radius-card);
@@ -964,6 +965,10 @@ a.w-btn { text-decoration: none; }
 .w-grip { color: var(--wl-neutral-line); }
 .w-deck-text { font: 800 23.04px/1.25 var(--wl-font-ui); color: var(--wl-ink); } /* FX2 B: the deck smaller, the columns get the room */
 .w-deck-count { margin-top: 12.8px; text-align: center; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+/* QA3: the empty deck's place: "All n cards placed." and Check, centred where the card was */
+.w-deck-check { position: absolute; left: 0; right: 0; top: 12.8px; display: flex; flex-direction: column; align-items: center; gap: 10.24px; }
+.w-deck-check[hidden] { display: none; }
+.w-deck-done-note { margin: 0; font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-on-wash, var(--wl-ink)); }
 /* drop columns: dashed, title and subtitle, fixed from the top (they grow down with the placed cards) */
 .w-drops { position: absolute; left: max(51.2px, calc((100% - 1177.6px) / 2)); right: max(51.2px, calc((100% - 1177.6px) / 2)); top: 314.88px;
   display: grid; gap: 20.48px; align-items: start; }

@@ -22,9 +22,9 @@
 // Nothing the learner types is kept anywhere. Review mode (?review=1) writes nothing; ?coach=hint |
 // open | tip | right | thinking | cap | demo shows that state on load (the review page's coach row).
 // No learner-facing text here: every string arrives from content ui.coach.
-import { h, reducedMotion } from '../util.js?v=41429d1d';
-import { glyph } from '../icons.js?v=41429d1d';
-import { ask } from './transport.js?v=41429d1d';
+import { h, reducedMotion } from '../util.js?v=6b628c2e';
+import { glyph } from '../icons.js?v=6b628c2e';
+import { ask } from './transport.js?v=6b628c2e';
 
 const HINT_CODE = 'a';
 const TOP = 96, BOTTOM = 632; // the panel's box in stage px

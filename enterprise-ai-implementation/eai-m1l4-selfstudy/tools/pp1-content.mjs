@@ -25,7 +25,7 @@ const V = {
         { n: 1, text: 'Vacation policy', column: 'a', feedback: fb('Placed. A knowledge source: the document an HR answer depends on.', 'Field 5 has three parts: source, owner, tag. A policy is a document. Which part is that?') },
         { n: 2, text: 'Pension policy', column: 'a', feedback: fb('Placed. Another source the HR staff read before they answer.', 'Staff read this document before they answer. Of source, owner and tag, which one is a document?') },
         { n: 3, text: 'HR manager', column: 'b', feedback: fb('Placed. The owner keeps the policies current. When one goes stale, the map names who updates it.', 'An owner is who keeps a source current and correct. This is a role. Which part fits a role?') },
-        { n: 4, text: 'INTERNAL', column: 'c', feedback: fb('Placed. The sensitivity tag decides what may go to an AI tool. The policies stay inside the company.', 'This word is one of the four sensitivity levels in the band above. Which part holds a level?') },
+        { n: 4, text: 'INTERNAL', column: 'c', feedback: fb('Placed. The sensitivity tag decides what may go to an AI tool. The policies stay inside the company.', 'This word is one of the four levels named under Sensitivity. Which part holds a level?') },
         { n: 5, text: 'WhatsApp question arrives', column: 'd', feedback: fb('Kept out. That starts the process. It is the trigger, Field 2.', 'Field 5 is about knowledge: sources, owners, tags. This card is about how the process starts.') },
         { n: 6, text: 'Staff check the topic', column: 'd', feedback: fb('Kept out. That is a step with its role owner, Field 3.', 'Field 5 is about knowledge: sources, owners, tags. This card is a step someone does.') },
       ],
@@ -34,7 +34,7 @@ const V = {
     },
     stretch: {
       pilotCopy: 'the owner (finance controller) and the CONFIDENTIAL tag for supplier bank details are constructed, not in the deck',
-      hint: 'Ask: what does this card tell the map, and does it happen today? Keys 1 to 4, then Enter.',
+      hint: 'Ask what each card tells the map, and whether it happens today. Keys 1 to 4, then Enter.',
       cards: [
         { n: 1, text: 'Receipt record', column: 'a', feedback: fb('Placed. In the car-company case, payment later ran straight from this record.', 'Ask what the matching step reads, and what a wrong copy would break.') },
         { n: 2, text: 'Supplier invoice', column: 'a', feedback: fb('Placed. One of the three documents the clerks reconcile today.', 'Placed here, the map loses track of what the matching depends on.') },
@@ -108,8 +108,12 @@ const V = {
       ],
       tracking: [{ id: 'L4_S11_1', type: 'choice', correctResponse: 'd', scored: false, bloom: 'Evaluate', result: 'graded' }],
       // the three-part band is the rule the stretch hint holds back; without it the approved case line and
-      // the longer answers fit the panel (the template's no-band layout: the Field 8 label over the heading)
+      // the longer answers fit the panel (the template's no-band layout: the Field 8 label over the heading).
+      // QA3: the Baseline / Target / Date slots and the coach tip held it back too little: the slots show
+      // only after the first answer (as its check), and the coach asks without naming the parts
       band: null,
+      slotsAfterChoice: true,
+      coach: { kind: 'practice', tip: 'Ask whose number each line uses, and whether anyone could check it later.', tipDrafted: true },
       sources: ['s16', 's29', 's30', 's37'],
     },
   },
@@ -170,13 +174,15 @@ const V = {
       hint: 'Ask: if this dispute stalls, could the map show you why?',
       stage: { top: { text: 'A customer disputes a charge. The agent sends it to disputes, whose contact is away.' } },
       visual: { from: 'Service agent', to: 'Disputes team', alt: 'Handoff: the dispute passes from the service agent to the disputes team, which is greyed out: the contact is away.' },
+      // QA3: no longer "a + b = d" (three partial lines and their sum); one full handoff record against three
+      // other kinds of mistake (the written rule, a future tool, an assumption), in plain words
       options: [
-        { id: 'a', label: 'Agent to disputes, with the chat', correct: false, feedback: 'Sender, receiver and what passes are there. With the contact away, nobody can see where the dispute now waits.' },
-        { id: 'b', label: 'Agent to disputes, and if unavailable', correct: false, feedback: "The away case is there, but not what passes. The disputes team starts without the customer's story." },
-        { id: 'c', label: 'Agent to disputes, per the playbook', correct: false, feedback: 'The playbook shows how it should run. If today differs, the map hides the real gap.' },
-        { id: 'd', label: 'Agent to disputes: chat, if unavailable', correct: true, feedback: 'Sender, receiver, what passes, and the away case. Nobody covers today, so Field 7 records that.' },
+        { id: 'a', label: "The playbook's backup rule", correct: false, feedback: 'The playbook shows how it should run. If today differs, the map hides the real gap.' },
+        { id: 'b', label: 'Agent to disputes, with the chat, and away cover', correct: true, feedback: 'Sender, receiver, what passes, and the away case. Today nobody covers, so Field 7 records that gap.' },
+        { id: 'c', label: 'An AI agent reroutes disputes', correct: false, feedback: 'That tool does not run today. Map the handoff as it works now, gap included.' },
+        { id: 'd', label: 'Nothing: disputes can read the chat', correct: false, feedback: 'Do not assume the receiver knows the history. And who takes the dispute while the contact is away?' },
       ],
-      tracking: [{ id: 'L4_S14_1', type: 'choice', correctResponse: 'd', scored: false, bloom: 'Analyze', result: 'graded' }],
+      tracking: [{ id: 'L4_S14_1', type: 'choice', correctResponse: 'b', scored: false, bloom: 'Analyze', result: 'graded' }],
       sources: ['s25', 's26', 's27', 's34'],
     },
   },
@@ -195,16 +201,19 @@ const V = {
       tracking: [{ id: 'L4_S15_1', type: 'choice', correctResponse: 'a', scored: false, bloom: 'Apply', result: 'graded' }],
       sources: ['s17', 's20', 's28'],
     },
+    // QA3: not the car company: its fix (pay from the receipt record) is the V1 film's answer, so stretch
+    // learners recalled it instead of working it out; a fintech bottleneck nobody has solved for them
     stretch: {
+      pilotCopy: 'the disputes specialist who reads every full chat is constructed from the fintech case',
       hint: 'Ask: what would happen if this step disappeared?',
-      stage: { top: { eyebrow: 'Accounts payable, US car company, early 1980s', text: 'Most of the work of 500 staff goes to matching three documents by hand.', highlight: '500 staff' } },
+      stage: { top: { eyebrow: 'The fintech, disputed charges', text: 'Every disputed charge waits for one specialist, who reads the whole chat history by hand.', highlight: 'one specialist' } },
       options: [
-        { id: 'a', label: 'How does a rival do it with 100 staff?', correct: false, feedback: 'Their result, not your process. Without knowing why your step formed, nothing tells you what to change.' },
-        { id: 'b', label: 'Which software would match the documents faster?', correct: false, feedback: 'Faster technology on an unexamined step entrenches it, faster and at larger scale.' },
-        { id: 'c', label: 'Why must three documents be matched at all?', correct: true, feedback: 'The cause decides the fix. Here payment could run from the receipt record, and the step could go.' },
+        { id: 'a', label: 'How many more specialists can we hire?', correct: false, feedback: 'More people on the same step keep it in place. First ask whether every dispute needs it.' },
+        { id: 'b', label: 'Which AI tool would read the chats faster?', correct: false, feedback: 'Faster technology on an unexamined step entrenches it, faster and at larger scale.' },
+        { id: 'c', label: 'Why does every dispute need the whole chat read?', correct: true, feedback: 'The cause decides the fix. If most disputes need only part of the chat, the full read could go.' },
       ],
       tracking: [{ id: 'L4_S15_1', type: 'choice', correctResponse: 'c', scored: false, bloom: 'Apply', result: 'graded' }],
-      sources: ['s6', 's28', 's29', 's30'],
+      sources: ['s6', 's25', 's26', 's28'],
     },
   },
 
@@ -214,12 +223,13 @@ const V = {
     support: {
       hint: "Good fit: free text, low risk, lossy handoffs. Poor: money, disorder, 'unclear'.",
       cards: [
-        { n: 1, text: 'Tag questions by topic', column: 'a', feedback: fb('Good fit, unstructured to structured: a free-text question in, a topic out.', 'The slide asks: what goes in, what comes out? A question is free text. What comes out?') },
-        { n: 2, text: 'Approve a pension exception', column: 'd', feedback: fb('Poor fit: money and rights at stake, hard to undo. That needs clear human judgment.', 'The slide marks money, rights and irreversible calls. Who carries a wrong answer here?') },
-        { n: 3, text: 'Mark urgent or routine', column: 'b', feedback: fb('Good fit, a low-risk decision: it can be accelerated, with a person watching.', 'The slide sorts decisions by risk. How much harm does one wrong label do, and how fast is it caught?') },
-        { n: 4, text: 'Sort out three unmanaged channels', column: 'd', feedback: fb('Poor fit, a process problem: the trouble is disorder, not missing information.', 'The slide asks: is the problem disorder, or missing information? Which is it here?') },
-        { n: 5, text: "Build on 'unclear' error counts", column: 'd', feedback: fb('Poor fit: you cannot build a solution on unknown foundations. Diagnose first.', "The slide warns about building on a map full of 'unclear'. What does the map know here?") },
-        { n: 6, text: 'Pass history to the manager', column: 'c', feedback: fb('Good fit, a handoff with delay or loss: AI documents what passes, so the manager gets the history.', 'The slide names handoffs that lose information. What does the manager receive today?') },
+        // QA3: the wrong lines no longer point to "the slide" (a self-study learner saw no slides)
+        { n: 1, text: 'Tag questions by topic', column: 'a', feedback: fb('Good fit, unstructured to structured: a free-text question in, a topic out.', 'Ask what goes in and what comes out. A question is free text. What comes out?') },
+        { n: 2, text: 'Approve a pension exception', column: 'd', feedback: fb('Poor fit: money and rights at stake, hard to undo. That needs clear human judgment.', 'Money, rights and calls that cannot be undone need a person. Who carries a wrong answer here?') },
+        { n: 3, text: 'Mark urgent or routine', column: 'b', feedback: fb('Good fit, a low-risk decision: it can be accelerated, with a person watching.', 'Decisions differ by risk. How much harm does one wrong label do, and how fast is it caught?') },
+        { n: 4, text: 'Sort out three unmanaged channels', column: 'd', feedback: fb('Poor fit, a process problem: the trouble is disorder, not missing information.', 'Ask: is the problem disorder, or missing information? Which is it here?') },
+        { n: 5, text: "Build on 'unclear' error counts", column: 'd', feedback: fb('Poor fit: you cannot build a solution on unknown foundations. Diagnose first.', "Building on 'unclear' means building on unknowns. What does the map know here?") },
+        { n: 6, text: 'Pass history to the manager', column: 'c', feedback: fb('Good fit, a handoff with delay or loss: AI documents what passes, so the manager gets the history.', 'Some handoffs lose information on the way. What does the manager receive today?') },
       ],
       tracking: [{ id: 'L4_S16_1', type: 'matching', correctResponse: '1.a,2.d,3.b,4.d,5.d,6.c', scored: false, bloom: 'Analyze', result: 'graded' }],
       sources: ['s19', 's32', 's33'],
@@ -227,10 +237,12 @@ const V = {
     stretch: {
       hint: 'What goes in, what is at stake, what is known?',
       cards: [
-        { n: 1, text: 'Summarize a customer chat', column: 'a', feedback: fb('Good fit, unstructured to structured: a free-text chat in, a short summary out.', 'Look at what goes in and what comes out. Is a decision made here at all?') },
+        // QA3: card 1 no longer a summary (card 6, the briefing, is one too: the two columns blurred)
+        { n: 1, text: 'Extract order numbers from chats', column: 'a', feedback: fb('Good fit, unstructured to structured: a free-text chat in, an order number out.', 'Look at what goes in and what comes out. Is a decision made here at all?') },
         { n: 2, text: 'Decide a disputed charge', column: 'd', feedback: fb("Poor fit: money at stake and hard to undo. Per reports, the fintech's quality dropped on disputes.", 'If this call is wrong, who carries the loss, and can it be undone?') },
         { n: 3, text: 'Route simple requests', column: 'b', feedback: fb('Good fit, a low-risk decision. Per reports, AI did as well as people on simple requests.', 'Ask how much one wrong route would cost, and how fast it would be caught.') },
-        { n: 4, text: 'Speed up three-document matching', column: 'd', feedback: fb('Poor fit, a process problem. The car company removed this step instead of speeding it up.', 'Ask whether this step should exist before asking how fast it runs.') },
+        // QA3: not the car company again (V1 film, S17 b and c): the fintech's own disorder
+        { n: 4, text: 'Auto-reply three unsorted inboxes', column: 'd', feedback: fb('Poor fit, a process problem: three unsorted inboxes stay disordered, only faster.', 'Is information missing here, or is the process itself disorganized?') },
         { n: 5, text: "Draft replies where the map says 'unclear'", column: 'd', feedback: fb('Poor fit: drafting looks safe, but the foundations are unknown. This needs diagnosis first.', 'Drafting can fit. Check what the map actually knows before building on it.') },
         { n: 6, text: 'Brief whoever takes a dispute', column: 'c', feedback: fb('Good fit, a handoff with delay or loss: AI documents the case, so the next person starts informed.', 'Nothing is decided here. Think about what the next person receives today.') },
       ],
@@ -262,7 +274,8 @@ const V = {
         { id: 'a', text: 'The AP map was drawn from the finance manual. Clerks skip half its steps.', column: '1', feedback: fb('The map describes the procedure, not a normal day. The real gaps stay hidden.', 'Nothing changed after the map was drawn. Compare it with what clerks actually do.') },
         { id: 'b', text: 'Payment now runs from the receipt record. The map still shows invoice matching.', column: '4', feedback: fb('The map was right once. Lesson 5 would build on a step that no longer exists.', 'The map matched the process when drawn. What happened since?') },
         { id: 'c', text: 'Software will match the three documents faster. Nobody asked why matching exists.', column: '5', feedback: fb('The most critical mistake. The car company removed this step; speeding it up keeps the mess.', 'The map may be accurate. Look at what is about to be done with the step.') },
-        { id: 'd', text: 'The fintech mapped every service step, with no question it should answer.', column: '2', feedback: fb('Without a question, nobody can say which steps or boundaries matter. The map grows and decides nothing.', 'The map may be accurate and complete. Ask what it was drawn to decide.') },
+        // QA3: no longer the definition's own words ("no question to answer")
+        { id: 'd', text: "The fintech mapped every service step 'just in case'. Nobody has used it since.", column: '2', feedback: fb('Without a question, nobody can say which steps or boundaries matter. The map grows and decides nothing.', 'The map may be accurate and complete. Ask what it was drawn to decide.') },
         { id: 'e', text: "Due in an hour, the fintech's map lists steps but no controls or gaps.", column: '3', feedback: fb('Controls and gaps are where the findings live. Skipping them leaves Lesson 5 nothing to protect against.', 'The steps may be accurate. Look at what the deadline cut.') },
       ],
       tracking: [{ id: 'L4_S17_1', type: 'matching', correctResponse: 'a.1,b.4,c.5,d.2,e.3', scored: false, bloom: 'Analyze', result: 'graded' }],

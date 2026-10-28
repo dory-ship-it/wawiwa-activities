@@ -137,7 +137,7 @@
         "default": "Next, locked until you finish this screen"
       }
     },
-    "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "question": "Question {i} of {n}", "deck": "{i} of {n}", "situation": "Situation {i} of {n}", "caseOf": "Case {i} of {n}", "opened": "{i}/{n}" },
+    "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "question": "Question {i} of {n}", "deck": "{i} of {n}", "deckDone": "All {n} cards placed.", "situation": "Situation {i} of {n}", "caseOf": "Case {i} of {n}", "opened": "{i}/{n}" },
     "drag": {
       "help": "Drag the card to a column, or press 1 to {n} to choose a column and Enter to drop it. Escape cancels.",
       "helpPlaces": "Drag the label to a place on the diagram, or press 1 to {n} to choose a place and Enter to drop it. Escape cancels.",
@@ -1187,7 +1187,7 @@
     {
       "id": "S09",
       "goal": "g2",
-      "coach": { "kind": "practice", "tip": "A source is a document, an owner is a role, a tag is a level. Some cards fit none.", "tipDrafted": true },
+      "coach": { "kind": "practice", "tip": "Not sure? Ask what the map would lose if this card sat in the wrong column.", "tipDrafted": true },
       "chapter": "ch3",
       "template": "sortDeck",
       "attempts": 2,
@@ -1196,12 +1196,13 @@
       "instruction": "Drag each card to its part of Field 5.",
       "hint": "Drag the card to a column. Or press 1 to 4 to choose a column, then Enter.",
       "layout": "sort-deck",
-      "header": "Field 5: sources, owners, sensitivity",
+      "hintShown": true,
+      "terms": ["Sensitivity"],
       "columns": [
-        { "id": "a", "label": "Source" },
-        { "id": "b", "label": "Owner" },
-        { "id": "c", "label": "Sensitivity" },
-        { "id": "d", "label": "Not Field 5" }
+        { "id": "a", "label": "Source", "sub": "A document the work depends on" },
+        { "id": "b", "label": "Owner", "sub": "The role that keeps it current" },
+        { "id": "c", "label": "Sensitivity", "sub": "Its level, PUBLIC to RESTRICTED" },
+        { "id": "d", "label": "Not Field 5", "sub": "Belongs elsewhere on the map" }
       ],
       "cards": [
         { "n": 1, "text": "Vacation policy", "column": "a",
@@ -1230,19 +1231,9 @@
       "sources": ["s14", "s18", "s20", "s22", "s44", "s16"],
       "hintPilotCopy": true,
       "ghost": { "type": "drag", "showMe": false },
-      "band": {
-        "label": "Four sensitivity levels, from open to closed:",
-        "items": [
-          { "term": "PUBLIC", "text": "anyone may see it" },
-          { "term": "INTERNAL", "text": "staff only; approved company tools" },
-          { "term": "CONFIDENTIAL", "text": "named people only, never a public AI tool" },
-          { "term": "RESTRICTED", "text": "strictest access, no AI tool without approval" }
-        ]
-      },
-      "bandPilotCopy": "the four definitions (SME to confirm before the pilot)",
       "wordLimit": {
         "max": 60,
-        "why": "storyboard v3 (S09: the explain band with the four sensitivity levels joins the sort deck; keep the approved text word for word): 60 words with all six cards placed"
+        "why": "QA3 (Noy, 28 Oct 2026: the screen was crowded): no field chip and no explain band; the hint line and one subtitle per column (the four levels in the Sensitivity tooltip). 60 words with all six cards placed"
       },
       "variants": {
         "support": {
@@ -1281,7 +1272,7 @@
               "column": "c",
               "feedback": {
                 "correct": "Placed. The sensitivity tag decides what may go to an AI tool. The policies stay inside the company.",
-                "wrong": "This word is one of the four sensitivity levels in the band above. Which part holds a level?"
+                "wrong": "This word is one of the four levels named under Sensitivity. Which part holds a level?"
               }
             },
             {
@@ -1323,7 +1314,7 @@
         },
         "stretch": {
           "pilotCopy": "the owner (finance controller) and the CONFIDENTIAL tag for supplier bank details are constructed, not in the deck",
-          "hint": "Ask: what does this card tell the map, and does it happen today? Keys 1 to 4, then Enter.",
+          "hint": "Ask what each card tells the map, and whether it happens today. Keys 1 to 4, then Enter.",
           "cards": [
             {
               "n": 1,
@@ -1726,6 +1717,12 @@
             }
           ],
           "band": null,
+          "slotsAfterChoice": true,
+          "coach": {
+            "kind": "practice",
+            "tip": "Ask whose number each line uses, and whether anyone could check it later.",
+            "tipDrafted": true
+          },
           "sources": [
             "s16",
             "s29",
@@ -2207,34 +2204,34 @@
           "options": [
             {
               "id": "a",
-              "label": "Agent to disputes, with the chat",
-              "correct": false,
-              "feedback": "Sender, receiver and what passes are there. With the contact away, nobody can see where the dispute now waits."
-            },
-            {
-              "id": "b",
-              "label": "Agent to disputes, and if unavailable",
-              "correct": false,
-              "feedback": "The away case is there, but not what passes. The disputes team starts without the customer's story."
-            },
-            {
-              "id": "c",
-              "label": "Agent to disputes, per the playbook",
+              "label": "The playbook's backup rule",
               "correct": false,
               "feedback": "The playbook shows how it should run. If today differs, the map hides the real gap."
             },
             {
-              "id": "d",
-              "label": "Agent to disputes: chat, if unavailable",
+              "id": "b",
+              "label": "Agent to disputes, with the chat, and away cover",
               "correct": true,
-              "feedback": "Sender, receiver, what passes, and the away case. Nobody covers today, so Field 7 records that."
+              "feedback": "Sender, receiver, what passes, and the away case. Today nobody covers, so Field 7 records that gap."
+            },
+            {
+              "id": "c",
+              "label": "An AI agent reroutes disputes",
+              "correct": false,
+              "feedback": "That tool does not run today. Map the handoff as it works now, gap included."
+            },
+            {
+              "id": "d",
+              "label": "Nothing: disputes can read the chat",
+              "correct": false,
+              "feedback": "Do not assume the receiver knows the history. And who takes the dispute while the contact is away?"
             }
           ],
           "tracking": [
             {
               "id": "L4_S14_1",
               "type": "choice",
-              "correctResponse": "d",
+              "correctResponse": "b",
               "scored": false,
               "bloom": "Analyze",
               "result": "graded"
@@ -2339,32 +2336,33 @@
           ]
         },
         "stretch": {
+          "pilotCopy": "the disputes specialist who reads every full chat is constructed from the fintech case",
           "hint": "Ask: what would happen if this step disappeared?",
           "stage": {
             "top": {
-              "eyebrow": "Accounts payable, US car company, early 1980s",
-              "text": "Most of the work of 500 staff goes to matching three documents by hand.",
-              "highlight": "500 staff"
+              "eyebrow": "The fintech, disputed charges",
+              "text": "Every disputed charge waits for one specialist, who reads the whole chat history by hand.",
+              "highlight": "one specialist"
             }
           },
           "options": [
             {
               "id": "a",
-              "label": "How does a rival do it with 100 staff?",
+              "label": "How many more specialists can we hire?",
               "correct": false,
-              "feedback": "Their result, not your process. Without knowing why your step formed, nothing tells you what to change."
+              "feedback": "More people on the same step keep it in place. First ask whether every dispute needs it."
             },
             {
               "id": "b",
-              "label": "Which software would match the documents faster?",
+              "label": "Which AI tool would read the chats faster?",
               "correct": false,
               "feedback": "Faster technology on an unexamined step entrenches it, faster and at larger scale."
             },
             {
               "id": "c",
-              "label": "Why must three documents be matched at all?",
+              "label": "Why does every dispute need the whole chat read?",
               "correct": true,
-              "feedback": "The cause decides the fix. Here payment could run from the receipt record, and the step could go."
+              "feedback": "The cause decides the fix. If most disputes need only part of the chat, the full read could go."
             }
           ],
           "tracking": [
@@ -2379,9 +2377,9 @@
           ],
           "sources": [
             "s6",
-            "s28",
-            "s29",
-            "s30"
+            "s25",
+            "s26",
+            "s28"
           ]
         }
       }
@@ -2484,7 +2482,7 @@
               "column": "a",
               "feedback": {
                 "correct": "Good fit, unstructured to structured: a free-text question in, a topic out.",
-                "wrong": "The slide asks: what goes in, what comes out? A question is free text. What comes out?"
+                "wrong": "Ask what goes in and what comes out. A question is free text. What comes out?"
               }
             },
             {
@@ -2493,7 +2491,7 @@
               "column": "d",
               "feedback": {
                 "correct": "Poor fit: money and rights at stake, hard to undo. That needs clear human judgment.",
-                "wrong": "The slide marks money, rights and irreversible calls. Who carries a wrong answer here?"
+                "wrong": "Money, rights and calls that cannot be undone need a person. Who carries a wrong answer here?"
               }
             },
             {
@@ -2502,7 +2500,7 @@
               "column": "b",
               "feedback": {
                 "correct": "Good fit, a low-risk decision: it can be accelerated, with a person watching.",
-                "wrong": "The slide sorts decisions by risk. How much harm does one wrong label do, and how fast is it caught?"
+                "wrong": "Decisions differ by risk. How much harm does one wrong label do, and how fast is it caught?"
               }
             },
             {
@@ -2511,7 +2509,7 @@
               "column": "d",
               "feedback": {
                 "correct": "Poor fit, a process problem: the trouble is disorder, not missing information.",
-                "wrong": "The slide asks: is the problem disorder, or missing information? Which is it here?"
+                "wrong": "Ask: is the problem disorder, or missing information? Which is it here?"
               }
             },
             {
@@ -2520,7 +2518,7 @@
               "column": "d",
               "feedback": {
                 "correct": "Poor fit: you cannot build a solution on unknown foundations. Diagnose first.",
-                "wrong": "The slide warns about building on a map full of 'unclear'. What does the map know here?"
+                "wrong": "Building on 'unclear' means building on unknowns. What does the map know here?"
               }
             },
             {
@@ -2529,7 +2527,7 @@
               "column": "c",
               "feedback": {
                 "correct": "Good fit, a handoff with delay or loss: AI documents what passes, so the manager gets the history.",
-                "wrong": "The slide names handoffs that lose information. What does the manager receive today?"
+                "wrong": "Some handoffs lose information on the way. What does the manager receive today?"
               }
             }
           ],
@@ -2554,10 +2552,10 @@
           "cards": [
             {
               "n": 1,
-              "text": "Summarize a customer chat",
+              "text": "Extract order numbers from chats",
               "column": "a",
               "feedback": {
-                "correct": "Good fit, unstructured to structured: a free-text chat in, a short summary out.",
+                "correct": "Good fit, unstructured to structured: a free-text chat in, an order number out.",
                 "wrong": "Look at what goes in and what comes out. Is a decision made here at all?"
               }
             },
@@ -2581,11 +2579,11 @@
             },
             {
               "n": 4,
-              "text": "Speed up three-document matching",
+              "text": "Auto-reply three unsorted inboxes",
               "column": "d",
               "feedback": {
-                "correct": "Poor fit, a process problem. The car company removed this step instead of speeding it up.",
-                "wrong": "Ask whether this step should exist before asking how fast it runs."
+                "correct": "Poor fit, a process problem: three unsorted inboxes stay disordered, only faster.",
+                "wrong": "Is information missing here, or is the process itself disorganized?"
               }
             },
             {
@@ -2776,7 +2774,7 @@
             },
             {
               "id": "d",
-              "text": "The fintech mapped every service step, with no question it should answer.",
+              "text": "The fintech mapped every service step 'just in case'. Nobody has used it since.",
               "column": "2",
               "feedback": {
                 "correct": "Without a question, nobody can say which steps or boundaries matter. The map grows and decides nothing.",

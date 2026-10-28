@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=41429d1d';
-import { glyph, icon } from '../icons.js?v=41429d1d';
-import { attachTip } from '../tooltip.js?v=41429d1d';
-import { letter } from '../tracking/index.js?v=41429d1d';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=41429d1d';
-import { targetSteps } from '../ghost.js?v=41429d1d';
+import { h, fmt, resolveLink } from '../util.js?v=6b628c2e';
+import { glyph, icon } from '../icons.js?v=6b628c2e';
+import { attachTip } from '../tooltip.js?v=6b628c2e';
+import { letter } from '../tracking/index.js?v=6b628c2e';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=6b628c2e';
+import { targetSteps } from '../ghost.js?v=6b628c2e';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -473,6 +473,10 @@ function metric(ctx) {
     x.el.querySelector('.w-slot-mark').replaceChildren(glyph(on ? 'g-check-b' : 'g-cross', { size: 16 }));
     x.state.textContent = ' ' + (on ? ui.slot.on : ui.slot.off);
   });
+  // QA3 (S11 stretch, screen.slotsAfterChoice): the three slots name the rule the stretch holds back, so
+  // they keep their place but show only once an answer is chosen, as its check
+  const slotBox = h('div', { class: 'w-slots', 'aria-live': 'polite', dataset: screen.slotsAfterChoice && !ctx.revisit ? { wait: 'true' } : {} },
+    h('p', { class: 'w-slots-title' }, screen.slotsTitle), h('ul', {}, slots.map((x) => x.el)));
   // NL3: the explain band on top (S08's), so the field name moves beside the heading as its chip
   layout(ctx, 'focus',
     sheet('focus',
@@ -484,10 +488,10 @@ function metric(ctx) {
         : [ruleLabel(screen.field.label), headRow(ctx, g)],
       h('div', { class: 'w-metric', dataset: { interaction: '' } },
         group,
-        h('div', { class: 'w-slots', 'aria-live': 'polite' }, h('p', { class: 'w-slots-title' }, screen.slotsTitle), h('ul', {}, slots.map((x) => x.el)))),
+        slotBox),
       zones.band));
   zones.setFeedback({ state: 'hint', text: screen.hint });
-  oneQuestion(ctx, btns, { onChoose: (i) => setSlots(screen.options[i]) });
+  oneQuestion(ctx, btns, { onChoose: (i) => { delete slotBox.dataset.wait; setSlots(screen.options[i]); } });
 }
 
 const newTabLink = (ctx, href, label, action, cls = 'w-btn w-btn-ghost') => h('a', { class: cls, href, target: '_blank', rel: 'noopener noreferrer', dataset: { action } },
