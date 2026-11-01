@@ -4,6 +4,8 @@
 //   url(...) in those stylesheets, content/l4-slice.json and every assets/ path in the content and in src/.
 // imsmanifest.xml at the zip root: one organization, one item, one SCO (adlcp:scormtype "sco",
 // href index.html) listing every file. No dev tools, tests, planning, review or video sources.
+// PK1: no adlcp:masteryscore, so the LMS never turns a score into passed / failed itself; the module
+// alone sets lesson_status (incomplete or passed).
 // Review mode stays out: review.html is never linked, and src/review/ (the toolbar the engine imports
 // only with ?review=1, the review page, the word counter) is skipped; in the package ?review=1 runs
 // without its toolbar.
@@ -77,7 +79,6 @@ const manifest = `<?xml version="1.0" encoding="UTF-8"?>
       <title>${title}</title>
       <item identifier="wawiwa-eai-m1l4-item" identifierref="wawiwa-eai-m1l4-sco" isvisible="true">
         <title>${title}</title>
-        <adlcp:masteryscore>${content.lesson.completion.passMark}</adlcp:masteryscore>
       </item>
     </organization>
   </organizations>

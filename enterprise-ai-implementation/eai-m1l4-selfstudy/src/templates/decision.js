@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=a66e85f4';
-import { glyph, icon } from '../icons.js?v=a66e85f4';
-import { attachTip } from '../tooltip.js?v=a66e85f4';
-import { letter } from '../tracking/index.js?v=a66e85f4';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=a66e85f4';
-import { targetSteps } from '../ghost.js?v=a66e85f4';
+import { h, fmt, resolveLink } from '../util.js?v=4fdd25d6';
+import { glyph, icon } from '../icons.js?v=4fdd25d6';
+import { attachTip } from '../tooltip.js?v=4fdd25d6';
+import { letter } from '../tracking/index.js?v=4fdd25d6';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=4fdd25d6';
+import { targetSteps } from '../ghost.js?v=4fdd25d6';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);

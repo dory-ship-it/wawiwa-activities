@@ -30,10 +30,13 @@ function normalize(s) {
   return state;
 }
 
-// state -> suspend_data string under 4096 chars (drops x first when long, empty keys left out)
+// state -> suspend_data string under 4096 chars (empty keys left out). Never refuses a save: when long,
+// the retry counts (x) go first; PK1: if it is still over the limit, the saved copy of the longest free
+// text is trimmed (from its end, the longest first, ties by key order) until it fits, so the latest
+// place, answers and attempt are always written. The state in memory keeps the full text.
 export function encode(state) {
   const short = (obj) => Object.fromEntries(Object.entries(obj || {}).map(([k, v]) => [k.startsWith(ID_PREFIX) ? k.slice(ID_PREFIX.length) : k, v]));
-  const out = { v: 1, s: state.s, d: state.d, a: short(state.a), r: state.r, f: state.f, x: short(state.x), g: state.g };
+  const out = { v: 1, s: state.s, d: state.d, a: short(state.a), r: state.r, f: { ...state.f }, x: short(state.x), g: state.g };
   if (state.fin) out.fin = state.fin;
   if (state.h) out.h = state.h;
   if (state.k) out.k = state.k;
@@ -41,7 +44,16 @@ export function encode(state) {
   for (const k of ['r', 'f', 'x', 'g']) if (!Object.keys(out[k] || {}).length) delete out[k];
   let str = JSON.stringify(out);
   if (str.length > SUSPEND_DROP_AT) { delete out.x; str = JSON.stringify(out); }
-  if (str.length >= SUSPEND_MAX) throw new Error('suspend_data_over_limit ' + str.length);
+  while (str.length >= SUSPEND_MAX) {
+    const keys = Object.keys(out.f || {}).filter((k) => typeof out.f[k] === 'string' && out.f[k].length).sort();
+    if (!keys.length) throw new Error('suspend_data_over_limit ' + str.length);
+    const k = keys.reduce((a, b) => (out.f[b].length > out.f[a].length ? b : a));
+    // each saved character is 1 to 6 long once escaped: cutting the overflow (at least 1) always shrinks it
+    let cut = out.f[k].slice(0, Math.max(0, out.f[k].length - Math.max(1, str.length - SUSPEND_MAX + 1)));
+    if (/[\ud800-\udbff]$/.test(cut)) cut = cut.slice(0, -1); // never half an emoji
+    out.f[k] = cut;
+    str = JSON.stringify(out);
+  }
   return str;
 }
 

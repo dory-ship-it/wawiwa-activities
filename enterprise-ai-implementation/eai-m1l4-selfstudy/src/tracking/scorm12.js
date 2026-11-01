@@ -8,14 +8,18 @@
 //              NL4: a retake of the check sends each item again (one more entry per item and attempt).
 //              'score' (an attempt of the check ends) sets score raw / min / max (the latest attempt)
 //              and, once an attempt passed, lesson_status passed; never back down from passed.
-//              'finish' sets score raw / min / max and passed / failed (or completed), exit "".
-//   save       suspend_data and lesson_location on every change; exit "suspend" until finished.
+//              'finish' sets score raw / min / max and passed, or incomplete below the pass mark.
+//              PK1: lesson_status is only ever "incomplete" or "passed" (never "failed" or "completed").
+//   save       suspend_data and lesson_location on every change; exit "suspend" until the lesson is
+//              both finished and passed (PK1: finished below 80 keeps "suspend", so the LMS keeps
+//              suspend_data and the learner can come back and retake the check), "" from then on.
 //   terminate  session_time, exit, commit and LMSFinish, once (pagehide / beforeunload).
 // Commits are throttled to one per 2 s and flushed on finish and exit. Every call is checked with
 // LMSGetLastError, logged, and never throws into the page. No identity element is ever touched.
 const IDENTITY_FIELDS = /student_id|student_name|learner_id|learner_name/i;
 const COMMIT_EVERY_MS = 2000;
 const MAX_RESPONSE = 250;
+const STATUSES = ['incomplete', 'passed']; // PK1: the only lesson_status values this module ever sets
 
 function scanChain(win) {
   let hops = 0;
@@ -50,7 +54,12 @@ const cleanResponse = (type, v) => {
 export function createScorm12(api, { log = () => {} } = {}) {
   let initialized = false, terminated = false, finished = false, passed = false, lastCommit = 0, pending = null;
   const started = Date.now();
-  const guard = (el) => { if (IDENTITY_FIELDS.test(el)) throw new Error('identity_field_refused ' + el); return el; };
+  const exitNow = () => (finished && passed ? '' : 'suspend');
+  const guard = (el, v) => {
+    if (IDENTITY_FIELDS.test(el)) throw new Error('identity_field_refused ' + el);
+    if (el === 'cmi.core.lesson_status' && v !== undefined && !STATUSES.includes(String(v))) throw new Error('status_refused ' + v);
+    return el;
+  };
   const err = (what) => {
     try {
       const code = String(api.LMSGetLastError());
@@ -59,7 +68,7 @@ export function createScorm12(api, { log = () => {} } = {}) {
     return true;
   };
   const get = (el) => { try { const v = api.LMSGetValue(guard(el)); err('get ' + el); log(`get ${el} = ${String(v).slice(0, 60)}`); return v == null ? '' : String(v); } catch (e) { log('get failed ' + e.message); return ''; } };
-  const set = (el, v) => { try { const r = api.LMSSetValue(guard(el), String(v)); log(`set ${el} = ${String(v).slice(0, 60)}`); return String(r) === 'true' && err('set ' + el); } catch (e) { log('set failed ' + e.message); return false; } };
+  const set = (el, v) => { try { const r = api.LMSSetValue(guard(el, v), String(v)); log(`set ${el} = ${String(v).slice(0, 60)}`); return String(r) === 'true' && err('set ' + el); } catch (e) { log('set failed ' + e.message); return false; } };
   const commitNow = () => { clearTimeout(pending); pending = null; lastCommit = Date.now(); try { const r = String(api.LMSCommit('')) === 'true'; log('commit ' + r); return r && err('commit'); } catch { return false; } };
   const commit = () => {
     const wait = COMMIT_EVERY_MS - (Date.now() - lastCommit);
@@ -79,8 +88,8 @@ export function createScorm12(api, { log = () => {} } = {}) {
       const suspend = get('cmi.suspend_data');
       const location = get('cmi.core.lesson_location');
       if (!status || status === 'not attempted') set('cmi.core.lesson_status', 'incomplete');
-      finished = ['passed', 'failed', 'completed'].includes(status); // until the engine says (setFinished)
-      passed = status === 'passed'; // sticky: a later finish never turns it into failed
+      finished = false; // the engine says, from state.fin in suspend_data (setFinished), never from the status
+      passed = status === 'passed'; // sticky: a later finish below the pass mark stays passed
       commitNow();
       return { ok: true, entry, status, suspend, location };
     },
@@ -106,6 +115,7 @@ export function createScorm12(api, { log = () => {} } = {}) {
           set('cmi.core.score.raw', String(ev.score));
         }
         if (ev.passed) { set('cmi.core.lesson_status', 'passed'); passed = true; }
+        if (finished && passed) set('cmi.core.exit', ''); // a retake that passes after the finish
         commitNow();
       } else if (ev.kind === 'finish') {
         if (ev.score != null) {
@@ -113,9 +123,10 @@ export function createScorm12(api, { log = () => {} } = {}) {
           set('cmi.core.score.max', '100');
           set('cmi.core.score.raw', String(ev.score));
         }
-        set('cmi.core.lesson_status', passed ? 'passed' : ev.status);
-        set('cmi.core.exit', '');
+        if (ev.status === 'passed') passed = true;
+        set('cmi.core.lesson_status', passed ? 'passed' : 'incomplete');
         finished = true;
+        set('cmi.core.exit', exitNow());
         commitNow();
       }
     },
@@ -123,14 +134,14 @@ export function createScorm12(api, { log = () => {} } = {}) {
       if (!initialized || terminated) return false;
       const a = set('cmi.suspend_data', suspend);
       const b = set('cmi.core.lesson_location', location || '');
-      if (!finished) set('cmi.core.exit', 'suspend');
+      if (exitNow()) set('cmi.core.exit', 'suspend');
       return commit() && a && b;
     },
     terminate() {
       if (!initialized || terminated) return;
       terminated = true;
       set('cmi.core.session_time', timespan(Date.now() - started));
-      set('cmi.core.exit', finished ? '' : 'suspend');
+      set('cmi.core.exit', exitNow());
       commitNow();
       try { api.LMSFinish(''); } catch { /* LMS already gone */ }
       log('finish');

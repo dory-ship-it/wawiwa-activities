@@ -8,27 +8,27 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=a66e85f4';
-import { createZones } from './zones.js?v=a66e85f4';
-import { createMenu, openDialog } from './menu.js?v=a66e85f4';
-import { initTooltips, applyTerms } from './tooltip.js?v=a66e85f4';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=a66e85f4';
-import { decision } from './templates/decision.js?v=a66e85f4';
-import { input } from './templates/input.js?v=a66e85f4';
-import { sortDeck } from './templates/sortdeck.js?v=a66e85f4';
-import { bpmn } from './templates/bpmn.js?v=a66e85f4';
-import { flags } from './templates/flags.js?v=a66e85f4';
-import { explorer } from './templates/explorer.js?v=a66e85f4';
-import { video } from './templates/video.js?v=a66e85f4';
-import { handoff } from './templates/handoff.js?v=a66e85f4';
-import { check } from './templates/check.js?v=a66e85f4';
-import { result } from './templates/result.js?v=a66e85f4';
-import { end } from './templates/end.js?v=a66e85f4';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=a66e85f4';
-import { createGhost, stopGhost } from './ghost.js?v=a66e85f4';
-import { createTracking } from './tracking/index.js?v=a66e85f4';
-import { createCoach } from './coach/coach.js?v=a66e85f4';
-import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=a66e85f4';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=4fdd25d6';
+import { createZones } from './zones.js?v=4fdd25d6';
+import { createMenu, openDialog } from './menu.js?v=4fdd25d6';
+import { initTooltips, applyTerms } from './tooltip.js?v=4fdd25d6';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=4fdd25d6';
+import { decision } from './templates/decision.js?v=4fdd25d6';
+import { input } from './templates/input.js?v=4fdd25d6';
+import { sortDeck } from './templates/sortdeck.js?v=4fdd25d6';
+import { bpmn } from './templates/bpmn.js?v=4fdd25d6';
+import { flags } from './templates/flags.js?v=4fdd25d6';
+import { explorer } from './templates/explorer.js?v=4fdd25d6';
+import { video } from './templates/video.js?v=4fdd25d6';
+import { handoff } from './templates/handoff.js?v=4fdd25d6';
+import { check } from './templates/check.js?v=4fdd25d6';
+import { result } from './templates/result.js?v=4fdd25d6';
+import { end } from './templates/end.js?v=4fdd25d6';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=4fdd25d6';
+import { createGhost, stopGhost } from './ghost.js?v=4fdd25d6';
+import { createTracking } from './tracking/index.js?v=4fdd25d6';
+import { createCoach } from './coach/coach.js?v=4fdd25d6';
+import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=4fdd25d6';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -127,7 +127,7 @@ class Lesson {
       this.state = lms.suspend ? decode(lms.suspend) : emptyState();
       if (!this.state.s && lms.location && this.screens[lms.location]) this.state.s = lms.location;
       // NL4: "passed" can reach the LMS before the finish (S21R), so the adapter learns from the state,
-      // not from lesson_status, whether the lesson is finished (exit "" only then)
+      // not from lesson_status, whether the lesson is finished (PK1: exit "" only once finished and passed)
       this.tracking.setFinished(!!this.state.fin);
       this.zones.setSaved(true);
     } else {
@@ -166,7 +166,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=a66e85f4').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=4fdd25d6').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -174,7 +174,11 @@ class Lesson {
     if (jump && this.screens[jump] && this.slice.includes(jump)) { this.go(jump); return; }
     // resume: the saved place (localStorage, or suspend_data / lesson_location from the LMS)
     // (the title screen completes on arrival, so "done screens" alone does not mean the learner went on)
-    const s = this.state.s;
+    let s = this.state.s;
+    // PK1: finished below the pass mark (state.fin, not lesson_status): a resume at S22 or END opens the
+    // check's result instead, where "Retake now" is
+    const kr = this.content.screens.find((x) => x.template === 'result')?.id;
+    if (this.state.fin && !this.state.k?.p && kr && this.slice.includes(kr) && this.order.indexOf(s) > this.order.indexOf(kr)) s = kr;
     if (s && this.slice.includes(s) && s !== this.slice[0]) {
       this.go(s);
       openDialog(this.stage, {
@@ -321,13 +325,14 @@ class Lesson {
     this.go(this.content.lesson.completion.scoredScreens[0]);
   }
 
-  // Finish (S22): passed once any attempt reached the pass mark (sticky), failed otherwise (completed
-  // when nothing is scored); the score is the latest attempt's.
+  // Finish (S22): passed once any attempt reached the pass mark (sticky), incomplete otherwise (PK1:
+  // never "failed" or "completed", so the LMS keeps the suspend data and the learner can come back to
+  // retake); the score is the latest attempt's. state.fin (truthy) is what says the lesson was finished.
   finishLesson() {
     const c = this.content.lesson.completion;
     const sc = this.score();
     const passed = !!this.state.k?.p || (sc.raw !== null && sc.raw >= c.passMark);
-    const status = sc.n ? (passed ? 'passed' : 'failed') : c.statusWhenNoScoredItems;
+    const status = passed ? 'passed' : c.statusWhenNotPassed;
     this.state.fin = status;
     this.tracking.emit({ kind: 'finish', status, score: sc.raw, passMark: c.passMark, attempt: this.state.k?.n || 1 });
     this.persist();

@@ -1494,15 +1494,17 @@ expect(retries.join() === 'L4_S01_1=b/correct,L4_W1_1=b/neutral,L4_V1_1=b/correc
 expect(!page.errors.length, 'main path: no console errors' + (page.errors.length ? ': ' + page.errors.join(' | ') : ''));
 if (SCORM) await scormChecks(page, IDS);
 if (SCORM) await scormRetake();
+if (SCORM) await scormStatusUnit();
 await page.close();
 if (SCORM) { await browser.close(); server.close(); console.log(fails.length ? `\ntest:scorm FAILED (${fails.length})` : '\ntest:scorm passed'); process.exit(fails.length ? 1 : 0); }
 
-// NL4: the check in an LMS: attempt 1 below the pass mark, a finish (failed), a retake that passes.
+// NL4: the check in an LMS: attempt 1 below the pass mark, a finish (PK1: incomplete), a quit and a
+// relaunch (lands on S21R), a retake that passes.
 // Each attempt appends its five interactions; score.raw is the latest attempt; passed is sticky and
 // reaches the LMS at the end of the passing attempt.
 async function scormRetake() {
   console.log('\nSCORM: knowledge check retake');
-  const p = await open('?reset=1&screen=S21', { lms: {} });
+  let p = await open('?reset=1&screen=S21', { lms: {} });
   // FX3: version a on attempt 1, version b on the retake (its own items and interaction ids)
   const answerAll = async (pick, v = 'a') => {
     const items = S.S21.items.map((it) => (v === 'b' ? { ...it, ...it.b } : it));
@@ -1524,11 +1526,32 @@ async function scormRetake() {
   await p.evaluate(() => window.__l4.go('S22'));
   await p.click('.w-takeaway[data-id="a"]'); await p.click('.w-next'); await p.click('[data-action="finish"]'); await p.click('[data-action="finish"]');
   m = await p.evaluate(() => window.__scormMock.report());
-  expect(m.data['cmi.core.lesson_status'] === 'failed' && m.data['cmi.core.score.raw'] === '0', `SCORM finish below 80: lesson_status ${m.data['cmi.core.lesson_status']}, score.raw ${m.data['cmi.core.score.raw']}`);
-  await p.evaluate(() => window.__l4.go('S21R'));
+  // PK1: below the pass mark the finish keeps "incomplete" (never failed), sends the score, and keeps exit "suspend"
+  expect(m.data['cmi.core.lesson_status'] === 'incomplete' && m.data['cmi.core.score.raw'] === '0' && m.data['cmi.core.exit'] === 'suspend',
+    `SCORM finish below 80: lesson_status ${m.data['cmi.core.lesson_status']}, score.raw ${m.data['cmi.core.score.raw']}, exit "${m.data['cmi.core.exit']}"`);
+  // PK1: quit after the finish (pagehide), then relaunch with what the LMS kept: the learner lands on
+  // S21R (Retake now), not on END, with every earlier input intact
+  await p.evaluate(() => { window.__l4.state.f.L4_CASE_TITLE = 'Ben\'s "order", step 2, rush'; window.__l4.persist(); });
+  const before = await p.evaluate(() => JSON.stringify({ a: window.__l4.state.a, f: window.__l4.state.f, d: window.__l4.state.d, k: window.__l4.state.k, fin: window.__l4.state.fin }));
+  m = await p.evaluate(() => { window.__l4.tracking.terminate(); return window.__scormMock.report(); });
+  expect(m.data['cmi.core.exit'] === 'suspend' && m.data['cmi.core.lesson_status'] === 'incomplete' && m.finished,
+    `SCORM quit after a finish below 80: exit "${m.data['cmi.core.exit']}" (the LMS keeps suspend_data), lesson_status ${m.data['cmi.core.lesson_status']}`);
+  const statuses = [...m.statuses], exits = [...m.exits];
+  await p.close();
+  p = await open('', { lms: { ...m.data, 'cmi.core.entry': 'resume', 'cmi.core.exit': '' } });
+  const back = await p.evaluate(() => ({ at: window.__l4.current, dialog: !!document.querySelector('.w-dialog [data-action="resume"]'), retake: !!document.querySelector('[data-action="retake"]'),
+    // (S21R completes on arrival: a presentation screen, so it joins the done list now)
+    state: JSON.stringify({ a: window.__l4.state.a, f: window.__l4.state.f, d: window.__l4.state.d.filter((x) => x !== 'S21R'), k: window.__l4.state.k, fin: window.__l4.state.fin }) }));
+  expect(back.at === 'S21R' && back.dialog && back.retake && back.state === before,
+    `SCORM relaunch after a finish below 80 (saved place ${m.data['cmi.core.lesson_location']}): lands on ${back.at} with the resume prompt and Retake now, every answer, text, done screen and the attempt intact` + (back.state === before ? '' : `\n    before ${before}\n    after  ${back.state}`));
+  await p.click('.w-dialog [data-action="resume"]');
   await p.click('[data-action="retake"]');
   await answerAll((o) => o.correct, 'b');
   m = await p.evaluate(() => window.__scormMock.report());
+  expect(m.data['cmi.core.exit'] === '', `SCORM retake passes after the finish: exit "${m.data['cmi.core.exit']}" (finished and passed)`);
+  statuses.push(...m.statuses); exits.push(...m.exits);
+  expect(statuses.every((s) => s === 'incomplete' || s === 'passed') && exits.every((x) => x === '' || x === 'suspend') && exits.lastIndexOf('suspend') < exits.indexOf(''),
+    `PK1: lesson_status only incomplete / passed in the fail-then-pass path (${[...new Set(statuses)].join(', ')}); exit "suspend" until passed, then "" (${exits.length} sets)`);
   const ids = Array.from({ length: m.count }, (_, n) => m.data[`cmi.interactions.${n}.id`] + '=' + m.data[`cmi.interactions.${n}.result`]).join(',');
   // the two path interactions, attempt 1's six (version a), the S22 takeaway, attempt 2's six (version b: L4_S21_1b ...)
   const s21 = ids.split(',').filter((x) => x.startsWith('L4_S21_'));
@@ -1538,6 +1561,45 @@ async function scormRetake() {
   const susp = m.data['cmi.suspend_data'] || '';
   expect(/"k":\{"n":2,"p":1,"s":100\}|"k":\{[^}]*"n":2[^}]*\}/.test(susp), `SCORM suspend_data keeps the attempt (${(/"k":\{[^}]*\}/.exec(susp) || [''])[0]})`);
   await p.close();
+}
+
+// PK1: the adapter alone (src/tracking/scorm12.js on a recording API, in Node), every path a learner
+// can take: pass on S21 then finish; finish below 80 (twice) then pass; a finish event that asks for
+// failed / completed / passed-without-a-pass; relaunches with each LMS status. lesson_status must only
+// ever be incomplete or passed, and exit "" only once finished and passed.
+async function scormStatusUnit() {
+  console.log('\nPK1: lesson_status and exit in every path (adapter unit)');
+  const { createScorm12 } = await import('../src/tracking/scorm12.js');
+  const run = (status, steps, fin = false) => {
+    const sets = [];
+    const api = { LMSInitialize: () => 'true', LMSFinish: () => 'true', LMSCommit: () => 'true', LMSGetLastError: () => '0', LMSGetErrorString: () => '',
+      LMSGetValue: (el) => (el === 'cmi.core.lesson_status' ? status : el === 'cmi.interactions._count' ? '0' : ''), LMSSetValue: (el, v) => { sets.push([el, v]); return 'true'; } };
+    const a = createScorm12(api);
+    a.init(); a.setFinished(fin);
+    for (const s of steps) s === 'save' ? a.save('x', 'S01') : a.record(s);
+    a.terminate();
+    return { st: sets.filter(([el]) => el === 'cmi.core.lesson_status').map(([, v]) => v), ex: sets.filter(([el]) => el === 'cmi.core.exit').map(([, v]) => v) };
+  };
+  const score = (s, p) => ({ kind: 'score', score: s, passed: p, attempt: 1 });
+  const finish = (status, s) => ({ kind: 'finish', status, score: s, passMark: 80, attempt: 1 });
+  const paths = {
+    'pass then finish': ['save', score(80, true), 'save', finish('passed', 80)],
+    'finish below 80': ['save', score(40, false), finish('incomplete', 40), 'save'],
+    'finish below 80, retake passes': ['save', score(0, false), finish('incomplete', 0), score(100, true), 'save'],
+    'finish asks failed': [score(0, false), finish('failed', 0)],
+    'finish asks completed': [finish('completed', null)],
+    'passed, later finish below': [score(100, true), score(20, false), finish('incomplete', 20)],
+  };
+  const all = [];
+  for (const [name, steps] of Object.entries(paths)) for (const lms of ['not attempted', 'incomplete', 'passed', 'failed', 'completed']) {
+    const r = run(lms, steps, lms === 'incomplete' && name.startsWith('finish below'));
+    const passed = lms === 'passed' || steps.some((s) => s.passed || s.status === 'passed');
+    const last = r.ex[r.ex.length - 1];
+    const finished = steps.some((s) => s.kind === 'finish');
+    all.push({ name, lms, ok: r.st.every((s) => s === 'incomplete' || s === 'passed') && last === (finished && passed ? '' : 'suspend'), r });
+  }
+  const bad = all.filter((x) => !x.ok);
+  expect(!bad.length, `PK1: ${all.length} adapter paths: lesson_status never failed or completed, exit "" only when finished and passed` + (bad.length ? ': ' + bad.map((x) => `${x.name} @${x.lms} ${x.r.st.join('>')} exit ${x.r.ex.join('>')}`).join(' | ') : ''));
 }
 
 // The SCORM data after the whole lesson, then a relaunch (entry=resume with the saved suspend data).
@@ -1566,6 +1628,11 @@ async function scormChecks(p, ids) {
   const wantFree = ids.filter((id) => metaOf(id)?.type === 'fill-in').length;
   expect(free.length === wantFree && free.every((r) => r.response.length <= 250 && r.result === 'neutral'),
     `SCORM: ${free.length} fill-in responses (case title twice: S02 and S18B, problem, the three-part sketch, the S12B metric, the S17B notes; NL4: no S19 metric), at most 250 chars, neutral`);
+  // PK1 B3: every interaction of the whole walk (the path ones included), its weighting and result
+  const allRows = Array.from({ length: m.count }, (_, n) => ({ id: d[`cmi.interactions.${n}.id`], w: d[`cmi.interactions.${n}.weighting`], r: d[`cmi.interactions.${n}.result`], s: d[`cmi.interactions.${n}.student_response`] || '' }));
+  expect(allRows.every((x) => x.s.length <= 250 && !/[\u0000-\u001f\u007f]/.test(x.s)), `PK1: all ${allRows.length} student_response values at most 250 chars (longest ${Math.max(...allRows.map((x) => x.s.length))}), no control characters`);
+  console.log('  note interactions: ' + allRows.map((x) => `${x.id.replace(/^L4_/, '')}${x.w === '1' ? '*' : ''}=${x.r[0]}`).join(' '));
+  expect(m.statuses.length && m.statuses.every((s) => s === 'incomplete' || s === 'passed'), `PK1: lesson_status only incomplete / passed on the main path (${m.statuses.join(' > ')}), never failed or completed`);
   expect(d['cmi.core.lesson_status'] === 'passed' && d['cmi.core.score.raw'] === '80' && d['cmi.core.score.min'] === '0' && d['cmi.core.score.max'] === '100' && d['cmi.core.exit'] === '',
     `SCORM: lesson_status ${d['cmi.core.lesson_status']}, score.raw ${d['cmi.core.score.raw']} (0 to 100, from S21 first attempts), exit "${d['cmi.core.exit']}"`);
   expect(/^\d{4}:\d{2}:\d{2}\.\d{2}$/.test(d['cmi.core.session_time'] || '') && m.finished, `SCORM: session_time ${d['cmi.core.session_time']}, LMSFinish once`);
@@ -1579,6 +1646,33 @@ async function scormChecks(p, ids) {
   for (const k of Object.keys(maxOf)) full.f[k] = 'x'.repeat(maxOf[k]);
   const fullLen = encode(full).length;
   expect(susp.length < 4096 && fullLen < 4096, `SCORM: suspend_data ${susp.length} chars after the whole lesson; ${fullLen} with all ${Object.keys(maxOf).length} free-text fields full (each at its maxlength; limit 4096)`);
+  // PK1 B2, the worst case on top of the whole lesson: the check failed once and retaken (both versions'
+  // answers kept, attempt 2, passed), both path levels set, a retry count on every interaction, and each
+  // free-text field at its maxlength in text that JSON escapes ("quotes", apostrophes, commas, new lines)
+  const worst = structuredClone(full);
+  const allIds = C.screens.flatMap((s) => [...(s.tracking || []), ...(s.stops || []).map((x) => x.tracking)]).filter(Boolean);
+  for (const t of allIds) if (!worst.a[t.id]) worst.a[t.id] = String(t.correctResponse ?? 'a').toLowerCase() + '|w';
+  for (const t of allIds) worst.x[t.id] = 9;
+  worst.k = { n: 2, s: 100, p: 1 }; worst.p = { c4: 'stretch', c5: 'support' }; worst.fin = 'passed';
+  const heavy = (n) => 'Ben\'s "rush" order, step 2,\n'.repeat(Math.ceil(n / 27)).slice(0, n);
+  for (const k of Object.keys(maxOf)) worst.f[k] = heavy(maxOf[k]);
+  let worstLen, worstX = false; try { const w = encode(worst); worstLen = w.length; worstX = w.includes('"x":'); } catch (e) { worstLen = Number(/\d+$/.exec(e.message)?.[0]) || 9999; }
+  // PK1: every character of every field a double quote (escaped to 2): over the limit, so the save drops
+  // the retry counts, then trims the longest text from its end until it fits; nothing else is lost
+  const hostile = structuredClone(worst);
+  for (const k of Object.keys(maxOf)) hostile.f[k] = '"'.repeat(maxOf[k]);
+  const raw = JSON.stringify(hostile).length;
+  let hs = null, herr = '';
+  try { hs = encode(hostile); } catch (e) { herr = e.message; }
+  const hd = hs ? decode(hs) : null;
+  const lost = hd ? Object.keys(maxOf).filter((k) => hd.f[k] !== hostile.f[k]).map((k) => `${k.replace('L4_CASE_', '')} ${hostile.f[k].length}>${hd.f[k].length}`) : [];
+  const kept = hd && JSON.stringify([hd.s, hd.d, hd.a, hd.g, hd.k, hd.p, hd.fin]) === JSON.stringify([hostile.s, hostile.d, hostile.a, hostile.g, hostile.k, hostile.p, hostile.fin])
+    && Object.keys(maxOf).every((k) => hostile.f[k].startsWith(hd.f[k]));
+  expect(hs && hs.length < 4096 && kept && encode(hostile) === hs && hostile.f.L4_CASE_STEPS.length === maxOf.L4_CASE_STEPS,
+    `PK1 all fields full of quotes (${raw} chars before shrinking): saved ${hs ? hs.length : herr} chars, retry counts dropped, trimmed ${lost.join(', ') || 'nothing'}; place, answers, flags, attempt, levels kept; deterministic; the state itself untouched`);
+  const hostileLen = hs ? hs.length : 9999;
+  expect(worstLen < 4096, `PK1 worst case: suspend_data ${worstLen} chars (margin ${4096 - worstLen}) with the check retaken, levels set, every field full of quotes, apostrophes, commas and new lines (retry counts ${worstX ? 'kept' : 'dropped, as encode does over 3800'})`);
+  void hostileLen;
   expect(d['cmi.core.lesson_location'] === full.s, `SCORM: lesson_location "${d['cmi.core.lesson_location']}" = the saved place`);
 
   console.log('\nSCORM relaunch (entry=resume)');
@@ -1589,6 +1683,16 @@ async function scormChecks(p, ids) {
     `SCORM resume: lands on ${back.at} with the resume prompt, ${back.done} screens done, case title and the S12B metric back`);
   expect(back.mock.data['cmi.core.lesson_status'] === 'passed' && !back.mock.errors.length && back.mock.count === 0,
     'SCORM resume: lesson_status stays passed (never downgraded), no interaction written again');
+  // PK1: in the page, through the LMS: every field at its maxlength in double quotes, then a move to the
+  // next screen; the save is written (under 4096, accepted), not dropped, and the new place is in it
+  const q = await r.evaluate(async (maxOf) => {
+    for (const k of Object.keys(maxOf)) window.__l4.state.f[k] = '"'.repeat(maxOf[k]);
+    window.__l4.go('S22');
+    const m = window.__scormMock.report();
+    return { len: (m.data['cmi.suspend_data'] || '').length, place: JSON.parse(m.data['cmi.suspend_data']).s, errors: m.errors.length, badge: !document.querySelector('.w-saved').hidden };
+  }, maxOf);
+  expect(q.len < 4096 && q.place === 'S22' && !q.errors && !q.badge,
+    `SCORM: all fields full of quotes, then Next: suspend_data written (${q.len} chars, accepted by the LMS), the new place S22 saved, no "Not saved" badge`);
   await r.close();
 }
 
@@ -1832,7 +1936,8 @@ console.log('\nS21 answers wrong, review, S21R, S22 finish failed, retake');
   await expectLayout(p, 'S22 finish confirm');
   await press(p, 'Enter');
   const fin = (await p.evaluate(() => window.__l4.tracking.events)).filter((e) => e.kind === 'finish');
-  expect(fin.length === 1 && fin[0].status === 'failed' && fin[0].score === 0, `S22 second Finish: lesson status ${fin[0]?.status}, score ${fin[0]?.score}`);
+  expect(fin.length === 1 && fin[0].status === 'incomplete' && fin[0].score === 0 && await p.evaluate(() => window.__l4.state.fin === 'incomplete'),
+    `S22 second Finish: lesson status ${fin[0]?.status} (PK1: never failed), score ${fin[0]?.score}, state.fin set`);
   // back to the check: Retake now, a new attempt with the options in a new order, every first answer right
   await p.evaluate(() => window.__l4.go('S21R'));
   await tabTo(p, '[data-action="retake"]');
