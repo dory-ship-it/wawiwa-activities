@@ -10,7 +10,7 @@
 import puppeteer from 'puppeteer-core';
 import http from 'node:http';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, rmSync, copyFileSync, existsSync, statSync, createReadStream } from 'node:fs';
+import { mkdirSync, rmSync, copyFileSync, existsSync, statSync, createReadStream, readFileSync } from 'node:fs';
 import { join, normalize, extname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { ROOT } from './serve.mjs';
@@ -67,6 +67,14 @@ const panelState = (lesson) => lesson.evaluate(() => {
   const log = document.querySelector('.w-coach-panel .w-coach-log, .w-coach-panel [class*="log"]');
   return { frame: !!f, frameShown: !!f && !f.hidden, offline: [...document.querySelectorAll('.w-coach-bubble')].map((b) => b.textContent).join(' | ').slice(0, 160), logShown: !!log && !log.hidden };
 });
+
+// PK1: Blossom answers images, video and fonts with a redirect to signed cloud storage on another (https)
+// host, so the packaged index.html must allow https: for them (the Pages copy stays 'self')
+{
+  const csp = (readFileSync(join(DIR, 'index.html'), 'utf8').match(/Content-Security-Policy" content="([^"]+)"/) || [])[1] || '';
+  const ok = /img-src 'self' data: https:/.test(csp) && /media-src 'self' https:/.test(csp) && /font-src 'self' https:/.test(csp) && /script-src 'self';/.test(csp) && /connect-src 'self';/.test(csp);
+  expect(ok, `packaged CSP: images, video and fonts also from https: (an LMS's storage redirect), scripts and fetches 'self' only`);
+}
 
 console.log(`\nA4: the lesson at ${LMS} (mock LMS, same origin), the coach page at ${COACH_ORIGIN}`);
 {

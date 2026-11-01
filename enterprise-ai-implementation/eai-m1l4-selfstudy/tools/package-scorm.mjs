@@ -96,7 +96,18 @@ const crc32 = (buf) => { let c = 0xffffffff; for (const b of buf) c = CRC[(c ^ b
 const now = new Date();
 const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
 const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
-const entries = [['imsmanifest.xml', Buffer.from(manifest, 'utf8')], ...list.map((f) => [f, readFileSync(join(ROOT, f))])];
+// PK1 (found in Blossom, 1 Nov 2026): an LMS may serve the package's files from its own page but answer
+// images, video and fonts with a redirect to a signed cloud-storage URL on another host (Blossom: Oracle
+// object storage). index.html's CSP allows them only from 'self', so in the package img-src, media-src
+// and font-src also allow https:. Scripts, styles and fetches stay 'self'; the Pages copy stays strict.
+const LMS_CSP = [[/img-src 'self' data:/, "img-src 'self' data: https:"], [/media-src 'self'/, "media-src 'self' https:"], [/font-src 'self'/, "font-src 'self' https:"]];
+const packaged = (f) => {
+  if (f !== 'index.html') return readFileSync(join(ROOT, f));
+  let s = readFileSync(join(ROOT, f), 'utf8');
+  for (const [re, to] of LMS_CSP) { if (!re.test(s)) { console.error('package: CSP directive not found ' + re); process.exit(1); } s = s.replace(re, to); }
+  return Buffer.from(s, 'utf8');
+};
+const entries = [['imsmanifest.xml', Buffer.from(manifest, 'utf8')], ...list.map((f) => [f, packaged(f)])];
 const parts = [], central = [];
 let offset = 0;
 for (const [name, data] of entries) {
