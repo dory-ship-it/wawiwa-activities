@@ -3,7 +3,8 @@
 // ?tracking=scorm12|none forces one (scorm12 still needs an API to talk to).
 // Event kinds (emit):
 //   answer  first attempt of an interaction: { kind, trackingId, type, response, result, latencyMs,
-//           correctResponse, scored, at }  -> one cmi.interactions.n in SCORM
+//           correctResponse, scored, lms, report, at }  -> one cmi.interactions.n in SCORM
+//           (PK1: report = the question and answers in words for the LMS; lms false = never sent)
 //   retry   any later attempt:               { kind, trackingId, type, response, result, attempt, latencyMs, at }
 //           -> suspend data only
 //   route   fast-track route chosen:         { kind, screen, route, at } -> suspend data only
@@ -17,9 +18,9 @@
 // attempt is an 'answer' again (one more cmi.interactions entry per item and attempt).
 // persist(): the encoded state to suspend_data and the screen to lesson_location (SCORM) on every
 // change. ?debug=1 logs every call to the console (calls keeps them for the tests).
-import { encode } from '../state.js?v=4fdd25d6';
-import { findAPI, createScorm12 } from './scorm12.js?v=4fdd25d6';
-import { createLocal } from './local.js?v=4fdd25d6';
+import { encode } from '../state.js?v=e7db6f55';
+import { findAPI, createScorm12 } from './scorm12.js?v=e7db6f55';
+import { createLocal } from './local.js?v=e7db6f55';
 
 export function createTracking({ debug = false, force = null, off = false } = {}) {
   const events = [];

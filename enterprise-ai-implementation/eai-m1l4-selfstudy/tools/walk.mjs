@@ -1520,8 +1520,8 @@ async function scormRetake() {
   };
   await answerAll((o) => !o.correct);
   let m = await p.evaluate(() => window.__scormMock.report());
-  // (PP1: the jump to S21 passes both checkpoints, so the two path interactions come first: 2 + 6)
-  expect(m.data['cmi.core.score.raw'] === '0' && m.data['cmi.core.lesson_status'] === 'incomplete' && m.count === 8,
+  // (PP1: the jump to S21 passes both checkpoints; PK1: their path levels are not sent, so 6)
+  expect(m.data['cmi.core.score.raw'] === '0' && m.data['cmi.core.lesson_status'] === 'incomplete' && m.count === 6,
     `SCORM attempt 1 (0 of 6): score.raw ${m.data['cmi.core.score.raw']}, lesson_status ${m.data['cmi.core.lesson_status']}, ${m.count} interactions`);
   await p.evaluate(() => window.__l4.go('S22'));
   await p.click('.w-takeaway[data-id="a"]'); await p.click('.w-next'); await p.click('[data-action="finish"]'); await p.click('[data-action="finish"]');
@@ -1548,14 +1548,15 @@ async function scormRetake() {
   await p.click('[data-action="retake"]');
   await answerAll((o) => o.correct, 'b');
   m = await p.evaluate(() => window.__scormMock.report());
-  expect(m.data['cmi.core.exit'] === '', `SCORM retake passes after the finish: exit "${m.data['cmi.core.exit']}" (finished and passed)`);
+  expect(m.data['cmi.core.exit'] === 'suspend' && m.data['cmi.core.lesson_status'] === 'passed', `SCORM retake passes after the finish: passed, exit "${m.data['cmi.core.exit']}" (one attempt that keeps everything)`);
   statuses.push(...m.statuses); exits.push(...m.exits);
-  expect(statuses.every((s) => s === 'incomplete' || s === 'passed') && exits.every((x) => x === '' || x === 'suspend') && exits.lastIndexOf('suspend') < exits.indexOf(''),
-    `PK1: lesson_status only incomplete / passed in the fail-then-pass path (${[...new Set(statuses)].join(', ')}); exit "suspend" until passed, then "" (${exits.length} sets)`);
-  const ids = Array.from({ length: m.count }, (_, n) => m.data[`cmi.interactions.${n}.id`] + '=' + m.data[`cmi.interactions.${n}.result`]).join(',');
-  // the two path interactions, attempt 1's six (version a), the S22 takeaway, attempt 2's six (version b: L4_S21_1b ...)
+  expect(statuses.every((s) => s === 'incomplete' || s === 'passed') && exits.length && exits.every((x) => x === 'suspend'),
+    `PK1: lesson_status only incomplete / passed in the fail-then-pass path (${[...new Set(statuses)].join(', ')}); exit always "suspend" (${exits.length} sets)`);
+  // PK1: the LMS id is the interaction id, then the question in words (shown here up to the question)
+  const ids = Array.from({ length: m.count }, (_, n) => (/^L4_S21_\d+b?/.exec(m.data[`cmi.interactions.${n}.id`]) || [m.data[`cmi.interactions.${n}.id`]])[0] + '=' + m.data[`cmi.interactions.${n}.result`]).join(',');
+  // attempt 1's six (version a), attempt 2's six (version b: L4_S21_1b ...); the path levels and the S22 takeaway are not sent
   const s21 = ids.split(',').filter((x) => x.startsWith('L4_S21_'));
-  expect(m.data['cmi.core.score.raw'] === '100' && m.data['cmi.core.lesson_status'] === 'passed' && m.count === 15 && s21.length === 12
+  expect(m.data['cmi.core.score.raw'] === '100' && m.data['cmi.core.lesson_status'] === 'passed' && m.count === 12 && s21.length === 12
     && s21.slice(0, 6).every((x) => /^L4_S21_\d=/.test(x)) && s21.slice(6).every((x) => /^L4_S21_\db=correct$/.test(x)) && !m.errors.length,
     `SCORM retake (6 of 6): score.raw ${m.data['cmi.core.score.raw']} (the latest attempt), lesson_status ${m.data['cmi.core.lesson_status']}, ${m.count} interactions (${ids})`);
   const susp = m.data['cmi.suspend_data'] || '';
@@ -1566,7 +1567,7 @@ async function scormRetake() {
 // PK1: the adapter alone (src/tracking/scorm12.js on a recording API, in Node), every path a learner
 // can take: pass on S21 then finish; finish below 80 (twice) then pass; a finish event that asks for
 // failed / completed / passed-without-a-pass; relaunches with each LMS status. lesson_status must only
-// ever be incomplete or passed, and exit "" only once finished and passed.
+// ever be incomplete or passed, and exit always "suspend" (one attempt per learner).
 async function scormStatusUnit() {
   console.log('\nPK1: lesson_status and exit in every path (adapter unit)');
   const { createScorm12 } = await import('../src/tracking/scorm12.js');
@@ -1596,10 +1597,10 @@ async function scormStatusUnit() {
     const passed = lms === 'passed' || steps.some((s) => s.passed || s.status === 'passed');
     const last = r.ex[r.ex.length - 1];
     const finished = steps.some((s) => s.kind === 'finish');
-    all.push({ name, lms, ok: r.st.every((s) => s === 'incomplete' || s === 'passed') && last === (finished && passed ? '' : 'suspend'), r });
+    all.push({ name, lms, ok: r.st.every((s) => s === 'incomplete' || s === 'passed') && r.ex.length && r.ex.every((x) => x === 'suspend') && last === 'suspend', r });
   }
   const bad = all.filter((x) => !x.ok);
-  expect(!bad.length, `PK1: ${all.length} adapter paths: lesson_status never failed or completed, exit "" only when finished and passed` + (bad.length ? ': ' + bad.map((x) => `${x.name} @${x.lms} ${x.r.st.join('>')} exit ${x.r.ex.join('>')}`).join(' | ') : ''));
+  expect(!bad.length, `PK1: ${all.length} adapter paths: lesson_status never failed or completed, exit always "suspend"` + (bad.length ? ': ' + bad.map((x) => `${x.name} @${x.lms} ${x.r.st.join('>')} exit ${x.r.ex.join('>')}`).join(' | ') : ''));
 }
 
 // The SCORM data after the whole lesson, then a relaunch (entry=resume with the saved suspend data).
@@ -1614,26 +1615,37 @@ async function scormChecks(p, ids) {
     return { id: g('id'), type: g('type'), response: g('student_response'), result: g('result'), latency: g('latency'), time: g('time'), weighting: g('weighting'), pattern: g('correct_responses.0.pattern') };
   });
   const metaOf = (id) => C.screens.flatMap((s) => [...(s.tracking || []), ...(s.stops || []).map((x) => x.tracking)]).find((t) => t.id === id);
-  const once = rows.length === ids.length && new Set(rows.map((r) => r.id)).size === ids.length && ids.every((id) => rows.some((r) => r.id === id));
-  expect(once, `SCORM: ${rows.length} interactions, each id written once (${ids.length} in the lesson)`);
-  // PP1: the two path interactions (not in any screen's tracking): fill-in, the level word, neutral, weighting 0, no pattern
-  const pathRows = rows.filter((r) => /^L4_PATH_C\d$/.test(r.id));
-  expect(pathRows.length === 2 && pathRows.every((r) => r.type === 'fill-in' && r.response === 'core' && r.result === 'neutral' && r.weighting === '0' && r.pattern === undefined && r.latency && r.time),
-    `SCORM: the path interactions ${pathRows.map((r) => `${r.id} ${r.type} "${r.response}" ${r.result} weighting ${r.weighting}`).join(', ')}`);
-  rows.splice(0, rows.length, ...rows.filter((r) => !pathRows.includes(r)));
-  const bad = rows.filter((r) => { const t = metaOf(r.id); return !t || r.type !== t.type || r.weighting !== (t.scored ? '1' : '0') || (t.correctResponse !== null && r.pattern !== String(t.correctResponse).toLowerCase())
-    || (t.correctResponse === null && r.pattern !== undefined) || !r.latency || !r.time || (t.result === 'neutral' && r.result !== 'neutral'); });
-  expect(!bad.length, 'SCORM: every interaction carries type, response, result, latency, time, weighting (1 for the 5 scored), correct pattern from the content' + (bad.length ? ': ' + bad.map((r) => r.id).join(', ') : ''));
-  const free = rows.filter((r) => r.type === 'fill-in');
-  const wantFree = ids.filter((id) => metaOf(id)?.type === 'fill-in').length;
-  expect(free.length === wantFree && free.every((r) => r.response.length <= 250 && r.result === 'neutral'),
-    `SCORM: ${free.length} fill-in responses (case title twice: S02 and S18B, problem, the three-part sketch, the S12B metric, the S17B notes; NL4: no S19 metric), at most 250 chars, neutral`);
+  // PK1: the LMS id is the interaction id + "_" + the question in words; the path levels and the S22
+  // takeaway (lesson.lmsReport.skip) are never sent
+  const skip = C.lesson.lmsReport.skip;
+  const sent = ids.filter((id) => !skip.includes(id));
+  const tidOf = (lmsId) => sent.filter((t) => lmsId.startsWith(t + '_')).sort((a, b) => b.length - a.length)[0];
+  const once = rows.length === sent.length && sent.every((t) => rows.filter((r) => tidOf(r.id) === t).length === 1);
+  expect(once && !rows.some((r) => skip.some((s) => r.id.startsWith(s))),
+    `SCORM: ${rows.length} interactions, each sent once (${ids.length} in the lesson, ${skip.join(', ')} not sent)`);
+  // each row is exactly the event's report (question in the id, answers in words), as fill-in; a
+  // neutral item (no right answer) has no result at all
+  const evs = await p.evaluate(() => window.__l4.tracking.events.filter((e) => e.kind === 'answer' && e.lms !== false).map((e) => ({ t: e.trackingId, report: e.report, scored: e.scored, result: e.result })));
+  const clean = (s) => String(s).replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 250);
+  const bad = rows.filter((r) => { const e = evs.find((x) => x.t === tidOf(r.id)); const t = metaOf(e?.t);
+    return !e || !t || r.id !== e.report.id || r.type !== 'fill-in' || r.response !== clean(e.report.response) || r.weighting !== (t.scored ? '1' : '0')
+      || (e.report.correct === null ? r.pattern !== undefined : r.pattern !== clean(e.report.correct)) || !r.latency || !r.time || (t.result === 'neutral' ? r.result !== undefined : !['correct', 'wrong'].includes(r.result))
+      || r.id.length > 255 || /\s/.test(r.id); });
+  expect(!bad.length, 'PK1: every interaction is fill-in with the question in its id (no spaces, at most 255) and the answer and the correct answer in words; result, latency, time, weighting kept' + (bad.length ? ': ' + bad.map((r) => r.id).join(', ') : ''));
+  const s21 = rows.find((r) => r.id.startsWith('L4_S21_1_'));
+  const it1 = S.S21.items[0];
+  expect(s21 && s21.id === 'L4_S21_1_' + it1.stem.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '') && s21.pattern === it1.options.find((o) => o.correct).label,
+    `PK1 report row: "${s21?.id}" | answered "${s21?.response}" | correct "${s21?.pattern}"`);
+  const free = rows.filter((r) => !metaOf(tidOf(r.id))?.correctResponse && metaOf(tidOf(r.id))?.type === 'fill-in');
+  const wantFree = sent.filter((id) => metaOf(id)?.type === 'fill-in').length;
+  expect(free.length === wantFree && free.every((r) => r.response.length <= 250 && r.result === undefined),
+    `SCORM: ${free.length} free-text responses (case title twice: S02 and S18B, problem, the three-part sketch, the S12B metric, the S17B notes; NL4: no S19 metric), at most 250 chars, no result (PK1: Blossom shows "neutral" as an X)`);
   // PK1 B3: every interaction of the whole walk (the path ones included), its weighting and result
   const allRows = Array.from({ length: m.count }, (_, n) => ({ id: d[`cmi.interactions.${n}.id`], w: d[`cmi.interactions.${n}.weighting`], r: d[`cmi.interactions.${n}.result`], s: d[`cmi.interactions.${n}.student_response`] || '' }));
   expect(allRows.every((x) => x.s.length <= 250 && !/[\u0000-\u001f\u007f]/.test(x.s)), `PK1: all ${allRows.length} student_response values at most 250 chars (longest ${Math.max(...allRows.map((x) => x.s.length))}), no control characters`);
-  console.log('  note interactions: ' + allRows.map((x) => `${x.id.replace(/^L4_/, '')}${x.w === '1' ? '*' : ''}=${x.r[0]}`).join(' '));
+  console.log('  note interactions: ' + allRows.map((x) => `${x.id.replace(/^L4_/, '')}${x.w === '1' ? '*' : ''}=${(x.r || '-')[0]}`).join(' '));
   expect(m.statuses.length && m.statuses.every((s) => s === 'incomplete' || s === 'passed'), `PK1: lesson_status only incomplete / passed on the main path (${m.statuses.join(' > ')}), never failed or completed`);
-  expect(d['cmi.core.lesson_status'] === 'passed' && d['cmi.core.score.raw'] === '80' && d['cmi.core.score.min'] === '0' && d['cmi.core.score.max'] === '100' && d['cmi.core.exit'] === '',
+  expect(d['cmi.core.lesson_status'] === 'passed' && d['cmi.core.score.raw'] === '80' && d['cmi.core.score.min'] === '0' && d['cmi.core.score.max'] === '100' && d['cmi.core.exit'] === 'suspend',
     `SCORM: lesson_status ${d['cmi.core.lesson_status']}, score.raw ${d['cmi.core.score.raw']} (0 to 100, from S21 first attempts), exit "${d['cmi.core.exit']}"`);
   expect(/^\d{4}:\d{2}:\d{2}\.\d{2}$/.test(d['cmi.core.session_time'] || '') && m.finished, `SCORM: session_time ${d['cmi.core.session_time']}, LMSFinish once`);
   const susp = d['cmi.suspend_data'] || '';

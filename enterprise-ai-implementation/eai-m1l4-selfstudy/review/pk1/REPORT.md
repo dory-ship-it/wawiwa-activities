@@ -63,6 +63,43 @@ Blossom domain (Noy will send both after the uploads).
 (to be filled with Noy, scenarios 1-6)
 
 ## Blossom
-(to be filled with Noy)
+Noy uploaded the 25.74 MB zip as is: it was accepted, no size problem. Test course "Unit test", assignment 93112, group 557, launched as Noy (manager). Checked from the browser console, 1 Nov:
+- The package is served from `platform.blossom-kc.com/wawiwa_tech/scorm_auth/<token>/index.html` (same origin as the launcher); `window.API` is on the launcher window. Blossom's API also has 2004 names and `BlossomReportingAvailable`.
+- The lesson runs in scorm12 mode, contentVersion PK1.
+- Resume works across sessions: `entry=resume`, status incomplete, suspend_data and location O2 from Noy's first launch.
+- Every set and commit returned true. An S01 answer wrote `cmi.interactions.0` (id, type, response, result, latency, time, weighting, pattern); `_count` is 1 and LMSGetLastError is 0.
+- The live coach frame loaded and was ready inside Blossom (S04).
+- Noy's test record now has place S04 and one S01 interaction.
+- **Scenario 2 (fail then pass), as a test student (impersonation), driven by Claude in the page; all PASS:**
+  - First launch: `ab-initio`, not attempted -> incomplete.
+  - S21 with every item wrong: score.raw 0, incomplete, 8 interactions.
+  - S22 Finish: lesson_status incomplete (never failed), score.raw 0, exit suspend.
+  - Quit and relaunch: `entry=resume`. Lands on S21R with the resume prompt and Retake now. The case title and problem (quotes, commas, an apostrophe) are intact, the attempt kept.
+  - Retake (version b, 6 of 6): passed, score.raw 100, exit "", 15 interactions, LMSGetLastError 0 throughout.
+  - The course page then shows Assignments 1/1.
+- **Gradebook (Reports > User performances, Demo Student):**
+  - One "Completed performance": score 100, Execution time 00:53. Nothing under "Uncompleted/failed".
+  - 00:53 looks like the last session only, not the total; this needs checking against a longer run.
+  - Details (chart icon) lists every interaction: result, id, type, user answer, correct answer, weight, response time (latency). All 15 are there.
+  - **Issue:** neutral unscored items (L4_PATH_C4/C5, L4_S22_1, weight 0) show a ✗ like a wrong answer. The question column shows only ids (SCORM 1.2 has no question text).
+- **Noy's own record** (manager, not assigned): Uncompleted, Status "Suspended", score N/A, Execution time 03:56. That looks like the sum of her sessions, so Execution time is probably the total.
+  - Blossom shows NO per-question details for an uncompleted record, only "Not completed" and score 0. A teacher therefore cannot see the answers of a learner who finished below 80 until they pass. Question for Blossom support: is it in Export?
+- **Noy's decision after the report (1 Nov):** do not send L4_PATH_C4/C5 and L4_S22_1 (`lesson.lmsReport.skip`). Send every interaction readable: fill-in, id = interaction id + the question in words (`src/tracking/describe.js`), and the answer and correct answer as text (PP1 variant aware).
+  - Blossom accepted a 57-character id with the question and text answers with spaces, quotes and an apostrophe (4 PK1TEST rows written to Noy's record, all `true`, error 0).
+- **New package (readable report) uploaded with Edit content:**
+  - Replacing the package cleared Noy's uncompleted (Suspended) record. **Never replace the package mid-pilot** without asking Blossom what happens to learners in progress.
+  - The demo student got a new attempt; the run (S01, S02 x2, W1, S04, S20, S21 fail, finish, resume, retake) showed status passed, 100, Execution time 01:16 (the sum of the attempt's sessions).
+  - The details now read well: question in words, user answer and correct answer as text, matching as "card -> column".
+  - Neutral rows (free text, W1, S20) still show ✗: Blossom marks anything not "correct" with ✗.
+- **After a passed attempt (exit "")**, every launch starts a NEW attempt (`ab-initio`, empty suspend_data): a learner who passed and comes back sees a fresh lesson without their notes.
+  - A third attempt by the demo student (5 TEST_ rows with other result values, then passed) was NOT recorded as a performance. Blossom's attempt setting must be checked.
+- **v3 package (exit always "suspend"; neutral items sent without a result), demo student, new attempt:**
+  - S01, S02 x2, W1, S04, S20, S21 fail, finish: incomplete, 0. Neutral rows have no result (accepted, error 0).
+  - Quit and relaunch: resume, S21R, the case title intact. Retake: passed, 100, 18 interactions, exit suspend.
+  - Relaunch after passing: Blossom STILL starts a new empty attempt (`ab-initio`) even with exit suspend. So it is Blossom's rule (a completed attempt is closed), not the module's exit.
+  - Earlier evidence: a later attempt after a completed one is not recorded, so the passed result stays.
+  - Open: whether an Advanced setting changes this.
+- Still to do: the total time check (status, score, time) and where Blossom shows per-question answers. Scenarios 3 (quit mid-video and on S19), 5 (coach answer as student) and 6 (S19 workbook tab, Copy) by hand.
+SCORM Cloud was not run first: Noy chose to try Blossom directly.
 
 Weekly usage (all models) after: 6%.

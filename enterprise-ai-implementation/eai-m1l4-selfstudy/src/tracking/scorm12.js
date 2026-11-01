@@ -5,14 +5,16 @@
 //   record     first attempts only (the engine sends one 'answer' per interaction id): one
 //              cmi.interactions.n per id with id, type, student_response, result, latency, time,
 //              weighting (1 scored, 0 practice) and correct_responses.0.pattern when there is one.
+//              PK1: from ev.report (src/tracking/describe.js): id = the interaction id + the question
+//              in words, type fill-in, the response and the pattern as text; ev.lms false = not sent.
 //              NL4: a retake of the check sends each item again (one more entry per item and attempt).
 //              'score' (an attempt of the check ends) sets score raw / min / max (the latest attempt)
 //              and, once an attempt passed, lesson_status passed; never back down from passed.
 //              'finish' sets score raw / min / max and passed, or incomplete below the pass mark.
 //              PK1: lesson_status is only ever "incomplete" or "passed" (never "failed" or "completed").
-//   save       suspend_data and lesson_location on every change; exit "suspend" until the lesson is
-//              both finished and passed (PK1: finished below 80 keeps "suspend", so the LMS keeps
-//              suspend_data and the learner can come back and retake the check), "" from then on.
+//   save       suspend_data and lesson_location on every change; exit always "suspend" (PK1: one
+//              attempt per learner; the LMS keeps suspend_data, so a learner below 80 can come back
+//              and retake the check, and a learner who passed comes back to their own work).
 //   terminate  session_time, exit, commit and LMSFinish, once (pagehide / beforeunload).
 // Commits are throttled to one per 2 s and flushed on finish and exit. Every call is checked with
 // LMSGetLastError, logged, and never throws into the page. No identity element is ever touched.
@@ -54,7 +56,10 @@ const cleanResponse = (type, v) => {
 export function createScorm12(api, { log = () => {} } = {}) {
   let initialized = false, terminated = false, finished = false, passed = false, lastCommit = 0, pending = null;
   const started = Date.now();
-  const exitNow = () => (finished && passed ? '' : 'suspend');
+  // PK1 (Noy, 1 Nov 2026, after the Blossom test): one attempt per learner that keeps everything, so
+  // exit is always "suspend", also once finished and passed. Blossom starts a new, empty attempt after an
+  // exit "" (a learner coming back would lose their case notes); "passed" is what marks it completed.
+  const exitNow = () => 'suspend';
   const guard = (el, v) => {
     if (IDENTITY_FIELDS.test(el)) throw new Error('identity_field_refused ' + el);
     if (el === 'cmi.core.lesson_status' && v !== undefined && !STATUSES.includes(String(v))) throw new Error('status_refused ' + v);
@@ -97,16 +102,23 @@ export function createScorm12(api, { log = () => {} } = {}) {
     record(ev) {
       if (!initialized || terminated) return;
       if (ev.kind === 'answer') {
+        if (ev.lms === false) { log('not reported ' + ev.trackingId); return; } // PK1: lesson.lmsReport.skip
+        // PK1: readable in the LMS report: the id carries the question, the answers are words (fill-in)
+        const r = ev.report;
+        const type = r ? 'fill-in' : ev.type;
         const n = Number(get('cmi.interactions._count')) || 0;
         const p = `cmi.interactions.${n}.`;
-        set(p + 'id', ev.trackingId);
-        set(p + 'type', ev.type);
-        set(p + 'student_response', cleanResponse(ev.type, ev.response));
-        set(p + 'result', ev.result === 'correct' || ev.result === 'wrong' ? ev.result : 'neutral');
+        set(p + 'id', r ? r.id : ev.trackingId);
+        set(p + 'type', type);
+        set(p + 'student_response', cleanResponse(type, r ? r.response : ev.response));
+        // PK1: an item with no right answer (free text, polls) sends no result: Blossom marks "neutral"
+        // with the same X as "wrong" (result is optional in SCORM 1.2)
+        if (ev.result === 'correct' || ev.result === 'wrong') set(p + 'result', ev.result);
         set(p + 'latency', timespan(ev.latencyMs || 0));
         set(p + 'time', clock());
         set(p + 'weighting', ev.scored ? '1' : '0');
-        if (ev.correctResponse != null) set(p + 'correct_responses.0.pattern', String(ev.correctResponse).toLowerCase());
+        const pattern = r ? r.correct : ev.correctResponse;
+        if (pattern != null) set(p + 'correct_responses.0.pattern', cleanResponse(type, pattern));
         commit();
       } else if (ev.kind === 'score') {
         if (ev.score != null) {
@@ -115,7 +127,6 @@ export function createScorm12(api, { log = () => {} } = {}) {
           set('cmi.core.score.raw', String(ev.score));
         }
         if (ev.passed) { set('cmi.core.lesson_status', 'passed'); passed = true; }
-        if (finished && passed) set('cmi.core.exit', ''); // a retake that passes after the finish
         commitNow();
       } else if (ev.kind === 'finish') {
         if (ev.score != null) {

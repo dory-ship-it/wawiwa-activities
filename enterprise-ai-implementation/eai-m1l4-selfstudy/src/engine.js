@@ -8,27 +8,28 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=4fdd25d6';
-import { createZones } from './zones.js?v=4fdd25d6';
-import { createMenu, openDialog } from './menu.js?v=4fdd25d6';
-import { initTooltips, applyTerms } from './tooltip.js?v=4fdd25d6';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=4fdd25d6';
-import { decision } from './templates/decision.js?v=4fdd25d6';
-import { input } from './templates/input.js?v=4fdd25d6';
-import { sortDeck } from './templates/sortdeck.js?v=4fdd25d6';
-import { bpmn } from './templates/bpmn.js?v=4fdd25d6';
-import { flags } from './templates/flags.js?v=4fdd25d6';
-import { explorer } from './templates/explorer.js?v=4fdd25d6';
-import { video } from './templates/video.js?v=4fdd25d6';
-import { handoff } from './templates/handoff.js?v=4fdd25d6';
-import { check } from './templates/check.js?v=4fdd25d6';
-import { result } from './templates/result.js?v=4fdd25d6';
-import { end } from './templates/end.js?v=4fdd25d6';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=4fdd25d6';
-import { createGhost, stopGhost } from './ghost.js?v=4fdd25d6';
-import { createTracking } from './tracking/index.js?v=4fdd25d6';
-import { createCoach } from './coach/coach.js?v=4fdd25d6';
-import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=4fdd25d6';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=e7db6f55';
+import { createZones } from './zones.js?v=e7db6f55';
+import { createMenu, openDialog } from './menu.js?v=e7db6f55';
+import { initTooltips, applyTerms } from './tooltip.js?v=e7db6f55';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=e7db6f55';
+import { decision } from './templates/decision.js?v=e7db6f55';
+import { input } from './templates/input.js?v=e7db6f55';
+import { sortDeck } from './templates/sortdeck.js?v=e7db6f55';
+import { bpmn } from './templates/bpmn.js?v=e7db6f55';
+import { flags } from './templates/flags.js?v=e7db6f55';
+import { explorer } from './templates/explorer.js?v=e7db6f55';
+import { video } from './templates/video.js?v=e7db6f55';
+import { handoff } from './templates/handoff.js?v=e7db6f55';
+import { check } from './templates/check.js?v=e7db6f55';
+import { result } from './templates/result.js?v=e7db6f55';
+import { end } from './templates/end.js?v=e7db6f55';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=e7db6f55';
+import { createGhost, stopGhost } from './ghost.js?v=e7db6f55';
+import { createTracking } from './tracking/index.js?v=e7db6f55';
+import { describe } from './tracking/describe.js?v=e7db6f55';
+import { createCoach } from './coach/coach.js?v=e7db6f55';
+import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=e7db6f55';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -93,6 +94,8 @@ class Lesson {
     const qa = this.review || q.get('debug') === '1';
     this.forced = { level: qa && LEVELS.includes(q.get('level')) ? q.get('level') : null, path: qa ? JOURNEYS[q.get('path')] || null : null };
     this.checkpoints = content.lesson.adapt?.checkpoints || [];
+    // PK1: interactions kept in the lesson but never sent to the LMS (lesson.lmsReport.skip)
+    this.lmsSkip = new Set(content.lesson.lmsReport?.skip || []);
 
     this.note = h('p', { class: 'w-small-note', hidden: true }, this.ui.smallScreenNote);
     this.stage = h('div', { class: 'w-stage' });
@@ -166,7 +169,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=4fdd25d6').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=e7db6f55').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -361,7 +364,10 @@ class Lesson {
     if (!(trackingId in this.state.a)) {
       this.state.a[trackingId] = (type === 'fill-in' ? '' : response) + '|' + result.charAt(0);
       // the interaction's content metadata goes along for the SCORM adapter (correct response, weighting)
-      this.tracking.emit({ kind: 'answer', trackingId, type, response, result, latencyMs, correctResponse: meta?.correctResponse ?? null, scored: !!meta?.scored });
+      // PK1: and what an LMS report shows (the question and the answers in words; lms false = not sent)
+      const correctResponse = meta?.correctResponse ?? null;
+      this.tracking.emit({ kind: 'answer', trackingId, type, response, result, latencyMs, correctResponse, scored: !!meta?.scored,
+        lms: !this.lmsSkip.has(trackingId), report: describe(this.view(screenId), trackingId, { type, response, correctResponse }, this.ui) });
       this.persist();
       return 'answer';
     }
@@ -413,7 +419,8 @@ class Lesson {
       const prev = i ? this.state.p?.[this.checkpoints[i - 1].key] || 'core' : null;
       const level = this.forced.level || this.forced.path?.[i] || levelAt(cp, tally(cp.items, (tid) => this.firstAnswer(tid)), prev);
       this.state.p = { ...(this.state.p || {}), [cp.key]: level };
-      this.tracking.emit({ kind: 'answer', trackingId: cp.trackingId, type: 'fill-in', response: level, result: 'neutral', latencyMs: 0, correctResponse: null, scored: false });
+      this.tracking.emit({ kind: 'answer', trackingId: cp.trackingId, type: 'fill-in', response: level, result: 'neutral', latencyMs: 0, correctResponse: null, scored: false,
+        lms: !this.lmsSkip.has(cp.trackingId), report: null });
     });
   }
 
