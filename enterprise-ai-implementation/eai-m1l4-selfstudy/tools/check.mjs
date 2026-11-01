@@ -278,7 +278,7 @@ const refs = content.screens.flatMap((s) => [
   ...(s.items || []).flatMap((it) => [[s.id, it.trackingId], ...(it.b ? [[s.id, it.b.trackingId]] : [])]),
   ...(s.step2?.field ? [[s.id, s.step2.field.trackingId]] : []),
 ]);
-// the scored screens and the pass mark (S21: 5 scored items, pass 80 = 4 of 5)
+// the scored screens and the pass mark (S21: 6 scored items at 20 points each, capped at 100: pass 80 = 4 of 6)
 const comp = content.lesson.completion;
 const scored = comp.scoredScreens.flatMap((sid) => (content.screens.find((x) => x.id === sid)?.tracking || []).filter((t) => t.scored));
 if (!scored.length || !(comp.passMark > 0 && comp.passMark <= 100) || interactions.some(([s, t]) => t?.scored && !comp.scoredScreens.includes(s.id)))

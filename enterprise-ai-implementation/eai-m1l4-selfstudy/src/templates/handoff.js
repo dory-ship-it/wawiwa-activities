@@ -16,10 +16,10 @@
 // Copy: navigator.clipboard first; when it is blocked (an LMS iframe without clipboard permission) the
 // card's text is selected and the button says "Press Ctrl+C" (the selection copies with the keys).
 // The ghost hand shows the first Copy once (it points beside it and taps nothing). Nothing is tracked.
-import { h, resolveLink } from '../util.js?v=86f78ba2';
-import { glyph, icon } from '../icons.js?v=86f78ba2';
-import { layout, sheet, privacyLine, ruleLabel } from './stage.js?v=86f78ba2';
-import { scaleOf } from '../ghost.js?v=86f78ba2';
+import { h, resolveLink } from '../util.js?v=a66e85f4';
+import { glyph, icon } from '../icons.js?v=a66e85f4';
+import { layout, sheet, privacyLine, ruleLabel } from './stage.js?v=a66e85f4';
+import { scaleOf } from '../ghost.js?v=a66e85f4';
 
 const COPIED_MS = 2000;
 

@@ -787,6 +787,9 @@ a.w-btn { text-decoration: none; }
 /* S21 knowledge check */
 .w-kc-head { display: flex; align-items: center; justify-content: space-between; gap: 20.48px; }
 .w-kc-head .w-instruction, .w-sheet .w-kc-head .w-instruction { margin: 0; }
+/* QZ3: the question is the heading, what to do is a small line beside the dots */
+.w-kc-ask { margin: 0; font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-sheet.w-kc .w-instruction { margin: 10.24px 0 0; font-size: 30.72px; line-height: 1.2; letter-spacing: -.6px; }
 .w-kc-body { margin-top: 15.36px; display: flex; flex-direction: column; gap: 12.8px; }
 .w-kc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12.8px 20.48px; }
 .w-kc-opt { font-size: 18.56px; line-height: 1.4; }
@@ -820,6 +823,7 @@ a.w-btn { text-decoration: none; }
 .w-result-chip[data-passed="true"] { background: var(--wl-correct-bg); color: var(--wl-correct-head); }
 .w-result-line { font: 600 19.2px/1.35 var(--wl-font-ui); color: var(--wl-text-2); }
 .w-missed { list-style: none; margin: 15.36px 0 0; padding: 0; display: grid; gap: 6.4px; }
+.w-missed:has(> .w-missed-item:nth-child(5)) { grid-template-columns: repeat(2, minmax(0, 1fr)); } /* QZ1: five or six missed, two columns, so the panel stays in main */
 .w-missed-item { display: flex; align-items: center; gap: 12.8px; padding: 6.4px 6.4px 6.4px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
 .w-missed-text { flex: 1 1 auto; min-width: 0; }
 .w-missed-stem { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 600 15.36px/1.3 var(--wl-font-ui); color: var(--wl-ink); }

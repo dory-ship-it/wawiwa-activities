@@ -278,31 +278,53 @@ const STATES = [
   ['S20', 'all answered, fix line', async (p) => { for (const [q, c] of [['q1', 'yes'], ['q2', 'notYet'], ['q3', 'yes']]) await click(p, `.w-check-row[data-row="${q}"] [data-choice="${c}"]`); }],
   ['S20B', 'hint', async () => {}],
   ['S20B', 'picked (longest fix)', async (p) => click(p, '.w-opt[data-id="automating"]')],
-  ['S21', 'item 1 wrong', async (p) => click(p, '.w-kc-opt[data-id="b"]')],
-  ['S21', 'item 5 one of two', async (p) => {
+  // QZ2: a pick only selects; Next question sends it with no feedback; after the last item, the review
+  ['S21', 'item 1 picked', async (p) => click(p, '.w-kc-opt[data-id="b"]')],
+  ['S21', 'item 5 picked (QZ1, the source owner)', async (p) => {
     for (const k of ['c', 'b', 'a', 'd']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
-    await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="1"]'); await click(p, '[data-action="check"]');
+    await click(p, '.w-kc-opt[data-id="a"]');
   }],
-  ['S21', 'done', async (p) => {
-    for (const k of ['c', 'b', 'a', 'd']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+  ['S21', 'tiles picked', async (p) => {
+    for (const k of ['c', 'b', 'a', 'd', 'b']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="1"]');
+  }],
+  ['S21', 'review, item 1 wrong', async (p) => {
+    for (const k of ['a', 'b', 'a', 'd', 'b']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
     await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="6"]'); await click(p, '[data-action="check"]');
   }],
-  // FX3: a retake shows version b (its options shuffled): the longest stem, then the eight sales-map lines with a wrong pick
-  ['S21', 'retake, item 1b wrong', async (p) => { await p.evaluate(() => { window.__l4.state.k = { n: 2, s: 40, p: 0 }; window.__l4.go('S21'); }); await click(p, '.w-kc-opt[data-id="a"]'); }],
-  ['S21', 'retake, item 5b one of two', async (p) => {
-    await p.evaluate(() => { window.__l4.state.k = { n: 2, s: 40, p: 0 }; window.__l4.go('S21'); });
-    for (const k of ['b', 'b', 'a', 'd']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
-    await click(p, '.w-kc-tile[data-n="3"]'); await click(p, '.w-kc-tile[data-n="7"]'); await click(p, '[data-action="check"]');
+  ['S21', 'review, tiles one of two', async (p) => {
+    for (const k of ['c', 'b', 'a', 'd', 'b']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="1"]'); await click(p, '[data-action="check"]');
+    for (let i = 0; i < 5; i++) await click(p, '[data-action="nextAnswer"]');
   }],
-  ['S21R', 'not passed, all five missed', async (p) => { await attempt(p, { L4_S21_1: 'a|w', L4_S21_2: 'a|w', L4_S21_3: 'b|w', L4_S21_4: 'a|w', L4_S21_5: '5,7|w' }, { n: 1, s: 0, p: 0 }); }],
-  ['S21R', 'version b, all five missed', async (p) => { await attempt(p, { L4_S21_1b: 'a|w', L4_S21_2b: 'a|w', L4_S21_3b: 'b|w', L4_S21_4b: 'a|w', L4_S21_5b: '5,7|w' }, { n: 2, s: 0, p: 0 }); }],
-  ['S21R', 'passed', async (p) => { await attempt(p, { L4_S21_1b: 'b|c', L4_S21_2b: 'b|c', L4_S21_3b: 'a|c', L4_S21_4b: 'd|c', L4_S21_5b: '3,6|w' }, { n: 2, s: 80, p: 1 }); }],
+  ['S21', 'review, tiles right (both lines)', async (p) => {
+    for (const k of ['c', 'b', 'a', 'd', 'b']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="6"]'); await click(p, '[data-action="check"]');
+    for (let i = 0; i < 5; i++) await click(p, '[data-action="nextAnswer"]');
+  }],
+  // FX3: a retake shows version b (its options shuffled): the longest stem, then the eight sales-map lines
+  ['S21', 'retake, item 1b picked', async (p) => { await p.evaluate(() => { window.__l4.state.k = { n: 2, s: 40, p: 0 }; window.__l4.go('S21'); }); await click(p, '.w-kc-opt[data-id="a"]'); }],
+  ['S21', 'retake, review, tiles 6b one of two', async (p) => {
+    await p.evaluate(() => { window.__l4.state.k = { n: 2, s: 40, p: 0 }; window.__l4.go('S21'); });
+    for (const k of ['b', 'b', 'a', 'd', 'c']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="3"]'); await click(p, '.w-kc-tile[data-n="7"]'); await click(p, '[data-action="check"]');
+    for (let i = 0; i < 5; i++) await click(p, '[data-action="nextAnswer"]');
+  }],
+  ['S21', 'retake, review, tiles 6b right (both lines)', async (p) => {
+    await p.evaluate(() => { window.__l4.state.k = { n: 2, s: 40, p: 0 }; window.__l4.go('S21'); });
+    for (const k of ['b', 'b', 'a', 'd', 'c']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="3"]'); await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '[data-action="check"]');
+    for (let i = 0; i < 5; i++) await click(p, '[data-action="nextAnswer"]');
+  }],
+  ['S21R', 'not passed, all six missed', async (p) => { await attempt(p, { L4_S21_1: 'a|w', L4_S21_2: 'a|w', L4_S21_3: 'b|w', L4_S21_4: 'a|w', L4_S21_6: 'a|w', L4_S21_5: '5,7|w' }, { n: 1, s: 0, p: 0 }); }],
+  ['S21R', 'version b, all six missed', async (p) => { await attempt(p, { L4_S21_1b: 'a|w', L4_S21_2b: 'a|w', L4_S21_3b: 'b|w', L4_S21_4b: 'a|w', L4_S21_6b: 'a|w', L4_S21_5b: '5,7|w' }, { n: 2, s: 0, p: 0 }); }],
+  ['S21R', 'passed', async (p) => { await attempt(p, { L4_S21_1b: 'b|c', L4_S21_2b: 'b|c', L4_S21_3b: 'a|c', L4_S21_4b: 'd|c', L4_S21_6b: 'a|w', L4_S21_5b: '3,6|w' }, { n: 2, s: 80, p: 1 }); }],
   ['S14', 'back to the check', async (p) => { await attempt(p, { L4_S21_1: 'a|w' }, { n: 1, s: 0, p: 0 }); await click(p, '[data-action="review"][data-screen="S14"]'); }],
   ['S22', 'takeaway', async (p) => click(p, '.w-takeaway[data-id="b"]')],
   ['S22', 'finish confirm', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); }],
   ['S22', 'finished', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="finish"]'); await click(p, '[data-action="finish"]'); }],
   // FX2 G: the closing screen, passed and not passed yet
-  ['END', 'passed', async (p) => { await attempt(p, { L4_S21_1: 'c|c', L4_S21_2: 'b|c', L4_S21_3: 'a|c', L4_S21_4: 'd|c', L4_S21_5: '5,6|c' }, { n: 1, s: 100, p: 1 }); await p.evaluate(() => window.__l4.go('END')); }],
+  ['END', 'passed', async (p) => { await attempt(p, { L4_S21_1: 'c|c', L4_S21_2: 'b|c', L4_S21_3: 'a|c', L4_S21_4: 'd|c', L4_S21_6: 'b|c', L4_S21_5: '5,6|c' }, { n: 1, s: 100, p: 1 }); await p.evaluate(() => window.__l4.go('END')); }],
   ['END', 'not passed yet', async (p) => { await attempt(p, { L4_S21_1: 'a|w' }, { n: 1, s: 0, p: 0 }); await p.evaluate(() => window.__l4.go('END')); }],
 ];
 // NL4: every note the S19 copy cards show, at its field's maxlength

@@ -1296,44 +1296,76 @@ await expectBand(page, 'S20B rushed', { state: 'neutral', text: opt('S20B', 'rus
 await expectLayout(page, 'S20B picked');
 await press(page, 'Enter');
 
-// S21: item 1 wrong then right (the wrong first answer counts), items 2 to 5 right first: 4 of 5; Next to S21R
-await expectNewScreen(page, 'S21', 'S20B Next');
+// S21 (QZ2): a pick only selects and may change; Next question sends it, with no feedback and no
+// retry. Item 1 picked c then changed to a (wrong), items 2 to 4 right, item 5 (QZ1, the source
+// owner) wrong, the tiles right: 4 of 6, 80 of 100 (QZ1: 20 points an item), the pass mark exactly.
+// Then the review: each item with its answer marked and its feedback, "Next answer"; Next to S21R
+await expectNewScreen(page, 'S21', 'S20B Next', { heading: S.S21.items[0].stem }); // QZ3: the question is the heading
 const steps6 = await page.evaluate(() => [...document.querySelectorAll('.w-steps-bar .w-step-label')].map((s) => s.textContent).join(' · '));
 expect(steps6 === 'Check · Score · Reflect · Finish',`Chapter 6 steps in the bar: ${steps6}`);
+const N21 = S.S21.items.length, TILES = S.S21.items.findIndex((it) => it.kind === 'tiles');
 const item = (k) => S.S21.items[k];
 const iopt = (k, id) => item(k).options.find((o) => o.id === id);
-await tabTo(page, '.w-kc-opt[data-id="a"]');
+const kcState = () => page.evaluate(() => ({ pressed: [...document.querySelectorAll('.w-kc-opt[aria-pressed="true"]')].map((b) => b.dataset.id).join(), marks: [...document.querySelectorAll('.w-kc-opt[data-result]')].filter((b) => b.dataset.result).length,
+  send: document.querySelector('[data-action="nextQuestion"]')?.disabled }));
+expect((await kcState()).send === true, 'S21 item 1: Next question locked until a pick');
+await tabTo(page, '.w-kc-opt[data-id="c"]');
 await press(page, 'Enter');
-await expectBand(page, 'S21 item 1 a', { state: 'wrong', text: iopt(0, 'a').feedback, unlocked: false, lockedWhy: UI.footer.locked.check });
-await expectLayout(page, 'S21 item 1 wrong');
-await press(page, 'ArrowRight', 2);
+await press(page, 'ArrowLeft', 2);
 await press(page, 'Enter');
-await expectBand(page, 'S21 item 1 c (retry)', { state: 'correct', text: iopt(0, 'c').feedback, unlocked: false, actions: ['nextQuestion'] });
-for (const [k, key] of [[1, 'b'], [2, 'a'], [3, 'd']]) {
-  await press(page, 'Enter'); // Next question
+const kc1 = await kcState();
+expect(kc1.pressed === 'a' && !kc1.marks && kc1.send === false, `S21 item 1: c then a: only a selected (${kc1.pressed}), nothing marked right or wrong, Next question open`);
+await expectBand(page, 'S21 item 1 picked', { state: 'hint', text: '', unlocked: false, lockedWhy: UI.footer.locked.check });
+// QZ3: the question is the heading; "Choose one answer." small above it
+const q1 = await page.evaluate(() => ({ h: document.querySelector('#w-instruction').textContent, ask: document.querySelector('.w-kc-ask').textContent }));
+expect(q1.h === item(0).stem && q1.ask === S.S21.instruction, `S21 item 1: the question is the heading ("${q1.h}"), "${q1.ask}" above it`);
+await expectLayout(page, 'S21 item 1 picked');
+expect(!(await events(page)).some((e) => e.trackingId === 'L4_S21_1'), 'S21 item 1: a pick sends nothing');
+for (const [k, key] of [[0, 'a'], [1, 'b'], [2, 'a'], [3, 'd'], [4, 'a']]) {
+  if (k) {
+    const idx = { a: 0, b: 1, c: 2, d: 3 }[key];
+    if (idx) await press(page, 'ArrowRight', idx);
+    await press(page, 'Enter');
+  }
+  await tabTo(page, '[data-action="nextQuestion"]');
+  await press(page, 'Enter'); // sends the answer, no feedback
   const dots = await page.evaluate(() => document.querySelector('.w-kc-head .w-dots').getAttribute('aria-label'));
-  expect(dots === `Question ${k + 1} of 5` && await isActive(page, '.w-kc-opt[data-id="a"]'), `S21 item ${k + 1}: "${dots}", focus on option A`);
-  const idx = { a: 0, b: 1, c: 2, d: 3 }[key];
-  if (idx) await press(page, 'ArrowRight', idx);
-  await press(page, 'Enter');
-  await expectBand(page, `S21 item ${k + 1} ${key}`, { state: 'correct', text: iopt(k, key).feedback, unlocked: false });
+  const st = await page.evaluate(() => document.querySelector('.w-band').dataset.strip);
+  expect(dots === `Question ${k + 2} of ${N21}` && st === 'off' && await isActive(page, k + 1 === TILES ? '.w-kc-tile[data-n="1"]' : '.w-kc-opt[data-id="a"]'),
+    `S21 item ${k + 1} ${key} sent: "${dots}", no feedback strip, focus on the next item`);
 }
-await press(page, 'Enter');
-expect(await page.evaluate(() => document.querySelector('#w-instruction').textContent) === item(4).instruction, `S21 item 5: the heading reads "${item(4).instruction}"`);
-await expectBand(page, 'S21 item 5 hint', { state: 'hint', text: item(4).hint, unlocked: false });
+expect(await page.evaluate(() => document.querySelector('#w-instruction').textContent) === item(TILES).instruction, `S21 item ${TILES + 1}: the heading reads "${item(TILES).instruction}"`);
+await expectBand(page, `S21 item ${TILES + 1}`, { state: 'hint', text: '', unlocked: false });
+expect(await page.evaluate(() => document.querySelector('.w-kc-ask').textContent) === item(TILES).hint, `S21 item ${TILES + 1}: "${item(TILES).hint}" above the question`);
 for (const n of [5, 6]) { await tabTo(page, `.w-kc-tile[data-n="${n}"]`); await press(page, ' '); }
 await tabTo(page, '[data-action="check"]');
+expect(await page.evaluate(() => document.querySelector('[data-action="check"]').textContent) === UI.buttons.finishCheck, `S21 last item: the band's button reads "${UI.buttons.finishCheck}"`);
 await press(page, 'Enter');
 const scoreEv = (await events(page)).filter((e) => e.kind === 'score');
-expect(await isActive(page, '.w-next') && scoreEv.length === 1 && scoreEv[0].score === 80 && scoreEv[0].passed && scoreEv[0].attempt === 1 && (await page.evaluate(() => window.__l4.score())).raw === 80,
-  `S21 done: Next focused; the attempt's score from first answers only: ${scoreEv[0]?.score} (passed ${scoreEv[0]?.passed}, attempt ${scoreEv[0]?.attempt})`);
+const ans21 = (await events(page)).filter((e) => /^L4_S21_/.test(e.trackingId || ''));
+expect(scoreEv.length === 1 && scoreEv[0].score === 80 && scoreEv[0].passed && scoreEv[0].attempt === 1 && (await page.evaluate(() => window.__l4.score())).raw === 80
+  && ans21.length === N21 && ans21.every((e) => e.kind === 'answer'),
+  `S21 done: one answer per item, no retry (${ans21.map((e) => e.trackingId + '=' + e.response).join(', ')}); score ${scoreEv[0]?.score} (passed ${scoreEv[0]?.passed}, attempt ${scoreEv[0]?.attempt})`);
+// the review: item 1, a marked wrong, c marked right, a's feedback; focus on Next answer; Next open
+const rv1 = await page.evaluate(() => ({ h: document.querySelector('#w-instruction').textContent, ask: document.querySelector('.w-kc-ask').textContent, marks: [...document.querySelectorAll('.w-kc-opt')].map((b) => b.dataset.id + ':' + (b.dataset.result || '-')).join(',') }));
+expect(rv1.ask === S.S21.reviewInstruction && rv1.h === item(0).stem && rv1.marks === 'a:wrong,b:-,c:correct,d:-' && await isActive(page, '[data-action="nextAnswer"]'), `S21 review item 1: "${rv1.ask}" over the question, ${rv1.marks}, focus on Next answer`);
+await expectBand(page, 'S21 review item 1', { state: 'wrong', text: iopt(0, 'a').feedback, unlocked: true, actions: ['nextAnswer'] });
+await expectLayout(page, 'S21 review item 1');
+for (const [k, key, state] of [[1, 'b', 'correct'], [2, 'a', 'correct'], [3, 'd', 'correct'], [4, 'a', 'wrong']]) {
+  await press(page, 'Enter'); // Next answer
+  await expectBand(page, `S21 review item ${k + 1}`, { state, text: iopt(k, key).feedback, unlocked: true, actions: ['nextAnswer'] });
+}
+await press(page, 'Enter');
+await expectBand(page, `S21 review item ${TILES + 1}`, { state: 'correct', text: item(TILES).tiles.filter((t) => t.correct).map((t) => t.feedback).join(' '), unlocked: true });
+await expectLayout(page, 'S21 review tiles');
+await tabTo(page, '.w-next');
 await press(page, 'Enter');
 
 // S21R: passed: the score line, the ring, "Passed", no retake, Next open
-await expectNewScreen(page, 'S21R', 'S21 Next', { heading: '4 of 5 on first try (80 of 100). Pass mark: 80.' });
+await expectNewScreen(page, 'S21R', 'S21 Next', { heading: '4 of 6 right (80 of 100). Pass mark: 80.' });
 const r21 = await page.evaluate(() => ({ h: document.querySelector('#w-instruction').textContent, chip: document.querySelector('.w-result-chip').textContent, line: document.querySelector('.w-result-line').textContent,
   ring: document.querySelector('.w-ring').getAttribute('aria-label'), retake: !!document.querySelector('[data-action="retake"]'), missed: document.querySelectorAll('.w-missed-item').length, next: document.querySelector('.w-next').dataset.locked }));
-expect(r21.h === '4 of 5 on first try (80 of 100). Pass mark: 80.' && r21.chip === S.S21R.passed.chip && r21.line === S.S21R.passed.text && r21.ring === '80 of 100' && !r21.retake && !r21.missed && r21.next === 'false',
+expect(r21.h === '4 of 6 right (80 of 100). Pass mark: 80.' && r21.chip === S.S21R.passed.chip && r21.line === S.S21R.passed.text && r21.ring === '80 of 100' && !r21.retake && !r21.missed && r21.next === 'false',
   `S21R passed: "${r21.h}", "${r21.chip}", the ring "${r21.ring}", no retake, no missed list, Next open`);
 await expectLayout(page, 'S21R passed');
 await tabTo(page, '.w-next');
@@ -1361,7 +1393,7 @@ await expectBand(page, 'S22 download', { state: 'neutral', text: S.S22.step2.fee
 let rec = '';
 for (let i = 0; i < 30 && !rec; i++) { await wait(200); try { rec = readFileSync(join(dlDir, UI.record.fileName), 'utf8'); } catch {} }
 expect(rec.includes(TITLE) && rec.includes(UI.record.sketch) && rec.includes(SKETCH.steps) && rec.includes(SKETCH.output) && rec.includes(UI.record.metric) && rec.includes(METRIC_PARTS.baseline) && rec.includes(METRIC_PARTS.target) && rec.includes(METRIC_PARTS.date)
-  && rec.includes('4 of 5 on first try (80 of 100), attempt 1') && rec.includes(opt('S20B', 'rushed').label) && rec.includes(UI.buttons.notYet) && rec.includes(UI.record.notes) && rec.includes(NOTES.aifit) && rec.includes(NOTES.human),
+  && rec.includes('4 of 6 right (80 of 100), attempt 1') && rec.includes(opt('S20B', 'rushed').label) && rec.includes(UI.buttons.notYet) && rec.includes(UI.record.notes) && rec.includes(NOTES.aifit) && rec.includes(NOTES.human),
   `S22 lesson record downloaded (${UI.record.fileName}, ${rec.length} bytes): case title, sketch, notes, first metric (Chapter 3), self-check, risk, score with the attempt`);
 await tabTo(page, '[data-action="finish"]');
 await press(page, 'Enter');
@@ -1390,7 +1422,7 @@ await expectLayout(page, 'END passed');
 for (const id of ['W2', 'S04', 'S05b', 'S06', 'S07', 'S08', 'S08B', 'W3', 'V2', 'S09', 'S10', 'S11', 'S12', 'S12B', 'W4', 'S13', 'S14', 'S15', 'S16', 'S17', 'S17B', 'S18A', 'S18', 'S18B', 'S19', 'S20', 'S20B', 'S21', 'S21R', 'S22']) {
   await page.evaluate((x) => window.__l4.go(x), id);
   const b = S[id].template === 'video' ? null : await band(page), n = await nextState(page);
-  const want = { W2: 'guess', W3: 'guess', W4: 'guess', S12B: 'neutral', S17B: 'neutral', S08B: 'neutral', S18B: 'neutral', S19: 'hint', S20: 'hint', S20B: 'neutral', S21: 'idle', S21R: 'idle', S22: 'neutral' }[id] || 'correct';
+  const want = { W2: 'guess', W3: 'guess', W4: 'guess', S12B: 'neutral', S17B: 'neutral', S08B: 'neutral', S18B: 'neutral', S19: 'hint', S20: 'hint', S20B: 'neutral', S21: 'wrong', S21R: 'idle', S22: 'neutral' }[id] || 'correct'; // QZ2: S21 reopens on the review of item 1 (answered wrong above)
   const nextOk = !n.locked; // FX2 G: S22 finished opens END
   expect((!b || b.state === want) && nextOk, `${id} revisit: the earlier state comes back${b ? ' (band ' + b.state + ')' : ' (stops answered, seek free)'}, ${id === 'S22' ? 'finished, Next unlocked (to END)' : 'Next unlocked'}`);
 }
@@ -1424,7 +1456,7 @@ await expectNewScreen(page, 'S18A', 'menu: Enter on the completed chapter 5 open
 const ev = await events(page);
 const first = (id) => ev.filter((e) => e.kind === 'answer' && e.trackingId === id);
 const IDS_CH34 = ['L4_W3_1', 'L4_V2_1', 'L4_V2_2', 'L4_V2_3', 'L4_S09_1', 'L4_S10_1', 'L4_S11_1', 'L4_S12_1', 'L4_S12B_1', 'L4_S12B_2', 'L4_S12B_3', 'L4_W4_1', 'L4_S13_1', 'L4_S14_1', 'L4_S15_1', 'L4_S16_1', 'L4_S17_1', 'L4_S17B_1', 'L4_S17B_2'];
-const IDS_CH56 = ['L4_S18A_1', 'L4_S18_1', 'L4_S18_2', 'L4_S20_1', 'L4_S20_2', 'L4_S20_3', 'L4_S20_4', 'L4_S21_1', 'L4_S21_2', 'L4_S21_3', 'L4_S21_4', 'L4_S21_5', 'L4_S22_1'];
+const IDS_CH56 = ['L4_S18A_1', 'L4_S18_1', 'L4_S18_2', 'L4_S20_1', 'L4_S20_2', 'L4_S20_3', 'L4_S20_4', 'L4_S21_1', 'L4_S21_2', 'L4_S21_3', 'L4_S21_4', 'L4_S21_6', 'L4_S21_5', 'L4_S22_1'];
 const IDS_CH2 = ['L4_W2_1', 'L4_S04_1', 'L4_S05B_1', 'L4_S06_1', 'L4_S06_2', 'L4_S07_1', 'L4_S08_1', 'L4_S08_2', 'L4_S08_3', 'L4_S08B_1', 'L4_S08B_2', 'L4_S08B_3'];
 // (PP1: the two neutral path interactions, written when Chapters 4 and 5 open)
 const IDS_PATH = ['L4_PATH_C4', 'L4_PATH_C5'];
@@ -1447,7 +1479,7 @@ const path = IDS_PATH.map((id) => `${id}=${f[id].response}/${f[id].result}/${f[i
 expect(path === 'L4_PATH_C4=core/neutral/fill-in/unscored L4_PATH_C5=core/neutral/fill-in/unscored', `bus, the personal path (pinned to core): ${path}`);
 const ch56 = IDS_CH56.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
 expect(ch56 === `L4_S18A_1=3.c,1.b,4.d,2.a/wrong L4_S18_1=a/wrong L4_S18_2=${TITLE}/neutral L4_S20_1=b/neutral L4_S20_2=a/neutral L4_S20_3=b/neutral `
-  + 'L4_S20_4=c/neutral L4_S21_1=a/wrong L4_S21_2=b/correct L4_S21_3=a/correct L4_S21_4=d/correct L4_S21_5=5,6/correct L4_S22_1=a/neutral', `bus, chapters 5 and 6 first attempts: ${ch56}`);
+  + 'L4_S20_4=c/neutral L4_S21_1=a/wrong L4_S21_2=b/correct L4_S21_3=a/correct L4_S21_4=d/correct L4_S21_6=a/wrong L4_S21_5=5,6/correct L4_S22_1=a/neutral', `bus, chapters 5 and 6 first attempts: ${ch56}`);
 expect(ch2 === 'L4_W2_1=a/neutral/choice L4_S04_1=1.b,2.b,3.a,4.b,5.c/wrong/matching L4_S05B_1=s.b,g.c,e.a/wrong/matching L4_S06_1=b/wrong/choice L4_S06_2=a/wrong/choice '
   + `L4_S07_1=7/wrong/choice L4_S08_1=a/wrong/choice L4_S08_2=c/correct/choice L4_S08_3=a/correct/choice L4_S08B_1=${SKETCH.trigger}/neutral/fill-in L4_S08B_2=${SKETCH.steps}/neutral/fill-in L4_S08B_3=${SKETCH.output}/neutral/fill-in`, `bus, chapter 2 first attempts: ${ch2}`);
 const retries = ev.filter((e) => e.kind === 'retry').map((e) => `${e.trackingId}=${e.response}/${e.result}`);
@@ -1457,7 +1489,7 @@ expect(retries.join() === 'L4_S01_1=b/correct,L4_W1_1=b/neutral,L4_V1_1=b/correc
   + ',L4_V2_1=b/correct,L4_V2_2=a/correct,L4_V2_3=b/correct,L4_S09_1=1.a,2.a,3.b,4.c,5.d,6.d/correct,L4_S10_1=c/correct,L4_S11_1=d/correct'
   + ',L4_S12_1=4,7/correct,L4_S13_1=s.1,e.5/correct,L4_S14_1=b/correct,L4_S15_1=a/correct'
   + ',L4_S16_1=1.a,2.d,3.b,4.d,5.d,6.c/correct,L4_S17_1=a.3,b.1,c.5,d.4,e.2/correct'
-  + ',L4_S18A_1=3.c,1.a,4.d,2.b/correct,L4_S18_1=b/correct,L4_S20_1=a/neutral,L4_S21_1=c/correct',
+  + ',L4_S18A_1=3.c,1.a,4.d,2.b/correct,L4_S18_1=b/correct,L4_S20_1=a/neutral',
   `bus: retries as retry events (${retries.join(', ')})`);
 expect(!page.errors.length, 'main path: no console errors' + (page.errors.length ? ': ' + page.errors.join(' | ') : ''));
 if (SCORM) await scormChecks(page, IDS);
@@ -1474,22 +1506,21 @@ async function scormRetake() {
   // FX3: version a on attempt 1, version b on the retake (its own items and interaction ids)
   const answerAll = async (pick, v = 'a') => {
     const items = S.S21.items.map((it) => (v === 'b' ? { ...it, ...it.b } : it));
-    for (let k = 0; k < 4; k++) {
-      const o = items[k].options.find(pick);
+    const tiles = items.find((it) => it.kind === 'tiles');
+    for (const it of items.filter((x) => x !== tiles)) {
+      const o = it.options.find(pick);
       await p.click(`.w-kc-opt[data-id="${o.id}"]`);
-      if (!o.correct) await p.click(`.w-kc-opt[data-id="${items[k].options.find((x) => x.correct).id}"]`);
       await p.click('[data-action="nextQuestion"]');
     }
-    const keys = items[4].tiles.filter((x) => x.correct).map((x) => x.n), miss = items[4].tiles.find((x) => !x.correct).n;
+    const keys = tiles.tiles.filter((x) => x.correct).map((x) => x.n), miss = tiles.tiles.find((x) => !x.correct).n;
     for (const n of pick({ correct: true }) ? keys : [keys[0], miss]) await p.click(`.w-kc-tile[data-n="${n}"]`);
     await p.click('[data-action="check"]');
-    if (!pick({ correct: true })) { await p.click(`.w-kc-tile[data-n="${keys[1]}"]`); await p.click('[data-action="check"]'); }
   };
   await answerAll((o) => !o.correct);
   let m = await p.evaluate(() => window.__scormMock.report());
-  // (PP1: the jump to S21 passes both checkpoints, so the two path interactions come first: 2 + 5)
-  expect(m.data['cmi.core.score.raw'] === '0' && m.data['cmi.core.lesson_status'] === 'incomplete' && m.count === 7,
-    `SCORM attempt 1 (0 of 5): score.raw ${m.data['cmi.core.score.raw']}, lesson_status ${m.data['cmi.core.lesson_status']}, ${m.count} interactions`);
+  // (PP1: the jump to S21 passes both checkpoints, so the two path interactions come first: 2 + 6)
+  expect(m.data['cmi.core.score.raw'] === '0' && m.data['cmi.core.lesson_status'] === 'incomplete' && m.count === 8,
+    `SCORM attempt 1 (0 of 6): score.raw ${m.data['cmi.core.score.raw']}, lesson_status ${m.data['cmi.core.lesson_status']}, ${m.count} interactions`);
   await p.evaluate(() => window.__l4.go('S22'));
   await p.click('.w-takeaway[data-id="a"]'); await p.click('.w-next'); await p.click('[data-action="finish"]'); await p.click('[data-action="finish"]');
   m = await p.evaluate(() => window.__scormMock.report());
@@ -1499,11 +1530,11 @@ async function scormRetake() {
   await answerAll((o) => o.correct, 'b');
   m = await p.evaluate(() => window.__scormMock.report());
   const ids = Array.from({ length: m.count }, (_, n) => m.data[`cmi.interactions.${n}.id`] + '=' + m.data[`cmi.interactions.${n}.result`]).join(',');
-  // the two path interactions, attempt 1's five (version a), the S22 takeaway, attempt 2's five (version b: L4_S21_1b ...)
+  // the two path interactions, attempt 1's six (version a), the S22 takeaway, attempt 2's six (version b: L4_S21_1b ...)
   const s21 = ids.split(',').filter((x) => x.startsWith('L4_S21_'));
-  expect(m.data['cmi.core.score.raw'] === '100' && m.data['cmi.core.lesson_status'] === 'passed' && m.count === 13 && s21.length === 10
-    && s21.slice(0, 5).every((x) => /^L4_S21_\d=/.test(x)) && s21.slice(5).every((x) => /^L4_S21_\db=correct$/.test(x)) && !m.errors.length,
-    `SCORM retake (5 of 5): score.raw ${m.data['cmi.core.score.raw']} (the latest attempt), lesson_status ${m.data['cmi.core.lesson_status']}, ${m.count} interactions (${ids})`);
+  expect(m.data['cmi.core.score.raw'] === '100' && m.data['cmi.core.lesson_status'] === 'passed' && m.count === 15 && s21.length === 12
+    && s21.slice(0, 6).every((x) => /^L4_S21_\d=/.test(x)) && s21.slice(6).every((x) => /^L4_S21_\db=correct$/.test(x)) && !m.errors.length,
+    `SCORM retake (6 of 6): score.raw ${m.data['cmi.core.score.raw']} (the latest attempt), lesson_status ${m.data['cmi.core.lesson_status']}, ${m.count} interactions (${ids})`);
   const susp = m.data['cmi.suspend_data'] || '';
   expect(/"k":\{"n":2,"p":1,"s":100\}|"k":\{[^}]*"n":2[^}]*\}/.test(susp), `SCORM suspend_data keeps the attempt (${(/"k":\{[^}]*\}/.exec(susp) || [''])[0]})`);
   await p.close();
@@ -1747,39 +1778,37 @@ console.log('\nno fast-track cards');
 expect(!C.screens.some((s) => s.variant === 'challenge' || s.routing) && !C.chapters.some((c) => c.fastTrack) && !C.lesson.slice.some((id) => /^FT/.test(id)),
   'no fast-track card, routing or chapter fast track left in the content (W1 to W4 replace FT1 to FT4)');
 
-/* ---------- NL4 S21 all first answers wrong: S21R not passed, review links, finish failed, retake (shuffled) passes for good ---------- */
-console.log('\nS21 first attempts wrong, S21R, S22 finish failed, retake');
+/* ---------- NL4 S21 all answers wrong: the review, S21R not passed, review links, finish failed, retake (shuffled) passes for good ---------- */
+console.log('\nS21 answers wrong, review, S21R, S22 finish failed, retake');
 {
   const p = await open('?reset=1&screen=S21');
-  for (const [k, wrongId, rightId] of [[0, 'a', 'c'], [1, 'a', 'b'], [2, 'b', 'a'], [3, 'a', 'd']]) {
+  for (const wrongId of ['a', 'a', 'b', 'a', 'a']) {
     await tabTo(p, `.w-kc-opt[data-id="${wrongId}"]`);
     await press(p, 'Enter');
-    await tabTo(p, `.w-kc-opt[data-id="${rightId}"]`, { back: rightId < wrongId });
-    await press(p, 'Enter');
-    await expectBand(p, `S21 item ${k + 1} retry right`, { state: 'correct', text: S.S21.items[k].options.find((o) => o.id === rightId).feedback, unlocked: false });
     await tabTo(p, '[data-action="nextQuestion"]');
     await press(p, 'Enter');
   }
   for (const n of [5, 7]) { await tabTo(p, `.w-kc-tile[data-n="${n}"]`); await press(p, ' '); }
   await tabTo(p, '[data-action="check"]');
   await press(p, 'Enter');
-  await expectBand(p, 'S21 item 5 tiles 5 + 7', { state: 'partial', verdict: UI.feedback.oneOfTwo, text: S.S21.items[4].tiles[6].feedback, unlocked: false });
-  await expectLayout(p, 'S21 item 5 one of two');
-  await tabTo(p, '.w-kc-tile[data-n="6"]', { back: true });
-  await press(p, ' ');
-  await tabTo(p, '[data-action="check"]');
-  await press(p, 'Enter');
   const sc = await p.evaluate(() => window.__l4.score());
-  expect(sc.raw === 0 && await isActive(p, '.w-next'), `S21: every item fixed on retry, score ${sc.raw}: only first attempts count; Next focused`);
+  expect(sc.raw === 0 && await p.evaluate(() => window.__l4.tracking.events.filter((e) => e.kind === 'retry').length === 0), `S21: every item wrong, score ${sc.raw}, no retry possible`);
+  for (let k = 0; k < 5; k++) { await tabTo(p, '[data-action="nextAnswer"]'); await press(p, 'Enter'); }
+  // the tiles in the review: 5 right, 7 wrong, 6 (not picked) marked as the right line; the band explains the missed error
+  const tl = await p.evaluate(() => [...document.querySelectorAll('.w-kc-tile')].map((b) => b.dataset.n + ':' + (b.dataset.result || '-')).join(','));
+  expect(tl === '1:-,2:-,3:-,4:-,5:correct,6:correct,7:wrong,8:-', `S21 review, tiles 5 + 7: ${tl}`);
+  await expectBand(p, 'S21 review tiles 5 + 7', { state: 'partial', verdict: UI.feedback.oneOfTwo, text: S.S21.items[5].tiles[5].feedback, unlocked: true });
+  await expectLayout(p, 'S21 review one of two');
+  await tabTo(p, '.w-next');
   await press(p, 'Enter');
-  // S21R not passed: the five missed items, each with its line and review link; Retake now; Next still open
-  await expectNewScreen(p, 'S21R', 'S21 Next (attempt 1, 0 of 5)', { heading: '0 of 5 on first try (0 of 100). Pass mark: 80.' });
+  // S21R not passed: the six missed items, each with its line and review link; Retake now; Next still open
+  await expectNewScreen(p, 'S21R', 'S21 Next (attempt 1, 0 of 6)', { heading: '0 of 6 right (0 of 100). Pass mark: 80.' });
   const r = await p.evaluate(() => ({ h: document.querySelector('#w-instruction').textContent, chip: document.querySelector('.w-result-chip').textContent,
     missed: [...document.querySelectorAll('.w-missed-item')].map((li) => li.dataset.item + '>' + li.querySelector('[data-action="review"]').dataset.screen + ':' + li.querySelector('.w-missed-line').textContent + ':' + li.querySelector('[data-action="review"]').textContent).join('|'),
     retake: !!document.querySelector('[data-action="retake"]'), next: document.querySelector('.w-next').dataset.locked }));
   const wantMissed = S.S21R.missed.map((m) => `${m.item}>${m.screen}:${m.text}:${S.S21R.reviewLabel.replace('{n}', chapterNo(C, S[m.screen].chapter))}`).join('|');
-  expect(r.h === '0 of 5 on first try (0 of 100). Pass mark: 80.' && r.chip === S.S21R.notPassed.chip && r.missed === wantMissed && r.retake && r.next === 'false',
-    `S21R not passed: "${r.h}", "${r.chip}", five missed items with their review links, Retake now, Next open`);
+  expect(r.h === '0 of 6 right (0 of 100). Pass mark: 80.' && r.chip === S.S21R.notPassed.chip && r.missed === wantMissed && r.retake && r.next === 'false',
+    `S21R not passed: "${r.h}", "${r.chip}", six missed items with their review links, Retake now, Next open`);
   await expectLayout(p, 'S21R not passed');
   // a review link: the screen opens with "Back to the check" in the footer; Next there keeps it; the chip comes back
   await tabTo(p, '[data-action="review"][data-screen="S11"]');
@@ -1808,23 +1837,22 @@ console.log('\nS21 first attempts wrong, S21R, S22 finish failed, retake');
   await p.evaluate(() => window.__l4.go('S21R'));
   await tabTo(p, '[data-action="retake"]');
   await press(p, 'Enter');
-  await expectNewScreen(p, 'S21', 'Retake now');
+  await expectNewScreen(p, 'S21', 'Retake now', { heading: S.S21.items[0].b.stem });
   // FX3: the retake shows version b (its own stems, options and interaction ids), options shuffled
   const B = S.S21.items.map((it) => ({ ...it, ...it.b }));
   const order = await p.evaluate(() => [...document.querySelectorAll('.w-kc-opt')].map((b) => b.dataset.id).join(''));
-  const stem1 = await p.evaluate(() => document.querySelector('.w-kc-stem').textContent);
+  const stem1 = await p.evaluate(() => document.querySelector('#w-instruction').textContent);
   expect(order !== 'abcd' && stem1 === B[0].stem && await p.evaluate(() => window.__l4.state.k.n === 2 && !window.__l4.state.a.L4_S21_1 && !window.__l4.state.d.includes('S21R')),
     `Retake: attempt 2, the answers cleared, version b ("${stem1}"), item 1's options in a new order (${order})`);
-  for (const k of [0, 1, 2, 3]) {
+  for (const k of [0, 1, 2, 3, 4]) {
     const right = B[k].options.find((o) => o.correct).id;
     await tabTo(p, `.w-kc-opt[data-id="${right}"]`);
     await press(p, 'Enter');
-    await expectBand(p, `S21 retake item ${k + 1}b right`, { state: 'correct', text: B[k].options.find((o) => o.id === right).feedback, unlocked: false });
     await tabTo(p, '[data-action="nextQuestion"]'); await press(p, 'Enter');
   }
   const h5 = await p.evaluate(() => document.querySelector('#w-instruction').textContent + '|' + [...document.querySelectorAll('.w-kc-tile .w-opt-label')].map((t) => t.textContent).join('/'));
-  expect(h5 === B[4].instruction + '|' + B[4].tiles.map((t) => t.text).join('/'), `S21 retake item 5b: "${B[4].instruction}", the eight lines of the sales map`);
-  for (const n of B[4].tiles.filter((t) => t.correct).map((t) => t.n)) { await tabTo(p, `.w-kc-tile[data-n="${n}"]`, { back: true }); await press(p, ' '); }
+  expect(h5 === B[5].instruction + '|' + B[5].tiles.map((t) => t.text).join('/'), `S21 retake item 6b: "${B[5].instruction}", the eight lines of the sales map`);
+  for (const n of B[5].tiles.filter((t) => t.correct).map((t) => t.n)) { await tabTo(p, `.w-kc-tile[data-n="${n}"]`, { back: true }); await press(p, ' '); }
   await tabTo(p, '[data-action="check"]');
   await press(p, 'Enter');
   const ev = await p.evaluate(() => window.__l4.tracking.events);
@@ -1832,11 +1860,12 @@ console.log('\nS21 first attempts wrong, S21R, S22 finish failed, retake');
   const scores = ev.filter((e) => e.kind === 'score').map((e) => `${e.score}/${e.passed}/${e.attempt}`).join();
   expect(ans('L4_S21_1') === 'a/wrong' && ans('L4_S21_1b') === 'b/correct' && ans('L4_S21_5b') === '3,5/correct' && scores === '0/false/1,100/true/2' && await p.evaluate(() => window.__l4.state.fin === 'passed' && window.__l4.state.k.p === 1),
     `retake: version a's ids on attempt 1 (L4_S21_1 ${ans('L4_S21_1')}), version b's on attempt 2 (L4_S21_1b ${ans('L4_S21_1b')}, L4_S21_5b ${ans('L4_S21_5b')}); scores ${scores}; the lesson now passed for good (state.fin passed)`);
+  await tabTo(p, '.w-next');
   await press(p, 'Enter');
   const r2 = await p.evaluate(() => ({ chip: document.querySelector('.w-result-chip').textContent, retake: !!document.querySelector('[data-action="retake"]') }));
   expect(r2.chip === S.S21R.passed.chip && !r2.retake, `S21R after the retake: "${r2.chip}", no retake`);
   // a third attempt alternates back to version a
-  const stem3 = await p.evaluate(() => { window.__l4.state.k.n = 3; window.__l4.state.d = window.__l4.state.d.filter((x) => x !== 'S21'); window.__l4.go('S21'); return document.querySelector('.w-kc-stem').textContent; });
+  const stem3 = await p.evaluate(() => { window.__l4.state.k.n = 3; window.__l4.state.d = window.__l4.state.d.filter((x) => x !== 'S21'); window.__l4.go('S21'); return document.querySelector('#w-instruction').textContent; });
   expect(stem3 === S.S21.items[0].stem, `attempt 3: version a again ("${stem3}")`);
   expect(!p.errors.length, 'S21 / S21R / S22 run: no console errors' + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
   await p.close();

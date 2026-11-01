@@ -8,27 +8,27 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=86f78ba2';
-import { createZones } from './zones.js?v=86f78ba2';
-import { createMenu, openDialog } from './menu.js?v=86f78ba2';
-import { initTooltips, applyTerms } from './tooltip.js?v=86f78ba2';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=86f78ba2';
-import { decision } from './templates/decision.js?v=86f78ba2';
-import { input } from './templates/input.js?v=86f78ba2';
-import { sortDeck } from './templates/sortdeck.js?v=86f78ba2';
-import { bpmn } from './templates/bpmn.js?v=86f78ba2';
-import { flags } from './templates/flags.js?v=86f78ba2';
-import { explorer } from './templates/explorer.js?v=86f78ba2';
-import { video } from './templates/video.js?v=86f78ba2';
-import { handoff } from './templates/handoff.js?v=86f78ba2';
-import { check } from './templates/check.js?v=86f78ba2';
-import { result } from './templates/result.js?v=86f78ba2';
-import { end } from './templates/end.js?v=86f78ba2';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=86f78ba2';
-import { createGhost, stopGhost } from './ghost.js?v=86f78ba2';
-import { createTracking } from './tracking/index.js?v=86f78ba2';
-import { createCoach } from './coach/coach.js?v=86f78ba2';
-import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=86f78ba2';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=a66e85f4';
+import { createZones } from './zones.js?v=a66e85f4';
+import { createMenu, openDialog } from './menu.js?v=a66e85f4';
+import { initTooltips, applyTerms } from './tooltip.js?v=a66e85f4';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=a66e85f4';
+import { decision } from './templates/decision.js?v=a66e85f4';
+import { input } from './templates/input.js?v=a66e85f4';
+import { sortDeck } from './templates/sortdeck.js?v=a66e85f4';
+import { bpmn } from './templates/bpmn.js?v=a66e85f4';
+import { flags } from './templates/flags.js?v=a66e85f4';
+import { explorer } from './templates/explorer.js?v=a66e85f4';
+import { video } from './templates/video.js?v=a66e85f4';
+import { handoff } from './templates/handoff.js?v=a66e85f4';
+import { check } from './templates/check.js?v=a66e85f4';
+import { result } from './templates/result.js?v=a66e85f4';
+import { end } from './templates/end.js?v=a66e85f4';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=a66e85f4';
+import { createGhost, stopGhost } from './ghost.js?v=a66e85f4';
+import { createTracking } from './tracking/index.js?v=a66e85f4';
+import { createCoach } from './coach/coach.js?v=a66e85f4';
+import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=a66e85f4';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -166,7 +166,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=86f78ba2').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=a66e85f4').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -281,11 +281,15 @@ class Lesson {
 
   // First attempts of the scored interactions only (lesson.completion.scoredScreens): x right of n,
   // raw 0 to 100. FX3: only this attempt's version (a tracking entry without a version is version a).
+  // QZ1: completion.pointsPerItem gives each right answer that many points, capped at 100 (S21: 20
+  // each over six items, so 4 of 6 reaches the pass mark of 80); without it, raw is the percentage.
   score() {
+    const c = this.content.lesson.completion;
     const v = this.checkVersion();
-    const ids = this.content.lesson.completion.scoredScreens.flatMap((sid) => (this.screens[sid]?.tracking || []).filter((t) => t.scored && (t.version || 'a') === v).map((t) => t.id));
+    const ids = c.scoredScreens.flatMap((sid) => (this.screens[sid]?.tracking || []).filter((t) => t.scored && (t.version || 'a') === v).map((t) => t.id));
     const x = ids.filter((tid) => this.firstAnswer(tid)?.result === 'correct').length;
-    return { x, n: ids.length, raw: ids.length ? Math.round((100 * x) / ids.length) : null };
+    const raw = !ids.length ? null : c.pointsPerItem ? Math.min(100, c.pointsPerItem * x) : Math.round((100 * x) / ids.length);
+    return { x, n: ids.length, raw };
   }
 
   // NL4: the end of a knowledge-check attempt (the last S21 item done). The attempt's score is the

@@ -2,15 +2,15 @@
 // knowledge check (screen.from, S21).
 //   left    the score ring (the visual anchor): a turquoise arc for the score out of 100, the number
 //           in the middle, the pass mark as a tick on the ring
-//   right   the score line as the heading ("4 of 5 on first try (80 of 100). Pass mark: 80."), the
+//   right   the score line as the heading ("4 of 6 on first try (80 of 100). Pass mark: 80."), the
 //           Passed / Not passed yet chip and its line; below 80 the items missed on first try, each its
 //           one-line stem (FX2 H1: the content's short stem), one line and a "Review Chapter N" link (it opens that screen with "Back to the check"
 //           in the footer), then "Retake now" (the whole check, at once)
 // Next is open either way (a presentation screen): below 80 the learner may finish as failed and come
 // back to retake. Nothing is tracked here: the attempt's score went out when S21 ended (ctx.checkDone).
-import { h, fmt, chapterNo } from '../util.js?v=86f78ba2';
-import { glyph, icon } from '../icons.js?v=86f78ba2';
-import { layout, sheet } from './stage.js?v=86f78ba2';
+import { h, fmt, chapterNo } from '../util.js?v=a66e85f4';
+import { glyph, icon } from '../icons.js?v=a66e85f4';
+import { layout, sheet } from './stage.js?v=a66e85f4';
 
 const R = 64, C = 2 * Math.PI * R; // the ring, in its 160 x 160 box
 
