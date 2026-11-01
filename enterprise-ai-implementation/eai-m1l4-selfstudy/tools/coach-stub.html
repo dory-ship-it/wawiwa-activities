@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!-- CO2 test stub: stands in for Dor's coach page in the tests (tools/lib.mjs stubCoach() serves it at the
+     coach URL by request interception, so its origin is the real page's). It speaks the page's protocol
+     only: ready on load (unless the test serves it silent), close on Escape, and it keeps every message
+     from its parent in window.got for the test to read. No AI, no network. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Coach stub</title>
+<style>
+  body { margin: 0; padding: 14px; font: 16px/1.4 Arial, sans-serif; background: #F7F4EE; color: #1C2A33; }
+  p { margin: 0 0 12px; }
+  input, button { font: inherit; min-height: 44px; }
+  input { width: 200px; }
+</style>
+</head>
+<body>
+<p id="line">Coach stub (test only)</p>
+<p id="ctx">No context yet</p>
+<form id="f"><input id="q" aria-label="Ask the coach about this screen"> <button>Send</button></form>
+<script>
+  window.got = [];
+  window.bornAt = Date.now();
+  window.addEventListener('message', function (e) {
+    if (e.source !== window.parent) return;
+    window.got.push({ origin: e.origin, data: e.data });
+    var d = e.data || {};
+    document.getElementById('ctx').textContent = 'Context: ' + d.screen + ' (' + d.screenType + ')';
+  });
+  document.getElementById('f').addEventListener('submit', function (e) { e.preventDefault(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') window.parent.postMessage({ type: 'wawiwa-coach-close' }, '*');
+  });
+  if (/*READY*/true) window.parent.postMessage({ type: 'wawiwa-coach-ready' }, '*');
+</script>
+</body>
+</html>

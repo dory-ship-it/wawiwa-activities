@@ -1296,44 +1296,76 @@ await expectBand(page, 'S20B rushed', { state: 'neutral', text: opt('S20B', 'rus
 await expectLayout(page, 'S20B picked');
 await press(page, 'Enter');
 
-// S21: item 1 wrong then right (the wrong first answer counts), items 2 to 5 right first: 4 of 5; Next to S21R
-await expectNewScreen(page, 'S21', 'S20B Next');
+// S21 (QZ2): a pick only selects and may change; Next question sends it, with no feedback and no
+// retry. Item 1 picked c then changed to a (wrong), items 2 to 4 right, item 5 (QZ1, the source
+// owner) wrong, the tiles right: 4 of 6, 80 of 100 (QZ1: 20 points an item), the pass mark exactly.
+// Then the review: each item with its answer marked and its feedback, "Next answer"; Next to S21R
+await expectNewScreen(page, 'S21', 'S20B Next', { heading: S.S21.items[0].stem }); // QZ3: the question is the heading
 const steps6 = await page.evaluate(() => [...document.querySelectorAll('.w-steps-bar .w-step-label')].map((s) => s.textContent).join(' · '));
 expect(steps6 === 'Check · Score · Reflect · Finish',`Chapter 6 steps in the bar: ${steps6}`);
+const N21 = S.S21.items.length, TILES = S.S21.items.findIndex((it) => it.kind === 'tiles');
 const item = (k) => S.S21.items[k];
 const iopt = (k, id) => item(k).options.find((o) => o.id === id);
-await tabTo(page, '.w-kc-opt[data-id="a"]');
+const kcState = () => page.evaluate(() => ({ pressed: [...document.querySelectorAll('.w-kc-opt[aria-pressed="true"]')].map((b) => b.dataset.id).join(), marks: [...document.querySelectorAll('.w-kc-opt[data-result]')].filter((b) => b.dataset.result).length,
+  send: document.querySelector('[data-action="nextQuestion"]')?.disabled }));
+expect((await kcState()).send === true, 'S21 item 1: Next question locked until a pick');
+await tabTo(page, '.w-kc-opt[data-id="c"]');
 await press(page, 'Enter');
-await expectBand(page, 'S21 item 1 a', { state: 'wrong', text: iopt(0, 'a').feedback, unlocked: false, lockedWhy: UI.footer.locked.check });
-await expectLayout(page, 'S21 item 1 wrong');
-await press(page, 'ArrowRight', 2);
+await press(page, 'ArrowLeft', 2);
 await press(page, 'Enter');
-await expectBand(page, 'S21 item 1 c (retry)', { state: 'correct', text: iopt(0, 'c').feedback, unlocked: false, actions: ['nextQuestion'] });
-for (const [k, key] of [[1, 'b'], [2, 'a'], [3, 'd']]) {
-  await press(page, 'Enter'); // Next question
+const kc1 = await kcState();
+expect(kc1.pressed === 'a' && !kc1.marks && kc1.send === false, `S21 item 1: c then a: only a selected (${kc1.pressed}), nothing marked right or wrong, Next question open`);
+await expectBand(page, 'S21 item 1 picked', { state: 'hint', text: '', unlocked: false, lockedWhy: UI.footer.locked.check });
+// QZ3: the question is the heading; "Choose one answer." small above it
+const q1 = await page.evaluate(() => ({ h: document.querySelector('#w-instruction').textContent, ask: document.querySelector('.w-kc-ask').textContent }));
+expect(q1.h === item(0).stem && q1.ask === S.S21.instruction, `S21 item 1: the question is the heading ("${q1.h}"), "${q1.ask}" above it`);
+await expectLayout(page, 'S21 item 1 picked');
+expect(!(await events(page)).some((e) => e.trackingId === 'L4_S21_1'), 'S21 item 1: a pick sends nothing');
+for (const [k, key] of [[0, 'a'], [1, 'b'], [2, 'a'], [3, 'd'], [4, 'a']]) {
+  if (k) {
+    const idx = { a: 0, b: 1, c: 2, d: 3 }[key];
+    if (idx) await press(page, 'ArrowRight', idx);
+    await press(page, 'Enter');
+  }
+  await tabTo(page, '[data-action="nextQuestion"]');
+  await press(page, 'Enter'); // sends the answer, no feedback
   const dots = await page.evaluate(() => document.querySelector('.w-kc-head .w-dots').getAttribute('aria-label'));
-  expect(dots === `Question ${k + 1} of 5` && await isActive(page, '.w-kc-opt[data-id="a"]'), `S21 item ${k + 1}: "${dots}", focus on option A`);
-  const idx = { a: 0, b: 1, c: 2, d: 3 }[key];
-  if (idx) await press(page, 'ArrowRight', idx);
-  await press(page, 'Enter');
-  await expectBand(page, `S21 item ${k + 1} ${key}`, { state: 'correct', text: iopt(k, key).feedback, unlocked: false });
+  const st = await page.evaluate(() => document.querySelector('.w-band').dataset.strip);
+  expect(dots === `Question ${k + 2} of ${N21}` && st === 'off' && await isActive(page, k + 1 === TILES ? '.w-kc-tile[data-n="1"]' : '.w-kc-opt[data-id="a"]'),
+    `S21 item ${k + 1} ${key} sent: "${dots}", no feedback strip, focus on the next item`);
 }
-await press(page, 'Enter');
-expect(await page.evaluate(() => document.querySelector('#w-instruction').textContent) === item(4).instruction, `S21 item 5: the heading reads "${item(4).instruction}"`);
-await expectBand(page, 'S21 item 5 hint', { state: 'hint', text: item(4).hint, unlocked: false });
+expect(await page.evaluate(() => document.querySelector('#w-instruction').textContent) === item(TILES).instruction, `S21 item ${TILES + 1}: the heading reads "${item(TILES).instruction}"`);
+await expectBand(page, `S21 item ${TILES + 1}`, { state: 'hint', text: '', unlocked: false });
+expect(await page.evaluate(() => document.querySelector('.w-kc-ask').textContent) === item(TILES).hint, `S21 item ${TILES + 1}: "${item(TILES).hint}" above the question`);
 for (const n of [5, 6]) { await tabTo(page, `.w-kc-tile[data-n="${n}"]`); await press(page, ' '); }
 await tabTo(page, '[data-action="check"]');
+expect(await page.evaluate(() => document.querySelector('[data-action="check"]').textContent) === UI.buttons.finishCheck, `S21 last item: the band's button reads "${UI.buttons.finishCheck}"`);
 await press(page, 'Enter');
 const scoreEv = (await events(page)).filter((e) => e.kind === 'score');
-expect(await isActive(page, '.w-next') && scoreEv.length === 1 && scoreEv[0].score === 80 && scoreEv[0].passed && scoreEv[0].attempt === 1 && (await page.evaluate(() => window.__l4.score())).raw === 80,
-  `S21 done: Next focused; the attempt's score from first answers only: ${scoreEv[0]?.score} (passed ${scoreEv[0]?.passed}, attempt ${scoreEv[0]?.attempt})`);
+const ans21 = (await events(page)).filter((e) => /^L4_S21_/.test(e.trackingId || ''));
+expect(scoreEv.length === 1 && scoreEv[0].score === 80 && scoreEv[0].passed && scoreEv[0].attempt === 1 && (await page.evaluate(() => window.__l4.score())).raw === 80
+  && ans21.length === N21 && ans21.every((e) => e.kind === 'answer'),
+  `S21 done: one answer per item, no retry (${ans21.map((e) => e.trackingId + '=' + e.response).join(', ')}); score ${scoreEv[0]?.score} (passed ${scoreEv[0]?.passed}, attempt ${scoreEv[0]?.attempt})`);
+// the review: item 1, a marked wrong, c marked right, a's feedback; focus on Next answer; Next open
+const rv1 = await page.evaluate(() => ({ h: document.querySelector('#w-instruction').textContent, ask: document.querySelector('.w-kc-ask').textContent, marks: [...document.querySelectorAll('.w-kc-opt')].map((b) => b.dataset.id + ':' + (b.dataset.result || '-')).join(',') }));
+expect(rv1.ask === S.S21.reviewInstruction && rv1.h === item(0).stem && rv1.marks === 'a:wrong,b:-,c:correct,d:-' && await isActive(page, '[data-action="nextAnswer"]'), `S21 review item 1: "${rv1.ask}" over the question, ${rv1.marks}, focus on Next answer`);
+await expectBand(page, 'S21 review item 1', { state: 'wrong', text: iopt(0, 'a').feedback, unlocked: true, actions: ['nextAnswer'] });
+await expectLayout(page, 'S21 review item 1');
+for (const [k, key, state] of [[1, 'b', 'correct'], [2, 'a', 'correct'], [3, 'd', 'correct'], [4, 'a', 'wrong']]) {
+  await press(page, 'Enter'); // Next answer
+  await expectBand(page, `S21 review item ${k + 1}`, { state, text: iopt(k, key).feedback, unlocked: true, actions: ['nextAnswer'] });
+}
+await press(page, 'Enter');
+await expectBand(page, `S21 review item ${TILES + 1}`, { state: 'correct', text: item(TILES).tiles.filter((t) => t.correct).map((t) => t.feedback).join(' '), unlocked: true });
+await expectLayout(page, 'S21 review tiles');
+await tabTo(page, '.w-next');
 await press(page, 'Enter');
 
 // S21R: passed: the score line, the ring, "Passed", no retake, Next open
-await expectNewScreen(page, 'S21R', 'S21 Next', { heading: '4 of 5 on first try (80 of 100). Pass mark: 80.' });
+await expectNewScreen(page, 'S21R', 'S21 Next', { heading: '4 of 6 right (80 of 100). Pass mark: 80.' });
 const r21 = await page.evaluate(() => ({ h: document.querySelector('#w-instruction').textContent, chip: document.querySelector('.w-result-chip').textContent, line: document.querySelector('.w-result-line').textContent,
   ring: document.querySelector('.w-ring').getAttribute('aria-label'), retake: !!document.querySelector('[data-action="retake"]'), missed: document.querySelectorAll('.w-missed-item').length, next: document.querySelector('.w-next').dataset.locked }));
-expect(r21.h === '4 of 5 on first try (80 of 100). Pass mark: 80.' && r21.chip === S.S21R.passed.chip && r21.line === S.S21R.passed.text && r21.ring === '80 of 100' && !r21.retake && !r21.missed && r21.next === 'false',
+expect(r21.h === '4 of 6 right (80 of 100). Pass mark: 80.' && r21.chip === S.S21R.passed.chip && r21.line === S.S21R.passed.text && r21.ring === '80 of 100' && !r21.retake && !r21.missed && r21.next === 'false',
   `S21R passed: "${r21.h}", "${r21.chip}", the ring "${r21.ring}", no retake, no missed list, Next open`);
 await expectLayout(page, 'S21R passed');
 await tabTo(page, '.w-next');
@@ -1361,7 +1393,7 @@ await expectBand(page, 'S22 download', { state: 'neutral', text: S.S22.step2.fee
 let rec = '';
 for (let i = 0; i < 30 && !rec; i++) { await wait(200); try { rec = readFileSync(join(dlDir, UI.record.fileName), 'utf8'); } catch {} }
 expect(rec.includes(TITLE) && rec.includes(UI.record.sketch) && rec.includes(SKETCH.steps) && rec.includes(SKETCH.output) && rec.includes(UI.record.metric) && rec.includes(METRIC_PARTS.baseline) && rec.includes(METRIC_PARTS.target) && rec.includes(METRIC_PARTS.date)
-  && rec.includes('4 of 5 on first try (80 of 100), attempt 1') && rec.includes(opt('S20B', 'rushed').label) && rec.includes(UI.buttons.notYet) && rec.includes(UI.record.notes) && rec.includes(NOTES.aifit) && rec.includes(NOTES.human),
+  && rec.includes('4 of 6 right (80 of 100), attempt 1') && rec.includes(opt('S20B', 'rushed').label) && rec.includes(UI.buttons.notYet) && rec.includes(UI.record.notes) && rec.includes(NOTES.aifit) && rec.includes(NOTES.human),
   `S22 lesson record downloaded (${UI.record.fileName}, ${rec.length} bytes): case title, sketch, notes, first metric (Chapter 3), self-check, risk, score with the attempt`);
 await tabTo(page, '[data-action="finish"]');
 await press(page, 'Enter');
@@ -1390,7 +1422,7 @@ await expectLayout(page, 'END passed');
 for (const id of ['W2', 'S04', 'S05b', 'S06', 'S07', 'S08', 'S08B', 'W3', 'V2', 'S09', 'S10', 'S11', 'S12', 'S12B', 'W4', 'S13', 'S14', 'S15', 'S16', 'S17', 'S17B', 'S18A', 'S18', 'S18B', 'S19', 'S20', 'S20B', 'S21', 'S21R', 'S22']) {
   await page.evaluate((x) => window.__l4.go(x), id);
   const b = S[id].template === 'video' ? null : await band(page), n = await nextState(page);
-  const want = { W2: 'guess', W3: 'guess', W4: 'guess', S12B: 'neutral', S17B: 'neutral', S08B: 'neutral', S18B: 'neutral', S19: 'hint', S20: 'hint', S20B: 'neutral', S21: 'idle', S21R: 'idle', S22: 'neutral' }[id] || 'correct';
+  const want = { W2: 'guess', W3: 'guess', W4: 'guess', S12B: 'neutral', S17B: 'neutral', S08B: 'neutral', S18B: 'neutral', S19: 'hint', S20: 'hint', S20B: 'neutral', S21: 'wrong', S21R: 'idle', S22: 'neutral' }[id] || 'correct'; // QZ2: S21 reopens on the review of item 1 (answered wrong above)
   const nextOk = !n.locked; // FX2 G: S22 finished opens END
   expect((!b || b.state === want) && nextOk, `${id} revisit: the earlier state comes back${b ? ' (band ' + b.state + ')' : ' (stops answered, seek free)'}, ${id === 'S22' ? 'finished, Next unlocked (to END)' : 'Next unlocked'}`);
 }
@@ -1424,7 +1456,7 @@ await expectNewScreen(page, 'S18A', 'menu: Enter on the completed chapter 5 open
 const ev = await events(page);
 const first = (id) => ev.filter((e) => e.kind === 'answer' && e.trackingId === id);
 const IDS_CH34 = ['L4_W3_1', 'L4_V2_1', 'L4_V2_2', 'L4_V2_3', 'L4_S09_1', 'L4_S10_1', 'L4_S11_1', 'L4_S12_1', 'L4_S12B_1', 'L4_S12B_2', 'L4_S12B_3', 'L4_W4_1', 'L4_S13_1', 'L4_S14_1', 'L4_S15_1', 'L4_S16_1', 'L4_S17_1', 'L4_S17B_1', 'L4_S17B_2'];
-const IDS_CH56 = ['L4_S18A_1', 'L4_S18_1', 'L4_S18_2', 'L4_S20_1', 'L4_S20_2', 'L4_S20_3', 'L4_S20_4', 'L4_S21_1', 'L4_S21_2', 'L4_S21_3', 'L4_S21_4', 'L4_S21_5', 'L4_S22_1'];
+const IDS_CH56 = ['L4_S18A_1', 'L4_S18_1', 'L4_S18_2', 'L4_S20_1', 'L4_S20_2', 'L4_S20_3', 'L4_S20_4', 'L4_S21_1', 'L4_S21_2', 'L4_S21_3', 'L4_S21_4', 'L4_S21_6', 'L4_S21_5', 'L4_S22_1'];
 const IDS_CH2 = ['L4_W2_1', 'L4_S04_1', 'L4_S05B_1', 'L4_S06_1', 'L4_S06_2', 'L4_S07_1', 'L4_S08_1', 'L4_S08_2', 'L4_S08_3', 'L4_S08B_1', 'L4_S08B_2', 'L4_S08B_3'];
 // (PP1: the two neutral path interactions, written when Chapters 4 and 5 open)
 const IDS_PATH = ['L4_PATH_C4', 'L4_PATH_C5'];
@@ -1447,7 +1479,7 @@ const path = IDS_PATH.map((id) => `${id}=${f[id].response}/${f[id].result}/${f[i
 expect(path === 'L4_PATH_C4=core/neutral/fill-in/unscored L4_PATH_C5=core/neutral/fill-in/unscored', `bus, the personal path (pinned to core): ${path}`);
 const ch56 = IDS_CH56.map((id) => `${id}=${f[id].response}/${f[id].result}`).join(' ');
 expect(ch56 === `L4_S18A_1=3.c,1.b,4.d,2.a/wrong L4_S18_1=a/wrong L4_S18_2=${TITLE}/neutral L4_S20_1=b/neutral L4_S20_2=a/neutral L4_S20_3=b/neutral `
-  + 'L4_S20_4=c/neutral L4_S21_1=a/wrong L4_S21_2=b/correct L4_S21_3=a/correct L4_S21_4=d/correct L4_S21_5=5,6/correct L4_S22_1=a/neutral', `bus, chapters 5 and 6 first attempts: ${ch56}`);
+  + 'L4_S20_4=c/neutral L4_S21_1=a/wrong L4_S21_2=b/correct L4_S21_3=a/correct L4_S21_4=d/correct L4_S21_6=a/wrong L4_S21_5=5,6/correct L4_S22_1=a/neutral', `bus, chapters 5 and 6 first attempts: ${ch56}`);
 expect(ch2 === 'L4_W2_1=a/neutral/choice L4_S04_1=1.b,2.b,3.a,4.b,5.c/wrong/matching L4_S05B_1=s.b,g.c,e.a/wrong/matching L4_S06_1=b/wrong/choice L4_S06_2=a/wrong/choice '
   + `L4_S07_1=7/wrong/choice L4_S08_1=a/wrong/choice L4_S08_2=c/correct/choice L4_S08_3=a/correct/choice L4_S08B_1=${SKETCH.trigger}/neutral/fill-in L4_S08B_2=${SKETCH.steps}/neutral/fill-in L4_S08B_3=${SKETCH.output}/neutral/fill-in`, `bus, chapter 2 first attempts: ${ch2}`);
 const retries = ev.filter((e) => e.kind === 'retry').map((e) => `${e.trackingId}=${e.response}/${e.result}`);
@@ -1457,56 +1489,118 @@ expect(retries.join() === 'L4_S01_1=b/correct,L4_W1_1=b/neutral,L4_V1_1=b/correc
   + ',L4_V2_1=b/correct,L4_V2_2=a/correct,L4_V2_3=b/correct,L4_S09_1=1.a,2.a,3.b,4.c,5.d,6.d/correct,L4_S10_1=c/correct,L4_S11_1=d/correct'
   + ',L4_S12_1=4,7/correct,L4_S13_1=s.1,e.5/correct,L4_S14_1=b/correct,L4_S15_1=a/correct'
   + ',L4_S16_1=1.a,2.d,3.b,4.d,5.d,6.c/correct,L4_S17_1=a.3,b.1,c.5,d.4,e.2/correct'
-  + ',L4_S18A_1=3.c,1.a,4.d,2.b/correct,L4_S18_1=b/correct,L4_S20_1=a/neutral,L4_S21_1=c/correct',
+  + ',L4_S18A_1=3.c,1.a,4.d,2.b/correct,L4_S18_1=b/correct,L4_S20_1=a/neutral',
   `bus: retries as retry events (${retries.join(', ')})`);
 expect(!page.errors.length, 'main path: no console errors' + (page.errors.length ? ': ' + page.errors.join(' | ') : ''));
 if (SCORM) await scormChecks(page, IDS);
 if (SCORM) await scormRetake();
+if (SCORM) await scormStatusUnit();
 await page.close();
 if (SCORM) { await browser.close(); server.close(); console.log(fails.length ? `\ntest:scorm FAILED (${fails.length})` : '\ntest:scorm passed'); process.exit(fails.length ? 1 : 0); }
 
-// NL4: the check in an LMS: attempt 1 below the pass mark, a finish (failed), a retake that passes.
+// NL4: the check in an LMS: attempt 1 below the pass mark, a finish (PK1: incomplete), a quit and a
+// relaunch (lands on S21R), a retake that passes.
 // Each attempt appends its five interactions; score.raw is the latest attempt; passed is sticky and
 // reaches the LMS at the end of the passing attempt.
 async function scormRetake() {
   console.log('\nSCORM: knowledge check retake');
-  const p = await open('?reset=1&screen=S21', { lms: {} });
+  let p = await open('?reset=1&screen=S21', { lms: {} });
   // FX3: version a on attempt 1, version b on the retake (its own items and interaction ids)
   const answerAll = async (pick, v = 'a') => {
     const items = S.S21.items.map((it) => (v === 'b' ? { ...it, ...it.b } : it));
-    for (let k = 0; k < 4; k++) {
-      const o = items[k].options.find(pick);
+    const tiles = items.find((it) => it.kind === 'tiles');
+    for (const it of items.filter((x) => x !== tiles)) {
+      const o = it.options.find(pick);
       await p.click(`.w-kc-opt[data-id="${o.id}"]`);
-      if (!o.correct) await p.click(`.w-kc-opt[data-id="${items[k].options.find((x) => x.correct).id}"]`);
       await p.click('[data-action="nextQuestion"]');
     }
-    const keys = items[4].tiles.filter((x) => x.correct).map((x) => x.n), miss = items[4].tiles.find((x) => !x.correct).n;
+    const keys = tiles.tiles.filter((x) => x.correct).map((x) => x.n), miss = tiles.tiles.find((x) => !x.correct).n;
     for (const n of pick({ correct: true }) ? keys : [keys[0], miss]) await p.click(`.w-kc-tile[data-n="${n}"]`);
     await p.click('[data-action="check"]');
-    if (!pick({ correct: true })) { await p.click(`.w-kc-tile[data-n="${keys[1]}"]`); await p.click('[data-action="check"]'); }
   };
   await answerAll((o) => !o.correct);
   let m = await p.evaluate(() => window.__scormMock.report());
-  // (PP1: the jump to S21 passes both checkpoints, so the two path interactions come first: 2 + 5)
-  expect(m.data['cmi.core.score.raw'] === '0' && m.data['cmi.core.lesson_status'] === 'incomplete' && m.count === 7,
-    `SCORM attempt 1 (0 of 5): score.raw ${m.data['cmi.core.score.raw']}, lesson_status ${m.data['cmi.core.lesson_status']}, ${m.count} interactions`);
+  // (PP1: the jump to S21 passes both checkpoints; PK1: their path levels are not sent, so 6)
+  expect(m.data['cmi.core.score.raw'] === '0' && m.data['cmi.core.lesson_status'] === 'incomplete' && m.count === 6,
+    `SCORM attempt 1 (0 of 6): score.raw ${m.data['cmi.core.score.raw']}, lesson_status ${m.data['cmi.core.lesson_status']}, ${m.count} interactions`);
   await p.evaluate(() => window.__l4.go('S22'));
   await p.click('.w-takeaway[data-id="a"]'); await p.click('.w-next'); await p.click('[data-action="finish"]'); await p.click('[data-action="finish"]');
   m = await p.evaluate(() => window.__scormMock.report());
-  expect(m.data['cmi.core.lesson_status'] === 'failed' && m.data['cmi.core.score.raw'] === '0', `SCORM finish below 80: lesson_status ${m.data['cmi.core.lesson_status']}, score.raw ${m.data['cmi.core.score.raw']}`);
-  await p.evaluate(() => window.__l4.go('S21R'));
+  // PK1: below the pass mark the finish keeps "incomplete" (never failed), sends the score, and keeps exit "suspend"
+  expect(m.data['cmi.core.lesson_status'] === 'incomplete' && m.data['cmi.core.score.raw'] === '0' && m.data['cmi.core.exit'] === 'suspend',
+    `SCORM finish below 80: lesson_status ${m.data['cmi.core.lesson_status']}, score.raw ${m.data['cmi.core.score.raw']}, exit "${m.data['cmi.core.exit']}"`);
+  // PK1: quit after the finish (pagehide), then relaunch with what the LMS kept: the learner lands on
+  // S21R (Retake now), not on END, with every earlier input intact
+  await p.evaluate(() => { window.__l4.state.f.L4_CASE_TITLE = 'Ben\'s "order", step 2, rush'; window.__l4.persist(); });
+  const before = await p.evaluate(() => JSON.stringify({ a: window.__l4.state.a, f: window.__l4.state.f, d: window.__l4.state.d, k: window.__l4.state.k, fin: window.__l4.state.fin }));
+  m = await p.evaluate(() => { window.__l4.tracking.terminate(); return window.__scormMock.report(); });
+  expect(m.data['cmi.core.exit'] === 'suspend' && m.data['cmi.core.lesson_status'] === 'incomplete' && m.finished,
+    `SCORM quit after a finish below 80: exit "${m.data['cmi.core.exit']}" (the LMS keeps suspend_data), lesson_status ${m.data['cmi.core.lesson_status']}`);
+  const statuses = [...m.statuses], exits = [...m.exits];
+  await p.close();
+  p = await open('', { lms: { ...m.data, 'cmi.core.entry': 'resume', 'cmi.core.exit': '' } });
+  const back = await p.evaluate(() => ({ at: window.__l4.current, dialog: !!document.querySelector('.w-dialog [data-action="resume"]'), retake: !!document.querySelector('[data-action="retake"]'),
+    // (S21R completes on arrival: a presentation screen, so it joins the done list now)
+    state: JSON.stringify({ a: window.__l4.state.a, f: window.__l4.state.f, d: window.__l4.state.d.filter((x) => x !== 'S21R'), k: window.__l4.state.k, fin: window.__l4.state.fin }) }));
+  expect(back.at === 'S21R' && back.dialog && back.retake && back.state === before,
+    `SCORM relaunch after a finish below 80 (saved place ${m.data['cmi.core.lesson_location']}): lands on ${back.at} with the resume prompt and Retake now, every answer, text, done screen and the attempt intact` + (back.state === before ? '' : `\n    before ${before}\n    after  ${back.state}`));
+  await p.click('.w-dialog [data-action="resume"]');
   await p.click('[data-action="retake"]');
   await answerAll((o) => o.correct, 'b');
   m = await p.evaluate(() => window.__scormMock.report());
-  const ids = Array.from({ length: m.count }, (_, n) => m.data[`cmi.interactions.${n}.id`] + '=' + m.data[`cmi.interactions.${n}.result`]).join(',');
-  // the two path interactions, attempt 1's five (version a), the S22 takeaway, attempt 2's five (version b: L4_S21_1b ...)
+  expect(m.data['cmi.core.exit'] === 'suspend' && m.data['cmi.core.lesson_status'] === 'passed', `SCORM retake passes after the finish: passed, exit "${m.data['cmi.core.exit']}" (one attempt that keeps everything)`);
+  statuses.push(...m.statuses); exits.push(...m.exits);
+  expect(statuses.every((s) => s === 'incomplete' || s === 'passed') && exits.length && exits.every((x) => x === 'suspend'),
+    `PK1: lesson_status only incomplete / passed in the fail-then-pass path (${[...new Set(statuses)].join(', ')}); exit always "suspend" (${exits.length} sets)`);
+  // PK1: the LMS id is the interaction id, then the question in words (shown here up to the question)
+  const ids = Array.from({ length: m.count }, (_, n) => (/^L4_S21_\d+b?/.exec(m.data[`cmi.interactions.${n}.id`]) || [m.data[`cmi.interactions.${n}.id`]])[0] + '=' + m.data[`cmi.interactions.${n}.result`]).join(',');
+  // attempt 1's six (version a), attempt 2's six (version b: L4_S21_1b ...); the path levels and the S22 takeaway are not sent
   const s21 = ids.split(',').filter((x) => x.startsWith('L4_S21_'));
-  expect(m.data['cmi.core.score.raw'] === '100' && m.data['cmi.core.lesson_status'] === 'passed' && m.count === 13 && s21.length === 10
-    && s21.slice(0, 5).every((x) => /^L4_S21_\d=/.test(x)) && s21.slice(5).every((x) => /^L4_S21_\db=correct$/.test(x)) && !m.errors.length,
-    `SCORM retake (5 of 5): score.raw ${m.data['cmi.core.score.raw']} (the latest attempt), lesson_status ${m.data['cmi.core.lesson_status']}, ${m.count} interactions (${ids})`);
+  expect(m.data['cmi.core.score.raw'] === '100' && m.data['cmi.core.lesson_status'] === 'passed' && m.count === 12 && s21.length === 12
+    && s21.slice(0, 6).every((x) => /^L4_S21_\d=/.test(x)) && s21.slice(6).every((x) => /^L4_S21_\db=correct$/.test(x)) && !m.errors.length,
+    `SCORM retake (6 of 6): score.raw ${m.data['cmi.core.score.raw']} (the latest attempt), lesson_status ${m.data['cmi.core.lesson_status']}, ${m.count} interactions (${ids})`);
   const susp = m.data['cmi.suspend_data'] || '';
   expect(/"k":\{"n":2,"p":1,"s":100\}|"k":\{[^}]*"n":2[^}]*\}/.test(susp), `SCORM suspend_data keeps the attempt (${(/"k":\{[^}]*\}/.exec(susp) || [''])[0]})`);
   await p.close();
+}
+
+// PK1: the adapter alone (src/tracking/scorm12.js on a recording API, in Node), every path a learner
+// can take: pass on S21 then finish; finish below 80 (twice) then pass; a finish event that asks for
+// failed / completed / passed-without-a-pass; relaunches with each LMS status. lesson_status must only
+// ever be incomplete or passed, and exit always "suspend" (one attempt per learner).
+async function scormStatusUnit() {
+  console.log('\nPK1: lesson_status and exit in every path (adapter unit)');
+  const { createScorm12 } = await import('../src/tracking/scorm12.js');
+  const run = (status, steps, fin = false) => {
+    const sets = [];
+    const api = { LMSInitialize: () => 'true', LMSFinish: () => 'true', LMSCommit: () => 'true', LMSGetLastError: () => '0', LMSGetErrorString: () => '',
+      LMSGetValue: (el) => (el === 'cmi.core.lesson_status' ? status : el === 'cmi.interactions._count' ? '0' : ''), LMSSetValue: (el, v) => { sets.push([el, v]); return 'true'; } };
+    const a = createScorm12(api);
+    a.init(); a.setFinished(fin);
+    for (const s of steps) s === 'save' ? a.save('x', 'S01') : a.record(s);
+    a.terminate();
+    return { st: sets.filter(([el]) => el === 'cmi.core.lesson_status').map(([, v]) => v), ex: sets.filter(([el]) => el === 'cmi.core.exit').map(([, v]) => v) };
+  };
+  const score = (s, p) => ({ kind: 'score', score: s, passed: p, attempt: 1 });
+  const finish = (status, s) => ({ kind: 'finish', status, score: s, passMark: 80, attempt: 1 });
+  const paths = {
+    'pass then finish': ['save', score(80, true), 'save', finish('passed', 80)],
+    'finish below 80': ['save', score(40, false), finish('incomplete', 40), 'save'],
+    'finish below 80, retake passes': ['save', score(0, false), finish('incomplete', 0), score(100, true), 'save'],
+    'finish asks failed': [score(0, false), finish('failed', 0)],
+    'finish asks completed': [finish('completed', null)],
+    'passed, later finish below': [score(100, true), score(20, false), finish('incomplete', 20)],
+  };
+  const all = [];
+  for (const [name, steps] of Object.entries(paths)) for (const lms of ['not attempted', 'incomplete', 'passed', 'failed', 'completed']) {
+    const r = run(lms, steps, lms === 'incomplete' && name.startsWith('finish below'));
+    const passed = lms === 'passed' || steps.some((s) => s.passed || s.status === 'passed');
+    const last = r.ex[r.ex.length - 1];
+    const finished = steps.some((s) => s.kind === 'finish');
+    all.push({ name, lms, ok: r.st.every((s) => s === 'incomplete' || s === 'passed') && r.ex.length && r.ex.every((x) => x === 'suspend') && last === 'suspend', r });
+  }
+  const bad = all.filter((x) => !x.ok);
+  expect(!bad.length, `PK1: ${all.length} adapter paths: lesson_status never failed or completed, exit always "suspend"` + (bad.length ? ': ' + bad.map((x) => `${x.name} @${x.lms} ${x.r.st.join('>')} exit ${x.r.ex.join('>')}`).join(' | ') : ''));
 }
 
 // The SCORM data after the whole lesson, then a relaunch (entry=resume with the saved suspend data).
@@ -1521,21 +1615,37 @@ async function scormChecks(p, ids) {
     return { id: g('id'), type: g('type'), response: g('student_response'), result: g('result'), latency: g('latency'), time: g('time'), weighting: g('weighting'), pattern: g('correct_responses.0.pattern') };
   });
   const metaOf = (id) => C.screens.flatMap((s) => [...(s.tracking || []), ...(s.stops || []).map((x) => x.tracking)]).find((t) => t.id === id);
-  const once = rows.length === ids.length && new Set(rows.map((r) => r.id)).size === ids.length && ids.every((id) => rows.some((r) => r.id === id));
-  expect(once, `SCORM: ${rows.length} interactions, each id written once (${ids.length} in the lesson)`);
-  // PP1: the two path interactions (not in any screen's tracking): fill-in, the level word, neutral, weighting 0, no pattern
-  const pathRows = rows.filter((r) => /^L4_PATH_C\d$/.test(r.id));
-  expect(pathRows.length === 2 && pathRows.every((r) => r.type === 'fill-in' && r.response === 'core' && r.result === 'neutral' && r.weighting === '0' && r.pattern === undefined && r.latency && r.time),
-    `SCORM: the path interactions ${pathRows.map((r) => `${r.id} ${r.type} "${r.response}" ${r.result} weighting ${r.weighting}`).join(', ')}`);
-  rows.splice(0, rows.length, ...rows.filter((r) => !pathRows.includes(r)));
-  const bad = rows.filter((r) => { const t = metaOf(r.id); return !t || r.type !== t.type || r.weighting !== (t.scored ? '1' : '0') || (t.correctResponse !== null && r.pattern !== String(t.correctResponse).toLowerCase())
-    || (t.correctResponse === null && r.pattern !== undefined) || !r.latency || !r.time || (t.result === 'neutral' && r.result !== 'neutral'); });
-  expect(!bad.length, 'SCORM: every interaction carries type, response, result, latency, time, weighting (1 for the 5 scored), correct pattern from the content' + (bad.length ? ': ' + bad.map((r) => r.id).join(', ') : ''));
-  const free = rows.filter((r) => r.type === 'fill-in');
-  const wantFree = ids.filter((id) => metaOf(id)?.type === 'fill-in').length;
-  expect(free.length === wantFree && free.every((r) => r.response.length <= 250 && r.result === 'neutral'),
-    `SCORM: ${free.length} fill-in responses (case title twice: S02 and S18B, problem, the three-part sketch, the S12B metric, the S17B notes; NL4: no S19 metric), at most 250 chars, neutral`);
-  expect(d['cmi.core.lesson_status'] === 'passed' && d['cmi.core.score.raw'] === '80' && d['cmi.core.score.min'] === '0' && d['cmi.core.score.max'] === '100' && d['cmi.core.exit'] === '',
+  // PK1: the LMS id is the interaction id + "_" + the question in words; the path levels and the S22
+  // takeaway (lesson.lmsReport.skip) are never sent
+  const skip = C.lesson.lmsReport.skip;
+  const sent = ids.filter((id) => !skip.includes(id));
+  const tidOf = (lmsId) => sent.filter((t) => lmsId.startsWith(t + '_')).sort((a, b) => b.length - a.length)[0];
+  const once = rows.length === sent.length && sent.every((t) => rows.filter((r) => tidOf(r.id) === t).length === 1);
+  expect(once && !rows.some((r) => skip.some((s) => r.id.startsWith(s))),
+    `SCORM: ${rows.length} interactions, each sent once (${ids.length} in the lesson, ${skip.join(', ')} not sent)`);
+  // each row is exactly the event's report (question in the id, answers in words), as fill-in; a
+  // neutral item (no right answer) has no result at all
+  const evs = await p.evaluate(() => window.__l4.tracking.events.filter((e) => e.kind === 'answer' && e.lms !== false).map((e) => ({ t: e.trackingId, report: e.report, scored: e.scored, result: e.result })));
+  const clean = (s) => String(s).replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 250);
+  const bad = rows.filter((r) => { const e = evs.find((x) => x.t === tidOf(r.id)); const t = metaOf(e?.t);
+    return !e || !t || r.id !== e.report.id || r.type !== 'fill-in' || r.response !== clean(e.report.response) || r.weighting !== (t.scored ? '1' : '0')
+      || (e.report.correct === null ? r.pattern !== undefined : r.pattern !== clean(e.report.correct)) || !r.latency || !r.time || (t.result === 'neutral' ? r.result !== undefined : !['correct', 'wrong'].includes(r.result))
+      || r.id.length > 255 || /\s/.test(r.id); });
+  expect(!bad.length, 'PK1: every interaction is fill-in with the question in its id (no spaces, at most 255) and the answer and the correct answer in words; result, latency, time, weighting kept' + (bad.length ? ': ' + bad.map((r) => r.id).join(', ') : ''));
+  const s21 = rows.find((r) => r.id.startsWith('L4_S21_1_'));
+  const it1 = S.S21.items[0];
+  expect(s21 && s21.id === 'L4_S21_1_' + it1.stem.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '') && s21.pattern === it1.options.find((o) => o.correct).label,
+    `PK1 report row: "${s21?.id}" | answered "${s21?.response}" | correct "${s21?.pattern}"`);
+  const free = rows.filter((r) => !metaOf(tidOf(r.id))?.correctResponse && metaOf(tidOf(r.id))?.type === 'fill-in');
+  const wantFree = sent.filter((id) => metaOf(id)?.type === 'fill-in').length;
+  expect(free.length === wantFree && free.every((r) => r.response.length <= 250 && r.result === undefined),
+    `SCORM: ${free.length} free-text responses (case title twice: S02 and S18B, problem, the three-part sketch, the S12B metric, the S17B notes; NL4: no S19 metric), at most 250 chars, no result (PK1: Blossom shows "neutral" as an X)`);
+  // PK1 B3: every interaction of the whole walk (the path ones included), its weighting and result
+  const allRows = Array.from({ length: m.count }, (_, n) => ({ id: d[`cmi.interactions.${n}.id`], w: d[`cmi.interactions.${n}.weighting`], r: d[`cmi.interactions.${n}.result`], s: d[`cmi.interactions.${n}.student_response`] || '' }));
+  expect(allRows.every((x) => x.s.length <= 250 && !/[\u0000-\u001f\u007f]/.test(x.s)), `PK1: all ${allRows.length} student_response values at most 250 chars (longest ${Math.max(...allRows.map((x) => x.s.length))}), no control characters`);
+  console.log('  note interactions: ' + allRows.map((x) => `${x.id.replace(/^L4_/, '')}${x.w === '1' ? '*' : ''}=${(x.r || '-')[0]}`).join(' '));
+  expect(m.statuses.length && m.statuses.every((s) => s === 'incomplete' || s === 'passed'), `PK1: lesson_status only incomplete / passed on the main path (${m.statuses.join(' > ')}), never failed or completed`);
+  expect(d['cmi.core.lesson_status'] === 'passed' && d['cmi.core.score.raw'] === '80' && d['cmi.core.score.min'] === '0' && d['cmi.core.score.max'] === '100' && d['cmi.core.exit'] === 'suspend',
     `SCORM: lesson_status ${d['cmi.core.lesson_status']}, score.raw ${d['cmi.core.score.raw']} (0 to 100, from S21 first attempts), exit "${d['cmi.core.exit']}"`);
   expect(/^\d{4}:\d{2}:\d{2}\.\d{2}$/.test(d['cmi.core.session_time'] || '') && m.finished, `SCORM: session_time ${d['cmi.core.session_time']}, LMSFinish once`);
   const susp = d['cmi.suspend_data'] || '';
@@ -1548,6 +1658,33 @@ async function scormChecks(p, ids) {
   for (const k of Object.keys(maxOf)) full.f[k] = 'x'.repeat(maxOf[k]);
   const fullLen = encode(full).length;
   expect(susp.length < 4096 && fullLen < 4096, `SCORM: suspend_data ${susp.length} chars after the whole lesson; ${fullLen} with all ${Object.keys(maxOf).length} free-text fields full (each at its maxlength; limit 4096)`);
+  // PK1 B2, the worst case on top of the whole lesson: the check failed once and retaken (both versions'
+  // answers kept, attempt 2, passed), both path levels set, a retry count on every interaction, and each
+  // free-text field at its maxlength in text that JSON escapes ("quotes", apostrophes, commas, new lines)
+  const worst = structuredClone(full);
+  const allIds = C.screens.flatMap((s) => [...(s.tracking || []), ...(s.stops || []).map((x) => x.tracking)]).filter(Boolean);
+  for (const t of allIds) if (!worst.a[t.id]) worst.a[t.id] = String(t.correctResponse ?? 'a').toLowerCase() + '|w';
+  for (const t of allIds) worst.x[t.id] = 9;
+  worst.k = { n: 2, s: 100, p: 1 }; worst.p = { c4: 'stretch', c5: 'support' }; worst.fin = 'passed';
+  const heavy = (n) => 'Ben\'s "rush" order, step 2,\n'.repeat(Math.ceil(n / 27)).slice(0, n);
+  for (const k of Object.keys(maxOf)) worst.f[k] = heavy(maxOf[k]);
+  let worstLen, worstX = false; try { const w = encode(worst); worstLen = w.length; worstX = w.includes('"x":'); } catch (e) { worstLen = Number(/\d+$/.exec(e.message)?.[0]) || 9999; }
+  // PK1: every character of every field a double quote (escaped to 2): over the limit, so the save drops
+  // the retry counts, then trims the longest text from its end until it fits; nothing else is lost
+  const hostile = structuredClone(worst);
+  for (const k of Object.keys(maxOf)) hostile.f[k] = '"'.repeat(maxOf[k]);
+  const raw = JSON.stringify(hostile).length;
+  let hs = null, herr = '';
+  try { hs = encode(hostile); } catch (e) { herr = e.message; }
+  const hd = hs ? decode(hs) : null;
+  const lost = hd ? Object.keys(maxOf).filter((k) => hd.f[k] !== hostile.f[k]).map((k) => `${k.replace('L4_CASE_', '')} ${hostile.f[k].length}>${hd.f[k].length}`) : [];
+  const kept = hd && JSON.stringify([hd.s, hd.d, hd.a, hd.g, hd.k, hd.p, hd.fin]) === JSON.stringify([hostile.s, hostile.d, hostile.a, hostile.g, hostile.k, hostile.p, hostile.fin])
+    && Object.keys(maxOf).every((k) => hostile.f[k].startsWith(hd.f[k]));
+  expect(hs && hs.length < 4096 && kept && encode(hostile) === hs && hostile.f.L4_CASE_STEPS.length === maxOf.L4_CASE_STEPS,
+    `PK1 all fields full of quotes (${raw} chars before shrinking): saved ${hs ? hs.length : herr} chars, retry counts dropped, trimmed ${lost.join(', ') || 'nothing'}; place, answers, flags, attempt, levels kept; deterministic; the state itself untouched`);
+  const hostileLen = hs ? hs.length : 9999;
+  expect(worstLen < 4096, `PK1 worst case: suspend_data ${worstLen} chars (margin ${4096 - worstLen}) with the check retaken, levels set, every field full of quotes, apostrophes, commas and new lines (retry counts ${worstX ? 'kept' : 'dropped, as encode does over 3800'})`);
+  void hostileLen;
   expect(d['cmi.core.lesson_location'] === full.s, `SCORM: lesson_location "${d['cmi.core.lesson_location']}" = the saved place`);
 
   console.log('\nSCORM relaunch (entry=resume)');
@@ -1558,6 +1695,16 @@ async function scormChecks(p, ids) {
     `SCORM resume: lands on ${back.at} with the resume prompt, ${back.done} screens done, case title and the S12B metric back`);
   expect(back.mock.data['cmi.core.lesson_status'] === 'passed' && !back.mock.errors.length && back.mock.count === 0,
     'SCORM resume: lesson_status stays passed (never downgraded), no interaction written again');
+  // PK1: in the page, through the LMS: every field at its maxlength in double quotes, then a move to the
+  // next screen; the save is written (under 4096, accepted), not dropped, and the new place is in it
+  const q = await r.evaluate(async (maxOf) => {
+    for (const k of Object.keys(maxOf)) window.__l4.state.f[k] = '"'.repeat(maxOf[k]);
+    window.__l4.go('S22');
+    const m = window.__scormMock.report();
+    return { len: (m.data['cmi.suspend_data'] || '').length, place: JSON.parse(m.data['cmi.suspend_data']).s, errors: m.errors.length, badge: !document.querySelector('.w-saved').hidden };
+  }, maxOf);
+  expect(q.len < 4096 && q.place === 'S22' && !q.errors && !q.badge,
+    `SCORM: all fields full of quotes, then Next: suspend_data written (${q.len} chars, accepted by the LMS), the new place S22 saved, no "Not saved" badge`);
   await r.close();
 }
 
@@ -1747,39 +1894,37 @@ console.log('\nno fast-track cards');
 expect(!C.screens.some((s) => s.variant === 'challenge' || s.routing) && !C.chapters.some((c) => c.fastTrack) && !C.lesson.slice.some((id) => /^FT/.test(id)),
   'no fast-track card, routing or chapter fast track left in the content (W1 to W4 replace FT1 to FT4)');
 
-/* ---------- NL4 S21 all first answers wrong: S21R not passed, review links, finish failed, retake (shuffled) passes for good ---------- */
-console.log('\nS21 first attempts wrong, S21R, S22 finish failed, retake');
+/* ---------- NL4 S21 all answers wrong: the review, S21R not passed, review links, finish failed, retake (shuffled) passes for good ---------- */
+console.log('\nS21 answers wrong, review, S21R, S22 finish failed, retake');
 {
   const p = await open('?reset=1&screen=S21');
-  for (const [k, wrongId, rightId] of [[0, 'a', 'c'], [1, 'a', 'b'], [2, 'b', 'a'], [3, 'a', 'd']]) {
+  for (const wrongId of ['a', 'a', 'b', 'a', 'a']) {
     await tabTo(p, `.w-kc-opt[data-id="${wrongId}"]`);
     await press(p, 'Enter');
-    await tabTo(p, `.w-kc-opt[data-id="${rightId}"]`, { back: rightId < wrongId });
-    await press(p, 'Enter');
-    await expectBand(p, `S21 item ${k + 1} retry right`, { state: 'correct', text: S.S21.items[k].options.find((o) => o.id === rightId).feedback, unlocked: false });
     await tabTo(p, '[data-action="nextQuestion"]');
     await press(p, 'Enter');
   }
   for (const n of [5, 7]) { await tabTo(p, `.w-kc-tile[data-n="${n}"]`); await press(p, ' '); }
   await tabTo(p, '[data-action="check"]');
   await press(p, 'Enter');
-  await expectBand(p, 'S21 item 5 tiles 5 + 7', { state: 'partial', verdict: UI.feedback.oneOfTwo, text: S.S21.items[4].tiles[6].feedback, unlocked: false });
-  await expectLayout(p, 'S21 item 5 one of two');
-  await tabTo(p, '.w-kc-tile[data-n="6"]', { back: true });
-  await press(p, ' ');
-  await tabTo(p, '[data-action="check"]');
-  await press(p, 'Enter');
   const sc = await p.evaluate(() => window.__l4.score());
-  expect(sc.raw === 0 && await isActive(p, '.w-next'), `S21: every item fixed on retry, score ${sc.raw}: only first attempts count; Next focused`);
+  expect(sc.raw === 0 && await p.evaluate(() => window.__l4.tracking.events.filter((e) => e.kind === 'retry').length === 0), `S21: every item wrong, score ${sc.raw}, no retry possible`);
+  for (let k = 0; k < 5; k++) { await tabTo(p, '[data-action="nextAnswer"]'); await press(p, 'Enter'); }
+  // the tiles in the review: 5 right, 7 wrong, 6 (not picked) marked as the right line; the band explains the missed error
+  const tl = await p.evaluate(() => [...document.querySelectorAll('.w-kc-tile')].map((b) => b.dataset.n + ':' + (b.dataset.result || '-')).join(','));
+  expect(tl === '1:-,2:-,3:-,4:-,5:correct,6:correct,7:wrong,8:-', `S21 review, tiles 5 + 7: ${tl}`);
+  await expectBand(p, 'S21 review tiles 5 + 7', { state: 'partial', verdict: UI.feedback.oneOfTwo, text: S.S21.items[5].tiles[5].feedback, unlocked: true });
+  await expectLayout(p, 'S21 review one of two');
+  await tabTo(p, '.w-next');
   await press(p, 'Enter');
-  // S21R not passed: the five missed items, each with its line and review link; Retake now; Next still open
-  await expectNewScreen(p, 'S21R', 'S21 Next (attempt 1, 0 of 5)', { heading: '0 of 5 on first try (0 of 100). Pass mark: 80.' });
+  // S21R not passed: the six missed items, each with its line and review link; Retake now; Next still open
+  await expectNewScreen(p, 'S21R', 'S21 Next (attempt 1, 0 of 6)', { heading: '0 of 6 right (0 of 100). Pass mark: 80.' });
   const r = await p.evaluate(() => ({ h: document.querySelector('#w-instruction').textContent, chip: document.querySelector('.w-result-chip').textContent,
     missed: [...document.querySelectorAll('.w-missed-item')].map((li) => li.dataset.item + '>' + li.querySelector('[data-action="review"]').dataset.screen + ':' + li.querySelector('.w-missed-line').textContent + ':' + li.querySelector('[data-action="review"]').textContent).join('|'),
     retake: !!document.querySelector('[data-action="retake"]'), next: document.querySelector('.w-next').dataset.locked }));
   const wantMissed = S.S21R.missed.map((m) => `${m.item}>${m.screen}:${m.text}:${S.S21R.reviewLabel.replace('{n}', chapterNo(C, S[m.screen].chapter))}`).join('|');
-  expect(r.h === '0 of 5 on first try (0 of 100). Pass mark: 80.' && r.chip === S.S21R.notPassed.chip && r.missed === wantMissed && r.retake && r.next === 'false',
-    `S21R not passed: "${r.h}", "${r.chip}", five missed items with their review links, Retake now, Next open`);
+  expect(r.h === '0 of 6 right (0 of 100). Pass mark: 80.' && r.chip === S.S21R.notPassed.chip && r.missed === wantMissed && r.retake && r.next === 'false',
+    `S21R not passed: "${r.h}", "${r.chip}", six missed items with their review links, Retake now, Next open`);
   await expectLayout(p, 'S21R not passed');
   // a review link: the screen opens with "Back to the check" in the footer; Next there keeps it; the chip comes back
   await tabTo(p, '[data-action="review"][data-screen="S11"]');
@@ -1803,28 +1948,28 @@ console.log('\nS21 first attempts wrong, S21R, S22 finish failed, retake');
   await expectLayout(p, 'S22 finish confirm');
   await press(p, 'Enter');
   const fin = (await p.evaluate(() => window.__l4.tracking.events)).filter((e) => e.kind === 'finish');
-  expect(fin.length === 1 && fin[0].status === 'failed' && fin[0].score === 0, `S22 second Finish: lesson status ${fin[0]?.status}, score ${fin[0]?.score}`);
+  expect(fin.length === 1 && fin[0].status === 'incomplete' && fin[0].score === 0 && await p.evaluate(() => window.__l4.state.fin === 'incomplete'),
+    `S22 second Finish: lesson status ${fin[0]?.status} (PK1: never failed), score ${fin[0]?.score}, state.fin set`);
   // back to the check: Retake now, a new attempt with the options in a new order, every first answer right
   await p.evaluate(() => window.__l4.go('S21R'));
   await tabTo(p, '[data-action="retake"]');
   await press(p, 'Enter');
-  await expectNewScreen(p, 'S21', 'Retake now');
+  await expectNewScreen(p, 'S21', 'Retake now', { heading: S.S21.items[0].b.stem });
   // FX3: the retake shows version b (its own stems, options and interaction ids), options shuffled
   const B = S.S21.items.map((it) => ({ ...it, ...it.b }));
   const order = await p.evaluate(() => [...document.querySelectorAll('.w-kc-opt')].map((b) => b.dataset.id).join(''));
-  const stem1 = await p.evaluate(() => document.querySelector('.w-kc-stem').textContent);
+  const stem1 = await p.evaluate(() => document.querySelector('#w-instruction').textContent);
   expect(order !== 'abcd' && stem1 === B[0].stem && await p.evaluate(() => window.__l4.state.k.n === 2 && !window.__l4.state.a.L4_S21_1 && !window.__l4.state.d.includes('S21R')),
     `Retake: attempt 2, the answers cleared, version b ("${stem1}"), item 1's options in a new order (${order})`);
-  for (const k of [0, 1, 2, 3]) {
+  for (const k of [0, 1, 2, 3, 4]) {
     const right = B[k].options.find((o) => o.correct).id;
     await tabTo(p, `.w-kc-opt[data-id="${right}"]`);
     await press(p, 'Enter');
-    await expectBand(p, `S21 retake item ${k + 1}b right`, { state: 'correct', text: B[k].options.find((o) => o.id === right).feedback, unlocked: false });
     await tabTo(p, '[data-action="nextQuestion"]'); await press(p, 'Enter');
   }
   const h5 = await p.evaluate(() => document.querySelector('#w-instruction').textContent + '|' + [...document.querySelectorAll('.w-kc-tile .w-opt-label')].map((t) => t.textContent).join('/'));
-  expect(h5 === B[4].instruction + '|' + B[4].tiles.map((t) => t.text).join('/'), `S21 retake item 5b: "${B[4].instruction}", the eight lines of the sales map`);
-  for (const n of B[4].tiles.filter((t) => t.correct).map((t) => t.n)) { await tabTo(p, `.w-kc-tile[data-n="${n}"]`, { back: true }); await press(p, ' '); }
+  expect(h5 === B[5].instruction + '|' + B[5].tiles.map((t) => t.text).join('/'), `S21 retake item 6b: "${B[5].instruction}", the eight lines of the sales map`);
+  for (const n of B[5].tiles.filter((t) => t.correct).map((t) => t.n)) { await tabTo(p, `.w-kc-tile[data-n="${n}"]`, { back: true }); await press(p, ' '); }
   await tabTo(p, '[data-action="check"]');
   await press(p, 'Enter');
   const ev = await p.evaluate(() => window.__l4.tracking.events);
@@ -1832,11 +1977,12 @@ console.log('\nS21 first attempts wrong, S21R, S22 finish failed, retake');
   const scores = ev.filter((e) => e.kind === 'score').map((e) => `${e.score}/${e.passed}/${e.attempt}`).join();
   expect(ans('L4_S21_1') === 'a/wrong' && ans('L4_S21_1b') === 'b/correct' && ans('L4_S21_5b') === '3,5/correct' && scores === '0/false/1,100/true/2' && await p.evaluate(() => window.__l4.state.fin === 'passed' && window.__l4.state.k.p === 1),
     `retake: version a's ids on attempt 1 (L4_S21_1 ${ans('L4_S21_1')}), version b's on attempt 2 (L4_S21_1b ${ans('L4_S21_1b')}, L4_S21_5b ${ans('L4_S21_5b')}); scores ${scores}; the lesson now passed for good (state.fin passed)`);
+  await tabTo(p, '.w-next');
   await press(p, 'Enter');
   const r2 = await p.evaluate(() => ({ chip: document.querySelector('.w-result-chip').textContent, retake: !!document.querySelector('[data-action="retake"]') }));
   expect(r2.chip === S.S21R.passed.chip && !r2.retake, `S21R after the retake: "${r2.chip}", no retake`);
   // a third attempt alternates back to version a
-  const stem3 = await p.evaluate(() => { window.__l4.state.k.n = 3; window.__l4.state.d = window.__l4.state.d.filter((x) => x !== 'S21'); window.__l4.go('S21'); return document.querySelector('.w-kc-stem').textContent; });
+  const stem3 = await p.evaluate(() => { window.__l4.state.k.n = 3; window.__l4.state.d = window.__l4.state.d.filter((x) => x !== 'S21'); window.__l4.go('S21'); return document.querySelector('#w-instruction').textContent; });
   expect(stem3 === S.S21.items[0].stem, `attempt 3: version a again ("${stem3}")`);
   expect(!p.errors.length, 'S21 / S21R / S22 run: no console errors' + (p.errors.length ? ': ' + p.errors.join(' | ') : ''));
   await p.close();
@@ -1861,8 +2007,9 @@ console.log('\ncoach (keyboard)');
   const coachState = (p) => p.evaluate(() => { const panel = document.querySelector('.w-coach-panel'); const b = document.querySelector('.w-coach-launcher');
     return { open: !panel.hidden, expanded: b.getAttribute('aria-expanded'), dock: panel.dataset.dock, msgs: [...panel.querySelectorAll('.w-coach-msg')].map((m) => m.textContent.trim()),
       inPanel: panel.contains(document.activeElement), onLauncher: document.activeElement === b }; });
+  // CO2: ?live=0, CO1's offline panel (the live page by keyboard is in tools/test-coach-live.mjs)
   for (const id of ['K1', 'W1', 'S04', 'S02', 'S22']) {
-    const p = await open(`?reset=1&screen=${id}`);
+    const p = await open(`?reset=1&live=0&screen=${id}`);
     const line = CO.lines[S[id].coach.kind];
     await tabTo(p, '.w-coach-launcher', { back: true });
     await press(p, 'Enter');
@@ -1885,7 +2032,7 @@ console.log('\ncoach (keyboard)');
     await p.close();
   }
   // the dock: Arrow Right on the grip, saved with the lesson's next save, back after a relaunch
-  const p = await open('?reset=1&screen=S04');
+  const p = await open('?reset=1&live=0&screen=S04');
   await tabTo(p, '.w-coach-launcher', { back: true });
   await press(p, 'Enter');
   await tabTo(p, '.w-coach-grip');
@@ -1898,7 +2045,7 @@ console.log('\ncoach (keyboard)');
   await p.evaluate(() => window.__l4.go('S05a'));
   const saved = await p.evaluate(() => JSON.parse(localStorage.getItem('wawiwa.eai.l4.slice')).g.cd);
   expect(r1.dock === 'r' && l1.dock === 'l' && saved === 'r', `grip: Arrow Right docks right, Arrow Left left; the dock goes out with the next save (g.cd ${saved})`);
-  await p.goto(BASE, { waitUntil: 'networkidle0' });
+  await p.goto(BASE + '?live=0', { waitUntil: 'networkidle0' });
   await p.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
   await tabTo(p, '[data-action="resume"]');
   await press(p, 'Enter');

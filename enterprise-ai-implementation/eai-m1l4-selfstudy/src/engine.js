@@ -8,27 +8,28 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=6b628c2e';
-import { createZones } from './zones.js?v=6b628c2e';
-import { createMenu, openDialog } from './menu.js?v=6b628c2e';
-import { initTooltips, applyTerms } from './tooltip.js?v=6b628c2e';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=6b628c2e';
-import { decision } from './templates/decision.js?v=6b628c2e';
-import { input } from './templates/input.js?v=6b628c2e';
-import { sortDeck } from './templates/sortdeck.js?v=6b628c2e';
-import { bpmn } from './templates/bpmn.js?v=6b628c2e';
-import { flags } from './templates/flags.js?v=6b628c2e';
-import { explorer } from './templates/explorer.js?v=6b628c2e';
-import { video } from './templates/video.js?v=6b628c2e';
-import { handoff } from './templates/handoff.js?v=6b628c2e';
-import { check } from './templates/check.js?v=6b628c2e';
-import { result } from './templates/result.js?v=6b628c2e';
-import { end } from './templates/end.js?v=6b628c2e';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=6b628c2e';
-import { createGhost, stopGhost } from './ghost.js?v=6b628c2e';
-import { createTracking } from './tracking/index.js?v=6b628c2e';
-import { createCoach } from './coach/coach.js?v=6b628c2e';
-import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=6b628c2e';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=e7db6f55';
+import { createZones } from './zones.js?v=e7db6f55';
+import { createMenu, openDialog } from './menu.js?v=e7db6f55';
+import { initTooltips, applyTerms } from './tooltip.js?v=e7db6f55';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=e7db6f55';
+import { decision } from './templates/decision.js?v=e7db6f55';
+import { input } from './templates/input.js?v=e7db6f55';
+import { sortDeck } from './templates/sortdeck.js?v=e7db6f55';
+import { bpmn } from './templates/bpmn.js?v=e7db6f55';
+import { flags } from './templates/flags.js?v=e7db6f55';
+import { explorer } from './templates/explorer.js?v=e7db6f55';
+import { video } from './templates/video.js?v=e7db6f55';
+import { handoff } from './templates/handoff.js?v=e7db6f55';
+import { check } from './templates/check.js?v=e7db6f55';
+import { result } from './templates/result.js?v=e7db6f55';
+import { end } from './templates/end.js?v=e7db6f55';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=e7db6f55';
+import { createGhost, stopGhost } from './ghost.js?v=e7db6f55';
+import { createTracking } from './tracking/index.js?v=e7db6f55';
+import { describe } from './tracking/describe.js?v=e7db6f55';
+import { createCoach } from './coach/coach.js?v=e7db6f55';
+import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=e7db6f55';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -93,6 +94,8 @@ class Lesson {
     const qa = this.review || q.get('debug') === '1';
     this.forced = { level: qa && LEVELS.includes(q.get('level')) ? q.get('level') : null, path: qa ? JOURNEYS[q.get('path')] || null : null };
     this.checkpoints = content.lesson.adapt?.checkpoints || [];
+    // PK1: interactions kept in the lesson but never sent to the LMS (lesson.lmsReport.skip)
+    this.lmsSkip = new Set(content.lesson.lmsReport?.skip || []);
 
     this.note = h('p', { class: 'w-small-note', hidden: true }, this.ui.smallScreenNote);
     this.stage = h('div', { class: 'w-stage' });
@@ -110,9 +113,11 @@ class Lesson {
       onChapter: (n) => this.goChapter(n),
       onStartOver: () => this.startOver(),
     });
-    // CO1: the Wawiwa AI Coach (offline tips), launcher in the bar on every screen; never tracked
+    // CO1: the Wawiwa AI Coach (offline tips), launcher in the bar on every screen; never tracked.
+    // CO2: live (Dor's coach page framed in the panel) except in review mode and with ?live=0 (the tests
+    // that run without the network)
     this.coach = createCoach(this.stage, content, { zones: this.zones, review: this.review, thumb: this.thumb, preview: q.get('coach'),
-      demoScreen: content.ui.coach.demoOn, getState: () => this.state });
+      demoScreen: content.ui.coach.demoOn, live: !this.review && q.get('live') !== '0', getState: () => this.state });
 
     // SCORM 1.2: the LMS holds the state (suspend_data, lesson_location); local mode: localStorage
     const lms = this.tracking.init();
@@ -125,7 +130,7 @@ class Lesson {
       this.state = lms.suspend ? decode(lms.suspend) : emptyState();
       if (!this.state.s && lms.location && this.screens[lms.location]) this.state.s = lms.location;
       // NL4: "passed" can reach the LMS before the finish (S21R), so the adapter learns from the state,
-      // not from lesson_status, whether the lesson is finished (exit "" only then)
+      // not from lesson_status, whether the lesson is finished (PK1: exit "" only once finished and passed)
       this.tracking.setFinished(!!this.state.fin);
       this.zones.setSaved(true);
     } else {
@@ -164,7 +169,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=6b628c2e').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=e7db6f55').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -172,7 +177,11 @@ class Lesson {
     if (jump && this.screens[jump] && this.slice.includes(jump)) { this.go(jump); return; }
     // resume: the saved place (localStorage, or suspend_data / lesson_location from the LMS)
     // (the title screen completes on arrival, so "done screens" alone does not mean the learner went on)
-    const s = this.state.s;
+    let s = this.state.s;
+    // PK1: finished below the pass mark (state.fin, not lesson_status): a resume at S22 or END opens the
+    // check's result instead, where "Retake now" is
+    const kr = this.content.screens.find((x) => x.template === 'result')?.id;
+    if (this.state.fin && !this.state.k?.p && kr && this.slice.includes(kr) && this.order.indexOf(s) > this.order.indexOf(kr)) s = kr;
     if (s && this.slice.includes(s) && s !== this.slice[0]) {
       this.go(s);
       openDialog(this.stage, {
@@ -279,11 +288,15 @@ class Lesson {
 
   // First attempts of the scored interactions only (lesson.completion.scoredScreens): x right of n,
   // raw 0 to 100. FX3: only this attempt's version (a tracking entry without a version is version a).
+  // QZ1: completion.pointsPerItem gives each right answer that many points, capped at 100 (S21: 20
+  // each over six items, so 4 of 6 reaches the pass mark of 80); without it, raw is the percentage.
   score() {
+    const c = this.content.lesson.completion;
     const v = this.checkVersion();
-    const ids = this.content.lesson.completion.scoredScreens.flatMap((sid) => (this.screens[sid]?.tracking || []).filter((t) => t.scored && (t.version || 'a') === v).map((t) => t.id));
+    const ids = c.scoredScreens.flatMap((sid) => (this.screens[sid]?.tracking || []).filter((t) => t.scored && (t.version || 'a') === v).map((t) => t.id));
     const x = ids.filter((tid) => this.firstAnswer(tid)?.result === 'correct').length;
-    return { x, n: ids.length, raw: ids.length ? Math.round((100 * x) / ids.length) : null };
+    const raw = !ids.length ? null : c.pointsPerItem ? Math.min(100, c.pointsPerItem * x) : Math.round((100 * x) / ids.length);
+    return { x, n: ids.length, raw };
   }
 
   // NL4: the end of a knowledge-check attempt (the last S21 item done). The attempt's score is the
@@ -315,13 +328,14 @@ class Lesson {
     this.go(this.content.lesson.completion.scoredScreens[0]);
   }
 
-  // Finish (S22): passed once any attempt reached the pass mark (sticky), failed otherwise (completed
-  // when nothing is scored); the score is the latest attempt's.
+  // Finish (S22): passed once any attempt reached the pass mark (sticky), incomplete otherwise (PK1:
+  // never "failed" or "completed", so the LMS keeps the suspend data and the learner can come back to
+  // retake); the score is the latest attempt's. state.fin (truthy) is what says the lesson was finished.
   finishLesson() {
     const c = this.content.lesson.completion;
     const sc = this.score();
     const passed = !!this.state.k?.p || (sc.raw !== null && sc.raw >= c.passMark);
-    const status = sc.n ? (passed ? 'passed' : 'failed') : c.statusWhenNoScoredItems;
+    const status = passed ? 'passed' : c.statusWhenNotPassed;
     this.state.fin = status;
     this.tracking.emit({ kind: 'finish', status, score: sc.raw, passMark: c.passMark, attempt: this.state.k?.n || 1 });
     this.persist();
@@ -350,7 +364,10 @@ class Lesson {
     if (!(trackingId in this.state.a)) {
       this.state.a[trackingId] = (type === 'fill-in' ? '' : response) + '|' + result.charAt(0);
       // the interaction's content metadata goes along for the SCORM adapter (correct response, weighting)
-      this.tracking.emit({ kind: 'answer', trackingId, type, response, result, latencyMs, correctResponse: meta?.correctResponse ?? null, scored: !!meta?.scored });
+      // PK1: and what an LMS report shows (the question and the answers in words; lms false = not sent)
+      const correctResponse = meta?.correctResponse ?? null;
+      this.tracking.emit({ kind: 'answer', trackingId, type, response, result, latencyMs, correctResponse, scored: !!meta?.scored,
+        lms: !this.lmsSkip.has(trackingId), report: describe(this.view(screenId), trackingId, { type, response, correctResponse }, this.ui) });
       this.persist();
       return 'answer';
     }
@@ -402,7 +419,8 @@ class Lesson {
       const prev = i ? this.state.p?.[this.checkpoints[i - 1].key] || 'core' : null;
       const level = this.forced.level || this.forced.path?.[i] || levelAt(cp, tally(cp.items, (tid) => this.firstAnswer(tid)), prev);
       this.state.p = { ...(this.state.p || {}), [cp.key]: level };
-      this.tracking.emit({ kind: 'answer', trackingId: cp.trackingId, type: 'fill-in', response: level, result: 'neutral', latencyMs: 0, correctResponse: null, scored: false });
+      this.tracking.emit({ kind: 'answer', trackingId: cp.trackingId, type: 'fill-in', response: level, result: 'neutral', latencyMs: 0, correctResponse: null, scored: false,
+        lms: !this.lmsSkip.has(cp.trackingId), report: null });
     });
   }
 

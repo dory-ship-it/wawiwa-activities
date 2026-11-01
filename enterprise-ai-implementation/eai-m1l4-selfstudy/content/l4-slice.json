@@ -10,10 +10,11 @@
     "title": "Process Modeling and Workflow Mapping",
     "lang": "en",
     "dir": "ltr",
-    "contentVersion": "FX3, 25 Oct 2026 (storyboard v3)",
+    "contentVersion": "PK1, 1 Nov 2026 (storyboard v3 + QZ1)",
     "pilot": true,
     "slice": ["O1", "O2", "O3", "S01", "S02", "W1", "V1", "K1", "S03", "W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B", "W3", "V2", "S09", "S10", "S11", "S12", "S12B", "W4", "S13", "S14", "S15", "K4", "S16", "S17", "S17B", "S18A", "S18", "S18B", "S19", "S20", "S20B", "S21", "S21R", "S22", "END"],
-    "completion": { "rule": "finish", "statusWhenNoScoredItems": "completed", "passMark": 80, "scoredScreens": ["S21"] },
+    "completion": { "rule": "finish", "statusWhenNotPassed": "incomplete", "$comment": "PK1 (Noy, 1 Nov 2026): lesson_status is only ever incomplete or passed, never failed or completed. Any S21 attempt at or over passMark sets passed (sticky). Finishing S22 below passMark keeps incomplete (score.raw still sent). exit is always suspend (one attempt per learner, after the Blossom test): the LMS keeps suspend_data, so a learner below passMark comes back to retake and a learner who passed comes back to their own work. Whether the lesson was finished is state.fin in suspend_data, never lesson_status.", "passMark": 80, "pointsPerItem": 20, "$pointsComment": "QZ1 (Noy, 1 Nov 2026): six S21 items at 20 points each, capped at 100, so a learner may miss two and still pass (4 of 6 = 80)", "scoredScreens": ["S21"] },
+    "lmsReport": { "$comment": "PK1 (Noy, 1 Nov 2026): what the LMS report shows. Each interaction goes out as fill-in, its id followed by the question in words, the learner's answer and the correct answer as text (src/tracking/describe.js), so a teacher can read Blossom's report. These ids are not questions with an answer to check and are never sent (they stay in the lesson's own data and events): the personal-path levels and the S22 takeaway.", "skip": ["L4_PATH_C4", "L4_PATH_C5", "L4_S22_1"] },
     "adapt": {
       "$comment": "PP1 personal path: silent adaptive practice (src/adapt.js). Entering a checkpoint chapter sets its level once from the first answers to items (fewer than minAnswered answered = core) and records it as trackingId (neutral, unscored). The level picks screen.variants.support / .stretch on the adaptive screens of that chapter; core = the screen itself. The level is never shown to the learner.",
       "checkpoints": [
@@ -63,6 +64,8 @@
       "nextRound": "Next round",
       "nextSituation": "Next situation",
       "nextQuestion": "Next question",
+      "finishCheck": "Finish the check",
+      "nextAnswer": "Next answer",
       "nextCase": "Next case",
       "openHomework": "Open homework",
       "openHomework1": "Open Homework 1",
@@ -163,10 +166,10 @@
       "selfCheck": "Self-check",
       "risk": "Biggest risk",
       "takeaway": "Your takeaway",
-      "itemRight": "Right on first try",
-      "itemMissed": "Missed on first try",
+      "itemRight": "Right",
+      "itemMissed": "Missed",
       "score": "Knowledge check",
-      "scoreLine": "{x} of {n} on first try ({p} of 100), attempt {a}. Pass mark: {pass} of 100.",
+      "scoreLine": "{x} of {n} right ({p} of 100), attempt {a}. Pass mark: {pass} of 100.",
       "empty": "Not filled in"
     },
     "slot": { "on": "present", "off": "missing" },
@@ -235,10 +238,11 @@
       "goalsIntro": "By the end of this lesson, you will be able to:"
     },
     "coach": {
-      "$comment": "CO1 (26 Oct 2026): the Wawiwa AI Coach, offline mode (src/coach/). Each screen has coach.kind (its opening line below) and coach.tip (its hint word for word, or a drafted tip marked tipDrafted for Noy). The panel shows the opening line and the chip tipChip; the chip is the learner's message and the tip is the coach's answer (Noy: a clean chat, the tip after a message). S21 is locked: no tip. demo: the one line of the short demo on the demoOn screen, once. reviewQuestion is the learner line on the review page only (thinking, cap).",
+      "$comment": "CO1 (26 Oct 2026): the Wawiwa AI Coach, offline mode (src/coach/). Each screen has coach.kind (its opening line below) and coach.tip (its hint word for word, or a drafted tip marked tipDrafted for Noy). The panel shows the opening line and the chip tipChip; the chip is the learner's message and the tip is the coach's answer (Noy: a clean chat, the tip after a message). S21 is locked: no tip. demo: the one line of the short demo on the demoOn screen, once. reviewQuestion is the learner line on the review page only (thinking, cap). CO2: frameTitle names the live coach page's iframe (Dor's page fills the panel body under the header).",
       "open": "Open the coach",
       "openLocked": "Open the coach. Paused during the check.",
       "title": "Wawiwa AI Coach",
+      "frameTitle": "Wawiwa AI Coach chat",
       "close": "Close the coach",
       "grip": "Move the coach. Arrow keys switch sides.",
       "dockedLeft": "Coach on the left.",
@@ -292,7 +296,8 @@
     "Field template": "A fixed set of fields; fits when you know the process and need a fast decision.",
     "BPMN": "A standard for process diagrams, shared across tools and teams.",
     "Eight fields": "Same spirit as the five-field template from Lesson 1, now for a whole process.",
-    "Owner": "Keeps a policy or document current.",
+    "Owner": "Keeps a policy or document current. Not the process owner, who answers for the whole process, start to end.",
+    "Process mapping": "How work really flows, step by step. Process modeling is the broader term: the map, plus a structure you can analyze and reproduce.",
     "Sensitivity": "One of four levels: PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED. It decides what may go to an AI tool.",
     "Existing controls": "Checks in place today; \"no formal control\" is valid.",
     "Gaps": "What is missing or unclear; \"unclear\" is allowed.",
@@ -355,7 +360,7 @@
     { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/md1/ch4-hr-demo.jpg", "position": "30% 40%", "temp": false }, "minutes": 20, "screens": ["W3", "V2", "S09", "S10", "S11", "S12", "S12B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch4", "n": 4, "title": "Critical eye", "photo": { "src": "assets/img/l4/md1/ch5-critical-eye.jpg", "position": "65% 50%", "temp": false }, "minutes": 25, "screens": ["W4", "S13", "S14", "S15", "K4", "S16", "S17", "S17B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch5", "n": 5, "title": "Build yours", "photo": { "src": "assets/img/l4/md1/ch6-build-yours.jpg", "position": "35% 50%", "temp": false }, "minutes": 57, "screens": ["S18A", "S18", "S18B", "S19", "S20", "S20B"], "inSlice": true, "pauseMarker": null },
-    { "id": "ch6", "n": 6, "title": "Wrap-up", "photo": { "src": "assets/img/l4/md1/ch7-wrap-up.jpg", "position": "40% 50%", "temp": false }, "minutes": 15, "screens": ["S21", "S21R", "S22", "END"], "inSlice": true, "pauseMarker": null }
+    { "id": "ch6", "n": 6, "title": "Wrap-up", "photo": { "src": "assets/img/l4/md1/ch7-wrap-up.jpg", "position": "40% 50%", "temp": false }, "minutes": 17, "screens": ["S21", "S21R", "S22", "END"], "inSlice": true, "pauseMarker": null }
   ],
 
   "screens": [
@@ -762,6 +767,7 @@
       "minutes": 2,
       "presentation": true,
       "label": "Key idea · Process mapping",
+      "terms": ["Process mapping"],
       "instruction": "Every process has three parts",
       "text": "Process mapping shows how work really flows: who does each step, what goes in, what comes out.",
       "layout": "concept",
@@ -1197,7 +1203,7 @@
       "hint": "Drag the card to a column. Or press 1 to 4 to choose a column, then Enter.",
       "layout": "sort-deck",
       "hintShown": true,
-      "terms": ["Sensitivity"],
+      "terms": ["Owner", "Sensitivity"],
       "columns": [
         { "id": "a", "label": "Source", "sub": "A document the work depends on" },
         { "id": "b", "label": "Owner", "sub": "The role that keeps it current" },
@@ -3094,9 +3100,9 @@
       "chapter": "ch6",
       "template": "check",
       "step": { "verb": "Check", "icon": "check" },
-      "minutes": 10,
-      "instruction": "Choose one. Your first answer counts.",
-      "hint": "Choose one. You can retry, but only the first answer counts.",
+      "minutes": 12,
+      "instruction": "Choose one answer.",
+      "reviewInstruction": "Your answers, with feedback",
       "layout": "wide",
       "wordLimit": { "max": 55, "why": "FX3 S21 item 5b (approved text): the eight lines of the AI-drafted sales map, longer than the HR map's; the other items stay under 45" },
       "items": [
@@ -3196,9 +3202,33 @@
               { "id": "d", "label": "Field 7: 'unclear', to investigate first", "correct": true,
                 "feedback": "Nobody can even estimate who reads it, so 'unclear' is the honest answer. It shows what to check before Lesson 5." }
             ] } },
+        { "id": "i6", "icon": "speech", "trackingId": "L4_S21_6",
+          "stem": "Lesson 1 case: student inquiries. Staff answer from admission terms the registrar keeps current. Field 5 owner?",
+          "options": [
+            { "id": "a", "label": "The administrative team, who answer from them", "correct": false,
+              "feedback": "Using a source is not keeping it current. When the terms change, the map points to the wrong team." },
+            { "id": "b", "label": "The registrar, who keeps them current", "correct": true,
+              "feedback": "The owner is the role that keeps a source correct. When the terms change, the map names who updates them." },
+            { "id": "c", "label": "The process owner, who answers for all inquiries", "correct": false,
+              "feedback": "That role owns the whole process, not this source. Field 5 names who keeps each source current." },
+            { "id": "d", "label": "No one: admission terms are public anyway", "correct": false,
+              "feedback": "Public or not, a source goes stale without an owner. Outdated terms then reach every applicant." }
+          ],
+          "b": { "trackingId": "L4_S21_6b",
+            "stem": "Lesson 1 case: weekly report. KPIs come from a sheet finance keeps current. Field 5 owner?",
+            "options": [
+              { "id": "a", "label": "The operations manager, who uses it weekly", "correct": false,
+                "feedback": "Using a source is not keeping it current. When the sheet goes stale, the map points to the wrong person." },
+              { "id": "b", "label": "Management, who read the final report", "correct": false,
+                "feedback": "Readers of the output own no source. Field 5 names who keeps each source current." },
+              { "id": "c", "label": "The finance team, which keeps it current", "correct": true,
+                "feedback": "The owner is the role that keeps a source correct. When numbers go stale, the map names who fixes them." },
+              { "id": "d", "label": "No one: a sheet is data, not a policy", "correct": false,
+                "feedback": "Data sources need owners too. A sheet nobody keeps current feeds wrong numbers into every report." }
+            ] } },
         { "id": "i5", "kind": "tiles", "select": 2, "trackingId": "L4_S21_5",
           "instruction": "Find the two errors in this AI-drafted HR map.",
-          "hint": "Select two, then press Check. Your first answer counts.",
+          "hint": "Select two.",
           "tiles": [
             { "n": 1, "text": "Repeat HR questions", "correct": false, "feedback": "This line matches the HR map. Compare each line with what the map really says." },
             { "n": 2, "text": "WhatsApp, email, in person", "correct": false, "feedback": "This line matches the HR map. Compare each line with what the map really says." },
@@ -3213,7 +3243,7 @@
           ],
           "b": { "trackingId": "L4_S21_5b",
             "instruction": "Find the two errors in this AI-drafted map.",
-            "hint": "Select two, then press Check. Your first answer counts.",
+            "hint": "Select two.",
             "tiles": [
               { "n": 1, "text": "Sales call summaries", "correct": false, "feedback": "This line matches the case. Compare each line with what really happens today." },
               { "n": 2, "text": "A sales call ends", "correct": false, "feedback": "This line matches the case. Compare each line with what really happens today." },
@@ -3227,8 +3257,6 @@
               { "n": 8, "text": "About 2 days now, same day in 3 months", "correct": false, "feedback": "This line matches the case. Compare each line with what really happens today." }
             ] } }
       ],
-      "resultCard": "{x} of {n} on first try. Pass mark: {pass} of {n}.",
-      "passItems": 4,
       "advance": "after-all-items",
       "shuffleOnRetake": true,
       "tracking": [
@@ -3236,14 +3264,16 @@
         { "id": "L4_S21_2", "type": "choice", "correctResponse": "b", "scored": true, "bloom": "Apply", "result": "graded" },
         { "id": "L4_S21_3", "type": "choice", "correctResponse": "a", "scored": true, "bloom": "Apply", "result": "graded" },
         { "id": "L4_S21_4", "type": "choice", "correctResponse": "d", "scored": true, "bloom": "Analyze", "result": "graded" },
+        { "id": "L4_S21_6", "type": "choice", "correctResponse": "b", "scored": true, "bloom": "Apply", "result": "graded" },
         { "id": "L4_S21_5", "type": "choice", "multiple": true, "correctResponse": "5,6", "scored": true, "bloom": "Evaluate", "result": "graded" },
         { "id": "L4_S21_1b", "version": "b", "type": "choice", "correctResponse": "b", "scored": true, "bloom": "Analyze", "result": "graded" },
         { "id": "L4_S21_2b", "version": "b", "type": "choice", "correctResponse": "b", "scored": true, "bloom": "Apply", "result": "graded" },
         { "id": "L4_S21_3b", "version": "b", "type": "choice", "correctResponse": "a", "scored": true, "bloom": "Apply", "result": "graded" },
         { "id": "L4_S21_4b", "version": "b", "type": "choice", "correctResponse": "d", "scored": true, "bloom": "Analyze", "result": "graded" },
+        { "id": "L4_S21_6b", "version": "b", "type": "choice", "correctResponse": "c", "scored": true, "bloom": "Apply", "result": "graded" },
         { "id": "L4_S21_5b", "version": "b", "type": "choice", "multiple": true, "correctResponse": "3,5", "scored": true, "bloom": "Evaluate", "result": "graded" }
       ],
-      "sources": ["s16", "s18", "s20", "s23", "s24", "s27", "s32", "s33", "s37", "s38", "s44", "L1 booklet Cases 2, 5, 6", "HW2 (fluent but wrong AI output)", "FX3 (25 Oct 2026): version b of every item, approved text; a on the first attempt, b on a retake, alternating"]
+      "sources": ["s16", "s18", "s20", "s23", "s24", "s27", "s32", "s33", "s37", "s38", "s44", "L1 booklet Cases 2, 5, 6", "HW2 (fluent but wrong AI output)", "FX3 (25 Oct 2026): version b of every item, approved text; a on the first attempt, b on a retake, alternating", "QZ1 (1 Nov 2026): item 6 on Goal 2, the owner of a knowledge source (s22, S09), so a learner may miss two items and pass"]
     },
 
     {
@@ -3254,9 +3284,9 @@
       "presentation": true,
       "step": { "verb": "Score", "icon": "gauge" },
       "minutes": 2,
-      "instruction": "{x} of {n} on first try ({p} of 100). Pass mark: 80.",
+      "instruction": "{x} of {n} right ({p} of 100). Pass mark: 80.",
       "from": "S21",
-      "wordLimit": { "max": 60, "why": "storyboard v3 Ch5-6 S21R, worst case (all five items missed): the chip and its line, each missed item's one-line stem and its line (the review links are buttons, not counted); FX2 H1 (Noy, 22 Oct 2026)" },
+      "wordLimit": { "max": 68, "why": "storyboard v3 Ch5-6 S21R, worst case (all six items missed): the chip and its line, each missed item's one-line stem and its line (the review links are buttons, not counted); FX2 H1 (Noy, 22 Oct 2026); QZ1 (1 Nov 2026) adds item 6" },
       "passed": { "chip": "Passed", "text": "You can map a process and judge where AI fits." },
       "notPassed": { "chip": "Not passed yet", "text": "Review what you missed, then retake the whole check." },
       "reviewLabel": "Review Chapter {n}",
@@ -3265,6 +3295,7 @@
         { "item": "i2", "stem": "First AI step", "text": "Revisit the three good fits for AI.", "screen": "K4" },
         { "item": "i3", "stem": "Report baseline", "stemB": "Feedback baseline", "text": "Revisit baseline, target and date.", "screen": "S11" },
         { "item": "i4", "stem": "Field 7 unknowns", "text": "Revisit why 'unclear' belongs in Field 7.", "screen": "S10" },
+        { "item": "i6", "stem": "Source owner", "text": "Revisit who keeps a source current.", "screen": "S09" },
         { "item": "i5", "stem": "HR map errors", "stemB": "Sales map errors", "text": "Revisit the full HR map, line by line.", "screen": "S12" }
       ],
       "ringAlt": "{p} of 100",
@@ -3295,7 +3326,7 @@
           "feedback": "Sometimes the right fix is to remove the step, not speed it up. Ask why it formed first." }
       ],
       "step2": {
-        "bridge": { "icon": "map", "text": "Lesson 5 starts from this map and your AI notes from Chapter {ch4}." },
+        "bridge": { "icon": "map", "text": "In Lesson 5 this map becomes an AI architecture: Field 5 its knowledge layer, Field 8 its monitoring. Bring your AI notes from Chapter {ch4}." },
         "homework": { "icon": "calendar", "text": "Homework: complete your map and mark three AI points, using the three good-fit kinds.", "href": "@links.homework", "newTab": true },
         "feedback": {
           "download": "Your record holds your case title, notes, metric, self-check answers, takeaway and score. Your map stays in your workbook PDF. Bring it to Lesson 5.",

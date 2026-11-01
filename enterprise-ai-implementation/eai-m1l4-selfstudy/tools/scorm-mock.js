@@ -6,7 +6,7 @@
 //   (n = _count); choice / matching responses in 1.2 identifier form; and NO identity element
 //   (student_id, student_name): any read or write of one is recorded as a violation.
 // Install: installScormMock({ 'cmi.core.entry': 'resume', 'cmi.suspend_data': '...', ... })
-// Report:  window.__scormMock.report() -> { data, calls, errors, identity, initialized, finished }
+// Report:  window.__scormMock.report() -> { data, calls, errors, identity, statuses, exits, initialized, finished }
 (function (root) {
   'use strict';
   var STATUS = ['passed', 'completed', 'failed', 'incomplete', 'browsed', 'not attempted'];
@@ -23,7 +23,9 @@
     var data = Object.assign({ 'cmi.core.entry': 'ab-initio', 'cmi.core.lesson_status': 'not attempted', 'cmi.suspend_data': '',
       'cmi.core.lesson_location': '', 'cmi.core.student_id': 'MOCK-ID', 'cmi.core.student_name': 'Mock, Learner' }, init || {});
     var count = 0, initialized = false, finished = false, last = '0';
-    var calls = [], errors = [], identity = [];
+    // a relaunch may carry the earlier session's data: its interactions count (as an LMS keeps them)
+    Object.keys(data).forEach(function (k) { var m = /^cmi\.interactions\.(\d+)\.id$/.exec(k); if (m) count = Math.max(count, Number(m[1]) + 1); });
+    var calls = [], errors = [], identity = [], statuses = [], exits = [];
     function fail(msg) { errors.push(msg); last = '405'; return 'false'; }
     function checkInteraction(el, v) {
       var m = /^cmi\.interactions\.(\d+)\.(.+)$/.exec(el);
@@ -73,6 +75,8 @@
         calls.push('set ' + el + ' = ' + v.slice(0, 80));
         if (IDENTITY.test(el)) { identity.push('set ' + el); return fail('identity element ' + el); }
         if (!initialized || finished) return fail('set outside the session ' + el);
+        if (el === 'cmi.core.lesson_status') statuses.push(v); // PK1: every status ever sent (tests: never failed / completed)
+        if (el === 'cmi.core.exit') exits.push(v);
         var problem = check(el, v);
         if (problem) return fail(problem);
         data[el] = v;
@@ -84,7 +88,7 @@
       LMSGetDiagnostic: function (c) { return 'mock diagnostic ' + c; },
     };
     root.API = api;
-    root.__scormMock = { report: function () { return { data: data, calls: calls, errors: errors, identity: identity, initialized: initialized, finished: finished, count: count }; } };
+    root.__scormMock = { report: function () { return { data: data, calls: calls, errors: errors, identity: identity, statuses: statuses, exits: exits, initialized: initialized, finished: finished, count: count }; } };
     return api;
   }
   root.installScormMock = install;

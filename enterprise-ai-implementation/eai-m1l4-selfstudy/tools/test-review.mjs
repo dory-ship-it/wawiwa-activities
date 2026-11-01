@@ -167,6 +167,10 @@ console.log('\nreview.html');
     'S04:cap': (c) => c.open && c.msgs === 'coach,you,notice,coach', 'S21:open': (c) => c.open && c.locked === 'true' && c.msgs === 'notice' };
   const coachBad = coach.filter((c) => !want[c.key] || !want[c.key](c) || c.cur !== c.key.split(':')[0] || c.cd !== undefined || (c.h || '').includes('a')); // the coach's own writes: the dock, hint letter a
   expect(coach.length === 7 && !coachBad.length, `coach row: ${coach.map((c) => c.key).join(', ')}, each in its state, nothing written${coachBad.length ? ': ' + JSON.stringify(coachBad) : ''}`);
+  // CO2: the row says where the live chat is; no thumbnail frames the live page (review mode never does)
+  const liveRow = await p.evaluate(() => ({ note: document.querySelector('.rv-coach .rv-coach-live')?.textContent,
+    framed: [...document.querySelectorAll('.rv-coach .rv-frame iframe')].filter((f) => f.contentDocument?.querySelector('.w-coach-frame')).length }));
+  expect(liveRow.note === "Live chat: Dor's page, framed only in the live lesson." && liveRow.framed === 0, `coach row note: "${liveRow.note}"; no thumbnail frames the live page`);
   // filters
   await p.evaluate(() => window.scrollTo(0, 0));
   await p.click('.rv-filter[data-kind="over"]');

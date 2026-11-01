@@ -4,6 +4,8 @@
 //   url(...) in those stylesheets, content/l4-slice.json and every assets/ path in the content and in src/.
 // imsmanifest.xml at the zip root: one organization, one item, one SCO (adlcp:scormtype "sco",
 // href index.html) listing every file. No dev tools, tests, planning, review or video sources.
+// PK1: no adlcp:masteryscore, so the LMS never turns a score into passed / failed itself; the module
+// alone sets lesson_status (incomplete or passed).
 // Review mode stays out: review.html is never linked, and src/review/ (the toolbar the engine imports
 // only with ?review=1, the review page, the word counter) is skipped; in the package ?review=1 runs
 // without its toolbar.
@@ -77,7 +79,6 @@ const manifest = `<?xml version="1.0" encoding="UTF-8"?>
       <title>${title}</title>
       <item identifier="wawiwa-eai-m1l4-item" identifierref="wawiwa-eai-m1l4-sco" isvisible="true">
         <title>${title}</title>
-        <adlcp:masteryscore>${content.lesson.completion.passMark}</adlcp:masteryscore>
       </item>
     </organization>
   </organizations>
@@ -95,7 +96,18 @@ const crc32 = (buf) => { let c = 0xffffffff; for (const b of buf) c = CRC[(c ^ b
 const now = new Date();
 const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
 const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
-const entries = [['imsmanifest.xml', Buffer.from(manifest, 'utf8')], ...list.map((f) => [f, readFileSync(join(ROOT, f))])];
+// PK1 (found in Blossom, 1 Nov 2026): an LMS may serve the package's files from its own page but answer
+// images, video and fonts with a redirect to a signed cloud-storage URL on another host (Blossom: Oracle
+// object storage). index.html's CSP allows them only from 'self', so in the package img-src, media-src
+// and font-src also allow https:. Scripts, styles and fetches stay 'self'; the Pages copy stays strict.
+const LMS_CSP = [[/img-src 'self' data:/, "img-src 'self' data: https:"], [/media-src 'self'/, "media-src 'self' https:"], [/font-src 'self'/, "font-src 'self' https:"]];
+const packaged = (f) => {
+  if (f !== 'index.html') return readFileSync(join(ROOT, f));
+  let s = readFileSync(join(ROOT, f), 'utf8');
+  for (const [re, to] of LMS_CSP) { if (!re.test(s)) { console.error('package: CSP directive not found ' + re); process.exit(1); } s = s.replace(re, to); }
+  return Buffer.from(s, 'utf8');
+};
+const entries = [['imsmanifest.xml', Buffer.from(manifest, 'utf8')], ...list.map((f) => [f, packaged(f)])];
 const parts = [], central = [];
 let offset = 0;
 for (const [name, data] of entries) {

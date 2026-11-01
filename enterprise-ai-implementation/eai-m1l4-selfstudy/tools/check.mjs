@@ -23,13 +23,16 @@
 // 15. version stamp: every link to the code and content carries the current ?v= (tools/stamp.mjs)
 // 16. the coach (CO1, offline): no network code and no proxy URL in src/coach; every slice screen has
 //     coach.kind with its opening line in ui.coach.lines; S21 locked with no tip; a copied tip is the
-//     screen's hint word for word, a drafted tip (tipDrafted) at most 20 words; the grounding pack exists
+//     screen's hint word for word, a drafted tip (tipDrafted) at most 20 words; the grounding pack exists.
+//     CO2: the only URL in src/coach is the live coach page (live.js), every kind maps to a live screen
+//     type, and the CSP frames only that page's origin
 // 17. the personal path (PP1): checkpoints, goals, both variants per adaptive screen, same template and
 //     item counts, keys match tracking, deck sources, banned wording, no S21 case (9 and 10 also count
 //     and key every variant)
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { SCREEN_TYPES } from '../src/coach/live.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fails = [];
@@ -275,7 +278,7 @@ const refs = content.screens.flatMap((s) => [
   ...(s.items || []).flatMap((it) => [[s.id, it.trackingId], ...(it.b ? [[s.id, it.b.trackingId]] : [])]),
   ...(s.step2?.field ? [[s.id, s.step2.field.trackingId]] : []),
 ]);
-// the scored screens and the pass mark (S21: 5 scored items, pass 80 = 4 of 5)
+// the scored screens and the pass mark (S21: 6 scored items at 20 points each, capped at 100: pass 80 = 4 of 6)
 const comp = content.lesson.completion;
 const scored = comp.scoredScreens.flatMap((sid) => (content.screens.find((x) => x.id === sid)?.tracking || []).filter((t) => t.scored));
 if (!scored.length || !(comp.passMark > 0 && comp.passMark <= 100) || interactions.some(([s, t]) => t?.scored && !comp.scoredScreens.includes(s.id)))
@@ -393,12 +396,20 @@ google.length || missingFace.length || lacking.length
 /* 16. the coach (CO1, offline mode) */
 {
   const coachFiles = srcFiles.filter((f) => relative(ROOT, f).startsWith(join('src', 'coach')) && f.endsWith('.js'));
-  const NET = /\bfetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|\bimport\s*\(|https?:\/\//;
+  // CO2: the one URL allowed is Dor's coach page, once, in src/coach/live.js (an iframe, not a request)
+  const COACH_URL = 'https://dory-ship-it.github.io/wawiwa-activities/enterprise-ai-implementation/eai-m1l4-coach/';
+  const NET = /\bfetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|\bimport\s*\(/;
   const net = coachFiles.filter((f) => NET.test(stripComments(read(f))));
+  const urls = coachFiles.flatMap((f) => (stripComments(read(f)).match(/https?:\/\/[^'"`\s)]*/g) || []).map((u) => [relative(ROOT, f), u]));
+  const badUrls = urls.filter(([f, u]) => u !== COACH_URL || !f.endsWith('live.js'));
   const proxy = [...srcFiles, join(ROOT, 'index.html'), contentPath].filter((f) => /proxy|workers\.dev|\.lambda-url\./i.test(read(f)));
-  net.length || proxy.length || !coachFiles.some((f) => f.endsWith('transport.js'))
-    ? fail(`coach: network code in ${net.map((f) => relative(ROOT, f)).join(', ') || '-'}; proxy URL in ${proxy.map((f) => relative(ROOT, f)).join(', ') || '-'}`)
-    : ok(`coach: no network code in ${coachFiles.length} src/coach files (one transport, ask()), no proxy URL in src, index.html or content`);
+  net.length || badUrls.length || urls.length !== 1 || proxy.length || !coachFiles.some((f) => f.endsWith('transport.js'))
+    ? fail(`coach: network code in ${net.map((f) => relative(ROOT, f)).join(', ') || '-'}; URLs ${urls.map(([f, u]) => f + ' ' + u).join(', ') || '-'}; proxy URL in ${proxy.map((f) => relative(ROOT, f)).join(', ') || '-'}`)
+    : ok(`coach: no network code in ${coachFiles.length} src/coach files (one transport, ask()); one URL, the coach page, in live.js; no proxy URL in src, index.html or content`);
+  // CO2: the CSP frames only the coach page's origin; nothing else in it changed
+  const CSP = "default-src 'self'; img-src 'self' data:; media-src 'self'; font-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; frame-src https://dory-ship-it.github.io; object-src 'none'; base-uri 'self'; form-action 'none'";
+  const csp = read(join(ROOT, 'index.html')).match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];
+  csp === CSP ? ok('CSP: frame-src https://dory-ship-it.github.io (the live coach), the rest unchanged') : fail(`CSP is ${csp}`);
   const lines = content.ui.coach?.lines || {};
   const slice = content.lesson.slice.map((id) => content.screens.find((s) => s.id === id));
   const bad = [];
@@ -407,6 +418,7 @@ google.length || missingFace.length || lacking.length
     if (!c || !c.kind) { bad.push(`${s.id} no coach.kind`); continue; }
     if (c.kind === 'locked') { if (c.tip) bad.push(`${s.id} locked with a tip`); continue; }
     if (!lines[c.kind]) bad.push(`${s.id} kind ${c.kind} has no opening line`);
+    if (!SCREEN_TYPES[c.kind]) bad.push(`${s.id} kind ${c.kind} has no live screen type`);
     if (!c.tip) bad.push(`${s.id} no tip`);
     else if (c.tipDrafted) { if (words(c.tip) > 20) bad.push(`${s.id} drafted tip ${words(c.tip)} words`); }
     else if (c.tip !== s.hint) bad.push(`${s.id} tip is not its hint word for word`);
