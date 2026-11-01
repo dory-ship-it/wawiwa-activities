@@ -1,5 +1,28 @@
 // Shared by tools/test-fit.mjs and tools/walk.mjs: Chrome lookup and the in-page layout measure.
-import { existsSync } from 'node:fs';
+// CO2: stubCoach(), the local stand-in for Dor's live coach page.
+import { existsSync, readFileSync } from 'node:fs';
+import { COACH_URL, COACH_ORIGIN } from '../src/coach/live.js';
+
+export { COACH_URL, COACH_ORIGIN };
+
+// CO2: serve tools/coach-stub.html at the coach URL by request interception (the iframe's src stays the
+// real URL and its origin the real origin); any other request to that origin is aborted, nothing reaches
+// the network. mode: 'ready' (the stub answers), 'silent' (never ready: the 8 s fallback), 'abort' (the
+// load fails). Returns { hits, mode }: hits counts the loads of the coach URL (a reload would show).
+export async function stubCoach(page, mode = 'ready') {
+  const html = readFileSync(new URL('./coach-stub.html', import.meta.url), 'utf8');
+  const st = { hits: 0, mode };
+  await page.setRequestInterception(true);
+  page.on('request', (r) => {
+    if (r.isInterceptResolutionHandled()) return;
+    const url = r.url();
+    if (!url.startsWith(COACH_ORIGIN + '/')) { r.continue(); return; }
+    if (url !== COACH_URL || st.mode === 'abort') { if (url === COACH_URL) st.hits++; r.abort(); return; }
+    st.hits++;
+    r.respond({ status: 200, contentType: 'text/html; charset=utf-8', body: st.mode === 'silent' ? html.replace('/*READY*/true', 'false') : html });
+  });
+  return st;
+}
 
 export function chromePath() {
   const cands = [process.env.CHROME_PATH, process.env.PUPPETEER_EXECUTABLE_PATH,

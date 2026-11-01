@@ -1861,8 +1861,9 @@ console.log('\ncoach (keyboard)');
   const coachState = (p) => p.evaluate(() => { const panel = document.querySelector('.w-coach-panel'); const b = document.querySelector('.w-coach-launcher');
     return { open: !panel.hidden, expanded: b.getAttribute('aria-expanded'), dock: panel.dataset.dock, msgs: [...panel.querySelectorAll('.w-coach-msg')].map((m) => m.textContent.trim()),
       inPanel: panel.contains(document.activeElement), onLauncher: document.activeElement === b }; });
+  // CO2: ?live=0, CO1's offline panel (the live page by keyboard is in tools/test-coach-live.mjs)
   for (const id of ['K1', 'W1', 'S04', 'S02', 'S22']) {
-    const p = await open(`?reset=1&screen=${id}`);
+    const p = await open(`?reset=1&live=0&screen=${id}`);
     const line = CO.lines[S[id].coach.kind];
     await tabTo(p, '.w-coach-launcher', { back: true });
     await press(p, 'Enter');
@@ -1885,7 +1886,7 @@ console.log('\ncoach (keyboard)');
     await p.close();
   }
   // the dock: Arrow Right on the grip, saved with the lesson's next save, back after a relaunch
-  const p = await open('?reset=1&screen=S04');
+  const p = await open('?reset=1&live=0&screen=S04');
   await tabTo(p, '.w-coach-launcher', { back: true });
   await press(p, 'Enter');
   await tabTo(p, '.w-coach-grip');
@@ -1898,7 +1899,7 @@ console.log('\ncoach (keyboard)');
   await p.evaluate(() => window.__l4.go('S05a'));
   const saved = await p.evaluate(() => JSON.parse(localStorage.getItem('wawiwa.eai.l4.slice')).g.cd);
   expect(r1.dock === 'r' && l1.dock === 'l' && saved === 'r', `grip: Arrow Right docks right, Arrow Left left; the dock goes out with the next save (g.cd ${saved})`);
-  await p.goto(BASE, { waitUntil: 'networkidle0' });
+  await p.goto(BASE + '?live=0', { waitUntil: 'networkidle0' });
   await p.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
   await tabTo(p, '[data-action="resume"]');
   await press(p, 'Enter');

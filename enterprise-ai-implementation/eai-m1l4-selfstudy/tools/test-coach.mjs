@@ -1,4 +1,5 @@
-// CO1: the Wawiwa AI Coach (offline mode) on its own. Usage: npm run test:coach
+// CO1: the Wawiwa AI Coach (offline mode) on its own, with ?live=0 (CO2: the live page has its own test,
+// npm run test:coach-live). Usage: npm run test:coach
 //   1. static: src/coach has no network code (fetch, XMLHttpRequest, WebSocket, EventSource,
 //      sendBeacon, dynamic import, a URL) and transport.ask() answers { offline: true }; every slice
 //      screen has a coach block (S21 locked with no tip, a tip everywhere else); the grounding pack is there
@@ -18,7 +19,7 @@ import puppeteer from 'puppeteer-core';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { startServer, ROOT } from './serve.mjs';
-import { chromePath } from './lib.mjs';
+import { chromePath, COACH_URL } from './lib.mjs';
 import { resolveChapterRefs } from '../src/util.js';
 
 const C = resolveChapterRefs(JSON.parse(readFileSync(join(ROOT, 'content', 'l4-slice.json'), 'utf8')));
@@ -33,9 +34,11 @@ const expect = (cond, m) => (cond ? ok(m) : fail(m));
 console.log('\n1. static');
 const coachDir = join(ROOT, 'src', 'coach');
 const files = readdirSync(coachDir).filter((f) => f.endsWith('.js'));
+// CO2: one URL, Dor's coach page, framed by live.js (an iframe, no request from the lesson)
 const NET = /\bfetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|\bimport\s*\(|https?:\/\//;
-const netHits = files.filter((f) => NET.test(readFileSync(join(coachDir, f), 'utf8').replace(/\/\/.*$/gm, '')));
-expect(files.includes('transport.js') && !netHits.length, `src/coach (${files.join(', ')}): no fetch, XHR, WebSocket, EventSource, beacon, dynamic import or URL${netHits.length ? ' (in ' + netHits.join(', ') + ')' : ''}`);
+const code = (f) => { const s = readFileSync(join(coachDir, f), 'utf8').replace(/\/\/.*$/gm, ''); return f === 'live.js' ? s.replace(`'${COACH_URL}'`, "''") : s; };
+const netHits = files.filter((f) => NET.test(code(f)));
+expect(files.includes('transport.js') && files.includes('live.js') && !netHits.length, `src/coach (${files.join(', ')}): no fetch, XHR, WebSocket, EventSource, beacon, dynamic import or URL but the coach page in live.js${netHits.length ? ' (in ' + netHits.join(', ') + ')' : ''}`);
 const { ask } = await import('../src/coach/transport.js');
 const answer = await ask({ screen: 'S04', kind: 'practice', question: 'test' });
 expect(answer && answer.offline === true && Object.keys(answer).length === 1, `transport.ask() answers ${JSON.stringify(answer)}`);
@@ -69,7 +72,8 @@ async function open(query, { lms = null } = {}) {
   page.on('pageerror', (e) => page.errors.push('pageerror: ' + e.message));
   await page.setViewport({ width: 1280, height: 720, deviceScaleFactor: 1 });
   await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
-  await page.goto(BASE + query, { waitUntil: 'networkidle0' });
+  // CO2: ?live=0, the offline coach (CO1) on its own; the live page is tools/test-coach-live.mjs
+  await page.goto(BASE + query + (query ? '&' : '?') + 'live=0', { waitUntil: 'networkidle0' });
   await page.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
   return page;
 }

@@ -8,27 +8,27 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=6b628c2e';
-import { createZones } from './zones.js?v=6b628c2e';
-import { createMenu, openDialog } from './menu.js?v=6b628c2e';
-import { initTooltips, applyTerms } from './tooltip.js?v=6b628c2e';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=6b628c2e';
-import { decision } from './templates/decision.js?v=6b628c2e';
-import { input } from './templates/input.js?v=6b628c2e';
-import { sortDeck } from './templates/sortdeck.js?v=6b628c2e';
-import { bpmn } from './templates/bpmn.js?v=6b628c2e';
-import { flags } from './templates/flags.js?v=6b628c2e';
-import { explorer } from './templates/explorer.js?v=6b628c2e';
-import { video } from './templates/video.js?v=6b628c2e';
-import { handoff } from './templates/handoff.js?v=6b628c2e';
-import { check } from './templates/check.js?v=6b628c2e';
-import { result } from './templates/result.js?v=6b628c2e';
-import { end } from './templates/end.js?v=6b628c2e';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=6b628c2e';
-import { createGhost, stopGhost } from './ghost.js?v=6b628c2e';
-import { createTracking } from './tracking/index.js?v=6b628c2e';
-import { createCoach } from './coach/coach.js?v=6b628c2e';
-import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=6b628c2e';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=86f78ba2';
+import { createZones } from './zones.js?v=86f78ba2';
+import { createMenu, openDialog } from './menu.js?v=86f78ba2';
+import { initTooltips, applyTerms } from './tooltip.js?v=86f78ba2';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=86f78ba2';
+import { decision } from './templates/decision.js?v=86f78ba2';
+import { input } from './templates/input.js?v=86f78ba2';
+import { sortDeck } from './templates/sortdeck.js?v=86f78ba2';
+import { bpmn } from './templates/bpmn.js?v=86f78ba2';
+import { flags } from './templates/flags.js?v=86f78ba2';
+import { explorer } from './templates/explorer.js?v=86f78ba2';
+import { video } from './templates/video.js?v=86f78ba2';
+import { handoff } from './templates/handoff.js?v=86f78ba2';
+import { check } from './templates/check.js?v=86f78ba2';
+import { result } from './templates/result.js?v=86f78ba2';
+import { end } from './templates/end.js?v=86f78ba2';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=86f78ba2';
+import { createGhost, stopGhost } from './ghost.js?v=86f78ba2';
+import { createTracking } from './tracking/index.js?v=86f78ba2';
+import { createCoach } from './coach/coach.js?v=86f78ba2';
+import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=86f78ba2';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -110,9 +110,11 @@ class Lesson {
       onChapter: (n) => this.goChapter(n),
       onStartOver: () => this.startOver(),
     });
-    // CO1: the Wawiwa AI Coach (offline tips), launcher in the bar on every screen; never tracked
+    // CO1: the Wawiwa AI Coach (offline tips), launcher in the bar on every screen; never tracked.
+    // CO2: live (Dor's coach page framed in the panel) except in review mode and with ?live=0 (the tests
+    // that run without the network)
     this.coach = createCoach(this.stage, content, { zones: this.zones, review: this.review, thumb: this.thumb, preview: q.get('coach'),
-      demoScreen: content.ui.coach.demoOn, getState: () => this.state });
+      demoScreen: content.ui.coach.demoOn, live: !this.review && q.get('live') !== '0', getState: () => this.state });
 
     // SCORM 1.2: the LMS holds the state (suspend_data, lesson_location); local mode: localStorage
     const lms = this.tracking.init();
@@ -164,7 +166,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=6b628c2e').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=86f78ba2').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }

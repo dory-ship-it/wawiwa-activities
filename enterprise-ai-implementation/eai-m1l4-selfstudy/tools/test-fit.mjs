@@ -14,7 +14,8 @@
 //   4. CO1, the coach on every slice screen: the launcher in the bar (56 x 56, y 0 to 80.64, the bar's
 //      parts still fit, nothing clipped), then the open panel at the left and the right dock: inside y 96
 //      to 632 and 24 from its side, opaque and on top, clear of Previous / Next and the bar, and the
-//      screen's layout checks with it open
+//      screen's layout checks with it open. CO2: with the live page (a local stub at the coach URL)
+//      filling the body under the header, 340 wide to the panel's foot (hidden on S21)
 // Usage: npm run test:fit                 everything
 //        node tools/test-fit.mjs S09 W3    only these screens' states (sections 2 and 4), for a quick check
 //        --coach                           section 4 only
@@ -23,7 +24,7 @@ import puppeteer from 'puppeteer-core';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { startServer, ROOT } from './serve.mjs';
-import { chromePath, measureLayout, layoutVerdict } from './lib.mjs';
+import { chromePath, measureLayout, layoutVerdict, stubCoach } from './lib.mjs';
 
 // every screen state at these sizes; 1366x650 to 2560x1080: browser windows with their bars, stage
 // widened (2560x1080 caps the stage at 1600 and letterboxes the rest)
@@ -46,18 +47,20 @@ const pairs = new Map(); // every text/background pair seen, for the report
 // browser the shared media loading stalled (the V1 film stopped buffering mid-way at 2560x1080).
 // NL3: after a few hundred pages one load sometimes never settles (S15 at 1024x576 waited 30 s for
 // the fonts; alone it loads at once). Such a load is tried once more in a fresh context.
-async function open(query, size = [1280, 720]) {
-  try { return await openOnce(query, size); } catch (e) {
+// coach: CO2, the live coach page's local stub at the coach URL (tools/coach-stub.html; no network)
+async function open(query, size = [1280, 720], { coach = false } = {}) {
+  try { return await openOnce(query, size, coach); } catch (e) {
     if (e.name !== 'TimeoutError') throw e;
     console.log(`  note ${query} ${size.join('x')}: load timed out, tried once more`);
-    return openOnce(query, size);
+    return openOnce(query, size, coach);
   }
 }
-async function openOnce(query, [w, h]) {
+async function openOnce(query, [w, h], coach = false) {
   const context = await browser.createBrowserContext();
   const page = await context.newPage();
   const closePage = page.close.bind(page);
   page.close = async () => { await closePage().catch(() => {}); await context.close().catch(() => {}); };
+  if (coach) await stubCoach(page);
   page.errors = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warn') page.errors.push(m.type() + ': ' + m.text()); });
   page.on('pageerror', (e) => page.errors.push('pageerror: ' + e.message));
@@ -454,12 +457,13 @@ const coachBoxes = () => {
   return { stageW: s.width / k, launcher: box(document.querySelector('.w-coach-launcher')), chapter: box(document.querySelector('.w-bar-chapter')),
     steps: [...document.querySelectorAll('.w-step')].map(box), bar: box(bar), barScroll: bar.scrollWidth > bar.clientWidth + 1,
     panel: box(panel), onTop: pts.every((e) => e && panel.contains(e)), opaque: !/rgba\(.*,\s*0?\.\d+\)$/.test(bg) && bg !== 'transparent',
+    head: box(panel.querySelector('.w-coach-head')), frame: box(panel.querySelector('.w-coach-frame')), live: window.__l4.coach.isLive(),
     foot: [...document.querySelectorAll('.w-footer > button')].filter((b) => !b.hidden && b.getClientRects().length).map(box) };
 };
 const meet = (a, b) => a && b && a.r > b.l + 0.5 && a.l < b.r - 0.5 && a.b > b.t + 0.5 && a.t < b.b - 0.5;
 for (const size of SIZES) {
   for (const id of SLICE.filter((x) => !ONLY.length || ONLY.includes(x))) {
-    const page = await open(`?reset=1&screen=${id}`, size);
+    const page = await open(`?reset=1&screen=${id}`, size, { coach: true }); // CO2: the panel with the live page (stub)
     const what = `${id} ${size.join('x')}`;
     await page.keyboard.press('Shift'); // any key stops a ghost hand
     const c = await page.evaluate(coachBoxes);
@@ -470,12 +474,16 @@ for (const size of SIZES) {
       `${what} launcher: ${w}x${hg} at x ${L && Math.round(L.l)}, in the bar, after the chapter name, clear of the ${steps.length} steps, the bar's parts fit`);
     for (const dock of ['l', 'r']) {
       await page.evaluate((d) => { const co = window.__l4.coach; if (!co.isOpen()) co.open({ focus: false }); co.setDock(d); }, dock);
+      await page.waitForFunction(() => window.__l4.coach.isLive(), { timeout: 5000 }).catch(() => {});
       await page.evaluate(() => new Promise((r) => setTimeout(r, 30)));
       const o = await page.evaluate(coachBoxes);
-      const P = o.panel;
+      const P = o.panel, F = o.frame;
       const side = dock === 'l' ? Math.abs(P.l - 24) < 1 : Math.abs(o.stageW - P.r - 24) < 1;
-      expect(P && P.t >= 96 - 0.5 && P.b <= 632 + 0.5 && Math.round(P.r - P.l) === 340 && side && o.onTop && o.opaque && !o.foot.some((F) => meet(P, F)) && !meet(P, o.bar),
+      expect(P && P.t >= 96 - 0.5 && P.b <= 632 + 0.5 && Math.round(P.r - P.l) === 340 && side && o.onTop && o.opaque && !o.foot.some((B) => meet(P, B)) && !meet(P, o.bar),
         `${what} panel ${dock === 'l' ? 'left' : 'right'}: x ${Math.round(P.l)} to ${Math.round(P.r)}, y ${Math.round(P.t)} to ${Math.round(P.b)}, opaque and on top, clear of the bar and Previous / Next`);
+      // CO2: the live page fills the body under the header, 340 wide, to the panel's foot (S21: hidden)
+      const frameOk = id === 'S21' ? !F : F && o.live && Math.round(F.r - F.l) === 340 && Math.abs(F.l - P.l) < 1 && Math.abs(F.t - o.head.b) < 1 && Math.abs(F.b - P.b) < 1;
+      expect(frameOk, `${what} live page ${dock === 'l' ? 'left' : 'right'}: ${F ? `x ${Math.round(F.l)} to ${Math.round(F.r)}, y ${Math.round(F.t)} to ${Math.round(F.b)}${o.live ? '' : ', not live'}` : 'hidden (S21 locked)'}`);
       await measure(page, `${what} coach open ${dock === 'l' ? 'left' : 'right'}`);
     }
     expect(!page.errors.length, `${what} coach: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);

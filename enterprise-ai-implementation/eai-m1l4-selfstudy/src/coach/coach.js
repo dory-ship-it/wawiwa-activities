@@ -21,22 +21,29 @@
 // the default and left out) and the demo (letter 'a' in state.h; 'c' is the choice ghost's).
 // Nothing the learner types is kept anywhere. Review mode (?review=1) writes nothing; ?coach=hint |
 // open | tip | right | thinking | cap | demo shows that state on load (the review page's coach row).
+// CO2, live: from the learner's first open, the panel body below the header is Dor's coach page in an
+// iframe (src/coach/live.js), kept mounted across screens and hidden on S21; it gets the screen's
+// context on every screen change. If the page does not answer, the offline tips above for the launch.
 // No learner-facing text here: every string arrives from content ui.coach.
-import { h, reducedMotion } from '../util.js?v=6b628c2e';
-import { glyph } from '../icons.js?v=6b628c2e';
-import { ask } from './transport.js?v=6b628c2e';
+import { h, reducedMotion } from '../util.js?v=86f78ba2';
+import { glyph } from '../icons.js?v=86f78ba2';
+import { ask } from './transport.js?v=86f78ba2';
+import { createLiveFrame, buildContext, caseLabels } from './live.js?v=86f78ba2';
 
 const HINT_CODE = 'a';
 const TOP = 96, BOTTOM = 632; // the panel's box in stage px
 const DEMO = { wait: 900, pulse: 1100, shown: 2600 }; // ms: before the pulse, pulse to open, open to close
 
-export function createCoach(stage, content, { zones, review = false, thumb = false, preview = null, demoScreen = null, getState }) {
+export function createCoach(stage, content, { zones, review = false, thumb = false, preview = null, demoScreen = null, live: liveOn = false, getState }) {
   const ui = content.ui.coach;
   let screen = null;
   let open = false;
   let run = 0;        // the panel's current fill; a later fill (or a screen change) drops an older one
   let previewed = false;
   let demo = null;    // the running demo: { timers, stop }
+  let liveCoach = null; // CO2: the framed coach page, from the first open; null before, and after a fallback
+  let liveOff = review || thumb || !liveOn; // no live page in this launch (review mode, ?live=0, or no answer)
+  const labels = caseLabels(content);
 
   /* ---- launcher ---- */
   const lockBadge = h('span', { class: 'w-coach-lock', 'aria-hidden': 'true', hidden: true }, glyph('g-lock', { size: 14 }));
@@ -82,11 +89,16 @@ export function createCoach(stage, content, { zones, review = false, thumb = fal
 
   // the panel's messages for this screen. mode: 'offline' (CO1: the opening line and the tip chip),
   // 'tip' (the chip already pressed), 'thinking' and 'cap' (the live coach, review page only), 'demo'
-  // (the goals screen's demo: one line, nothing to press)
+  // (the goals screen's demo: one line, nothing to press). CO2: with the live page framed, 'offline'
+  // shows the page instead (S21: CO1's locked notice, the page hidden)
   function fill(mode = 'offline') {
     run++;
+    const framed = !!liveCoach && mode === 'offline' && !locked();
+    if (liveCoach) liveCoach.frame.hidden = !framed;
+    log.hidden = framed;
     log.removeAttribute('aria-busy');
     log.replaceChildren();
+    if (framed) { foot.hidden = true; return; }
     foot.dataset.mode = ['thinking', 'cap'].includes(mode) ? 'live' : 'tips';
     if (locked()) { foot.hidden = true; log.append(notice(ui.locked)); return; }
     if (mode === 'demo') { foot.hidden = true; log.append(coachMsg(ui.demo)); return; }
@@ -118,6 +130,29 @@ export function createCoach(stage, content, { zones, review = false, thumb = fal
     if (!(st.h || '').includes(HINT_CODE)) st.h = (st.h || '') + HINT_CODE;
   }
 
+  /* ---- CO2: the live coach page ---- */
+  // the screen's context to the page (once it is ready; on every screen change, open or not)
+  function sendContext() {
+    if (liveCoach?.ready() && screen) liveCoach.send(buildContext(content, screen, getState().f || {}, labels));
+  }
+  // the frame, once per launch, on the first open
+  function startLive() {
+    liveCoach = createLiveFrame(head, {
+      title: ui.frameTitle,
+      onReady: sendContext,
+      onClose: () => close(),
+      onFail: () => {
+        // the page did not answer: CO1's offline tips for the rest of the launch (no error shown)
+        const hadFocus = !!liveCoach && document.activeElement === liveCoach.frame;
+        liveCoach = null;
+        liveOff = true;
+        if (!open || demo) return;
+        fill('tip');
+        if (hadFocus && !thumb) panel.focus({ preventScroll: true });
+      },
+    });
+  }
+
   function openPanel({ focus = true, mode = 'offline' } = {}) {
     stopDemo();
     hideHint();
@@ -125,6 +160,7 @@ export function createCoach(stage, content, { zones, review = false, thumb = fal
     open = true;
     panel.hidden = false;
     launcher.setAttribute('aria-expanded', 'true');
+    if (!liveCoach && !liveOff && mode === 'offline') startLive();
     fill(mode);
     if (focus && !thumb) panel.focus({ preventScroll: true });
   }
@@ -243,6 +279,7 @@ export function createCoach(stage, content, { zones, review = false, thumb = fal
     lockBadge.hidden = !isLocked;
     panel.dataset.dock = dockOf();
     if (open) fill();
+    sendContext();
     // review page: the state asked for in the URL, once (nothing is written)
     if (review && preview && !previewed) {
       previewed = true;
@@ -261,5 +298,5 @@ export function createCoach(stage, content, { zones, review = false, thumb = fal
     }
   }
 
-  return { show, open: openPanel, close, setDock, isOpen: () => open, launcher, panel, hint };
+  return { show, open: openPanel, close, setDock, isOpen: () => open, isLive: () => !!liveCoach?.ready(), launcher, panel, hint };
 }
