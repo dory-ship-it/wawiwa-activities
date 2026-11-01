@@ -124,7 +124,7 @@ Known Blossom limits (questions sent to support):
 - do not replace the package mid-pilot.
 Not yet done by hand: quit mid-video, the coach answering a student, S19 workbook tab and Copy.
 Ready for the 2-3 learner pilot once the pilot course is set up (assignment required, score from SCORM, Strict, no Blossom pass mark).
-- Still to do: the total time check (status, score, time) and where Blossom shows per-question answers. Scenarios 3 (quit mid-video and on S19), 5 (coach answer as student) and 6 (S19 workbook tab, Copy) by hand.
+- Still to do by hand: scenario 3 (quit mid-video and on S19), 5 (the coach answering a student), 6 (the S19 workbook tab, Copy). The report is over 80 lines, because of the Blossom rounds.
 SCORM Cloud was not run first: Noy chose to try Blossom directly.
 
 Weekly usage (all models) after: 6%.
