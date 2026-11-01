@@ -99,6 +99,31 @@ Noy uploaded the 25.74 MB zip as is: it was accepted, no size problem. Test cour
   - Relaunch after passing: Blossom STILL starts a new empty attempt (`ab-initio`) even with exit suspend. So it is Blossom's rule (a completed attempt is closed), not the module's exit.
   - Earlier evidence: a later attempt after a completed one is not recorded, so the passed result stays.
   - Open: whether an Advanced setting changes this.
+- **v3 report:** questions and answers read well. Neutral rows still show ✗ even with no result: Blossom shows ✗ for anything not "correct". Kept as is (honest data); teachers are told that ✗ with weight 0 and no correct answer = an open question.
+- **Assignment settings (Edit > General > Scorm):**
+  - Completion requirement stays "Strict - results processed on LMSFinish/Terminate". "Flexible" would process at S21's passed, mid-lesson.
+  - "Don't show report after finishing": on.
+  - "This content support reviewing": turned on by Noy. It did not change the relaunch: it resumed the empty "Suspended" attempt left by an earlier revisit.
+  - Upload limit 512 MB.
+- **For Blossom support:**
+  1. Can a learner who completed reopen their completed attempt (review) instead of starting a new one?
+  2. Can rows with no result show something other than ✗?
+  3. Are the per-question answers of uncompleted attempts available (Export)?
+  4. What happens to learners in progress when the package is replaced (Edit content)?
+
+## Summary for the foreman chat
+PK1 is done and tested in Blossom (test course "Unit test", demo student). The SCORM 1.2 package (25.75 MB, limit 512 MB) reports correctly:
+- passed / incomplete only, never failed; score 0-100;
+- total time; progress saved across sessions, and a learner below 80 comes back to "Retake now" with their work intact;
+- every answer per question in words in the teacher report;
+- the live coach works inside Blossom; Dor needs to allow only https://dory-ship-it.github.io.
+Known Blossom limits (questions sent to support):
+- a learner who passed and reopens gets a new empty attempt (the passed result stays);
+- open questions show ✗;
+- answers of uncompleted learners are not shown;
+- do not replace the package mid-pilot.
+Not yet done by hand: quit mid-video, the coach answering a student, S19 workbook tab and Copy.
+Ready for the 2-3 learner pilot once the pilot course is set up (assignment required, score from SCORM, Strict, no Blossom pass mark).
 - Still to do: the total time check (status, score, time) and where Blossom shows per-question answers. Scenarios 3 (quit mid-video and on S19), 5 (coach answer as student) and 6 (S19 workbook tab, Copy) by hand.
 SCORM Cloud was not run first: Noy chose to try Blossom directly.
 
