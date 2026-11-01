@@ -111,6 +111,11 @@ Noy uploaded the 25.74 MB zip as is: it was accepted, no size problem. Test cour
   3. Are the per-question answers of uncompleted attempts available (Export)?
   4. What happens to learners in progress when the package is replaced (Edit content)?
 
+- **Images missing in Blossom (found by Noy):** Blossom answers images with a redirect to signed Oracle object storage, another host. The page's CSP `img-src 'self' data:` blocked them (58 console errors). Video and fonts fall under the same rule.
+  - Fix in the package only (`tools/package-scorm.mjs`): img-src, media-src and font-src also allow `https:`; scripts, styles and fetches stay 'self'. Checked by `test:lms-origin`.
+  - v4 in Blossom: logo and scene photos load, Assistant fonts load, V1 plays (175 s), captions show.
+  - My earlier Blossom checks read the data only and never looked at the screen; the local tests have no redirect.
+
 ## Summary for the foreman chat
 PK1 is done and tested in Blossom (test course "Unit test", demo student). The SCORM 1.2 package (25.75 MB, limit 512 MB) reports correctly:
 - passed / incomplete only, never failed; score 0-100;
