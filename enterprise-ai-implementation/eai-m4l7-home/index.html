@@ -178,7 +178,7 @@
 
 <div class="warn">
   <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 4.4-3.1 8.3-8 9-4.9-.7-8-4.6-8-9V7l8-4z"/></svg>
-  <span>One page that travels with the system. No passwords or access keys anywhere in it. Your partner should be able to start from it without a verbal explanation.</span>
+  <span>One page that travels with the system. No passwords or access keys anywhere in it. Your partner should be able to start from it without a verbal explanation. The project was built in pairs; each person submits their own page, on the date the trainer sets.</span>
 </div>
 
 <div class="stage"><span>The one-page handover</span><i></i></div>
@@ -213,10 +213,10 @@
 <section class="card" id="card-t3">
   <div class="cn">03</div>
   <h3>The state of the tests</h3>
-  <p class="instr">The permission matrix, the five test scenarios with their results and evidence, and the limits and gaps.</p>
+  <p class="instr">The permission matrix, the test scenarios you ran with their results and evidence, and the limits and gaps.</p>
   <p class="aid">&ldquo;Not verified&rdquo; is an honest result. Write it where it applies.</p>
   <label class="fl" for="t3">Matrix, tests and gaps</label>
-  <textarea id="t3" rows="7" placeholder="Matrix: &hellip;&#10;Tests 1 to 5, with results and evidence: &hellip;&#10;Limits and gaps: &hellip;"></textarea>
+  <textarea id="t3" rows="7" placeholder="Matrix: &hellip;&#10;The tests you ran, with results and evidence: &hellip;&#10;Limits and gaps: &hellip;"></textarea>
   <span class="pii"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>Keep it about the work. No names, email addresses, phone numbers or anything else personal, yours or anyone else&rsquo;s.</span>
   <div class="row">
     <button class="coach" data-task="t3">Check with AI Coach</button>
@@ -260,7 +260,7 @@
 The lesson's slides are the authority. The coach reasons only from what is here.
 
 ## The homework
-Slide 45. Finish the project file and the one-page handover: 1. purpose and users (name, business need, core path); 2. access and operation (link and version or date, how to start, roles, process owner and maintenance owner, connected services and the dependency on them); 3. the state of the tests (matrix, test scenarios with results and evidence, limits and gaps); 4. the agreed next step (readiness decision, next step, owner, date). No passwords or access keys. The partner checks it can be understood without a verbal explanation.
+Slide 45. Finish the project file and the one-page handover: 1. purpose and users (name, business need, core path); 2. access and operation (link and version or date, how to start, roles, process owner and maintenance owner, connected services and the dependency on them); 3. the state of the tests (matrix, test scenarios with results and evidence, limits and gaps); 4. the agreed next step (readiness decision, next step, owner, date). No passwords or access keys. The partner checks it can be understood without a verbal explanation. The project was built in pairs; each person submits their own page, on the date the trainer sets.
 
 ## Signed in is not the same as allowed
 Authentication answers who the user is. Authorization answers what they may do. A successful sign-in
@@ -279,13 +279,15 @@ absence of a rule is not a permission.
 
 ## Testing
 Test from separate accounts or isolated browser profiles, on a system you own, with dummy data. Test
-the roles the project really has, and two users in the same role where the policy separates them.
+the permissions the project really has; there is no required number of roles or users.
 Testing from the builder's own account passes everything. Never test a system you do not own, never
 use a real person's account, and never widen a permission to make a test pass. Finding no fault is a
 valid result; a documented test is a deliverable. Where you could not check a layer, write "not
 verified".
 
 ## The five tests
+Tests 1 to 4 were run in class; test 5 only after a fix. No problem found = no fix and no re-test,
+and that is a valid result.
 1. The normal path: create and update are saved, still there after a refresh.
 2. Invalid input: blocked when a required field is missing, with an explanation.
 3. Someone else's data: another user's request is not exposed.
