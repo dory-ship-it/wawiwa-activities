@@ -10,8 +10,8 @@
 //                multi-select), and paint() for their selected / correct / wrong states
 //   showMe       the "Show me" outline button with the hand
 // Each template builds its own layout inside zones.main from these parts; layout() names it.
-import { h, nextId } from '../util.js?v=0903aa42';
-import { glyph } from '../icons.js?v=0903aa42';
+import { h, nextId } from '../util.js?v=250c2853';
+import { glyph } from '../icons.js?v=250c2853';
 
 // layout(ctx, name, ...children): set main's layout and fill it
 export function layout(ctx, name, ...children) {
@@ -46,6 +46,11 @@ export function paintAnswer(btn, result, ui) {
   // (a pressed multi card shows its check on the navy square; a pressed one-answer card keeps its mark
   // empty, so the CSS draws the filled radio dot: FX4, S20B showed a white check on white)
   else mark.replaceChildren(btn.getAttribute('aria-pressed') === 'true' && btn.closest('.w-ans-multi') ? glyph('g-check-b', { size: 17.92 }) : '');
+  // FX7 (the approved frames): the state in words on the card's right, "Your answer" on a wrong pick,
+  // "Right answer" on the right one (aria-hidden: the mark's label and the feedback already say it)
+  btn.querySelector(':scope > .w-ans-tag')?.remove();
+  const tag = result === 'correct' ? ui.marks?.right : result === 'wrong' ? ui.marks?.yours : null;
+  if (tag && btn.classList.contains('w-ans')) btn.append(h('span', { class: 'w-ans-tag', 'aria-hidden': 'true' }, tag));
 }
 
 // A screen image slot: content image object { src, alt, prompt, temp, position }.

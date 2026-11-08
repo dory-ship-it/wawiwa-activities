@@ -10,8 +10,8 @@
 // every new screen) and the band: the hint row (hint text, the band's tool such as Check or Resume)
 // and the feedback strip (aria-live polite) flush to the bottom edges of the panel it sits in.
 // No learner-facing text here: every string arrives from the content JSON.
-import { h, fmt, reducedMotion } from './util.js?v=0903aa42';
-import { glyph, icon } from './icons.js?v=0903aa42';
+import { h, fmt, reducedMotion } from './util.js?v=250c2853';
+import { glyph, icon } from './icons.js?v=250c2853';
 
 const TONE = { correct: 'correct', neutral: 'neutral', wrong: 'wrong', notice: 'neutral', guess: 'neutral', partial: 'neutral', pause: 'neutral' };
 const LEAD = { correct: 'g-ok-disc', wrong: 'g-no-disc', neutral: 'guess' };
@@ -42,6 +42,9 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
       return el;
     };
     if (mode === 'focus') scene.replaceChildren(layer('w-wash-photo'), h('div', { class: 'w-wash-veil' }));
+    // FX7: the photo full-bleed in the left zone (under the panel's edge), the same photo blurred behind
+    // the rest, so the translucent bar runs over one continuous picture
+    else if (mode === 'fx7photo') scene.replaceChildren(layer('w-wash-photo'), h('div', { class: 'w-wash-veil' }), layer('w-x-photo w-push'));
     // FX5: the other looks of a task screen
     else if (mode === 'band') scene.replaceChildren(layer('w-band-photo'), h('div', { class: 'w-band-veil' }));
     else if (mode === 'split') scene.replaceChildren(layer('w-split-photo'));

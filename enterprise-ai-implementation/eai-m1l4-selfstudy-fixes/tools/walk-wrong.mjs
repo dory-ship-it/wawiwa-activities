@@ -76,6 +76,7 @@ async function act(st) {
           const opts = [...document.querySelectorAll('.w-stop-view .w-opt')].filter((b) => !b.dataset.result);
           const wrong = opts.find((b) => true);
           wrong?.click();
+          document.querySelector('.w-stop-view [data-action="check"]:not([disabled])')?.click(); // FX7: select, then Check
           await new Promise((r) => setTimeout(r, 120));
         }
         return 'stop';
@@ -93,6 +94,7 @@ async function act(st) {
       const L = window.__l4, s = L.view(L.current);
       const wrong = tiles.filter((x, i) => !s.tiles[i].correct && !x.dataset.result);
       (wrong[0] || tiles[0]).click();
+      document.querySelector('[data-action="check"]:not([disabled])')?.click(); // FX7: select, then Check
       return 'tile answer';
     });
   }
@@ -135,6 +137,7 @@ async function act(st) {
       const list = s.options || [];
       const wrong = opts.find((b) => { const o = list.find((x) => x.id === b.dataset.id); return o && !o.correct; });
       (wrong || opts[0])?.click();
+      document.querySelector('[data-action="check"]:not([disabled])')?.click(); // FX7: select, then Check
       return 'option';
     });
   }

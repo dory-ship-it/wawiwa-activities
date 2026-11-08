@@ -2,6 +2,7 @@
   "$chapterRefs": "FX3: a chapter number in any text is written {chN} (the chapter id) and shown as that chapter's place in chapters + 1 (Intro = 1 ... Wrap-up = 7), so no number is typed twice. S21R's review links take theirs from the screen they open.",
   "$comment": "EAI M1 L4 self-study, pilot slice content. ALL learner-facing text lives here (localization = swap this file). Design lives in src/. Screen text is verbatim from L4_Storyboard_v2.md (2026-10-15). Strings under ui.* marked pilotCopy:true are new UI copy not in the storyboard; Noy reviews them in P5. Schema: see planning/PRD.md section 5.",
   "schemaVersion": "1.0",
+  "$fx7": "FX7 (8 Nov 2026): the original look rearranged (tools/fx7-content.mjs, src/compose.js, src/fx7.css): photo / cases / wide media, select then Check.",
   "$fx6": "FX6 (8 Nov 2026): the looks (tools/fx6-content.mjs, src/compose.js) and the upgraded V1 film.",
   "$fx5": "FX5 (8 Nov 2026): tools/fx5-content.mjs; Noy's review of the FX4 copy.",
   "$fx4": "FX4 fixes pass (5 Nov 2026): tools/fx4-content.mjs; Dor's pilot review and Noy's notes.",
@@ -184,7 +185,9 @@
       "upNext": "Up next: {what}",
       "upNextChapter": "Up next: Chapter {n}, {title}"
     },
-    "checkWhy": { "pick": "Pick {n} first", "labels": "Place every label first", "flags": "Place both flags first", "fields": "Fill every field first", "red": "Change the red ones first" },
+    "marks": { "yours": "Your answer", "right": "Right answer" },
+    "checkWhy": { "pick": "Pick {n} first",
+      "one": "Choose one first", "labels": "Place every label first", "flags": "Place both flags first", "fields": "Fill every field first", "red": "Change the red ones first" },
     "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "question": "Question {i} of {n}", "deck": "{i} of {n}", "deckDone": "All {n} cards placed.", "situation": "Situation {i} of {n}", "caseOf": "Case {i} of {n}", "opened": "{i} of {n} opened" },
     "drag": {
       "help": "Drag the card to a column, or press 1 to {n} to choose a column and Enter to drop it. Escape cancels.",
@@ -493,7 +496,7 @@
 
     {
       "id": "S01",
-      "look": "framed",
+      "look": "photo",
       "coach": { "kind": "practice", "tip": "Ask what each move needs to know first, and whether anyone knows it today.", "tipDrafted": true },
       "chapter": "ch0",
       "template": "decision",
@@ -531,7 +534,7 @@
 
     {
       "id": "S02",
-      "look": "text",
+      "look": "wide",
       "coach": { "kind": "own", "tip": "Use the case from Homework 1. Name the role that feels the pain, not a person.", "tipDrafted": true },
       "chapter": "ch0",
       "template": "input",
@@ -737,7 +740,7 @@
 
     {
       "id": "S03",
-      "look": "text",
+      "look": "photo",
       "coach": { "kind": "practice", "tip": "For each card, ask: did both cases show this problem, or only one of them?", "tipDrafted": true },
       "chapter": "ch1",
       "template": "decision",
@@ -784,7 +787,7 @@
 
     {
       "id": "W2",
-      "look": "photo-right",
+      "look": "photo",
       "coach": { "kind": "warmup", "tip": "Not scored. Ask yourself: does the email start the work, do the work, or end it?", "tipDrafted": true },
       "chapter": "ch2",
       "template": "warmup",
@@ -951,7 +954,7 @@
 
     {
       "id": "S06",
-      "look": "framed",
+      "look": "wide",
       "coach": { "kind": "practice", "tip": "Picture who reads the map next: just you, or other teams and systems?", "tipDrafted": true },
       "chapter": "ch2",
       "template": "decision",
@@ -1037,7 +1040,7 @@
 
     {
       "id": "S08",
-      "look": "text",
+      "look": "wide",
       "coach": { "kind": "practice", "tip": "Ask where the line came from: a normal day, a wish, or a written rule?", "tipDrafted": true },
       "chapter": "ch2",
       "template": "decision",
@@ -1083,7 +1086,7 @@
 
     {
       "id": "S08B",
-      "look": "photo-right",
+      "look": "wide",
       "coach": { "kind": "own", "tip": "Start with what triggers it, then the main steps and who does them. A rough first try is enough.", "tipDrafted": true },
       "chapter": "ch2",
       "template": "input",
@@ -1471,7 +1474,7 @@
 
     {
       "id": "S10",
-      "look": "text",
+      "look": "wide",
       "goal": "g3",
       "coach": { "kind": "practice", "tip": "Ask what HR could prove today with the records it keeps.", "tipDrafted": true },
       "chapter": "ch3",
@@ -1625,7 +1628,7 @@
 
     {
       "id": "S11",
-      "look": "framed",
+      "look": "wide",
       "goal": "g4",
       "coach": { "kind": "practice", "tip": "Look for three parts in each line: a number today, a number to reach, and a date.", "tipDrafted": true },
       "chapter": "ch3",
@@ -2021,7 +2024,7 @@
 
     {
       "id": "S12B",
-      "look": "framed",
+      "look": "wide",
       "coach": { "kind": "own", "tip": "Use a number you could count today, even roughly: hours, days, or a share of cases.", "tipDrafted": true },
       "chapter": "ch3",
       "template": "input",
@@ -2071,7 +2074,7 @@
 
     {
       "id": "W4",
-      "look": "photo-right",
+      "look": "photo",
       "coach": { "kind": "warmup", "tip": "Not scored. For each choice, ask what happens to a person if the answer is wrong.", "tipDrafted": true },
       "chapter": "ch4",
       "template": "warmup",
@@ -2147,7 +2150,7 @@
 
     {
       "id": "S14",
-      "look": "photo",
+      "look": "wide",
       "onePanel": true,
       "goal": "g1",
       "coach": { "kind": "practice", "tip": "Picture the manager away for a week. What would the next person need to know?", "tipDrafted": true },
@@ -2311,7 +2314,7 @@
 
     {
       "id": "S15",
-      "look": "photo-right",
+      "look": "wide",
       "onePanel": true,
       "goal": "g5",
       "coach": { "kind": "practice", "tip": "Each option assumes something about the step. Which one checks that assumption first?", "tipDrafted": true },
@@ -2694,7 +2697,7 @@
 
     {
       "id": "S17",
-      "look": "text",
+      "look": "wide",
       "goal": "g5",
       "coach": { "kind": "practice", "tip": "Read each case for what went wrong with the map itself, not with the people.", "tipDrafted": true },
       "chapter": "ch4",
@@ -2878,7 +2881,7 @@
 
     {
       "id": "S17B",
-      "look": "framed",
+      "look": "wide",
       "coach": { "kind": "own", "tip": "Look at your own steps. Free text into structured data often fits AI; money or rights stay with a person.", "tipDrafted": true },
       "chapter": "ch4",
       "template": "input",
@@ -2970,7 +2973,7 @@
 
     {
       "id": "S18",
-      "look": "photo",
+      "look": "wide",
       "coach": { "kind": "practice", "tip": "Ask what in your notes could identify a person or a company.", "tipDrafted": true },
       "chapter": "ch5",
       "template": "decision",
@@ -3005,7 +3008,7 @@
 
     {
       "id": "S18B",
-      "look": "framed",
+      "look": "wide",
       "coach": { "kind": "own", "tip": "Could a stranger tell which company or person this is from the title alone?", "tipDrafted": true },
       "chapter": "ch5",
       "template": "input",
@@ -3105,7 +3108,7 @@
 
     {
       "id": "S19C",
-      "look": "photo-right",
+      "look": "wide",
       "coach": { "kind": "workbook", "tip": "The export is in the workbook's Mission report, its last step.", "tipDrafted": true },
       "chapter": "ch5",
       "template": "handoff",
@@ -3122,7 +3125,7 @@
 
     {
       "id": "S20",
-      "look": "framed",
+      "look": "wide",
       "coach": { "kind": "workbook", "tip": "Open your PDF beside the questions and check each one against what you actually wrote.", "tipDrafted": true },
       "chapter": "ch5",
       "template": "decision",
@@ -3157,7 +3160,7 @@
 
     {
       "id": "S20B",
-      "look": "text",
+      "look": "wide",
       "coach": { "kind": "own", "tip": "Think about where you rushed or guessed most while filling the workbook.", "tipDrafted": true },
       "chapter": "ch5",
       "template": "decision",
@@ -3187,7 +3190,7 @@
 
     {
       "id": "S21",
-      "look": "text",
+      "look": "wide",
       "coach": { "kind": "locked" },
       "chapter": "ch6",
       "template": "check",
@@ -3397,7 +3400,7 @@
 
     {
       "id": "S22",
-      "look": "photo",
+      "look": "wide",
       "coach": { "kind": "review", "tip": "Pick the idea your own map shows best, then download your record for Lesson 5.", "tipDrafted": true },
       "chapter": "ch6",
       "template": "decision",

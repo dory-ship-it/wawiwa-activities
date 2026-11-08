@@ -13,7 +13,7 @@
 //   target[data-over]    under the pointer  target[data-chosen]  chosen by key
 // onDrop(card, target) -> 'placed' (the template has moved the card), 'returned' (slide back, put
 // down) or 'kept' (slide back, still picked up).
-import { fmt, reducedMotion } from './util.js?v=0903aa42';
+import { fmt, reducedMotion } from './util.js?v=250c2853';
 
 const SLOP = 4; // window px before a press becomes a drag
 const BACK_MS = 300;

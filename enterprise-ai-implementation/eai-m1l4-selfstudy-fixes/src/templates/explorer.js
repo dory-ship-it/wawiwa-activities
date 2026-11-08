@@ -3,9 +3,10 @@
 //   tiles   (S07)  NL2: on the Focus wash, a 4 x 2 grid of tiles that open in place; after all eight the
 //                  heading becomes the question and the tiles answer it (one question, two attempts).
 // Tracking: tiles = the field number of the first answer. Retries as retry events.
-import { h, fmt } from '../util.js?v=0903aa42';
-import { glyph } from '../icons.js?v=0903aa42';
-import { layout, arrowNav, paintAnswer } from './stage.js?v=0903aa42';
+import { h, fmt } from '../util.js?v=250c2853';
+import { glyph } from '../icons.js?v=250c2853';
+import { layout, arrowNav, paintAnswer } from './stage.js?v=250c2853';
+import { checkButton } from './decision.js?v=250c2853';
 
 export const explorer = {
   mount(ctx) {
@@ -98,6 +99,7 @@ function tiles(ctx) {
     if (g) { g.cancel(); g.button.remove(); }
     zones.setFeedback({ state: 'hint', text: screen.questionHint });
     if (max) zones.setAttempts(1, max);
+    if (!ctx.revisit) zones.setTool(check); // FX7: select a tile, then Check
     ctx.need(ui.footer.need.single);
   };
 
@@ -114,8 +116,20 @@ function tiles(ctx) {
       if (visited.size === list.length) { list.forEach((y) => flip(y, false)); unlock(); }
       return;
     }
-    if (solved || i === chosen) return;
+    // FX7: in the question phase a click selects the tile; Check (the band's tool) sends it (one try)
+    if (solved || x.btn.getAttribute('aria-disabled') === 'true') return;
     list.forEach((y) => flip(y, false));
+    pick = i;
+    list.forEach((y, j) => y.btn.setAttribute('aria-pressed', String(j === i)));
+    check.disabled = false;
+  }));
+  let pick = -1;
+  const check = checkButton(ui, ui.buttons.check, () => { if (pick >= 0) commit(pick); }, ui.checkWhy.one || fmt(ui.checkWhy.pick, { n: 1 }));
+  function commit(i) {
+    const x = list[i];
+    if (solved || i === chosen) return;
+    zones.setTool();
+    list.forEach((y) => y.btn.removeAttribute('aria-pressed'));
     chosen = i;
     tries += 1;
     const right = !!x.t.correct;
@@ -133,7 +147,7 @@ function tiles(ctx) {
     }
     ctx.complete();
     ctx.unlockNext({ focus: true });
-  }));
+  }
 
   list.forEach((x) => flip(x, false));
   count();

@@ -1,54 +1,46 @@
-// FX6 (Noy, 8 Nov 2026: "you centre the content wrongly; spread it smartly over the screen; nothing on
-// top of the photos; a technology lesson; free hand"): the composer. After a question screen is built,
-// its parts are laid out again over the whole stage, read left to right:
-//   head   the instruction (first, largest), then its context: the context line, a quote or case card,
-//          the tools ("Show me how", "Reopen workbook")
-//   task   the screen's panel as a white card: the answers or fields, Check, then the feedback card
-//          under it
-//   photo  the screen's (or its chapter's) photo, framed, never under an object
-// The look (screen.look) picks the arrangement:
-//   text         head left, task right, no photo
-//   framed       head left with the photo framed under it, task right
-//   photo        the photo as a full column on the left; head and task stacked on the right
-//   photo-right  the same, the photo on the right
-//   none         the screen keeps its own layout (wide tasks: S18A, S19A)
-// The templates are untouched: the composer only moves their elements (the references they keep stay
-// valid), and the scene behind turns light (src/engine.js).
-import { h } from './util.js?v=0903aa42';
+// FX7 (Noy, 8 Nov 2026, approved mock-ups planning/fx7-mockups/v4.html + v6-light): the original
+// "Hybrid cinematic" look, rearranged. Every question screen is laid out again over the stage:
+//   media  the left zone: the screen's photo full-bleed behind it (src/zones.js scene "fx7photo": nothing
+//          sits on the photo but the translucent bar), or the video cases as a film strip on the blurred
+//          chapter photo ("cases"); none on a wide screen
+//   panel  one cream panel docked right at full height: the head (a quote, the context, the instruction),
+//          the task (the answers or fields), the feedback as a message under them, and the bottom row
+//          (Previous; Check or Save, which turns into Next in the same place; src/fx7.css)
+// The media kind (fx7Media): "cases" when the screen has video cases, "wide" when its task needs the
+// whole width (screen.look "wide"), else "photo". Screens this composer does not take (sorts, labels,
+// flags, tiles, key ideas, the module map, S18A, S19A, S19B) sit in one wide cream panel on the blurred
+// chapter photo (stage[data-fx7="wide"]); the title, the video and the end keep their own scenes.
+// The templates are untouched: the composer only moves their elements (the references they keep stay valid).
+import { h } from './util.js?v=250c2853';
 
 const COMPOSED = { decision: true, input: true, warmup: true, handoff: true, check: true };
-const HEAD = '.w-context, .w-label, .w-head-row, .w-instruction, .w-case-row, .w-handoff-head, .w-kc-head, .w-case-thumbs, .w-round-top, .w-open-head, .w-glass, .w-case-card, .w-q-chip';
+const HEAD = '.w-context, .w-label, .w-head-row, .w-instruction, .w-case-row, .w-handoff-head, .w-kc-head, .w-round-top, .w-open-head, .w-glass, .w-case-card, .w-q-chip';
 
 export const composes = (screen) => COMPOSED[screen.template] && screen.look !== 'none';
+export const fx7Media = (screen) => (screen.look === 'wide' ? 'wide' : screen.cases?.some((c) => c.image?.src) ? 'cases' : 'photo');
 
-export function compose(main, screen, photo) {
-  const look = ['text', 'framed', 'photo', 'photo-right'].includes(screen.look) ? screen.look : 'text';
+export function compose(main, screen) {
+  const media = fx7Media(screen);
   const sheet = main.querySelector('.w-sheet');
   if (!sheet) return null;
-  // the head: what stands outside the panel (a quote, a case card, S02's head), then the panel's own head parts
+  // the head: what stands outside the panel (a quote, a case card, S02's head), then the panel's own head
+  // parts, in the content's order (the approved frames: the quote, the context, then the instruction)
   const outside = [...main.children].filter((el) => el !== sheet && !el.contains(sheet));
   const wrap = [...main.children].find((el) => el !== sheet && el.contains(sheet)); // S02's .w-open
   const opened = wrap ? [...wrap.children].filter((el) => el !== sheet) : [];
   const inside = [...sheet.children].filter((el) => el.matches(HEAD));
-  let head = [...outside, ...opened, ...inside];
-  // the instruction first (Noy: read left to right, the task first), then the rest in its order
-  const lead = head.find((el) => el.matches('.w-instruction') || el.querySelector('.w-instruction'));
-  if (lead) head = [lead, ...head.filter((el) => el !== lead)];
-  const headCol = h('div', { class: 'w-comp-head' }, head);
-  const task = h('div', { class: 'w-comp-task' }, sheet);
-  let figure = null;
-  if (photo?.src && look !== 'text') {
-    const img = h('img', { class: 'w-comp-img', src: photo.src, alt: '', dataset: photo.mirror ? { mirror: 'true' } : {} });
-    if (photo.position) img.style.objectPosition = photo.position;
-    figure = h('figure', { class: 'w-comp-photo', 'aria-hidden': 'true' }, img);
+  const head = h('div', { class: 'w-x-head' }, [...outside, ...opened, ...inside]);
+  const panel = h('section', { class: 'w-x-panel' }, head, sheet);
+  const comp = h('div', { class: 'w-x', dataset: { media, layout: main.dataset.layout || '' } });
+  if (media === 'cases') {
+    comp.append(h('div', { class: 'w-x-film' }, screen.cases.filter((c) => c.image?.src).map((c) => {
+      const img = h('img', { src: c.image.src, alt: c.image.alt || '' });
+      if (c.image.position) img.style.objectPosition = c.image.position; // (CSSOM: the strict CSP allows it)
+      return h('figure', { class: 'w-x-case' }, img, h('figcaption', {}, c.label));
+    })));
   }
-  const comp = h('div', { class: 'w-comp', dataset: { look: figure ? look : 'text', layout: main.dataset.layout || '' } });
-  if (look === 'framed' && figure) { headCol.append(figure); comp.append(headCol, task); }
-  else if (figure) {
-    const stack = h('div', { class: 'w-comp-stack' }, headCol, task);
-    comp.append(...(look === 'photo-right' ? [stack, figure] : [figure, stack]));
-  } else comp.append(headCol, task);
+  comp.append(panel);
   main.replaceChildren(comp);
-  main.dataset.composed = comp.dataset.look;
+  main.dataset.composed = media;
   return comp;
 }

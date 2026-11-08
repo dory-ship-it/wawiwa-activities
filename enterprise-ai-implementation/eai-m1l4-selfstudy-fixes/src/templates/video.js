@@ -19,11 +19,12 @@
 // media.duration, stops[].t. Swapping the real film in is a change of those paths and times only.
 // Seeking forward never passes the part already watched or the next unanswered stop (the slider
 // clamps, a polite note says why).
-import { h, fmt, nextId } from '../util.js?v=0903aa42';
-import { glyph, icon } from '../icons.js?v=0903aa42';
-import { letter } from '../tracking/index.js?v=0903aa42';
-import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=0903aa42';
-import { targetSteps } from '../ghost.js?v=0903aa42';
+import { h, fmt, nextId } from '../util.js?v=250c2853';
+import { glyph, icon } from '../icons.js?v=250c2853';
+import { letter } from '../tracking/index.js?v=250c2853';
+import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=250c2853';
+import { targetSteps } from '../ghost.js?v=250c2853';
+import { checkButton } from './decision.js?v=250c2853';
 
 const SEEK_STEP = 5, SEEK_PAGE = 15, AT_STOP = 0.05, AT_END = 0.3;
 // FX4 (Dor): playback speed in the player bar, 1 to 2, kept for the session (every video plays at the
@@ -90,7 +91,7 @@ export const video = {
     let rate = readRate();
     const badge = h('span', { class: 'w-speed-badge', 'aria-hidden': 'true' });
     const speedBtn = h('button', { class: 'w-tool w-speed', type: 'button', 'aria-haspopup': 'menu', 'aria-expanded': 'false', dataset: { action: 'speed' } },
-      icon('settings', { size: 25.6 }), badge);
+      icon('gauge', { size: 25.6 }), badge); // FX7 (Noy): a speed icon (a speedometer), not a gear
     const items = SPEEDS.map((x) => h('button', { class: 'w-speed-item', type: 'button', role: 'menuitemradio', 'aria-checked': 'false', dataset: { rate: String(x) } },
       h('span', { class: 'w-speed-tick', 'aria-hidden': 'true' }, glyph('g-check', { size: 16 })), h('span', {}, x === 1 ? v.speedNormal : fmt(v.speedChip, { x }))));
     const menu = h('div', { class: 'w-speed-menu', role: 'menu', 'aria-label': v.speedMenu, hidden: true }, h('p', { class: 'w-speed-head', 'aria-hidden': 'true' }, v.speedMenu), items);
@@ -253,9 +254,19 @@ export const video = {
         h('span', { class: 'w-opt-mark w-ans-mark' }), h('span', { class: 'w-opt-label' }, o.label)));
       stopOpts.replaceChildren(...btns);
       const paint = (k, res) => btns.forEach((b, j) => paintAnswer(b, j === k ? res : '', ui));
+      // FX7: select, then Check (one try); Resume takes Check's place once the stop is answered
+      let pick = -1;
+      const check = checkButton(ui, ui.buttons.check, () => { if (pick >= 0) commit(pick); }, ui.checkWhy.one || fmt(ui.checkWhy.pick, { n: 1 }));
       btns.forEach((b, k) => b.addEventListener('click', () => {
+        if (right || b.getAttribute('aria-disabled') === 'true') return;
+        pick = k;
+        btns.forEach((x, j) => x.setAttribute('aria-pressed', String(j === k)));
+        check.disabled = false;
+      }));
+      function commit(k) {
         if (right || k === chosen) return;
         chosen = k;
+        btns.forEach((x) => x.removeAttribute('aria-pressed'));
         tries += 1;
         const o = s.options[k];
         ctx.answer({ trackingId: s.tracking.id, response: letter(k), result: o.correct ? 'correct' : 'wrong' });
@@ -273,14 +284,18 @@ export const video = {
         answered.add(s.id);
         ctx.flags.set('stops', [...answered]);
         btns.forEach((x) => x.setAttribute('aria-disabled', 'true'));
+        check.hidden = true;
+        resume.hidden = false;
         setResume(false);
         resume.focus();
-      }));
+      }
       stopPanel.append(zones.band);
-      stopTools.replaceChildren(resumeWhy, resume);
+      stopTools.replaceChildren(resumeWhy, check, resume);
+      resume.hidden = true; // (until the stop is answered: Check stands in its place)
       // FX4: the locked Resume has its reason on screen, beside it (in the tools row: the panel keeps its height)
       zones.setFeedback({ state: 'hint', text: '' });
       setResume(true);
+      resumeWhy.hidden = true; // (FX7: Check carries the reason now, "Choose one first")
       ctx.need(ui.footer.need.stop);
       // the transcript closes while the stop is open (its state comes back after Resume)
       trWasOpen = trBtn.getAttribute('aria-pressed') === 'true';

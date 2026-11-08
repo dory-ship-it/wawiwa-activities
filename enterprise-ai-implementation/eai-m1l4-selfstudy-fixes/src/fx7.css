@@ -1,0 +1,160 @@
+/* ---------- FX7 (Noy, 8 Nov 2026): the original look, rearranged ----------
+   Approved mock-ups: planning/fx7-mockups/v4.html (?fb=light) and the v6-light shots.
+   - Every screen but the title, the video and the end stands on its chapter photo, blurred and dark,
+     under the translucent Kit 13 bar.
+   - A question screen (src/compose.js): the photo full-bleed in the left zone (nothing on it) or the
+     video cases as a film strip there, and ONE cream panel docked right at full height. In the panel:
+     the head, the task, the feedback as a message under the answers, and the bottom row (Previous left;
+     Check or Save right, which turns into Next in the same place once the task is done).
+   - Any other screen: one wide cream panel, the footer in its bottom row.
+   Colours only from tokens.css. */
+
+.w-stage { --x-left: calc(var(--w-stage-w, 1280px) * .38); --x-top: 15.36px; --x-gap: 24px; --x-foot: 74px; }
+
+/* the photo wash behind everything: blurred harder than the old Focus wash, so it reads as ground */
+.w-stage[data-fx7] .w-wash-photo { filter: blur(18px) saturate(.8); inset: -60px; }
+
+/* the photo in the left zone: full height, running under the panel's edge, behind the bar */
+.w-x-photo { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--x-left) + 220px); background-size: cover; background-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(to right, var(--wl-ink) calc(100% - 200px), transparent); mask-image: linear-gradient(to right, var(--wl-ink) calc(100% - 200px), transparent); } /* (a mask: only the alpha counts) */
+.w-x-photo[data-mirror="true"] { scale: -1 1; }
+
+/* ---------- the panel (question screens) ---------- */
+.w-stage[data-fx7^="panel"] > .w-main { overflow: visible; }
+.w-x { position: absolute; inset: 0; }
+.w-x-panel { position: absolute; left: var(--x-left); right: var(--x-gap); top: var(--x-top); bottom: 16px; z-index: 2;
+  display: flex; flex-direction: column; padding: 24px 44px calc(var(--x-foot) + 12px); overflow: hidden;
+  background: var(--wl-ivory); border-radius: var(--wl-radius-panel); box-shadow: var(--wl-panel-shadow); }
+.w-x[data-media="wide"] .w-x-panel { left: var(--x-gap); padding-left: 56px; padding-right: 56px; }
+.w-x-panel::after { content: ""; position: absolute; left: 0; right: 0; bottom: var(--x-foot); border-top: 1px solid var(--wl-line); pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) { .w-x-panel { animation: w-x-in .5s var(--wl-ease-enter) both; } }
+@keyframes w-x-in { from { opacity: 0; transform: translateX(28px); } }
+
+/* the head: a quote, the context, the instruction (largest) */
+.w-x-head { flex: none; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.w-stage .w-x-head .w-instruction { margin: 10px 0 0; font: 800 34px/1.1 var(--wl-font-ui); letter-spacing: -.34px; color: var(--wl-ink); }
+.w-x-head > .w-instruction:first-child, .w-x-head > :first-child .w-instruction { margin-top: 0; }
+.w-x-head .w-context { margin: 0; font-size: 18px; line-height: 1.4; color: var(--wl-text-2); }
+.w-x-head .w-head-row { margin: 0; display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.w-x-head .w-head-row .w-instruction { flex: 1 1 auto; min-width: 0; }
+.w-x-head .w-head-tools { flex: none; display: flex; align-items: center; gap: 10px; }
+.w-x-head .w-label { margin: 0; }
+.w-x-head .w-case-row { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.w-x-head .w-hv-inline { flex: none; width: 100%; max-width: 380px; }
+/* the character's quote: turquoise marks, the line in ink, the name under it (no glass: no photo under it) */
+.w-x-head .w-quote-glass { position: relative; inset: auto; width: auto; max-width: none; margin: 0; padding: 0 0 0 48px; background: none; border: 0; box-shadow: none;
+  -webkit-backdrop-filter: none; backdrop-filter: none; color: var(--wl-ink); }
+.w-x-head .w-quote-glass > .w-glyph, .w-x-head .w-quote-glass > svg { position: absolute; left: 0; top: 2px; width: 36px; height: auto; color: var(--wl-turquoise); }
+.w-x-head .w-quote-glass .w-quote { margin: 0; }
+.w-x-head .w-quote-glass .w-quote-1 { margin: 0; font: 800 24px/1.22 var(--wl-font-ui); color: var(--wl-ink); }
+.w-x-head .w-quote-glass .w-attrib { margin-top: 6px; font-size: 15px; color: var(--wl-muted); }
+.w-x-head .w-quote-glass .w-card-tools:empty { display: none; }
+/* a warm-up's kicker and question: plain blocks in the head */
+.w-x-head .w-glass:not(.w-quote-glass) { position: static; width: auto; max-width: none; margin: 0; padding: 0; background: none; box-shadow: none; border: 0;
+  -webkit-backdrop-filter: none; backdrop-filter: none; color: var(--wl-ink); }
+.w-x-head .w-glass-kicker { color: var(--wl-teal-ink); margin-bottom: 8px; }
+.w-x-head .w-glass-label { color: var(--wl-ink); }
+.w-x-head .w-case-card { position: static; width: auto; max-width: none; margin: 0; padding: 14px 18px; box-shadow: none; border: 1px solid var(--wl-line); background: var(--wl-white); }
+
+/* the task: the template's panel, flat inside ours (no card in a card) */
+.w-x-panel .w-sheet { position: static; inset: auto; transform: none; width: auto; max-width: none; height: auto; margin: 14px 0 0; padding: 0;
+  background: none; border: 0; border-radius: 0; box-shadow: none; display: flex; flex-direction: column; min-height: 0; }
+.w-x-panel .w-sheet[data-fb="on"] { margin-top: 14px; }
+.w-x-panel .w-sheet-title { display: none; } /* a warm-up's "Make your best guess.": the instruction says it */
+.w-x-panel .w-case-thumbs { display: none; } /* S03: the cases are the film strip */
+.w-x[data-media="photo"] .w-ans-cols-3, .w-x[data-media="cases"] .w-ans-cols-2 { grid-template-columns: minmax(0, 1fr); }
+.w-x[data-media="cases"] .w-x-panel .w-ans { min-height: 46px; }
+/* an input in the photo panel: the fields one under the other, the case card in the head's flow */
+.w-x[data-media="photo"] .w-fields:not(.w-fields-chain) { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.w-x-panel .w-sheet-open > .w-case-slim { position: static; max-width: none; align-self: flex-start; margin: 0 0 6px; }
+.w-x-panel .w-open-ctx { margin-top: 4px; }
+.w-x-head .w-open-head { margin: 0; padding: 0; border: 0; }
+.w-x-panel textarea.w-input { min-height: 84px; height: 84px; }
+.w-x-panel .w-actionbar { margin-top: 10px; }
+.w-x-panel .w-sheet-open .w-actionbar { margin-top: 10px; }
+.w-x-panel .w-ans { min-height: 50px; padding-top: 7px; padding-bottom: 7px; background: var(--wl-white); }
+.w-x-panel .w-options { gap: 9px; }
+/* the state in words on a marked card (stage.js paintAnswer) */
+.w-ans-tag { flex: none; margin-left: auto; padding-left: 12px; font: 700 15px/1.2 var(--wl-font-ui); }
+.w-ans[data-result="wrong"] .w-ans-tag { color: var(--wl-error-head); }
+.w-ans[data-result="correct"] .w-ans-tag { color: var(--wl-correct-head); }
+/* S08's rule cards and S07's tiles: the picked one before Check */
+:is(.w-rule-card, .w-tile)[aria-pressed="true"]:not([data-result="correct"]):not([data-result="wrong"]) { border: 3.2px solid var(--wl-navy); }
+
+/* the bottom row: Check / Save sits where Next sits; Next shows once the tool is gone */
+.w-x-panel .w-band { margin: 0; position: static; }
+.w-x-panel .w-band-row { position: absolute; right: 28px; bottom: 12px; z-index: 5; margin: 0; padding: 0; min-height: 50px; display: flex; align-items: center; gap: 12px; }
+.w-x-panel .w-band-row[hidden] { display: none; }
+.w-x-panel .w-band-tool .w-btn-action { min-height: 50px; padding: 0 30px; font-size: var(--wl-fs-next); }
+.w-stage[data-fx7^="panel"]:has(.w-x-panel .w-band-tool > :is(.w-btn-action, [data-action="save"], [data-action="send"])) > .w-footer .w-next-wrap { visibility: hidden; }
+.w-stage[data-fx7^="panel"] > .w-footer { left: calc(var(--x-left) + 28px); right: calc(var(--x-gap) + 28px); bottom: 28px; }
+.w-stage[data-fx7="panel-wide"] > .w-footer { left: calc(var(--x-gap) + 28px); }
+
+/* ---------- the feedback: a message under the answers, never like an answer ----------
+   (Noy: not stuck to the bottom, not the wrong answer's red, more room from the question, and no
+   border or one-line row like an answer: the verdict is its own heading line, a notch points up) */
+.w-stage .w-x-panel .w-band .w-strip { position: relative; inset: auto; margin: 22px 0 0; padding: 12px 22px 14px 18px; gap: 12px; align-items: flex-start;
+  border: 0; border-radius: 16px; background: var(--wl-neutral-bg); box-shadow: none; }
+.w-stage .w-x-panel .w-band .w-strip::before { content: ""; position: absolute; left: 30px; top: -9px; width: 18px; height: 18px; transform: rotate(45deg);
+  border-radius: 3px 0 0 0; background: var(--wl-neutral-bg); }
+.w-x-panel .w-strip-icon { flex: none; display: grid; place-content: center; width: 30px; height: 28px; }
+.w-x-panel .w-strip-icon svg { width: 28px; height: 28px; }
+.w-x-panel .w-band-live { margin: 0; }
+.w-x-panel .w-band-verdict { display: block; font: 800 21px/28px var(--wl-font-ui); color: var(--wl-ink); }
+.w-x-panel .w-strip[data-tone="wrong"] .w-band-verdict { color: var(--wl-error-head); }
+.w-x-panel .w-strip[data-tone="correct"] .w-band-verdict { color: var(--wl-correct-head); }
+.w-x-panel .w-band-text { display: block; margin-top: 4px; font-size: 18px; line-height: 1.42; color: var(--wl-fb-text); }
+.w-x-panel .w-band-actions { align-self: center; margin-left: auto; }
+
+/* ---------- the page structure (Noy: "everything stuck to the top, the spacing is wrong") ----------
+   The head and the task form one block, centred in the room above the bottom row (auto margins: when
+   the feedback appears the block grows and moves up as a whole, as FX5's centred panel did); on a wide
+   panel the block keeps a reading width (max 1000px) in the middle, and the type is larger. */
+.w-x-head { margin-top: auto; }
+.w-x-panel > .w-sheet { margin-bottom: auto; }
+.w-x[data-media="wide"] .w-x-panel { align-items: center; padding-left: 64px; padding-right: 64px; }
+.w-x[data-media="wide"] .w-x-panel > * { width: 100%; max-width: 1000px; }
+.w-x[data-media="wide"] .w-x-head .w-instruction { font-size: 36px; letter-spacing: -.4px; }
+.w-x[data-media="wide"] .w-x-head .w-context { font-size: 19px; }
+.w-x[data-media="wide"] .w-x-panel .w-sheet { margin-top: 22px; }
+.w-x[data-media="wide"] .w-x-panel .w-ans { min-height: 54px; font-size: 20px; }
+.w-x[data-media="wide"] .w-x-panel .w-options { gap: 12px; }
+.w-x[data-media="wide"] .w-x-panel .w-band .w-strip { margin-top: 28px; }
+
+/* S10 (Noy: "crowded and wrongly divided; sentence completion"): the workbook line to complete on top,
+   large, its blank waiting; the four endings under it, two by two */
+.w-x .w-fill { display: flex; flex-direction: column; gap: 22px; }
+.w-x .w-fill .w-wb-page { width: 100%; padding: 14px 18px; }
+.w-x .w-fill .w-field-rows { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 12px; }
+.w-x .w-fill .w-field-row { margin: 0; }
+.w-x .w-fill .w-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; max-width: none; }
+/* S08 (Noy: "the instruction in bold, in a different colour"): the round's question in teal ink */
+.w-x-head:has(.w-round-top) .w-instruction { color: var(--wl-teal-ink); }
+
+/* ---------- the film strip (S03): the video cases on the blurred chapter photo ---------- */
+.w-x-film { position: absolute; left: var(--x-gap); top: var(--x-top); bottom: 16px; width: calc(var(--x-left) - 2 * var(--x-gap)); display: flex; flex-direction: column; gap: 14px; }
+.w-x-case { flex: 1 1 0; min-height: 0; margin: 0; display: flex; flex-direction: column; }
+.w-x-case img { flex: 1 1 auto; min-height: 0; width: 100%; object-fit: cover; border-radius: 12px; }
+.w-x-case figcaption { flex: none; margin-top: 8px; font: 600 16px/1.3 var(--wl-font-ui); color: var(--wl-on-wash); }
+
+/* ---------- the wide panel (every other screen) ---------- */
+.w-stage[data-fx7="wide"] > .w-main { left: var(--x-gap); right: var(--x-gap); width: auto; top: calc(var(--wl-bar-h) + var(--x-top)); bottom: 16px; height: auto;
+  background: var(--wl-ivory); border-radius: var(--wl-radius-panel); box-shadow: var(--wl-panel-shadow); }
+.w-stage[data-fx7="wide"] > .w-footer { left: calc(var(--x-gap) + 28px); right: calc(var(--x-gap) + 28px); bottom: 30px; }
+/* the template's own panels sit flat in ours */
+.w-stage[data-fx7="wide"] .w-main .w-sheet { background: none; border-color: transparent; box-shadow: none; }
+/* text that stood straight on the dark wash (frame.css FX3) now stands on the cream panel: back to ink */
+.w-stage[data-fx7][data-scene="focus"] :is(.w-task-head, .w-focus-head, .w-open-head) .w-instruction,
+.w-stage[data-fx7][data-scene="focus"] :is(.w-map-kicker, .w-evidence b, .w-bpmn-key b) { color: var(--wl-ink); }
+.w-stage[data-fx7][data-scene="focus"] :is(.w-task-head, .w-focus-head, .w-open-head) :is(.w-context, .w-subline, .w-concept-text, .w-task-sub),
+.w-stage[data-fx7][data-scene="focus"] :is(.w-map-title, .w-evidence, .w-bpmn-key p, .w-sdeck .w-deck-count, .w-float .w-attempts, .w-float .w-check-why) { color: var(--wl-text-2); }
+.w-stage[data-fx7][data-scene="focus"] .w-focus-head .w-eyebrow { color: var(--wl-muted); }
+.w-stage[data-fx7][data-scene="focus"] :is(.w-float .w-hint-link, .w-float .w-hint-text) { color: var(--wl-ink); }
+.w-stage[data-fx7][data-scene="focus"] .w-float .w-attempt-discs i { border-color: var(--wl-navy); }
+.w-stage[data-fx7][data-scene="focus"] .w-float .w-attempt-discs i[data-used="true"] { background: var(--wl-navy); }
+/* a sort's, a label's or a flag's feedback: the same message look, floating where the template puts it */
+.w-stage[data-fx7] .w-float .w-strip { border: 0; border-radius: 16px; background: var(--wl-neutral-bg); box-shadow: var(--wl-card-shadow); }
+.w-stage[data-fx7] .w-float .w-band-verdict { color: var(--wl-ink); }
+.w-stage[data-fx7] .w-float .w-strip[data-tone="wrong"] .w-band-verdict { color: var(--wl-error-head); }
+.w-stage[data-fx7] .w-float .w-strip[data-tone="correct"] .w-band-verdict { color: var(--wl-correct-head); }
+.w-stage[data-fx7] .w-float .w-band-text { color: var(--wl-fb-text); }

@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=0903aa42';
-import { glyph, icon } from '../icons.js?v=0903aa42';
-import { attachTip } from '../tooltip.js?v=0903aa42';
-import { letter } from '../tracking/index.js?v=0903aa42';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=0903aa42';
-import { targetSteps } from '../ghost.js?v=0903aa42';
+import { h, fmt, resolveLink } from '../util.js?v=250c2853';
+import { glyph, icon } from '../icons.js?v=250c2853';
+import { attachTip } from '../tooltip.js?v=250c2853';
+import { letter } from '../tracking/index.js?v=250c2853';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=250c2853';
+import { targetSteps } from '../ghost.js?v=250c2853';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -288,18 +288,32 @@ function multi(ctx) {
 function rowQuestion(ctx, btns, list, { trackingId, isRight, feedbackOf, onRight, onChoose = () => {} }) {
   const { ui, zones } = ctx;
   const max = ctx.revisit ? 0 : 1; // FX5 (Noy): one try on a choice question, then the right answer and why
-  let solved = false, chosen = -1, tries = 0;
+  let solved = false, chosen = -1, tries = 0, pick = -1;
   const show = (i) => btns.forEach((b, j) => paint(b, j === i ? (isRight(list[i]) ? 'correct' : 'wrong') : '', ui));
-  const solve = (i, focus) => { solved = true; chosen = i; show(i); lock(btns); onChoose(i, true); onRight(i, focus, false); };
+  const unpress = () => btns.forEach((b) => b.removeAttribute('aria-pressed'));
+  const solve = (i, focus) => { solved = true; chosen = i; unpress(); show(i); lock(btns); zones.setTool(); onChoose(i, true); onRight(i, focus, false); };
   const reveal = (wrong) => {
     solved = true;
     const k = list.findIndex((o) => isRight(o));
+    unpress();
     btns.forEach((b, j) => paint(b, j === k ? 'correct' : j === wrong ? 'wrong' : '', ui));
     lock(btns);
+    zones.setTool();
     onChoose(k, true);
     onRight(k, true, true);
   };
+  // FX7 (Noy, approved mock-ups): select, then Check (one try, so a slip of the mouse does not spend it).
+  // A click marks the card (navy, filled marker); Check, in the panel's bottom row where Next will be,
+  // sends it. Locked, Check says "Choose one first".
+  const check = checkButton(ui, ui.buttons.check, () => { if (pick >= 0) commit(pick); }, ui.checkWhy.one || fmt(ui.checkWhy.pick, { n: 1 }));
+  const arm = () => { pick = -1; check.disabled = true; zones.setTool(check); };
   btns.forEach((btn, i) => btn.addEventListener('click', () => {
+    if (solved || btn.getAttribute('aria-disabled') === 'true') return;
+    pick = i;
+    btns.forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
+    check.disabled = false;
+  }));
+  function commit(i) {
     if (solved || i === chosen) return;
     chosen = i;
     tries += 1;
@@ -311,11 +325,12 @@ function rowQuestion(ctx, btns, list, { trackingId, isRight, feedbackOf, onRight
     show(i);
     if (max) zones.setAttempts(tries + 1, max);
     zones.setFeedback({ state: 'wrong', text: feedbackOf(list[i]) });
-  }));
+  }
   if (max) zones.setAttempts(1, max);
+  if (!ctx.revisit) arm();
   return {
     solve,
-    reset() { solved = false; chosen = -1; tries = 0; if (max) zones.setAttempts(1, max); btns.forEach((b) => { paint(b, '', ui); b.removeAttribute('aria-disabled'); }); },
+    reset() { solved = false; chosen = -1; tries = 0; if (max) zones.setAttempts(1, max); unpress(); btns.forEach((b) => { paint(b, '', ui); b.removeAttribute('aria-disabled'); }); if (!ctx.revisit) arm(); },
   };
 }
 
@@ -637,7 +652,7 @@ function cases(ctx) {
   zones.setHintVisible(true);
   const first = {}, last = {};
   let r = 0, tries = 0, solved = false, chosen = -1;
-  const show = (k) => {
+  let show = (k) => {
     r = k; tries = 0; solved = false; chosen = -1;
     kicker.textContent = fmt(ui.progress.caseOf, { i: k + 1, n: list.length });
     dots.set(k, k);
@@ -669,7 +684,21 @@ function cases(ctx) {
     ctx.complete();
     ctx.unlockNext({ focus });
   }
+  // FX7: select, then Check (as rowQuestion); Check goes when the case is done, back for the next case
+  let picked = -1;
+  const check = checkButton(ui, ui.buttons.check, () => { if (picked >= 0) commit(picked); }, ui.checkWhy.one || fmt(ui.checkWhy.pick, { n: 1 }));
+  const arm = () => { picked = -1; check.disabled = true; btns.forEach((x) => x.removeAttribute('aria-pressed')); if (!ctx.revisit) zones.setTool(check); };
+  const showCase = show;
+  show = (k) => { showCase(k); arm(); };
   btns.forEach((b, i) => b.addEventListener('click', () => {
+    if (solved || b.getAttribute('aria-disabled') === 'true') return;
+    picked = i;
+    btns.forEach((x, j) => x.setAttribute('aria-pressed', String(j === i)));
+    check.disabled = false;
+  }));
+  const doneCase = done;
+  done = (...a) => { btns.forEach((x) => x.removeAttribute('aria-pressed')); zones.setTool(); doneCase(...a); };
+  function commit(i) {
     if (solved || i === chosen) return;
     chosen = i;
     tries += 1;
@@ -686,7 +715,7 @@ function cases(ctx) {
     btns.forEach((x, j) => paint(x, j === i ? 'wrong' : '', ui));
     zones.setAttempts(tries + 1, max);
     zones.setFeedback({ state: 'wrong', text: c.feedback.wrong });
-  }));
+  }
   show(0);
   if (ctx.revisit) { show(list.length - 1); const k = right(r); paint(btns[k], 'correct', ui); zones.setAttempts(null); done(r, k, false, false); }
 }

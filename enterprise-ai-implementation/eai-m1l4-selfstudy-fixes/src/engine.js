@@ -8,29 +8,29 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=0903aa42';
-import { createZones } from './zones.js?v=0903aa42';
-import { createMenu, openDialog } from './menu.js?v=0903aa42';
-import { initTooltips, applyTerms } from './tooltip.js?v=0903aa42';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=0903aa42';
-import { decision } from './templates/decision.js?v=0903aa42';
-import { input } from './templates/input.js?v=0903aa42';
-import { sortDeck } from './templates/sortdeck.js?v=0903aa42';
-import { bpmn } from './templates/bpmn.js?v=0903aa42';
-import { flags } from './templates/flags.js?v=0903aa42';
-import { explorer } from './templates/explorer.js?v=0903aa42';
-import { video } from './templates/video.js?v=0903aa42';
-import { handoff } from './templates/handoff.js?v=0903aa42';
-import { check } from './templates/check.js?v=0903aa42';
-import { result } from './templates/result.js?v=0903aa42';
-import { end } from './templates/end.js?v=0903aa42';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=0903aa42';
-import { createGhost, stopGhost } from './ghost.js?v=0903aa42';
-import { compose, composes } from './compose.js?v=0903aa42';
-import { createTracking } from './tracking/index.js?v=0903aa42';
-import { describe } from './tracking/describe.js?v=0903aa42';
-import { createCoach } from './coach/coach.js?v=0903aa42';
-import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=0903aa42';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=250c2853';
+import { createZones } from './zones.js?v=250c2853';
+import { createMenu, openDialog } from './menu.js?v=250c2853';
+import { initTooltips, applyTerms } from './tooltip.js?v=250c2853';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=250c2853';
+import { decision } from './templates/decision.js?v=250c2853';
+import { input } from './templates/input.js?v=250c2853';
+import { sortDeck } from './templates/sortdeck.js?v=250c2853';
+import { bpmn } from './templates/bpmn.js?v=250c2853';
+import { flags } from './templates/flags.js?v=250c2853';
+import { explorer } from './templates/explorer.js?v=250c2853';
+import { video } from './templates/video.js?v=250c2853';
+import { handoff } from './templates/handoff.js?v=250c2853';
+import { check } from './templates/check.js?v=250c2853';
+import { result } from './templates/result.js?v=250c2853';
+import { end } from './templates/end.js?v=250c2853';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=250c2853';
+import { createGhost, stopGhost } from './ghost.js?v=250c2853';
+import { compose, composes, fx7Media } from './compose.js?v=250c2853';
+import { createTracking } from './tracking/index.js?v=250c2853';
+import { describe } from './tracking/describe.js?v=250c2853';
+import { createCoach } from './coach/coach.js?v=250c2853';
+import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=250c2853';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -164,7 +164,9 @@ class Lesson {
     // FX4 (Dor's Blossom shots, clipped on the left): fit into the part of this frame that is really
     // visible. In an LMS the page may sit in an iframe larger than the window or inside a clipping
     // container; same-origin parents (Blossom serves the package from its own origin) tell us where.
-    const vis = this.visibleBox(fullW, fullH);
+    // (review mode, a thumbnail on review.html: the review page scales the frame itself, so the whole
+    // viewport counts; the visible-box fit would shrink the stage into the thumbnail's corner)
+    const vis = this.review ? { x: 0, y: 0, w: fullW, h: fullH } : this.visibleBox(fullW, fullH);
     const W = vis.w, H = vis.h;
     const narrow = W < NARROW_BELOW;
     this.note.hidden = !narrow;
@@ -222,7 +224,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=0903aa42').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=250c2853').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -323,11 +325,19 @@ class Lesson {
       // the ghost hand (src/ghost.js): a once-per-interaction-type demo with a "Show me" replay
       ghost: (opts) => this.ghostFor(opts),
     });
-    // FX6 (Noy): a question screen is laid out again over the whole stage, on a light ground, its photo
-    // framed and never under an object (src/compose.js)
-    if (composes(screen)) {
-      const photo = screen.photo || chapter?.photo || null;
-      if (compose(this.zones.main, screen, photo)) this.zones.setScene('light', null);
+    // FX7 (Noy, approved 8 Nov 2026): the original look rearranged (src/compose.js). A question screen: its
+    // photo full-bleed on the left (nothing on it) or the video cases as a film strip, and one cream panel
+    // right; any other screen (but the title, the video and the end): one wide cream panel; both on the
+    // chapter photo, blurred and dark, behind the translucent bar
+    const photo = screen.photo || screen.image || chapter?.photo || null;
+    delete this.stage.dataset.fx7;
+    if (composes(screen) && compose(this.zones.main, screen)) {
+      const media = fx7Media(screen);
+      this.stage.dataset.fx7 = media === 'wide' ? 'panel-wide' : 'panel';
+      this.zones.setScene(media === 'photo' ? 'fx7photo' : 'focus', media === 'photo' ? photo : (screen.photo || chapter?.photo || null));
+    } else if (!['title', 'end', 'plain'].includes(mode)) {
+      this.stage.dataset.fx7 = 'wide';
+      this.zones.setScene('focus', screen.photo || chapter?.photo || null);
     }
     // presentation screens (title, module map, goals, key idea) never lock Next: done on arrival
     if (screen.presentation) { this.complete(id); this.zones.setNext(false); }

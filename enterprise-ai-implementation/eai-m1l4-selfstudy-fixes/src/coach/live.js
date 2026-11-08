@@ -11,7 +11,7 @@
 // No SCORM call, nothing stored: the learner's own-case fields go to the page as they are (raw: the page
 // gates and redacts them), only on own-case screens. Never in review mode or with ?live=0 (the tests
 // that run without the network).
-import { h, chapterNo } from '../util.js?v=0903aa42';
+import { h, chapterNo } from '../util.js?v=250c2853';
 
 export const COACH_URL = 'https://dory-ship-it.github.io/wawiwa-activities/enterprise-ai-implementation/eai-m1l4-coach/';
 export const COACH_ORIGIN = new URL(COACH_URL).origin;
