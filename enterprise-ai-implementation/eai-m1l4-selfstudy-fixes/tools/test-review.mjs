@@ -1,0 +1,253 @@
+// Review mode (?review=1) and the review page (review.html). Usage: npm run test:review
+//  1. a normal run writes its state; then ?review=1 walks every screen with Next (never locked),
+//     answers and opens things on the way, and Previous walks back; localStorage is byte-for-byte the
+//     same afterwards, and with a mock SCORM 1.2 API present review mode makes no SCORM call at all
+//  2. the toolbar on every screen: id, template, chapter, word count = src/review/words.js; red over 45
+//  3. ?screen=ID&review=1 opens any screen, also one outside the slice route
+//  4. review.html: one card per screen in review order, every thumbnail renders its own screen,
+//     the "Over word limit" filter shows exactly the screens over the rule
+//  5. the SCORM package holds no review file
+import puppeteer from 'puppeteer-core';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { inflateRawSync } from 'node:zlib';
+import { startServer, ROOT } from './serve.mjs';
+import { chromePath } from './lib.mjs';
+import { screenWords } from '../src/review/words.js';
+import { chapterNo } from '../src/util.js';
+import { JOURNEYS, variantOf } from '../src/adapt.js';
+
+const C = JSON.parse(readFileSync(join(ROOT, 'content', 'l4-slice.json'), 'utf8'));
+const S = Object.fromEntries(C.screens.map((s) => [s.id, s]));
+const MOCK = readFileSync(join(ROOT, 'tools', 'scorm-mock.js'), 'utf8');
+const fails = [];
+const ok = (m) => console.log('  ok   ' + m);
+const fail = (m) => { fails.push(m); console.log('  FAIL ' + m); };
+const expect = (cond, m) => (cond ? ok(m) : fail(m));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// the review order, as the engine builds it
+const listed = C.chapters.flatMap((c) => c.screens).filter((id) => S[id]);
+const ORDER = [...new Set([...listed, ...C.screens.map((s) => s.id)])];
+
+const server = await startServer(0);
+const ORIGIN = `http://127.0.0.1:${server.address().port}`;
+const browser = await puppeteer.launch({ executablePath: chromePath(), headless: true, args: ['--no-first-run', '--disable-extensions', '--hide-scrollbars'] });
+
+async function open(path, { size = [1280, 720], lms = null } = {}) {
+  const p = await browser.newPage();
+  if (lms) await p.evaluateOnNewDocument(`${MOCK}\n;window.installScormMock(${JSON.stringify(lms)});`);
+  p.errors = [];
+  p.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warn') p.errors.push(m.type() + ': ' + m.text()); });
+  p.on('pageerror', (e) => p.errors.push('pageerror: ' + e.message));
+  await p.setViewport({ width: size[0], height: size[1], deviceScaleFactor: 1 });
+  await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+  await p.goto(ORIGIN + path, { waitUntil: 'networkidle0' });
+  return p;
+}
+const storage = (p) => p.evaluate(() => JSON.stringify(Object.fromEntries(Object.entries(localStorage).sort())));
+const bar = (p) => p.evaluate(() => {
+  const b = document.querySelector('.rv-bar');
+  return b && { screen: b.dataset.screen, id: b.querySelector('.rv-id').textContent, tpl: b.querySelector('.rv-tpl').textContent, chap: b.querySelector('.rv-chap').textContent,
+    words: b.querySelector('.rv-words').textContent, over: b.querySelector('.rv-words').dataset.over, red: getComputedStyle(b.querySelector('.rv-words')).backgroundColor,
+    href: b.querySelector('.rv-overview').getAttribute('href'), current: window.__l4.current, locked: document.querySelector('.w-next').dataset.locked };
+});
+
+/* ---------- 1 and 2: a real run's state, then review mode walks everything and leaves it alone ---------- */
+console.log('\nreview mode: walk, toolbar, no writes');
+{
+  const p = await open('/index.html?reset=1&screen=S01');
+  await p.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
+  await p.click('.w-opt[data-id="b"]'); // a real answer: the normal run writes its state
+  await wait(200);
+  const before = await storage(p);
+  expect(before.includes('wawiwa.eai.l4.slice') && before.includes('L4_S01_1'), 'normal run: the state with the S01 answer is in localStorage');
+
+  await p.goto(ORIGIN + '/index.html?review=1', { waitUntil: 'networkidle0' });
+  await p.waitForFunction(() => window.__l4 && document.querySelector('.rv-bar') && document.fonts.status === 'loaded');
+  const first = await bar(p);
+  expect(first.current === ORDER[0] && !(await p.$('.w-dialog')), `?review=1 opens on ${first.current}, no resume prompt`);
+  let walked = [], toolbarFails = [], locked = [];
+  for (let i = 0; i < ORDER.length; i++) {
+    const b = await bar(p);
+    walked.push(b.current);
+    const w = screenWords(S[b.current], C);
+    const ch = C.chapters.find((c) => c.id === S[b.current].chapter);
+    const want = { id: b.current, tpl: S[b.current].template + (S[b.current].variant ? ' / ' + S[b.current].variant : ''), chap: `Ch ${chapterNo(C, ch.id)} · ${ch.title}`, over: String(w.over) };
+    if (b.id !== want.id || b.tpl !== want.tpl || b.chap !== want.chap || !b.words.startsWith(w.max + ' words') || b.over !== want.over || b.href !== 'review.html#' + b.current
+      || (w.over && b.red !== 'rgb(204, 0, 0)')) toolbarFails.push(`${b.current}: ${JSON.stringify(b)}`);
+    if (b.locked !== 'false') locked.push(b.current);
+    // touch the screen: the first option or card, if there is one (answers stay in memory only)
+    await p.evaluate(() => { const o = document.querySelector('.w-main .w-opt, .w-main .w-guess, .w-main .w-map-tab'); if (o) o.click(); });
+    // Next in the footer (O1 has no footer by design: its "Start the lesson" is its Next)
+    if (i < ORDER.length - 1) { await p.click((await p.$('[data-action="start"]')) ? '[data-action="start"]' : '.w-next'); await wait(60); }
+  }
+  expect(walked.join() === ORDER.join(), `Next walks all ${ORDER.length} screens in chapter order (${walked.join(' ')})`);
+  expect(!locked.length, 'Next never locked in review mode' + (locked.length ? ': locked on ' + locked.join(', ') : ''));
+  expect(!toolbarFails.length, 'toolbar on every screen: id, template, chapter, word count from src/review/words.js, red over 45, Overview link' + (toolbarFails.length ? '\n         ' + toolbarFails.join('\n         ') : ''));
+  const back = [];
+  for (let i = 0; i < 4; i++) { await p.click('.w-prev'); await wait(60); back.push(await p.evaluate(() => window.__l4.current)); }
+  expect(back.join() === ORDER.slice(-5, -1).reverse().join(), `Previous walks back in order (${back.join(' ')})`);
+  // the menu's Start over in review mode clears memory only
+  await p.evaluate(() => window.__l4.startOver());
+  const after = await storage(p);
+  expect(after === before, `localStorage unchanged after the review walk (${before.length} chars before and after)`);
+  expect(!p.errors.length, 'review walk: no console errors' + (p.errors.length ? ': ' + p.errors.slice(0, 5).join(' | ') : ''));
+  await p.close();
+}
+
+/* ---------- no SCORM calls with an LMS present ---------- */
+{
+  const p = await open('/index.html?review=1&screen=S01', { lms: {} });
+  await p.waitForFunction(() => window.__l4 && document.querySelector('.rv-bar'));
+  await p.click('.w-opt[data-id="b"]');
+  await p.click('.w-next');
+  await wait(200);
+  const r = await p.evaluate(() => ({ mode: window.__l4.tracking.mode, report: window.__scormMock.report(), events: window.__l4.tracking.events.length }));
+  expect(r.mode === 'off' && r.report.calls.length === 0 && !r.report.initialized && r.events > 0,
+    `with a SCORM 1.2 API present, review mode makes ${r.report.calls.length} SCORM calls (events still on the bus: ${r.events})`);
+  await p.close();
+}
+
+/* ---------- 3: any screen by id ---------- */
+{
+  const outside = ORDER.filter((id) => !C.lesson.slice.includes(id));
+  const ids = ['S04', 'S13', 'S22', ...outside]; // NL3: S13 (the flags) in place of the gone FT3
+  const got = [];
+  for (const id of ids) {
+    const p = await open(`/index.html?screen=${id}&review=1`);
+    await p.waitForFunction(() => window.__l4 && document.querySelector('.rv-bar'));
+    got.push((await bar(p)).current);
+    await p.close();
+  }
+  expect(got.join() === ids.join(), `?screen=ID&review=1 opens ${ids.join(', ')}` + (outside.length ? '' : ' (every screen is in the slice today)'));
+}
+
+/* ---------- 4: review.html ---------- */
+console.log('\nreview.html');
+{
+  const p = await open('/review.html', { size: [1600, 900] });
+  await p.waitForSelector('.rv-chapter .rv-card');
+  const cards = await p.evaluate(() => [...document.querySelectorAll('.rv-chapter .rv-card')].map((a) => ({ id: a.id, href: a.getAttribute('href'), target: a.target,
+    words: a.querySelector('.rv-meta-words').textContent, over: a.dataset.over })));
+  expect(cards.map((c) => c.id).join() === ORDER.join() && cards.every((c) => c.href === `index.html?screen=${c.id}&review=1` && c.target === '_blank'),
+    `${cards.length} cards in review order, each opens index.html?screen=ID&review=1 in a new tab`);
+  const wrong = cards.filter((c) => { const w = screenWords(S[c.id], C); return !c.words.startsWith(w.max + ' w') || c.over !== String(w.over || w.longFeedback > 0); });
+  expect(!wrong.length, 'word counts under the thumbnails match src/review/words.js' + (wrong.length ? ': ' + wrong.map((c) => c.id).join(', ') : ''));
+  // FX3: the chapter rows numbered 1 to 7 from the chapters' order, the content version in the header
+  const heads = await p.evaluate(() => ({ rows: [...document.querySelectorAll('.rv-chapter-head')].map((x) => x.firstChild.textContent), sum: document.querySelector('.rv-summary').textContent }));
+  expect(heads.rows.join('|') === C.chapters.map((c) => `Chapter ${chapterNo(C, c.id)} · ${c.title}`).join('|') && heads.sum.endsWith(`content ${C.lesson.contentVersion}`),
+    `review.html rows: ${heads.rows.join(', ')}; header "...${heads.sum.slice(-45)}"`);
+  const loadedEarly = await p.evaluate(() => document.querySelectorAll('.rv-frame iframe[src]').length);
+  expect(loadedEarly < cards.length, `thumbnails load lazily (${loadedEarly} of ${cards.length} on arrival)`);
+  // scroll through the page, then every thumbnail must show its own screen
+  for (let y = 0; y < 12; y++) { await p.evaluate(() => window.scrollBy(0, 700)); await wait(250); }
+  await p.waitForFunction((n) => document.querySelectorAll('.rv-frame[data-state="loaded"]').length === n, { timeout: 60000 }, cards.length).catch(() => {});
+  const frames = await p.evaluate(() => [...document.querySelectorAll('.rv-chapter .rv-card')].map((a) => {
+    const f = a.querySelector('iframe');
+    let cur = null, err = null, bar = null, main = 0;
+    try { const w = f.contentWindow; cur = w.__l4?.current; err = !w.document.getElementById('boot-error')?.hidden; bar = !!w.document.querySelector('.rv-bar'); main = w.document.querySelector('.w-main')?.children.length || 0; } catch (e) { err = e.message; }
+    return { id: a.id, cur, err, bar, main, scale: getComputedStyle(f).transform };
+  }));
+  const bad = frames.filter((f) => f.cur !== f.id || f.err || f.bar || !f.main);
+  expect(!bad.length, `every thumbnail renders its own screen (${frames.length - bad.length} of ${frames.length}), no boot error, no toolbar inside` + (bad.length ? ': ' + JSON.stringify(bad.slice(0, 3)) : ''));
+  expect(frames.every((f) => f.scale === 'matrix(0.25, 0, 0, 0.25, 0, 0)'), 'thumbnails are the 1280 x 720 stage at 25%');
+  // CO1: the coach row after the chapters: O3 demo; S04 closed + hint, open, tip, thinking, cap; S21 locked
+  await p.evaluate(() => document.querySelector('.rv-coach').scrollIntoView());
+  await p.waitForFunction(() => [...document.querySelectorAll('.rv-coach .rv-frame')].every((f) => f.dataset.state === 'loaded'), { timeout: 30000 }).catch(() => {});
+  const coach = await p.evaluate(() => [...document.querySelectorAll('.rv-coach .rv-card')].map((a) => {
+    const w = a.querySelector('iframe').contentWindow, d = w.document;
+    const panel = d.querySelector('.w-coach-panel');
+    return { key: a.dataset.screen + ':' + a.dataset.coach, cur: w.__l4?.current, hint: !d.querySelector('.w-coach-hint').hidden, open: !panel.hidden,
+      msgs: [...panel.querySelectorAll('.w-coach-msg')].map((m) => m.dataset.from).join(','), busy: panel.querySelector('.w-coach-log').getAttribute('aria-busy'),
+      locked: d.querySelector('.w-coach-launcher').dataset.locked, cd: w.__l4?.state.g.cd, h: w.__l4?.state.h };
+  }));
+  const want = { 'O3:demo': (c) => c.open && c.msgs === 'coach', 'S04:hint': (c) => c.hint && !c.open, 'S04:open': (c) => c.open && c.msgs === 'coach', 'S04:tip': (c) => c.open && c.msgs === 'coach,you,coach', 'S04:thinking': (c) => c.open && c.busy === 'true' && c.msgs === 'coach,you,coach',
+    'S04:cap': (c) => c.open && c.msgs === 'coach,you,notice,coach', 'S21:open': (c) => c.open && c.locked === 'true' && c.msgs === 'notice' };
+  const coachBad = coach.filter((c) => !want[c.key] || !want[c.key](c) || c.cur !== c.key.split(':')[0] || c.cd !== undefined || (c.h || '').includes('a')); // the coach's own writes: the dock, hint letter a
+  expect(coach.length === 7 && !coachBad.length, `coach row: ${coach.map((c) => c.key).join(', ')}, each in its state, nothing written${coachBad.length ? ': ' + JSON.stringify(coachBad) : ''}`);
+  // CO2: the row says where the live chat is; no thumbnail frames the live page (review mode never does)
+  const liveRow = await p.evaluate(() => ({ note: document.querySelector('.rv-coach .rv-coach-live')?.textContent,
+    framed: [...document.querySelectorAll('.rv-coach .rv-frame iframe')].filter((f) => f.contentDocument?.querySelector('.w-coach-frame')).length }));
+  expect(liveRow.note === "Live chat: Dor's page, framed only in the live lesson." && liveRow.framed === 0, `coach row note: "${liveRow.note}"; no thumbnail frames the live page`);
+  // filters
+  await p.evaluate(() => window.scrollTo(0, 0));
+  await p.click('.rv-filter[data-kind="over"]');
+  const overShown = await p.evaluate(() => [...document.querySelectorAll('.rv-chapter .rv-card')].filter((a) => !a.hidden).map((a) => a.id));
+  const overWant = ORDER.filter((id) => { const w = screenWords(S[id], C); return w.over || w.longFeedback > 0; });
+  expect(overShown.join() === overWant.join(), `"Over word limit" shows ${overShown.join(', ') || 'none'} (expected ${overWant.join(', ') || 'none'})`);
+  await p.click('.rv-filter[data-kind="ch1"]');
+  const ch1 = await p.evaluate(() => [...document.querySelectorAll('.rv-chapter .rv-card')].filter((a) => !a.hidden).map((a) => a.id));
+  expect(ch1.join() === C.chapters.find((c) => c.id === 'ch1').screens.join(), `chapter filter "ch1" shows ${ch1.join(', ')}`);
+  expect(!p.errors.length, 'review.html: no console errors' + (p.errors.length ? ': ' + p.errors.slice(0, 5).join(' | ') : ''));
+  await p.close();
+}
+
+/* ---------- 4b: PP1, the Paths view and the toolbar's level ---------- */
+console.log('\nPaths (PP1)');
+{
+  const ADAPTIVE = C.lesson.slice.filter((id) => S[id].variants);
+  const p = await open('/review.html', { size: [1600, 900] });
+  await p.waitForSelector('.rv-chapter .rv-card');
+  const before = await p.evaluate(() => document.querySelector('.rv-paths').hidden);
+  await p.click('.rv-filter[data-kind="paths"]');
+  const view = await p.evaluate(() => ({ paths: !document.querySelector('.rv-paths').hidden, chapters: [...document.querySelectorAll('.rv-chapter')].filter((s) => !s.hidden).length,
+    coach: !document.querySelector('.rv-coach').hidden, cells: [...document.querySelectorAll('.rv-path-cell')].map((a) => ({ screen: a.dataset.screen, level: a.dataset.level, href: a.getAttribute('href'), target: a.target })) }));
+  const cellsOk = view.cells.length === 3 * ADAPTIVE.length && ['stretch', 'core', 'support'].every((lv, r) => view.cells.slice(r * ADAPTIVE.length, (r + 1) * ADAPTIVE.length).map((c) => c.screen + ':' + c.level).join() === ADAPTIVE.map((id) => id + ':' + lv).join())
+    && view.cells.every((c) => c.href === `index.html?screen=${c.screen}&level=${c.level}&review=1` && c.target === '_blank');
+  expect(before && view.paths && !view.chapters && !view.coach && cellsOk,
+    `"Paths" filter: hidden under All, then alone; rows Stretch / Core / Support x ${ADAPTIVE.length} screens (${ADAPTIVE.join(' ')}), each opens index.html?screen=ID&level=LEVEL&review=1 in a new tab`);
+  for (const j of ['1', '4', '5']) {
+    await p.click(`.rv-journeys [data-journey="${j}"]`);
+    const on = await p.evaluate(() => [...document.querySelectorAll('.rv-path-cell[data-on="true"]')].map((a) => `${a.querySelector('.rv-path-step').textContent}.${a.dataset.screen}:${a.dataset.level}`));
+    const levels = JOURNEYS[j];
+    const want = ADAPTIVE.map((id, i) => `${i + 1}.${id}:${levels[C.lesson.adapt.checkpoints.findIndex((cp) => cp.chapter === S[id].chapter)]}`);
+    on.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+    expect(on.join() === want.join(), `journey ${j} marks ${on.join(' ')}`);
+  }
+  // the thumbnails of the S11 column: each renders its own level (scroll the grid to load them)
+  await p.evaluate(() => document.querySelector('.rv-path-cell[data-screen="S11"]').scrollIntoView({ inline: 'center', block: 'center' }));
+  await p.waitForFunction(() => [...document.querySelectorAll('.rv-path-cell[data-screen="S11"] .rv-frame')].every((f) => f.dataset.state === 'loaded'), { timeout: 30000 }).catch(() => {});
+  const s11 = await p.evaluate(() => [...document.querySelectorAll('.rv-path-cell[data-screen="S11"]')].map((a) => {
+    const w = a.querySelector('iframe').contentWindow;
+    return { level: a.dataset.level, cur: w.__l4?.current, hint: w.document.querySelector('.w-stage')?.textContent || '' };
+  }));
+  const s11Bad = s11.filter((c) => c.cur !== 'S11' || !c.hint.includes(variantOf(S.S11, c.level).hint));
+  expect(s11.length === 3 && !s11Bad.length, `the S11 thumbnails render their own level (${s11.map((c) => c.level).join(', ')})${s11Bad.length ? ': ' + JSON.stringify(s11Bad.map((c) => c.level)) : ''}`);
+  expect(!p.errors.length, 'Paths view: no console errors' + (p.errors.length ? ': ' + p.errors.slice(0, 5).join(' | ') : ''));
+  await p.close();
+  // review.html#paths-3 opens the view with journey 3 marked
+  const q = await open('/review.html#paths-3', { size: [1600, 900] });
+  await q.waitForSelector('.rv-path-cell');
+  const deep = await q.evaluate(() => ({ paths: !document.querySelector('.rv-paths').hidden, pressed: document.querySelector('.rv-journeys [aria-pressed="true"]')?.dataset.journey, on: document.querySelectorAll('.rv-path-cell[data-on="true"]').length }));
+  expect(deep.paths && deep.pressed === '3' && deep.on === ADAPTIVE.length, `review.html#paths-3: the Paths view, journey ${deep.pressed}, ${deep.on} screens marked`);
+  await q.close();
+  // the toolbar names the level and goal on an adaptive screen, and counts the variant's words
+  const t = await open('/index.html?screen=S11&level=stretch&review=1');
+  await t.waitForFunction(() => window.__l4 && document.querySelector('.rv-bar'));
+  const b = await t.evaluate(() => ({ level: document.querySelector('.rv-level').textContent, hidden: document.querySelector('.rv-level').hidden, words: document.querySelector('.rv-words').textContent }));
+  const w = screenWords(variantOf(S.S11, 'stretch'), C);
+  expect(!b.hidden && b.level === 'stretch · g4' && b.words.startsWith(w.max + ' words'), `toolbar on S11 stretch: "${b.level}", ${b.words}`);
+  await t.close();
+}
+
+/* ---------- 5: the SCORM package has no review file ---------- */
+console.log('\npackage');
+{
+  execFileSync(process.execPath, [join(ROOT, 'tools', 'package-scorm.mjs')], { cwd: ROOT, stdio: 'pipe' });
+  const zip = readFileSync(join(ROOT, 'dist', 'eai-m1l4-selfstudy-scorm12.zip'));
+  // the first entry is imsmanifest.xml (local header: method at 8, sizes at 18, name and extra lengths at 26, 28)
+  const nameLen = zip.readUInt16LE(26), extraLen = zip.readUInt16LE(28), size = zip.readUInt32LE(18), method = zip.readUInt16LE(8);
+  const body = zip.subarray(30 + nameLen + extraLen, 30 + nameLen + extraLen + size);
+  const manifest = (method === 8 ? inflateRawSync(body) : body).toString('utf8');
+  const names = [...manifest.matchAll(/<file href="([^"]+)"\/>/g)].map((m) => m[1]);
+  const zipNames = zip.toString('latin1'); // entry names are stored as plain text in the headers
+  expect(names.length > 0 && !names.some((n) => n === 'review.html' || n.startsWith('src/review/')) && !zipNames.includes('src/review/') && !zipNames.includes('review.html'),
+    `SCORM package: ${names.length} files in imsmanifest.xml, none from review.html or src/review/, and none in the zip`);
+}
+
+await browser.close();
+server.close();
+console.log(fails.length ? `\ntest:review FAILED (${fails.length})` : '\ntest:review passed');
+process.exit(fails.length ? 1 : 0);
