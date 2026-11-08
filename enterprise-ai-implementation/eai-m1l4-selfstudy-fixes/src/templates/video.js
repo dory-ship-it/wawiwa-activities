@@ -19,11 +19,11 @@
 // media.duration, stops[].t. Swapping the real film in is a change of those paths and times only.
 // Seeking forward never passes the part already watched or the next unanswered stop (the slider
 // clamps, a polite note says why).
-import { h, fmt, nextId } from '../util.js?v=e59b9691';
-import { glyph, icon } from '../icons.js?v=e59b9691';
-import { letter } from '../tracking/index.js?v=e59b9691';
-import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=e59b9691';
-import { targetSteps } from '../ghost.js?v=e59b9691';
+import { h, fmt, nextId } from '../util.js?v=7fdf6fcd';
+import { glyph, icon } from '../icons.js?v=7fdf6fcd';
+import { letter } from '../tracking/index.js?v=7fdf6fcd';
+import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=7fdf6fcd';
+import { targetSteps } from '../ghost.js?v=7fdf6fcd';
 
 const SEEK_STEP = 5, SEEK_PAGE = 15, AT_STOP = 0.05, AT_END = 0.3;
 // FX4 (Dor): playback speed in the player bar, 1 to 2, kept for the session (every video plays at the
@@ -263,7 +263,7 @@ export const video = {
           // the right answer marked (the wrong pick keeps its cross) and explained, Resume opens
           const r = s.options.findIndex((x) => x.correct);
           btns.forEach((x, j) => paintAnswer(x, j === r ? 'correct' : j === k ? 'wrong' : '', ui));
-          zones.setFeedback({ state: 'neutral', verdict: ui.feedback.revealed, text: s.options[r].feedback });
+          zones.setFeedback({ state: 'wrong', verdict: ui.feedback.revealed, text: s.options[r].feedback });
         } else {
           paint(k, o.correct ? 'correct' : 'wrong');
           zones.setFeedback({ state: o.correct ? 'correct' : 'wrong', text: o.feedback });

@@ -27,8 +27,8 @@
 // Timing: in ~150 ms, then per step a 450 ms move, a tap with a ripple, a short hold; out by 3 s.
 // Any pointer or key input stops it at once. prefers-reduced-motion: no motion, a static hand and
 // arrow at the first target for 3 s.
-import { h, reducedMotion } from './util.js?v=e59b9691';
-import { glyph } from './icons.js?v=e59b9691';
+import { h, reducedMotion } from './util.js?v=7fdf6fcd';
+import { glyph } from './icons.js?v=7fdf6fcd';
 
 const SETTLE = 600, IDLE = 8000, STATIC = 3000;
 const MOVE = 450, TAP = 140, HOLD = 260, IN = 150, OUT = 200;
@@ -107,7 +107,8 @@ export function targetSteps(scope, target) {
 // FX4 (Dor's pilot): "Show me how" is hidden when the screen opens. It appears after 8 s without input
 // (the demo plays then) or after the first wrong answer (reveal(), from the engine). The hand never
 // plays on arrival any more: every type waits for 8 s idle (seen is always true from the engine).
-export function createGhost(stage, { ui, steps, restore = null, seen = false, chip = null, onPlay = () => {} }) {
+// delay: ms before the first play on arrival (FX6: O2 waits for its build-up)
+export function createGhost(stage, { ui, steps, restore = null, seen = false, chip = null, onPlay = () => {}, delay = null }) {
   let timer = null, played = false, cancelled = false;
   const button = h('button', { class: 'w-showme', type: 'button', hidden: true, dataset: { action: 'showMe' } }, glyph('g-hand', { size: 24.32 }), h('span', {}, ui.buttons.showMe));
   const reveal = () => { if (!cancelled) button.hidden = false; };
@@ -133,7 +134,7 @@ export function createGhost(stage, { ui, steps, restore = null, seen = false, ch
     document.addEventListener('keydown', idleReset, true);
     idleReset();
   } else {
-    timer = setTimeout(play, SETTLE);
+    timer = setTimeout(play, delay ?? SETTLE);
   }
   return {
     button,

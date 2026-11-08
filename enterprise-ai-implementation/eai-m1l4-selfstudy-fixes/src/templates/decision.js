@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=e59b9691';
-import { glyph, icon } from '../icons.js?v=e59b9691';
-import { attachTip } from '../tooltip.js?v=e59b9691';
-import { letter } from '../tracking/index.js?v=e59b9691';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=e59b9691';
-import { targetSteps } from '../ghost.js?v=e59b9691';
+import { h, fmt, resolveLink } from '../util.js?v=7fdf6fcd';
+import { glyph, icon } from '../icons.js?v=7fdf6fcd';
+import { attachTip } from '../tooltip.js?v=7fdf6fcd';
+import { letter } from '../tracking/index.js?v=7fdf6fcd';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=7fdf6fcd';
+import { targetSteps } from '../ghost.js?v=7fdf6fcd';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -106,8 +106,10 @@ const headRow = (ctx, g, ...tools) => h('div', { class: 'w-head-row w-head-q' },
 
 // FX1 B2: the strip after a right answer, or after the last wrong attempt (revealed: the right answer
 // is marked and explained, in the neutral strip, so it never looks like the learner's own)
+// FX6 (Noy: the feedback did not read as feedback): a wrong answer's card is red with a cross ("Not
+// quite. Here is the right answer." and why), a right one teal with a check; never the beige hint look
 const rightStrip = (ctx, text, revealed, more = {}) => ctx.zones.setFeedback(revealed
-  ? { state: 'neutral', verdict: ctx.ui.feedback.revealed, text, ...more }
+  ? { state: 'wrong', verdict: ctx.ui.feedback.revealed, text, ...more }
   : { state: 'correct', text, ...more });
 
 // the Check button of a select-several task: locked (grey, lock) until the selection is complete

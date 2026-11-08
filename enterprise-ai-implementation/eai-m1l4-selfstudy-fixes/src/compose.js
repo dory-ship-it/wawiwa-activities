@@ -14,7 +14,7 @@
 //   none         the screen keeps its own layout (wide tasks: S18A, S19A)
 // The templates are untouched: the composer only moves their elements (the references they keep stay
 // valid), and the scene behind turns light (src/engine.js).
-import { h } from './util.js?v=e59b9691';
+import { h } from './util.js?v=7fdf6fcd';
 
 const COMPOSED = { decision: true, input: true, warmup: true, handoff: true, check: true };
 const HEAD = '.w-context, .w-label, .w-head-row, .w-instruction, .w-case-row, .w-handoff-head, .w-kc-head, .w-case-thumbs, .w-round-top, .w-open-head, .w-glass, .w-case-card, .w-q-chip';

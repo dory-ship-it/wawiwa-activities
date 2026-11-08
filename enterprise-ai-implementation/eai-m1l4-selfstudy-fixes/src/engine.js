@@ -8,29 +8,29 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=e59b9691';
-import { createZones } from './zones.js?v=e59b9691';
-import { createMenu, openDialog } from './menu.js?v=e59b9691';
-import { initTooltips, applyTerms } from './tooltip.js?v=e59b9691';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=e59b9691';
-import { decision } from './templates/decision.js?v=e59b9691';
-import { input } from './templates/input.js?v=e59b9691';
-import { sortDeck } from './templates/sortdeck.js?v=e59b9691';
-import { bpmn } from './templates/bpmn.js?v=e59b9691';
-import { flags } from './templates/flags.js?v=e59b9691';
-import { explorer } from './templates/explorer.js?v=e59b9691';
-import { video } from './templates/video.js?v=e59b9691';
-import { handoff } from './templates/handoff.js?v=e59b9691';
-import { check } from './templates/check.js?v=e59b9691';
-import { result } from './templates/result.js?v=e59b9691';
-import { end } from './templates/end.js?v=e59b9691';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=e59b9691';
-import { createGhost, stopGhost } from './ghost.js?v=e59b9691';
-import { compose, composes } from './compose.js?v=e59b9691';
-import { createTracking } from './tracking/index.js?v=e59b9691';
-import { describe } from './tracking/describe.js?v=e59b9691';
-import { createCoach } from './coach/coach.js?v=e59b9691';
-import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=e59b9691';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=7fdf6fcd';
+import { createZones } from './zones.js?v=7fdf6fcd';
+import { createMenu, openDialog } from './menu.js?v=7fdf6fcd';
+import { initTooltips, applyTerms } from './tooltip.js?v=7fdf6fcd';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=7fdf6fcd';
+import { decision } from './templates/decision.js?v=7fdf6fcd';
+import { input } from './templates/input.js?v=7fdf6fcd';
+import { sortDeck } from './templates/sortdeck.js?v=7fdf6fcd';
+import { bpmn } from './templates/bpmn.js?v=7fdf6fcd';
+import { flags } from './templates/flags.js?v=7fdf6fcd';
+import { explorer } from './templates/explorer.js?v=7fdf6fcd';
+import { video } from './templates/video.js?v=7fdf6fcd';
+import { handoff } from './templates/handoff.js?v=7fdf6fcd';
+import { check } from './templates/check.js?v=7fdf6fcd';
+import { result } from './templates/result.js?v=7fdf6fcd';
+import { end } from './templates/end.js?v=7fdf6fcd';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=7fdf6fcd';
+import { createGhost, stopGhost } from './ghost.js?v=7fdf6fcd';
+import { compose, composes } from './compose.js?v=7fdf6fcd';
+import { createTracking } from './tracking/index.js?v=7fdf6fcd';
+import { describe } from './tracking/describe.js?v=7fdf6fcd';
+import { createCoach } from './coach/coach.js?v=7fdf6fcd';
+import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=7fdf6fcd';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -222,7 +222,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=e59b9691').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=7fdf6fcd').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -538,12 +538,12 @@ class Lesson {
   // The ghost hand for one interaction on this screen. The first time a type (tabs, stop, pickTwo)
   // appears it plays ~600 ms after the screen settles; once the type is seen it plays only after 8 s
   // without input. One letter per seen type is kept in state.h (suspend data). Returns { button, cancel }.
-  ghostFor({ type, steps, restore = null, chip = null }) {
+  ghostFor({ type, steps, restore = null, chip = null, delay = null }) {
     const code = { tabs: 't', stop: 'v', pickTwo: 's', copy: 'y' }[type] || type.charAt(0); // NL4: S19's Copy (y)
     // FX5 (Noy, 8 Nov 2026): the hand plays on arrival, on every screen that has one (the choice screens
     // have none), and "Show me how" replays it
     const seen = false;
-    const g = createGhost(this.stage, { ui: this.ui, steps, restore, seen, chip,
+    const g = createGhost(this.stage, { ui: this.ui, steps, restore, seen, chip, delay,
       onPlay: () => { if (!(this.state.h || '').includes(code)) { this.state.h = (this.state.h || '') + code; this.persist(); } } });
     this.ghosts.push(g);
     return g;
