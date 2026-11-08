@@ -12,11 +12,11 @@
 //                              a field marked optional may stay empty (S12B Date)
 //   all filled              -> values stored under each field's store key, one fill-in answer per
 //                              field on the tracking bus, feedback.saved, Next unlocks
-import { h, fmt, nextId, resolveLink } from '../util.js?v=c9ed6bad';
-import { glyph } from '../icons.js?v=c9ed6bad';
-import { attachTip } from '../tooltip.js?v=c9ed6bad';
-import { layout, sheet, contextLine, privacyLine, showMe, splitFirst } from './stage.js?v=c9ed6bad';
-import { scaleOf } from '../ghost.js?v=c9ed6bad';
+import { h, fmt, nextId, resolveLink } from '../util.js?v=e59b9691';
+import { glyph, icon } from '../icons.js?v=e59b9691';
+import { attachTip } from '../tooltip.js?v=e59b9691';
+import { layout, sheet, contextLine, privacyLine, showMe, splitFirst } from './stage.js?v=e59b9691';
+import { scaleOf } from '../ghost.js?v=e59b9691';
 
 const COUNTER_ANNOUNCE_AT = 230;
 
@@ -38,8 +38,10 @@ export const input = {
     const href = mid.link ? resolveLink(ctx.content, mid.link) : null;
     // FX1 D4: on S02 (headAbove) the two help controls are a small row of links under the fields
     const small = !!screen.headAbove;
-    const hw = href ? h('a', { class: small ? 'w-link w-link-small' : 'w-btn w-btn-ghost', href, target: '_blank', rel: 'noopener noreferrer', dataset: { action: 'homework1' } },
-      h('span', {}, ui.buttons.openHomework1), glyph('g-arrow', { size: 19.2 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')')) : null;
+    // FX5 (Noy, S02): the homework is a clear button with a document icon beside the context line (the
+    // line itself names the fallback, so nothing on screen looks clickable that is not)
+    const hw = href ? h('a', { class: small ? 'w-btn w-btn-ghost w-hw-btn' : 'w-btn w-btn-ghost', href, target: '_blank', rel: 'noopener noreferrer', dataset: { action: 'homework1' } },
+      small ? icon('workbook', { size: 20.48 }) : null, h('span', {}, ui.buttons.openHomework1), glyph('g-arrow', { size: 19.2 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')')) : null;
     const [question, answer] = mid.help ? splitFirst(mid.help.text) : ['', ''];
     const help = mid.help ? h('button', { class: (small ? 'w-link w-link-small' : 'w-btn w-btn-ghost') + ' w-help-btn', type: 'button', dataset: { action: 'homeworkHelp' } }, question) : null;
 
@@ -85,13 +87,13 @@ export const input = {
     // between the bar and the footer; S18B: the checkbox on the left of that row)
     const task = h('div', { class: 'w-form-task', dataset: { interaction: '' } },
       fields,
-      h('div', { class: 'w-actionbar' }, boxLine, small ? h('div', { class: 'w-helprow' }, hw, help) : [hw, help], privacy?.el, extra?.el, save));
+      h('div', { class: 'w-actionbar' }, boxLine, small ? (help ? h('div', { class: 'w-helprow' }, help) : null) : [hw, help], privacy?.el, extra?.el, save));
     if (small) {
       // FX1 D4 (S02): the context line and the heading stand above the panel, on the wash; the panel
       // holds the fields, the small help row and the action bar, with more space between the groups
       layout(ctx, 'focus',
         h('div', { class: 'w-open' },
-          h('div', { class: 'w-open-head' }, contextLine(screen.stage.top?.text), shown, heading),
+          h('div', { class: 'w-open-head' }, heading, h('div', { class: 'w-open-ctx' }, contextLine(screen.stage.top?.text), hw), shown),
           sheet('focus w-sheet-open', caseCard, task, zones.band))); // (the card at the panel's top right, beside the field labels)
     } else {
       // the card on the context line's row, at its right: the panel keeps its height

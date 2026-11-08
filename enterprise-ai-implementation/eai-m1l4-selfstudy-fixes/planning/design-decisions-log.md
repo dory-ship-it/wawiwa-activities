@@ -3,6 +3,31 @@
 Visual and interaction decisions with Noy's reasons. Lesson-agnostic unless marked. Newest first.
 Last updated: 2026-11-05.
 
+## FX6 (8 Nov 2026, Noy: "you centre the content wrongly; spread it smartly; nothing on the photos; colours accessible; a technology lesson; free hand")
+| Decision | Reason |
+|---|---|
+| **The composer** (`src/compose.js`): every question screen (decision, input, warm-up, handoff, check) is laid out again over the stage, read left to right: the head (the instruction first and largest, a turquoise rule beside it, then the context, a quote or case) and the task as a white card with its feedback card under it. Top-aligned, so feedback appearing moves nothing. | Content spread over the screen, not one centred card. |
+| **Photos never under an object.** Four arrangements per screen (`look`): text, framed (the photo framed under the head), photo / photo-right (the photo as a full column). All on a light ground with a solid dark bar. | Noy: objects on top of photos; variety. |
+| **The key ideas, O2 and O3 on the light ground too** (ink text, no blurred photo behind). | Contrast and calm. |
+| **Ink text on light grounds everywhere**; white only on the dark bar, the dark quote card and the video. | Accessible colours (AA). |
+| **V1 is the upgraded film** (3:41, stops 85.0 and 170.4, its own captions and poster). | Noy. |
+
+## FX5 (8 Nov 2026, Noy's review of the FX4 copy): this round wins over FX4 where they differ
+Rules for every self-study screen, all chapters (memory: selfstudy-ux-rules-noy):
+
+| Decision | Reason |
+|---|---|
+| **No text beside Next.** "Up next" is gone; the reason line opens only after the learner presses a locked Next twice. | Noy: the added text was clutter. |
+| **No Hint links at all.** Hints stay for screen readers only. | Noy: hints are unnecessary. |
+| **Choice questions get one try** (single, multi, pair, rounds, fill, metric, the S17 cases, S07's question, video stops): a wrong answer shows "Not quite. Here is the right answer." with the why. | Noy: two tries made learners click through. |
+| **Feedback is its own card** under the question panel (the panel moves up so both stay centred), with a coloured edge. | Dor and Noy: the feedback was lost in the question box. |
+| **A locked Check carries its reason as its label** ("Pick 2 first"), is centred and filled once it can be pressed; the hand points at it then. | Noy: the reason beside it was crammed. |
+| **The hand plays on arrival** wherever the action is not obvious (O2's tabs, drags, S07 tiles, inputs); choice screens still have none. | Noy: O2 and S05b needed the hand at once. |
+| **Drag tasks judged at once, Rise style** (S04, S09, S16, S05b, S12, S13): no Check; a right drop stays with a teal check and its tag, a wrong drop flashes red, says why and goes back; two misses move the card to its place. The deck is centred, the piles lower with space. S12 and S13: a click on a field or a step places the next flag. | Noy: "look at Rise's sorting". |
+| **Varied looks**: besides the blurred photo and the full photo, a top photo band, a side photo, or a clean light ground (screen.look). | Noy: the same background on every screen was boring. |
+| **Rebuilt screens**: S02 (the homework as a clear button, no fake link), S05a (key in white cards, turquoise numbers), S07 (the question looks different), S08 (question in teal ink, the map line large), S10 (a workbook page with a blank to fill), S11 (a "Checkable later?" gauge with three icons), S14 / S15 (the situation inside the question panel). | Noy's notes per screen. |
+| **Video speed** as a gear menu (Normal, 1.25, 1.5, 2). | Noy: like YouTube. |
+
 ## FX4 fixes pass (5 Nov 2026, Dor's pilot review + Noy's notes; work order "EAI M1 L4 self-study: fixes pass")
 Built in the copy `eai-m1l4-selfstudy-fixes` (the live folder untouched). Where this pass contradicts an earlier entry, this pass wins.
 **Core principle: one screen, one clear task.** A first-time learner can say in 3 seconds what to do, where, and how they know they are done.

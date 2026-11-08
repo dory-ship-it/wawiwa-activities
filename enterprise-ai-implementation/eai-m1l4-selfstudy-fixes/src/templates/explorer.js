@@ -3,9 +3,9 @@
 //   tiles   (S07)  NL2: on the Focus wash, a 4 x 2 grid of tiles that open in place; after all eight the
 //                  heading becomes the question and the tiles answer it (one question, two attempts).
 // Tracking: tiles = the field number of the first answer. Retries as retry events.
-import { h, fmt } from '../util.js?v=c9ed6bad';
-import { glyph } from '../icons.js?v=c9ed6bad';
-import { layout, arrowNav, paintAnswer } from './stage.js?v=c9ed6bad';
+import { h, fmt } from '../util.js?v=e59b9691';
+import { glyph } from '../icons.js?v=e59b9691';
+import { layout, arrowNav, paintAnswer } from './stage.js?v=e59b9691';
 
 export const explorer = {
   mount(ctx) {
@@ -30,7 +30,7 @@ function tiles(ctx) {
   const { screen, ui, zones } = ctx;
   const trackingId = screen.tracking[0].id;
   const visited = new Set();
-  const max = ctx.revisit ? 0 : screen.attempts || 2; // FX4: every scored task reveals after two tries
+  const max = ctx.revisit ? 0 : 1; // FX5 (Noy): one try on a choice question, then the right answer and why
   let phase = 'explore', solved = false, chosen = -1, tries = 0;
 
   const sub = h('p', { class: 'w-task-sub', 'aria-live': 'polite' });
@@ -86,6 +86,10 @@ function tiles(ctx) {
   const unlock = () => {
     phase = 'answer';
     grid.dataset.phase = 'answer';
+    // FX5 (Noy: "it is not clear at all that there is a new instruction"): the screen changes look: a
+    // "Question" tag before the heading, the heading in turquoise, the tiles turn into compact answer cards
+    zones.main.dataset.phase = 'answer';
+    if (screen.questionChip && !zones.main.querySelector('.w-q-chip')) zones.instruction.before(h('span', { class: 'w-q-chip' }, screen.questionChip));
     zones.instruction.textContent = screen.question;
     sub.textContent = ''; // (FX4: the question's hint behind the Hint link)
     list.forEach((x) => { x.btn.removeAttribute('aria-expanded'); paintDisc(x); });

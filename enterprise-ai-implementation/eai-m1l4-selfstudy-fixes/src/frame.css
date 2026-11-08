@@ -1295,6 +1295,98 @@ a.w-btn { text-decoration: none; }
 .w-hint-text { font: 500 16px/1.35 var(--wl-font-label); color: var(--wl-text-2); }
 .w-stage[data-scene="focus"] .w-float .w-hint-link, .w-stage[data-scene="focus"] .w-float .w-hint-text { color: var(--wl-white); }
 .w-stage[data-scene="focus"] .w-float .w-hint-link:hover { background: var(--wl-bar-on-dark-disc); }
+/* ---------- FX5 (Noy, 8 Nov 2026) ---------- */
+/* the feedback is its own card, apart from the question box: under the panel, a gap between them; the
+   panel moves up by half the card (zones.js placeCard sets --fb-shift), so both stay centred */
+.w-sheet .w-band { margin: 0 -30.72px 0; }
+.w-sheet .w-band-row, .w-sheet .w-band[data-strip="on"] .w-band-row { padding-bottom: 0; }
+.w-sheet[data-fb="on"] { margin-top: calc(-1 * var(--fb-shift, 0px)); }
+.w-sheet .w-band .w-strip { position: absolute; left: 0; right: 0; top: calc(100% + 15.36px); margin: 0; border-top: 0; border-left: 7.68px solid;
+  border-radius: var(--wl-radius-panel); box-shadow: var(--wl-panel-shadow); }
+.w-float .w-strip { border-top: 0; border-left: 7.68px solid; border-radius: var(--wl-radius-panel); box-shadow: var(--wl-panel-shadow); }
+.w-strip[data-tone="correct"] { border-left-color: var(--wl-teal); }
+.w-strip[data-tone="wrong"] { border-left-color: var(--wl-error); }
+.w-strip[data-tone="neutral"] { border-left-color: var(--wl-neutral-line); }
+/* the looks a task screen can take (screen.look), besides the blurred photo (focus) and the full photo (stage):
+   band   the photo as a band at the top (behind the bar and the heading), the task on the light ground
+   split  the photo on the left, the task on the light ground on the right
+   light  a clean light ground, no photo */
+.w-stage:is([data-scene="band"], [data-scene="split"], [data-scene="light"]) { background: var(--wl-stone); }
+.w-band-photo { position: absolute; left: 0; right: 0; top: 0; height: 288px; background-size: cover; background-repeat: no-repeat; }
+.w-band-veil { position: absolute; left: 0; right: 0; top: 0; height: 288px; background: var(--wl-wash-veil); }
+.w-split-photo { position: absolute; left: 0; top: 0; bottom: 0; width: 36%; background-size: cover; background-repeat: no-repeat; }
+.w-stage:is([data-scene="split"], [data-scene="light"])[data-bar="dark"] > .w-bar { background: var(--wl-stage-ground); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.w-stage[data-scene="band"] :is(.w-task-head, .w-focus-head, .w-open-head) .w-instruction { color: var(--wl-white); }
+.w-stage[data-scene="band"] :is(.w-task-head, .w-focus-head, .w-open-head) :is(.w-context, .w-subline, .w-task-sub) { color: var(--wl-on-wash); }
+.w-stage[data-scene="split"] .w-sheet-focus { left: calc(36% + 40px); right: 40px; width: auto; transform: translateY(-50%); }
+/* S02: the heading first, then the context line with the Homework 1 button beside it */
+.w-open-ctx { display: flex; align-items: center; gap: 17.92px; margin-top: 10.24px; }
+.w-open-ctx .w-context { flex: 1 1 auto; min-width: 0; }
+.w-hw-btn { flex: none; gap: 8.96px; }
+/* S05a: the key stands out: white cards, turquoise numbers (on the diagram too) */
+.w-bpmn-marker, .w-bpmn-key-n { width: 38.4px; height: 38.4px; background: var(--wl-turquoise); color: var(--wl-o1-ground); font-size: 19.2px; }
+.w-bpmn-key { gap: 12.8px; }
+.w-bpmn-key li { align-items: center; padding: 14.08px 17.92px; border-radius: var(--wl-radius-card); background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
+.w-stage[data-scene] .w-main .w-bpmn-key li p { font-size: 19.2px; color: var(--wl-text-2); }
+.w-stage[data-scene] .w-main .w-bpmn-key li b { color: var(--wl-ink); }
+/* S07: the question looks different from the tiles before it */
+.w-q-chip { display: inline-block; margin-bottom: 6.4px; padding: 2.56px 12.8px; border-radius: 5.12px; background: var(--wl-turquoise); font: 700 15.36px/1.4 var(--wl-font-label); color: var(--wl-o1-ground); }
+.w-stage .w-main[data-phase="answer"] .w-task-head .w-instruction { color: var(--wl-aqua-text); }
+.w-main[data-phase="answer"] .w-tiles .w-tile { min-height: 96px; background: var(--wl-ivory); }
+.w-main[data-phase="answer"] .w-tiles .w-tile-icon-wrap { display: none; }
+.w-main[data-phase="answer"] .w-tiles .w-tile .w-opt-mark { width: 32px; height: 32px; }
+/* S08: the rule question in turquoise ink; the map line to judge, larger, on a turquoise edge */
+.w-main:has(.w-rounds) .w-instruction { color: var(--wl-teal-ink); }
+.w-map-strip { border-left-width: 9px; border-left-color: var(--wl-turquoise); padding: 17.92px 23.04px; }
+.w-round-line { font-size: 24.32px; font-weight: 700; }
+/* S10: left the workbook page (the note, Field 6 filled, Field 7's blank); right the four lines */
+.w-sheet-fill .w-fill { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 25.6px; align-items: start; }
+.w-wb-page { display: grid; gap: 12.8px; padding: 17.92px; border-radius: var(--wl-radius-card); background: var(--wl-white); border: 1px solid var(--wl-line); box-shadow: var(--wl-card-shadow); }
+.w-fill-note { display: flex; gap: 10.24px; align-items: flex-start; padding: 10.24px 12.8px; border-radius: 7.68px; background: var(--wl-keypill-bg); font: 600 18.56px/1.4 var(--wl-font-ui); color: var(--wl-ink); }
+.w-fill-note .w-glyph, .w-fill-note svg { flex: none; color: var(--wl-teal-ink); }
+.w-sheet-fill .w-field-row { flex-direction: column; align-items: stretch; gap: 4px; }
+.w-sheet-fill .w-field-row[data-state="active"] .w-field-slot { min-height: 34px; }
+/* S11: left the four metrics; right the "Checkable later?" gauge: three big icon tiles */
+.w-sheet-metric .w-metric { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 25.6px; align-items: start; }
+.w-sheet-metric .w-slots { flex-direction: column; align-items: stretch; gap: 12.8px; padding: 17.92px; border-radius: var(--wl-radius-card); background: var(--wl-white); border: 1px solid var(--wl-line); box-shadow: var(--wl-card-shadow); }
+.w-sheet-metric .w-slots-title { font-size: 19.2px; text-align: center; }
+.w-sheet-metric .w-slots ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10.24px; }
+.w-sheet-metric .w-slot { min-width: 0; min-height: 112px; flex-direction: column; justify-content: center; gap: 6.4px; padding: 10.24px 6.4px; text-align: center; }
+.w-slot-icon { display: grid; color: var(--wl-idle-ink); }
+.w-slot[data-on="true"] .w-slot-icon { color: var(--wl-teal-ink); }
+.w-sheet-metric .w-slot-label { font: 700 16.64px/1.2 var(--wl-font-ui); }
+/* S14 / S15: the situation in the panel, the handoff drawing beside its line */
+.w-sheet-one .w-case-row { margin-bottom: 4px; }
+.w-hv-inline { flex: 0 0 300px; margin: 0; }
+.w-hv-inline .w-hv-box { min-height: 48px; padding: 6.4px; font-size: 16px; }
+/* Check: centred under the task, and filled (the main action) once it can be pressed */
+.w-sheet .w-band-row:has([data-action="check"]) { justify-content: center; }
+.w-sheet .w-band-row:has([data-action="check"]) .w-band-tool { margin-left: 0; }
+.w-btn-action[data-action="check"]:not(:disabled) { min-width: 160px; border-color: var(--wl-navy); background: var(--wl-navy); color: var(--wl-white); }
+.w-btn-action[data-action="check"]:not(:disabled):hover { background: var(--wl-ink); }
+/* the sort (Rise style): the deck centred, its feedback card centred under it, the piles lower */
+.w-float.w-float-under { position: absolute; left: 50%; width: min(720px, calc(100% - 204.8px)); transform: translateX(-50%); }
+.w-float-under .w-band-row { display: none; }
+.w-main[data-layout="sort-deck"] .w-sdeck { top: 112px; }
+.w-main[data-layout="sort-deck"] .w-drop { min-height: 220px; }
+.w-placed[data-state="wrong"] { border-color: var(--wl-error); background: var(--wl-error-bg); }
+.w-placed[data-state="wrong"] .w-placed-disc { background: var(--wl-error); }
+@media (prefers-reduced-motion: no-preference) {
+  .w-placed[data-state="wrong"], .w-target-placed[data-state="wrong"] { animation: w-shake .38s ease-in-out 1; }
+  .w-placed[data-state="right"] { animation: w-pop .3s var(--wl-ease-enter) 1; }
+}
+@keyframes w-shake { 0%, 100% { translate: 0 0; } 25% { translate: -6px 0; } 75% { translate: 6px 0; } }
+/* labels and flags: where a label went is clear at once: solid teal (right), red (wrong, a moment) */
+.w-target[data-placed="right"] { background: var(--wl-halo); } /* see-through: the diagram under it stays readable */
+.w-target[data-placed="wrong"] { border-style: solid; border-color: var(--wl-error); background: transparent; }
+.w-target-placed[data-state="right"] { background: var(--wl-teal); border-color: var(--wl-teal); color: var(--wl-white); }
+.w-target-placed[data-state="right"] .w-placed-disc { background: var(--wl-white); color: var(--wl-teal-ink); }
+.w-target-placed[data-state="wrong"] { border-color: var(--wl-error); color: var(--wl-error-head); background: var(--wl-white); }
+.w-target-placed[data-state="wrong"] .w-placed-disc { background: var(--wl-error); }
+/* flags: the next flag a click places glows; the free targets show they take it */
+.w-flag-card[data-active="true"] { border: 2.56px solid var(--wl-turquoise); box-shadow: 0 0 0 5.12px var(--wl-halo); }
+.w-target[data-ready="true"] { cursor: pointer; border-color: var(--wl-navy); }
+.w-target[data-ready="true"]:hover { border-style: solid; background: var(--wl-keypill-bg); }
 /* S19A (the brief): the line and three steps left, the workbook's screenshot right */
 .w-sheet-brief { padding-bottom: 28.16px; }
 .w-sheet-brief .w-handoff-head { margin-bottom: 15.36px; }
@@ -1317,9 +1409,18 @@ a.w-btn { text-decoration: none; }
 .w-pdf-choice .w-btn { min-width: 140.8px; }
 .w-pdf-choice .w-btn[aria-pressed="true"].w-btn-ghost { border: 2.56px solid var(--wl-navy); }
 .w-pdf-fix { display: grid; gap: 12.8px; justify-items: start; margin-top: 20.48px; }
-/* the video's speed button: an outline chip with the speed (the CC chip's look, off) */
-.w-speed-chip { min-width: 48px; padding: 2.56px 8.96px; border-radius: 5.12px; box-shadow: inset 0 0 0 1.5px var(--wl-white); font: 600 14.72px/normal var(--wl-font-label); color: var(--wl-white); text-align: center; }
-.w-speed:hover .w-speed-chip { background: var(--wl-bar-on-dark-disc); }
+/* FX5: the video's speed: a gear (a badge with any speed but Normal) and its menu above it */
+.w-speed-wrap { position: relative; flex: none; }
+.w-speed { position: relative; }
+.w-speed-badge { position: absolute; right: -2px; top: 2px; padding: 0 4px; border-radius: 4px; background: var(--wl-turquoise); font: 700 14px/1.2 var(--wl-font-label); color: var(--wl-o1-ground); }
+.w-speed-badge:empty { display: none; }
+.w-speed-menu { position: absolute; right: -8px; bottom: calc(100% + 10px); z-index: 6; min-width: 168px; padding: 8px 0; border-radius: var(--wl-radius-card);
+  background: var(--wl-quote-glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: var(--wl-panel-shadow); }
+.w-speed-head { margin: 0; padding: 4px 16px 8px; font: 600 14px/1.2 var(--wl-font-label); color: var(--wl-on-glass); }
+.w-speed-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 16px; border: 0; background: none; font: 600 16px/1 var(--wl-font-ui); color: var(--wl-white); text-align: left; cursor: pointer; }
+.w-speed-item:hover, .w-speed-item:focus-visible { background: var(--wl-bar-on-dark-disc); }
+.w-speed-tick { width: 16px; display: grid; color: var(--wl-aqua-text); visibility: hidden; }
+.w-speed-item[aria-checked="true"] .w-speed-tick { visibility: visible; }
 /* a checked card's tag: why it belongs in that column (one short line, teal ink) */
 .w-placed-body { min-width: 0; display: grid; }
 .w-placed-tag { font: 600 14px/1.25 var(--wl-font-label); color: var(--wl-teal-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1328,3 +1429,59 @@ a.w-btn { text-decoration: none; }
 .w-line-cell.w-target { padding: 6.4px; border-radius: 11.52px; grid-template-rows: 44.8px 1fr; gap: 6.4px; }
 .w-target-empty { visibility: hidden; }
 .w-line-arrow { padding-top: 67.84px; }
+
+/* ---------- FX6 (Noy, 8 Nov 2026): the composition of a question screen (src/compose.js) ----------
+   On a light ground, read left to right: the head (instruction first, then its context) and the task in a
+   white card with its feedback card under it; the photo framed, never under an object. Top-aligned, so
+   the feedback card appearing under the task moves nothing. */
+.w-comp { position: absolute; left: max(56px, calc((100% - 1376px) / 2)); right: max(56px, calc((100% - 1376px) / 2)); top: 38.4px; bottom: 92px;
+  display: grid; column-gap: 48px; align-items: start; }
+.w-comp[data-look="text"], .w-comp[data-look="framed"] { grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); }
+.w-comp[data-look="photo"] { grid-template-columns: minmax(0, .6fr) minmax(0, 1.4fr); }
+.w-comp[data-look="photo-right"] { grid-template-columns: minmax(0, 1.4fr) minmax(0, .6fr); }
+.w-comp-stack { display: grid; gap: 22.4px; align-content: start; min-width: 0; }
+.w-comp-photo { margin: 0; align-self: stretch; min-height: 0; border-radius: var(--wl-radius-panel); overflow: hidden; box-shadow: var(--wl-card-shadow); background: var(--wl-line); }
+.w-comp-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.w-comp-img[data-mirror="true"] { scale: -1 1; }
+/* (framed: the photo takes the head column's room that is left, 120 to 236 px, never past its foot) */
+.w-comp[data-look="framed"] .w-comp-head { align-self: stretch; display: flex; flex-direction: column; }
+.w-comp[data-look="framed"] .w-comp-head > * { flex: none; }
+.w-comp[data-look="framed"] .w-comp-head > .w-comp-photo { flex: 0 1 236px; min-height: 120px; max-height: 236px; margin-top: 10px; align-self: stretch; }
+/* the head: instruction largest, in ink; a turquoise rule marks where reading starts */
+.w-comp-head { display: grid; gap: 14px; align-content: start; min-width: 0; min-height: 0; padding-left: 20.48px; border-left: 5.12px solid var(--wl-turquoise); }
+.w-comp-stack > .w-comp-head { padding-left: 17.92px; }
+.w-stage .w-comp-head .w-instruction { margin: 0; font: 800 36px/1.12 var(--wl-font-ui); letter-spacing: -.8px; color: var(--wl-ink); }
+.w-comp-stack .w-comp-head .w-instruction { font-size: 32px; }
+.w-comp-head .w-head-row { margin: 0; flex-direction: column; align-items: flex-start; gap: 14px; }
+.w-comp-head .w-head-tools { flex-wrap: wrap; }
+.w-comp-head .w-context { margin: 0; font-size: 19.2px; line-height: 1.45; color: var(--wl-text-2); }
+.w-comp-head .w-label { margin: 0; }
+.w-comp-head .w-case-row { flex-direction: column; align-items: flex-start; }
+.w-comp-head .w-hv-inline { flex: none; width: 100%; max-width: 360px; }
+.w-comp-head .w-case-thumbs { margin: 0; }
+/* a warm-up's kicker and a quote stand in the head as plain blocks (no glass over a photo any more) */
+.w-comp-head .w-glass { position: static; width: auto; margin: 0; padding: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; color: var(--wl-ink); box-shadow: none; }
+.w-comp-head .w-glass-kicker { color: var(--wl-teal-ink); margin-bottom: 10px; }
+.w-comp-head .w-glass-label { color: var(--wl-ink); }
+.w-comp-head .w-glass .w-instruction { margin: 0; }
+.w-comp-head .w-quote-glass { padding: 18px 22px; border-radius: var(--wl-radius-card); background: var(--wl-stage-ground); color: var(--wl-white); }
+.w-comp-head .w-quote-glass .w-quote-1 { margin-top: 4px; font-size: 22px; line-height: 1.25; color: var(--wl-white); }
+.w-comp-head .w-quote-glass .w-attrib { margin-top: 8px; font-size: 15px; }
+.w-comp-head .w-case-thumbs { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.w-comp-head .w-case-thumb { display: flex; align-items: center; gap: 14px; margin: 0; }
+.w-comp-head .w-case-thumb img { flex: none; width: 132px; height: 74px; object-fit: cover; border-radius: 8px; }
+.w-comp-head .w-case-thumb figcaption { font: 600 16px/1.3 var(--wl-font-label); color: var(--wl-text-2); }
+.w-comp-head .w-quote-glass .w-attrib { color: var(--wl-on-glass); }
+.w-comp-head .w-quote-glass .w-glyph { width: 32px; height: auto; }
+.w-comp-head .w-case-card { position: static; width: auto; margin: 0; padding: 16px 20px; box-shadow: none; border: 1px solid var(--wl-line); }
+/* the task: the screen's panel as a white card, its feedback card under it */
+.w-comp .w-sheet { position: relative; top: auto; left: auto; right: auto; bottom: auto; transform: none; width: auto; max-width: none; margin: 0;
+  padding: 24px 26px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
+.w-comp .w-sheet[data-fb="on"] { margin-top: 0; }
+.w-comp .w-sheet .w-band { margin: 0; }
+.w-comp .w-sheet .w-band-row { padding: 0; }
+.w-comp .w-sheet .w-band .w-strip { top: calc(100% + 14px); }
+.w-comp .w-sheet-title { display: none; } /* a warm-up's "Make your best guess.": the instruction says it */
+.w-comp .w-ans-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.w-comp .w-sheet > :first-child { margin-top: 0; }
+.w-comp .w-ans { background: var(--wl-white); }

@@ -19,11 +19,11 @@
 // media.duration, stops[].t. Swapping the real film in is a change of those paths and times only.
 // Seeking forward never passes the part already watched or the next unanswered stop (the slider
 // clamps, a polite note says why).
-import { h, fmt, nextId } from '../util.js?v=c9ed6bad';
-import { glyph } from '../icons.js?v=c9ed6bad';
-import { letter } from '../tracking/index.js?v=c9ed6bad';
-import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=c9ed6bad';
-import { targetSteps } from '../ghost.js?v=c9ed6bad';
+import { h, fmt, nextId } from '../util.js?v=e59b9691';
+import { glyph, icon } from '../icons.js?v=e59b9691';
+import { letter } from '../tracking/index.js?v=e59b9691';
+import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=e59b9691';
+import { targetSteps } from '../ghost.js?v=e59b9691';
 
 const SEEK_STEP = 5, SEEK_PAGE = 15, AT_STOP = 0.05, AT_END = 0.3;
 // FX4 (Dor): playback speed in the player bar, 1 to 2, kept for the session (every video plays at the
@@ -85,19 +85,39 @@ export const video = {
     const muteBtn = tool('w-mute', v.mute, glyph('g-volume', { size: 25.6 }), false);
     const trBtn = tool('w-tr', v.transcript, glyph('learn', { size: 25.6 }), false); // closed until the learner opens it
     const limitNote = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
-    // the speed button: each press steps 1, 1.25, 1.5, 2, then 1 again; its chip shows the speed
+    // FX5 (Noy): the speed as a gear icon that opens a small menu above it (YouTube style): Normal, 1.25,
+    // 1.5, 2; the chosen one is ticked; a small badge on the gear shows any speed other than Normal
     let rate = readRate();
-    const speedChip = h('span', { class: 'w-speed-chip', 'aria-hidden': 'true' });
-    const speedBtn = h('button', { class: 'w-tool w-speed', type: 'button', dataset: { action: 'speed' } }, speedChip);
+    const badge = h('span', { class: 'w-speed-badge', 'aria-hidden': 'true' });
+    const speedBtn = h('button', { class: 'w-tool w-speed', type: 'button', 'aria-haspopup': 'menu', 'aria-expanded': 'false', dataset: { action: 'speed' } },
+      icon('settings', { size: 25.6 }), badge);
+    const items = SPEEDS.map((x) => h('button', { class: 'w-speed-item', type: 'button', role: 'menuitemradio', 'aria-checked': 'false', dataset: { rate: String(x) } },
+      h('span', { class: 'w-speed-tick', 'aria-hidden': 'true' }, glyph('g-check', { size: 16 })), h('span', {}, x === 1 ? v.speedNormal : fmt(v.speedChip, { x }))));
+    const menu = h('div', { class: 'w-speed-menu', role: 'menu', 'aria-label': v.speedMenu, hidden: true }, h('p', { class: 'w-speed-head', 'aria-hidden': 'true' }, v.speedMenu), items);
+    const speedWrap = h('div', { class: 'w-speed-wrap' }, menu, speedBtn);
     const applyRate = () => {
       vid.defaultPlaybackRate = rate; vid.playbackRate = rate;
-      speedChip.textContent = fmt(v.speedChip, { x: rate });
+      badge.textContent = rate === 1 ? '' : fmt(v.speedChip, { x: rate });
       speedBtn.setAttribute('aria-label', fmt(v.speed, { x: rate }));
+      items.forEach((b) => b.setAttribute('aria-checked', String(Number(b.dataset.rate) === rate)));
     };
-    speedBtn.addEventListener('click', () => { rate = SPEEDS[(SPEEDS.indexOf(rate) + 1) % SPEEDS.length]; keepRate(rate); applyRate(); });
+    const openMenu = (on) => {
+      menu.hidden = !on;
+      speedBtn.setAttribute('aria-expanded', String(on));
+      if (on) (items.find((b) => b.getAttribute('aria-checked') === 'true') || items[0]).focus();
+    };
+    speedBtn.addEventListener('click', () => openMenu(menu.hidden));
+    items.forEach((b) => b.addEventListener('click', () => { rate = Number(b.dataset.rate); keepRate(rate); applyRate(); openMenu(false); speedBtn.focus(); }));
+    menu.addEventListener('keydown', (e) => {
+      const i = items.indexOf(document.activeElement);
+      if (e.key === 'Escape') { e.stopPropagation(); openMenu(false); speedBtn.focus(); }
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus(); }
+    });
+    const outside = (e) => { if (!menu.hidden && !speedWrap.contains(e.target)) openMenu(false); };
+    document.addEventListener('pointerdown', outside, true);
     vid.addEventListener('loadedmetadata', applyRate); // (a new source resets the rate in some browsers)
     applyRate();
-    const controls = h('div', { class: 'w-controls', role: 'group', 'aria-label': v.controls }, playBtn, timeText, seek, speedBtn, ccBtn, muteBtn, trBtn, limitNote);
+    const controls = h('div', { class: 'w-controls', role: 'group', 'aria-label': v.controls }, playBtn, timeText, seek, speedWrap, ccBtn, muteBtn, trBtn, limitNote);
     const col = h('div', { class: 'w-player-col' }, head, frame, controls);
 
     /* ---- transcript (the light panel, right) ---- */
@@ -228,7 +248,7 @@ export const video = {
       kicker.replaceChildren(glassKicker('watch', fmt(v.stopKicker, { i: i + 1, n: stops.length }), mmss(s.t)));
       stopQ.textContent = s.question;
       let chosen = -1, right = false, tries = 0;
-      const max = s.attempts || 2; // FX4: as every scored task, the answer shows after two wrong tries
+      const max = 1; // FX5 (Noy): one try on a choice question, then the right answer and why
       const btns = s.options.map((o, k) => h('button', { class: 'w-opt w-ans', type: 'button', dataset: { id: o.id, letter: letter(k) } },
         h('span', { class: 'w-opt-mark w-ans-mark' }), h('span', { class: 'w-opt-label' }, o.label)));
       stopOpts.replaceChildren(...btns);
@@ -303,6 +323,6 @@ export const video = {
     }
     render();
     if (ctx.revisit) { stops.forEach((s) => answered.add(s.id)); done = true; ctx.unlockNext({ focus: false }); render(); }
-    return { unmount() { vid.pause(); vid.removeAttribute('src'); vid.load(); delete zones.main.dataset.side; } };
+    return { unmount() { document.removeEventListener('pointerdown', outside, true); vid.pause(); vid.removeAttribute('src'); vid.load(); delete zones.main.dataset.side; } };
   },
 };

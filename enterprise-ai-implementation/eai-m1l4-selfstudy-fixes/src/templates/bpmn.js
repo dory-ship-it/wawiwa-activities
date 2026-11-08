@@ -15,11 +15,12 @@
 // Tracking (label): one matching interaction when the last label is placed; the response records
 // each label's FIRST target by the label's one-character code (SCORM 1.2 matching: "s.a,g.b,e.c"),
 // correct only if every first drop was.
-import { h, fmt } from '../util.js?v=c9ed6bad';
-import { glyph } from '../icons.js?v=c9ed6bad';
-import { layout } from './stage.js?v=c9ed6bad';
-import { dragDrop } from '../drag.js?v=c9ed6bad';
-import { checkButton } from './decision.js?v=c9ed6bad';
+import { h, fmt, reducedMotion } from '../util.js?v=e59b9691';
+import { glyph } from '../icons.js?v=e59b9691';
+import { layout } from './stage.js?v=e59b9691';
+import { dragDrop } from '../drag.js?v=e59b9691';
+// (FX5: no Check here any more)
+// import { checkButton } from './decision.js?v=e59b9691';
 
 const U = 1.28; // stage px per diagram unit
 const G = { W: 600, H: 254, PAD: 16, LANE: 74, HEAD: 96, X0: 145, PITCH: 97.5, STEP_W: 84, STEP_H: 42, R: 14, GATE: 22 };
@@ -151,24 +152,24 @@ function labelTask(ctx) {
       return [{ point: () => grab, carry: c, hold: 120 }, { point: () => ({ x: grab.x + (aim.x - grab.x) * 0.3, y: grab.y + (aim.y - grab.y) * 0.3 }), hold: 800 }];
     } }) : null;
 
-  const check = checkButton(ui, ui.buttons.check, () => doCheck(), ui.checkWhy.labels);
+  // FX5 (Noy): every drop is judged at once, as the sort: no Check; the label stays coloured where it went
   layout(ctx, 'bpmn-label',
     h('div', { class: 'w-task-head' }, zones.instruction, h('span', { class: 'w-head-tools' }, g ? g.button : null)),
     h('div', { class: 'w-board w-board-label', dataset: { interaction: '' } },
       h('div', { class: 'w-bpmn-zoom' }, d.el), tray, h('span', { class: 'w-sr-only', id: helpId }, fmt(ui.drag.helpPlaces, { n: targets.length })), live,
       h('div', { class: 'w-float w-float-tray' }, zones.band)));
-  zones.setHintVisible(false); // the frame shows no hint line: the hint stays for screen readers
   zones.setFeedback({ state: 'hint', text: screen.hint });
-  if (!ctx.revisit) { zones.setTool(check); zones.setAttempts(1, max); }
+  const misses = {};
+  let over = false;
 
-  // state: 'pending' (placed, not checked: the label, no mark), 'right' (teal with a check), 'shown'
-  // (moved there after the last attempt: the check, dashed)
+  // state: 'right' (solid teal with a check), 'shown' (moved there after two misses: dashed), 'wrong'
+  // (red with a cross, for a moment, before the label goes back to the tray)
   function place(l, t, state) {
     t.el.dataset.placed = state;
     t.el.inert = true;
     t.chip.className = 'w-target-placed';
     t.chip.dataset.state = state;
-    t.chip.replaceChildren(state === 'pending' ? '' : h('span', { class: 'w-placed-disc w-placed-disc-s' }, glyph('g-check-b', { size: 12.8 })), l.text);
+    t.chip.replaceChildren(h('span', { class: 'w-placed-disc w-placed-disc-s' }, glyph(state === 'wrong' ? 'g-cross' : 'g-check-b', { size: 12.8 })), l.text);
     t.chip.removeAttribute('aria-hidden');
     cards[screen.labels.indexOf(l)].hidden = true;
     at[l.id] = t.id;
@@ -181,46 +182,42 @@ function labelTask(ctx) {
     delete t.chip.dataset.state;
     t.chip.setAttribute('aria-hidden', 'true');
     t.chip.replaceChildren(screen.dropLabel);
-    const c = cards[screen.labels.indexOf(l)];
-    c.hidden = false;
-    c.dataset.line = l.feedback.wrong; // its line comes back when it is picked up again
+    cards[screen.labels.indexOf(l)].hidden = false;
+    delete at[l.id];
   }
   const inTray = () => cards.filter((c) => !c.hidden);
   function dropOn(c, tid) {
+    if (over) return 'returned';
     const l = byCard.get(c);
     if (!(l.id in first)) first[l.id] = tid;
-    place(l, targets.find((t) => t.id === tid), 'pending');
+    const t = targets.find((x) => x.id === tid);
+    if (tid === l.target) {
+      place(l, t, 'right');
+      zones.setFeedback({ state: 'correct', verdict: '', text: l.feedback.correct }); // (its line starts "Right:")
+    } else if ((misses[l.id] = (misses[l.id] || 0) + 1) >= 2) {
+      // (a label still flashing red on that place goes back to the tray first)
+      const occ = screen.labels.find((x) => x !== l && at[x.id] === l.target);
+      if (occ) unplace(occ);
+      place(l, targets.find((x) => x.id === l.target), 'shown');
+      zones.setFeedback({ state: 'neutral', verdict: ui.feedback.revealedPlaces, text: l.feedback.correct });
+    } else {
+      place(l, t, 'wrong');
+      zones.setFeedback({ state: 'wrong', text: l.feedback.wrong });
+      setTimeout(() => { if (at[l.id] === tid && t.chip.dataset.state === 'wrong') unplace(l); }, reducedMotion() ? 0 : 750);
+      return 'placed';
+    }
     const next = inTray()[0];
-    if (next) { next.focus({ preventScroll: true }); if (!tries) zones.setFeedback({ state: 'hint', text: screen.hint }); }
-    else { check.disabled = false; ctx.need(ui.footer.needCheck); zones.setFeedback({ state: 'hint', text: screen.hint }); check.focus({ preventScroll: true }); }
+    if (next) next.focus({ preventScroll: true });
+    if (screen.labels.every((x) => at[x.id] === x.target)) finish(true);
     return 'placed';
   }
-  // a label that came back shows its line again when it is picked up
-  cards.forEach((c) => ['pointerdown', 'focus'].forEach((ev) => c.addEventListener(ev, () => { if (c.dataset.line && tries) zones.setFeedback({ state: 'wrong', text: c.dataset.line }); })));
-  function doCheck() {
-    if (inTray().length) return;
-    tries += 1;
-    const wrong = screen.labels.filter((l) => at[l.id] !== l.target);
-    screen.labels.filter((l) => !wrong.includes(l)).forEach((l) => place(l, targets.find((t) => t.id === l.target), 'right'));
-    const response = (pick) => screen.labels.map((x) => `${x.code}.${pick[x.id]}`).join(',');
-    if (tries === 1) ctx.answer({ trackingId, response: response(first), result: screen.labels.every((x) => first[x.id] === x.target) ? 'correct' : 'wrong' });
-    else ctx.answer({ trackingId, response: response(at), result: wrong.length ? 'wrong' : 'correct' });
-    if (!wrong.length) { zones.setFeedback({ state: 'correct', verdict: '', text: ui.feedback.allPlaced }); finish(true); return; }
-    if (tries >= max) {
-      wrong.forEach((l) => { unplace(l); place(l, targets.find((t) => t.id === l.target), 'shown'); delete cards[screen.labels.indexOf(l)].dataset.line; });
-      zones.setFeedback({ state: 'neutral', verdict: ui.feedback.revealedPlaces, text: wrong[0].feedback.correct });
-      finish(true);
-      return;
-    }
-    wrong.forEach(unplace);
-    check.disabled = true;
-    ctx.need(ui.footer.need.label);
-    zones.setAttempts(tries + 1, max);
-    zones.setFeedback({ state: 'wrong', text: wrong[0].feedback.wrong });
-    cards[screen.labels.indexOf(wrong[0])].focus({ preventScroll: true });
-  }
   function finish(focus) {
-    zones.setTool();
+    over = true;
+    const clean = screen.labels.every((x) => first[x.id] === x.target);
+    const response = (pick) => screen.labels.map((x) => `${x.code}.${pick[x.id]}`).join(',');
+    ctx.answer({ trackingId, response: response(first), result: clean ? 'correct' : 'wrong' });
+    if (!clean) ctx.answer({ trackingId, response: response(at), result: 'correct' });
+    zones.setFeedback(clean ? { state: 'correct', verdict: '', text: ui.feedback.allPlaced } : { state: 'neutral', verdict: ui.feedback.allPlacedNow, text: '' });
     ctx.complete();
     ctx.unlockNext({ focus });
   }

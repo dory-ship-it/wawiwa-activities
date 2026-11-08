@@ -10,8 +10,8 @@
 // every new screen) and the band: the hint row (hint text, the band's tool such as Check or Resume)
 // and the feedback strip (aria-live polite) flush to the bottom edges of the panel it sits in.
 // No learner-facing text here: every string arrives from the content JSON.
-import { h, fmt, reducedMotion } from './util.js?v=c9ed6bad';
-import { glyph, icon } from './icons.js?v=c9ed6bad';
+import { h, fmt, reducedMotion } from './util.js?v=e59b9691';
+import { glyph, icon } from './icons.js?v=e59b9691';
 
 const TONE = { correct: 'correct', neutral: 'neutral', wrong: 'wrong', notice: 'neutral', guess: 'neutral', partial: 'neutral', pause: 'neutral' };
 const LEAD = { correct: 'g-ok-disc', wrong: 'g-no-disc', neutral: 'guess' };
@@ -42,6 +42,10 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
       return el;
     };
     if (mode === 'focus') scene.replaceChildren(layer('w-wash-photo'), h('div', { class: 'w-wash-veil' }));
+    // FX5: the other looks of a task screen
+    else if (mode === 'band') scene.replaceChildren(layer('w-band-photo'), h('div', { class: 'w-band-veil' }));
+    else if (mode === 'split') scene.replaceChildren(layer('w-split-photo'));
+    else if (mode === 'light') scene.replaceChildren();
     else if (mode === 'plain') scene.replaceChildren(); // FX2 A (Noy): the video on a clean ground, no photo
     else if (mode === 'title' || mode === 'end') scene.replaceChildren(layer('w-scene-photo w-scene-full w-push'), h('div', { class: 'w-o1-veil' }));
     else scene.replaceChildren(layer('w-scene-photo w-push'));
@@ -105,10 +109,11 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
   const band = h('div', { class: 'w-band', dataset: { state: 'hint', strip: 'off' } }, row, strip);
 
   const refresh = () => {
-    // (once the strip speaks, its line is the help: the Hint link steps back unless it was already opened)
-    const hintShown = !!hintText.textContent && band.dataset.hint !== 'off' && (band.dataset.strip !== 'on' || !hintText.hidden);
-    hintLink.classList.toggle('w-gone', band.dataset.strip === 'on');
-    bHint.classList.toggle('w-sr-only', band.dataset.hint === 'off');
+    // FX5 (Noy, 8 Nov 2026): no hints on screen at all; the hint stays for screen readers only
+    const hintShown = false;
+    hintLink.hidden = true;
+    bHint.classList.add('w-sr-only');
+    hintText.hidden = false;
     // (a template may place the attempt marker elsewhere, e.g. S06's situation card: then it is not the row's)
     row.hidden = !hintShown && !bTool.children.length && (bTries.hidden || bTries.parentElement !== row);
     band.dataset.empty = String(row.hidden && band.dataset.strip === 'off');
@@ -133,6 +138,7 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
       bSr.textContent = ''; bVerdict.textContent = ''; bText.textContent = '';
       bActions.replaceChildren();
       refresh();
+      placeCard();
       return null;
     }
     const tone = toneOf || TONE[state] || 'neutral';
@@ -156,10 +162,20 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
     bActions.replaceChildren(...actions.map((a) => h('button', { class: 'w-btn w-btn-ghost', type: 'button', onclick: a.onClick, dataset: { action: a.id || '' } }, a.label)));
     band.dataset.strip = 'on';
     refresh();
+    placeCard();
     // the strip slides up 8 px in 320 ms, each time it changes (none with reduced motion)
     strip.classList.remove('w-strip-in');
     if (!reducedMotion()) { void strip.offsetWidth; strip.classList.add('w-strip-in'); }
     return bActions.querySelector('button');
+  }
+  // FX5 (Noy: "separate the feedback from the question box"): in a panel the feedback is its own card,
+  // hanging under the panel; the panel moves up by half the card, so the two stay centred together
+  function placeCard() {
+    const sheet = band.closest('.w-sheet');
+    if (!sheet) return;
+    const on = band.dataset.strip === 'on';
+    sheet.dataset.fb = on ? 'on' : 'off';
+    sheet.style.setProperty('--fb-shift', on ? (strip.offsetHeight + 15.36) / 2 + 'px' : '0px');
   }
   // the band's persistent tool (Check, Resume, Skip): stays through state changes until the screen goes
   // (a Check with a reason line brings it along, just before the button)
@@ -188,8 +204,14 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
     h('span', {}, ui.footer.previous));
   const nextLock = glyph('g-lock', { size: 17.92, className: 'w-next-lock' });
   const nextText = h('span', {}, ui.footer.next);
-  const nextBtn = h('button', { class: 'w-next', type: 'button', dataset: { action: 'next' }, onclick: () => { if (nextBtn.dataset.locked !== 'true') onNext(); } },
-    nextLock, nextText);
+  // FX5 (Noy): the reason line beside a locked Next opens only after the learner presses it twice
+  let lockedPresses = 0;
+  const nextBtn = h('button', { class: 'w-next', type: 'button', dataset: { action: 'next' }, onclick: () => {
+    if (nextBtn.dataset.locked !== 'true') { onNext(); return; }
+    lockedPresses += 1;
+    if (lockedPresses >= 2) setNeed(needText, true);
+  } }, nextLock, nextText);
+  let needText = '';
   // NL4: "Back to the check" (a review link from S21R opened an earlier screen), beside Previous
   let backFn = null;
   const backChip = h('button', { class: 'w-backchip', type: 'button', hidden: true, dataset: { action: 'backToCheck' }, onclick: () => backFn?.() },
@@ -219,10 +241,14 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
     nextBtn.classList.remove('w-next-on');
     if (was === 'true' && !locked && !reducedMotion()) { void nextBtn.offsetWidth; nextBtn.classList.add('w-next-on'); }
   }
+  // FX5: the line is kept (needText) but shows only while Next is locked and after two presses on it;
+  // nothing shows beside an open Next ("Up next" is gone)
   function setNeed(line, locked = nextBtn.dataset.locked === 'true') {
-    nextWhy.textContent = line || '';
-    nextWhy.hidden = !line;
-    nextWhy.dataset.state = locked ? 'locked' : 'open';
+    if (locked) needText = line || '';
+    const show = locked && lockedPresses >= 2 && !!needText;
+    nextWhy.textContent = show ? needText : '';
+    nextWhy.hidden = !show;
+    nextWhy.dataset.state = 'locked';
   }
   // setBack(label, fn): the chip shown with its label; setBack(null): hidden
   function setBack(label, fn) {
@@ -242,8 +268,11 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
   }
 
   function clearScreen() {
+    lockedPresses = 0; needText = ''; // FX5: a new screen starts with no reason line
     main.replaceChildren();
     main.removeAttribute('data-layout');
+    delete main.dataset.phase;
+    delete main.dataset.composed;
     delete band.dataset.hint;
     if (bTries.parentElement !== row) row.insertBefore(bTries, bTool); // back in the band row for the next screen
     setAttempts(null);

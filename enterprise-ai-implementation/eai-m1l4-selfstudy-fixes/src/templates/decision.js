@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=c9ed6bad';
-import { glyph, icon } from '../icons.js?v=c9ed6bad';
-import { attachTip } from '../tooltip.js?v=c9ed6bad';
-import { letter } from '../tracking/index.js?v=c9ed6bad';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=c9ed6bad';
-import { targetSteps } from '../ghost.js?v=c9ed6bad';
+import { h, fmt, resolveLink } from '../util.js?v=e59b9691';
+import { glyph, icon } from '../icons.js?v=e59b9691';
+import { attachTip } from '../tooltip.js?v=e59b9691';
+import { letter } from '../tracking/index.js?v=e59b9691';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=e59b9691';
+import { targetSteps } from '../ghost.js?v=e59b9691';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -114,18 +114,26 @@ const rightStrip = (ctx, text, revealed, more = {}) => ctx.zones.setFeedback(rev
 // FX4: a locked Check never stands alone: its reason (why) shows beside it while it is disabled
 // (btn.why, placed by zones.setTool; setWhy changes the line later, e.g. "Change the red ones first.")
 export const checkButton = (ui, label, onclick, why = null) => {
+  // FX5 (Noy: the reason beside it was crammed): a locked Check says its reason as its own label
+  // ("Pick 2 first"), and turns into "Check" once it can be pressed
+  const text = h('span', {}, label);
   const btn = h('button', { class: 'w-btn w-btn-action', type: 'button', dataset: { action: 'check' }, disabled: true, onclick },
-    glyph('g-lock', { size: 20.48, className: 'w-btn-lock' }), h('span', {}, label));
-  if (why) {
-    btn.why = h('span', { class: 'w-check-why', 'aria-hidden': 'true' }, why);
-    btn.setAttribute('aria-description', why);
-    const sync = () => { btn.why.hidden = !btn.disabled; };
-    new MutationObserver(sync).observe(btn, { attributes: true, attributeFilter: ['disabled'] });
-    sync();
-    btn.setWhy = (t) => { btn.why.textContent = t; btn.setAttribute('aria-description', t); };
-  }
+    glyph('g-lock', { size: 20.48, className: 'w-btn-lock' }), text);
+  let reason = why;
+  const sync = () => { text.textContent = btn.disabled && reason ? reason : label; };
+  new MutationObserver(sync).observe(btn, { attributes: true, attributeFilter: ['disabled'] });
+  sync();
+  btn.setWhy = (t) => { reason = t; sync(); };
   return btn;
 };
+
+// FX5 (Noy: "a hand that shows what to press once everything is done"): the first time Check can be
+// pressed on a screen, the hand moves to it and taps it (it presses nothing)
+function pointAtCheck(ctx, check) {
+  if (ctx.revisit || check.dataset.pointed) return;
+  check.dataset.pointed = '1';
+  ctx.ghost({ type: 'check', steps: () => [{ el: check, hold: 700 }] });
+}
 
 /* ---------- single (S01 on Stage; S14, S15 in Focus) ---------- */
 function single(ctx) {
@@ -144,8 +152,15 @@ function single(ctx) {
   if (isCase(screen) && screen.onePanel) {
     // FX3 (S18): one panel on the photo for the whole question: the situation line, the heading, the
     // answers, then the band (the hint, the attempt marker, "Show me how" as its tool, the feedback)
+    // FX5 (Noy, S14: "the box before the question box is confusing: does it need filling?"): S14 and S15
+    // too: their situation (eyebrow, line, S14's small handoff drawing) sits in the panel above the heading
+    const v = screen.visual;
+    const visual = v ? h('div', { class: 'w-hv w-hv-inline', role: 'img', 'aria-label': v.alt },
+      h('span', { class: 'w-hv-box' }, v.from), glyph('g-arrow-long', { size: 30, className: 'w-hv-arrow' }),
+      h('span', { class: 'w-hv-box w-hv-away' }, v.to, h('span', { class: 'w-hv-chip' }, v.away))) : null;
     layout(ctx, 'stage-decision',
-      h('section', { class: 'w-sheet w-sheet-right w-sheet-50 w-sheet-one' }, contextLine(top.text, statement), zones.instruction, group, zones.band));
+      h('section', { class: 'w-sheet w-sheet-right w-sheet-50 w-sheet-one' }, top.eyebrow ? ruleLabel(top.eyebrow) : null,
+        h('div', { class: 'w-case-row' }, contextLine(top.text, statement), visual), zones.instruction, group, zones.band));
     if (g) zones.setTool(g.button);
   } else if (isCase(screen)) {
     const v = screen.visual;
@@ -190,7 +205,7 @@ function multi(ctx) {
   const trackingId = screen.tracking[0].id;
   const keys = screen.options.map((o, i) => (o.correct ? i : -1)).filter((i) => i >= 0);
   const selected = new Set();
-  const max = ctx.revisit ? 0 : screen.attempts || 2; // FX4: every scored task reveals after two tries
+  const max = ctx.revisit ? 0 : 1; // FX5 (Noy): one try on a choice question, then the right answer and why
   let solved = false, marked = false, tries = 0;
 
   const check = checkButton(ui, ui.buttons[screen.stage.bottom.action], () => doCheck(), fmt(ui.checkWhy.pick, { n: need }));
@@ -213,6 +228,7 @@ function multi(ctx) {
       if (full && !selected.has(i)) b.setAttribute('aria-disabled', 'true'); else b.removeAttribute('aria-disabled');
     });
     check.disabled = selected.size !== need;
+    if (!check.disabled) pointAtCheck(ctx, check);
   }
 
   btns.forEach((btn, i) => btn.addEventListener('click', () => {
@@ -269,7 +285,7 @@ function multi(ctx) {
 // first attempt is the one tracked (ctx.answer; later ones go out as retries).
 function rowQuestion(ctx, btns, list, { trackingId, isRight, feedbackOf, onRight, onChoose = () => {} }) {
   const { ui, zones } = ctx;
-  const max = ctx.revisit ? 0 : ctx.screen.attempts || 2; // FX4: every scored task reveals after two tries
+  const max = ctx.revisit ? 0 : 1; // FX5 (Noy): one try on a choice question, then the right answer and why
   let solved = false, chosen = -1, tries = 0;
   const show = (i) => btns.forEach((b, j) => paint(b, j === i ? (isRight(list[i]) ? 'correct' : 'wrong') : '', ui));
   const solve = (i, focus) => { solved = true; chosen = i; show(i); lock(btns); onChoose(i, true); onRight(i, focus, false); };
@@ -454,18 +470,21 @@ function oneQuestion(ctx, btns, { onChoose } = {}) {
 }
 
 /* ---------- fill (S10), Focus by analogy ---------- */
+// FX5 (Noy: "crowded, wrongly divided; think of sentence completion, visuals, icons"): the heading on top;
+// left, the workbook page: the situation as a note with its icon, then Field 6 (filled) and Field 7 with
+// its blank; right, the four lines to complete it. The chosen line drops into the blank.
 function fill(ctx) {
   const { screen, zones } = ctx;
-  const { group, btns } = options(ctx, 'radio', { cols: 2, interaction: false });
+  const { group, btns } = options(ctx, 'radio', { cols: 1, interaction: false });
   const slot = h('span', { class: 'w-field-slot', 'aria-live': 'polite' });
   const rows = screen.fieldRows.map((f) => h('div', { class: 'w-field-row', dataset: { state: f.prefilled ? 'prefilled' : 'active' } },
     h('span', { class: 'w-field-name' }, f.label), f.prefilled ? h('span', { class: 'w-field-value' }, f.value) : slot));
+  const note = h('p', { class: 'w-fill-note' }, icon(screen.situation.icon || 'speech', { size: 24 }), h('span', {}, screen.situation.text));
   layout(ctx, 'focus',
-    sheet('focus',
-      contextLine(screen.situation.text),
+    sheet('focus w-sheet-fill',
       headRow(ctx, choiceGhost(ctx)),
       h('div', { class: 'w-fill', dataset: { interaction: '' } },
-        h('div', { class: 'w-field-rows' }, rows),
+        h('div', { class: 'w-wb-page' }, note, h('div', { class: 'w-field-rows' }, rows)),
         group),
       zones.band));
   zones.setFeedback({ state: 'hint', text: screen.hint });
@@ -475,11 +494,16 @@ function fill(ctx) {
 /* ---------- metric (S11), Focus by analogy ---------- */
 function metric(ctx) {
   const { screen, ui, zones } = ctx;
-  const { group, btns } = options(ctx, 'radio', { cols: 2, interaction: false });
+  // FX5 (Noy: "something special with Baseline / Target / Date"): the answers stacked on the left; on the
+  // right a gauge card, "Checkable later?", three big icon tiles that light up teal (present) or stay grey
+  // with a cross (missing) for the chosen metric
+  const { group, btns } = options(ctx, 'radio', { cols: 1, interaction: false });
   const g = choiceGhost(ctx);
+  const SLOT_ICON = { baseline: 'gauge', target: 'target', date: 'calendar' };
   const slots = screen.slots.map((s) => {
     const state = h('span', { class: 'w-sr-only' });
-    const el = h('li', { class: 'w-slot', dataset: { slot: s.id } }, h('span', { class: 'w-slot-mark', 'aria-hidden': 'true' }), h('span', { class: 'w-slot-label' }, s.label), state);
+    const el = h('li', { class: 'w-slot', dataset: { slot: s.id } }, h('span', { class: 'w-slot-icon', 'aria-hidden': 'true' }, icon(SLOT_ICON[s.id] || 'check', { size: 34 })),
+      h('span', { class: 'w-slot-label' }, s.label), h('span', { class: 'w-slot-mark', 'aria-hidden': 'true' }), state);
     return { s, el, state };
   });
   const setSlots = (o) => slots.forEach((x) => {
@@ -494,7 +518,7 @@ function metric(ctx) {
     h('p', { class: 'w-slots-title' }, screen.slotsTitle), h('ul', {}, slots.map((x) => x.el)));
   // NL3: the explain band on top (S08's), so the field name moves beside the heading as its chip
   layout(ctx, 'focus',
-    sheet('focus',
+    sheet('focus w-sheet-metric',
       // (PP1: a variant's case line, when it has one, above the band)
       screen.context ? contextLine(screen.context) : null,
       // (S11: the heading on one line with the field chip and "Show me how" on its right; the row keeps
@@ -600,7 +624,7 @@ function cases(ctx) {
   const { screen, ui, zones } = ctx;
   const list = screen.cards;
   const trackingId = screen.tracking[0].id;
-  const max = screen.attempts || 2;
+  const max = 1; // FX5 (Noy): one try on a choice question, then the right answer and why
   const { group, btns } = options(ctx, 'radio', { list: screen.options, cols: 3 }); // two rows: the panel stays within 41cqw
   group.classList.add('w-risk');
   const kicker = h('p', { class: 'w-sit-kicker' });
@@ -705,7 +729,7 @@ function fields(ctx) {
   zones.setHintVisible(true); // the hint on the band's row, beside the attempt marker and Check
   zones.setFeedback({ state: 'hint', text: screen.hint });
   if (!ctx.revisit) { zones.setTool(check); zones.setAttempts(1, max); }
-  const ready = () => { check.disabled = done || rows.some((x) => !x.sel.value); };
+  const ready = () => { check.disabled = done || rows.some((x) => !x.sel.value); if (!check.disabled) pointAtCheck(ctx, check); };
   const setRow = (x, res) => {
     x.el.dataset.result = res;
     paintAnswer(x.el, res, ui);

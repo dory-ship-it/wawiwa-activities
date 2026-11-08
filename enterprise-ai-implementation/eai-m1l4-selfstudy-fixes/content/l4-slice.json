@@ -2,6 +2,8 @@
   "$chapterRefs": "FX3: a chapter number in any text is written {chN} (the chapter id) and shown as that chapter's place in chapters + 1 (Intro = 1 ... Wrap-up = 7), so no number is typed twice. S21R's review links take theirs from the screen they open.",
   "$comment": "EAI M1 L4 self-study, pilot slice content. ALL learner-facing text lives here (localization = swap this file). Design lives in src/. Screen text is verbatim from L4_Storyboard_v2.md (2026-10-15). Strings under ui.* marked pilotCopy:true are new UI copy not in the storyboard; Noy reviews them in P5. Schema: see planning/PRD.md section 5.",
   "schemaVersion": "1.0",
+  "$fx6": "FX6 (8 Nov 2026): the looks (tools/fx6-content.mjs, src/compose.js) and the upgraded V1 film.",
+  "$fx5": "FX5 (8 Nov 2026): tools/fx5-content.mjs; Noy's review of the FX4 copy.",
   "$fx4": "FX4 fixes pass (5 Nov 2026): tools/fx4-content.mjs; Dor's pilot review and Noy's notes.",
   "lesson": {
     "id": "eai-m1l4-selfstudy",
@@ -105,9 +107,10 @@
       "correctPrefix": "Correct.",
       "wrongPrefix": "Not quite.",
       "oneOfTwo": "One of two.",
-      "revealed": "Here is the right answer.",
+      "revealed": "Not quite. Here is the right answer.",
       "revealedPlaces": "Here are the right places.",
       "allPlaced": "Every card is in its place.",
+      "allPlacedNow": "Every card is in its place now.",
       "oneMoreTry": "Not quite. One more try.",
       "changeRed": "Change the red ones, then Check.",
       "srCorrect": "Correct answer.",
@@ -181,7 +184,7 @@
       "upNext": "Up next: {what}",
       "upNextChapter": "Up next: Chapter {n}, {title}"
     },
-    "checkWhy": { "pick": "Pick {n} first.", "labels": "Place every label first.", "flags": "Place both flags first.", "fields": "Choose a card for every field.", "red": "Change the red ones first." },
+    "checkWhy": { "pick": "Pick {n} first", "labels": "Place every label first", "flags": "Place both flags first", "fields": "Fill every field first", "red": "Change the red ones first" },
     "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "question": "Question {i} of {n}", "deck": "{i} of {n}", "deckDone": "All {n} cards placed.", "situation": "Situation {i} of {n}", "caseOf": "Case {i} of {n}", "opened": "{i} of {n} opened" },
     "drag": {
       "help": "Drag the card to a column, or press 1 to {n} to choose a column and Enter to drop it. Escape cancels.",
@@ -236,7 +239,9 @@
       "seekLimit": "Answer the stop first. The video continues after the right answer.",
       "seekAhead": "You can move ahead only to the part you have already watched.",
       "speed": "Playback speed {x} times. Press to change.",
-      "speedChip": "{x}×"
+      "speedChip": "{x}×",
+      "speedMenu": "Playback speed",
+      "speedNormal": "Normal"
     },
     "rail": {
       "label": "Chapters",
@@ -433,6 +438,7 @@
 
     {
       "id": "O2",
+      "look": "light",
       "coach": { "kind": "idea", "tip": "Open any lesson to see how it connects. Today's map is what Lesson 5 builds on.", "tipDrafted": true },
       "chapter": "ch0",
       "template": "moduleMap",
@@ -461,6 +467,7 @@
 
     {
       "id": "O3",
+      "look": "light",
       "coach": { "kind": "idea", "tip": "Your goal: an AS-IS map of your own case in eight fields, with one success metric.", "tipDrafted": true },
       "chapter": "ch0",
       "template": "goals",
@@ -485,6 +492,7 @@
 
     {
       "id": "S01",
+      "look": "framed",
       "coach": { "kind": "practice", "tip": "Ask what each move needs to know first, and whether anyone knows it today.", "tipDrafted": true },
       "chapter": "ch0",
       "template": "decision",
@@ -522,6 +530,7 @@
 
     {
       "id": "S02",
+      "look": "text",
       "coach": { "kind": "own", "tip": "Use the case from Homework 1. Name the role that feels the pain, not a person.", "tipDrafted": true },
       "chapter": "ch0",
       "template": "input",
@@ -534,8 +543,8 @@
       "hint": "Describe what happens today, not the solution you want.",
       "ghost": { "type": "input", "target": ".w-input", "showMe": true },
       "stage": {
-        "top": { "kind": "line", "icon": "folder", "text": "Use the case you chose in Lesson 1." },
-        "middle": { "kind": "fields", "arrange": "stack", "help": { "icon": "info", "text": "No Homework 1 at hand? Use any repeating process you know well." }, "link": "@links.homework1" },
+        "top": { "kind": "line", "icon": "folder", "text": "Use your Lesson 1 case, or any repeating process you know well." },
+        "middle": { "kind": "fields", "arrange": "stack", "link": "@links.homework1" },
         "bottom": { "kind": "privacy", "icon": "shield", "text": "Leave out names and identifying details.", "action": "save" }
       },
       "fields": [
@@ -559,6 +568,7 @@
 
     {
       "id": "W1",
+      "look": "photo",
       "coach": { "kind": "warmup", "tip": "Not scored. Picture a slow process at your work, then imagine it running twice as fast.", "tipDrafted": true },
       "chapter": "ch1",
       "template": "warmup",
@@ -597,24 +607,15 @@
       "guidingQuestion": "what separates a change that works from one you fix later?",
       "ghost": { "type": "stop", "target": "options-sweep", "showMe": true },
       "media": {
-        "$comment": "the real film: duration and stops[].t from assets/video/v1.cues.json (each stop sits in a caption gap).",
+        "$comment": "FX5 (8 Nov 2026): the upgraded film (EAI film upgrade/full, 3:41, 1080p, faststart). Duration and stops[].t from assets/video/v1.cues.json (each stop sits in a caption gap). The old film's captionPlaces are gone: they were read off the old film's labels.",
         "src": "assets/video/v1.mp4",
+        "poster": "assets/video/v1-poster.jpg",
         "captions": [ { "lang": "en", "label": "English", "src": "assets/video/v1.en.vtt" } ],
-        "duration": 174.972,
-        "length": "2:54",
+        "duration": 221.4,
+        "length": "3:41",
         "transcript": "from-captions",
         "temp": false,
-        "captionPlacesNote": "QA1 (26 Oct 2026): a cue that overlaps a range is shown at its place, clear of the film's labels at the bottom (seconds, read off the film every 2 s)",
-        "captionPlaces": [
-          { "from": 12.5, "to": 18.5, "place": "top" },
-          { "from": 34.5, "to": 42, "place": "top" },
-          { "from": 66, "to": 73.7, "place": "top" },
-          { "from": 73.7, "to": 82, "place": "top-right" },
-          { "from": 110, "to": 121.5, "place": "top" },
-          { "from": 142.5, "to": 149.3, "place": "top-right" },
-          { "from": 149.3, "to": 154.5, "place": "top" },
-          { "from": 164.5, "to": 176, "place": "top" }
-        ]
+        "captionPlaces": []
       },
       "stopLayout": { "still": "left-40", "panel": "right-60", "feedbackIn": "feedback-row" },
       "stops": [
@@ -622,7 +623,7 @@
           "id": "stop1",
           "cueId": "stop1",
           "storyboardTime": "0:58",
-          "t": 61.159,
+          "t": 85.0,
           "question": "The US company wants to close a five-times gap. What should it look at first?",
           "options": [
             { "id": "a", "label": "A faster system for its current payment checks", "correct": false,
@@ -638,7 +639,7 @@
           "id": "stop2",
           "cueId": "stop2",
           "storyboardTime": "2:06",
-          "t": 136.265,
+          "t": 170.4,
           "question": "Quality dropped on complex requests. What was the root problem?",
           "options": [
             { "id": "a", "label": "Routine and judgment cases got the same path", "correct": true,
@@ -711,6 +712,7 @@
 
     {
       "id": "K1",
+      "look": "light",
       "coach": { "kind": "idea", "tip": "New technology on a broken process only speeds up the mess. Map the process, cut steps, then speed up.", "tipDrafted": true },
       "chapter": "ch1",
       "template": "concept",
@@ -734,6 +736,7 @@
 
     {
       "id": "S03",
+      "look": "text",
       "coach": { "kind": "practice", "tip": "For each card, ask: did both cases show this problem, or only one of them?", "tipDrafted": true },
       "chapter": "ch1",
       "template": "decision",
@@ -780,6 +783,7 @@
 
     {
       "id": "W2",
+      "look": "photo-right",
       "coach": { "kind": "warmup", "tip": "Not scored. Ask yourself: does the email start the work, do the work, or end it?", "tipDrafted": true },
       "chapter": "ch2",
       "template": "warmup",
@@ -805,6 +809,7 @@
 
     {
       "id": "K2",
+      "look": "light",
       "coach": { "kind": "idea", "tip": "Every process has a trigger, steps and an output. Turn on the HR case to see each one.", "tipDrafted": true },
       "chapter": "ch2",
       "template": "keyParts",
@@ -829,6 +834,7 @@
 
     {
       "id": "S04",
+      "look": "light",
       "coach": { "kind": "practice", "tip": "For each card, ask: does this start the work, move it along, or finish it?", "tipDrafted": true },
       "chapter": "ch2",
       "template": "sortDeck",
@@ -879,6 +885,7 @@
 
     {
       "id": "S05a",
+      "look": "light",
       "coach": { "kind": "idea", "tip": "You only need three BPMN parts: swimlane for a role, gateway for a decision, event for a start or end.", "tipDrafted": true },
       "chapter": "ch2",
       "template": "bpmn",
@@ -903,6 +910,7 @@
 
     {
       "id": "S05b",
+      "look": "light",
       "coach": { "kind": "practice", "tip": "Look back at the three parts on the previous screen, then find each shape here.", "tipDrafted": true },
       "chapter": "ch2",
       "template": "bpmn",
@@ -942,6 +950,7 @@
 
     {
       "id": "S06",
+      "look": "framed",
       "coach": { "kind": "practice", "tip": "Picture who reads the map next: just you, or other teams and systems?", "tipDrafted": true },
       "chapter": "ch2",
       "template": "decision",
@@ -983,6 +992,7 @@
 
     {
       "id": "S07",
+      "look": "light",
       "coach": { "kind": "practice", "tip": "Read each field as a question you will answer for your own case later.", "tipDrafted": true },
       "chapter": "ch2",
       "template": "explorer",
@@ -1014,6 +1024,7 @@
       ],
       "iconsNote": "task icons (CH2-SPEC 6): name = pencil (write), trigger = flag (start), steps = map (overview), handoffs = sort, sources = book (learn), controls = magnifier (explore), gaps = question mark (decide), metric = target (goals)",
       "question": "Pick the field that shows, in three months, whether the change worked.",
+      "questionChip": "Question",
       "questionHint": "Think about what you could measure again later.",
       "questionHintPilotCopy": true,
       "advance": "after-correct",
@@ -1025,6 +1036,7 @@
 
     {
       "id": "S08",
+      "look": "text",
       "coach": { "kind": "practice", "tip": "Ask where the line came from: a normal day, a wish, or a written rule?", "tipDrafted": true },
       "chapter": "ch2",
       "template": "decision",
@@ -1070,6 +1082,7 @@
 
     {
       "id": "S08B",
+      "look": "photo-right",
       "coach": { "kind": "own", "tip": "Start with what triggers it, then the main steps and who does them. A rough first try is enough.", "tipDrafted": true },
       "chapter": "ch2",
       "template": "input",
@@ -1109,6 +1122,7 @@
 
     {
       "id": "W3",
+      "look": "photo",
       "coach": { "kind": "warmup", "tip": "Not scored. Think about what the question reveals about one person, and who could see it.", "tipDrafted": true },
       "chapter": "ch3",
       "template": "warmup",
@@ -1238,6 +1252,7 @@
 
     {
       "id": "S09",
+      "look": "light",
       "goal": "g2",
       "coach": { "kind": "practice", "tip": "Not sure? Ask what the map would lose if this card sat in the wrong column.", "tipDrafted": true },
       "chapter": "ch3",
@@ -1455,6 +1470,7 @@
 
     {
       "id": "S10",
+      "look": "text",
       "goal": "g3",
       "coach": { "kind": "practice", "tip": "Ask what HR could prove today with the records it keeps.", "tipDrafted": true },
       "chapter": "ch3",
@@ -1608,6 +1624,7 @@
 
     {
       "id": "S11",
+      "look": "framed",
       "goal": "g4",
       "coach": { "kind": "practice", "tip": "Look for three parts in each line: a number today, a number to reach, and a date.", "tipDrafted": true },
       "chapter": "ch3",
@@ -1781,6 +1798,7 @@
 
     {
       "id": "S12",
+      "look": "light",
       "goal": "g1",
       "coach": { "kind": "practice", "tip": "A handoff risk lives where the work changes hands. Which fields describe that moment?", "tipDrafted": true },
       "chapter": "ch3",
@@ -1789,7 +1807,7 @@
       "variant": "map",
       "step": { "verb": "Flag", "icon": "flag" },
       "minutes": 3,
-      "instruction": "Drag the two risk flags onto the fields with the handoff risk.",
+      "instruction": "Click the two fields that show the handoff risk.",
       "hint": "Follow the question after it leaves the first staffer.",
       "context": "Your HR map is complete: all eight fields from this chapter.",
       "layout": "flags",
@@ -2002,6 +2020,7 @@
 
     {
       "id": "S12B",
+      "look": "framed",
       "coach": { "kind": "own", "tip": "Use a number you could count today, even roughly: hours, days, or a share of cases.", "tipDrafted": true },
       "chapter": "ch3",
       "template": "input",
@@ -2051,6 +2070,7 @@
 
     {
       "id": "W4",
+      "look": "photo-right",
       "coach": { "kind": "warmup", "tip": "Not scored. For each choice, ask what happens to a person if the answer is wrong.", "tipDrafted": true },
       "chapter": "ch4",
       "template": "warmup",
@@ -2075,6 +2095,7 @@
 
     {
       "id": "S13",
+      "look": "light",
       "coach": { "kind": "practice", "tip": "Ask who in this line is outside HR, and where they appear.", "tipDrafted": true },
       "chapter": "ch4",
       "template": "flags",
@@ -2082,7 +2103,7 @@
       "variant": "line",
       "step": { "verb": "Scope", "icon": "start" },
       "minutes": 3,
-      "instruction": "Drag the Start and End flags onto the HR process line.",
+      "instruction": "Click where the HR process starts, then where it ends.",
       "hint": "Look for what starts it from outside, and who picks up the result.",
       "layout": "flags",
       "dragHelp": "helpSteps",
@@ -2125,6 +2146,8 @@
 
     {
       "id": "S14",
+      "look": "photo",
+      "onePanel": true,
       "goal": "g1",
       "coach": { "kind": "practice", "tip": "Picture the manager away for a week. What would the next person need to know?", "tipDrafted": true },
       "chapter": "ch4",
@@ -2287,6 +2310,8 @@
 
     {
       "id": "S15",
+      "look": "photo-right",
+      "onePanel": true,
       "goal": "g5",
       "coach": { "kind": "practice", "tip": "Each option assumes something about the step. Which one checks that assumption first?", "tipDrafted": true },
       "chapter": "ch4",
@@ -2421,6 +2446,7 @@
 
     {
       "id": "K4",
+      "look": "light",
       "coach": { "kind": "idea", "tip": "For each step, ask what goes in and what is at stake. Money or rights at stake: a person decides.", "tipDrafted": true },
       "chapter": "ch4",
       "template": "keyColumns",
@@ -2455,6 +2481,7 @@
 
     {
       "id": "S16",
+      "look": "light",
       "goal": "g5",
       "coach": { "kind": "practice", "tip": "Ask two things per card: is the input free text, and could a wrong output hurt someone?", "tipDrafted": true },
       "chapter": "ch4",
@@ -2666,6 +2693,7 @@
 
     {
       "id": "S17",
+      "look": "text",
       "goal": "g5",
       "coach": { "kind": "practice", "tip": "Read each case for what went wrong with the map itself, not with the people.", "tipDrafted": true },
       "chapter": "ch4",
@@ -2849,6 +2877,7 @@
 
     {
       "id": "S17B",
+      "look": "framed",
       "coach": { "kind": "own", "tip": "Look at your own steps. Free text into structured data often fits AI; money or rights stay with a person.", "tipDrafted": true },
       "chapter": "ch4",
       "template": "input",
@@ -2898,6 +2927,7 @@
 
     {
       "id": "S18A",
+      "look": "none",
       "coach": { "kind": "practice", "tip": "Read each card and ask whether it is true today, then which field it fills.", "tipDrafted": true },
       "chapter": "ch5",
       "template": "decision",
@@ -2939,6 +2969,7 @@
 
     {
       "id": "S18",
+      "look": "photo",
       "coach": { "kind": "practice", "tip": "Ask what in your notes could identify a person or a company.", "tipDrafted": true },
       "chapter": "ch5",
       "template": "decision",
@@ -2973,6 +3004,7 @@
 
     {
       "id": "S18B",
+      "look": "framed",
       "coach": { "kind": "own", "tip": "Could a stranger tell which company or person this is from the title alone?", "tipDrafted": true },
       "chapter": "ch5",
       "template": "input",
@@ -3006,6 +3038,7 @@
 
     {
       "id": "S19A",
+      "look": "none",
       "coach": { "kind": "workbook", "tip": "Read the three steps first. The workbook has its own coach for each field.", "tipDrafted": true },
       "chapter": "ch5",
       "template": "handoff",
@@ -3029,6 +3062,7 @@
 
     {
       "id": "S19B",
+      "look": "none",
       "coach": { "kind": "workbook", "tip": "Fill the fields in order. Copy your earlier notes from the panel below, then sharpen them.", "tipDrafted": true },
       "chapter": "ch5",
       "template": "handoff",
@@ -3070,6 +3104,7 @@
 
     {
       "id": "S19C",
+      "look": "photo-right",
       "coach": { "kind": "workbook", "tip": "The export is in the workbook's Mission report, its last step.", "tipDrafted": true },
       "chapter": "ch5",
       "template": "handoff",
@@ -3086,6 +3121,7 @@
 
     {
       "id": "S20",
+      "look": "framed",
       "coach": { "kind": "workbook", "tip": "Open your PDF beside the questions and check each one against what you actually wrote.", "tipDrafted": true },
       "chapter": "ch5",
       "template": "decision",
@@ -3120,6 +3156,7 @@
 
     {
       "id": "S20B",
+      "look": "text",
       "coach": { "kind": "own", "tip": "Think about where you rushed or guessed most while filling the workbook.", "tipDrafted": true },
       "chapter": "ch5",
       "template": "decision",
@@ -3149,6 +3186,7 @@
 
     {
       "id": "S21",
+      "look": "text",
       "coach": { "kind": "locked" },
       "chapter": "ch6",
       "template": "check",
@@ -3358,6 +3396,7 @@
 
     {
       "id": "S22",
+      "look": "photo",
       "coach": { "kind": "review", "tip": "Pick the idea your own map shows best, then download your record for Lesson 5.", "tipDrafted": true },
       "chapter": "ch6",
       "template": "decision",

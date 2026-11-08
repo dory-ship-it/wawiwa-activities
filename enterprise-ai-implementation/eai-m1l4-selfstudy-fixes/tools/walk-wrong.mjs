@@ -182,7 +182,13 @@ while (steps++ < 800) {
     if (!f.stage || !f.prev || !f.next) fitFails.push(`${st.id} stage ${f.stage} prev ${f.prev} next ${f.next}`);
     if (shots) await page.screenshot({ path: join(ROOT, shots, `${String(log.length + 1).padStart(2, '0')}-${st.id}.png`) });
     log.push({ id: st.id, notes: [] });
-    if (st.locked && !st.why) log[log.length - 1].notes.push('LOCKED WITHOUT A LINE');
+    // FX5: no line beside a locked Next until it is pressed twice; then its reason must show
+    if (st.locked) {
+      if (st.why) log[log.length - 1].notes.push('LINE BEFORE ANY PRESS');
+      await F(() => { const n = document.querySelector('.w-next'); n.click(); n.click(); });
+      const after2 = await state();
+      if (after2.id === st.id && after2.locked && !after2.why) log[log.length - 1].notes.push('LOCKED WITHOUT A LINE');
+    }
   }
   if (st.template === 'end') break;
   if (!st.locked && st.variant !== 'close') {

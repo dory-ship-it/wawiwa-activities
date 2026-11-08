@@ -10,8 +10,8 @@
 //                multi-select), and paint() for their selected / correct / wrong states
 //   showMe       the "Show me" outline button with the hand
 // Each template builds its own layout inside zones.main from these parts; layout() names it.
-import { h, nextId } from '../util.js?v=c9ed6bad';
-import { glyph } from '../icons.js?v=c9ed6bad';
+import { h, nextId } from '../util.js?v=e59b9691';
+import { glyph } from '../icons.js?v=e59b9691';
 
 // layout(ctx, name, ...children): set main's layout and fill it
 export function layout(ctx, name, ...children) {
