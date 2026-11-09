@@ -77,5 +77,11 @@ Plan: `planning/V2-CH1-2-PLAN.md` (Noy said "I trust you, keep the same way"). C
 - No italics in src/*.css (check.mjs rule): the deck's italic statements are set upright.
 - Review 1 (Noy, 9 Nov): O1 less text (no subtitle, no programme line) and the deck's slide-1 photo (ch1-o1-deck-slide1.jpg, from ppt/media/image6.png); S02 photo narrower (ground size 'narrow' = 30%, zones.js stage[data-size]) and a line beside Open Homework 1 ('No case yet, or starting over? Do Homework 1.'); V1 on the darkblur ground (W1's photo). Approved.
 
+## Toolkit + HR demo (built 9 Nov 2026, sent to Noy, waiting for her verdict)
+Plans: planning/V2-CH3-PLAN.md, planning/V2-CH4-PLAN.md (Noy: continue without a plan round). Content: tools/v2-ch3-content.mjs, tools/v2-ch4-content.mjs.
+- W2 and W3 are openers (warm-up guesses retired). K2, S05a, S07 dark. S07 has no question any more (explorer: screen.question absent = open all eight, then Next). S08 rule cards carry the slide 16 reasons (o.sub). S06 thumbnails removed.
+- NEW screen K3 (s38, 'Unclear' is a legitimate answer, deliverable template) after S10: parts S10 and S11. V2 on darkblur, showTitle false.
+- Committed locally (b2df4af) for Noy to push. check green, test-fit passes, test:adapt same 11 pre-existing failures.
+
 ## Next
-After Noy's verdict on Intro + Why map: plan Toolkit (W2, K2, S04, S05a, S05b, S06, S07, S08, S08B) from the deck the same way.
+After Noy's verdict: Build yours (S18A-S20B) and Wrap-up (S21-END; the parked outcomes from O3 go there).
