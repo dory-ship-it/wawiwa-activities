@@ -8,29 +8,28 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=250c2853';
-import { createZones } from './zones.js?v=250c2853';
-import { createMenu, openDialog } from './menu.js?v=250c2853';
-import { initTooltips, applyTerms } from './tooltip.js?v=250c2853';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=250c2853';
-import { decision } from './templates/decision.js?v=250c2853';
-import { input } from './templates/input.js?v=250c2853';
-import { sortDeck } from './templates/sortdeck.js?v=250c2853';
-import { bpmn } from './templates/bpmn.js?v=250c2853';
-import { flags } from './templates/flags.js?v=250c2853';
-import { explorer } from './templates/explorer.js?v=250c2853';
-import { video } from './templates/video.js?v=250c2853';
-import { handoff } from './templates/handoff.js?v=250c2853';
-import { check } from './templates/check.js?v=250c2853';
-import { result } from './templates/result.js?v=250c2853';
-import { end } from './templates/end.js?v=250c2853';
-import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=250c2853';
-import { createGhost, stopGhost } from './ghost.js?v=250c2853';
-import { compose, composes, fx7Media } from './compose.js?v=250c2853';
-import { createTracking } from './tracking/index.js?v=250c2853';
-import { describe } from './tracking/describe.js?v=250c2853';
-import { createCoach } from './coach/coach.js?v=250c2853';
-import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=250c2853';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=91bb02f0';
+import { createZones } from './zones.js?v=91bb02f0';
+import { createMenu, openDialog } from './menu.js?v=91bb02f0';
+import { initTooltips, applyTerms } from './tooltip.js?v=91bb02f0';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=91bb02f0';
+import { decision } from './templates/decision.js?v=91bb02f0';
+import { input } from './templates/input.js?v=91bb02f0';
+import { sortDeck } from './templates/sortdeck.js?v=91bb02f0';
+import { bpmn } from './templates/bpmn.js?v=91bb02f0';
+import { flags } from './templates/flags.js?v=91bb02f0';
+import { explorer } from './templates/explorer.js?v=91bb02f0';
+import { video } from './templates/video.js?v=91bb02f0';
+import { handoff } from './templates/handoff.js?v=91bb02f0';
+import { check } from './templates/check.js?v=91bb02f0';
+import { result } from './templates/result.js?v=91bb02f0';
+import { end } from './templates/end.js?v=91bb02f0';
+import { title, moduleMap, goals, warmup, concept, keyParts, keyColumns } from './templates/intro.js?v=91bb02f0';
+import { createGhost, stopGhost } from './ghost.js?v=91bb02f0';
+import { createTracking } from './tracking/index.js?v=91bb02f0';
+import { describe } from './tracking/describe.js?v=91bb02f0';
+import { createCoach } from './coach/coach.js?v=91bb02f0';
+import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=91bb02f0';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -224,7 +223,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=250c2853').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=91bb02f0').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -280,9 +279,9 @@ class Lesson {
     // look from the content (screen.look): 'band' (the photo as a band at the top), 'split' (the photo on
     // the left, the task on a light ground right), 'light' (a clean light ground, no photo)
     const mode = tpl.scene ? tpl.scene(screen) : 'focus';
-    // (FX6: any other look, e.g. "none" for a wide task, stands on the light ground)
-    const sceneLook = screen.look ? (['band', 'split', 'light'].includes(screen.look) ? screen.look : 'light') : null;
-    this.zones.setScene(mode === 'focus' && sceneLook ? sceneLook : mode, screen.photo || chapter?.photo || null);
+    // FX8: the FX5/FX6 looks (band, split, light) are retired: a screen is Stage (its photo sharp) or Focus
+    // (the chapter photo as a light wash), as in Noy's boards; content "scene" may move a Focus screen to Stage
+    this.zones.setScene(mode, screen.photo || chapter?.photo || null);
     // QA1: the next screen's photo loads now, so it is there when that screen opens (no dark gap)
     const after = this.screens[this.order[this.order.indexOf(id) + 1]];
     const afterPhoto = after && (after.photo || this.chapters.find((c) => c.id === after.chapter)?.photo);
@@ -325,20 +324,9 @@ class Lesson {
       // the ghost hand (src/ghost.js): a once-per-interaction-type demo with a "Show me" replay
       ghost: (opts) => this.ghostFor(opts),
     });
-    // FX7 (Noy, approved 8 Nov 2026): the original look rearranged (src/compose.js). A question screen: its
-    // photo full-bleed on the left (nothing on it) or the video cases as a film strip, and one cream panel
-    // right; any other screen (but the title, the video and the end): one wide cream panel; both on the
-    // chapter photo, blurred and dark, behind the translucent bar
-    const photo = screen.photo || screen.image || chapter?.photo || null;
-    delete this.stage.dataset.fx7;
-    if (composes(screen) && compose(this.zones.main, screen)) {
-      const media = fx7Media(screen);
-      this.stage.dataset.fx7 = media === 'wide' ? 'panel-wide' : 'panel';
-      this.zones.setScene(media === 'photo' ? 'fx7photo' : 'focus', media === 'photo' ? photo : (screen.photo || chapter?.photo || null));
-    } else if (!['title', 'end', 'plain'].includes(mode)) {
-      this.stage.dataset.fx7 = 'wide';
-      this.zones.setScene('focus', screen.photo || chapter?.photo || null);
-    }
+    // FX8 (Noy, 8 Nov 2026: "go back to my design in Artifacts"): the FX7 composer is retired; every screen
+    // is laid out by its template on its scene, as in the boards (L4 Screens Intro to Ch2, planning/fx8-board)
+    this.stage.dataset.screen = id;
     // presentation screens (title, module map, goals, key idea) never lock Next: done on arrival
     if (screen.presentation) { this.complete(id); this.zones.setNext(false); }
     applyTerms(this.zones.main, screen.terms, this.content.tooltips);

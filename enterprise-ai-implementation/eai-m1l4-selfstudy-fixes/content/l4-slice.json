@@ -2,6 +2,7 @@
   "$chapterRefs": "FX3: a chapter number in any text is written {chN} (the chapter id) and shown as that chapter's place in chapters + 1 (Intro = 1 ... Wrap-up = 7), so no number is typed twice. S21R's review links take theirs from the screen they open.",
   "$comment": "EAI M1 L4 self-study, pilot slice content. ALL learner-facing text lives here (localization = swap this file). Design lives in src/. Screen text is verbatim from L4_Storyboard_v2.md (2026-10-15). Strings under ui.* marked pilotCopy:true are new UI copy not in the storyboard; Noy reviews them in P5. Schema: see planning/PRD.md section 5.",
   "schemaVersion": "1.0",
+  "$fx8": "FX8 (8 Nov 2026): back to Noy's boards (L4 Screens Intro to Ch2, planning/fx8-board); tools/fx8-content.mjs: S12/S13 click wording, flag count, icons on K4, S16, S17, S20B.",
   "$fx7": "FX7 (8 Nov 2026): the original look rearranged (tools/fx7-content.mjs, src/compose.js, src/fx7.css): photo / cases / wide media, select then Check.",
   "$fx6": "FX6 (8 Nov 2026): the looks (tools/fx6-content.mjs, src/compose.js) and the upgraded V1 film.",
   "$fx5": "FX5 (8 Nov 2026): tools/fx5-content.mjs; Noy's review of the FX4 copy.",
@@ -116,6 +117,7 @@
       "changeRed": "Change the red ones, then Check.",
       "srCorrect": "Correct answer.",
       "srWrong": "Incorrect answer. Try again.",
+      "srWrongFinal": "Incorrect answer.",
       "srNeutral": "Answer recorded."
     },
     "footer": {
@@ -186,6 +188,7 @@
       "upNextChapter": "Up next: Chapter {n}, {title}"
     },
     "marks": { "yours": "Your answer", "right": "Right answer" },
+    "flagCount": "{x} of {n} flags",
     "checkWhy": { "pick": "Pick {n} first",
       "one": "Choose one first", "labels": "Place every label first", "flags": "Place both flags first", "fields": "Fill every field first", "red": "Change the red ones first" },
     "progress": { "card": "Card {i} of {n}", "round": "Round {i} of {n}", "question": "Question {i} of {n}", "deck": "{i} of {n}", "deckDone": "All {n} cards placed.", "situation": "Situation {i} of {n}", "caseOf": "Case {i} of {n}", "opened": "{i} of {n} opened" },
@@ -450,7 +453,7 @@
       "presentation": true,
       "eyebrow": "Module 1",
       "instruction": "Lesson 4 of Module 1",
-      "line": "By the end you will have your own process map, exported as a PDF.",
+      "line": "Lessons 4 to 6 are self-study. Today's map, exported as a PDF, feeds Lessons 5 and 6.",
       "ghost": { "type": "tabs", "target": "l1", "delay": 2400 },
       "layout": "wide",
       "stations": [
@@ -459,11 +462,11 @@
         { "id": "l23", "kicker": "Lessons 2, 3", "title": "Working template", "status": "done", "icon": "check-circle",
           "text": "Looked at one step only." },
         { "id": "l4", "kicker": "Lesson 4", "title": "Full process map", "status": "today", "n": "4", "icon": "map", "open": true,
-          "text": "One process, as it runs." },
+          "text": "Self-study: one process, as it runs." },
         { "id": "l5", "kicker": "Lesson 5", "title": "Architecture diagram", "status": "next", "n": "5", "icon": "diagram",
-          "text": "Where AI enters your map." },
+          "text": "Self-study: where AI enters your map." },
         { "id": "l6", "kicker": "Lesson 6", "title": "Build vs Buy", "status": "next", "n": "6", "icon": "forms",
-          "text": "How you will build it." }
+          "text": "Self-study: how you will build it." }
       ],
       "tracking": [],
       "sources": ["Round 4 board R4-O2", "module outline (Lessons 1 to 6)"]
@@ -1812,7 +1815,8 @@
       "variant": "map",
       "step": { "verb": "Flag", "icon": "flag" },
       "minutes": 3,
-      "instruction": "Click the two fields that show the handoff risk.",
+      "instruction": "Where could the question get lost?",
+      "lead": "Click the two fields that show the handoff and its risk. Each click places a flag.",
       "hint": "Follow the question after it leaves the first staffer.",
       "context": "Your HR map is complete: all eight fields from this chapter.",
       "layout": "flags",
@@ -2108,17 +2112,19 @@
       "variant": "line",
       "step": { "verb": "Scope", "icon": "start" },
       "minutes": 3,
-      "instruction": "Click where the HR process starts, then where it ends.",
+      "instruction": "Click where the HR process starts.",
+      "instructionEnd": "Now click where it ends.",
+      "lead": "Look for what starts it from outside, and who picks up the result.",
       "hint": "Look for what starts it from outside, and who picks up the result.",
       "layout": "flags",
       "dragHelp": "helpSteps",
       "dropLabel": "Drop here",
       "line": [
-        { "n": 1, "text": "Employee sends a question" },
-        { "n": 2, "text": "HR staff open the inbox" },
-        { "n": 3, "text": "HR staff check the topic" },
-        { "n": 4, "text": "Question reaches the HR manager" },
-        { "n": 5, "text": "Employee gets an answer" }
+        { "n": 1, "text": "Employee sends a question", "icon": "speech" },
+        { "n": 2, "text": "HR staff open the inbox", "icon": "folder" },
+        { "n": 3, "text": "HR staff check the topic", "icon": "tag" },
+        { "n": 4, "text": "Question reaches the HR manager", "icon": "person" },
+        { "n": 5, "text": "Employee gets an answer", "icon": "check-circle" }
       ],
       "flags": [
         {
@@ -2468,16 +2474,16 @@
           "kind": "lean",
           "title": "Good fit",
           "items": [
-            { "term": "Unstructured to structured", "text": "text in, data out" },
-            { "term": "Low-risk decision points", "text": "reversible, watched" },
-            { "term": "Handoffs with delay or loss", "text": "AI records what passes" }
+            { "term": "Unstructured to structured", "text": "text in, data out", "icon": "arrows" },
+            { "term": "Low-risk decision points", "text": "reversible, watched", "icon": "lightning" },
+            { "term": "Handoffs with delay or loss", "text": "AI records what passes", "icon": "route" }
           ]
         },
         {
           "id": "poor",
           "kind": "mess",
           "title": "Poor fit",
-          "items": [{ "term": "Money or rights at stake" }, { "term": "A disorganized process" }, { "term": "Map says \"unclear\"" }]
+          "items": [{ "term": "Money or rights at stake", "icon": "shield" }, { "term": "A disorganized process", "icon": "gear-broken" }, { "term": "Map says \"unclear\"", "icon": "help-circle" }]
         }
       ],
       "tracking": [],
@@ -2498,10 +2504,10 @@
       "hint": "What goes in, and what is at stake?",
       "layout": "sort-deck",
       "columns": [
-        { "id": "a", "label": "Unstructured to structured" },
-        { "id": "b", "label": "Low-risk decision" },
-        { "id": "c", "label": "Handoff delay or loss" },
-        { "id": "d", "label": "Poor fit", "width": 1.8 }
+        { "id": "a", "label": "Unstructured to structured", "icon": "arrows", "kind": "good" },
+        { "id": "b", "label": "Low-risk decision", "icon": "lightning", "kind": "good" },
+        { "id": "c", "label": "Handoff delay or loss", "icon": "route", "kind": "good" },
+        { "id": "d", "label": "Poor fit", "width": 1.8, "icon": "x", "kind": "poor" }
       ],
       "cards": [
         { "n": 1, "text": "Sort incoming messages by topic", "column": "a", "tag": "Text in, topic out",
@@ -2711,11 +2717,11 @@
       "hint": "Two tries per case.",
       "layout": "focus",
       "options": [
-        { "id": "1", "label": "Ideal, not actual", "sub": "maps how it should work, not a normal day" },
-        { "id": "2", "label": "No clear goal", "sub": "drawn with no question to answer" },
-        { "id": "3", "label": "Rushed mapping", "sub": "hard fields skipped to finish fast" },
-        { "id": "4", "label": "Not updated", "sub": "the process changed, the map did not" },
-        { "id": "5", "label": "Automating a broken process", "sub": "speeds up a process nobody fixed" }
+        { "id": "1", "label": "Ideal, not actual", "icon": "eye", "sub": "maps how it should work, not a normal day" },
+        { "id": "2", "label": "No clear goal", "icon": "target", "sub": "drawn with no question to answer" },
+        { "id": "3", "label": "Rushed mapping", "icon": "clock", "sub": "hard fields skipped to finish fast" },
+        { "id": "4", "label": "Not updated", "icon": "history", "sub": "the process changed, the map did not" },
+        { "id": "5", "label": "Automating a broken process", "icon": "gear-broken", "sub": "speeds up a process nobody fixed" }
       ],
       "cards": [
         { "id": "a", "text": "Fields 6 and 7 are blank: the map was due within the hour.", "column": "3",
@@ -2895,7 +2901,7 @@
       "stage": {
         "top": { "kind": "line", "text": "Your steps from Chapter {ch2}:", "show": "L4_CASE_STEPS" },
         "privacy": { "kind": "privacy", "icon": "shield", "text": "No names or identifying details." },
-        "bottom": { "kind": "note", "text": "Not on your map: Lesson 5 starts from this note.", "action": "save" }
+        "bottom": { "kind": "note", "text": "Not on your map: your homework builds on this note.", "action": "save" }
       },
       "fields": [
         {
@@ -2917,7 +2923,7 @@
       ],
       "saveWhenFilled": true,
       "feedback": {
-        "saved": "Saved. It comes back in Chapter {ch5} and Lesson 5.",
+        "saved": "Saved. It comes back in Chapter {ch5}, and your homework builds on it.",
         "empty": "Add a few words to both fields. A rough version is enough; you can edit it later."
       },
       "feedbackPilotCopy": "empty (the storyboard gives no empty-Save line; modelled on S08B)",
@@ -3058,7 +3064,7 @@
       "steps": [
         { "n": 1, "text": "Fill eight fields as the process runs today" },
         { "n": 2, "text": "Keep AI ideas off the map" },
-        { "n": 3, "text": "Export your PDF" }
+        { "n": 3, "text": "Press Review my work, fix, then export your PDF" }
       ],
       "image": { "src": "assets/img/l4/s19a-workbook.jpg", "alt": "The workbook's first page: AS-IS Process Mapping for Your Own Use Case, with its mission board and coach", "prompt": "assets/img/prompts/S19A-workbook-shot.md", "temp": false, "position": "50% 0%" },
       "tracking": [],
@@ -3109,6 +3115,7 @@
 
     {
       "id": "S19C",
+      "photo": { "src": "assets/img/l4/md1/ch6-build-yours.jpg", "position": "35% 50%", "mirror": true, "temp": false },
       "look": "wide",
       "coach": { "kind": "workbook", "tip": "The export is in the workbook's Mission report, its last step.", "tipDrafted": true },
       "chapter": "ch5",
@@ -3173,11 +3180,11 @@
       "hint": "The five mistakes from Chapter {ch4}. Any pick is fine.",
       "ghost": { "type": "choice", "target": "options-sweep" },
       "options": [
-        { "id": "ideal", "label": "Ideal, not actual", "sub": "maps how it should work", "feedback": "In your workbook: reread Field 3 against a normal day, not the written procedure." },
-        { "id": "goal", "label": "No clear goal", "sub": "no question to answer", "feedback": "In your workbook: write one sentence on what this map must help decide." },
-        { "id": "rushed", "label": "Rushed mapping", "sub": "hard fields skipped", "feedback": "In your workbook: reopen Fields 6 and 7, the ones skipped first." },
-        { "id": "updated", "label": "Not updated", "sub": "the process changed, the map did not", "feedback": "In your workbook: note the map's date and what would trigger an update." },
-        { "id": "automating", "label": "Automating a broken process", "sub": "speeds up a process nobody fixed", "feedback": "In your workbook: list which steps need fixing, not speeding up, before Lesson 5." }
+        { "id": "ideal", "label": "Ideal, not actual", "icon": "eye", "sub": "maps how it should work", "feedback": "In your workbook: reread Field 3 against a normal day, not the written procedure." },
+        { "id": "goal", "label": "No clear goal", "icon": "target", "sub": "no question to answer", "feedback": "In your workbook: write one sentence on what this map must help decide." },
+        { "id": "rushed", "label": "Rushed mapping", "icon": "clock", "sub": "hard fields skipped", "feedback": "In your workbook: reopen Fields 6 and 7, the ones skipped first." },
+        { "id": "updated", "label": "Not updated", "icon": "history", "sub": "the process changed, the map did not", "feedback": "In your workbook: note the map's date and what would trigger an update." },
+        { "id": "automating", "label": "Automating a broken process", "icon": "gear-broken", "sub": "speeds up a process nobody fixed", "feedback": "In your workbook: list which steps need fixing, not speeding up, before Lesson 5." }
       ],
       "strip": "Before Lesson 5: every field filled, metric measurable, no invented answers.",
       "link": "reopenWorkbook",
@@ -3402,7 +3409,7 @@
     {
       "id": "S22",
       "look": "wide",
-      "coach": { "kind": "review", "tip": "Pick the idea your own map shows best, then download your record for Lesson 5.", "tipDrafted": true },
+      "coach": { "kind": "review", "tip": "Pick the idea your own map shows best. Keep your map PDF for Lesson 5.", "tipDrafted": true },
       "chapter": "ch6",
       "template": "decision",
       "step": { "verb": "Reflect", "icon": "key" },
@@ -3421,8 +3428,8 @@
           "feedback": "Sometimes the right fix is to remove the step, not speed it up. Ask why it formed first." }
       ],
       "step2": {
-        "instruction": "Bring your PDF map to Lesson 5.",
-        "bridge": { "icon": "map", "text": "Your workbook PDF is your map: bring it to Lesson 5, where it becomes your AI architecture." },
+        "instruction": "Keep your map PDF for Lesson 5.",
+        "bridge": { "icon": "map", "text": "Your workbook PDF is your map. Lesson 5 opens by copying it in, then turns it into your AI architecture." },
         "homework": { "icon": "calendar", "text": "Homework: complete your map and mark three AI points, using the three good-fit kinds.", "href": "@links.homework", "newTab": true },
         "feedback": {
           "download": "Saved: your notes, answers and score. Your map itself is the workbook PDF.",
@@ -3439,7 +3446,7 @@
     },
     {
       "id": "END",
-      "coach": { "kind": "hello", "tip": "Bring your map PDF to Lesson 5. There you mark where AI enters your process.", "tipDrafted": true },
+      "coach": { "kind": "hello", "tip": "Keep your map PDF. Lesson 5 opens by copying it in, then you mark where AI enters.", "tipDrafted": true },
       "chapter": "ch6",
       "template": "end",
       "step": { "verb": "Finish", "icon": "finish" },
@@ -3450,7 +3457,7 @@
       "sub": "Process Modeling and Workflow Mapping · Module 1 · Lesson 4",
       "passed": { "chip": "Passed" },
       "notPassed": { "chip": "Not passed yet", "hint": "You can retake the knowledge check in Wrap-up at any time." },
-      "next": "Next: Lesson 5 in class. Bring your map PDF.",
+      "next": "Next: Lesson 5, self-study. Keep your map PDF ready.",
       "homework": { "href": "@links.homework" },
       "advance": "none",
       "tracking": [],

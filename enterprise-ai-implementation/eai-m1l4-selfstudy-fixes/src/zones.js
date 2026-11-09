@@ -10,8 +10,8 @@
 // every new screen) and the band: the hint row (hint text, the band's tool such as Check or Resume)
 // and the feedback strip (aria-live polite) flush to the bottom edges of the panel it sits in.
 // No learner-facing text here: every string arrives from the content JSON.
-import { h, fmt, reducedMotion } from './util.js?v=250c2853';
-import { glyph, icon } from './icons.js?v=250c2853';
+import { h, fmt, reducedMotion } from './util.js?v=91bb02f0';
+import { glyph, icon } from './icons.js?v=91bb02f0';
 
 const TONE = { correct: 'correct', neutral: 'neutral', wrong: 'wrong', notice: 'neutral', guess: 'neutral', partial: 'neutral', pause: 'neutral' };
 const LEAD = { correct: 'g-ok-disc', wrong: 'g-no-disc', neutral: 'guess' };
@@ -129,7 +129,7 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
   // actions: [{ id, label, onClick }] secondary buttons in the strip (FT routes, Next round).
   // open: true shows a hint row's text at once, with no link (a reason, not a hint: the video stop's
   // "The video continues after the right answer.")
-  function setFeedback({ state = 'hint', text = '', verdict = null, actions = [], tone: toneOf = null, open = false } = {}) {
+  function setFeedback({ state = 'hint', text = '', verdict = null, sr: srOverride = null, actions = [], tone: toneOf = null, open = false } = {}) {
     band.dataset.state = state;
     if (state === 'hint' || state === 'idle') {
       const t = state === 'hint' ? text || '' : '';
@@ -153,7 +153,8 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
     if (head === null) [head, line] = splitHead(line);
     strip.dataset.tone = tone;
     sIcon.replaceChildren(glyph(LEAD[tone], { size: 33.28 }));
-    const sr = state === 'correct' ? ui.feedback.srCorrect : state === 'wrong' ? ui.feedback.srWrong : ['neutral', 'guess', 'partial'].includes(state) ? ui.feedback.srNeutral : '';
+    // FX6 (Noy): a screen with no retry (the S21 review) passes its own screen-reader line
+    const sr = srOverride ?? (state === 'correct' ? ui.feedback.srCorrect : state === 'wrong' ? ui.feedback.srWrong : ['neutral', 'guess', 'partial'].includes(state) ? ui.feedback.srNeutral : '');
     bSr.textContent = sr ? sr + ' ' : '';
     bVerdict.textContent = head ? head + ' ' : '';
     bVerdict.hidden = !head;

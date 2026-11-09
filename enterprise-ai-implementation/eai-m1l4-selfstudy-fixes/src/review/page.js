@@ -3,10 +3,10 @@
 // index.html?screen=ID&review=1 at 1280 x 720, scaled to 25%), loaded only when it nears the viewport.
 // Under each: id, template, word count (red over 45). A click opens the screen full size in review
 // mode in a new tab. Filters: All, one chapter, Over word limit, Paths (PP1). Review-only strings live here.
-import { h, chapterNo, resolveChapterRefs } from '../util.js?v=250c2853';
-import { reviewOrder } from '../engine.js?v=250c2853';
-import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=250c2853';
-import { JOURNEYS, variantOf } from '../adapt.js?v=250c2853';
+import { h, chapterNo, resolveChapterRefs } from '../util.js?v=91bb02f0';
+import { reviewOrder } from '../engine.js?v=91bb02f0';
+import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=91bb02f0';
+import { JOURNEYS, variantOf } from '../adapt.js?v=91bb02f0';
 
 const root = document.getElementById('review');
 const res = await fetch(new URL('../../content/l4-slice.json', import.meta.url), { cache: 'no-cache' }); // asked fresh on every load
@@ -34,6 +34,22 @@ function load(frame) {
   f.src = f.dataset.src;
 }
 
+// FX8: the review notes (this browser only; a private window or blocked storage just keeps them for the page)
+const NOTES_KEY = 'l4-review-notes';
+let notes = {};
+try { notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}') || {}; } catch { notes = {}; }
+const noteCount = h('span', { class: 'rv-note-count' });
+const paintCount = () => { const n = Object.keys(notes).length; noteCount.textContent = n ? `${n} note${n === 1 ? '' : 's'}` : 'No notes yet'; };
+function saveNotes() { try { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); } catch { /* storage blocked: notes stay for this page */ } paintCount(); }
+paintCount();
+const notesText = () => order.filter((id) => notes[id]).map((id) => `${id}: ${notes[id].trim()}`).join('\n');
+const copyBtn = h('button', { class: 'rv-filter rv-copy', type: 'button', onclick: async () => {
+  const text = notesText();
+  if (!text) { copyBtn.textContent = 'Nothing to copy'; setTimeout(() => { copyBtn.textContent = 'Copy notes'; }, 1500); return; }
+  try { await navigator.clipboard.writeText(text); copyBtn.textContent = 'Copied'; } catch { prompt('Copy the notes:', text); }
+  setTimeout(() => { copyBtn.textContent = 'Copy notes'; }, 1500);
+} }, 'Copy notes');
+
 const cards = new Map();
 const card = (id) => {
   const s = screens[id];
@@ -50,8 +66,14 @@ const card = (id) => {
     frame,
     h('span', { class: 'rv-meta' }, h('span', { class: 'rv-meta-id' }, id), h('span', { class: 'rv-meta-tpl' }, s.template + (s.variant ? ' / ' + s.variant : '')), words));
   io.observe(frame);
-  cards.set(id, { a, frame, over });
-  return a;
+  // FX8 (Noy: "hard to go screen by screen and tell you what to fix"): a note box under every screen,
+  // kept in this browser; "Copy notes" in the header copies them all as one text to paste in the chat
+  const note = h('textarea', { class: 'rv-note', rows: '2', placeholder: `Note on ${id} (optional)`, 'aria-label': `Note on ${id}` });
+  note.value = notes[id] || '';
+  note.addEventListener('input', () => { if (note.value.trim()) notes[id] = note.value; else delete notes[id]; saveNotes(); });
+  const cell = h('div', { class: 'rv-cell', dataset: { over: String(over), chapter: s.chapter || 'none' } }, a, note);
+  cards.set(id, { a, frame, over, cell });
+  return cell;
 };
 
 // CO1: one row for the Wawiwa AI Coach (offline mode): its states on S04, and S21 locked, each a thumbnail
@@ -141,9 +163,10 @@ function apply(key) {
   sections.forEach((sec) => {
     const g = sec.dataset.group;
     let shown = 0;
-    sec.querySelectorAll('.rv-card').forEach((a) => {
+    sec.querySelectorAll(':scope .rv-row > :is(.rv-cell, .rv-card)').forEach((a) => {
       const on = key === 'all' || key === g || (key === 'over' && a.dataset.over === 'true');
       a.hidden = !on;
+      const inner = a.querySelector(':scope > .rv-card'); if (inner) inner.hidden = !on; // (FX8: the card inside a note cell)
       if (on) shown++;
     });
     sec.hidden = !shown;
@@ -159,7 +182,8 @@ root.append(
     h('h1', { class: 'rv-title' }, `L4 review · ${content.lesson.title}`),
     h('p', { class: 'rv-summary' }, `${order.length} screens · ${groups.length} rows · `, h('b', { dataset: { over: String(overCount > 0) } }, `${overCount} over the word limit`),
       ` · content ${content.lesson.contentVersion}`),
-    h('div', { class: 'rv-filters', role: 'group', 'aria-label': 'Filter screens' }, buttons)),
+    h('div', { class: 'rv-filters', role: 'group', 'aria-label': 'Filter screens' }, buttons),
+    h('div', { class: 'rv-notes-bar' }, noteCount, copyBtn)),
   h('main', { class: 'rv-main' }, sections, coachRow, pathsSection, empty));
 
 // review.html#S04 (the toolbar's Overview link): load and show that screen's card

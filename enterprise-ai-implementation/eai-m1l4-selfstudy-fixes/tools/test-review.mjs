@@ -59,7 +59,7 @@ console.log('\nreview mode: walk, toolbar, no writes');
 {
   const p = await open('/index.html?reset=1&screen=S01');
   await p.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
-  await p.click('.w-opt[data-id="b"]'); // a real answer: the normal run writes its state
+  await p.click('.w-opt[data-id="b"]'); await p.click('[data-action="check"]'); // a real answer (FX7: select, then Check): the normal run writes its state
   await wait(200);
   const before = await storage(p);
   expect(before.includes('wawiwa.eai.l4.slice') && before.includes('L4_S01_1'), 'normal run: the state with the S01 answer is in localStorage');
@@ -102,6 +102,7 @@ console.log('\nreview mode: walk, toolbar, no writes');
   const p = await open('/index.html?review=1&screen=S01', { lms: {} });
   await p.waitForFunction(() => window.__l4 && document.querySelector('.rv-bar'));
   await p.click('.w-opt[data-id="b"]');
+  await p.click('[data-action="check"]'); // (FX7: select, then Check)
   await p.click('.w-next');
   await wait(200);
   const r = await p.evaluate(() => ({ mode: window.__l4.tracking.mode, report: window.__scormMock.report(), events: window.__l4.tracking.events.length }));
@@ -152,7 +153,7 @@ console.log('\nreview.html');
   }));
   const bad = frames.filter((f) => f.cur !== f.id || f.err || f.bar || !f.main);
   expect(!bad.length, `every thumbnail renders its own screen (${frames.length - bad.length} of ${frames.length}), no boot error, no toolbar inside` + (bad.length ? ': ' + JSON.stringify(bad.slice(0, 3)) : ''));
-  expect(frames.every((f) => f.scale === 'matrix(0.25, 0, 0, 0.25, 0, 0)'), 'thumbnails are the 1280 x 720 stage at 25%');
+  expect(frames.every((f) => f.scale === 'matrix(0.375, 0, 0, 0.375, 0, 0)'), 'thumbnails are the 1280 x 720 stage at 37.5% (FX7: 480 px cards)');
   // CO1: the coach row after the chapters: O3 demo; S04 closed + hint, open, tip, thinking, cap; S21 locked
   await p.evaluate(() => document.querySelector('.rv-coach').scrollIntoView());
   await p.waitForFunction(() => [...document.querySelectorAll('.rv-coach .rv-frame')].every((f) => f.dataset.state === 'loaded'), { timeout: 30000 }).catch(() => {});

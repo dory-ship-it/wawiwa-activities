@@ -131,7 +131,9 @@ export function measureLayout() {
   const underFooter = [...boxes, ...(bandOn ? [{ what: 'band', ...B }] : [])].filter((b) => footBtns.some((F) => hit(b, F))).map((b) => b.what);
   // NL3: a panel is as high as its content, at most 41cqw (524.8 stage px; storyboard v3 critical detail 1)
   // (the old tray, S18A, is exempt until it moves to the sort deck in NL4)
-  const tallPanels = [...main.querySelectorAll('.w-sheet:not(.w-sheet-tray)')].filter((el) => visible(el) && el.getClientRects().length)
+  // FX8: with its feedback bubble open (approved 8 Nov, inside the panel, after the storyboard's limit) a panel
+  // may grow past it; it is then held by the underFooter and outside checks instead
+  const tallPanels = [...main.querySelectorAll('.w-sheet:not(.w-sheet-tray)')].filter((el) => visible(el) && el.getClientRects().length && !el.querySelector('.w-band[data-strip="on"]'))
     .map((el) => box(el.getBoundingClientRect()).h).filter((hgt) => hgt > 524.8 + 0.5).map((hgt) => Math.round(hgt));
 
   // equal gutters (NL1): a Focus panel sits centred in main at any stage width, the same gap left and
@@ -147,7 +149,8 @@ export function measureLayout() {
 
   let bandWidth = null;
   if (bandOn) {
-    const sheet = band.closest('.w-sheet');
+    // (FX8: S17's band sits in the right column of its grid, under the mistakes: not a full-width band)
+    const sheet = band.closest('.w-sheet:not(.w-sheet-cases)');
     if (sheet) {
       const P = box(sheet.getBoundingClientRect());
       bandWidth = { band: Math.round(B.w), area: Math.round(P.w), gap: Math.round(P.bottom - B.bottom), left: Math.round(B.left - P.left) };
@@ -262,7 +265,9 @@ export function layoutVerdict(m) {
   if (m.textOverlaps && m.textOverlaps.length) bad.push('text over text: ' + [...new Set(m.textOverlaps)].join('; '));
   if (m.textClipped && m.textClipped.length) bad.push('text cut off: ' + [...new Set(m.textClipped)].join('; '));
   if (m.bandOverflow) bad.push('band text overflows the band');
-  if (m.bandWidth && (Math.abs(m.bandWidth.band - m.bandWidth.area) > 1 || Math.abs(m.bandWidth.left) > 1 || Math.abs(m.bandWidth.gap) > 1))
+  // FX8: the feedback is a bubble inside the panel's padding (not a full-width strip at its foot): the band
+  // sits inset by the same padding on both sides and never runs past the panel
+  if (m.bandWidth && (m.bandWidth.band > m.bandWidth.area + 1 || m.bandWidth.left < -1 || Math.abs(m.bandWidth.area - m.bandWidth.band - 2 * m.bandWidth.left) > 2 || m.bandWidth.gap < -1))
     bad.push(`band ${m.bandWidth.band}px vs its panel ${m.bandWidth.area}px, offset ${m.bandWidth.left}, bottom gap ${m.bandWidth.gap}`);
   if (m.lowContrast.length) bad.push('contrast: ' + m.lowContrast.join('; '));
   if (m.small.length) bad.push('text under 14px: ' + m.small.join(', '));

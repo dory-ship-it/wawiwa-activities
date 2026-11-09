@@ -12,10 +12,10 @@
 // Tracking: the same one matching interaction as before, once, when the last card is placed: each card's
 // FIRST pile ("1.a,2.b,..."), correct only if every first drop was right; when any card needed another
 // drop, one retry follows with the final piles.
-import { h, fmt, reducedMotion } from '../util.js?v=250c2853';
-import { glyph } from '../icons.js?v=250c2853';
-import { layout } from './stage.js?v=250c2853';
-import { dragDrop } from '../drag.js?v=250c2853';
+import { h, fmt, reducedMotion } from '../util.js?v=91bb02f0';
+import { glyph, icon } from '../icons.js?v=91bb02f0';
+import { layout } from './stage.js?v=91bb02f0';
+import { dragDrop } from '../drag.js?v=91bb02f0';
 
 const keyOf = (c) => String(c.id ?? c.n);
 const COLS_TOP = 304, GAP = 17.92, WRONG_MS = 750; // stage px in main
@@ -33,7 +33,10 @@ export const sortDeck = {
     /* ---- piles ---- */
     const cols = screen.columns.map((c) => {
       const placed = h('ul', { class: 'w-drop-cards', 'aria-label': c.label });
-      const el = h('div', { class: 'w-drop', dataset: { column: c.id } },
+      // FX8 (the board's S16): a column with an icon (content c.icon) shows it in a disc above its name;
+      // c.kind "good" / "poor" tints it (the three good-fit kinds teal, Poor fit grey)
+      const el = h('div', { class: 'w-drop', dataset: { column: c.id, ...(c.kind ? { kind: c.kind } : {}) } },
+        c.icon ? h('span', { class: 'w-drop-icon', 'aria-hidden': 'true' }, icon(c.icon, { size: 20.48 })) : null,
         h('b', { class: 'w-drop-title' }, c.label), c.sub ? h('span', { class: 'w-drop-sub' }, c.sub) : null, placed);
       return { id: c.id, el, name: c.label, placed };
     });

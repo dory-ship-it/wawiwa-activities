@@ -16,10 +16,10 @@
 // Copy: navigator.clipboard first; when it is blocked (an LMS iframe without clipboard permission) the
 // card's text is selected and the button says "Press Ctrl+C" (the selection copies with the keys).
 // The ghost hand shows the first Copy once (it points beside it and taps nothing). Nothing is tracked.
-import { h, resolveLink } from '../util.js?v=250c2853';
-import { glyph, icon } from '../icons.js?v=250c2853';
-import { layout, sheet, privacyLine, ruleLabel, picture } from './stage.js?v=250c2853';
-import { scaleOf } from '../ghost.js?v=250c2853';
+import { h, resolveLink } from '../util.js?v=91bb02f0';
+import { glyph, icon } from '../icons.js?v=91bb02f0';
+import { layout, sheet, privacyLine, ruleLabel, picture } from './stage.js?v=91bb02f0';
+import { scaleOf } from '../ghost.js?v=91bb02f0';
 
 const COPIED_MS = 2000;
 
@@ -30,6 +30,8 @@ const COPIED_MS = 2000;
 //                 Next unlocks after Open, and the line beside it says so.
 //   back   (S19C) "Did you export your PDF?": Yes opens Next; Not yet shows the reopen link. Nothing tracked.
 export const handoff = {
+  // FX8 (the board's S19C): back from the workbook on Stage, the chapter photo with the panel right
+  scene: (screen) => (screen.variant === 'back' ? 'stage' : 'focus'),
   mount(ctx) {
     if (ctx.screen.variant === 'brief') return brief(ctx);
     if (ctx.screen.variant === 'back') return back(ctx);
@@ -55,7 +57,8 @@ function back(ctx) {
   const yes = h('button', { class: 'w-btn w-btn-primary', type: 'button', 'aria-pressed': 'false', dataset: { action: 'pdfYes' } }, ui.buttons.yes);
   const notYet = h('button', { class: 'w-btn w-btn-ghost', type: 'button', 'aria-pressed': 'false', dataset: { action: 'pdfNotYet' } }, ui.buttons.notYet);
   const fix = h('div', { class: 'w-pdf-fix', hidden: true }, h('p', { class: 'w-context' }, screen.notYetLine), reopen);
-  layout(ctx, 'focus', sheet('focus w-sheet-back', screen.text ? h('p', { class: 'w-context' }, screen.text) : null, zones.instruction,
+  layout(ctx, 'stage', sheet('right w-sheet-back', h('span', { class: 'w-pdf-badge', 'aria-hidden': 'true' }, icon('document', { size: 52 })),
+    screen.text ? h('p', { class: 'w-context' }, screen.text) : null, zones.instruction,
     h('div', { class: 'w-pdf-choice', role: 'group', 'aria-labelledby': 'w-instruction', dataset: { interaction: '' } }, yes, notYet), fix, zones.band));
   zones.setFeedback({ state: 'hint', text: '' });
   const done = (focus) => {

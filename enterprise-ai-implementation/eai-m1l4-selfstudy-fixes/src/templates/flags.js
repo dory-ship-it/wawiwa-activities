@@ -13,12 +13,12 @@
 // Tracking: one interaction when the last flag is placed, from each flag's FIRST drop:
 //   choice (map)     the first fields, in number order ("4,7"), correct only if both were right
 //   matching (line)  the flag's one-character code and its first step ("s.1,e.5"), SCORM 1.2 matching
-import { h, fmt, reducedMotion } from '../util.js?v=250c2853';
-import { glyph } from '../icons.js?v=250c2853';
-import { layout } from './stage.js?v=250c2853';
-import { dragDrop } from '../drag.js?v=250c2853';
+import { h, fmt, reducedMotion } from '../util.js?v=91bb02f0';
+import { glyph, icon } from '../icons.js?v=91bb02f0';
+import { layout } from './stage.js?v=91bb02f0';
+import { dragDrop } from '../drag.js?v=91bb02f0';
 // (FX5: no Check here any more)
-// import { checkButton } from './decision.js?v=250c2853';
+// import { checkButton } from './decision.js?v=91bb02f0';
 
 export const flags = {
   mount(ctx) {
@@ -47,7 +47,9 @@ export const flags = {
       const steps = screen.line.map((s) => {
         const chip = h('span', { class: 'w-target-chip w-target-empty', 'aria-hidden': 'true' });
         const box = h('div', { class: 'w-line-step' }, h('span', { class: 'w-step-n', 'aria-hidden': 'true' }, String(s.n)), h('span', {}, s.text));
-        const el = h('div', { class: 'w-target w-line-cell', dataset: { target: String(s.n) } }, h('div', { class: 'w-line-slot' }, chip), box);
+        // FX8 (the board's S13): the step's icon in a disc on the process line, between its flag place and its box
+        const disc = s.icon ? h('span', { class: 'w-line-disc', 'aria-hidden': 'true' }, icon(s.icon, { size: 36 })) : null;
+        const el = h('div', { class: 'w-target w-line-cell', dataset: { target: String(s.n) } }, h('div', { class: 'w-line-slot' }, chip), disc, box);
         return { id: String(s.n), el, chip, box, name: fmt(ui.drag.stepName, { n: s.n, text: s.text }) };
       });
       const row = [];
@@ -57,6 +59,16 @@ export const flags = {
     }
     card.setAttribute('role', 'group');
     card.setAttribute('aria-labelledby', 'w-instruction');
+    // FX8 (Noy, 8 Nov 2026: "Risk flag: unclear what to do there"): no tray of flags to drag. A click on a
+    // field or a step places the next flag there; each target is a button for the keyboard (Enter, Space).
+    // S12 shows how many flags are placed ("1 of 2 flags"); S13's heading moves on to the end once the
+    // start is marked (screen.instructionEnd). The flag cards stay, hidden, as the drag module's items.
+    targets.forEach((t) => {
+      t.el.tabIndex = 0;
+      t.el.setAttribute('role', 'button');
+      t.el.setAttribute('aria-label', t.name);
+      t.el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); t.el.click(); } });
+    });
 
     /* ---- the flags ---- */
     const live = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
@@ -69,21 +81,28 @@ export const flags = {
     const dd = dragDrop({ ui, live, targets, nameOf: (c) => c.getAttribute('aria-label'), onDrop: (c, tid) => dropOn(c, tid), picked: ui.drag.pickedPlace });
     cards.forEach((c) => dd.add(c));
 
-    // FX1 B1: the ghost hand grabs the first flag in the tray and drags it toward the card, stopping
-    // before it gets there (it drops nothing, points at no field or step); "Show me how" replays it
+    // FX8: the ghost hand moves over the targets and taps none (it places nothing, points at no answer):
+    // it rests on a target that is not a right one; "Show me how" replays it
+    const notAnswer = targets.find((t) => (map ? !screen.map.find((x) => String(x.n) === t.id)?.correct : !screen.flags.some((f) => f.target === t.id))) || targets[0];
     const g = !ctx.revisit ? ctx.ghost({ type: screen.ghost?.type || 'flag',
       steps: () => {
-        const c = cards.find((x) => !x.hidden);
-        if (!c) return [];
-        const r = c.getBoundingClientRect(), b = card.getBoundingClientRect();
-        const grab = { x: r.left + 0.8 * r.width, y: r.top + 0.45 * r.height };
-        // 55% of the way to the card's right edge, level with the flag: it ends in the gap beside the card
-        const aim = { x: b.right + (grab.x - b.right) * 0.45, y: grab.y };
-        return [{ point: () => grab, carry: c, hold: 120 }, { point: () => aim, hold: 800 }];
+        const r = notAnswer.el.getBoundingClientRect();
+        return [{ point: () => ({ x: r.left + 0.55 * r.width, y: r.top + 0.6 * r.height }), hold: 900 }];
       } }) : null;
 
+    // S12: the flags still to place, as discs, and the count in words
+    const dots = screen.flags.map(() => h('span', { class: 'w-flag-dot' }, glyph('start', { size: 20.48 })));
+    const countText = h('b', { class: 'w-flag-count-text' });
+    const count = map ? h('div', { class: 'w-flag-count', 'aria-hidden': 'true' }, h('span', { class: 'w-flag-dots' }, dots), countText) : null;
+    const paintCount = () => {
+      const n = screen.flags.filter((x) => at[x.id] && tgState(x) !== 'wrong').length;
+      dots.forEach((d, i) => { d.dataset.on = String(i < n); });
+      countText.textContent = fmt(ui.flagCount || '{x} of {n} flags', { x: n, n: screen.flags.length });
+      if (!map && screen.instructionEnd) zones.instruction.textContent = at[screen.flags[0].id] && tgState(screen.flags[0]) !== 'wrong' && !over ? screen.instructionEnd : screen.instruction;
+    };
+
     layout(ctx, 'flags',
-      h('div', { class: 'w-task-head' }, h('div', {}, screen.context ? h('p', { class: 'w-context' }, screen.context) : null, zones.instruction), h('span', { class: 'w-head-tools' }, g ? g.button : null)),
+      h('div', { class: 'w-task-head' }, h('div', {}, screen.context ? h('p', { class: 'w-context' }, screen.context) : null, zones.instruction, screen.lead ? h('p', { class: 'w-flag-lead' }, screen.lead) : null), h('span', { class: 'w-head-tools' }, count, g ? g.button : null)),
       h('div', { class: 'w-board w-board-flags', dataset: { interaction: '', variant: screen.variant } },
         card,
         h('div', { class: 'w-flag-side' }, tray, h('div', { class: 'w-float w-float-side' }, zones.band)),
@@ -126,6 +145,7 @@ export const flags = {
       const next = over ? null : inTray()[0];
       cards.forEach((c) => { c.dataset.active = String(c === next); });
       targets.forEach((x) => { x.el.dataset.ready = String(!!next && !x.el.inert); });
+      paintCount();
     }
     let lastDrop = 0; // (the click that ends a drag's or a picked flag's drop must not place a second flag)
     targets.forEach((x) => x.el.addEventListener('click', () => {

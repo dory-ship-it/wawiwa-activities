@@ -11,7 +11,7 @@
 // flags, tiles, key ideas, the module map, S18A, S19A, S19B) sit in one wide cream panel on the blurred
 // chapter photo (stage[data-fx7="wide"]); the title, the video and the end keep their own scenes.
 // The templates are untouched: the composer only moves their elements (the references they keep stay valid).
-import { h } from './util.js?v=250c2853';
+import { h } from './util.js?v=91bb02f0';
 
 const COMPOSED = { decision: true, input: true, warmup: true, handoff: true, check: true };
 const HEAD = '.w-context, .w-label, .w-head-row, .w-instruction, .w-case-row, .w-handoff-head, .w-kc-head, .w-round-top, .w-open-head, .w-glass, .w-case-card, .w-q-chip';

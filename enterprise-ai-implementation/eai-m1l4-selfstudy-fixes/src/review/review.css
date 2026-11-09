@@ -100,3 +100,13 @@
 .rv-paths-grid:has(.rv-path-cell[data-on="true"]) .rv-path-cell[data-on="false"] { opacity: .45; }
 .rv-path-step { display: inline-grid; place-items: center; min-width: 22px; height: 22px; border-radius: 11px; background: var(--wl-navy); color: var(--wl-white); font-weight: 700; }
 .rv-path-step[hidden] { display: none; }
+
+/* FX8: a note box under every screen, and the notes bar (count + Copy notes) in the header */
+.rv-cell { display: grid; gap: 6px; width: 480px; align-content: start; }
+.rv-cell[hidden] { display: none; }
+.rv-note { width: 100%; min-height: 44px; resize: vertical; padding: 8px 10px; border: 1px solid var(--wl-line-strong); border-radius: 8px; background: var(--wl-white);
+  font: 400 15px/1.4 var(--wl-font-ui); color: var(--wl-ink); }
+.rv-note:focus-visible { outline: 3px solid var(--wl-navy); outline-offset: 1px; }
+.rv-note:not(:placeholder-shown) { border-color: var(--wl-navy); background: var(--wl-keypill-bg); }
+.rv-notes-bar { display: flex; align-items: center; gap: 10px; }
+.rv-note-count { font: 600 15px/1.2 var(--wl-font-ui); color: var(--wl-text-2); }

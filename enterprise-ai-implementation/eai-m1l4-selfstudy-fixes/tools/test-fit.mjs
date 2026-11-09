@@ -114,7 +114,13 @@ for (const size of ONLY.length || COACH_ONLY ? [] : SIZE_ARG ? SIZES : [[1280, 7
 
 /* ---- 2. every screen in every band state ---- */
 console.log('\n2. screens and band states');
-const click = (page, sel) => page.click(sel);
+// FX7/FX8: a graded choice is selected, then checked: after an answer card or a tile, Check is pressed
+// when it can be (a multi-select waits for its last pick; a tile that only opens has no Check)
+const click = async (page, sel) => {
+  if (sel.includes('data-action="check"') && !(await page.$(sel + ':not([disabled])'))) return; // (already checked after the pick)
+  await page.click(sel);
+  if (/w-opt|w-tile|w-guess/.test(sel)) await page.evaluate(() => { const c = document.querySelector('[data-action="check"]:not([disabled])'); if (c && c.offsetParent) c.click(); });
+};
 const STATES = [
   ['S01', 'hint', async () => {}],
   ['S01', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
@@ -337,7 +343,7 @@ async function attempt(p, answers, k) {
   await p.evaluate((a, kk) => { const s = window.__l4.state; Object.assign(s.a, a); s.k = kk; s.d.push('S21'); window.__l4.go('S21R'); }, answers, k);
 }
 // the flags (S12, S13): click a flag, then its target
-async function flag(p, f, t) { await click(p, `.w-flag-card[data-flag="${f}"]`); await click(p, `.w-target[data-target="${t}"]`); }
+async function flag(p, f, t) { await click(p, `.w-target[data-target="${t}"]`); } // FX8: no tray; a click places the next flag (S13: Start, then End)
 // S05b: click a label, then its place, per pair
 async function labels(p, pairs) { for (const [l, t] of pairs) { await click(p, `.w-label-card[data-label="${l}"]`); await click(p, `.w-target[data-target="${t}"]`); } }
 // FX2 D1 (S17): the right mistake for each case given, then "Next case"

@@ -19,12 +19,12 @@
 // media.duration, stops[].t. Swapping the real film in is a change of those paths and times only.
 // Seeking forward never passes the part already watched or the next unanswered stop (the slider
 // clamps, a polite note says why).
-import { h, fmt, nextId } from '../util.js?v=250c2853';
-import { glyph, icon } from '../icons.js?v=250c2853';
-import { letter } from '../tracking/index.js?v=250c2853';
-import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=250c2853';
-import { targetSteps } from '../ghost.js?v=250c2853';
-import { checkButton } from './decision.js?v=250c2853';
+import { h, fmt, nextId } from '../util.js?v=91bb02f0';
+import { glyph, icon } from '../icons.js?v=91bb02f0';
+import { letter } from '../tracking/index.js?v=91bb02f0';
+import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=91bb02f0';
+import { targetSteps } from '../ghost.js?v=91bb02f0';
+import { checkButton } from './decision.js?v=91bb02f0';
 
 const SEEK_STEP = 5, SEEK_PAGE = 15, AT_STOP = 0.05, AT_END = 0.3;
 // FX4 (Dor): playback speed in the player bar, 1 to 2, kept for the session (every video plays at the

@@ -15,11 +15,11 @@
 // shuffled option reports the same letter as before. A revisit shows the review from the first item;
 // a reload in the middle of an attempt goes on from the first item not answered yet.
 // FX3: version b of every item on a retake (its own interaction ids, L4_S21_1b ...), a again after that.
-import { h, fmt } from '../util.js?v=250c2853';
-import { glyph } from '../icons.js?v=250c2853';
-import { checkButton } from './decision.js?v=250c2853';
-import { letter } from '../tracking/index.js?v=250c2853';
-import { layout, sheet, progressDots, arrowNav } from './stage.js?v=250c2853';
+import { h, fmt } from '../util.js?v=91bb02f0';
+import { glyph } from '../icons.js?v=91bb02f0';
+import { checkButton } from './decision.js?v=91bb02f0';
+import { letter } from '../tracking/index.js?v=91bb02f0';
+import { layout, sheet, progressDots, arrowNav } from './stage.js?v=91bb02f0';
 
 export const check = {
   mount(ctx) {
@@ -126,6 +126,8 @@ export const check = {
       zones.setFeedback({ state: 'idle' }); // the attempt's hint line goes
       const actions = k < last ? [{ id: 'nextAnswer', label: ui.buttons.nextAnswer, onClick: () => review(k + 1, true) }] : [];
       let fb;
+      // FX6 (Noy): the check has no retry, so a wrong answer says "Not quite." (not "One more try.")
+      const FINAL_WRONG = () => ({ verdict: ui.feedback.wrongPrefix, sr: ui.feedback.srWrongFinal || ui.feedback.srWrong });
       if (it.kind === 'tiles') {
         const btns = tileButtons(it);
         tilesBody(btns);
@@ -140,7 +142,7 @@ export const check = {
         const missed = keys.filter((t) => !picked.has(String(t.n)));
         fb = !missed.length ? { state: 'correct', text: keys.map((t) => t.feedback).join(' ') }
           : missed.length < keys.length ? { state: 'partial', verdict: ui.feedback.oneOfTwo, text: missed.map((t) => t.feedback).join(' ') }
-          : { state: 'wrong', text: missed.map((t) => t.feedback).join(' ') };
+          : { state: 'wrong', ...FINAL_WRONG(), text: missed.map((t) => t.feedback).join(' ') };
       } else {
         const btns = choiceButtons(it);
         choiceBody(btns);
@@ -150,7 +152,7 @@ export const check = {
           else if (o.correct) mark(btns[i], 'correct'); // the right answer, when the learner's was wrong
         });
         const o = it.options.find((x) => x.id === a?.response);
-        fb = { state: o?.correct ? 'correct' : 'wrong', text: o?.feedback || '' };
+        fb = { state: o?.correct ? 'correct' : 'wrong', ...(o?.correct ? {} : FINAL_WRONG()), text: o?.feedback || '' };
       }
       const go = zones.setFeedback({ ...fb, actions });
       if (focus) (go || body.querySelector('button'))?.focus();

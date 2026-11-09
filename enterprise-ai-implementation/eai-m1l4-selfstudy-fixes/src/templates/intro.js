@@ -24,11 +24,11 @@
 //                    term in bold, its line after it) with a check or a cross mark.
 // Title, module map, goals and key idea are presentation screens (screen.presentation): the engine
 // marks them done on arrival, so Next never locks. All text comes from the content.
-import { h } from '../util.js?v=250c2853';
-import { glyph } from '../icons.js?v=250c2853';
-import { scaleOf } from '../ghost.js?v=250c2853';
-import { letter } from '../tracking/index.js?v=250c2853';
-import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst, buildUp } from './stage.js?v=250c2853';
+import { h } from '../util.js?v=91bb02f0';
+import { glyph, icon } from '../icons.js?v=91bb02f0';
+import { scaleOf } from '../ghost.js?v=91bb02f0';
+import { letter } from '../tracking/index.js?v=91bb02f0';
+import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst, buildUp } from './stage.js?v=91bb02f0';
 
 /* ---------- title (O1) ---------- */
 export const title = {
@@ -269,9 +269,13 @@ export const keyColumns = {
     const { screen, zones } = ctx;
     const cols = screen.columns.map((c) => h('figure', { class: 'w-fig w-kcol', dataset: { kind: c.kind, column: c.id } },
       h('figcaption', { class: 'w-fig-caption' }, c.title),
-      h('ul', { class: 'w-kcol-list' }, c.items.map((it) => h('li', {},
-        h('span', { class: 'w-kcol-mark', 'aria-hidden': 'true' }, glyph(c.kind === 'lean' ? 'g-check-b' : 'g-cross', { size: 14.08 })),
-        h('span', {}, h('b', {}, it.term + (it.text ? ':' : '')), it.text ? ' ' + it.text : null))))));
+      // FX8 (the board's K4): an item with an icon gets it in a disc (teal good fit, grey poor fit), the
+      // term bold and its line under it; the column's name carries the check or the cross
+      h('ul', { class: 'w-kcol-list' }, c.items.map((it) => h('li', { dataset: it.icon ? { icon: it.icon } : {} },
+        it.icon ? h('span', { class: 'w-kcol-icon', 'aria-hidden': 'true' }, icon(it.icon, { size: 23.04 }))
+          : h('span', { class: 'w-kcol-mark', 'aria-hidden': 'true' }, glyph(c.kind === 'lean' ? 'g-check-b' : 'g-cross', { size: 14.08 })),
+        it.icon ? h('span', { class: 'w-kcol-body' }, h('b', {}, it.term), it.text ? h('span', {}, it.text) : null)
+          : h('span', {}, h('b', {}, it.term + (it.text ? ':' : '')), it.text ? ' ' + it.text : null))))));
     layout(ctx, 'concept',
       h('div', { class: 'w-focus-head' },
         h('p', { class: 'w-key-label' }, glyph('learn', { size: 23.04 }), h('span', {}, screen.label)),

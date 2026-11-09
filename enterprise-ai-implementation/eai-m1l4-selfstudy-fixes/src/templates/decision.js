@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=250c2853';
-import { glyph, icon } from '../icons.js?v=250c2853';
-import { attachTip } from '../tooltip.js?v=250c2853';
-import { letter } from '../tracking/index.js?v=250c2853';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=250c2853';
-import { targetSteps } from '../ghost.js?v=250c2853';
+import { h, fmt, resolveLink } from '../util.js?v=91bb02f0';
+import { glyph, icon } from '../icons.js?v=91bb02f0';
+import { attachTip } from '../tooltip.js?v=91bb02f0';
+import { letter } from '../tracking/index.js?v=91bb02f0';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=91bb02f0';
+import { targetSteps } from '../ghost.js?v=91bb02f0';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -66,9 +66,14 @@ export const decision = {
 function options(ctx, kind, { list = ctx.screen.options, cols = 1, labelledby = 'w-instruction', interaction = true } = {}) {
   const { content } = ctx;
   const group = h('div', { class: `w-options w-ans-list w-ans-cols-${cols}` + (kind === 'check' ? ' w-ans-multi' : ''), role: 'group', 'aria-labelledby': labelledby, dataset: interaction ? { interaction: '' } : {} });
+  // (FX8: the icon tiles belong to the boards' S17 and S20B, the five mistakes; elsewhere the radio stays)
+  const withIcons = ['cases', 'risk'].includes(ctx.screen.variant);
   const btns = list.map((o, i) => {
-    const btn = h('button', { class: 'w-opt w-ans', type: 'button', dataset: { id: o.id, letter: letter(i) }, 'aria-pressed': kind === 'check' ? 'false' : null },
-      h('span', { class: 'w-opt-mark w-ans-mark' }), h('span', { class: 'w-opt-label' }, labelWithTerm(o, content.tooltips),
+    // FX8: an option with an icon (content o.icon: S17's and S20B's five mistakes, S22's takeaways) shows it
+    // in a tile in front of its name, where the marker sits; the marker comes back once the answer is marked
+    const btn = h('button', { class: 'w-opt w-ans', type: 'button', dataset: { id: o.id, letter: letter(i), ...(withIcons && o.icon ? { icon: o.icon } : {}) }, 'aria-pressed': kind === 'check' ? 'false' : null },
+      h('span', { class: 'w-opt-mark w-ans-mark' }), withIcons && o.icon ? h('span', { class: 'w-ans-icon', 'aria-hidden': 'true' }, icon(o.icon, { size: 23.04 })) : null,
+      h('span', { class: 'w-opt-label' }, labelWithTerm(o, content.tooltips),
         o.sub ? h('span', { class: 'w-opt-sub' }, o.sub) : null)); // NL4 S20B: the one-line definition under the name
     group.append(btn);
     // a term inside a button: no nested focusable; the definition goes on the button itself
