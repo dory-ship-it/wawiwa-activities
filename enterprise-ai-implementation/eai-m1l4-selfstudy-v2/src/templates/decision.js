@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=77a89e51';
-import { glyph, icon } from '../icons.js?v=77a89e51';
-import { attachTip } from '../tooltip.js?v=77a89e51';
-import { letter } from '../tracking/index.js?v=77a89e51';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=77a89e51';
-import { targetSteps } from '../ghost.js?v=77a89e51';
+import { h, fmt, resolveLink } from '../util.js?v=3e1f82e2';
+import { glyph, icon } from '../icons.js?v=3e1f82e2';
+import { attachTip } from '../tooltip.js?v=3e1f82e2';
+import { letter } from '../tracking/index.js?v=3e1f82e2';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=3e1f82e2';
+import { targetSteps } from '../ghost.js?v=3e1f82e2';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -433,7 +433,9 @@ function rounds(ctx) {
   const counter = h('p', { class: 'w-round-count' });
   const btns = screen.options.map((o, i) => h('button', { class: 'w-opt w-rule-card', type: 'button', dataset: { id: o.id, letter: letter(i) } },
     h('span', { class: 'w-rule-icon', 'aria-hidden': 'true' }, icon(o.icon, { size: 30.72 })),
-    h('span', { class: 'w-rule-name', 'aria-hidden': 'true' }, screen.rules.items[i] || o.label), h('span', { class: 'w-sr-only' }, o.label),
+    // (v2 S08, slide 16: the rule's one-line reason under its name, o.sub)
+    h('span', { class: 'w-rule-text', 'aria-hidden': 'true' }, h('span', { class: 'w-rule-name' }, screen.rules.items[i] || o.label), o.sub ? h('span', { class: 'w-rule-sub' }, o.sub) : null),
+    h('span', { class: 'w-sr-only' }, o.label + (o.sub ? ': ' + o.sub : '')),
     h('span', { class: 'w-opt-mark w-rule-mark' })));
   const group = h('div', { class: 'w-options w-rule-cards', role: 'group', 'aria-labelledby': 'w-instruction' }, btns);
   arrowNav(group);

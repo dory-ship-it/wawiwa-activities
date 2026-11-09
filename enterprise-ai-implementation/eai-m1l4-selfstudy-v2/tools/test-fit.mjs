@@ -148,8 +148,7 @@ const STATES = [
   ['V1', 'stop, wrong', async (p) => { await toStop(p); await click(p, '.w-stop-view .w-opt[data-id="a"]'); }],
   ['V1', 'stop, right', async (p) => { await toStop(p); await click(p, '.w-stop-view .w-opt[data-id="b"]'); }],
   // NL2: Chapter 2 (storyboard v3)
-  ['W2', 'hint', async () => {}],
-  ['W2', 'guess', async (p) => click(p, '.w-guess[data-id="a"]')],
+  ['W2', 'opener', async () => {}], // v2: the chapter opener (slide 9)
   ['K2', 'key idea', async () => {}],
   ['K2', 'HR case on', async (p) => click(p, '[data-action="caseToggle"]')],
   ['S04', 'start', async (p) => p.keyboard.press('Shift')], // any key stops the ghost hand
@@ -169,9 +168,7 @@ const STATES = [
   ['S06', 'situation 2 wrong', async (p) => { await click(p, '.w-opt[data-id="a"]'); await click(p, '[data-action="nextSituation"]'); await click(p, '.w-situation-now .w-opt[data-id="a"]'); }],
   ['S06', 'both right', async (p) => { await click(p, '.w-opt[data-id="a"]'); await click(p, '[data-action="nextSituation"]'); await click(p, '.w-situation-now .w-opt[data-id="b"]'); }],
   ['S07', 'tile 5 open', async (p) => { await p.keyboard.press('Shift'); await click(p, '.w-tile[data-n="5"]'); }],
-  ['S07', 'question', async (p) => { await p.keyboard.press('Shift'); for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); }],
-  ['S07', 'wrong', async (p) => { await p.keyboard.press('Shift'); for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); await click(p, '.w-tile[data-n="7"]'); }],
-  ['S07', 'correct', async (p) => { await p.keyboard.press('Shift'); for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); await click(p, '.w-tile[data-n="8"]'); }],
+  ['S07', 'all eight opened', async (p) => { await p.keyboard.press('Shift'); for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); }], // v2: no question
   ['S08', 'round 1 wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
   ['S08', 'round 1 right', async (p) => click(p, '.w-opt[data-id="b"]')],
   ['S08', 'round 3 right', async (p) => {
@@ -187,8 +184,8 @@ const STATES = [
     await click(p, '[data-action="save"]');
   }],
   // NL3: Chapters 3 and 4 (storyboard v3)
-  ['W3', 'hint', async () => {}],
-  ['W3', 'guess', async (p) => click(p, '.w-guess[data-id="c"]')],
+  ['W3', 'opener', async () => {}], // v2: the chapter opener (slide 15)
+  ['K3', 'key idea', async () => {}], // v2: new, slide 38
   ['V2', 'play view', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); }],
   ['V2', 'stop 3, wrong', async (p) => {
     for (const k of ['b', 'a']) { await toStop(p); await click(p, `.w-stop-view .w-opt[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }

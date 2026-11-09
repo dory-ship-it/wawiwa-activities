@@ -420,7 +420,8 @@
         "K1"
       ], "inSlice": true, "pauseMarker": null },
     { "id": "ch2", "n": 2, "title": "Toolkit", "photo": { "src": "assets/img/l4/md1/ch3-toolkit.jpg", "position": "50% 50%", "temp": false }, "minutes": 28, "screens": ["W2", "K2", "S04", "S05a", "S05b", "S06", "S07", "S08", "S08B"], "inSlice": true, "pauseMarker": null },
-    { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/md1/ch4-hr-demo.jpg", "position": "30% 40%", "temp": false }, "minutes": 20, "screens": ["W3", "V2", "S09", "S10", "S11", "S12", "S12B"], "inSlice": true, "pauseMarker": null },
+    { "id": "ch3", "n": 3, "title": "HR demo", "photo": { "src": "assets/img/l4/md1/ch4-hr-demo.jpg", "position": "30% 40%", "temp": false }, "minutes": 20, "screens": ["W3", "V2", "S09", "S10",
+        "K3", "S11", "S12", "S12B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch4", "n": 4, "title": "Critical eye", "photo": { "src": "assets/img/l4/md1/ch5-critical-eye.jpg", "position": "65% 50%", "temp": false }, "minutes": 25, "screens": ["W4", "S13", "S14", "S15", "K4", "S16", "S17", "S17B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch5", "n": 5, "title": "Build yours", "photo": { "src": "assets/img/l4/md1/ch6-build-yours.jpg", "position": "35% 50%", "temp": false }, "minutes": 57, "screens": ["S18A", "S18", "S18B", "S19A", "S19B", "S19C", "S20", "S20B"], "inSlice": true, "pauseMarker": null },
     { "id": "ch6", "n": 6, "title": "Wrap-up", "photo": { "src": "assets/img/l4/md1/ch7-wrap-up.jpg", "position": "40% 50%", "temp": false }, "minutes": 17, "screens": ["S21", "S21R", "S22", "END"], "inSlice": true, "pauseMarker": null }
@@ -1288,179 +1289,471 @@
 
     {
       "id": "W2",
-      "look": "photo",
-      "coach": { "kind": "warmup", "tip": "Not scored. Ask yourself: does the email start the work, do the work, or end it?", "tipDrafted": true },
+      "coach": {
+        "kind": "idea",
+        "tip": "Four tools in this chapter. Keep your own case in mind as you meet each one.",
+        "tipDrafted": true
+      },
       "chapter": "ch2",
-      "template": "warmup",
-      "step": { "verb": "Guess", "icon": "guess" },
+      "template": "opener",
+      "step": {
+        "verb": "Overview",
+        "icon": "overview"
+      },
       "minutes": 1,
-      "instruction": "Guess what an employee's email to HR is, in process terms.",
-      "hint": "Pick the answer you expect. A guess cannot be wrong.",
-      "hintPilotCopy": true,
-      "layout": "warmup",
-      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "foot": "Chapter {ch2} · Toolkit" },
-      "options": [
-        { "id": "a", "label": "The trigger" },
-        { "id": "b", "label": "The first step" },
-        { "id": "c", "label": "The output" }
+      "presentation": true,
+      "instruction": "Pick up the tools of a mapper",
+      "lead": "Mapping shows how work really flows: who does each step, what goes in and out.",
+      "points": [
+        {
+          "icon": "arrows",
+          "title": "Three building blocks",
+          "text": "Trigger, steps, output"
+        },
+        {
+          "icon": "lanes",
+          "title": "BPMN at a glance",
+          "text": "Read it, know when to use it"
+        },
+        {
+          "icon": "forms",
+          "title": "The eight fields",
+          "text": "Your main working tool"
+        },
+        {
+          "icon": "eye",
+          "title": "AS-IS rules",
+          "text": "Map what really happens"
+        }
       ],
-      "feedback": { "verdict": "Hold that thought.", "text": "This chapter names the three parts of every process." },
-      "advance": "after-any",
-      "tracking": [
-        { "id": "L4_W2_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Understand", "result": "neutral" }
-      ],
-      "sources": ["planning/CH2-SPEC.md 1 (replaces FT2)", "s9"]
+      "photo": {
+        "src": "assets/img/l4/v2/ch3-w2-sketching-flow.jpg",
+        "position": "64% 45%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "full"
+      },
+      "tracking": [],
+      "sources": [
+        "s9",
+        "s10",
+        "s12",
+        "s13",
+        "s14",
+        "s16",
+        "v2 (9 Nov 2026): the chapter opener replaces the warm-up guess"
+      ]
     },
 
     {
       "id": "K2",
-      "look": "light",
-      "coach": { "kind": "idea", "tip": "Every process has a trigger, steps and an output. Turn on the HR case to see each one.", "tipDrafted": true },
+      "coach": {
+        "kind": "idea",
+        "tip": "Every process has a trigger, steps and an output. Turn on the HR case to see each one.",
+        "tipDrafted": true
+      },
       "chapter": "ch2",
       "template": "keyParts",
-      "step": { "verb": "Learn", "icon": "learn" },
+      "step": {
+        "verb": "Learn",
+        "icon": "learn"
+      },
       "minutes": 2,
       "presentation": true,
-      "label": "Key idea · Process mapping",
-      "terms": ["Process mapping"],
+      "label": "Key idea",
+      "terms": [
+        "Process mapping"
+      ],
       "instruction": "Every process has three parts",
-      "text": "How work really flows.",
+      "text": "Per ISO 9001: inputs in, an intended output out.",
       "layout": "concept",
       "parts": [
-        { "id": "trigger", "title": "Trigger", "text": "What starts it.", "case": "A question arrives" },
-        { "id": "steps", "title": "Steps", "text": "The path to the result.", "case": "Check, answer or escalate" },
-        { "id": "output", "title": "Output", "text": "What comes out, to whom.", "case": "The employee gets an answer" }
+        {
+          "id": "trigger",
+          "title": "Trigger",
+          "text": "A message, a form, a date.",
+          "case": "A question arrives"
+        },
+        {
+          "id": "steps",
+          "title": "Steps",
+          "text": "Three to seven, to the result.",
+          "case": "Check, answer, escalate"
+        },
+        {
+          "id": "output",
+          "title": "Output",
+          "text": "What comes out, to whom.",
+          "case": "Employee gets an answer"
+        }
       ],
-      "caseToggle": "See it in the HR case",
-      "caseLabel": "HR case",
+      "caseToggle": "See it in the HR case from Lesson 1",
+      "caseLabel": "HR",
       "tracking": [],
-      "sources": ["planning/CH2-SPEC.md 2", "s9", "s10", "s11"]
+      "sources": [
+        "s10",
+        "s11",
+        "HR canon Fields 2, 3"
+      ],
+      "photo": {
+        "src": "assets/img/l4/v2/ch3-w2-sketching-flow.jpg",
+        "position": "64% 45%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "darkblur"
+      }
     },
 
     {
       "id": "S04",
       "look": "light",
-      "coach": { "kind": "practice", "tip": "For each card, ask: does this start the work, move it along, or finish it?", "tipDrafted": true },
+      "coach": {
+        "kind": "practice",
+        "tip": "For each card, ask: does this start the work, move it along, or finish it?",
+        "tipDrafted": true
+      },
       "chapter": "ch2",
       "template": "sortDeck",
       "attempts": 2,
-      "step": { "verb": "Sort", "icon": "sort" },
+      "step": {
+        "verb": "Sort",
+        "icon": "sort"
+      },
       "minutes": 4,
       "instruction": "Drag each HR card to its part of the process.",
       "hint": "Drag a card, or click it and then click a column.",
       "hintPilotCopy": true,
       "layout": "sort-deck",
-      "ghost": { "type": "drag", "showMe": true },
+      "ghost": {
+        "type": "drag",
+        "showMe": true
+      },
       "columns": [
-        { "id": "a", "label": "Trigger", "sub": "What starts it" },
-        { "id": "b", "label": "Steps", "sub": "The path to the result" },
-        { "id": "c", "label": "Output", "sub": "What comes out, and to whom" }
+        {
+          "id": "a",
+          "label": "Trigger",
+          "sub": "What starts it"
+        },
+        {
+          "id": "b",
+          "label": "Steps",
+          "sub": "The path to the result"
+        },
+        {
+          "id": "c",
+          "label": "Output",
+          "sub": "What comes out, and to whom"
+        }
       ],
       "cards": [
-        { "n": 1, "text": "An employee sends a question by email", "column": "a", "tag": "Starts the work",
-          "feedback": { "correct": "Right: an email is one way the work starts.",
+        {
+          "n": 1,
+          "text": "An employee sends a question by email",
+          "column": "a",
+          "tag": "Starts the work",
+          "feedback": {
+            "correct": "Right: an email is one way the work starts.",
             "b": "This is how the work reaches HR. Ask whether anything happens before it.",
-            "c": "If this is the end, nothing happens to the question. Where does the work begin?" } },
-        { "n": 2, "text": "HR staff check the topic of the question", "column": "b", "tag": "A step on the path",
-          "feedback": { "correct": "Right: checking the topic is a step on the path to the answer.",
+            "c": "If this is the end, nothing happens to the question. Where does the work begin?"
+          }
+        },
+        {
+          "n": 2,
+          "text": "HR staff check the topic of the question",
+          "column": "b",
+          "tag": "A step on the path",
+          "feedback": {
+            "correct": "Right: checking the topic is a step on the path to the answer.",
             "a": "Checking needs a question to check. Something must arrive before this can happen.",
-            "c": "Nobody receives a topic check. The employee is still waiting at this point." } },
-        { "n": 3, "text": "An employee walks over to ask HR", "column": "a", "tag": "Another way it starts",
-          "feedback": { "correct": "Right: asking in person is another trigger; requests arrive three ways.",
+            "c": "Nobody receives a topic check. The employee is still waiting at this point."
+          }
+        },
+        {
+          "n": 3,
+          "text": "An employee walks over to ask HR",
+          "column": "a",
+          "tag": "Another way it starts",
+          "feedback": {
+            "correct": "Right: asking in person is another trigger; requests arrive three ways.",
             "b": "Requests arrive three ways. Each way is a different start, not a middle step.",
-            "c": "The employee has nothing yet at this point. The work has not begun." } },
-        { "n": 4, "text": "HR staff answer or escalate to the manager", "column": "b", "tag": "Still a step",
-          "feedback": { "correct": "Right: answering or escalating is still a step, because the employee is still waiting.",
+            "c": "The employee has nothing yet at this point. The work has not begun."
+          }
+        },
+        {
+          "n": 4,
+          "text": "HR staff answer or escalate to the manager",
+          "column": "b",
+          "tag": "Still a step",
+          "feedback": {
+            "correct": "Right: answering or escalating is still a step, because the employee is still waiting.",
             "a": "The question already arrived and was checked before this happens.",
-            "c": "Escalation passes work on, it does not end it. Someone still has to reply." } },
-        { "n": 6, "text": "HR staff send the answer back", "column": "b", "tag": "HR's step, not the result",
-          "feedback": { "correct": "Right: sending is still HR's step; the output is what the employee receives.",
+            "c": "Escalation passes work on, it does not end it. Someone still has to reply."
+          }
+        },
+        {
+          "n": 6,
+          "text": "HR staff send the answer back",
+          "column": "b",
+          "tag": "HR's step, not the result",
+          "feedback": {
+            "correct": "Right: sending is still HR's step; the output is what the employee receives.",
             "a": "The question was answered before this, so the work has long started.",
-            "c": "Sending is something HR does. The output is what the employee ends up with." } },
-        { "n": 5, "text": "The employee receives an answer", "column": "c", "tag": "What comes out, to whom",
-          "feedback": { "correct": "Right: this is what comes out, and to whom.",
-            "wrong": "If this is a middle step, the map never says what comes out, or to whom." } }
+            "c": "Sending is something HR does. The output is what the employee ends up with."
+          }
+        },
+        {
+          "n": 5,
+          "text": "The employee receives an answer",
+          "column": "c",
+          "tag": "What comes out, to whom",
+          "feedback": {
+            "correct": "Right: this is what comes out, and to whom.",
+            "wrong": "If this is a middle step, the map never says what comes out, or to whom."
+          }
+        }
       ],
       "advance": "after-all-placed",
       "tracking": [
-        { "id": "L4_S04_1", "type": "matching", "correctResponse": "1.a,2.b,3.a,4.b,6.b,5.c", "scored": false, "bloom": "Understand", "result": "graded" }
+        {
+          "id": "L4_S04_1",
+          "type": "matching",
+          "correctResponse": "1.a,2.b,3.a,4.b,6.b,5.c",
+          "scored": false,
+          "bloom": "Understand",
+          "result": "graded"
+        }
       ],
-      "sources": ["s9", "s10", "s11", "HR canon Fields 2, 3"]
+      "sources": [
+        "s9",
+        "s10",
+        "s11",
+        "HR canon Fields 2, 3"
+      ],
+      "photo": {
+        "src": "assets/img/l4/v2/ch3-w2-sketching-flow.jpg",
+        "position": "64% 45%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "blur"
+      }
     },
 
     {
       "id": "S05a",
-      "look": "light",
-      "coach": { "kind": "idea", "tip": "You only need three BPMN parts: swimlane for a role, gateway for a decision, event for a start or end.", "tipDrafted": true },
+      "coach": {
+        "kind": "idea",
+        "tip": "You only need three BPMN parts: swimlane for a role, gateway for a decision, event for a start or end.",
+        "tipDrafted": true
+      },
       "chapter": "ch2",
       "template": "bpmn",
       "variant": "key",
-      "step": { "verb": "Read", "icon": "lanes" },
+      "step": {
+        "verb": "Read",
+        "icon": "lanes"
+      },
       "minutes": 2,
       "presentation": true,
       "label": "Key idea · BPMN",
       "instruction": "How to read a BPMN diagram",
-      "terms": ["BPMN"],
-      "text": "You only need these three parts.",
+      "terms": [
+        "BPMN"
+      ],
+      "text": "Recognise three parts. You never have to draw one.",
       "layout": "bpmn-key",
       "diagram": "hr",
       "key": [
-        { "n": 1, "part": "swimlane", "text": "Swimlane: one row per role.", "marker": [564, 169] },
-        { "n": 2, "part": "gateway", "text": "Gateway: the path splits.", "marker": [364, 83] },
-        { "n": 3, "part": "event", "text": "Event: start or end.", "marker": [103, 19] }
+        {
+          "n": 1,
+          "part": "swimlane",
+          "text": "Swimlane: one row per role.",
+          "marker": [
+            564,
+            169
+          ]
+        },
+        {
+          "n": 2,
+          "part": "gateway",
+          "text": "Gateway: the path splits.",
+          "marker": [
+            364,
+            83
+          ]
+        },
+        {
+          "n": 3,
+          "part": "event",
+          "text": "Event: start or end.",
+          "marker": [
+            103,
+            19
+          ]
+        }
       ],
       "tracking": [],
-      "sources": ["planning/CH2-SPEC.md 4", "s12", "s13", "HR canon Fields 2 to 4", "End event 'Answer received' is illustrative (FL14)"]
+      "sources": [
+        "planning/CH2-SPEC.md 4",
+        "s12",
+        "s13",
+        "HR canon Fields 2 to 4",
+        "End event 'Answer received' is illustrative (FL14)"
+      ],
+      "photo": {
+        "src": "assets/img/l4/v2/ch3-w2-sketching-flow.jpg",
+        "position": "64% 45%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "darkblur"
+      }
     },
 
     {
       "id": "S05b",
       "look": "light",
-      "coach": { "kind": "practice", "tip": "Look back at the three parts on the previous screen, then find each shape here.", "tipDrafted": true },
+      "coach": {
+        "kind": "practice",
+        "tip": "Look back at the three parts on the previous screen, then find each shape here.",
+        "tipDrafted": true
+      },
       "chapter": "ch2",
       "template": "bpmn",
       "attempts": 2,
       "variant": "label",
-      "step": { "verb": "Label", "icon": "label" },
+      "step": {
+        "verb": "Label",
+        "icon": "label"
+      },
       "minutes": 3,
       "instruction": "Drag each label to its part of the diagram.",
       "hint": "Drag a label, or click it and then click its place.",
       "hintPilotCopy": true,
       "layout": "bpmn-label",
       "diagram": "hr",
-      "ghost": { "type": "label", "showMe": true },
+      "ghost": {
+        "type": "label",
+        "showMe": true
+      },
       "dropLabel": "Drop here",
       "targets": [
-        { "id": "a", "name": "Place 1: the bottom row, HR manager", "rect": [10, 162, 580, 78], "chip": [200, 202] },
-        { "id": "b", "name": "Place 2: after Check the topic, in the HR staff row", "rect": [311, 98, 58, 58], "chip": [340, 80] },
-        { "id": "c", "name": "Place 3: the first point of the Employee row, at Question sent", "rect": [123, 31, 44, 44], "chip": [145, 26] }
+        {
+          "id": "a",
+          "name": "Place 1: the bottom row, HR manager",
+          "rect": [
+            10,
+            162,
+            580,
+            78
+          ],
+          "chip": [
+            200,
+            202
+          ]
+        },
+        {
+          "id": "b",
+          "name": "Place 2: after Check the topic, in the HR staff row",
+          "rect": [
+            311,
+            98,
+            58,
+            58
+          ],
+          "chip": [
+            340,
+            80
+          ]
+        },
+        {
+          "id": "c",
+          "name": "Place 3: the first point of the Employee row, at Question sent",
+          "rect": [
+            123,
+            31,
+            44,
+            44
+          ],
+          "chip": [
+            145,
+            26
+          ]
+        }
       ],
       "targetsNote": "rect [left, top, width, height] and chip [centre x, centre y] in diagram units (.1cqw), from the S05b frames",
       "labels": [
-        { "id": "swimlane", "code": "s", "text": "Swimlane", "target": "a",
-          "feedback": { "correct": "Right: each row is one role, and escalations sit in the HR manager's lane.", "wrong": "A swimlane is a whole row, one per role." } },
-        { "id": "gateway", "code": "g", "text": "Gateway", "target": "b",
-          "feedback": { "correct": "Right: the diamond is a decision where the path splits, within policy or beyond it.", "wrong": "Look for the shape where the path splits in two." } },
-        { "id": "event", "code": "e", "text": "Event", "target": "c",
-          "feedback": { "correct": "Right: the circle marks where the process starts.", "wrong": "Look for the circle where the process starts." } }
+        {
+          "id": "swimlane",
+          "code": "s",
+          "text": "Swimlane",
+          "target": "a",
+          "feedback": {
+            "correct": "Right: each row is one role, and escalations sit in the HR manager's lane.",
+            "wrong": "A swimlane is a whole row, one per role."
+          }
+        },
+        {
+          "id": "gateway",
+          "code": "g",
+          "text": "Gateway",
+          "target": "b",
+          "feedback": {
+            "correct": "Right: the diamond is a decision where the path splits, within policy or beyond it.",
+            "wrong": "Look for the shape where the path splits in two."
+          }
+        },
+        {
+          "id": "event",
+          "code": "e",
+          "text": "Event",
+          "target": "c",
+          "feedback": {
+            "correct": "Right: the circle marks where the process starts.",
+            "wrong": "Look for the circle where the process starts."
+          }
+        }
       ],
       "advance": "after-all-placed",
       "tracking": [
-        { "id": "L4_S05B_1", "type": "matching", "correctResponse": "s.a,g.b,e.c", "scored": false, "bloom": "Remember", "result": "graded" }
+        {
+          "id": "L4_S05B_1",
+          "type": "matching",
+          "correctResponse": "s.a,g.b,e.c",
+          "scored": false,
+          "bloom": "Remember",
+          "result": "graded"
+        }
       ],
-      "sources": ["planning/CH2-SPEC.md 4", "s12", "s13"],
+      "sources": [
+        "planning/CH2-SPEC.md 4",
+        "s12",
+        "s13"
+      ],
       "diagramAlt": "Process diagram of the HR case in three rows: Employee, HR staff, HR manager. Question sent, in the Employee row, starts it. HR staff check the topic. Then a decision, Within policy? Yes: HR staff answer. No: the HR manager handles the escalation, in the HR manager row. Both paths end in the Employee row at Answer received.",
-      "diagramAltPilotCopy": true
+      "diagramAltPilotCopy": true,
+      "ground": {
+        "kind": "dots"
+      }
     },
 
     {
       "id": "S06",
       "look": "wide",
-      "coach": { "kind": "practice", "tip": "Picture who reads the map next: just you, or other teams and systems?", "tipDrafted": true },
+      "coach": {
+        "kind": "practice",
+        "tip": "Picture who reads the map next: just you, or other teams and systems?",
+        "tipDrafted": true
+      },
       "chapter": "ch2",
       "template": "decision",
       "attempts": 2,
-      "step": { "verb": "Decide", "icon": "decide" },
+      "step": {
+        "verb": "Decide",
+        "icon": "decide"
+      },
       "variant": "pair",
       "minutes": 3,
       "instruction": "Pick the right format for this situation.",
@@ -1468,146 +1761,382 @@
       "layout": "wide",
       "answerLabel": "Your answer",
       "situations": [
-        { "id": "s1", "text": "You know your own process well and need a fast first diagnosis.", "trackingId": "L4_S06_1",
-          "hint": "Ask how fast you need it and who will use it.", "doneLabel": "Situation 1",
-          "image": { "src": "assets/img/s15.jpg", "alt": "A team lead going through her own stack of requests", "prompt": "assets/img/prompts/S06-s1-own-process.md", "temp": false, "position": "50% 35%" },
+        {
+          "id": "s1",
+          "text": "You know your own process well and need a fast first diagnosis.",
+          "trackingId": "L4_S06_1",
+          "hint": "Ask how fast you need it and who will use it.",
+          "doneLabel": "Situation 1",
           "options": [
-            { "id": "a", "label": "Field template", "preview": "table", "sub": "A fixed set of fields, in a table", "icon": "forms", "correct": true,
-              "feedback": "Fast to fill alone and enough for a first diagnosis, so you use it for your own case." },
-            { "id": "b", "label": "BPMN diagram", "preview": "lanes", "sub": "Lanes and symbols, drawn to a standard", "icon": "diagram", "correct": false,
-              "feedback": "You would spend your time on drawing rules, while the decision you need waits." }
-          ] },
-        { "id": "s2", "text": "The map must serve several systems and a professional process team.", "trackingId": "L4_S06_2",
-          "hint": "Ask who else needs to read this map.", "doneLabel": "Situation 2",
-          "image": { "src": "assets/img/ft2.jpg", "alt": "A process diagram being drawn on a whiteboard", "prompt": "assets/img/prompts/S06-s2-process-team.md", "temp": false, "position": "50% 50%" },
+            {
+              "id": "a",
+              "label": "Field template",
+              "preview": "table",
+              "sub": "A fixed set of fields, in a table",
+              "icon": "forms",
+              "correct": true,
+              "feedback": "Fast to fill alone and enough for a first diagnosis, so you use it for your own case."
+            },
+            {
+              "id": "b",
+              "label": "BPMN diagram",
+              "preview": "lanes",
+              "sub": "Lanes and symbols, drawn to a standard",
+              "icon": "diagram",
+              "correct": false,
+              "feedback": "You would spend your time on drawing rules, while the decision you need waits."
+            }
+          ]
+        },
+        {
+          "id": "s2",
+          "text": "The map must serve several systems and a professional process team.",
+          "trackingId": "L4_S06_2",
+          "hint": "Ask who else needs to read this map.",
+          "doneLabel": "Situation 2",
           "options": [
-            { "id": "a", "label": "Field template", "preview": "table", "sub": "A fixed set of fields, in a table", "icon": "forms", "correct": false,
-              "feedback": "Your fields make sense to you. Other teams and tools need a shared standard form to read them." },
-            { "id": "b", "label": "BPMN diagram", "preview": "lanes", "sub": "Lanes and symbols, drawn to a standard", "icon": "diagram", "correct": true,
-              "feedback": "A shared standard lets other tools, systems and process teams read the same map." }
-          ] }
+            {
+              "id": "a",
+              "label": "Field template",
+              "preview": "table",
+              "sub": "A fixed set of fields, in a table",
+              "icon": "forms",
+              "correct": false,
+              "feedback": "Your fields make sense to you. Other teams and tools need a shared standard form to read them."
+            },
+            {
+              "id": "b",
+              "label": "BPMN diagram",
+              "preview": "lanes",
+              "sub": "Lanes and symbols, drawn to a standard",
+              "icon": "diagram",
+              "correct": true,
+              "feedback": "A shared standard lets other tools, systems and process teams read the same map."
+            }
+          ]
+        }
       ],
       "advance": "after-correct",
       "tracking": [
-        { "id": "L4_S06_1", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Apply", "result": "graded" },
-        { "id": "L4_S06_2", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Apply", "result": "graded" }
+        {
+          "id": "L4_S06_1",
+          "type": "choice",
+          "correctResponse": "a",
+          "scored": false,
+          "bloom": "Apply",
+          "result": "graded"
+        },
+        {
+          "id": "L4_S06_2",
+          "type": "choice",
+          "correctResponse": "b",
+          "scored": false,
+          "bloom": "Apply",
+          "result": "graded"
+        }
       ],
-      "sources": ["planning/CH2-SPEC.md 5", "s13"]
+      "sources": [
+        "planning/CH2-SPEC.md 5",
+        "s13"
+      ],
+      "photo": {
+        "src": "assets/img/l4/v2/ch3-w2-sketching-flow.jpg",
+        "position": "64% 45%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "blur"
+      }
     },
 
     {
       "id": "S07",
-      "look": "light",
-      "coach": { "kind": "practice", "tip": "Read each field as a question you will answer for your own case later.", "tipDrafted": true },
+      "coach": {
+        "kind": "practice",
+        "tip": "Read each field as a question you will answer for your own case later.",
+        "tipDrafted": true
+      },
       "chapter": "ch2",
       "template": "explorer",
       "attempts": 2,
-      "step": { "verb": "Explore", "icon": "explore" },
+      "step": {
+        "verb": "Explore",
+        "icon": "explore"
+      },
       "variant": "tiles",
       "minutes": 5,
       "instruction": "Open all eight fields.",
-      "hint": "Open each tile. The question unlocks after all eight.",
+      "hint": "Open each tile to read what the field asks.",
       "layout": "tiles",
-      "ghost": { "type": "open" },
+      "ghost": {
+        "type": "open"
+      },
       "tiles": [
-        { "n": 1, "title": "Process name", "icon": "write", "back": "Name one process. Where it starts and ends is a decision, not a given.", "correct": false,
-          "feedback": "This field describes how the process runs now. Look for the one that sets a result to measure." },
-        { "n": 2, "title": "Trigger", "icon": "start", "back": "What starts the process: a message, a form, a date.", "correct": false,
-          "feedback": "This field describes how the process runs now. Look for the one that sets a result to measure." },
-        { "n": 3, "title": "Steps and role owners", "icon": "overview", "back": "The path from trigger to result, and who exactly does each step.", "correct": false,
-          "feedback": "This field describes how the process runs now. Look for the one that sets a result to measure." },
-        { "n": 4, "title": "Handoffs", "icon": "sort", "back": "Each point where responsibility passes between roles: from whom, to whom, what passes.", "correct": false,
-          "feedback": "This field describes how the process runs now. Look for the one that sets a result to measure." },
-        { "n": 5, "title": "Knowledge/data sources, owners, sensitivity", "icon": "learn", "back": "Policies and data the process uses, who keeps each current, and a sensitivity tag.", "correct": false,
-          "feedback": "This field describes how the process runs now. Look for the one that sets a result to measure." },
-        { "n": 6, "title": "Existing controls", "icon": "explore", "back": "Checks already in place today. 'No formal control' is a valid answer.", "correct": false,
-          "feedback": "Controls describe checks that exist today. They do not state the result you will check later." },
-        { "n": 7, "title": "Gaps", "icon": "decide", "back": "What is missing or unclear. Writing 'unclear' here is a result, not a weakness.", "correct": false,
-          "feedback": "Gaps tell you what to investigate first. 'Unclear' cannot be measured before and after." },
-        { "n": 8, "title": "Success metric: baseline and target", "icon": "goals", "back": "A number with a baseline and a target, not 'significant improvement'.", "correct": true,
-          "feedback": "A baseline now and a target later make the map checkable: a number, not a feeling." }
+        {
+          "n": 1,
+          "title": "Process name",
+          "icon": "write",
+          "back": "Name one process. Where it starts and ends is a decision, not a given."
+        },
+        {
+          "n": 2,
+          "title": "Trigger",
+          "icon": "start",
+          "back": "What starts the process: a message, a form, a date."
+        },
+        {
+          "n": 3,
+          "title": "Steps and role owners",
+          "icon": "overview",
+          "back": "The path from trigger to result, and who exactly does each step."
+        },
+        {
+          "n": 4,
+          "title": "Handoffs",
+          "icon": "sort",
+          "back": "Each point where responsibility passes between roles: from whom, to whom, what passes."
+        },
+        {
+          "n": 5,
+          "title": "Knowledge/data sources, owners, sensitivity",
+          "icon": "learn",
+          "back": "Policies and data the process uses, who keeps each current, and a tag: public, internal, confidential or restricted."
+        },
+        {
+          "n": 6,
+          "title": "Existing controls",
+          "icon": "explore",
+          "back": "Checks already in place today. 'No formal control' is a valid answer."
+        },
+        {
+          "n": 7,
+          "title": "Gaps",
+          "icon": "decide",
+          "back": "What is missing or unclear. Writing 'unclear' here is a result, not a weakness."
+        },
+        {
+          "n": 8,
+          "title": "Success metric: baseline and target",
+          "icon": "goals",
+          "back": "A number with a baseline and a target, not 'significant improvement'."
+        }
       ],
       "iconsNote": "task icons (CH2-SPEC 6): name = pencil (write), trigger = flag (start), steps = map (overview), handoffs = sort, sources = book (learn), controls = magnifier (explore), gaps = question mark (decide), metric = target (goals)",
-      "question": "Pick the field that shows, in three months, whether the change worked.",
-      "questionChip": "Question",
-      "questionHint": "Think about what you could measure again later.",
-      "questionHintPilotCopy": true,
-      "advance": "after-correct",
-      "tracking": [
-        { "id": "L4_S07_1", "type": "choice", "correctResponse": "8", "scored": false, "bloom": "Understand", "result": "graded" }
+      "advance": "after-all-opened",
+      "tracking": [],
+      "sources": [
+        "s14",
+        "s10",
+        "s18",
+        "s19",
+        "s21",
+        "s22",
+        "s27",
+        "s37",
+        "v2 (9 Nov 2026): the closing question removed (choice screens S06 and S08 on both sides)"
       ],
-      "sources": ["planning/CH2-SPEC.md 6", "s14", "s10", "s18", "s19", "s21", "s22", "s27", "s37"]
+      "photo": {
+        "src": "assets/img/l4/v2/ch3-w2-sketching-flow.jpg",
+        "position": "64% 45%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "darkblur"
+      }
     },
 
     {
       "id": "S08",
       "look": "wide",
-      "coach": { "kind": "practice", "tip": "Ask where the line came from: a normal day, a wish, or a written rule?", "tipDrafted": true },
+      "coach": {
+        "kind": "practice",
+        "tip": "Ask where the line came from: a normal day, a wish, or a written rule?",
+        "tipDrafted": true
+      },
       "chapter": "ch2",
       "template": "decision",
       "attempts": 2,
-      "step": { "verb": "Spot", "icon": "eye" },
+      "step": {
+        "verb": "Spot",
+        "icon": "eye"
+      },
       "variant": "rounds",
       "minutes": 4,
       "instruction": "Find which AS-IS rule this map line breaks.",
       "hint": "Compare the line with what really happens on a normal day.",
       "layout": "wide",
-      "terms": ["AS-IS"],
-      "rules": { "label": "Three rules while you map:", "items": ["Don't fix", "Don't add AI", "Don't map the official process"] },
+      "terms": [
+        "AS-IS"
+      ],
+      "rules": {
+        "label": "Three rules while you map:",
+        "items": [
+          "Don't fix",
+          "Don't add AI",
+          "Don't map the official process"
+        ]
+      },
       "options": [
-        { "id": "a", "label": "Don't fix while mapping", "icon": "wrench" },
-        { "id": "b", "label": "Don't add AI while mapping", "icon": "spark" },
-        { "id": "c", "label": "Don't map the official process", "icon": "document" }
+        {
+          "id": "a",
+          "label": "Don't fix while mapping",
+          "icon": "wrench",
+          "sub": "Record a wrong step as it is"
+        },
+        {
+          "id": "b",
+          "label": "Don't add AI while mapping",
+          "icon": "spark",
+          "sub": "AI is a future step"
+        },
+        {
+          "id": "c",
+          "label": "Don't map the official process",
+          "icon": "document",
+          "sub": "Map what really happens"
+        }
       ],
       "rounds": [
-        { "id": "r1", "badge": "Steps and role owners", "line": "checking the topic (HR staff), then an AI assistant drafts the answer.", "correct": "b", "trackingId": "L4_S08_1",
+        {
+          "id": "r1",
+          "badge": "Steps and role owners",
+          "line": "checking the topic (HR staff), then an AI assistant drafts the answer.",
+          "correct": "b",
+          "trackingId": "L4_S08_1",
           "feedback": {
             "a": "Nothing here was repaired. Compare each step with what happens on a normal day.",
             "b": "The map now shows an AI tool nobody uses today, so the real current state is lost.",
-            "c": "No written procedure is quoted here. The line describes a step that does not exist in practice." } },
-        { "id": "r2", "badge": "Trigger", "line": "questions arrive by email only, as the written HR procedure requires.", "correct": "c", "trackingId": "L4_S08_2",
+            "c": "No written procedure is quoted here. The line describes a step that does not exist in practice."
+          }
+        },
+        {
+          "id": "r2",
+          "badge": "Trigger",
+          "line": "questions arrive by email only, as the written HR procedure requires.",
+          "correct": "c",
+          "trackingId": "L4_S08_2",
           "feedback": {
             "a": "Nothing is being improved in this line. Compare it with how employees really send questions.",
             "b": "No AI appears in this line. Look at the source the mapper relied on.",
-            "c": "WhatsApp and in-person questions vanish from the map, and so does most of the disorder you came to find." } },
-        { "id": "r3", "badge": "Handoffs", "line": "HR staff to HR manager, through a shared channel the mapper just added.", "correct": "a", "trackingId": "L4_S08_3",
+            "c": "WhatsApp and in-person questions vanish from the map, and so does most of the disorder you came to find."
+          }
+        },
+        {
+          "id": "r3",
+          "badge": "Handoffs",
+          "line": "HR staff to HR manager, through a shared channel the mapper just added.",
+          "correct": "a",
+          "trackingId": "L4_S08_3",
           "feedback": {
             "a": "The mapper added a channel that does not exist today, which is fixing the process while mapping it.",
             "b": "No AI is mentioned. Ask who created this channel, and when.",
-            "c": "No written procedure is cited. The mapper made this change during the mapping itself." } }
+            "c": "No written procedure is cited. The mapper made this change during the mapping itself."
+          }
+        }
       ],
       "advance": "after-all-rounds",
       "tracking": [
-        { "id": "L4_S08_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Analyze", "result": "graded" },
-        { "id": "L4_S08_2", "type": "choice", "correctResponse": "c", "scored": false, "bloom": "Analyze", "result": "graded" },
-        { "id": "L4_S08_3", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Analyze", "result": "graded" }
+        {
+          "id": "L4_S08_1",
+          "type": "choice",
+          "correctResponse": "b",
+          "scored": false,
+          "bloom": "Analyze",
+          "result": "graded"
+        },
+        {
+          "id": "L4_S08_2",
+          "type": "choice",
+          "correctResponse": "c",
+          "scored": false,
+          "bloom": "Analyze",
+          "result": "graded"
+        },
+        {
+          "id": "L4_S08_3",
+          "type": "choice",
+          "correctResponse": "a",
+          "scored": false,
+          "bloom": "Analyze",
+          "result": "graded"
+        }
       ],
-      "sources": ["planning/CH2-SPEC.md 7", "s16", "s17", "s34 #1 and #5", "s19", "R2 'written procedure' is constructed"]
+      "sources": [
+        "planning/CH2-SPEC.md 7",
+        "s16",
+        "s17",
+        "s34 #1 and #5",
+        "s19",
+        "R2 'written procedure' is constructed"
+      ],
+      "ground": {
+        "kind": "dots"
+      }
     },
 
     {
       "id": "S08B",
       "look": "wide",
-      "coach": { "kind": "own", "tip": "Start with what triggers it, then the main steps and who does them. A rough first try is enough.", "tipDrafted": true },
+      "coach": {
+        "kind": "own",
+        "tip": "Start with what triggers it, then the main steps and who does them. A rough first try is enough.",
+        "tipDrafted": true
+      },
       "chapter": "ch2",
       "template": "input",
       "caseCard": true,
       "lockedNext": "Save to continue",
-      "step": { "verb": "Sketch", "icon": "sketch" },
+      "step": {
+        "verb": "Sketch",
+        "icon": "sketch"
+      },
       "minutes": 4,
       "instruction": "Sketch your own case in three parts.",
       "arrange": "chain",
       "stage": {
-        "top": { "kind": "line", "text": "It goes into workbook Fields 2 and 3 in Chapter {ch5}." },
-        "bottom": { "kind": "privacy", "icon": "shield", "text": "No names or identifying details.", "action": "save" }
+        "top": {
+          "kind": "line",
+          "text": "It goes into workbook Fields 2 and 3 in Chapter {ch5}."
+        },
+        "bottom": {
+          "kind": "privacy",
+          "icon": "shield",
+          "text": "No names or identifying details.",
+          "action": "save"
+        }
       },
       "fields": [
-        { "id": "trigger", "label": "Trigger", "placeholder": "e.g. A form arrives", "maxLength": 120, "multiline": true,
-          "demo": "A sales call ends", "store": "L4_CASE_TRIGGER", "trackingId": "L4_S08B_1" },
-        { "id": "steps", "label": "Steps", "placeholder": "Steps, and who does them", "maxLength": 250, "multiline": true,
-          "demo": "The rep types notes; the manager reads them", "store": "L4_CASE_STEPS", "trackingId": "L4_S08B_2", "width": 1.3 },
-        { "id": "output", "label": "Output", "placeholder": "e.g. A summary, to a manager", "maxLength": 120, "multiline": true,
-          "demo": "A summary, to the sales manager", "store": "L4_CASE_OUTPUT", "trackingId": "L4_S08B_3" }
+        {
+          "id": "trigger",
+          "label": "Trigger",
+          "placeholder": "e.g. A form arrives",
+          "maxLength": 120,
+          "multiline": true,
+          "demo": "A sales call ends",
+          "store": "L4_CASE_TRIGGER",
+          "trackingId": "L4_S08B_1"
+        },
+        {
+          "id": "steps",
+          "label": "Steps",
+          "placeholder": "Steps, and who does them",
+          "maxLength": 250,
+          "multiline": true,
+          "demo": "The rep types notes; the manager reads them",
+          "store": "L4_CASE_STEPS",
+          "trackingId": "L4_S08B_2",
+          "width": 1.3
+        },
+        {
+          "id": "output",
+          "label": "Output",
+          "placeholder": "e.g. A summary, to a manager",
+          "maxLength": 120,
+          "multiline": true,
+          "demo": "A summary, to the sales manager",
+          "store": "L4_CASE_OUTPUT",
+          "trackingId": "L4_S08B_3"
+        }
       ],
       "saveWhenFilled": true,
       "feedback": {
@@ -1618,71 +2147,197 @@
       "advance": "after-save",
       "endOfChapter": true,
       "tracking": [
-        { "id": "L4_S08B_1", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" },
-        { "id": "L4_S08B_2", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" },
-        { "id": "L4_S08B_3", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" }
+        {
+          "id": "L4_S08B_1",
+          "type": "fill-in",
+          "correctResponse": null,
+          "scored": false,
+          "bloom": "Apply",
+          "result": "neutral"
+        },
+        {
+          "id": "L4_S08B_2",
+          "type": "fill-in",
+          "correctResponse": null,
+          "scored": false,
+          "bloom": "Apply",
+          "result": "neutral"
+        },
+        {
+          "id": "L4_S08B_3",
+          "type": "fill-in",
+          "correctResponse": null,
+          "scored": false,
+          "bloom": "Apply",
+          "result": "neutral"
+        }
       ],
-      "sources": ["planning/CH2-SPEC.md 8"]
+      "sources": [
+        "planning/CH2-SPEC.md 8"
+      ],
+      "photo": {
+        "src": "assets/img/l4/v2/ch3-w2-sketching-flow.jpg",
+        "position": "64% 45%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "blur"
+      }
     },
 
     {
       "id": "W3",
-      "look": "photo",
-      "coach": { "kind": "warmup", "tip": "Not scored. Think about what the question reveals about one person, and who could see it.", "tipDrafted": true },
+      "coach": {
+        "kind": "idea",
+        "tip": "Watch each field fill in for the HR case. Your own case comes next.",
+        "tipDrafted": true
+      },
       "chapter": "ch3",
-      "template": "warmup",
-      "step": { "verb": "Guess", "icon": "guess" },
+      "template": "opener",
+      "step": {
+        "verb": "Overview",
+        "icon": "overview"
+      },
       "minutes": 1,
-      "instruction": "Guess: may a salary question go into a public AI tool?",
-      "photo": { "src": "assets/img/l4/md1/ch4-hr-demo.jpg", "position": "30% 40%", "mirror": true, "temp": false },
-      "hint": "Pick the answer you expect. A guess cannot be wrong.",
-      "hintPilotCopy": true,
-      "layout": "warmup",
-      "panel": { "icon": "lightbulb", "title": "Warm-up", "chip": "Not scored", "text": "An employee asks HR about their own salary.", "foot": "Chapter {ch3} · HR demo" },
-      "options": [
-        { "id": "a", "label": "Yes, if the name is removed" },
-        { "id": "b", "label": "Only with the employee's consent" },
-        { "id": "c", "label": "No, it holds confidential details" }
+      "presentation": true,
+      "instruction": "Map the HR case from Lesson 1, field by field",
+      "lead": "Repeat questions to HR at a services company of about 400 employees.",
+      "points": [
+        {
+          "icon": "route",
+          "title": "Fields 1 to 4",
+          "text": "The process frame"
+        },
+        {
+          "icon": "database",
+          "title": "Fields 5 and 6",
+          "text": "Knowledge, sensitivity, control"
+        },
+        {
+          "icon": "gauge",
+          "title": "Fields 7 and 8",
+          "text": "Gaps and a success metric"
+        },
+        {
+          "icon": "flag",
+          "title": "The full map",
+          "text": "Where a question gets lost"
+        }
       ],
-      "feedback": { "verdict": "Hold that thought.", "text": "This chapter tags every source by how sensitive it is." },
-      "advance": "after-any",
-      "tracking": [{ "id": "L4_W3_1", "type": "choice", "correctResponse": null, "scored": false, "bloom": "Understand", "result": "neutral" }],
-      "sources": ["planning/STORYBOARD-V3.md Ch3 W3 (replaces FT3)", "s22", "s44"]
+      "photo": {
+        "src": "assets/img/l4/v2/ch4-w3-hr-desk.jpg",
+        "position": "62% 40%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "full"
+      },
+      "tracking": [],
+      "sources": [
+        "s15",
+        "s17",
+        "s18",
+        "s19",
+        "s20",
+        "v2 (9 Nov 2026): the chapter opener replaces the warm-up guess"
+      ]
     },
 
     {
       "id": "V2",
-      "coach": { "kind": "idea", "tip": "Watch how about 90 messy requests a month become a map you can check later.", "tipDrafted": true },
+      "coach": {
+        "kind": "idea",
+        "tip": "Watch how about 90 messy requests a month become a map you can check later.",
+        "tipDrafted": true
+      },
       "chapter": "ch3",
       "template": "video",
       "guidingLabel": "Watch for:",
-      "step": { "verb": "Watch", "icon": "watch" },
+      "step": {
+        "verb": "Watch",
+        "icon": "watch"
+      },
       "minutes": 5,
       "instruction": "Watch the video. Answer the questions when it stops.",
       "instructionPilotCopy": true,
       "title": "Mapping the HR case",
+      "showTitle": false,
+      "photo": {
+        "src": "assets/img/l4/v2/ch4-w3-hr-desk.jpg",
+        "position": "62% 40%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "darkblur"
+      },
       "guidingQuestion": "How do you turn about 90 messy requests a month into a map you can check later?",
-      "ghost": { "type": "stop", "target": "options-sweep", "showMe": true },
+      "ghost": {
+        "type": "stop",
+        "target": "options-sweep",
+        "showMe": true
+      },
       "media": {
         "$comment": "FX9 (9 Nov 2026): the tightened upgraded film (EAI film upgrade/v2, rev4: shorter pauses, new shots, full-map ending). Duration and stops[].t from assets/video/v2.cues.json (each stop sits in a caption gap).",
         "src": "assets/video/v2.mp4",
         "poster": "assets/video/v2-poster.jpg",
-        "captions": [ { "lang": "en", "label": "English", "src": "assets/video/v2.en.vtt" } ],
+        "captions": [
+          {
+            "lang": "en",
+            "label": "English",
+            "src": "assets/video/v2.en.vtt"
+          }
+        ],
         "duration": 217.25,
         "length": "3:37",
         "transcript": "from-captions",
         "temp": false,
         "captionPlacesNote": "FX9: no side panel any more (a slim rail on the right); captions go to the top while an answer card or the metric note sits at the bottom of the picture",
         "captionPlaces": [
-          {"from": 65.1, "to": 68.7, "place": "top"},
-          {"from": 79.9, "to": 84.0, "place": "top"},
-          {"from": 102.2, "to": 106.4, "place": "top"},
-          {"from": 124.0, "to": 127.9, "place": "top"},
-          {"from": 148.1, "to": 154.4, "place": "top"},
-          {"from": 157.5, "to": 161.8, "place": "top"},
-          {"from": 173.5, "to": 177.5, "place": "top"},
-          {"from": 187.2, "to": 193.5, "place": "top"},
-          {"from": 203.2, "to": 206.1, "place": "top"}
+          {
+            "from": 65.1,
+            "to": 68.7,
+            "place": "top"
+          },
+          {
+            "from": 79.9,
+            "to": 84,
+            "place": "top"
+          },
+          {
+            "from": 102.2,
+            "to": 106.4,
+            "place": "top"
+          },
+          {
+            "from": 124,
+            "to": 127.9,
+            "place": "top"
+          },
+          {
+            "from": 148.1,
+            "to": 154.4,
+            "place": "top"
+          },
+          {
+            "from": 157.5,
+            "to": 161.8,
+            "place": "top"
+          },
+          {
+            "from": 173.5,
+            "to": 177.5,
+            "place": "top"
+          },
+          {
+            "from": 187.2,
+            "to": 193.5,
+            "place": "top"
+          },
+          {
+            "from": 203.2,
+            "to": 206.1,
+            "place": "top"
+          }
         ]
       },
       "stops": [
@@ -1693,14 +2348,33 @@
           "t": 77.754,
           "question": "Which line belongs in Field 2, as the process runs today?",
           "options": [
-            { "id": "a", "label": "An employee emails HR, the most formal channel", "correct": false,
-              "feedback": "Email is only one of three real channels. WhatsApp and in-person questions vanish from the map." },
-            { "id": "b", "label": "An employee asks by WhatsApp, email, or in person", "correct": true,
-              "feedback": "It names the concrete event that starts the work, across all three channels that really exist." },
-            { "id": "c", "label": "A chatbot receives every employee question", "correct": false,
-              "feedback": "That describes a future tool. An AS-IS map records today, so AI has no place on it yet." }
+            {
+              "id": "a",
+              "label": "An employee emails HR, the most formal channel",
+              "correct": false,
+              "feedback": "Email is only one of three real channels. WhatsApp and in-person questions vanish from the map."
+            },
+            {
+              "id": "b",
+              "label": "An employee asks by WhatsApp, email, or in person",
+              "correct": true,
+              "feedback": "It names the concrete event that starts the work, across all three channels that really exist."
+            },
+            {
+              "id": "c",
+              "label": "A chatbot receives every employee question",
+              "correct": false,
+              "feedback": "That describes a future tool. An AS-IS map records today, so AI has no place on it yet."
+            }
           ],
-          "tracking": { "id": "L4_V2_1", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Apply", "result": "graded" }
+          "tracking": {
+            "id": "L4_V2_1",
+            "type": "choice",
+            "correctResponse": "b",
+            "scored": false,
+            "bloom": "Apply",
+            "result": "graded"
+          }
         },
         {
           "id": "stop2",
@@ -1708,14 +2382,33 @@
           "t": 118.612,
           "question": "Where does responsibility pass from one role to another?",
           "options": [
-            { "id": "a", "label": "HR staff to HR manager, when policy is exceeded", "correct": true,
-              "feedback": "From here on, the HR manager depends on what the staffer passes along." },
-            { "id": "b", "label": "HR staff check the topic of each request", "correct": false,
-              "feedback": "One role does this from start to finish. Nothing changes hands, so it stays a step in Field 3." },
-            { "id": "c", "label": "HR manager keeps the four policies current", "correct": false,
-              "feedback": "That is ownership of a knowledge source. It goes in Field 5, next to each policy." }
+            {
+              "id": "a",
+              "label": "HR staff to HR manager, when policy is exceeded",
+              "correct": true,
+              "feedback": "From here on, the HR manager depends on what the staffer passes along."
+            },
+            {
+              "id": "b",
+              "label": "HR staff check the topic of each request",
+              "correct": false,
+              "feedback": "One role does this from start to finish. Nothing changes hands, so it stays a step in Field 3."
+            },
+            {
+              "id": "c",
+              "label": "HR manager keeps the four policies current",
+              "correct": false,
+              "feedback": "That is ownership of a knowledge source. It goes in Field 5, next to each policy."
+            }
           ],
-          "tracking": { "id": "L4_V2_2", "type": "choice", "correctResponse": "a", "scored": false, "bloom": "Analyze", "result": "graded" }
+          "tracking": {
+            "id": "L4_V2_2",
+            "type": "choice",
+            "correctResponse": "a",
+            "scored": false,
+            "bloom": "Analyze",
+            "result": "graded"
+          }
         },
         {
           "id": "stop3",
@@ -1723,14 +2416,33 @@
           "t": 171.906,
           "question": "What goes in Field 6, existing controls?",
           "options": [
-            { "id": "a", "label": "A manager review before answers go out", "correct": false,
-              "feedback": "That is a fix for later. Added now, the map shows a check that does not exist today." },
-            { "id": "b", "label": "No formal control: the staffer's own judgment", "correct": true,
-              "feedback": "It records what really happens, and that missing check is what the map should reveal." },
-            { "id": "c", "label": "Nothing yet: leave Field 6 empty for now", "correct": false,
-              "feedback": "An empty field reads as not checked yet. The finding itself is the content this field needs." }
+            {
+              "id": "a",
+              "label": "A manager review before answers go out",
+              "correct": false,
+              "feedback": "That is a fix for later. Added now, the map shows a check that does not exist today."
+            },
+            {
+              "id": "b",
+              "label": "No formal control: the staffer's own judgment",
+              "correct": true,
+              "feedback": "It records what really happens, and that missing check is what the map should reveal."
+            },
+            {
+              "id": "c",
+              "label": "Nothing yet: leave Field 6 empty for now",
+              "correct": false,
+              "feedback": "An empty field reads as not checked yet. The finding itself is the content this field needs."
+            }
           ],
-          "tracking": { "id": "L4_V2_3", "type": "choice", "correctResponse": "b", "scored": false, "bloom": "Apply", "result": "graded" }
+          "tracking": {
+            "id": "L4_V2_3",
+            "type": "choice",
+            "correctResponse": "b",
+            "scored": false,
+            "bloom": "Apply",
+            "result": "graded"
+          }
         }
       ],
       "advance": "after-video-end",
@@ -1739,71 +2451,208 @@
         "words": 422,
         "canvas": "left 60% process map (lanes illustrative, from Fields 2 to 4); right 40% eight empty field slots that fill with keywords",
         "segments": [
-          { "n": 1, "time": "0:00", "narration": "This is the HR case from Lesson 1: a services company with about 400 employees. HR gets about 90 requests a month, most of them repeats: vacation days, pension, expenses, overtime. They arrive by WhatsApp, by email, and in person, with no system. Nobody knows how many need human judgment." },
-          { "n": 2, "time": "0:23", "narration": "The tempting first move is a chatbot. Not yet. First we map, AS-IS: how it actually happens on a normal day. No fixing, no AI." },
-          { "n": 3, "time": "0:38", "narration": "Field 1 is the process name, plain and specific: answering employees' repeat questions to HR. Field 2 is the trigger, the concrete thing that starts the process: a message, a form, a date. Before I fill it in, you choose.", "stopAfter": "stop1" },
-          { "n": 4, "time": "0:59", "narration": "All three channels go on the map, because all three really happen. Where a process starts and ends is a decision. Without clear boundaries, it swells until it covers the whole organization." },
-          { "n": 5, "time": "1:18", "narration": "Field 3 is the steps, each with a role owner. Here there are three: receiving the request, checking the topic, then an answer or an escalation. Owners are roles, not names, so the map stays true when people change." },
-          { "n": 6, "time": "1:42", "narration": "Each role gets its own lane, so you can always see who is holding the work. Field 4 asks where responsibility passes from one role to another.", "stopAfter": "stop2" },
-          { "n": 7, "time": "1:59", "narration": "From HR staff to the HR manager, when a question goes beyond known policy. That's the most dangerous moment in a process: the staffer assumes the manager knows what happened before. A good map marks each handoff: from whom, to whom, what passes, and what if the receiver is unavailable. Here, there's no single channel for it." },
-          { "n": 8, "time": "2:27", "narration": "Field 5 is knowledge sources: the vacation, pension, expense, and overtime policies. Each gets an owner, here the HR manager, and a sensitivity tag: public, internal, confidential, or restricted. These policies are internal. An employee's personal or financial details are confidential, and never go into a public AI tool." },
-          { "n": 9, "time": "2:52", "narration": "Field 6 is existing controls. Is anything checking the answers before they go out? What goes in the map?", "stopAfter": "stop3" },
-          { "n": 10, "time": "3:02", "narration": "No formal control: it depends on the staffer's own judgment. That's a valid answer, and exactly what mapping reveals." },
-          { "n": 11, "time": "3:09", "narration": "Field 7 is gaps, and here you can write unclear. Nobody knows how many wrong answers were given, and there's no single handoff channel. That's a diagnostic result." },
-          { "n": 12, "time": "3:22", "narration": "Field 8 is the success metric. Today, about 35 percent of the HR team's time goes to repeat questions. Target: 20 percent within three months. A number you can check later. Next, you fill Field 5 yourself." }
+          {
+            "n": 1,
+            "time": "0:00",
+            "narration": "This is the HR case from Lesson 1: a services company with about 400 employees. HR gets about 90 requests a month, most of them repeats: vacation days, pension, expenses, overtime. They arrive by WhatsApp, by email, and in person, with no system. Nobody knows how many need human judgment."
+          },
+          {
+            "n": 2,
+            "time": "0:23",
+            "narration": "The tempting first move is a chatbot. Not yet. First we map, AS-IS: how it actually happens on a normal day. No fixing, no AI."
+          },
+          {
+            "n": 3,
+            "time": "0:38",
+            "narration": "Field 1 is the process name, plain and specific: answering employees' repeat questions to HR. Field 2 is the trigger, the concrete thing that starts the process: a message, a form, a date. Before I fill it in, you choose.",
+            "stopAfter": "stop1"
+          },
+          {
+            "n": 4,
+            "time": "0:59",
+            "narration": "All three channels go on the map, because all three really happen. Where a process starts and ends is a decision. Without clear boundaries, it swells until it covers the whole organization."
+          },
+          {
+            "n": 5,
+            "time": "1:18",
+            "narration": "Field 3 is the steps, each with a role owner. Here there are three: receiving the request, checking the topic, then an answer or an escalation. Owners are roles, not names, so the map stays true when people change."
+          },
+          {
+            "n": 6,
+            "time": "1:42",
+            "narration": "Each role gets its own lane, so you can always see who is holding the work. Field 4 asks where responsibility passes from one role to another.",
+            "stopAfter": "stop2"
+          },
+          {
+            "n": 7,
+            "time": "1:59",
+            "narration": "From HR staff to the HR manager, when a question goes beyond known policy. That's the most dangerous moment in a process: the staffer assumes the manager knows what happened before. A good map marks each handoff: from whom, to whom, what passes, and what if the receiver is unavailable. Here, there's no single channel for it."
+          },
+          {
+            "n": 8,
+            "time": "2:27",
+            "narration": "Field 5 is knowledge sources: the vacation, pension, expense, and overtime policies. Each gets an owner, here the HR manager, and a sensitivity tag: public, internal, confidential, or restricted. These policies are internal. An employee's personal or financial details are confidential, and never go into a public AI tool."
+          },
+          {
+            "n": 9,
+            "time": "2:52",
+            "narration": "Field 6 is existing controls. Is anything checking the answers before they go out? What goes in the map?",
+            "stopAfter": "stop3"
+          },
+          {
+            "n": 10,
+            "time": "3:02",
+            "narration": "No formal control: it depends on the staffer's own judgment. That's a valid answer, and exactly what mapping reveals."
+          },
+          {
+            "n": 11,
+            "time": "3:09",
+            "narration": "Field 7 is gaps, and here you can write unclear. Nobody knows how many wrong answers were given, and there's no single handoff channel. That's a diagnostic result."
+          },
+          {
+            "n": 12,
+            "time": "3:22",
+            "narration": "Field 8 is the success metric. Today, about 35 percent of the HR team's time goes to repeat questions. Target: 20 percent within three months. A number you can check later. Next, you fill Field 5 yourself."
+          }
         ]
       },
-      "sources": ["storyboard v2 section 4"]
+      "sources": [
+        "storyboard v2 section 4"
+      ]
     },
 
     {
       "id": "S09",
-      "look": "light",
       "goal": "g2",
-      "coach": { "kind": "practice", "tip": "Not sure? Ask what the map would lose if this card sat in the wrong column.", "tipDrafted": true },
+      "coach": {
+        "kind": "practice",
+        "tip": "Not sure? Ask what the map would lose if this card sat in the wrong column.",
+        "tipDrafted": true
+      },
       "chapter": "ch3",
       "template": "sortDeck",
       "attempts": 2,
-      "step": { "verb": "Sort", "icon": "sort" },
+      "step": {
+        "verb": "Sort",
+        "icon": "sort"
+      },
       "minutes": 4,
       "instruction": "Drag each card to its part of Field 5.",
       "hint": "Drag a card, or click it and then click a column.",
       "layout": "sort-deck",
       "hintShown": true,
-      "terms": ["Owner", "Sensitivity"],
+      "terms": [
+        "Owner",
+        "Sensitivity"
+      ],
       "columns": [
-        { "id": "a", "label": "Source", "sub": "A document the work depends on" },
-        { "id": "b", "label": "Owner", "sub": "The role that keeps it current" },
-        { "id": "c", "label": "Sensitivity", "sub": "Its level, PUBLIC to RESTRICTED" },
-        { "id": "d", "label": "Not Field 5", "sub": "Belongs elsewhere on the map" }
+        {
+          "id": "a",
+          "label": "Source",
+          "sub": "A document the work depends on"
+        },
+        {
+          "id": "b",
+          "label": "Owner",
+          "sub": "The role that keeps it current"
+        },
+        {
+          "id": "c",
+          "label": "Sensitivity",
+          "sub": "Its level, PUBLIC to RESTRICTED"
+        },
+        {
+          "id": "d",
+          "label": "Not Field 5",
+          "sub": "Belongs elsewhere on the map"
+        }
       ],
       "cards": [
-        { "n": 1, "text": "Vacation policy", "column": "a", "tag": "A document HR answers from",
-          "feedback": { "correct": "Placed: the map now shows which document an HR answer depends on.",
-            "wrong": "A policy is not a person or a label. What role does it play in the process?" } },
-        { "n": 2, "text": "Overtime policy", "column": "a", "tag": "Another source",
-          "feedback": { "correct": "Placed: overtime is one of the repeat topics in the HR case.",
-            "wrong": "A policy is not a person or a label. What role does it play in the process?" } },
-        { "n": 3, "text": "HR manager", "column": "b", "tag": "Keeps the policies current",
-          "feedback": { "correct": "Placed: when a policy goes stale, the map names who must update it.",
-            "wrong": "This is a role, not a document or a label. What does this role do for the policies?" } },
-        { "n": 4, "text": "INTERNAL", "column": "c", "tag": "Stays inside the company",
-          "feedback": { "correct": "Placed: the policies stay inside the company, so they are tagged INTERNAL.",
-            "wrong": "This is not a document and not a person. What does it tell you about the data?" } },
-        { "n": 5, "text": "No formal control", "column": "d", "tag": "Field 6: controls",
-          "feedback": { "correct": "Kept out: it describes how answers get checked, which is Field 6.",
-            "wrong": "This card says nothing about where knowledge comes from, who keeps it, or how sensitive it is." } },
-        { "n": 6, "text": "Chatbot answers policy questions", "column": "d", "tag": "AI idea, not today",
-          "feedback": { "correct": "Kept out: no chatbot runs today, and adding AI while mapping turns the map into a plan.",
-            "wrong": "Ask whether this happens on a normal day in the HR case, as it runs now." } }
+        {
+          "n": 1,
+          "text": "Vacation policy",
+          "column": "a",
+          "tag": "A document HR answers from",
+          "feedback": {
+            "correct": "Placed: the map now shows which document an HR answer depends on.",
+            "wrong": "A policy is not a person or a label. What role does it play in the process?"
+          }
+        },
+        {
+          "n": 2,
+          "text": "Overtime policy",
+          "column": "a",
+          "tag": "Another source",
+          "feedback": {
+            "correct": "Placed: overtime is one of the repeat topics in the HR case.",
+            "wrong": "A policy is not a person or a label. What role does it play in the process?"
+          }
+        },
+        {
+          "n": 3,
+          "text": "HR manager",
+          "column": "b",
+          "tag": "Keeps the policies current",
+          "feedback": {
+            "correct": "Placed: when a policy goes stale, the map names who must update it.",
+            "wrong": "This is a role, not a document or a label. What does this role do for the policies?"
+          }
+        },
+        {
+          "n": 4,
+          "text": "INTERNAL",
+          "column": "c",
+          "tag": "Stays inside the company",
+          "feedback": {
+            "correct": "Placed: the policies stay inside the company, so they are tagged INTERNAL.",
+            "wrong": "This is not a document and not a person. What does it tell you about the data?"
+          }
+        },
+        {
+          "n": 5,
+          "text": "No formal control",
+          "column": "d",
+          "tag": "Field 6: controls",
+          "feedback": {
+            "correct": "Kept out: it describes how answers get checked, which is Field 6.",
+            "wrong": "This card says nothing about where knowledge comes from, who keeps it, or how sensitive it is."
+          }
+        },
+        {
+          "n": 6,
+          "text": "Chatbot answers policy questions",
+          "column": "d",
+          "tag": "AI idea, not today",
+          "feedback": {
+            "correct": "Kept out: no chatbot runs today, and adding AI while mapping turns the map into a plan.",
+            "wrong": "Ask whether this happens on a normal day in the HR case, as it runs now."
+          }
+        }
       ],
       "advance": "after-all-placed",
       "tracking": [
-        { "id": "L4_S09_1", "type": "matching", "correctResponse": "1.a,2.a,3.b,4.c,5.d,6.d", "scored": false, "bloom": "Understand", "result": "graded" }
+        {
+          "id": "L4_S09_1",
+          "type": "matching",
+          "correctResponse": "1.a,2.a,3.b,4.c,5.d,6.d",
+          "scored": false,
+          "bloom": "Understand",
+          "result": "graded"
+        }
       ],
-      "sources": ["s14", "s18", "s20", "s22", "s44", "s16"],
+      "sources": [
+        "s14",
+        "s18",
+        "s20",
+        "s22",
+        "s44",
+        "s16"
+      ],
       "hintPilotCopy": true,
-      "ghost": { "type": "drag", "showMe": false },
+      "ghost": {
+        "type": "drag",
+        "showMe": false
+      },
       "variants": {
         "support": {
           "hint": "Field 5 lists each source, its owner, and its sensitivity tag.",
@@ -1971,6 +2820,14 @@
             "s44"
           ]
         }
+      },
+      "photo": {
+        "src": "assets/img/l4/v2/ch4-w3-hr-desk.jpg",
+        "position": "62% 40%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "blur"
       }
     },
 
@@ -1978,37 +2835,89 @@
       "id": "S10",
       "look": "wide",
       "goal": "g3",
-      "coach": { "kind": "practice", "tip": "Ask what HR could prove today with the records it keeps.", "tipDrafted": true },
+      "coach": {
+        "kind": "practice",
+        "tip": "Ask what HR could prove today with the records it keeps.",
+        "tipDrafted": true
+      },
       "chapter": "ch3",
       "template": "decision",
       "attempts": 2,
-      "step": { "verb": "Decide", "icon": "decide" },
+      "step": {
+        "verb": "Decide",
+        "icon": "decide"
+      },
       "variant": "fill",
       "minutes": 2,
       "instruction": "Choose what to write in Field 7.",
       "hint": "Write what is true on a normal day, even if it looks bad.",
       "layout": "wide",
-      "terms": ["Existing controls", "Gaps"],
-      "situation": { "icon": "speech", "text": "HR keeps no record of answers given or corrected." },
+      "terms": [
+        "Existing controls",
+        "Gaps"
+      ],
+      "situation": {
+        "icon": "speech",
+        "text": "HR keeps no record of answers given or corrected."
+      },
       "fieldRows": [
-        { "id": "f6", "label": "Field 6, Existing controls:", "value": "no formal control", "prefilled": true, "from": "V2 stop 3" },
-        { "id": "f7", "label": "Field 7, Gaps:", "value": null, "active": true }
+        {
+          "id": "f6",
+          "label": "Field 6, Existing controls:",
+          "value": "no formal control",
+          "prefilled": true,
+          "from": "V2 stop 3"
+        },
+        {
+          "id": "f7",
+          "label": "Field 7, Gaps:",
+          "value": null,
+          "active": true
+        }
       ],
       "options": [
-        { "id": "a", "label": "Staff think wrong answers are rare", "correct": false,
-          "feedback": "No one has counted. The map now holds a guess that nobody can verify." },
-        { "id": "b", "label": "AI will catch wrong answers later", "correct": false,
-          "feedback": "The map describes today. A checker that does not exist yet turns a gap into a plan." },
-        { "id": "c", "label": "Unclear how many answers were wrong", "correct": true,
-          "feedback": "Field 7 now tells you what to investigate before Lesson 5, and what not to build on yet." },
-        { "id": "d", "label": "Leave it empty until data exists", "correct": false,
-          "feedback": "The map now hides its biggest unknown. Lesson 5 would treat it as known and build on it." }
+        {
+          "id": "a",
+          "label": "Staff think wrong answers are rare",
+          "correct": false,
+          "feedback": "No one has counted. The map now holds a guess that nobody can verify."
+        },
+        {
+          "id": "b",
+          "label": "AI will catch wrong answers later",
+          "correct": false,
+          "feedback": "The map describes today. A checker that does not exist yet turns a gap into a plan."
+        },
+        {
+          "id": "c",
+          "label": "Unclear how many answers were wrong",
+          "correct": true,
+          "feedback": "Right: 'unclear' is the honest answer for Field 7 today."
+        },
+        {
+          "id": "d",
+          "label": "Leave it empty until data exists",
+          "correct": false,
+          "feedback": "The map now hides its biggest unknown. Lesson 5 would treat it as known and build on it."
+        }
       ],
       "advance": "after-correct",
       "tracking": [
-        { "id": "L4_S10_1", "type": "choice", "correctResponse": "c", "scored": false, "bloom": "Apply", "result": "graded" }
+        {
+          "id": "L4_S10_1",
+          "type": "choice",
+          "correctResponse": "c",
+          "scored": false,
+          "bloom": "Apply",
+          "result": "graded"
+        }
       ],
-      "sources": ["s19", "s38", "s33", "s43 item 4"],
+      "sources": [
+        "s19",
+        "s38",
+        "s33",
+        "s43 item 4"
+      ],
       "variants": {
         "support": {
           "hint": "Field 7 is where it is allowed, even desirable, to write 'unclear'.",
@@ -2125,42 +3034,169 @@
             "s38"
           ]
         }
+      },
+      "ground": {
+        "kind": "dots"
       }
+    },
+
+    {
+      "id": "K3",
+      "coach": {
+        "kind": "idea",
+        "tip": "Writing 'unclear' is a finding. It tells you what to check before you build anything.",
+        "tipDrafted": true
+      },
+      "chapter": "ch3",
+      "template": "deliverable",
+      "step": {
+        "verb": "Learn",
+        "icon": "learn"
+      },
+      "minutes": 1,
+      "presentation": true,
+      "label": "Key idea",
+      "instruction": "'Unclear' is a legitimate answer",
+      "parts": [
+        {
+          "id": "result",
+          "icon": "check-circle",
+          "title": "A result of the mapping",
+          "text": "Not a weakness of the mapper. Field 7 exists for exactly this."
+        },
+        {
+          "id": "next",
+          "icon": "help-circle",
+          "title": "What to do with it",
+          "text": "Record it in Field 7: what to check before Lesson 5, and what not to build on yet."
+        }
+      ],
+      "photo": {
+        "src": "assets/img/l4/v2/ch4-w3-hr-desk.jpg",
+        "position": "62% 40%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "darkblur"
+      },
+      "tracking": [],
+      "sources": [
+        "s38",
+        "s19",
+        "v2 (9 Nov 2026): new; parts S10 and S11, two choice screens"
+      ]
     },
 
     {
       "id": "S11",
       "look": "wide",
       "goal": "g4",
-      "coach": { "kind": "practice", "tip": "Look for three parts in each line: a number today, a number to reach, and a date.", "tipDrafted": true },
+      "coach": {
+        "kind": "practice",
+        "tip": "Look for three parts in each line: a number today, a number to reach, and a date.",
+        "tipDrafted": true
+      },
       "chapter": "ch3",
       "template": "decision",
       "attempts": 2,
-      "step": { "verb": "Measure", "icon": "gauge" },
+      "step": {
+        "verb": "Measure",
+        "icon": "gauge"
+      },
       "variant": "metric",
       "minutes": 3,
       "instruction": "Pick the strongest success metric.",
       "hint": "Ask: three months from now, could someone check it?",
       "layout": "wide",
-      "terms": ["Success metric", "Field 8", "Baseline", "Target", "Date"],
-      "field": { "label": "Field 8", "icon": "gauge" },
+      "terms": [
+        "Success metric",
+        "Field 8",
+        "Baseline",
+        "Target",
+        "Date"
+      ],
+      "field": {
+        "label": "Field 8",
+        "icon": "gauge"
+      },
       "options": [
-        { "id": "a", "label": "HR time on repeats: significant improvement within 3 months", "correct": false, "checks": { "baseline": false, "target": false, "date": true },
-          "feedback": "No number to check. In three months, nobody can say whether it worked." },
-        { "id": "b", "label": "Employees feel HR answers repeat questions faster", "correct": false, "checks": { "baseline": false, "target": false, "date": false },
-          "feedback": "A feeling shifts with mood and memory. You cannot compare it before and after." },
-        { "id": "c", "label": "HR time on repeats: down to 20% within 3 months", "correct": false, "checks": { "baseline": false, "target": true, "date": true },
-          "feedback": "Twenty percent, down from what? Without today's number, nobody can show a change happened." },
-        { "id": "d", "label": "HR time on repeats: ~35% now, 20% in 3 months", "correct": true, "checks": { "baseline": true, "target": true, "date": true },
-          "feedback": "Checkable: it has a start point, a target and a date for one number." }
+        {
+          "id": "a",
+          "label": "HR time on repeats: significant improvement within 3 months",
+          "correct": false,
+          "checks": {
+            "baseline": false,
+            "target": false,
+            "date": true
+          },
+          "feedback": "No number to check. In three months, nobody can say whether it worked."
+        },
+        {
+          "id": "b",
+          "label": "Employees feel HR answers repeat questions faster",
+          "correct": false,
+          "checks": {
+            "baseline": false,
+            "target": false,
+            "date": false
+          },
+          "feedback": "A feeling shifts with mood and memory. You cannot compare it before and after."
+        },
+        {
+          "id": "c",
+          "label": "HR time on repeats: down to 20% within 3 months",
+          "correct": false,
+          "checks": {
+            "baseline": false,
+            "target": true,
+            "date": true
+          },
+          "feedback": "Twenty percent, down from what? Without today's number, nobody can show a change happened."
+        },
+        {
+          "id": "d",
+          "label": "HR time on repeats: ~35% now, 20% in 3 months",
+          "correct": true,
+          "checks": {
+            "baseline": true,
+            "target": true,
+            "date": true
+          },
+          "feedback": "Checkable: it has a start point, a target and a date for one number."
+        }
       ],
       "slotsTitle": "Checkable later?",
-      "slots": [ { "id": "baseline", "label": "Baseline" }, { "id": "target", "label": "Target" }, { "id": "date", "label": "Date" } ],
+      "slots": [
+        {
+          "id": "baseline",
+          "label": "Baseline"
+        },
+        {
+          "id": "target",
+          "label": "Target"
+        },
+        {
+          "id": "date",
+          "label": "Date"
+        }
+      ],
       "advance": "after-correct",
       "tracking": [
-        { "id": "L4_S11_1", "type": "choice", "correctResponse": "d", "scored": false, "bloom": "Evaluate", "result": "graded" }
+        {
+          "id": "L4_S11_1",
+          "type": "choice",
+          "correctResponse": "d",
+          "scored": false,
+          "bloom": "Evaluate",
+          "result": "graded"
+        }
       ],
-      "sources": ["s4", "s19", "s20", "s37"],
+      "sources": [
+        "s4",
+        "s19",
+        "s20",
+        "s37"
+      ],
       "variants": {
         "support": {
           "hint": "A checkable metric has three parts: today's number, a target, a date.",
@@ -2299,19 +3335,33 @@
             "s37"
           ]
         }
+      },
+      "photo": {
+        "src": "assets/img/l4/v2/ch4-w3-hr-desk.jpg",
+        "position": "62% 40%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "blur"
       }
     },
 
     {
       "id": "S12",
-      "look": "light",
       "goal": "g1",
-      "coach": { "kind": "practice", "tip": "A handoff risk lives where the work changes hands. Which fields describe that moment?", "tipDrafted": true },
+      "coach": {
+        "kind": "practice",
+        "tip": "A handoff risk lives where the work changes hands. Which fields describe that moment?",
+        "tipDrafted": true
+      },
       "chapter": "ch3",
       "template": "flags",
       "attempts": 2,
       "variant": "map",
-      "step": { "verb": "Flag", "icon": "flag" },
+      "step": {
+        "verb": "Flag",
+        "icon": "flag"
+      },
       "minutes": 3,
       "instruction": "Where could the question get lost?",
       "lead": "Click the two fields that show the handoff and its risk. Each click places a flag.",
@@ -2321,7 +3371,14 @@
       "dragHelp": "helpFields",
       "flagLabel": "Risk flag",
       "flagLabelPilotCopy": true,
-      "flags": [{ "id": "r1" }, { "id": "r2" }],
+      "flags": [
+        {
+          "id": "r1"
+        },
+        {
+          "id": "r2"
+        }
+      ],
       "map": [
         {
           "n": 1,
@@ -2383,9 +3440,22 @@
       "feedbackCorrect": "Field 4 shows the question passing to the HR manager, and Field 7 adds its risk: no single channel.",
       "advance": "after-all-placed",
       "tracking": [
-        { "id": "L4_S12_1", "type": "choice", "multiple": true, "correctResponse": "4,7", "scored": false, "bloom": "Analyze", "result": "graded" }
+        {
+          "id": "L4_S12_1",
+          "type": "choice",
+          "multiple": true,
+          "correctResponse": "4,7",
+          "scored": false,
+          "bloom": "Analyze",
+          "result": "graded"
+        }
       ],
-      "sources": ["s20", "s17 to s19", "s27", "s43 item 2"],
+      "sources": [
+        "s20",
+        "s17 to s19",
+        "s27",
+        "s43 item 2"
+      ],
       "variants": {
         "support": {
           "hint": "A handoff is the moment responsibility passes from one role to another. Flag where it passes, and its risk.",
@@ -2522,25 +3592,43 @@
             "s34"
           ]
         }
+      },
+      "ground": {
+        "kind": "dots"
       }
     },
 
     {
       "id": "S12B",
       "look": "wide",
-      "coach": { "kind": "own", "tip": "Use a number you could count today, even roughly: hours, days, or a share of cases.", "tipDrafted": true },
+      "coach": {
+        "kind": "own",
+        "tip": "Use a number you could count today, even roughly: hours, days, or a share of cases.",
+        "tipDrafted": true
+      },
       "chapter": "ch3",
       "template": "input",
       "caseCard": true,
       "lockedNext": "Save to continue",
-      "step": { "verb": "Write", "icon": "write" },
+      "step": {
+        "verb": "Write",
+        "icon": "write"
+      },
       "minutes": 2,
       "instruction": "Set one success metric for your case.",
       "hint": "A rough number is fine. You refine it in Chapter {ch5}.",
       "arrange": "chain",
       "stage": {
-        "top": { "kind": "line", "text": "This goes into Field 8 of your workbook in Chapter {ch5}." },
-        "bottom": { "kind": "privacy", "icon": "shield", "text": "Leave out names and identifying details.", "action": "save" }
+        "top": {
+          "kind": "line",
+          "text": "This goes into Field 8 of your workbook in Chapter {ch5}."
+        },
+        "bottom": {
+          "kind": "privacy",
+          "icon": "shield",
+          "text": "Leave out names and identifying details.",
+          "action": "save"
+        }
       },
       "fields": [
         {
@@ -2548,31 +3636,76 @@
           "label": "Baseline",
           "placeholder": "Today, e.g. about 2 days to a summary",
           "maxLength": 80,
-          "demo": "About 2 days", "store": "L4_CASE_BASELINE",
+          "demo": "About 2 days",
+          "store": "L4_CASE_BASELINE",
           "trackingId": "L4_S12B_1",
           "width": 1.6
         },
-        { "id": "target", "label": "Target", "placeholder": "e.g. same day", "maxLength": 80, "demo": "Same day", "store": "L4_CASE_TARGET", "trackingId": "L4_S12B_2" },
+        {
+          "id": "target",
+          "label": "Target",
+          "placeholder": "e.g. same day",
+          "maxLength": 80,
+          "demo": "Same day",
+          "store": "L4_CASE_TARGET",
+          "trackingId": "L4_S12B_2"
+        },
         {
           "id": "date",
           "label": "Date",
           "placeholder": "e.g. within 3 months",
           "maxLength": 40,
-          "demo": "Within 3 months", "store": "L4_CASE_DATE",
+          "demo": "Within 3 months",
+          "store": "L4_CASE_DATE",
           "trackingId": "L4_S12B_3",
           "optional": true
         }
       ],
       "saveWhenFilled": true,
-      "feedback": { "saved": "Saved. It comes back in Chapter {ch5}, ready to refine.", "empty": "Add a number to Baseline and Target." },
+      "feedback": {
+        "saved": "Saved. It comes back in Chapter {ch5}, ready to refine.",
+        "empty": "Add a number to Baseline and Target."
+      },
       "advance": "after-save",
       "endOfChapter": true,
       "tracking": [
-        { "id": "L4_S12B_1", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" },
-        { "id": "L4_S12B_2", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" },
-        { "id": "L4_S12B_3", "type": "fill-in", "correctResponse": null, "scored": false, "bloom": "Apply", "result": "neutral" }
+        {
+          "id": "L4_S12B_1",
+          "type": "fill-in",
+          "correctResponse": null,
+          "scored": false,
+          "bloom": "Apply",
+          "result": "neutral"
+        },
+        {
+          "id": "L4_S12B_2",
+          "type": "fill-in",
+          "correctResponse": null,
+          "scored": false,
+          "bloom": "Apply",
+          "result": "neutral"
+        },
+        {
+          "id": "L4_S12B_3",
+          "type": "fill-in",
+          "correctResponse": null,
+          "scored": false,
+          "bloom": "Apply",
+          "result": "neutral"
+        }
       ],
-      "sources": ["planning/STORYBOARD-V3.md Ch3 S12B", "s37"]
+      "sources": [
+        "planning/STORYBOARD-V3.md Ch3 S12B",
+        "s37"
+      ],
+      "photo": {
+        "src": "assets/img/l4/v2/ch4-w3-hr-desk.jpg",
+        "position": "62% 40%",
+        "temp": false
+      },
+      "ground": {
+        "kind": "blur"
+      }
     },
 
     {

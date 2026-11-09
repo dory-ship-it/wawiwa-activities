@@ -3,10 +3,10 @@
 //   tiles   (S07)  NL2: on the Focus wash, a 4 x 2 grid of tiles that open in place; after all eight the
 //                  heading becomes the question and the tiles answer it (one question, two attempts).
 // Tracking: tiles = the field number of the first answer. Retries as retry events.
-import { h, fmt } from '../util.js?v=77a89e51';
-import { glyph } from '../icons.js?v=77a89e51';
-import { layout, arrowNav, paintAnswer } from './stage.js?v=77a89e51';
-import { checkButton } from './decision.js?v=77a89e51';
+import { h, fmt } from '../util.js?v=3e1f82e2';
+import { glyph } from '../icons.js?v=3e1f82e2';
+import { layout, arrowNav, paintAnswer } from './stage.js?v=3e1f82e2';
+import { checkButton } from './decision.js?v=3e1f82e2';
 
 export const explorer = {
   mount(ctx) {
@@ -29,7 +29,7 @@ export const explorer = {
 // moment (nothing counts as opened).
 function tiles(ctx) {
   const { screen, ui, zones } = ctx;
-  const trackingId = screen.tracking[0].id;
+  const trackingId = screen.tracking[0]?.id; // (v2 S07: none when there is no question)
   const visited = new Set();
   const max = ctx.revisit ? 0 : 1; // FX5 (Noy): one try on a choice question, then the right answer and why
   let phase = 'explore', solved = false, chosen = -1, tries = 0;
@@ -113,7 +113,12 @@ function tiles(ctx) {
       count();
       // QA1: the tiles close as the question comes (opened in order, the last one open was the answer,
       // Field 8); any click now answers
-      if (visited.size === list.length) { list.forEach((y) => flip(y, false)); unlock(); }
+      if (visited.size === list.length) {
+        // v2 S07 (slide 14): no question (screen.question absent): the eight fields opened is the task;
+        // the last opened tile stays open, Next unlocks
+        if (!screen.question) { if (!solved) { solved = true; ctx.complete(); ctx.unlockNext({ focus: true }); } return; }
+        list.forEach((y) => flip(y, false)); unlock();
+      }
       return;
     }
     // FX7: in the question phase a click selects the tile; Check (the band's tool) sends it (one try)
@@ -151,7 +156,13 @@ function tiles(ctx) {
 
   list.forEach((x) => flip(x, false));
   count();
-  if (ctx.revisit) {
+  if (ctx.revisit && !screen.question) {
+    list.forEach((x) => visited.add(x.t.n));
+    list.forEach(paintDisc);
+    count();
+    solved = true;
+    ctx.unlockNext({ focus: false });
+  } else if (ctx.revisit) {
     list.forEach((x) => visited.add(x.t.n));
     unlock();
     const k = list.findIndex((x) => x.t.correct);

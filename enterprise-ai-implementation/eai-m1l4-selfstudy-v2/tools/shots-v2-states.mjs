@@ -21,6 +21,9 @@ const STATES = [
   ['O2', 'l1-open', async (p) => { await p.keyboard.press('Shift'); await click(p, '.w-map-tab[data-station="l1"]'); }],
   ['S03', 'wrong-drop', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['metric']); }],
   ['S03', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['map', 'metric', 'map', 'metric', 'map', 'metric']); }],
+  ['K2', 'case-on', (p) => click(p, '[data-action="caseToggle"]')],
+  ['S07', 'all-opened', async (p) => { await p.keyboard.press('Shift'); for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); }],
+  ['S08', 'round1-right', (p) => click(p, '.w-opt[data-id="b"]')],
   ['S02', 'saved', async (p) => { await p.type('.w-input[data-store="L4_CASE_TITLE"]', 'Sales call summaries'); await p.type('textarea', 'Today reps write call notes by hand.'); await click(p, '[data-action="save"]'); }],
 ];
 for (const [id, name, act] of STATES) {
