@@ -83,5 +83,12 @@ Plans: planning/V2-CH3-PLAN.md, planning/V2-CH4-PLAN.md (Noy: continue without a
 - NEW screen K3 (s38, 'Unclear' is a legitimate answer, deliverable template) after S10: parts S10 and S11. V2 on darkblur, showTitle false.
 - Committed locally (b2df4af) for Noy to push. check green, test-fit passes, test:adapt same 11 pre-existing failures.
 
+## Build yours + Wrap-up (built 9 Nov 2026, sent to Noy, waiting for her verdict)
+Content: tools/v2-ch56-content.mjs. Noy (mid-build): no runs of screens that look the same; checked across the lesson.
+- NEW W5 (Build yours opener, s35) and W6 (Wrap-up opener: the five outcomes, s39; O3's parked copy removed).
+- S18 half right (redaction photo), S20 half left (tick photo), S08B narrow half left (sticky notes) so S08/S08B differ. v2.css moves .w-sheet-focus into the light half on half grounds.
+- S19A dark, its time chip removed (handoff brief renders no chip without content), its bar icon 'map'. S21R dark. S22 new photo. END uses the deck's slide-1 photo (bookend with O1).
+- The chapter screen lists are one line each in the JSON: the scripts now keep that format.
+
 ## Next
-After Noy's verdict: Build yours (S18A-S20B) and Wrap-up (S21-END; the parked outcomes from O3 go there).
+Noy's verdicts on Toolkit, HR demo, Build yours, Wrap-up. Then: walk.mjs, test-review and test:scorm are stale; test:adapt has 11 failures from Ch5's S14-S17 (pre-existing).

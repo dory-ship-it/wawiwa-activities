@@ -12,10 +12,10 @@
 // Tracking: the same one matching interaction as before, once, when the last card is placed: each card's
 // FIRST pile ("1.a,2.b,..."), correct only if every first drop was right; when any card needed another
 // drop, one retry follows with the final piles.
-import { h, fmt, reducedMotion } from '../util.js?v=3e1f82e2';
-import { glyph, icon } from '../icons.js?v=3e1f82e2';
-import { layout } from './stage.js?v=3e1f82e2';
-import { dragDrop } from '../drag.js?v=3e1f82e2';
+import { h, fmt, reducedMotion } from '../util.js?v=fe02c3a1';
+import { glyph, icon } from '../icons.js?v=fe02c3a1';
+import { layout } from './stage.js?v=fe02c3a1';
+import { dragDrop } from '../drag.js?v=fe02c3a1';
 
 const keyOf = (c) => String(c.id ?? c.n);
 const COLS_TOP = 304, GAP = 17.92, WRONG_MS = 750; // stage px in main

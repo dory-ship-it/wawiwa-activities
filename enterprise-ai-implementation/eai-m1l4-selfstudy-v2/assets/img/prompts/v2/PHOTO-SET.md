@@ -29,3 +29,13 @@ Editorial photograph; cool navy and teal colour grade (warm wood or skin as the 
 | File | Screen | Prompt (core) | Seed |
 |---|---|---|---|
 | ch4-w3-hr-desk.jpg | W3 opener (full); V2, S09, K3, S11, S12B blurred | An HR staffer on the phone at her desk, chat on the screens, an employee beside the desk asking; people right, dark space left; 50 mm f/2 | 403258964 |
+
+## Toolkit (added) and Build yours, Wrap-up
+| File | Screen | Prompt (core) | Seed |
+|---|---|---|---|
+| ch3-s08b-notes.jpg | S08B (narrow half left) | Hands arranging blank coloured sticky notes in columns on a desk, angled top view | 1249494162 |
+| ch6-w5-evening-desk.jpg | W5 opener (full); S18B, S19C, S20B blurred | A professional working alone at a home-office desk in the evening, laptop, pen over a notepad | 1529133742 |
+| ch6-s18-redact.jpg | S18 (half right) | A hand striking out lines on a printed page with a marker, very low side angle (crop right: a fake word sits top left) | 1815129733 |
+| ch6-s20-tick.jpg | S20 (half left) | A hand ticking a box with a blue pen, the sheet out of focus | 70794882 |
+| ch7-w6-map-wall.jpg | W6 opener (full); S21, S21R blurred | A professional placing the last card on a finished process map on a wall | 29610405 |
+| ch7-s22-day-done.jpg | S22 (stage) | End of the day: a professional at her desk by the window, laptop, smiling | 1604490454 |

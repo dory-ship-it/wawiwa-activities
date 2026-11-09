@@ -16,10 +16,10 @@
 // Copy: navigator.clipboard first; when it is blocked (an LMS iframe without clipboard permission) the
 // card's text is selected and the button says "Press Ctrl+C" (the selection copies with the keys).
 // The ghost hand shows the first Copy once (it points beside it and taps nothing). Nothing is tracked.
-import { h, resolveLink } from '../util.js?v=3e1f82e2';
-import { glyph, icon } from '../icons.js?v=3e1f82e2';
-import { layout, sheet, privacyLine, ruleLabel, picture } from './stage.js?v=3e1f82e2';
-import { scaleOf } from '../ghost.js?v=3e1f82e2';
+import { h, resolveLink } from '../util.js?v=fe02c3a1';
+import { glyph, icon } from '../icons.js?v=fe02c3a1';
+import { layout, sheet, privacyLine, ruleLabel, picture } from './stage.js?v=fe02c3a1';
+import { scaleOf } from '../ghost.js?v=fe02c3a1';
 
 const COPIED_MS = 2000;
 
@@ -41,8 +41,9 @@ export const handoff = {
 
 function brief(ctx) {
   const { screen, zones } = ctx;
+  // (v2: no time chip when the content has none: no times on screen)
   const head = h('div', { class: 'w-handoff-head' }, h('div', {}, ruleLabel(screen.eyebrow), zones.instruction),
-    h('p', { class: 'w-time-chip' }, icon('clock', { size: 17.92 }), h('span', {}, screen.chip)));
+    screen.chip ? h('p', { class: 'w-time-chip' }, icon('clock', { size: 17.92 }), h('span', {}, screen.chip)) : null);
   const steps = h('ol', { class: 'w-steps' }, screen.steps.map((s) => h('li', {}, h('span', { class: 'w-step-n', 'aria-hidden': 'true' }, String(s.n)), h('span', {}, s.text))));
   const shot = h('figure', { class: 'w-wb-shot' }, picture(screen.image, 'w-wb-shot-img'));
   layout(ctx, 'focus', sheet('focus w-col-handoff w-sheet-doc w-sheet-brief', head,

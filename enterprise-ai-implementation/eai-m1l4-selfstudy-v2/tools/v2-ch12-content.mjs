@@ -203,7 +203,7 @@ put({
 /* ---- the chapter order: S03 before K1 ---- */
 const ch = json.chapters.find((c) => c.id === 'ch1');
 if (ch.screens.join() !== 'W1,V1,S03,K1') {
-  t = t.replace(/("id": "ch1",[\s\S]*?"screens": \[)[\s\S]*?(\])/, (m, a, b) => a + '\n        "W1",\n        "V1",\n        "S03",\n        "K1"\n      ' + b);
+  t = t.replace(/("id": "ch1",[^\n]*?"screens": \[)[^\]]*?(\])/, (m, a, b) => a + '"W1", "V1", "S03", "K1"' + b);
 }
 // the screens array keeps the learner's order too
 {

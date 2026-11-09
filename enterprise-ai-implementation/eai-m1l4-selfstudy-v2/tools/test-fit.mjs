@@ -185,6 +185,8 @@ const STATES = [
   }],
   // NL3: Chapters 3 and 4 (storyboard v3)
   ['W3', 'opener', async () => {}], // v2: the chapter opener (slide 15)
+  ['W5', 'opener', async () => {}], // v2: new, Build yours (slide 35)
+  ['W6', 'opener', async () => {}], // v2: new, Wrap-up (slide 39)
   ['K3', 'key idea', async () => {}], // v2: new, slide 38
   ['V2', 'play view', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); }],
   ['V2', 'stop 3, wrong', async (p) => {

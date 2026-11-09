@@ -86,7 +86,7 @@ else {
   t = t.slice(0, e) + ',\n' + block(K3) + t.slice(e);
 }
 const ch = json.chapters.find((c) => c.id === 'ch3');
-if (!ch.screens.includes('K3')) t = t.replace(/("id": "ch3",[\s\S]*?"screens": \[[\s\S]*?"S10",)/, '$1\n        "K3",');
+if (!ch.screens.includes('K3')) t = t.replace(/("id": "ch3",[^\n]*?"screens": \[[^\]]*?"S10",)/, '$1 "K3",');
 
 JSON.parse(t);
 writeFileSync(FILE, t.replace(/\n/g, EOL));
