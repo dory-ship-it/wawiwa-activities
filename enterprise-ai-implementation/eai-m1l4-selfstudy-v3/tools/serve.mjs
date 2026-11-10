@@ -25,8 +25,12 @@ export function startServer(port = 0) {
   const server = http.createServer((req, res) => {
     let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     if (p.endsWith('/')) p += 'index.html';
-    const file = normalize(join(ROOT, p));
-    if (!file.startsWith(ROOT) || !existsSync(file) || !statSync(file).isFile()) { res.writeHead(404); res.end('not found'); return; }
+    // v3 review copy: the films load from the sibling v2 folder (../eai-m1l4-selfstudy-v2/ on Pages,
+    // /eai-m1l4-selfstudy-v2/ here), so the copy does not duplicate them on GitHub Pages
+    const V2 = normalize(join(ROOT, '..', 'eai-m1l4-selfstudy-v2'));
+    const fromV2 = p.startsWith('/eai-m1l4-selfstudy-v2/');
+    const file = fromV2 ? normalize(join(ROOT, '..', p)) : normalize(join(ROOT, p));
+    if (!file.startsWith(fromV2 ? V2 : ROOT) || !existsSync(file) || !statSync(file).isFile()) { res.writeHead(404); res.end('not found'); return; }
     const type = TYPES[extname(file).toLowerCase()] || 'application/octet-stream';
     const size = statSync(file).size;
     // byte ranges (the video player seeks with Range requests, as on any real web server or LMS)
