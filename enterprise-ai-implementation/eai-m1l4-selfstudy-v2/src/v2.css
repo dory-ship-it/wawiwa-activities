@@ -1,0 +1,242 @@
+/* v2 (Noy, 9 Nov 2026; approved sample board claude.ai/artifact/3Y2yjcWbHd8u47cPnhe2HL): the lesson rebuilt
+   screen by screen. Loaded after fx8.css. Each screen names its ground from a small kit in the content
+   (screen.ground: full, half, blur, darkblur, split, dots; src/zones.js setScene), and gets the layout,
+   colours and motion that fit its own content. Motion only where it shows something (a build, a path, a
+   row): one thing at a time, short, once, never on buttons, none with reduced motion.
+   Colours only through src/tokens.css. */
+
+/* ---------- the ground kit ---------- */
+.w-g-full, .w-g-half, .w-g-blur { position: absolute; background-size: cover; background-repeat: no-repeat; }
+.w-g-full { inset: 0; }
+.w-g-half { top: 0; bottom: 0; width: 44%; }
+.w-stage[data-side="left"] .w-g-half { left: 0; }
+.w-stage[data-side="right"] .w-g-half { right: 0; }
+.w-g-blur { inset: -64px; filter: blur(26px) saturate(1.15); }
+.w-g-veil { position: absolute; inset: 0; background: rgba(10, 26, 38, .8); }
+.w-g-split { position: absolute; left: 0; top: 0; bottom: 0; width: 44%; overflow: hidden; background: var(--wl-stage-ground); }
+.w-g-dots { position: absolute; inset: 0; background-color: var(--wl-stone); background-image: radial-gradient(var(--wl-line-mid) 1.3px, transparent 1.4px); background-size: 24px 24px; }
+.w-g-half[data-mirror="true"], .w-g-full[data-mirror="true"], .w-g-blur[data-mirror="true"] { scale: -1 1; }
+/* the stage ground under each (the contrast check measures text against it) */
+.w-stage:is([data-ground="half"], [data-ground="split"]) { background: var(--wl-ivory); }
+.w-stage[data-ground="dots"] { background: var(--wl-stone); }
+.w-stage:is([data-ground="darkblur"], [data-ground="full"]) { background: var(--wl-stage-ground); }
+/* the bar: translucent over a full photo, near solid elsewhere (white text keeps AA) */
+.w-stage[data-ground]:not([data-ground="full"])[data-bar="dark"] > .w-bar { background: var(--wl-bar-focus-bg); }
+
+/* ---------- opener (W4 and the other chapters' first screens): a glass card on the full photo ---------- */
+.w-main[data-layout="opener"] .w-opener-card { position: absolute; left: 48px; top: 30px; width: 520px; display: flex; flex-direction: column; gap: 14px;
+  padding: 36px 36px 34px; border: 0; border-radius: 20px; background: rgba(10, 22, 32, .76); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: none; }
+.w-opener-card .w-instruction { margin: 0; font: 800 42px/1.08 var(--wl-font-ui); letter-spacing: -.8px; color: var(--wl-white); }
+.w-opener-lead { margin: 0 0 8px; font: 400 20px/1.4 var(--wl-font-ui); color: var(--wl-glass-text); }
+.w-stops { margin: 0; padding: 0; list-style: none; display: grid; gap: 16px; }
+.w-stop { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 14px; align-items: center; }
+.w-stop-icon { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--wl-turquoise); color: var(--wl-o1-ground); }
+.w-stop-body { display: grid; gap: 1px; }
+.w-stop-body b { font: 700 19px/1.25 var(--wl-font-ui); color: var(--wl-white); }
+.w-stop-body span { font: 400 16px/1.35 var(--wl-font-ui); color: var(--wl-glass-text); }
+.w-opener-end { margin-top: 6px; font: 400 16px/1.4 var(--wl-font-ui); color: var(--wl-glass-text); }
+
+/* ---------- half photo (S14 left, S15 right): the task on the light half, no panel ---------- */
+.w-stage[data-ground="half"] .w-sheet-right.w-sheet-one { top: 30px; bottom: auto; transform: none; width: auto; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+.w-stage[data-ground="half"][data-side="left"] .w-sheet-right.w-sheet-one { left: calc(44% + 56px); right: 56px; }
+.w-stage[data-ground="half"][data-side="right"] .w-sheet-right.w-sheet-one { left: 56px; right: calc(44% + 56px); }
+.w-stage[data-ground="half"] .w-sheet-one .w-case-row { margin: 0; padding: 0; border: 0; background: none; box-shadow: none; }
+.w-stage[data-ground="half"] .w-sheet-one .w-context { font: 400 19px/1.42 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-stage[data-ground="half"] .w-sheet-one .w-context .w-figure { color: var(--wl-teal-ink); }
+.w-stage[data-ground="half"] .w-sheet-one .w-label { margin: 0 0 10px; }
+.w-stage[data-ground="half"] .w-sheet-one .w-instruction { margin: 14px 0 18px; font-size: 34px; line-height: 1.1; letter-spacing: -.6px; }
+.w-stage[data-ground="half"] .w-sheet-one .w-options { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.w-stage[data-ground="half"] .w-sheet-one .w-ans { min-height: 56px; background: var(--wl-white); font-size: 18.5px; }
+
+/* ---------- K4 on the dark blur: two rows of three cards ---------- */
+.w-stage[data-ground="darkblur"] .w-focus-head .w-instruction { color: var(--wl-white); }
+.w-stage[data-ground="darkblur"] .w-focus-head .w-key-label { color: var(--wl-aqua-text); background: rgba(255, 255, 255, .1); }
+.w-stage[data-ground="darkblur"] .w-concept-text:empty { display: none; }
+.w-stage[data-ground="darkblur"] .w-main[data-layout="concept"] .w-figs.w-figs-two { position: absolute; left: 64px; right: 64px; top: 176px; bottom: auto; width: auto; transform: none;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+.w-stage[data-ground="darkblur"] .w-kcol { margin: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; display: grid; gap: 12px; }
+.w-stage[data-ground="darkblur"] .w-kcol .w-fig-caption { margin: 0; font: 700 15px/1.2 var(--wl-font-ui); letter-spacing: 1.6px; text-transform: uppercase; color: var(--wl-aqua-text); }
+.w-stage[data-ground="darkblur"] .w-kcol[data-kind="mess"] .w-fig-caption { color: var(--wl-glass-text); }
+.w-stage[data-ground="darkblur"] .w-kcol:has(li[data-icon]) .w-kcol-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0; padding: 0; }
+.w-stage[data-ground="darkblur"] .w-kcol-list li[data-icon] { padding: 22px 22px; gap: 16px; border-radius: 14px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .14); }
+.w-stage[data-ground="darkblur"] .w-kcol-icon { width: 52px; height: 52px; background: var(--wl-turquoise); color: var(--wl-o1-ground); }
+.w-stage[data-ground="darkblur"] .w-kcol[data-kind="mess"] .w-kcol-icon { background: none; border: 2px solid var(--wl-on-glass); color: var(--wl-white); }
+.w-stage[data-ground="darkblur"] .w-kcol-body b { font-size: 19px; color: var(--wl-white); }
+.w-stage[data-ground="darkblur"] .w-kcol-body span { font: 400 16px/1.35 var(--wl-font-ui); color: var(--wl-glass-text); }
+
+/* ---------- S16: two columns, each with its line ---------- */
+.w-drop-sub { display: block; margin-top: 2px; font: 400 15px/1.35 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-drops[data-count="2"] .w-drop[data-kind="good"] { background: var(--wl-correct-bg); }
+/* two wide columns: the placed cards two across, so six of them end above Previous / Next */
+.w-drops[data-count="2"] .w-drop-cards { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+/* the icon beside the column's name and line, not above them */
+.w-drops[data-count="2"] .w-drop { min-height: 150px; display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 14px; align-content: start; }
+.w-drops[data-count="2"] .w-drop-icon { grid-row: 1 / span 2; align-self: center; margin: 0; }
+.w-drops[data-count="2"] .w-drop-title { grid-column: 2; }
+.w-drops[data-count="2"] .w-drop-sub { grid-column: 2; margin-top: 0; }
+
+/* ---------- S17: 1 the case on the left, 2 the choice on the right (light: a task) ---------- */
+.w-stage .w-sheet-cases.w-sheet-focus { left: 64px; right: 64px; grid-template-columns: 440px minmax(0, 1fr); column-gap: 72px; row-gap: 14px; }
+.w-stage .w-sheet-cases > .w-head-row { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 14px; justify-content: flex-start; }
+.w-stage .w-sheet-cases .w-instruction { font-size: 30px; line-height: 1.15; }
+.w-stage .w-sheet-cases .w-case-now { grid-column: 1; grid-row: 1 / span 3; align-self: center; position: relative; padding: 30px 28px 32px; border: 0; border-radius: 18px;
+  box-shadow: var(--wl-float-shadow), 10px 10px 0 -1px var(--wl-white), 10px 10px 0 0 var(--wl-line); }
+.w-stage .w-sheet-cases .w-case-now-text { font-size: 26px; line-height: 1.3; }
+.w-stage .w-sheet-cases .w-options { grid-column: 2; grid-row: 2; }
+.w-stage .w-sheet-cases .w-ans { min-height: 58px; }
+.w-stage .w-sheet-cases > .w-band { grid-column: 2; grid-row: 3; }
+/* the step numbers: 1 on the case, 2 on the question */
+.w-stage .w-sheet-cases > .w-head-row::before,
+.w-stage .w-sheet-cases .w-case-now::before { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 800 18px/1 var(--wl-font-ui); }
+.w-stage .w-sheet-cases > .w-head-row::before { content: "2"; background: var(--wl-navy); color: var(--wl-white); }
+.w-stage .w-sheet-cases .w-case-now::before { content: "1"; position: absolute; left: -19px; top: -19px; background: var(--wl-navy); color: var(--wl-white); }
+
+/* ---------- S13 (slide 21): the boundary pair, then seven steps without numbers ---------- */
+.w-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 900px; margin-bottom: 18px; }
+.w-pair-card { display: grid; gap: 2px; padding: 12px 16px; border-radius: 12px; background: var(--wl-white); box-shadow: var(--wl-float-shadow); }
+.w-pair-card b { font: 800 16px/1.25 var(--wl-font-ui); color: var(--wl-grey-ink); }
+.w-pair-card[data-tone="lean"] b { color: var(--wl-teal-ink); }
+.w-pair-card span { font: 400 16px/1.35 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-main[data-layout="flags"]:has(.w-pair) .w-task-head .w-instruction { font-size: 34px; }
+.w-board-flags[data-variant="line"]:has(.w-line-cell:nth-of-type(7)) { top: 190px; }
+.w-line:has(> .w-line-cell:nth-of-type(7)) { gap: 10px; }
+.w-line:has(> .w-line-cell:nth-of-type(7)) .w-line-cell.w-target { grid-template-rows: 36px 64px auto; gap: 8px; }
+.w-line:has(> .w-line-cell:nth-of-type(7)) .w-line-disc { width: 64px; height: 64px; }
+.w-line:has(> .w-line-cell:nth-of-type(7)) .w-line-disc svg { width: 28px; height: 28px; }
+.w-board-flags[data-variant="line"] .w-line:has(> .w-line-cell:nth-of-type(7))::before { top: 74px; }
+.w-board-flags[data-variant="line"] .w-line:has(> .w-line-cell:nth-of-type(7)) .w-line-step { min-height: 78px; padding: 10px 10px; font-size: 16.5px; line-height: 1.28; }
+.w-board-flags[data-variant="line"] .w-line-step .w-step-n { display: none; }
+/* once both flags sit: the steps between them are the process, the ones outside fade */
+.w-line-card[data-span="true"] .w-line-cell[data-inside="false"] { opacity: .45; }
+.w-line-card[data-span="true"] .w-line-cell[data-inside="true"] .w-line-step { background: var(--wl-correct-bg); }
+/* the feedback under the clicked step, its notch pointing at it */
+.w-board-flags[data-variant="line"] .w-line-card > .w-float { position: absolute; top: calc(100% + 14px); left: 0; width: 480px; max-width: none; }
+.w-board-flags[data-variant="line"] .w-line-card > .w-float .w-strip::before { display: block; left: calc(var(--notch-x, 240px) - 9px); }
+.w-board-flags[data-variant="line"] .w-line-card > .w-float .w-band-text { display: block; margin: 2px 0 0; }
+
+/* ---------- S14 (slide 27): six cards, two across, on the dot grid ---------- */
+.w-stage[data-ground="dots"] .w-sheet-focus .w-ans-list { gap: 10px; }
+
+/* ---------- S15 (slides 29-30): the proof card on the photo, after the answer ---------- */
+.w-proof { position: absolute; right: 48px; bottom: 112px; width: 400px; margin: 0; display: grid; gap: 2px; padding: 20px 24px 22px; border-radius: 18px;
+  background: var(--wl-white); box-shadow: 0 25px 50px rgba(0, 0, 0, .3); z-index: 3; }
+.w-proof-eyebrow { font: 700 14px/1.2 var(--wl-font-ui); letter-spacing: 1.2px; text-transform: uppercase; color: var(--wl-muted); }
+.w-proof-figure { font: 800 64px/1 var(--wl-font-ui); letter-spacing: -1.5px; color: var(--wl-teal-ink); }
+.w-proof-text { font: 600 18px/1.35 var(--wl-font-ui); color: var(--wl-ink); }
+
+/* ---------- S17B on the dot grid: the steps numbered 1, 2, 3 ---------- */
+.w-stage[data-ground="dots"] .w-sheet-focus .w-shown { display: flex; align-items: center; gap: 12px; }
+.w-stage[data-ground="dots"] .w-sheet-focus .w-shown::before,
+.w-stage[data-ground="dots"] .w-fields-pair > .w-field .w-field-label::before { flex: none; display: inline-grid; place-items: center; width: 30px; height: 30px; margin-right: 10px; border-radius: 50%;
+  background: var(--wl-navy); color: var(--wl-white); font: 800 15px/1 var(--wl-font-ui); vertical-align: middle; }
+.w-stage[data-ground="dots"] .w-sheet-focus .w-shown::before { content: "1"; margin-right: 0; }
+.w-stage[data-ground="dots"] .w-fields-pair > .w-field:nth-of-type(1) .w-field-label::before { content: "2"; }
+.w-stage[data-ground="dots"] .w-fields-pair > .w-field:nth-of-type(2) .w-field-label::before { content: "3"; }
+
+/* ---------- motion, only on the screens that need it ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* S13: the process line draws, then the five steps rise one by one (under 1.5 s) */
+  .w-stage[data-screen="S13"] .w-board-flags[data-variant="line"] .w-line::before { transform-origin: left center; animation: v2-grow .8s var(--wl-ease-enter) both; }
+  .w-stage[data-screen="S13"] .w-line-cell { animation: v2-rise .42s var(--wl-ease-enter) both; }
+  .w-stage[data-screen="S13"] .w-line-cell:nth-of-type(2) { animation-delay: .12s; }
+  .w-stage[data-screen="S13"] .w-line-cell:nth-of-type(3) { animation-delay: .24s; }
+  .w-stage[data-screen="S13"] .w-line-cell:nth-of-type(4) { animation-delay: .36s; }
+  .w-stage[data-screen="S13"] .w-line-cell:nth-of-type(5) { animation-delay: .48s; }
+  /* K4: the good-fit row, then the poor-fit row */
+  .w-stage[data-screen="K4"] .w-kcol { animation: v2-rise .45s var(--wl-ease-enter) both; }
+  .w-stage[data-screen="K4"] .w-kcol + .w-kcol { animation-delay: .35s; }
+  /* S17: the case card slides in with each new case */
+  .w-stage .w-sheet-cases .w-case-now { animation: v2-in-left .4s var(--wl-ease-enter) both; }
+  /* S15: the proof rises in once the answer is right */
+  .w-proof:not([hidden]) { animation: v2-rise .5s var(--wl-ease-enter) both; }
+  /* S13: the process span lights up once both flags sit */
+  .w-line-card[data-span="true"] .w-line-cell { transition: opacity .4s ease; }
+}
+@keyframes v2-rise { from { opacity: 0; transform: translateY(14px); } }
+@keyframes v2-grow { from { transform: scaleX(0); } }
+@keyframes v2-in-left { from { opacity: 0; transform: translateX(-24px); } }
+
+/* ---------- v2 Intro and Why map (planning/V2-CH1-2-PLAN.md) ---------- */
+/* O1 (slide 1): the deck's subtitle under the h1 */
+.w-title-sub { margin: 12px 0 0; font: 400 24px/1.35 var(--wl-font-ui); color: var(--wl-glass-text); }
+
+/* O3 (slide 4): the deliverable, a pair of big cards on the dark blur, the foot line under them */
+.w-stage[data-ground="darkblur"] .w-focus-head .w-concept-text { color: var(--wl-glass-text); }
+.w-dlv-pair { position: absolute; left: max(64px, calc((100% - 1152px) / 2)); right: max(64px, calc((100% - 1152px) / 2)); top: 236px;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.w-dlv-card { margin: 0; display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 22px; align-items: center; padding: 30px 30px 32px;
+  border-radius: 18px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .16); }
+.w-dlv-icon { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--wl-turquoise); color: var(--wl-o1-ground); }
+.w-dlv-body { display: grid; gap: 6px; }
+.w-dlv-body b { font: 800 28px/1.15 var(--wl-font-ui); letter-spacing: -.3px; color: var(--wl-white); }
+.w-dlv-body span { font: 400 19px/1.4 var(--wl-font-ui); color: var(--wl-glass-text); }
+.w-dlv-foot { position: absolute; left: max(64px, calc((100% - 1152px) / 2)); right: max(64px, calc((100% - 1152px) / 2)); top: 432px; margin: 0;
+  display: flex; align-items: center; gap: 14px; font: 600 21px/1.4 var(--wl-font-ui); color: var(--wl-white); }
+.w-dlv-foot-icon { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--wl-turquoise); color: var(--wl-aqua-text); }
+
+/* W1 (slide 6): the statement opener: the h1 as the slide's small teal title, the statement large (no italics: the house rule) */
+.w-main[data-layout="opener"] .w-opener-card[data-kind="statement"] { top: 50%; width: 600px; transform: translateY(calc(-50% - 24px)); gap: 18px; padding: 40px 40px 38px; }
+.w-opener-card[data-kind="statement"] .w-instruction { font: 700 19px/1.3 var(--wl-font-ui); letter-spacing: .4px; color: var(--wl-aqua-text); }
+.w-opener-card[data-kind="statement"] .w-opener-lead { margin: 0; font: 600 30px/1.36 var(--wl-font-ui); letter-spacing: -.2px; color: var(--wl-white); }
+.w-opener-card[data-kind="statement"] .w-opener-end { margin-top: 4px; font-size: 15px; }
+
+/* K1 (slides 7, 8, 3) on the dark blur: the two drawings on glass cards, the two sources as cards */
+.w-stage[data-ground="darkblur"] .w-main[data-layout="concept"] .w-figs:not(.w-figs-two) { top: 236px; }
+.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig { background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .16); }
+.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig-label { color: var(--wl-aqua-text); text-transform: uppercase; letter-spacing: 1.4px; }
+.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="mess"] .w-fig-caption { color: var(--wl-glass-text); }
+.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="lean"] .w-fig-caption { color: var(--wl-white); }
+.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="mess"] .w-fig-lines { stroke: var(--wl-glass-text); }
+.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="mess"] .w-fig-heads { fill: var(--wl-glass-text); }
+.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="lean"] .w-fig-lines { stroke: var(--wl-turquoise); }
+.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="lean"] .w-fig-heads { fill: var(--wl-turquoise); }
+.w-stage[data-ground="darkblur"] .w-figs-arrow { color: var(--wl-aqua-text); }
+.w-evidence.w-evidence-pair { bottom: 104px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 64px; row-gap: 10px; align-items: start; }
+.w-ev-card { margin: 0; display: grid; gap: 4px; padding-left: 16px; border-left: 3px solid var(--wl-turquoise); }
+.w-ev-card b { font: 700 16px/1.3 var(--wl-font-label); letter-spacing: .6px; text-transform: uppercase; color: var(--wl-aqua-text); }
+.w-ev-card span { font: 400 19px/1.4 var(--wl-font-ui); color: var(--wl-white); }
+.w-evidence-pair .w-evidence-source { grid-column: 1 / -1; justify-self: end; font: 400 15px/1.3 var(--wl-font-label); color: var(--wl-glass-text); }
+
+/* S01 (slide 5): the four causes 2 x 2, each its name and line; "Addressed today" after the pick */
+.w-options.w-risk.w-risk-four { gap: 12px 16px; }
+.w-risk-four .w-ans { min-height: 92px; padding: 16px 18px; align-items: center; }
+.w-risk-four .w-ans .w-ans-icon { width: 46px; height: 46px; border-radius: 12px; }
+.w-risk-four .w-opt-label { font-size: 21px; line-height: 1.25; }
+.w-risk-four .w-opt-sub { font-size: 16px; }
+.w-today-chip { display: table; margin-top: 8px; padding: 3px 10px; border-radius: 6px; background: var(--wl-chip-bg); font: 700 14.72px/normal var(--wl-font-label); color: var(--wl-correct-head); }
+
+/* S02: the case form on the light half, right of the photo */
+.w-stage[data-ground="half"][data-side="left"] .w-open { left: calc(44% + 48px); right: 48px; width: auto; transform: translateY(-50%); }
+.w-stage[data-ground="half"][data-side="left"] .w-open .w-fields { grid-template-columns: minmax(0, 1fr); row-gap: 16px; }
+.w-stage[data-ground="half"][data-side="left"] .w-open .w-field { grid-template-columns: minmax(0, 1fr); }
+.w-stage[data-ground="darkblur"] .w-evidence-pair .w-ev-card b { color: var(--wl-aqua-text); }
+.w-stage[data-ground="darkblur"] .w-evidence-pair .w-ev-card span { color: var(--wl-white); }
+.w-stage[data-ground="darkblur"] .w-evidence-pair .w-evidence-source { color: var(--wl-glass-text); }
+.w-stage[data-ground="half"][data-side="left"] .w-open { top: 30px; transform: none; gap: 16px; }
+.w-stage[data-ground="half"][data-side="left"] .w-open .w-instruction { font-size: 34px; line-height: 1.12; letter-spacing: -.5px; }
+.w-stage[data-ground="half"][data-side="left"] .w-open textarea { min-height: 84px; height: 84px; }
+/* S02 fits above Next with its Saved message: tighter spacing on the light half */
+.w-stage[data-ground="half"][data-side="left"] .w-open { top: 16px; gap: 12px; }
+.w-stage[data-ground="half"][data-side="left"] .w-open .w-sheet-open { padding-top: 20px; padding-bottom: 18px; }
+.w-stage[data-ground="half"][data-side="left"] .w-open .w-fields { row-gap: 8px; }
+.w-stage[data-ground="half"][data-side="left"] .w-open textarea { min-height: 68px; height: 68px; }
+
+/* review 1 (Noy): S02's photo narrower (30%), the form gets most of the width */
+.w-stage[data-ground="half"][data-size="narrow"] .w-g-half { width: 30%; }
+.w-stage[data-ground="half"][data-side="left"][data-size="narrow"] .w-open { left: calc(30% + 56px); right: 56px; }
+.w-stage[data-ground="half"][data-size="narrow"] .w-open textarea { min-height: 64px; height: 64px; }
+.w-stage[data-ground="half"][data-size="narrow"] .w-open-ctx { font-weight: 600; color: var(--wl-ink); }
+
+/* ---------- v2 Toolkit (planning/V2-CH3-PLAN.md) ---------- */
+/* S07 (slide 14) on the dark blur: the head in white */
+.w-stage[data-ground="darkblur"] .w-task-head .w-instruction { color: var(--wl-white); }
+.w-stage[data-ground="darkblur"] .w-task-head .w-task-sub { color: var(--wl-glass-text); }
+/* S08 (slide 16): each rule card, its name and one-line reason stacked */
+.w-rule-text { min-width: 0; flex: 1 1 auto; display: grid; gap: 3px; text-align: left; }
+.w-rule-sub { font: 400 15px/1.3 var(--wl-font-ui); color: var(--wl-text-2); }
+
+/* ---------- v2 Build yours and Wrap-up: a centred panel moves into the light half beside a half photo ---------- */
+.w-stage[data-ground="half"][data-side="left"] .w-main > .w-sheet-focus { left: calc(44% + 48px); right: 48px; width: auto; transform: translateY(-50%); }
+.w-stage[data-ground="half"][data-side="right"] .w-main > .w-sheet-focus { left: 48px; right: calc(44% + 48px); width: auto; transform: translateY(-50%); }
+.w-stage[data-ground="half"][data-side="left"][data-size="narrow"] .w-main > .w-sheet-focus { left: calc(30% + 56px); right: 56px; }
+.w-stage[data-ground="half"] .w-sheet-focus .w-head-row .w-instruction { font-size: 30px; line-height: 1.15; }

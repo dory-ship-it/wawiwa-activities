@@ -1,0 +1,31 @@
+﻿
+> eai-m1l4-selfstudy@0.1.0 test:review
+> node tools/test-review.mjs
+
+
+review mode: walk, toolbar, no writes
+  ok   normal run: the state with the S01 answer is in localStorage
+  ok   ?review=1 opens on O1, no resume prompt
+  ok   Next walks all 33 screens in chapter order (O1 O2 O3 S01 S02 W1 V1 K1 S03 FT2 S04 S05 S06 S07 S08 FT3 V2 S09 S10 S11 S12 FT4 S13 S14 S15 S16 S17 S18A S18 S19 S20 S21 S22)
+  ok   Next never locked in review mode
+  ok   toolbar on every screen: id, template, chapter, word count from src/review/words.js, red over 45, Overview link
+  ok   Previous walks back in order (S21 S20 S19 S18)
+  ok   localStorage unchanged after the review walk (155 chars before and after)
+  ok   review walk: no console errors
+  ok   with a SCORM 1.2 API present, review mode makes 0 SCORM calls (events still on the bus: 1)
+  ok   ?screen=ID&review=1 opens S04, FT3, S22 (every screen is in the slice today)
+
+review.html
+  ok   33 cards in review order, each opens index.html?screen=ID&review=1 in a new tab
+  ok   word counts under the thumbnails match src/review/words.js
+  ok   thumbnails load lazily (15 of 33 on arrival)
+  ok   every thumbnail renders its own screen (33 of 33), no boot error, no toolbar inside
+  ok   thumbnails are the 1280 x 720 stage at 25%
+  ok   "Over word limit" shows S02 (expected S02)
+  ok   chapter filter "ch1" shows W1, V1, K1, S03
+  ok   review.html: no console errors
+
+package
+  ok   SCORM package: 54 files in imsmanifest.xml, none from review.html or src/review/, and none in the zip
+
+test:review passed

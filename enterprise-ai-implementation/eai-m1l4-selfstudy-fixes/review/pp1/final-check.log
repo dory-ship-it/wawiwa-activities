@@ -1,0 +1,135 @@
+﻿
+> eai-m1l4-selfstudy@0.1.0 check
+> node tools/check.mjs
+
+  ok   content/l4-slice.json parses
+  ok   all 43 slice ids exist in screens[]
+  ok   no em or en dash in content, index.html and 36 src files
+  ok   no mojibake (U+0590 to U+05FF) in 38 text files under content/ and src/
+  ok   all 47 icon names used in content exist in icons.js
+  ok   Next font token 18.7px weight 700 (large text, white on red allowed)
+  ok   --wl-red is used by the unlocked Next button (and O1 Start) only
+
+  contrast (text / background, ratio, needed, use)
+  ok   --wl-ink       on --wl-stone       13.65:1  >= 4.5  headings and chapter name on the ground and the bar
+  ok   --wl-ink       on --wl-ivory       14.24:1  >= 4.5  panel headings
+  ok   --wl-ink       on --wl-white       14.87:1  >= 4.5  card text, menu current chapter
+  ok   --wl-body-ink  on --wl-white       17.61:1  >= 4.5  answer cards
+  ok   --wl-text-2    on --wl-ivory       10.07:1  >= 4.5  context line, subline
+  ok   --wl-text-2    on --wl-white       10.51:1  >= 4.5  card body copy
+  ok   --wl-muted     on --wl-stone        5.76:1  >= 4.5  step labels
+  ok   --wl-muted     on --wl-ivory        6.01:1  >= 4.5  hint line, counters, privacy line, menu chapters
+  ok   --wl-navy      on --wl-white        7.75:1  >= 4.5  Previous, Save, Check, Show me
+  ok   --wl-teal-ink  on --wl-stone        5.63:1  >= 4.5  Focus labels (Where we are, Lesson goals)
+  ok   --wl-teal-ink  on --wl-keypill-bg   5.19:1  >= 4.5  Key idea pill
+  ok   --wl-teal-ink  on --wl-white        6.13:1  >= 4.5  current-step icon and today number, "With mapping"
+  ok   --wl-correct-head on --wl-correct-bg   7.68:1  >= 4.5  correct verdict
+  ok   --wl-correct-head on --wl-chip-bg      7.07:1  >= 4.5  Today chip
+  ok   --wl-fb-text   on --wl-correct-bg  12.10:1  >= 4.5  strip line, correct
+  ok   --wl-error-head on --wl-error-bg     7.06:1  >= 4.5  wrong verdict
+  ok   --wl-fb-text   on --wl-error-bg    12.49:1  >= 4.5  strip line, wrong
+  ok   --wl-text-2    on --wl-neutral-bg   8.28:1  >= 4.5  neutral verdict
+  ok   --wl-fb-text   on --wl-neutral-bg  11.44:1  >= 4.5  strip line, neutral
+  ok   --wl-grey-ink  on --wl-white        7.33:1  >= 4.5  "Without mapping"
+  ok   --wl-evidence  on --wl-stone        6.26:1  >= 4.5  K1 evidence line
+  ok   --wl-idle-ink  on --wl-white        4.65:1  >= 4.5  numbers of steps and stations to come
+  ok   --wl-o1-ground on --wl-turquoise    6.86:1  >= 4.5  Not scored, length and CC chips on glass
+  ok   --wl-white     on --wl-o1-ground   17.03:1  >= 4.5  text on dark glass (the darkest ground it sits on)
+  ok   --wl-white     on --wl-wash-ground 14.00:1  >= 4.5  FX3: headings and lines straight on the dark Focus wash
+  ok   --wl-white     on --wl-red          4.12:1  >= 3  Next label (large text: 18.7px bold), O1 Start (23px bold)
+  ok   --wl-white     on --wl-navy         7.75:1  >= 3  check on navy (graphic)
+  ok   --wl-white     on --wl-teal         4.19:1  >= 3  check on teal (graphic)
+  ok   --wl-white     on --wl-error        5.89:1  >= 3  cross on red (graphic)
+  ok   --wl-navy      on --wl-white        7.75:1  >= 3  focus ring, selected border, markers (UI)
+  ok   --wl-teal      on --wl-white        4.19:1  >= 3  correct border (UI)
+  ok   --wl-error     on --wl-white        5.89:1  >= 3  wrong border (UI)
+  ok   --wl-turquoise on --wl-white        2.48:1  >= 2  current-step ring (decorative; the label is bold and the state is in aria-current)
+  ok   --wl-turquoise on --wl-o1-ground    6.86:1  >= 3  FX2 G END: "complete" in the brand accent on the dark photo (76.8px, large text)
+  ok   --wl-white     on --wl-coach-head  15.67:1  >= 4.5  CO1: "Wawiwa AI Coach" and the close mark on the panel header
+  ok   --wl-coach-sub on --wl-coach-head   9.70:1  >= 4.5  CO1: "Chapter N · verb" under the coach title
+  ok   --wl-body-ink  on --wl-white       17.61:1  >= 4.5  CO1: coach bubble text
+  ok   --wl-white     on --wl-navy         7.75:1  >= 4.5  CO1: learner bubble text
+  ok   --wl-coach-notice on --wl-coach-notice-bg  7.07:1  >= 4.5  CO1: notice bubble
+  ok   --wl-coach-chip on --wl-white        9.39:1  >= 4.5  CO1: chip text
+  ok   --wl-coach-meta on --wl-coach-ground  5.19:1  >= 4.5  CO1: the privacy line under the input
+  ok   --wl-ink       on --wl-white       14.87:1  >= 4.5  CO1: the first-use hint "Stuck? Ask me."
+  ok   --wl-navy      on --wl-white        7.75:1  >= 4.5  CO1: "Got it"
+  ok   --wl-turquoise is text colour only on dark glass
+
+  ok   no English sentences in src/*.js string literals
+  ok   no italics in src/*.css
+  ok   index.html boot fallback equals ui.boot
+  ok   on-screen words at most 45 in all 105 screen views but the allowances below (O1 17, O2 l1 open 49, O2 l23 open 52, O2 l4 open 55, O2 l5 open 48, O2 l6 open 49, O3 45, S01 45, S02 61, W1 38, V1 15, V1 stop1 37, V1 stop2 35, K1 44, S03 38, W2 13, K2 50, K2 case on 68, S04 50, S05a 59, S05b 22, S06 s1 44, S06 s2 44, S07 tile 1 open 42, S07 tile 2 open 38, S07 tile 3 open 40, S07 tile 4 open 41, S07 tile 5 open 42, S07 tile 6 open 40, S07 tile 7 open 42, S07 tile 8 open 39, S07 answering 38, S08 r1 56, S08 r2 52, S08 r3 54, S08B 42, W3 23, V2 21, V2 stop1 34, V2 stop2 33, V2 stop3 29, S09 60, S09 [support] 60, S09 [stretch] 60, S10 43, S10 [support] 42, S10 [stretch] 45, S11 64, S11 [support] 55, S11 [stretch] 55, S12 116, S12 [support] 116, S12 [stretch] 116, S12B 29, W4 26, S13 30, S14 54, S14 [support] 47, S14 [stretch] 53, S15 56, S15 [support] 45, S15 [stretch] 53, K4 66, S16 50, S16 [support] 50, S16 [stretch] 48, S17 case a 65, S17 case b 66, S17 case c 65, S17 case d 64, S17 case e 67, S17 case a [support] 69, S17 case b [support] 71, S17 case c [support] 70, S17 case d [support] 69, S17 case e [support] 68, S17 case a [stretch] 72, S17 case b [stretch] 71, S17 case c [stretch] 70, S17 case d [stretch] 70, S17 case e [stretch] 72, S17B 44, S18A 60, S18 35, S18B 27, S19 123, S20 44, S20B 60, S21 i1 43, S21 i1b 45, S21 i2 35, S21 i2b 37, S21 i3 37, S21 i3b 43, S21 i4 38, S21 i4b 40, S21 i5 44, S21 i5b 53, S21R passed 11, S21R not passed 59, S21R not passed, version b 59, S22 step1 29, S22 step2 27, END passed 19, END not passed 32)
+  WARNING 52 screen views over the 45-word rule by an explicit content allowance:
+          O2 l1 open: 49 words (allowance 55: NL2 foreman decision 3b: the frame's line 'Open any lesson to see how it connects to today.' is restored (10 words); only one lesson's line shows at a time, and O2 is a presentation screen)
+          O2 l23 open: 52 words (allowance 55: NL2 foreman decision 3b: the frame's line 'Open any lesson to see how it connects to today.' is restored (10 words); only one lesson's line shows at a time, and O2 is a presentation screen)
+          O2 l4 open: 55 words (allowance 55: NL2 foreman decision 3b: the frame's line 'Open any lesson to see how it connects to today.' is restored (10 words); only one lesson's line shows at a time, and O2 is a presentation screen)
+          O2 l5 open: 48 words (allowance 55: NL2 foreman decision 3b: the frame's line 'Open any lesson to see how it connects to today.' is restored (10 words); only one lesson's line shows at a time, and O2 is a presentation screen)
+          O2 l6 open: 49 words (allowance 55: NL2 foreman decision 3b: the frame's line 'Open any lesson to see how it connects to today.' is restored (10 words); only one lesson's line shows at a time, and O2 is a presentation screen)
+          S02: 61 words (allowance 61: R4 copy as specified: the Homework 1 top line and the help line bring S02 to 61 words; the 45-word target needs a planning cut (see review/r4/REPORT.md))
+          K2: 50 words (allowance 68: storyboard v3 decision (keep the approved text word for word): the K2 frame copy is 50 words, 68 with the HR case on; a presentation screen, read at the learner's pace)
+          K2 case on: 68 words (allowance 68: storyboard v3 decision (keep the approved text word for word): the K2 frame copy is 50 words, 68 with the HR case on; a presentation screen, read at the learner's pace)
+          S04: 50 words (allowance 50: storyboard v3 decision (keep the approved text word for word): the column subtitles of the S04 frames bring the screen to 50 words with all five cards placed, one card at a time on the deck)
+          S05a: 59 words (allowance 60: storyboard v3 decision (keep the approved text word for word): the S05a frame (diagram labels, the key) as approved; a presentation screen, read at the learner's pace)
+          S08 r1: 56 words (allowance 56: storyboard v3 decision (keep the approved text word for word): the S08 frames add the three rules band and show the hint, 52 to 56 words per round)
+          S08 r2: 52 words (allowance 56: storyboard v3 decision (keep the approved text word for word): the S08 frames add the three rules band and show the hint, 52 to 56 words per round)
+          S08 r3: 54 words (allowance 56: storyboard v3 decision (keep the approved text word for word): the S08 frames add the three rules band and show the hint, 52 to 56 words per round)
+          S09: 60 words (allowance 60: storyboard v3 (S09: the explain band with the four sensitivity levels joins the sort deck; keep the approved text word for word): 60 words with all six cards placed)
+          S09 [support]: 60 words (allowance 60: storyboard v3 (S09: the explain band with the four sensitivity levels joins the sort deck; keep the approved text word for word): 60 words with all six cards placed)
+          S09 [stretch]: 60 words (allowance 60: storyboard v3 (S09: the explain band with the four sensitivity levels joins the sort deck; keep the approved text word for word): 60 words with all six cards placed)
+          S11: 64 words (allowance 64: storyboard v3 (S11: the explain band, three parts of a checkable metric, joins the four answers and the slots; keep the approved text word for word))
+          S11 [support]: 55 words (allowance 64: storyboard v3 (S11: the explain band, three parts of a checkable metric, joins the four answers and the slots; keep the approved text word for word))
+          S11 [stretch]: 55 words (allowance 64: storyboard v3 (S11: the explain band, three parts of a checkable metric, joins the four answers and the slots; keep the approved text word for word))
+          S12: 116 words (allowance 120: storyboard v3 (S12: over 45 words, document view): the full HR map shows all eight filled fields at once, read as a document)
+          S12 [support]: 116 words (allowance 120: storyboard v3 (S12: over 45 words, document view): the full HR map shows all eight filled fields at once, read as a document)
+          S12 [stretch]: 116 words (allowance 120: storyboard v3 (S12: over 45 words, document view): the full HR map shows all eight filled fields at once, read as a document)
+          S14: 54 words (allowance 54: storyboard v3 (S14: the handoff band and the handoff visual join the situation and four answers; keep the approved text word for word))
+          S14 [support]: 47 words (allowance 54: storyboard v3 (S14: the handoff band and the handoff visual join the situation and four answers; keep the approved text word for word))
+          S14 [stretch]: 53 words (allowance 54: storyboard v3 (S14: the handoff band and the handoff visual join the situation and four answers; keep the approved text word for word))
+          S15: 56 words (allowance 56: storyboard v3 (S15: the bottleneck band and the longer eyebrow join the case line and three answers; keep the approved text word for word))
+          S15 [stretch]: 53 words (allowance 56: storyboard v3 (S15: the bottleneck band and the longer eyebrow join the case line and three answers; keep the approved text word for word))
+          K4: 66 words (allowance 66: storyboard v3 (K4: a new key idea, two columns with the three good fits and their lines; keep the approved text word for word); a presentation screen, read at the learner's pace)
+          S16: 50 words (allowance 50: storyboard v3 (S16: the hint line under the heading and four columns with all six cards placed; keep the approved text word for word))
+          S16 [support]: 50 words (allowance 50: storyboard v3 (S16: the hint line under the heading and four columns with all six cards placed; keep the approved text word for word))
+          S16 [stretch]: 48 words (allowance 50: storyboard v3 (S16: the hint line under the heading and four columns with all six cards placed; keep the approved text word for word))
+          S17 case a: 65 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case b: 66 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case c: 65 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case d: 64 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case e: 67 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case a [support]: 69 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case b [support]: 71 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case c [support]: 70 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case d [support]: 69 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case e [support]: 68 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case a [stretch]: 72 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case b [stretch]: 71 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case c [stretch]: 70 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case d [stretch]: 70 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S17 case e [stretch]: 72 words (allowance 72: storyboard v3 decision (S17 "read, then sort": the five mistakes with their one-line definitions, no separate K5 screen); FX2 D1: one case at a time, the mistakes as answer cards)
+          S18A: 60 words (allowance 60: storyboard v3 Ch5-6 (S18A: the header chip, the hint line and four fields with their subtitles, all four cards chosen; text as approved; FX2 D2: workbook rows with a select))
+          S19: 123 words (allowance 125: storyboard v3 Ch5-6 Q6 (accepted, document view, as S12): the brief, the four copy cards with their labels and field chips, the workbook's eight field names and the return line; the learner's own text is not counted)
+          S20B: 60 words (allowance 60: storyboard v3 Ch5-6 S20B (read then pick, as S17's definitions): the five mistakes with their one-line definitions, the hint line and the note; text as approved)
+          S21 i5b: 53 words (allowance 55: FX3 S21 item 5b (approved text): the eight lines of the AI-drafted sales map, longer than the HR map's; the other items stay under 45)
+          S21R not passed: 59 words (allowance 60: storyboard v3 Ch5-6 S21R, worst case (all five items missed): the chip and its line, each missed item's one-line stem and its line (the review links are buttons, not counted); FX2 H1 (Noy, 22 Oct 2026))
+          S21R not passed, version b: 59 words (allowance 60: storyboard v3 Ch5-6 S21R, worst case (all five items missed): the chip and its line, each missed item's one-line stem and its line (the review links are buttons, not counted); FX2 H1 (Noy, 22 Oct 2026))
+  ok   all 389 hints, feedback lines and pause markers at most 25 words
+  ok   scored: 10 interactions on S21 (L4_S21_1, L4_S21_2, L4_S21_3, L4_S21_4, L4_S21_5, L4_S21_1b, L4_S21_2b, L4_S21_3b, L4_S21_4b, L4_S21_5b), pass mark 80
+  ok   all 56 interactions have full tracking metadata (L4_S01_1, L4_S02_1, L4_S02_2, L4_W1_1, L4_V1_1, L4_V1_2, L4_S03_1, L4_W2_1, L4_S04_1, L4_S05B_1, L4_S06_1, L4_S06_2, L4_S07_1, L4_S08_1, L4_S08_2, L4_S08_3, L4_S08B_1, L4_S08B_2, L4_S08B_3, L4_W3_1, L4_V2_1, L4_V2_2, L4_V2_3, L4_S09_1, L4_S10_1, L4_S11_1, L4_S12_1, L4_S12B_1, L4_S12B_2, L4_S12B_3, L4_W4_1, L4_S13_1, L4_S14_1, L4_S15_1, L4_S16_1, L4_S17_1, L4_S17B_1, L4_S17B_2, L4_S18A_1, L4_S18_1, L4_S18_2, L4_S20_1, L4_S20_2, L4_S20_3, L4_S20_4, L4_S21_1, L4_S21_2, L4_S21_3, L4_S21_4, L4_S21_5, L4_S21_1b, L4_S21_2b, L4_S21_3b, L4_S21_4b, L4_S21_5b, L4_S22_1)
+  ok   no arrow glyph in ui strings or src (icon arrow-right exists)
+  ok   every hex colour in src/ is an approved token (49 allowed)
+  ok   2 videos: media and captions exist, stop times in order (V1 61.159s/136.265s, V2 46.999s/81.366s/131.097s)
+  ok   all 6 image slots have a file or null, alt text and a prompt file (O1, S01, S03 case1, S03 case2, S06 s1, S06 s2)
+  ok   12 scene photos exist (ch0 ch1-intro.jpg, ch1 ch2-why-map.jpg, ch2 ch3-toolkit.jpg, ch3 ch4-hr-demo.jpg, ch4 ch5-critical-eye.jpg, ch5 ch6-build-yours.jpg, ch6 ch7-wrap-up.jpg, O1 o1-lanes-office.jpg, W3 ch4-hr-demo.jpg, W4 ch5-critical-eye.jpg, S14 ch5-critical-eye.jpg, S15 ch5-critical-eye.jpg)
+  ok   every chapter screen names its step (verb + icon)
+  ok   the steps of each chapter all differ (verb and icon)
+  ok   fonts self-hosted, no Google Fonts: Assistant 400, Assistant 600, Assistant 700, Assistant 800, Roboto 400, Roboto 500, Roboto 700
+  ok   version stamp ?v=41429d1d on all 109 links (pages, imports)
+  ok   the content is fetched fresh (cache: 'no-cache') in src\engine.js, src\review\page.js
+  ok   coach: no network code in 2 src/coach files (one transport, ask()), no proxy URL in src, index.html or content
+  ok   coach: every slice screen has its kind and tip (42 drafted, 0 copied from the hint), S21 locked
+  ok   coach: content/coach/grounding-pack.md exists
+  ok   personal path: c4 on ch3 counts 9 (L4_PATH_C4), c5 on ch4 counts 4 (L4_PATH_C5); 8 adaptive screens (S09 g2, S10 g3, S11 g4, S12 g1, S14 g1, S15 g5, S16 g5, S17 g5), support and stretch each: same template and counts, keys match, deck sources, no banned wording or S21 case
+
+check passed
+check exit 0

@@ -1,0 +1,156 @@
+/* FX7 round 3: the original Hybrid cinematic palette (src/tokens.css only). Planning only. */
+main { max-width: 1500px; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cap { margin: 0 0 6px; font-size: 15px; font-weight: 700; color: var(--wl-muted); }
+
+.v3 { background: var(--wl-stage-ground); }
+.v3-photo { position: absolute; left: -540px; top: -150px; width: 1820px; height: 1024px; object-fit: cover; }
+
+/* the Kit 13 bar, dark translucent over the photo */
+.v3-bar { position: absolute; inset: 0 0 auto 0; height: 80px; z-index: 3; display: flex; align-items: center; gap: 14px; padding: 0 24px;
+  background: var(--wl-bar-stage-bg); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); color: var(--wl-white); }
+.v3-bar .logo { width: 72px; }
+.v3-bar .dv { width: 1px; height: 32px; background: var(--wl-bar-on-dark-rule); }
+.v3-bar .burger { width: 44px; height: 44px; display: grid; place-content: center; background: none; border: 0; color: var(--wl-white); }
+.v3-bar .burger .ic { width: 26px; height: 26px; }
+.v3-bar .chap span { display: block; font: 500 14px var(--wl-font-label); color: var(--wl-bar-on-dark-text); }
+.v3-bar .chap b { font-size: 22px; font-weight: 800; line-height: 1.1; }
+.v3-steps { margin: 0 0 0 auto; padding: 0; list-style: none; display: flex; align-items: flex-start; }
+.v3-steps li:not(.cn) { width: 66px; display: flex; flex-direction: column; align-items: center; }
+.v3-steps .d { width: 38px; height: 38px; border-radius: 50%; display: grid; place-content: center; }
+.v3-steps .d .ic { width: 19px; height: 19px; }
+.v3-steps .done .d { background: var(--wl-white); color: var(--wl-ink); }
+.v3-steps .done .d .ic { stroke-width: 3; }
+.v3-steps .cur .d { background: var(--wl-white); color: var(--wl-teal-ink); border: 3px solid var(--wl-turquoise); box-shadow: 0 0 0 7px var(--wl-halo); }
+.v3-steps .todo .d { background: var(--wl-bar-on-dark-disc); border: 1px solid var(--wl-bar-on-dark-ring); color: var(--wl-bar-on-dark-icon); }
+.v3-steps .l { margin-top: 5px; font: 500 14px var(--wl-font-label); color: var(--wl-bar-on-dark-text); }
+.v3-steps .cur .l { color: var(--wl-white); font-weight: 700; }
+.v3-steps .cn { width: 16px; height: 3px; margin-top: 18px; border-radius: 2px; background: var(--wl-bar-on-dark-link); }
+
+/* the panel, docked right, full height */
+.v3-panel { position: absolute; left: 576px; right: 24px; top: 96px; bottom: 16px; z-index: 2; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--wl-ivory); border-radius: var(--wl-radius-panel); box-shadow: var(--wl-panel-shadow); animation: panelIn .6s var(--wl-ease-enter) both; }
+.v3-body { flex: 1; padding: 38px 44px 18px; }
+.v3-body.center { display: flex; flex-direction: column; justify-content: center; padding-bottom: 30px; }
+.v3-quote { position: relative; margin: 0; padding-left: 46px; }
+.v3-quote .qm { position: absolute; left: 0; top: -14px; font-size: 76px; font-weight: 800; line-height: 1; color: var(--wl-turquoise); }
+.v3-quote p { margin: 0; font-size: 26px; font-weight: 800; line-height: 1.2; color: var(--wl-ink); }
+.v3-quote cite { display: block; margin-top: 6px; font-style: normal; font-size: 15px; color: var(--wl-muted); }
+.v3-ctx { margin: 14px 0 0 46px; font-size: 18px; line-height: 1.4; color: var(--wl-text-2); }
+.v3-ctx.top { margin: 0; }
+.v3-instr { margin: 30px 0 18px; font-size: 36px; font-weight: 800; letter-spacing: -.01em; line-height: 1.1; color: var(--wl-ink); }
+.v3-body.center .v3-instr { margin-top: 8px; }
+
+.v3-opts { display: flex; flex-direction: column; gap: 12px; }
+.v3-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.v3-opt { width: 100%; min-height: 64px; display: flex; align-items: center; gap: 14px; padding: 10px 18px; background: var(--wl-white);
+  border: 1.5px solid var(--wl-card-line); border-radius: var(--wl-radius-card); font-size: 20px; font-weight: 600; color: var(--wl-body-ink); text-align: left; line-height: 1.2; }
+.v3-opt.tile { min-height: 60px; }
+.v3-opt .oi { width: 22px; height: 22px; color: var(--wl-navy); flex: none; }
+.v3-opt em { margin-left: auto; flex: none; font-style: normal; font-size: 15px; font-weight: 700; }
+.rd, .bx { width: 24px; height: 24px; flex: none; display: grid; place-content: center; border: 2px solid var(--wl-line-strong); color: var(--wl-white); }
+.rd { border-radius: 50%; }
+.bx { border-radius: 6px; }
+.rd .ic, .bx .ic { width: 15px; height: 15px; stroke-width: 3.2; }
+.v3-opt.picked { border: 2px solid var(--wl-navy); }
+.bx.on { background: var(--wl-navy); border-color: var(--wl-navy); }
+.v3-opt.wrong { border: 2px solid var(--wl-error); background: var(--wl-error-bg); }
+.v3-opt.wrong .fill { background: var(--wl-error); border-color: var(--wl-error); }
+.v3-opt.wrong em { color: var(--wl-error-head); }
+.v3-opt.right { border: 2px solid var(--wl-teal); background: var(--wl-correct-bg); }
+.v3-opt.missed { border: 2px dashed var(--wl-teal); background: var(--wl-white); }
+.v3-opt.right .fill, .v3-opt.missed .fill { background: var(--wl-teal); border-color: var(--wl-teal); }
+.v3-opt.right em, .v3-opt.missed em { color: var(--wl-correct-head); }
+.v3-opt.dim { color: var(--wl-muted); background: var(--wl-stone); }
+.v3-opt.dim .oi { color: var(--wl-muted); }
+
+/* the panel's bottom row, and the feedback sheet that replaces it */
+.v3-bottom { flex: none; height: 88px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; border-top: 1px solid var(--wl-line); }
+.v3-prev { height: 46px; padding: 0 18px; display: flex; align-items: center; gap: 8px; background: var(--wl-white); border: 1.5px solid var(--wl-line-strong); border-radius: var(--wl-radius-btn); font-size: 16px; font-weight: 600; color: var(--wl-ink); }
+.v3-prev .ic { width: 18px; height: 18px; }
+.v3-check { height: 52px; padding: 0 32px; display: flex; align-items: center; gap: 8px; border: 0; border-radius: var(--wl-radius-btn); background: var(--wl-navy); color: var(--wl-white); font-size: 18.7px; font-weight: 700; }
+.v3-check.locked { background: var(--wl-neutral-bg); color: var(--wl-muted); border: 1.5px solid var(--wl-line-strong); font-size: 17px; }
+.v3-check .ic { width: 17px; height: 17px; }
+.v3-sheet { flex: none; min-height: 140px; display: flex; align-items: center; gap: 24px; padding: 22px 28px 24px 32px; animation: sheetUp .32s var(--wl-ease-enter) both; }
+.v3-sheet.wrong { background: var(--wl-error-bg); border-top: 3px solid var(--wl-error); }
+.v3-sheet.right { background: var(--wl-correct-bg); border-top: 3px solid var(--wl-teal); }
+.sh-txt { flex: 1; }
+.vd { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 25px; font-weight: 800; }
+.v3-sheet.wrong .vd { color: var(--wl-error-head); }
+.v3-sheet.right .vd { color: var(--wl-correct-head); }
+.vi { width: 34px; height: 34px; border-radius: 50%; display: grid; place-content: center; color: var(--wl-white); }
+.v3-sheet.wrong .vi { background: var(--wl-error); }
+.v3-sheet.right .vi { background: var(--wl-teal); }
+.vi .ic { width: 19px; height: 19px; stroke-width: 3.2; }
+.wy { margin: 8px 0 0 44px; font-size: 18.5px; line-height: 1.4; color: var(--wl-fb-text); }
+.v3-next { flex: none; height: 54px; padding: 0 30px; display: flex; align-items: center; gap: 8px; border: 0; border-radius: var(--wl-radius-btn); background: var(--wl-turquoise); color: var(--wl-ink); font-size: 18.7px; font-weight: 700; }
+.v3-next.pulse { box-shadow: 0 0 0 7px var(--wl-halo); }
+.v3-next .ic { width: 19px; height: 19px; }
+
+/* S03: the two video cases as a film strip in the photo zone */
+.v3-film { position: absolute; left: 24px; top: 96px; bottom: 16px; width: 528px; display: flex; flex-direction: column; gap: 16px; }
+.v3-film figure { margin: 0; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.v3-film img { flex: 1; min-height: 0; width: 100%; object-fit: cover; border-radius: 12px; }
+.v3-film figcaption { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 16px; font-weight: 600; color: var(--wl-on-wash); }
+.v3-film figcaption .ic { width: 15px; height: 15px; color: var(--wl-aqua-text); }
+
+@keyframes panelIn { from { opacity: 0; transform: translateX(32px); } }
+@keyframes sheetUp { from { transform: translateY(100%); } }
+
+/* ---------- round 4 ---------- */
+/* tighter S01 so the feedback card fits under the answers */
+.v3-body { padding: 28px 44px 10px; }
+.v3-quote p { font-size: 24px; }
+.v3-ctx { margin-top: 8px; }
+.v3-instr { margin: 22px 0 14px; font-size: 34px; }
+.v3-opts { gap: 10px; }
+.v3-opt { min-height: 56px; }
+.v3-opt.tile { min-height: 54px; }
+.v3-bottom { height: 78px; }
+/* the feedback card: right under the answers, a tinted note with a thick left edge (never an answer's full border) */
+.v4-fb { display: flex; align-items: flex-start; gap: 12px; margin-top: 14px; padding: 12px 18px 13px 16px; border-radius: var(--wl-radius-card);
+  box-shadow: var(--wl-card-shadow); animation: fbIn .32s var(--wl-ease-enter) both; }
+.v4-fb.wrong { background: var(--wl-error-bg); border-left: 5px solid var(--wl-error); }
+.v4-fb.right { background: var(--wl-correct-bg); border-left: 5px solid var(--wl-teal); }
+.v4-fb .vi { flex: none; width: 28px; height: 28px; margin-top: 1px; }
+.v4-fb .vi .ic { width: 16px; height: 16px; }
+.v4-fb.wrong .vi { background: var(--wl-error); }
+.v4-fb.right .vi { background: var(--wl-teal); }
+.v4-fb p { margin: 0; font-size: 18px; line-height: 1.42; color: var(--wl-fb-text); }
+.v4-fb.wrong b { color: var(--wl-error-head); }
+.v4-fb.right b { color: var(--wl-correct-head); }
+/* S03: the chapter photo, blurred and dark, behind everything (the original Focus wash), so the bar looks as on S01 */
+.v4-wash { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(18px) brightness(.42) saturate(.8); transform: scale(1.1); }
+@keyframes fbIn { from { opacity: 0; transform: translateY(-8px); } }
+
+/* ---------- round 5: the feedback in its own colour (not the wrong answer's red), further from the answers ---------- */
+.v4-fb { margin-top: 30px; border-left: 0 !important; padding: 16px 20px 17px 18px; }
+.v4-fb .vi { width: 30px; height: 30px; }
+/* option 1: dark ink card */
+.fb-dark .v4-fb { background: var(--wl-ink) !important; box-shadow: var(--wl-card-shadow); }
+.fb-dark .v4-fb p { color: var(--wl-glass-text); }
+.fb-dark .v4-fb b { color: var(--wl-white) !important; }
+/* option 2: warm neutral card */
+.fb-light .v4-fb { background: var(--wl-neutral-bg) !important; box-shadow: none; }
+.fb-light .v4-fb p { color: var(--wl-fb-text); }
+
+/* ---------- round 6: the light feedback reads as a message, not as a fourth answer ---------- */
+/* answers that were not picked stay white (a grey-filled row looked like the feedback's sibling) */
+.v3-opt.dim { background: var(--wl-white); color: var(--wl-muted); border-color: var(--wl-line); }
+.v4-fb { position: relative; display: block; margin-top: 32px; padding: 16px 24px 18px; border-radius: 16px; }
+.v4-fb::before { content: ""; position: absolute; left: 34px; top: -9px; width: 18px; height: 18px; transform: rotate(45deg); border-radius: 3px 0 0 0; }
+.fb-light .v4-fb::before { background: var(--wl-neutral-bg); }
+.fb-dark .v4-fb::before { background: var(--wl-ink); }
+.fb-v { display: flex; align-items: center; gap: 10px; margin: 0; }
+.fb-v b { font-size: 21px; font-weight: 800; }
+.v4-fb .vi { width: 28px; height: 28px; margin: 0; }
+.v4-fb p.fb-w { margin: 6px 0 0 38px; font-size: 18px; line-height: 1.42; }
+.stage-photo .v3-instr { margin: 18px 0 12px; }
+.stage-photo .v3-opt { min-height: 54px; }
+.v4-fb { padding: 14px 24px 16px; }
+/* S03 has four answers: a little tighter so the message fits */
+.stage-film .v3-body { padding-top: 22px; }
+.stage-film .v3-instr { margin: 12px 0 12px; }
+.stage-film .v3-opt.tile { min-height: 50px; }
+.stage-film .v3-opts { gap: 8px; }
+.stage-film .v4-fb { margin-top: 26px; }

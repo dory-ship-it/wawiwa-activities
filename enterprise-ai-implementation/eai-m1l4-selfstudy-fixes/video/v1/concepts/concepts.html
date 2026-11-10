@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>V1 concept stills</title>
+<link rel="icon" href="data:,">
+<!-- P2 Part A: two visual directions for V1, one still each at the busiest moment (end of segment 5,
+     all counters built). Review sketch only; Part B builds the chosen one as film.html.
+     ?d=1 process as a conveyor, ?d=2 two timelines. All words come from film.json. -->
+<link rel="stylesheet" href="../../../src/fonts.css">
+<style>
+  :root {
+    --navy: #255777; --turq: #5AB3AA; --teal: #3E868F; --teal-text: #2E6E76; --teal-tint: #E8F3F2;
+    --red: #EE3124; --grey: #E6E6E8; --line: #D5D7DB; --neutral-tint: #EEF2F6;
+    --past: #A3AEB9; --past-line: #D3DAE0;
+  }
+  html, body { margin: 0; background: #fff; }
+  #stage { position: relative; width: 1280px; height: 720px; overflow: hidden; background: #fff; color: var(--navy);
+    font-family: "Assistant", "Roboto", Arial, sans-serif; line-height: 1.2; }
+  #stage * { box-sizing: border-box; }
+  .abs { position: absolute; }
+  .logo { position: absolute; top: 30px; right: 72px; width: 108px; height: auto; }
+  .kw { font-size: 32px; font-weight: 600; }
+  .num { font-size: 64px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+  .red { color: var(--red); }
+  .row { display: flex; align-items: center; gap: 14px; }
+  .chip { display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 20px; border: 2px solid var(--navy);
+    border-radius: 26px; font-size: 32px; font-weight: 700; white-space: nowrap; }
+  .chip.hedge { border: 0; background: var(--neutral-tint); font-weight: 600; }
+  .ai { display: inline-flex; align-items: center; justify-content: center; background: var(--navy); color: #fff;
+    border-radius: 14px; font-weight: 800; }
+  .past, .past .chip { color: var(--past); border-color: var(--past-line); }
+  .past .fixed { color: #9FC3C6; border-color: #C7DEDF; background: #F4F9F9; }
+  .strike { text-decoration: line-through; text-decoration-thickness: 3px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(37,87,119,.07);
+    padding: 22px 24px; }
+  .card .ico { color: var(--navy); }
+  .card .label { margin-top: 10px; }
+  .fixed { color: var(--teal-text); border: 2px solid var(--teal); background: var(--teal-tint); border-radius: 10px; padding: 2px 14px; }
+  svg.w-icon { flex: none; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script type="module">
+import { icon } from '../../../src/icons.js';
+
+// Lucide message-circle (ISC), not in the module icon set.
+const msg = (size, cls = '') => `<svg class="w-icon ${cls}" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`;
+const ic = (name, size) => icon(name, { size }).outerHTML;
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// Keyword with the arrow glyph drawn as the arrow-right icon (P1 note: never the glyph itself).
+const kw = (s, size = 32) => esc(s).split('→').map((p) => p.trim()).join(` ${ic('arrow-right', size)} `);
+// "2.3M conversations / month" -> ["2.3M", "conversations / month"]
+const split = (s) => { const m = s.match(/^(~?[\d.,]+[A-Za-z%]*)\s+(.*)$/); return m ? [m[1], m[2]] : [s, '']; };
+
+const film = await (await fetch('../film.json')).json();
+const seg = (n) => film.segments.find((s) => s.n === n).onScreen;
+const [s3, s4, s5] = [seg(3), seg(4), seg(5)];
+// segment 5: "2024 to 2025", "2.3M conversations / month", "~700 reps: load reduction", "~11 min → under 2", "per reports"
+const [era5, conv, reps, time, hedge] = s5;
+const [convN, convL] = split(conv), [repsN, repsL] = split(reps);
+const [timeA, timeB] = time.split('→').map((p) => p.trim());
+// segment 3: "early 1980s", "500", "~100", "5x"; segment 4: docs, receipt record, ~75% fewer
+const [era3, n500, n100, n5x] = s3;
+const [docs, receipt, fewer] = s4;
+const AI = film.labels.aiChip;
+const logo = `<img class="logo" src="../../../${film.logo.src}" alt="">`;
+
+const counters = (y) => `
+  <div class="abs card" style="left:72px;top:${y}px;width:270px;height:200px">
+    <div class="ico abs" style="right:22px;top:22px">${msg(36)}</div>
+    <div class="num">${esc(convN)}</div>
+    <div class="kw label">${esc(convL)}</div>
+  </div>
+  <div class="abs card" style="left:366px;top:${y}px;width:270px;height:200px">
+    <div class="ico abs" style="right:22px;top:22px">${ic('person', 36)}</div>
+    <div class="num red">${esc(repsN)}</div>
+    <div class="kw label">${esc(repsL)}</div>
+  </div>
+  <div class="abs card" style="left:660px;top:${y}px;width:548px;height:200px">
+    <div class="ico abs" style="right:22px;top:22px">${ic('clock', 36)}</div>
+    <div class="row num" style="gap:16px;margin-top:44px;white-space:nowrap;font-size:56px">
+      <span>${esc(timeA)}</span><span style="display:flex">${ic('arrow-right', 48)}</span><span>${esc(timeB)}</span></div>
+  </div>`;
+
+function direction1() {
+  // Ghost of case one (greyed, rebuilt conveyor), the case-two conveyor with the AI chip, counters below.
+  const roll = Array.from({ length: 15 }, (_, i) => `<circle cx="${100 + i * 79}" cy="330" r="7" fill="#fff" stroke="var(--turq)" stroke-width="3"/>`).join('');
+  const inQ = [96, 166, 228, 284, 334, 380, 424, 466, 506].map((x, i) => `<div class="abs" style="left:${x}px;top:${270 - (i % 2) * 6}px;color:var(--navy)">${msg(44)}</div>`).join('');
+  const outQ = [780, 920, 1060].map((x) => `
+    <div class="abs" style="left:${x}px;top:262px;color:var(--navy)">${msg(44)}</div>
+    <div class="abs" style="left:${x + 28}px;top:250px;width:26px;height:26px;border-radius:13px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center">${ic('check', 18)}</div>
+    <svg class="abs" style="left:${x - 62}px;top:270px" width="54" height="30" aria-hidden="true"><g stroke="var(--turq)" stroke-width="4" stroke-linecap="round"><path d="M6 6h40"/><path d="M18 15h28"/><path d="M10 24h36"/></g></svg>`).join('');
+  return `
+  <div class="abs row past" style="left:72px;top:44px;gap:18px;font-size:26px;font-weight:600">
+    <span class="chip" style="font-size:26px;height:44px;padding:0 16px">${esc(era3)}</span>
+    <span class="row" style="gap:4px">${ic('transcript', 30)}${ic('transcript', 30)}${ic('transcript', 30)}</span>
+    ${ic('arrow-right', 26)}
+    <span class="fixed row" style="gap:8px;font-size:26px">${kw(receipt, 24)}</span>
+    <span>${esc(fewer)}</span>
+  </div>
+  <svg class="abs" style="left:72px;top:100px" width="1000" height="8" aria-hidden="true"><path d="M0 4h1000" stroke="var(--past-line)" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/></svg>
+
+  <div class="abs" style="left:72px;top:150px"><span class="chip">${esc(era5)}</span></div>
+  <div class="abs" style="right:72px;top:150px"><span class="chip hedge">${ic('info', 28)} ${esc(hedge)}</span></div>
+
+  <svg class="abs" style="left:0;top:0" width="1280" height="720" aria-hidden="true">
+    <path d="M72 318H1208M72 342H1208" stroke="var(--turq)" stroke-width="4"/>
+    ${roll}
+    <path d="M207 342V440M501 342V440M934 342V440" stroke="var(--turq)" stroke-width="2" stroke-dasharray="4 6"/>
+  </svg>
+  ${inQ}
+  <div class="abs ai" style="left:580px;top:222px;width:132px;height:96px;font-size:48px">${esc(AI)}</div>
+  ${outQ}
+  ${counters(440)}
+  ${logo}`;
+}
+
+function direction2() {
+  // Two lanes: early 1980s (done, greyed) above, 2024 to 2025 (building) below. They meet in segment 8.
+  const dotsA = '<g id="dotsA"></g>'; // placed under each [data-dot] item after layout
+  const dotsB = [207, 501, 934].map((x) => `<circle cx="${x}" cy="650" r="9" fill="var(--turq)"/><path d="M${x} 604V641" stroke="var(--turq)" stroke-width="3"/>`).join('');
+  return `
+  <div class="abs past" style="left:0;top:0;width:1280px;height:300px">
+    <div class="abs row" style="left:72px;top:40px;gap:14px"><span class="chip">${esc(era3)}</span>${ic('person', 36)}</div>
+    <div class="abs row" style="left:72px;top:126px;gap:36px;align-items:flex-end">
+      <span class="num" data-dot style="font-size:56px">${esc(n500)}</span>
+      <span class="num" data-dot style="font-size:56px">${esc(n100)}</span>
+      <span class="num" data-dot style="font-size:56px">${esc(n5x)}</span>
+    </div>
+    <div class="abs" style="left:560px;top:104px;display:grid;gap:8px;justify-items:start">
+      <div class="kw row strike" data-dot>${ic('transcript', 30)} ${esc(docs)}</div>
+      <div class="kw"><span class="fixed row" style="display:inline-flex;gap:10px">${kw(receipt, 28)}</span></div>
+      <div class="kw">${esc(fewer)}</div>
+    </div>
+    <svg class="abs" style="left:0;top:0" width="1280" height="300" aria-hidden="true">
+      <path d="M72 276H1208" stroke="var(--past-line)" stroke-width="4"/>${dotsA}
+    </svg>
+  </div>
+
+  <div class="abs row" style="left:72px;top:322px;gap:14px">
+    <span class="chip">${esc(era5)}</span>
+    <span class="ai" style="width:76px;height:52px;font-size:30px">${esc(AI)}</span>
+  </div>
+  <div class="abs" style="right:72px;top:322px"><span class="chip hedge">${ic('info', 28)} ${esc(hedge)}</span></div>
+  ${counters(404)}
+  <svg class="abs" style="left:0;top:0" width="1280" height="720" aria-hidden="true">
+    <path d="M72 650H1208" stroke="var(--turq)" stroke-width="4"/>${dotsB}
+  </svg>
+  ${logo}`;
+}
+
+const d = new URLSearchParams(location.search).get('d') || '1';
+document.getElementById('stage').innerHTML = d === '2' ? direction2() : direction1();
+await document.fonts.ready;
+const g = document.getElementById('dotsA');
+if (g) g.innerHTML = [...document.querySelectorAll('[data-dot]')].map((el) => {
+  const b = el.getBoundingClientRect(), x = Math.round(b.width > 200 ? b.left + 15 : b.left + b.width / 2);
+  return `<circle cx="${x}" cy="276" r="7" fill="#fff" stroke="var(--past-line)" stroke-width="3"/>`;
+}).join('');
+await Promise.all([...document.images].map((im) => im.complete ? 0 : new Promise((r) => { im.onload = im.onerror = r; })));
+window.__ready = true;
+</script>
+</body>
+</html>

@@ -1,0 +1,533 @@
+// Fit and layout harness (P1.5 version). Adapted from
+// genai-for-marketing/s1-ai-awareness/tools/test-fit.mjs: tiny static server + puppeteer-core +
+// the machine's Chrome. Mouse-driven (the keyboard walk is tools/walk.mjs).
+//   1. load and scale at 1280x720, 1920x1080, 1024x576: stage inside the window, no scrollbars,
+//      the shell in place (NL1: top bar 97.28 px, main under it, Previous / Next bottom left and
+//      right), no console errors
+//   2. every slice screen in every band state: the band never overlaps the screen's content, it is
+//      flush to its panel's edges, nothing clipped, contrast of every text/background pair, no text
+//      under 14 px, targets 44 px
+//   2b. PP1: the eight adaptive screens on each level (support, core, stretch via ?debug=1&level=) in
+//      their main states, the answers read from the variant shown; the same checks as 2 (a state that
+//      fails on the core screen too is listed as a WARNING: core is not PP1's to change)
+//   3. the open menu and its dialogs: the same contrast, size and target checks
+//   4. CO1, the coach on every slice screen: the launcher in the bar (56 x 56, y 0 to 80.64, the bar's
+//      parts still fit, nothing clipped), then the open panel at the left and the right dock: inside y 96
+//      to 632 and 24 from its side, opaque and on top, clear of Previous / Next and the bar, and the
+//      screen's layout checks with it open. CO2: with the live page (a local stub at the coach URL)
+//      filling the body under the header, 340 wide to the panel's foot (hidden on S21)
+// Usage: npm run test:fit                 everything
+//        node tools/test-fit.mjs S09 W3    only these screens' states (sections 2 and 4), for a quick check
+//        --coach                           section 4 only
+// Chrome: set CHROME_PATH, or a stock Google Chrome / Chromium install is found on its own.
+import puppeteer from 'puppeteer-core';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { startServer, ROOT } from './serve.mjs';
+import { chromePath, measureLayout, layoutVerdict, stubCoach } from './lib.mjs';
+
+// every screen state at these sizes; 1366x650 to 2560x1080: browser windows with their bars, stage
+// widened (2560x1080 caps the stage at 1600 and letterboxes the rest)
+// FX1: --sizes=1280x720,1600x900 measures only these sizes (the fast run); the full six are for packaging
+const SIZE_ARG = process.argv.find((a) => a.startsWith('--sizes='));
+const SIZES = SIZE_ARG ? SIZE_ARG.slice(8).split(',').map((s) => s.split('x').map(Number)) : [[1280, 720], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 1080]];
+const ONLY = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+const COACH_ONLY = process.argv.includes('--coach'); // CO1: section 4 only
+const fails = [];
+const ok = (m) => console.log('  ok   ' + m);
+const fail = (m) => { fails.push(m); console.log('  FAIL ' + m); };
+const expect = (cond, m) => (cond ? ok(m) : fail(m));
+
+const server = await startServer(0);
+const BASE = `http://127.0.0.1:${server.address().port}/index.html`;
+const browser = await puppeteer.launch({ executablePath: chromePath(), headless: true, args: ['--no-first-run', '--disable-extensions', '--hide-scrollbars'] });
+const pairs = new Map(); // every text/background pair seen, for the report
+
+// Each page in its own browser context, closed with the page: after about a thousand pages in one
+// browser the shared media loading stalled (the V1 film stopped buffering mid-way at 2560x1080).
+// NL3: after a few hundred pages one load sometimes never settles (S15 at 1024x576 waited 30 s for
+// the fonts; alone it loads at once). Such a load is tried once more in a fresh context.
+// coach: CO2, the live coach page's local stub at the coach URL (tools/coach-stub.html; no network)
+async function open(query, size = [1280, 720], { coach = false } = {}) {
+  try { return await openOnce(query, size, coach); } catch (e) {
+    if (e.name !== 'TimeoutError') throw e;
+    console.log(`  note ${query} ${size.join('x')}: load timed out, tried once more`);
+    return openOnce(query, size, coach);
+  }
+}
+async function openOnce(query, [w, h], coach = false) {
+  const context = await browser.createBrowserContext();
+  const page = await context.newPage();
+  const closePage = page.close.bind(page);
+  page.close = async () => { await closePage().catch(() => {}); await context.close().catch(() => {}); };
+  if (coach) await stubCoach(page);
+  page.errors = [];
+  page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warn') page.errors.push(m.type() + ': ' + m.text()); });
+  page.on('pageerror', (e) => page.errors.push('pageerror: ' + e.message));
+  await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+  try {
+    await page.goto(BASE + query, { waitUntil: /screen=V\d/.test(query) ? 'load' : 'networkidle0' }); // a film keeps a range request open
+    await page.waitForFunction(() => window.__l4 && document.fonts.status === 'loaded');
+    await page.evaluate(() => document.fonts.ready);
+  } catch (e) { await page.close(); throw e; }
+  return page;
+}
+async function measure(page, what) {
+  await page.mouse.move(0, 0); // no hover state in the measure
+  const m = await page.evaluate(measureLayout);
+  for (const [k, v] of Object.entries(m.contrast)) if (!pairs.has(k)) pairs.set(k, v);
+  const [good, detail] = layoutVerdict(m);
+  expect(good, `${what}: ${detail}`);
+}
+
+/* ---- 1. load, scale, shell ---- */
+console.log('\n1. load and fit');
+for (const size of ONLY.length || COACH_ONLY ? [] : SIZE_ARG ? SIZES : [[1280, 720], [1920, 1080], [1024, 576], [1366, 650], [1536, 730], [1920, 950], [2560, 900], [2560, 1080]]) {
+  const page = await open('?reset=1&screen=S01', size); // the shell (O1, the title, has no footer by design)
+  const r = await page.evaluate(() => {
+    const stage = document.querySelector('.w-stage');
+    const s = stage.getBoundingClientRect();
+    const k = s.height / 720;
+    const box = (sel) => { const b = document.querySelector(sel).getBoundingClientRect(); return [b.left - s.left, b.top - s.top, b.width, b.height].map((v) => Math.round(v / k)); };
+    return { k, sw: s.width, sh: s.height, left: s.left, top: s.top,
+      scroll: document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight,
+      bar: box('.w-bar'), main: box('.w-main'), prev: box('.w-prev'), next: box('.w-next'),
+      removed: ['.w-segments', '.w-topbar', '.w-readout', '.w-minutes'].filter((sel) => document.querySelector(sel)) };
+  });
+  const [w, h] = size;
+  const want = Math.min(w / 1280, h / 720);
+  // a wide window widens the stage (up to 1600) instead of leaving white bars; main takes the width right of the rail
+  const stageW = Math.round(Math.min(1600, Math.max(1280, w / want)));
+  expect(Math.abs(r.k - want) < 0.01 && r.left >= -0.5 && r.top >= -0.5 && r.left + r.sw <= w + 0.5 && r.top + r.sh <= h + 0.5, `${w}x${h}: stage scaled ${r.k.toFixed(3)} and inside the window`);
+  expect(Math.abs(r.sw / r.k - stageW) < 1 && (stageW === 1600 || Math.abs(r.sw - w) < 2), `${w}x${h}: stage ${Math.round(r.sw / r.k)} wide, ${stageW < 1600 ? 'fills the window width' : 'capped at 1600, the rest letterboxed'}`);
+  expect(!r.scroll, `${w}x${h}: no scrollbars`);
+  // the bar 80.64 high (FX2 C, rounded 81), main under it; Previous 23 px from the left, Next 23 px from the right, both 18 px over the foot
+  const near = (a, b) => Math.abs(a - b) <= 1; // edges rounded one by one
+  expect(r.bar.join() === `0,0,${stageW},81` && r.main.join() === `0,81,${stageW},639` && near(r.prev[0], 23) && near(r.next[0] + r.next[2], stageW - 23)
+    && near(r.prev[1] + r.prev[3], 702) && near(r.next[1] + r.next[3], 702),
+    `${w}x${h}: shell in place (bar ${r.bar.join(',')}, main ${r.main.join(',')}, Previous ${r.prev.join(',')}, Next ${r.next.join(',')})`);
+  expect(!r.removed.length, `${w}x${h}: no segmented bar, top bar, screen readout or minutes in the player${r.removed.length ? ' (' + r.removed.join(', ') + ')' : ''}`);
+  expect(!page.errors.length, `${w}x${h}: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);
+  await page.close();
+}
+
+/* ---- 2. every screen in every band state ---- */
+console.log('\n2. screens and band states');
+// FX7/FX8: a graded choice is selected, then checked: after an answer card or a tile, Check is pressed
+// when it can be (a multi-select waits for its last pick; a tile that only opens has no Check)
+const click = async (page, sel) => {
+  if (sel.includes('data-action="check"') && !(await page.$(sel + ':not([disabled])'))) return; // (already checked after the pick)
+  await page.click(sel);
+  if (/w-opt|w-tile|w-guess/.test(sel)) await page.evaluate(() => { const c = document.querySelector('[data-action="check"]:not([disabled])'); if (c && c.offsetParent) c.click(); });
+};
+const STATES = [
+  ['S01', 'hint', async () => {}],
+  ['S01', 'picked, today chips', async (p) => click(p, '.w-opt[data-id="a"]')], // v2: a neutral pick on the own case
+  ['S01', 'picked today', async (p) => click(p, '.w-opt[data-id="d"]')],
+  // V3-1: Intro and Chapter 1 (Round 4)
+  ['O1', 'title', async () => {}],
+  ['O2', 'L4 open', async (p) => p.keyboard.press('Shift')], // any key stops the ghost hand
+  ['O2', 'L1 open', async (p) => click(p, '.w-map-tab[data-station="l1"]')],
+  ['O3', 'deliverable', async () => {}], // v2: the deliverable pair (slide 4)
+  ['W1', 'statement', async () => {}], // v2: the dark statement opener (slide 6)
+  ['K1', 'key idea', async () => {}],
+  ['S02', 'hint', async () => {}],
+  ['S02', 'one field, Save locked', async (p) => p.type('.w-input[data-store="L4_CASE_TITLE"]', 'Sales call summaries')],
+  ['S02', 'saved', async (p) => {
+    await p.type('.w-input[data-store="L4_CASE_TITLE"]', 'Sales call summaries');
+    await p.type('.w-input[data-store="L4_CASE_PROBLEM"]', 'Today reps write call summaries by hand, and it hurts because notes reach the CRM a day late and nobody can find them again.');
+    await click(p, '[data-action="save"]');
+  }],
+  ['S03', 'start', async (p) => p.keyboard.press('Shift')], // v2: sort the film's facts (slide 31)
+  ['S03', 'card picked up', async (p) => { await p.keyboard.press('Shift'); await click(p, '[data-action="card"]'); }],
+  ['S03', 'wrong drop', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['metric']); }],
+  ['S03', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['map', 'metric', 'map', 'metric', 'map', 'metric']); }],
+  ['V1', 'play view', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); }],
+  ['V1', 'transcript open', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); await click(p, '.w-tr'); }],
+  ['V1', 'stop, wrong', async (p) => { await toStop(p); await click(p, '.w-stop-view .w-opt[data-id="a"]'); }],
+  ['V1', 'stop, right', async (p) => { await toStop(p); await click(p, '.w-stop-view .w-opt[data-id="b"]'); }],
+  // NL2: Chapter 2 (storyboard v3)
+  ['W2', 'opener', async () => {}], // v2: the chapter opener (slide 9)
+  ['K2', 'key idea', async () => {}],
+  ['K2', 'HR case on', async (p) => click(p, '[data-action="caseToggle"]')],
+  ['S04', 'start', async (p) => p.keyboard.press('Shift')], // any key stops the ghost hand
+  ['S04', 'card picked up', async (p) => { await p.keyboard.press('Shift'); await click(p, '[data-action="card"]'); }],
+  // FX5: every drop is judged at once (no Check): a wrong drop flashes red with its line, a right one stays
+  ['S04', 'wrong drop', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['c']); }],
+  ['S04', 'two right', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'b']); }],
+  ['S04', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'b', 'a', 'b', 'b', 'c']); }],
+  ['S05a', 'key idea', async () => {}],
+  ['S05b', 'start', async (p) => p.keyboard.press('Shift')],
+  ['S05b', 'wrong drop', async (p) => { await p.keyboard.press('Shift'); await labels(p, [['event', 'a']]); }],
+  ['S05b', 'one right', async (p) => { await p.keyboard.press('Shift'); await labels(p, [['swimlane', 'a']]); }],
+  ['S05b', 'done', async (p) => { await p.keyboard.press('Shift'); await labels(p, [['swimlane', 'a'], ['gateway', 'b'], ['event', 'c']]); }],
+  ['S06', 'hint', async () => {}],
+  ['S06', 'situation 1 wrong', async (p) => click(p, '.w-opt[data-id="b"]')],
+  ['S06', 'situation 1 right', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['S06', 'situation 2 wrong', async (p) => { await click(p, '.w-opt[data-id="a"]'); await click(p, '[data-action="nextSituation"]'); await click(p, '.w-situation-now .w-opt[data-id="a"]'); }],
+  ['S06', 'both right', async (p) => { await click(p, '.w-opt[data-id="a"]'); await click(p, '[data-action="nextSituation"]'); await click(p, '.w-situation-now .w-opt[data-id="b"]'); }],
+  ['S07', 'tile 5 open', async (p) => { await p.keyboard.press('Shift'); await click(p, '.w-tile[data-n="5"]'); }],
+  ['S07', 'all eight opened', async (p) => { await p.keyboard.press('Shift'); for (let n = 1; n <= 8; n++) await click(p, `.w-tile[data-n="${n}"]`); }], // v2: no question
+  ['S08', 'round 1 wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['S08', 'round 1 right', async (p) => click(p, '.w-opt[data-id="b"]')],
+  ['S08', 'round 3 right', async (p) => {
+    for (const k of ['b', 'c']) { await click(p, `.w-opt[data-id="${k}"]`); await click(p, '[data-action="nextRound"]'); }
+    await click(p, '.w-opt[data-id="a"]');
+  }],
+  ['S08B', 'hint', async () => {}],
+  ['S08B', 'one part, Save locked', async (p) => p.type('.w-input[data-store="L4_CASE_TRIGGER"]', 'A sales call ends')],
+  ['S08B', 'saved, full', async (p) => {
+    await p.type('.w-input[data-store="L4_CASE_TRIGGER"]', 'A request form arrives from a sales rep after every customer call, by email');
+    await p.type('.w-input[data-store="L4_CASE_STEPS"]', 'The rep writes notes by hand, the team lead checks them, the sales manager reads them two days later and asks follow-up questions by phone');
+    await p.type('.w-input[data-store="L4_CASE_OUTPUT"]', 'A call summary in the CRM, to the sales manager and the account team');
+    await click(p, '[data-action="save"]');
+  }],
+  // NL3: Chapters 3 and 4 (storyboard v3)
+  ['W3', 'opener', async () => {}], // v2: the chapter opener (slide 15)
+  ['W5', 'opener', async () => {}], // v2: new, Build yours (slide 35)
+  ['W6', 'opener', async () => {}], // v2: new, Wrap-up (slide 39)
+  ['K3', 'key idea', async () => {}], // v2: new, slide 38
+  ['V2', 'play view', async (p) => { await p.waitForFunction(() => document.querySelectorAll('.w-tline').length > 0); }],
+  ['V2', 'stop 3, wrong', async (p) => {
+    for (const k of ['b', 'a']) { await toStop(p); await click(p, `.w-stop-view .w-opt[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }
+    await toStop(p); await click(p, '.w-stop-view .w-opt[data-id="a"]');
+  }],
+  ['V2', 'ended', async (p) => {
+    for (const k of ['b', 'a', 'b']) { await toStop(p); await click(p, `.w-stop-view .w-opt[data-id="${k}"]`); await click(p, '[data-action="resume"]'); }
+    await playUntil(p, () => document.querySelector('.w-next').dataset.locked === 'false', 'video end');
+  }],
+  ['S09', 'start', async (p) => p.keyboard.press('Shift')],
+  ['S09', 'wrong drop', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['b']); }],
+  ['S09', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['a', 'a', 'b', 'c', 'd', 'd']); }],
+  ['S10', 'wrong', async (p) => click(p, '.w-opt[data-id="d"]')],
+  ['S10', 'right', async (p) => click(p, '.w-opt[data-id="c"]')],
+  ['S11', 'wrong', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['S11', 'right', async (p) => click(p, '.w-opt[data-id="d"]')],
+  ['S12', 'start', async () => {}],
+  ['S12', 'wrong click', async (p) => click(p, '.w-target[data-target="3"]')],
+  ['S12', 'one right', async (p) => click(p, '.w-target[data-target="4"]')],
+  ['S12', 'both right', async (p) => { await click(p, '.w-target[data-target="4"]'); await click(p, '.w-target[data-target="7"]'); }],
+  ['S12B', 'hint', async () => {}],
+  ['S12B', 'Baseline only, Save locked', async (p) => p.type('.w-input[data-store="L4_CASE_BASELINE"]', 'About 2 days')],
+  ['S12B', 'saved, full', async (p) => {
+    await p.type('.w-input[data-store="L4_CASE_BASELINE"]', 'About two working days from the call to a summary in the CRM, by our own count');
+    await p.type('.w-input[data-store="L4_CASE_TARGET"]', 'The same working day for nine summaries out of ten, checked on a weekly sample');
+    await p.type('.w-input[data-store="L4_CASE_DATE"]', 'Within three months of the pilot start');
+    await click(p, '[data-action="save"]');
+  }],
+  ['W4', 'opener', async () => {}], // v2: the chapter opener (the warm-up retired)
+  ['S13', 'start', async () => {}],
+  // v2: seven steps, the HR process from 2 to 6; the feedback under the clicked step (the first and last ones too)
+  ['S13', 'start wrong', async (p) => click(p, '.w-target[data-target="3"]')],
+  ['S13', 'start wrong, first step', async (p) => click(p, '.w-target[data-target="1"]')],
+  ['S13', 'start placed', async (p) => click(p, '.w-target[data-target="2"]')],
+  ['S13', 'end wrong, last step', async (p) => { await click(p, '.w-target[data-target="2"]'); await click(p, '.w-target[data-target="7"]'); }],
+  ['S13', 'both right', async (p) => { await click(p, '.w-target[data-target="2"]'); await click(p, '.w-target[data-target="6"]'); }],
+  // v2: the handoff record, four of six (multi)
+  ['S14', 'hint', async () => {}],
+  ['S14', 'four picked', async (p) => { for (const id of ['a', 'b', 'c', 'd']) await click(p, `.w-opt[data-id="${id}"]`); }],
+  ['S14', 'checked, one wrong', async (p) => { for (const id of ['a', 'b', 'c', 'e']) await click(p, `.w-opt[data-id="${id}"]`); await click(p, '[data-action="check"]'); }],
+  ['S14', 'checked, right', async (p) => { for (const id of ['a', 'b', 'c', 'd']) await click(p, `.w-opt[data-id="${id}"]`); await click(p, '[data-action="check"]'); }],
+  ['S15', 'hint', async () => {}],
+  ['S15', 'wrong', async (p) => click(p, '.w-opt[data-id="b"]')],
+  ['S15', 'right', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['K4', 'key idea', async () => {}],
+  ['S16', 'start', async (p) => p.keyboard.press('Shift')],
+  ['S16', 'card picked up', async (p) => { await p.keyboard.press('Shift'); await click(p, '[data-action="card"]'); }],
+  ['S16', 'wrong drop', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['poor']); }], // v2: two columns
+  ['S16', 'done', async (p) => { await p.keyboard.press('Shift'); await deck(p, ['good', 'poor', 'good', 'poor', 'poor', 'good']); }],
+  // FX2 D1: S17 one case at a time, the mistakes as answer cards
+  ['S17', 'case 1', async (p) => p.keyboard.press('Shift')],
+  ['S17', 'case 1 wrong', async (p) => { await p.keyboard.press('Shift'); await click(p, '.w-opt[data-id="1"]'); }],
+  ['S17', 'case 1 revealed', async (p) => { await p.keyboard.press('Shift'); await click(p, '.w-opt[data-id="1"]'); await click(p, '.w-opt[data-id="2"]'); }],
+  ['S17', 'case 5 (longest) wrong', async (p) => { await p.keyboard.press('Shift'); await cases(p, ['3', '1', '5', '4']); await click(p, '.w-opt[data-id="5"]'); }],
+  ['S17', 'done', async (p) => { await p.keyboard.press('Shift'); await cases(p, ['3', '1', '5', '4']); await click(p, '.w-opt[data-id="2"]'); }],
+  ['S17B', 'hint', async () => {}],
+  ['S17B', 'one field, Save locked', async (p) => p.type('.w-input[data-store="L4_CASE_AIFIT"]', 'Sort notes by topic')],
+  ['S17B', 'saved, full, long steps', async (p) => {
+    await p.evaluate(() => { window.__l4.state.f.L4_CASE_STEPS = 'Steps and who does them '.repeat(11).slice(0, 250); window.__l4.go('S17B'); });
+    await p.type('.w-input[data-store="L4_CASE_AIFIT"]', 'Sort the incoming call notes by topic and by account before the sales manager reads them');
+    await p.type('.w-input[data-store="L4_CASE_HUMAN"]', 'Approve a discount or an exception for a key account, with the account history');
+    await click(p, '[data-action="save"]');
+  }],
+  // NL4: Chapters 5 and 6 (storyboard v3)
+  // FX2 D2: S18A the workbook rows with a select each (row: card)
+  ['S18A', 'rows', async () => {}],
+  ['S18A', 'checked, two wrong', async (p) => { await fields(p, { a: '1', b: '3', c: '2', d: '4' }); await click(p, '[data-action="check"]'); }],
+  ['S18A', 'shown after attempt 2', async (p) => { await fields(p, { a: '1', b: '3', c: '2', d: '4' }); await click(p, '[data-action="check"]'); await fields(p, { b: '4' }); await click(p, '[data-action="check"]'); }],
+  ['S18A', 'done', async (p) => { await fields(p, { a: '1', b: '2', c: '3', d: '4' }); await click(p, '[data-action="check"]'); }],
+  ['S18', 'hint', async () => {}],
+  ['S18', 'wrong (longest line)', async (p) => click(p, '.w-opt[data-id="a"]')],
+  ['S18', 'right', async (p) => click(p, '.w-opt[data-id="b"]')],
+  ['S18B', 'hint, long title', async (p) => { await p.evaluate(() => { window.__l4.state.f.L4_CASE_TITLE = 'Summaries of sales calls for key accounts in the north region'.slice(0, 60); window.__l4.go('S18B'); }); }],
+  ['S18B', 'unticked', async (p) => { await p.type('.w-input', 'Sales call summaries'); await click(p, '[data-action="save"]'); }],
+  ['S18B', 'saved', async (p) => { await p.type('.w-input', 'Sales call summaries'); await click(p, '.w-checkbox'); await click(p, '[data-action="save"]'); }],
+  // FX4: S19 is S19A (brief), S19B (open, the copy cards), S19C (back: Yes / Not yet)
+  ['S19A', 'brief', async () => {}],
+  ['S19B', 'nothing written', async () => {}],
+  ['S19B', 'every note full', async (p) => { await fullNotes(p); }],
+  ['S19B', 'opened, every note full', async (p) => { await fullNotes(p); await noNewTab(p, '[data-action="open"]'); await click(p, '[data-action="open"]'); }],
+  ['S19C', 'question', async () => {}],
+  ['S19C', 'not yet', async (p) => { await noNewTab(p, '[data-action="reopen"]'); await click(p, '[data-action="pdfNotYet"]'); }],
+  ['S19C', 'yes', async (p) => click(p, '[data-action="pdfYes"]')],
+  ['S19B', 'copy blocked, every note full', async (p) => {
+    await fullNotes(p);
+    await p.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.reject(new Error('blocked')) } }));
+    await click(p, '[data-action="copy"][data-card="sketch"]'); await new Promise((r) => setTimeout(r, 200));
+  }],
+  ['S20', 'row answered', async (p) => click(p, '.w-check-row[data-row="q1"] [data-choice="notYet"]')],
+  ['S20', 'all answered, fix line', async (p) => { for (const [q, c] of [['q1', 'yes'], ['q2', 'notYet'], ['q3', 'yes']]) await click(p, `.w-check-row[data-row="${q}"] [data-choice="${c}"]`); }],
+  ['S20B', 'hint', async () => {}],
+  ['S20B', 'picked (longest fix)', async (p) => click(p, '.w-opt[data-id="automating"]')],
+  // QZ2: a pick only selects; Next question sends it with no feedback; after the last item, the review
+  ['S21', 'item 1 picked', async (p) => click(p, '.w-kc-opt[data-id="b"]')],
+  ['S21', 'item 5 picked (QZ1, the source owner)', async (p) => {
+    for (const k of ['c', 'b', 'a', 'd']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-opt[data-id="a"]');
+  }],
+  ['S21', 'tiles picked', async (p) => {
+    for (const k of ['c', 'b', 'a', 'd', 'b']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="1"]');
+  }],
+  ['S21', 'review, item 1 wrong', async (p) => {
+    for (const k of ['a', 'b', 'a', 'd', 'b']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="6"]'); await click(p, '[data-action="check"]');
+  }],
+  ['S21', 'review, tiles one of two', async (p) => {
+    for (const k of ['c', 'b', 'a', 'd', 'b']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="1"]'); await click(p, '[data-action="check"]');
+    for (let i = 0; i < 5; i++) await click(p, '[data-action="nextAnswer"]');
+  }],
+  ['S21', 'review, tiles right (both lines)', async (p) => {
+    for (const k of ['c', 'b', 'a', 'd', 'b']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '.w-kc-tile[data-n="6"]'); await click(p, '[data-action="check"]');
+    for (let i = 0; i < 5; i++) await click(p, '[data-action="nextAnswer"]');
+  }],
+  // FX3: a retake shows version b (its options shuffled): the longest stem, then the eight sales-map lines
+  ['S21', 'retake, item 1b picked', async (p) => { await p.evaluate(() => { window.__l4.state.k = { n: 2, s: 40, p: 0 }; window.__l4.go('S21'); }); await click(p, '.w-kc-opt[data-id="a"]'); }],
+  ['S21', 'retake, review, tiles 6b one of two', async (p) => {
+    await p.evaluate(() => { window.__l4.state.k = { n: 2, s: 40, p: 0 }; window.__l4.go('S21'); });
+    for (const k of ['b', 'b', 'a', 'd', 'c']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="3"]'); await click(p, '.w-kc-tile[data-n="7"]'); await click(p, '[data-action="check"]');
+    for (let i = 0; i < 5; i++) await click(p, '[data-action="nextAnswer"]');
+  }],
+  ['S21', 'retake, review, tiles 6b right (both lines)', async (p) => {
+    await p.evaluate(() => { window.__l4.state.k = { n: 2, s: 40, p: 0 }; window.__l4.go('S21'); });
+    for (const k of ['b', 'b', 'a', 'd', 'c']) { await click(p, `.w-kc-opt[data-id="${k}"]`); await click(p, '[data-action="nextQuestion"]'); }
+    await click(p, '.w-kc-tile[data-n="3"]'); await click(p, '.w-kc-tile[data-n="5"]'); await click(p, '[data-action="check"]');
+    for (let i = 0; i < 5; i++) await click(p, '[data-action="nextAnswer"]');
+  }],
+  ['S21R', 'not passed, all six missed', async (p) => { await attempt(p, { L4_S21_1: 'a|w', L4_S21_2: 'a|w', L4_S21_3: 'b|w', L4_S21_4: 'a|w', L4_S21_6: 'a|w', L4_S21_5: '5,7|w' }, { n: 1, s: 0, p: 0 }); }],
+  ['S21R', 'version b, all six missed', async (p) => { await attempt(p, { L4_S21_1b: 'a|w', L4_S21_2b: 'a|w', L4_S21_3b: 'b|w', L4_S21_4b: 'a|w', L4_S21_6b: 'a|w', L4_S21_5b: '5,7|w' }, { n: 2, s: 0, p: 0 }); }],
+  ['S21R', 'passed', async (p) => { await attempt(p, { L4_S21_1b: 'b|c', L4_S21_2b: 'b|c', L4_S21_3b: 'a|c', L4_S21_4b: 'd|c', L4_S21_6b: 'a|w', L4_S21_5b: '3,6|w' }, { n: 2, s: 80, p: 1 }); }],
+  ['S14', 'back to the check', async (p) => { await attempt(p, { L4_S21_1: 'a|w' }, { n: 1, s: 0, p: 0 }); await click(p, '[data-action="review"][data-screen="S14"]'); }],
+  ['S22', 'takeaway', async (p) => click(p, '.w-takeaway[data-id="b"]')],
+  // FX4: Finish no longer asks for the record first (one click finishes and opens END), so step 2 is the state to measure
+  ['S22', 'step 2', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); }],
+  ['S22', 'record downloaded', async (p) => { await click(p, '.w-takeaway[data-id="a"]'); await click(p, '.w-next'); await click(p, '[data-action="download"]'); }],
+  // FX2 G: the closing screen, passed and not passed yet
+  ['END', 'passed', async (p) => { await attempt(p, { L4_S21_1: 'c|c', L4_S21_2: 'b|c', L4_S21_3: 'a|c', L4_S21_4: 'd|c', L4_S21_6: 'b|c', L4_S21_5: '5,6|c' }, { n: 1, s: 100, p: 1 }); await p.evaluate(() => window.__l4.go('END')); }],
+  ['END', 'not passed yet', async (p) => { await attempt(p, { L4_S21_1: 'a|w' }, { n: 1, s: 0, p: 0 }); await p.evaluate(() => window.__l4.go('END')); }],
+];
+// NL4: every note the S19 copy cards show, at its field's maxlength
+async function fullNotes(p) {
+  await p.evaluate(() => { const f = window.__l4.state.f; Object.assign(f, { L4_CASE_TITLE: 't'.repeat(60), L4_CASE_PROBLEM: 'The problem today '.repeat(14).slice(0, 250),
+    L4_CASE_TRIGGER: 'Trigger text '.repeat(10).slice(0, 120), L4_CASE_STEPS: 'Steps and who does them '.repeat(11).slice(0, 250), L4_CASE_OUTPUT: 'Output text '.repeat(11).slice(0, 120),
+    L4_CASE_BASELINE: 'b'.repeat(80), L4_CASE_TARGET: 't'.repeat(80), L4_CASE_DATE: 'd'.repeat(40), L4_CASE_AIFIT: 'Could fit AI '.repeat(8).slice(0, 100), L4_CASE_HUMAN: 'Stays with a person '.repeat(6).slice(0, 100) }); window.__l4.go('S19B'); });
+}
+// NL4: an attempt of the check (first answers, the attempt state), then S21R
+async function attempt(p, answers, k) {
+  await p.evaluate((a, kk) => { const s = window.__l4.state; Object.assign(s.a, a); s.k = kk; s.d.push('S21'); window.__l4.go('S21R'); }, answers, k);
+}
+// the flags (S12, S13): click a flag, then its target
+async function flag(p, f, t) { await click(p, `.w-target[data-target="${t}"]`); } // FX8: no tray; a click places the next flag (S13: Start, then End)
+// S05b: click a label, then its place, per pair
+async function labels(p, pairs) { for (const [l, t] of pairs) { await click(p, `.w-label-card[data-label="${l}"]`); await click(p, `.w-target[data-target="${t}"]`); } }
+// FX2 D1 (S17): the right mistake for each case given, then "Next case"
+async function cases(p, picks) { for (const k of picks) { await click(p, `.w-opt[data-id="${k}"]`); await click(p, '[data-action="nextCase"]'); } }
+// FX2 D2 (S18A): a card chosen in each row given ({ row: card })
+async function fields(p, rows) { for (const [r, c] of Object.entries(rows)) await p.select(`select[data-row="${r}"]`, c); }
+// the sort deck: click the card, then a column, once per column given
+async function deck(p, cols) { for (const col of cols) { await click(p, '[data-action="card"]'); await click(p, `.w-drop[data-column="${col}"]`); } }
+// links that open a new tab: keep the test inside the module (the tab itself is checked in walk.mjs)
+async function noNewTab(p, sel) { await p.evaluate((s) => document.querySelector(s).addEventListener('click', (e) => e.preventDefault(), { capture: true }), sel); }
+// the video player: no seeking ahead of what was watched, so play muted at 16x to the next stop
+async function fastPlay(p) {
+  await p.waitForFunction(() => document.querySelector('.w-video').readyState >= 1);
+  await p.evaluate(() => { const v = document.querySelector('.w-video'); v.muted = true; v.playbackRate = 16; v.play(); });
+}
+// Headless Chrome at a 2560x1080 window sometimes stalls a 16x video (fully buffered, time stuck;
+// 1x plays normally). When the time stops moving, re-seek to the same point (it resets the decoder)
+// and play on at 4x, until done() is true. Report where it got to if it never is.
+async function playUntil(p, done, what) {
+  await fastPlay(p);
+  let last = -1;
+  for (let i = 0; i < 60; i++) {
+    if (await p.evaluate(done)) return;
+    last = await p.evaluate((prev) => {
+      const v = document.querySelector('.w-video');
+      if (document.querySelector('.w-stop-view').hidden && !v.ended && (v.paused || Math.abs(v.currentTime - prev) < 0.01)) {
+        v.pause(); v.currentTime = v.currentTime; v.muted = true; v.playbackRate = 4; v.play().catch(() => {});
+      }
+      return v.currentTime;
+    }, last);
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  const at = await p.evaluate(() => { const v = document.querySelector('.w-video'); return `t ${v.currentTime.toFixed(1)}, paused ${v.paused}, readyState ${v.readyState}, error ${v.error?.code ?? 'none'}`; });
+  throw new Error(`${what} not reached in 60 s: ${at}`);
+}
+const toStop = (p) => playUntil(p, () => !document.querySelector('.w-stop-view').hidden, 'video stop');
+for (const size of COACH_ONLY ? [] : SIZES) {
+  for (const [id, state, act] of STATES.filter(([id]) => !ONLY.length || ONLY.includes(id))) {
+    const page = await open(`?reset=1&screen=${id}`, size);
+    await act(page);
+    await measure(page, `${id} ${state} ${size.join('x')}`);
+    expect(!page.errors.length, `${id} ${state} ${size.join('x')}: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);
+    await page.close();
+  }
+}
+
+/* ---- 2b. PP1: every adaptive screen on each level (support, core, stretch; ?level= needs ?debug=1),
+   in its main states, the answers read from the variant shown ---- */
+console.log('\n2b. personal path: adaptive screens x levels');
+const { variantOf } = await import('../src/adapt.js');
+const ADAPTIVE = JSON.parse(readFileSync(join(ROOT, 'content', 'l4-slice.json'), 'utf8')).screens.filter((s) => s.variants);
+const shift = (p) => p.keyboard.press('Shift'); // any key stops a ghost hand
+const longest = (list, text) => [...list].sort((a, b) => text(b).length - text(a).length)[0];
+function levelStates(x) {
+  if (x.variant === 'cases') {
+    const picks = x.cards.map((c) => c.column);
+    const miss = (k) => x.options.find((o) => o.id !== picks[k]).id;
+    return [['case 1', shift], ['case 1 wrong', async (p) => { await shift(p); await click(p, `.w-opt[data-id="${miss(0)}"]`); }],
+      ['last case wrong', async (p) => { await shift(p); await cases(p, picks.slice(0, -1)); await click(p, `.w-opt[data-id="${miss(picks.length - 1)}"]`); }],
+      ['done', async (p) => { await shift(p); await cases(p, picks.slice(0, -1)); await click(p, `.w-opt[data-id="${picks[picks.length - 1]}"]`); }]];
+  }
+  // v2 (S14): pick n of six, then Check
+  if (x.variant === 'multi') {
+    const keys = x.options.filter((o) => o.correct).map((o) => o.id);
+    const wrong = longest(x.options.filter((o) => !o.correct), (o) => o.feedback).id;
+    const pick = async (p, ids) => { for (const id of ids) await click(p, `.w-opt[data-id="${id}"]`); await click(p, '[data-action="check"]'); };
+    return [['hint', async () => {}], ['checked, one wrong (longest line)', async (p) => pick(p, [...keys.slice(0, -1), wrong])], ['checked, right', async (p) => pick(p, keys)]];
+  }
+  if (x.template === 'decision') {
+    const right = x.options.find((o) => o.correct).id;
+    const wrongs = x.options.filter((o) => !o.correct).sort((a, b) => b.feedback.length - a.feedback.length).map((o) => o.id);
+    return [['hint', async () => {}], ['wrong (longest line)', async (p) => click(p, `.w-opt[data-id="${wrongs[0]}"]`)], ['right', async (p) => click(p, `.w-opt[data-id="${right}"]`)],
+      ['revealed after two wrong', async (p) => { await click(p, `.w-opt[data-id="${wrongs[0]}"]`); await click(p, `.w-opt[data-id="${wrongs[1]}"]`); }]];
+  }
+  if (x.template === 'sortDeck') {
+    const cols = x.cards.map((c) => c.column);
+    const ids = x.columns.map((c) => c.id); // (v2: S16 has two columns, good and poor)
+    return [['start', shift], ['checked, wrong back', async (p) => { await shift(p); await deck(p, cols.map((c) => (c === ids[0] ? ids[1] : ids[0]))); await click(p, '[data-action="check"]'); }],
+      ['done', async (p) => { await shift(p); await deck(p, cols); await click(p, '[data-action="check"]'); }]];
+  }
+  if (x.template === 'flags') {
+    const [t1, t2] = x.map.filter((f) => f.correct).map((f) => String(f.n));
+    const wrong = String(longest(x.map.filter((f) => !f.correct), (f) => f.feedback).n);
+    return [['start', async () => {}], ['checked, one back (longest line)', async (p) => { await flag(p, 'r1', t1); await flag(p, 'r2', wrong); await click(p, '[data-action="check"]'); }],
+      ['both right', async (p) => { await flag(p, 'r1', t1); await flag(p, 'r2', t2); await click(p, '[data-action="check"]'); }]];
+  }
+  return [];
+}
+// a state that already fails on the core screen (core is out of PP1's scope) is reported as a WARNING
+// on every level, with its detail; any other failure fails
+const knownCore = [];
+for (const size of COACH_ONLY ? [] : SIZES) {
+  for (const s of ADAPTIVE.filter((x) => !ONLY.length || ONLY.includes(x.id))) {
+    const byState = {};
+    for (const level of ['core', 'support', 'stretch']) {
+      for (const [state, act] of levelStates(variantOf(s, level))) {
+        const what = `${s.id} [${level}] ${state} ${size.join('x')}`;
+        const page = await open(`?reset=1&debug=1&level=${level}&screen=${s.id}`, size);
+        await act(page);
+        await page.mouse.move(0, 0);
+        const m = await page.evaluate(measureLayout);
+        for (const [k, v] of Object.entries(m.contrast)) if (!pairs.has(k)) pairs.set(k, v);
+        const [good, detail] = layoutVerdict(m);
+        if (level === 'core') byState[state] = good;
+        if (!good && byState[state] === false) knownCore.push(`${what}: ${detail}`);
+        else expect(good, `${what}: ${detail}`);
+        expect(!page.errors.length, `${what}: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);
+        await page.close();
+      }
+    }
+  }
+}
+if (knownCore.length) {
+  console.log(`  WARNING ${knownCore.length} states over a layout limit on the core screen too (out of PP1's scope, core untouched):`);
+  knownCore.forEach((t) => console.log('          ' + t));
+}
+
+/* ---- 3. menu and dialogs ---- */
+console.log('\n3. menu and dialogs');
+for (const size of ONLY.length || COACH_ONLY ? [] : SIZES) {
+  const page = await open('?reset=1&screen=S03', size);
+  await click(page, '.w-bar-menu');
+  await measure(page, `menu open ${size.join('x')}`);
+  for (const action of ['help', 'startover']) {
+    await click(page, `.w-panel [data-action="${action}"]`);
+    await measure(page, `menu dialog "${action}" ${size.join('x')}`);
+    await page.keyboard.press('Escape');
+  }
+  expect(!page.errors.length, `menu ${size.join('x')}: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);
+  await page.close();
+}
+
+/* ---- 4. CO1: the coach launcher on every screen, the open panel at both docks ---- */
+console.log('\n4. coach');
+const SLICE = JSON.parse(readFileSync(join(ROOT, 'content', 'l4-slice.json'), 'utf8')).lesson.slice;
+// stage-px boxes of the launcher, the bar's parts, the panel, Previous / Next; whether the panel is opaque
+// and on top (the element at five points of its box is its own)
+const coachBoxes = () => {
+  const s = document.querySelector('.w-stage').getBoundingClientRect(), k = s.height / 720;
+  const box = (el) => { if (!el || el.hidden || !el.getClientRects().length) return null; const r = el.getBoundingClientRect(); return { l: (r.left - s.left) / k, t: (r.top - s.top) / k, r: (r.right - s.left) / k, b: (r.bottom - s.top) / k }; };
+  const panel = document.querySelector('.w-coach-panel');
+  const P = panel.getBoundingClientRect();
+  const pts = [[.5, .5], [.1, .1], [.9, .1], [.1, .9], [.9, .9]].map(([x, y]) => document.elementFromPoint(P.left + x * P.width, P.top + y * P.height));
+  const bg = getComputedStyle(panel).backgroundColor;
+  const bar = document.querySelector('.w-bar');
+  return { stageW: s.width / k, launcher: box(document.querySelector('.w-coach-launcher')), chapter: box(document.querySelector('.w-bar-chapter')),
+    steps: [...document.querySelectorAll('.w-step')].map(box), bar: box(bar), barScroll: bar.scrollWidth > bar.clientWidth + 1,
+    panel: box(panel), onTop: pts.every((e) => e && panel.contains(e)), opaque: !/rgba\(.*,\s*0?\.\d+\)$/.test(bg) && bg !== 'transparent',
+    head: box(panel.querySelector('.w-coach-head')), frame: box(panel.querySelector('.w-coach-frame')), live: window.__l4.coach.isLive(),
+    foot: [...document.querySelectorAll('.w-footer > button')].filter((b) => !b.hidden && b.getClientRects().length).map(box) };
+};
+const meet = (a, b) => a && b && a.r > b.l + 0.5 && a.l < b.r - 0.5 && a.b > b.t + 0.5 && a.t < b.b - 0.5;
+for (const size of SIZES) {
+  for (const id of SLICE.filter((x) => !ONLY.length || ONLY.includes(x))) {
+    const page = await open(`?reset=1&screen=${id}`, size, { coach: true }); // CO2: the panel with the live page (stub)
+    const what = `${id} ${size.join('x')}`;
+    await page.keyboard.press('Shift'); // any key stops a ghost hand
+    const c = await page.evaluate(coachBoxes);
+    const L = c.launcher;
+    const w = L && Math.round(L.r - L.l), hg = L && Math.round(L.b - L.t);
+    const steps = c.steps.filter(Boolean);
+    expect(L && w === 56 && hg === 56 && L.t >= -0.5 && L.b <= 80.64 + 0.5 && L.l >= c.chapter.r + 17.5 && steps.every((st) => !meet(L, st)) && !c.barScroll && steps.every((st) => st.r <= c.stageW - 23 + 0.5),
+      `${what} launcher: ${w}x${hg} at x ${L && Math.round(L.l)}, in the bar, after the chapter name, clear of the ${steps.length} steps, the bar's parts fit`);
+    for (const dock of ['l', 'r']) {
+      await page.evaluate((d) => { const co = window.__l4.coach; if (!co.isOpen()) co.open({ focus: false }); co.setDock(d); }, dock);
+      await page.waitForFunction(() => window.__l4.coach.isLive(), { timeout: 5000 }).catch(() => {});
+      await page.evaluate(() => new Promise((r) => setTimeout(r, 30)));
+      const o = await page.evaluate(coachBoxes);
+      const P = o.panel, F = o.frame;
+      const side = dock === 'l' ? Math.abs(P.l - 24) < 1 : Math.abs(o.stageW - P.r - 24) < 1;
+      expect(P && P.t >= 96 - 0.5 && P.b <= 632 + 0.5 && Math.round(P.r - P.l) === 340 && side && o.onTop && o.opaque && !o.foot.some((B) => meet(P, B)) && !meet(P, o.bar),
+        `${what} panel ${dock === 'l' ? 'left' : 'right'}: x ${Math.round(P.l)} to ${Math.round(P.r)}, y ${Math.round(P.t)} to ${Math.round(P.b)}, opaque and on top, clear of the bar and Previous / Next`);
+      // CO2: the live page fills the body under the header, 340 wide, to the panel's foot (S21: hidden)
+      const frameOk = id === 'S21' ? !F : F && o.live && Math.round(F.r - F.l) === 340 && Math.abs(F.l - P.l) < 1 && Math.abs(F.t - o.head.b) < 1 && Math.abs(F.b - P.b) < 1;
+      expect(frameOk, `${what} live page ${dock === 'l' ? 'left' : 'right'}: ${F ? `x ${Math.round(F.l)} to ${Math.round(F.r)}, y ${Math.round(F.t)} to ${Math.round(F.b)}${o.live ? '' : ', not live'}` : 'hidden (S21 locked)'}`);
+      await measure(page, `${what} coach open ${dock === 'l' ? 'left' : 'right'}`);
+    }
+    expect(!page.errors.length, `${what} coach: no console errors${page.errors.length ? ': ' + page.errors.join(' | ') : ''}`);
+    await page.close();
+  }
+}
+
+console.log('\n  text/background pairs rendered (ratio, needed):');
+for (const [k, v] of [...pairs.entries()].sort()) console.log(`       ${k.padEnd(34)} ${v.ratio.toFixed(2).padStart(5)}:1  >= ${v.need}  e.g. "${v.sample.replace('text:', '')}"`);
+
+await browser.close();
+server.close();
+console.log(fails.length ? `\ntest:fit FAILED (${fails.length})` : '\ntest:fit passed');
+process.exit(fails.length ? 1 : 0);

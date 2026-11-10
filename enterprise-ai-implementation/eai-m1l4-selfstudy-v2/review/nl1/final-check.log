@@ -1,0 +1,73 @@
+﻿
+> eai-m1l4-selfstudy@0.1.0 check
+> node tools/check.mjs
+
+  ok   content/l4-slice.json parses
+  ok   all 33 slice ids exist in screens[]
+  ok   no em or en dash in content, index.html and 28 src files
+  ok   all 55 icon names used in content exist in icons.js
+  ok   Next font token 18.7px weight 700 (large text, white on red allowed)
+  ok   --wl-red is used by the unlocked Next button (and O1 Start) only
+
+  contrast (text / background, ratio, needed, use)
+  ok   --wl-ink       on --wl-stone       13.65:1  >= 4.5  headings and chapter name on the ground and the bar
+  ok   --wl-ink       on --wl-ivory       14.24:1  >= 4.5  panel headings
+  ok   --wl-ink       on --wl-white       14.87:1  >= 4.5  card text, menu current chapter
+  ok   --wl-body-ink  on --wl-white       17.61:1  >= 4.5  answer cards
+  ok   --wl-text-2    on --wl-ivory       10.07:1  >= 4.5  context line, subline
+  ok   --wl-text-2    on --wl-white       10.51:1  >= 4.5  card body copy
+  ok   --wl-muted     on --wl-stone        5.76:1  >= 4.5  step labels
+  ok   --wl-muted     on --wl-ivory        6.01:1  >= 4.5  hint line, counters, privacy line, menu chapters
+  ok   --wl-navy      on --wl-white        7.75:1  >= 4.5  Previous, Save, Check, Show me
+  ok   --wl-teal-ink  on --wl-stone        5.63:1  >= 4.5  Focus labels (Where we are, Lesson goals)
+  ok   --wl-teal-ink  on --wl-keypill-bg   5.19:1  >= 4.5  Key idea pill
+  ok   --wl-teal-ink  on --wl-white        6.13:1  >= 4.5  current-step icon and today number, "With mapping"
+  ok   --wl-correct-head on --wl-correct-bg   7.68:1  >= 4.5  correct verdict
+  ok   --wl-correct-head on --wl-chip-bg      7.07:1  >= 4.5  Today chip
+  ok   --wl-fb-text   on --wl-correct-bg  12.10:1  >= 4.5  strip line, correct
+  ok   --wl-error-head on --wl-error-bg     7.06:1  >= 4.5  wrong verdict
+  ok   --wl-fb-text   on --wl-error-bg    12.49:1  >= 4.5  strip line, wrong
+  ok   --wl-text-2    on --wl-neutral-bg   8.28:1  >= 4.5  neutral verdict
+  ok   --wl-fb-text   on --wl-neutral-bg  11.44:1  >= 4.5  strip line, neutral
+  ok   --wl-grey-ink  on --wl-white        7.33:1  >= 4.5  "Without mapping"
+  ok   --wl-evidence  on --wl-stone        6.26:1  >= 4.5  K1 evidence line
+  ok   --wl-idle-ink  on --wl-white        4.65:1  >= 4.5  numbers of steps and stations to come
+  ok   --wl-o1-ground on --wl-turquoise    6.86:1  >= 4.5  Not scored, length and CC chips on glass
+  ok   --wl-white     on --wl-o1-ground   17.03:1  >= 4.5  text on dark glass (the darkest ground it sits on)
+  ok   --wl-white     on --wl-red          4.12:1  >= 3  Next label (large text: 18.7px bold), O1 Start (23px bold)
+  ok   --wl-white     on --wl-navy         7.75:1  >= 3  check on navy (graphic)
+  ok   --wl-white     on --wl-teal         4.19:1  >= 3  check on teal (graphic)
+  ok   --wl-white     on --wl-error        5.89:1  >= 3  cross on red (graphic)
+  ok   --wl-navy      on --wl-white        7.75:1  >= 3  focus ring, selected border, markers (UI)
+  ok   --wl-teal      on --wl-white        4.19:1  >= 3  correct border (UI)
+  ok   --wl-error     on --wl-white        5.89:1  >= 3  wrong border (UI)
+  ok   --wl-turquoise on --wl-white        2.48:1  >= 2  current-step ring (decorative; the label is bold and the state is in aria-current)
+  ok   --wl-turquoise is text colour only on dark glass
+
+  ok   no English sentences in src/*.js string literals
+  ok   no italics in src/*.css
+  ok   index.html boot fallback equals ui.boot
+  ok   on-screen words at most 45 in all 67 screen views but the allowances below (O1 17, O2 l1 open 39, O2 l23 open 42, O2 l4 open 45, O2 l5 open 38, O2 l6 open 39, O3 45, S01 45, S02 61, W1 38, V1 15, V1 stop1 37, V1 stop2 35, K1 44, S03 36, FT2 42, S04 36, S05 26, S06 31, S07 tile 1 open 40, S07 tile 2 open 37, S07 tile 3 open 36, S07 tile 4 open 40, S07 tile 5 open 38, S07 tile 6 open 38, S07 tile 7 open 41, S07 tile 8 open 34, S07 answering 34, S08 r1 35, S08 r2 31, S08 r3 33, FT3 43, V2 21, V2 stop1 34, V2 stop2 33, V2 stop3 29, S09 25, S10 43, S11 43, S12 tile 1 open 33, S12 tile 2 open 35, S12 tile 3 open 44, S12 tile 4 open 37, S12 tile 5 open 37, S12 tile 6 open 36, S12 tile 7 open 38, S12 tile 8 open 40, FT4 40, S13 41, S14 39, S15 44, S16 42, S17 28, S18A 41, S18 step1 35, S18 step2 30, S19 brief 40, S19 return 23, S20 step1 27, S20 step2 25, S21 i1 43, S21 i2 35, S21 i3 37, S21 i4 38, S21 i5 44, S22 step1 16, S22 step2 32)
+  WARNING 1 screen views over the 45-word rule by an explicit content allowance:
+          S02: 61 words (allowance 61: R4 copy as specified: the Homework 1 top line and the help line bring S02 to 61 words; the 45-word target needs a planning cut (see review/r4/REPORT.md))
+  ok   all 223 hints, feedback lines and pause markers at most 25 words
+  ok   scored: 5 interactions on S21 (L4_S21_1, L4_S21_2, L4_S21_3, L4_S21_4, L4_S21_5), pass mark 80
+  ok   all 44 interactions have full tracking metadata (L4_S01_1, L4_S02_1, L4_S02_2, L4_W1_1, L4_V1_1, L4_V1_2, L4_S03_1, L4_FT2_1, L4_S04_1, L4_S05_1, L4_S06_1, L4_S06_2, L4_S07_1, L4_S08_1, L4_S08_2, L4_S08_3, L4_FT3_1, L4_V2_1, L4_V2_2, L4_V2_3, L4_S09_1, L4_S10_1, L4_S11_1, L4_S12_1, L4_FT4_1, L4_S13_1, L4_S14_1, L4_S15_1, L4_S16_1, L4_S17_1, L4_S18A_1, L4_S18_1, L4_S18_2, L4_S19_1, L4_S20_1, L4_S20_2, L4_S20_3, L4_S20_4, L4_S21_1, L4_S21_2, L4_S21_3, L4_S21_4, L4_S21_5, L4_S22_1)
+  ok   no arrow glyph in ui strings or src (icon arrow-right exists)
+  ok   every hex colour in src/ is an approved token (35 allowed)
+  ok   2 videos: media and captions exist, stop times in order (V1 61.159s/136.265s, V2 46.999s/81.366s/131.097s)
+  ok   all 12 image slots have a file or null, alt text and a prompt file (O1, S01, S03 case1, S03 case2, FT2, FT3, FT4, S14, S15, S18, S19, S22)
+  ok   8 scene photos exist (ch0 s01-dana-phone.jpg, ch1 w1-new-computer-same-mess.jpg, ch2 s04-three-channels.jpg, ch3 s01-dana-phone.jpg, ch4 o1-lanes-office.jpg, ch5 w1-new-computer-same-mess.jpg, ch6 s04-three-channels.jpg, O1 o1-lanes-office.jpg)
+  ok   every chapter screen names its step (verb + glyph icon)
+  WARNING 8 temp images in use (board references, replace before release):
+          ch0 photo: assets/img/l4/s01-dana-phone.jpg
+          ch1 photo: assets/img/l4/w1-new-computer-same-mess.jpg
+          ch2 photo: assets/img/l4/s04-three-channels.jpg
+          ch3 photo: assets/img/l4/s01-dana-phone.jpg
+          ch4 photo: assets/img/l4/o1-lanes-office.jpg
+          ch5 photo: assets/img/l4/w1-new-computer-same-mess.jpg
+          ch6 photo: assets/img/l4/s04-three-channels.jpg
+          O1 photo: assets/img/l4/o1-lanes-office.jpg
+  ok   fonts self-hosted, no Google Fonts: Assistant 400, Assistant 600, Assistant 700, Assistant 800, Roboto 400, Roboto 500, Roboto 700
+
+check passed

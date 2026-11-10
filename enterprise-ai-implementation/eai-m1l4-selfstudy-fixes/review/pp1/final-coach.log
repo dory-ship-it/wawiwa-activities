@@ -1,0 +1,50 @@
+﻿
+> eai-m1l4-selfstudy@0.1.0 test:coach
+> node tools/test-coach.mjs
+
+
+1. static
+  ok   src/coach (coach.js, transport.js): no fetch, XHR, WebSocket, EventSource, beacon, dynamic import or URL
+  ok   transport.ask() answers {"offline":true}
+  ok   every slice screen has coach.kind; S21 locked with no tip; a tip on every other screen
+  ok   0 tips are the screen's hint word for word
+  ok   42 drafted tips: 20 words or fewer, no dashes
+  ok   every coach.kind has its opening line in ui.coach.lines
+  ok   content/coach/grounding-pack.md is there (not read at runtime)
+  ok   index.html CSP connect-src stays 'self'
+
+2. SCORM and network
+  ok   S04 open: only "Stuck? Ask me." and the chip "What do I do here?"; the chip asks, the coach answers with the tip, the chip goes
+  ok   dock: Arrow Right -> r, drag left -> l; Escape closes, focus on the launcher
+  ok   no LMSSetValue / LMSCommit while the coach is used (9 before, 9 after)
+  ok   no network request while the coach is used
+  ok   no console errors
+
+3. locked on the check
+  ok   S21 launcher locked: opacity 0.6, ring rgb(138, 151, 159), lock badge, "Open the coach. Paused during the check."
+  ok   S21 panel: only "No hints during the check. I'm back after you submit.", no tip, no input
+  ok   S21R unlocked: "Want to go over a question? Ask me." and the tip chip back
+
+4. suspend_data and resume
+  ok   suspend_data after the dock switch: 62 chars, holds "cd":"r"
+  ok   heavy state: 2630 chars with cd, 2615 without (+15), under 4096
+  ok   relaunch with entry=resume: the coach opens on the right dock
+
+5. nothing kept
+  ok   offline: no input row and no privacy line shown (the input stays disabled), only the chip
+  ok   review mode: no dock, no hint letter, no first-use hint, localStorage empty (0 keys)
+
+6. left by default
+  ok   no side picked: all 43 screens open the coach on the left
+  ok   the learner's right dock stays on S05a, S05b, S09, K4 (r, r, r, r)
+
+7. demo
+  ok   O3: the coach opens by itself with "Hi, I'm your AI coach. Stuck on a screen? Open me here.", closes, then "Stuck? Ask me." stays (h a)
+  ok   O3 again: no second demo
+  ok   a key during the demo ends it at once; the hint stays
+  ok   demo: no console errors
+  ok   reduced motion: no demo, only the hint
+  ok   coach opened on O2: no demo on O3, the panel stays open with the screen's own line, no hint (h a)
+
+test:coach passed
+coach exit 0

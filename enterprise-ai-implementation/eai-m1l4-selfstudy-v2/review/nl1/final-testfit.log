@@ -1,0 +1,1236 @@
+﻿
+> eai-m1l4-selfstudy@0.1.0 test:fit
+> node tools/test-fit.mjs
+
+
+1. load and fit
+  ok   1280x720: stage scaled 1.000 and inside the window
+  ok   1280x720: stage 1280 wide, fills the window width
+  ok   1280x720: no scrollbars
+  ok   1280x720: shell in place (bar 0,0,1280,97, main 0,97,1280,623, Previous 23,657,114,45, Next 1137,657,120,44)
+  ok   1280x720: no segmented bar, top bar, screen readout or minutes in the player
+  ok   1280x720: no console errors
+  ok   1920x1080: stage scaled 1.500 and inside the window
+  ok   1920x1080: stage 1280 wide, fills the window width
+  ok   1920x1080: no scrollbars
+  ok   1920x1080: shell in place (bar 0,0,1280,97, main 0,97,1280,623, Previous 23,657,114,45, Next 1137,657,120,44)
+  ok   1920x1080: no segmented bar, top bar, screen readout or minutes in the player
+  ok   1920x1080: no console errors
+  ok   1024x576: stage scaled 0.800 and inside the window
+  ok   1024x576: stage 1280 wide, fills the window width
+  ok   1024x576: no scrollbars
+  ok   1024x576: shell in place (bar 0,0,1280,97, main 0,97,1280,623, Previous 23,657,114,45, Next 1137,657,120,44)
+  ok   1024x576: no segmented bar, top bar, screen readout or minutes in the player
+  ok   1024x576: no console errors
+  ok   1366x650: stage scaled 0.903 and inside the window
+  ok   1366x650: stage 1513 wide, fills the window width
+  ok   1366x650: no scrollbars
+  ok   1366x650: shell in place (bar 0,0,1513,97, main 0,97,1513,623, Previous 23,657,114,45, Next 1370,657,120,44)
+  ok   1366x650: no segmented bar, top bar, screen readout or minutes in the player
+  ok   1366x650: no console errors
+  ok   1536x730: stage scaled 1.014 and inside the window
+  ok   1536x730: stage 1515 wide, fills the window width
+  ok   1536x730: no scrollbars
+  ok   1536x730: shell in place (bar 0,0,1515,97, main 0,97,1515,623, Previous 23,657,114,45, Next 1372,657,120,44)
+  ok   1536x730: no segmented bar, top bar, screen readout or minutes in the player
+  ok   1536x730: no console errors
+  ok   1920x950: stage scaled 1.319 and inside the window
+  ok   1920x950: stage 1455 wide, fills the window width
+  ok   1920x950: no scrollbars
+  ok   1920x950: shell in place (bar 0,0,1455,97, main 0,97,1455,623, Previous 23,657,114,45, Next 1312,657,120,44)
+  ok   1920x950: no segmented bar, top bar, screen readout or minutes in the player
+  ok   1920x950: no console errors
+  ok   2560x900: stage scaled 1.250 and inside the window
+  ok   2560x900: stage 1600 wide, capped at 1600, the rest letterboxed
+  ok   2560x900: no scrollbars
+  ok   2560x900: shell in place (bar 0,0,1600,97, main 0,97,1600,623, Previous 23,657,114,45, Next 1457,657,120,44)
+  ok   2560x900: no segmented bar, top bar, screen readout or minutes in the player
+  ok   2560x900: no console errors
+  ok   2560x1080: stage scaled 1.500 and inside the window
+  ok   2560x1080: stage 1600 wide, capped at 1600, the rest letterboxed
+  ok   2560x1080: no scrollbars
+  ok   2560x1080: shell in place (bar 0,0,1600,97, main 0,97,1600,623, Previous 23,657,114,45, Next 1457,657,120,44)
+  ok   2560x1080: no segmented bar, top bar, screen readout or minutes in the player
+  ok   2560x1080: no console errors
+
+2. screens and band states
+  ok   S01 hint 1280x720: no band
+  ok   S01 hint 1280x720: no console errors
+  ok   S01 wrong 1280x720: band 589px = panel 589px, flush
+  ok   S01 wrong 1280x720: no console errors
+  ok   S01 correct 1280x720: band 589px = panel 589px, flush
+  ok   S01 correct 1280x720: no console errors
+  ok   O1 title 1280x720: no band
+  ok   O1 title 1280x720: no console errors
+  ok   O2 L4 open 1280x720: no band
+  ok   O2 L4 open 1280x720: no console errors
+  ok   O2 L1 open 1280x720: no band
+  ok   O2 L1 open 1280x720: no console errors
+  ok   O3 goals 1280x720: no band
+  ok   O3 goals 1280x720: no console errors
+  ok   O3 goal tip 1280x720: no band
+  ok   O3 goal tip 1280x720: no console errors
+  ok   W1 hint 1280x720: no band
+  ok   W1 hint 1280x720: no console errors
+  ok   W1 guess 1280x720: band 563px = panel 563px, flush
+  ok   W1 guess 1280x720: no console errors
+  ok   K1 key idea 1280x720: no band
+  ok   K1 key idea 1280x720: no console errors
+  ok   S02 hint 1280x720: no band, focus panel (focus) gaps 102/102
+  ok   S02 hint 1280x720: no console errors
+  ok   S02 notice 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S02 notice 1280x720: no console errors
+  ok   S02 saved 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S02 saved 1280x720: no console errors
+  ok   S03 hint 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S03 hint 1280x720: no console errors
+  ok   S03 two selected 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S03 two selected 1280x720: no console errors
+  ok   S03 not quite 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S03 not quite 1280x720: no console errors
+  ok   S03 one of two 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S03 one of two 1280x720: no console errors
+  ok   S03 correct 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S03 correct 1280x720: no console errors
+  ok   S03 pause marker 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S03 pause marker 1280x720: no console errors
+  ok   V1 play view 1280x720: no band
+  ok   V1 play view 1280x720: no console errors
+  ok   V1 transcript open 1280x720: no band
+  ok   V1 transcript open 1280x720: no console errors
+  ok   V1 stop, wrong 1280x720: band 563px = panel 563px, flush
+  ok   V1 stop, wrong 1280x720: no console errors
+  ok   V1 stop, right 1280x720: band 563px = panel 563px, flush
+  ok   V1 stop, right 1280x720: no console errors
+  ok   FT2 idle 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT2 idle 1280x720: no console errors
+  ok   FT2 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT2 wrong 1280x720: no console errors
+  ok   FT2 correct + routes 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT2 correct + routes 1280x720: no console errors
+  ok   S04 start 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S04 start 1280x720: no console errors
+  ok   S04 card selected 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S04 card selected 1280x720: no console errors
+  ok   S04 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S04 wrong 1280x720: no console errors
+  ok   S04 done 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S04 done 1280x720: no console errors
+  ok   S05 hint 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S05 hint 1280x720: no console errors
+  ok   S05 wrong (lane) 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S05 wrong (lane) 1280x720: no console errors
+  ok   S05 wrong (event) 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S05 wrong (event) 1280x720: no console errors
+  ok   S05 gateway + chips 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S05 gateway + chips 1280x720: no console errors
+  ok   S06 hint 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S06 hint 1280x720: no console errors
+  ok   S06 left wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S06 left wrong 1280x720: no console errors
+  ok   S06 both right 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S06 both right 1280x720: no console errors
+  ok   S07 tile 5 open 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S07 tile 5 open 1280x720: no console errors
+  ok   S07 question 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S07 question 1280x720: no console errors
+  ok   S07 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S07 wrong 1280x720: no console errors
+  ok   S07 correct 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S07 correct 1280x720: no console errors
+  ok   S08 round 1 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S08 round 1 wrong 1280x720: no console errors
+  ok   S08 round 1 right 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S08 round 1 right 1280x720: no console errors
+  ok   S08 round 3 right 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S08 round 3 right 1280x720: no console errors
+  ok   S08 pause marker 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S08 pause marker 1280x720: no console errors
+  ok   FT3 idle 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT3 idle 1280x720: no console errors
+  ok   FT3 correct + routes 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT3 correct + routes 1280x720: no console errors
+  ok   V2 play view 1280x720: no band
+  ok   V2 play view 1280x720: no console errors
+  ok   V2 stop 3, wrong 1280x720: band 563px = panel 563px, flush
+  ok   V2 stop 3, wrong 1280x720: no console errors
+  ok   V2 ended 1280x720: no band
+  ok   V2 ended 1280x720: no console errors
+  ok   S09 start 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S09 start 1280x720: no console errors
+  ok   S09 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S09 wrong 1280x720: no console errors
+  ok   S09 done 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S09 done 1280x720: no console errors
+  ok   S10 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S10 wrong 1280x720: no console errors
+  ok   S10 right 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S10 right 1280x720: no console errors
+  ok   S11 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S11 wrong 1280x720: no console errors
+  ok   S11 right 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S11 right 1280x720: no console errors
+  ok   S12 one of two 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S12 one of two 1280x720: no console errors
+  ok   S12 correct 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S12 correct 1280x720: no console errors
+  ok   S12 pause marker 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S12 pause marker 1280x720: no console errors
+  ok   FT4 idle 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT4 idle 1280x720: no console errors
+  ok   FT4 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT4 wrong 1280x720: no console errors
+  ok   S13 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S13 wrong 1280x720: no console errors
+  ok   S13 right 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S13 right 1280x720: no console errors
+  ok   S14 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S14 wrong 1280x720: no console errors
+  ok   S14 right 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S14 right 1280x720: no console errors
+  ok   S15 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S15 wrong 1280x720: no console errors
+  ok   S15 right 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S15 right 1280x720: no console errors
+  ok   S16 card selected 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S16 card selected 1280x720: no console errors
+  ok   S16 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S16 wrong 1280x720: no console errors
+  ok   S16 done 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S16 done 1280x720: no console errors
+  ok   S17 start 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S17 start 1280x720: no console errors
+  ok   S17 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S17 wrong 1280x720: no console errors
+  ok   S17 pause marker 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S17 pause marker 1280x720: no console errors
+  ok   S18A wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S18A wrong 1280x720: no console errors
+  ok   S18A done 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S18A done 1280x720: no console errors
+  ok   S18 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S18 wrong 1280x720: no console errors
+  ok   S18 step 2 unticked 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S18 step 2 unticked 1280x720: no console errors
+  ok   S18 saved 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S18 saved 1280x720: no console errors
+  ok   S19 brief 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S19 brief 1280x720: no console errors
+  ok   S19 opened 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S19 opened 1280x720: no console errors
+  ok   S19 return, saved 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S19 return, saved 1280x720: no console errors
+  ok   S20 row answered 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S20 row answered 1280x720: no console errors
+  ok   S20 step 2 chip 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S20 step 2 chip 1280x720: no console errors
+  ok   S20 step 2 with goal reminder 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S20 step 2 with goal reminder 1280x720: no console errors
+  ok   S21 item 1 wrong 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S21 item 1 wrong 1280x720: no console errors
+  ok   S21 item 5 one of two 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S21 item 5 one of two 1280x720: no console errors
+  ok   S21 result 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S21 result 1280x720: no console errors
+  ok   S22 takeaway 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S22 takeaway 1280x720: no console errors
+  ok   S22 finish confirm 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S22 finish confirm 1280x720: no console errors
+  ok   S22 finished 1280x720: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S22 finished 1280x720: no console errors
+  ok   S01 hint 1024x576: no band
+  ok   S01 hint 1024x576: no console errors
+  ok   S01 wrong 1024x576: band 589px = panel 589px, flush
+  ok   S01 wrong 1024x576: no console errors
+  ok   S01 correct 1024x576: band 589px = panel 589px, flush
+  ok   S01 correct 1024x576: no console errors
+  ok   O1 title 1024x576: no band
+  ok   O1 title 1024x576: no console errors
+  ok   O2 L4 open 1024x576: no band
+  ok   O2 L4 open 1024x576: no console errors
+  ok   O2 L1 open 1024x576: no band
+  ok   O2 L1 open 1024x576: no console errors
+  ok   O3 goals 1024x576: no band
+  ok   O3 goals 1024x576: no console errors
+  ok   O3 goal tip 1024x576: no band
+  ok   O3 goal tip 1024x576: no console errors
+  ok   W1 hint 1024x576: no band
+  ok   W1 hint 1024x576: no console errors
+  ok   W1 guess 1024x576: band 563px = panel 563px, flush
+  ok   W1 guess 1024x576: no console errors
+  ok   K1 key idea 1024x576: no band
+  ok   K1 key idea 1024x576: no console errors
+  ok   S02 hint 1024x576: no band, focus panel (focus) gaps 102/102
+  ok   S02 hint 1024x576: no console errors
+  ok   S02 notice 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S02 notice 1024x576: no console errors
+  ok   S02 saved 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S02 saved 1024x576: no console errors
+  ok   S03 hint 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S03 hint 1024x576: no console errors
+  ok   S03 two selected 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S03 two selected 1024x576: no console errors
+  ok   S03 not quite 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S03 not quite 1024x576: no console errors
+  ok   S03 one of two 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S03 one of two 1024x576: no console errors
+  ok   S03 correct 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S03 correct 1024x576: no console errors
+  ok   S03 pause marker 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S03 pause marker 1024x576: no console errors
+  ok   V1 play view 1024x576: no band
+  ok   V1 play view 1024x576: no console errors
+  ok   V1 transcript open 1024x576: no band
+  ok   V1 transcript open 1024x576: no console errors
+  ok   V1 stop, wrong 1024x576: band 563px = panel 563px, flush
+  ok   V1 stop, wrong 1024x576: no console errors
+  ok   V1 stop, right 1024x576: band 563px = panel 563px, flush
+  ok   V1 stop, right 1024x576: no console errors
+  ok   FT2 idle 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT2 idle 1024x576: no console errors
+  ok   FT2 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT2 wrong 1024x576: no console errors
+  ok   FT2 correct + routes 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT2 correct + routes 1024x576: no console errors
+  ok   S04 start 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S04 start 1024x576: no console errors
+  ok   S04 card selected 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S04 card selected 1024x576: no console errors
+  ok   S04 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S04 wrong 1024x576: no console errors
+  ok   S04 done 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S04 done 1024x576: no console errors
+  ok   S05 hint 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S05 hint 1024x576: no console errors
+  ok   S05 wrong (lane) 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S05 wrong (lane) 1024x576: no console errors
+  ok   S05 wrong (event) 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S05 wrong (event) 1024x576: no console errors
+  ok   S05 gateway + chips 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S05 gateway + chips 1024x576: no console errors
+  ok   S06 hint 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S06 hint 1024x576: no console errors
+  ok   S06 left wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S06 left wrong 1024x576: no console errors
+  ok   S06 both right 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S06 both right 1024x576: no console errors
+  ok   S07 tile 5 open 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S07 tile 5 open 1024x576: no console errors
+  ok   S07 question 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S07 question 1024x576: no console errors
+  ok   S07 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S07 wrong 1024x576: no console errors
+  ok   S07 correct 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S07 correct 1024x576: no console errors
+  ok   S08 round 1 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S08 round 1 wrong 1024x576: no console errors
+  ok   S08 round 1 right 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S08 round 1 right 1024x576: no console errors
+  ok   S08 round 3 right 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S08 round 3 right 1024x576: no console errors
+  ok   S08 pause marker 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S08 pause marker 1024x576: no console errors
+  ok   FT3 idle 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT3 idle 1024x576: no console errors
+  ok   FT3 correct + routes 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT3 correct + routes 1024x576: no console errors
+  ok   V2 play view 1024x576: no band
+  ok   V2 play view 1024x576: no console errors
+  ok   V2 stop 3, wrong 1024x576: band 563px = panel 563px, flush
+  ok   V2 stop 3, wrong 1024x576: no console errors
+  ok   V2 ended 1024x576: no band
+  ok   V2 ended 1024x576: no console errors
+  ok   S09 start 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S09 start 1024x576: no console errors
+  ok   S09 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S09 wrong 1024x576: no console errors
+  ok   S09 done 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S09 done 1024x576: no console errors
+  ok   S10 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S10 wrong 1024x576: no console errors
+  ok   S10 right 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S10 right 1024x576: no console errors
+  ok   S11 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S11 wrong 1024x576: no console errors
+  ok   S11 right 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S11 right 1024x576: no console errors
+  ok   S12 one of two 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S12 one of two 1024x576: no console errors
+  ok   S12 correct 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S12 correct 1024x576: no console errors
+  ok   S12 pause marker 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S12 pause marker 1024x576: no console errors
+  ok   FT4 idle 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT4 idle 1024x576: no console errors
+  ok   FT4 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   FT4 wrong 1024x576: no console errors
+  ok   S13 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S13 wrong 1024x576: no console errors
+  ok   S13 right 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S13 right 1024x576: no console errors
+  ok   S14 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S14 wrong 1024x576: no console errors
+  ok   S14 right 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S14 right 1024x576: no console errors
+  ok   S15 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S15 wrong 1024x576: no console errors
+  ok   S15 right 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S15 right 1024x576: no console errors
+  ok   S16 card selected 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S16 card selected 1024x576: no console errors
+  ok   S16 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S16 wrong 1024x576: no console errors
+  ok   S16 done 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S16 done 1024x576: no console errors
+  ok   S17 start 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S17 start 1024x576: no console errors
+  ok   S17 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S17 wrong 1024x576: no console errors
+  ok   S17 pause marker 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S17 pause marker 1024x576: no console errors
+  ok   S18A wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S18A wrong 1024x576: no console errors
+  ok   S18A done 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S18A done 1024x576: no console errors
+  ok   S18 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S18 wrong 1024x576: no console errors
+  ok   S18 step 2 unticked 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S18 step 2 unticked 1024x576: no console errors
+  ok   S18 saved 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S18 saved 1024x576: no console errors
+  ok   S19 brief 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S19 brief 1024x576: no console errors
+  ok   S19 opened 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S19 opened 1024x576: no console errors
+  ok   S19 return, saved 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S19 return, saved 1024x576: no console errors
+  ok   S20 row answered 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S20 row answered 1024x576: no console errors
+  ok   S20 step 2 chip 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S20 step 2 chip 1024x576: no console errors
+  ok   S20 step 2 with goal reminder 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S20 step 2 with goal reminder 1024x576: no console errors
+  ok   S21 item 1 wrong 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S21 item 1 wrong 1024x576: no console errors
+  ok   S21 item 5 one of two 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S21 item 5 one of two 1024x576: no console errors
+  ok   S21 result 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S21 result 1024x576: no console errors
+  ok   S22 takeaway 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S22 takeaway 1024x576: no console errors
+  ok   S22 finish confirm 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S22 finish confirm 1024x576: no console errors
+  ok   S22 finished 1024x576: band 1075px = panel 1075px, flush, focus panel (focus) gaps 102/102
+  ok   S22 finished 1024x576: no console errors
+  ok   S01 hint 1366x650: no band
+  ok   S01 hint 1366x650: no console errors
+  ok   S01 wrong 1366x650: band 589px = panel 589px, flush
+  ok   S01 wrong 1366x650: no console errors
+  ok   S01 correct 1366x650: band 589px = panel 589px, flush
+  ok   S01 correct 1366x650: no console errors
+  ok   O1 title 1366x650: no band
+  ok   O1 title 1366x650: no console errors
+  ok   O2 L4 open 1366x650: no band
+  ok   O2 L4 open 1366x650: no console errors
+  ok   O2 L1 open 1366x650: no band
+  ok   O2 L1 open 1366x650: no console errors
+  ok   O3 goals 1366x650: no band
+  ok   O3 goals 1366x650: no console errors
+  ok   O3 goal tip 1366x650: no band
+  ok   O3 goal tip 1366x650: no console errors
+  ok   W1 hint 1366x650: no band
+  ok   W1 hint 1366x650: no console errors
+  ok   W1 guess 1366x650: band 563px = panel 563px, flush
+  ok   W1 guess 1366x650: no console errors
+  ok   K1 key idea 1366x650: no band
+  ok   K1 key idea 1366x650: no console errors
+  ok   S02 hint 1366x650: no band, focus panel (focus) gaps 219/219
+  ok   S02 hint 1366x650: no console errors
+  ok   S02 notice 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S02 notice 1366x650: no console errors
+  ok   S02 saved 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S02 saved 1366x650: no console errors
+  ok   S03 hint 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S03 hint 1366x650: no console errors
+  ok   S03 two selected 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S03 two selected 1366x650: no console errors
+  ok   S03 not quite 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S03 not quite 1366x650: no console errors
+  ok   S03 one of two 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S03 one of two 1366x650: no console errors
+  ok   S03 correct 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S03 correct 1366x650: no console errors
+  ok   S03 pause marker 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S03 pause marker 1366x650: no console errors
+  ok   V1 play view 1366x650: no band
+  ok   V1 play view 1366x650: no console errors
+  ok   V1 transcript open 1366x650: no band
+  ok   V1 transcript open 1366x650: no console errors
+  ok   V1 stop, wrong 1366x650: band 563px = panel 563px, flush
+  ok   V1 stop, wrong 1366x650: no console errors
+  ok   V1 stop, right 1366x650: band 563px = panel 563px, flush
+  ok   V1 stop, right 1366x650: no console errors
+  ok   FT2 idle 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   FT2 idle 1366x650: no console errors
+  ok   FT2 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   FT2 wrong 1366x650: no console errors
+  ok   FT2 correct + routes 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   FT2 correct + routes 1366x650: no console errors
+  ok   S04 start 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S04 start 1366x650: no console errors
+  ok   S04 card selected 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S04 card selected 1366x650: no console errors
+  ok   S04 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S04 wrong 1366x650: no console errors
+  ok   S04 done 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S04 done 1366x650: no console errors
+  ok   S05 hint 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S05 hint 1366x650: no console errors
+  ok   S05 wrong (lane) 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S05 wrong (lane) 1366x650: no console errors
+  ok   S05 wrong (event) 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S05 wrong (event) 1366x650: no console errors
+  ok   S05 gateway + chips 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S05 gateway + chips 1366x650: no console errors
+  ok   S06 hint 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S06 hint 1366x650: no console errors
+  ok   S06 left wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S06 left wrong 1366x650: no console errors
+  ok   S06 both right 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S06 both right 1366x650: no console errors
+  ok   S07 tile 5 open 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S07 tile 5 open 1366x650: no console errors
+  ok   S07 question 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S07 question 1366x650: no console errors
+  ok   S07 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S07 wrong 1366x650: no console errors
+  ok   S07 correct 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S07 correct 1366x650: no console errors
+  ok   S08 round 1 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S08 round 1 wrong 1366x650: no console errors
+  ok   S08 round 1 right 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S08 round 1 right 1366x650: no console errors
+  ok   S08 round 3 right 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S08 round 3 right 1366x650: no console errors
+  ok   S08 pause marker 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S08 pause marker 1366x650: no console errors
+  ok   FT3 idle 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   FT3 idle 1366x650: no console errors
+  ok   FT3 correct + routes 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   FT3 correct + routes 1366x650: no console errors
+  ok   V2 play view 1366x650: no band
+  ok   V2 play view 1366x650: no console errors
+  ok   V2 stop 3, wrong 1366x650: band 563px = panel 563px, flush
+  ok   V2 stop 3, wrong 1366x650: no console errors
+  ok   V2 ended 1366x650: no band
+  ok   V2 ended 1366x650: no console errors
+  ok   S09 start 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S09 start 1366x650: no console errors
+  ok   S09 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S09 wrong 1366x650: no console errors
+  ok   S09 done 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S09 done 1366x650: no console errors
+  ok   S10 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S10 wrong 1366x650: no console errors
+  ok   S10 right 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S10 right 1366x650: no console errors
+  ok   S11 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S11 wrong 1366x650: no console errors
+  ok   S11 right 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S11 right 1366x650: no console errors
+  ok   S12 one of two 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S12 one of two 1366x650: no console errors
+  ok   S12 correct 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S12 correct 1366x650: no console errors
+  ok   S12 pause marker 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S12 pause marker 1366x650: no console errors
+  ok   FT4 idle 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   FT4 idle 1366x650: no console errors
+  ok   FT4 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   FT4 wrong 1366x650: no console errors
+  ok   S13 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S13 wrong 1366x650: no console errors
+  ok   S13 right 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S13 right 1366x650: no console errors
+  ok   S14 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S14 wrong 1366x650: no console errors
+  ok   S14 right 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S14 right 1366x650: no console errors
+  ok   S15 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S15 wrong 1366x650: no console errors
+  ok   S15 right 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S15 right 1366x650: no console errors
+  ok   S16 card selected 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S16 card selected 1366x650: no console errors
+  ok   S16 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S16 wrong 1366x650: no console errors
+  ok   S16 done 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S16 done 1366x650: no console errors
+  ok   S17 start 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S17 start 1366x650: no console errors
+  ok   S17 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S17 wrong 1366x650: no console errors
+  ok   S17 pause marker 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S17 pause marker 1366x650: no console errors
+  ok   S18A wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S18A wrong 1366x650: no console errors
+  ok   S18A done 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S18A done 1366x650: no console errors
+  ok   S18 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S18 wrong 1366x650: no console errors
+  ok   S18 step 2 unticked 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S18 step 2 unticked 1366x650: no console errors
+  ok   S18 saved 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S18 saved 1366x650: no console errors
+  ok   S19 brief 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S19 brief 1366x650: no console errors
+  ok   S19 opened 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S19 opened 1366x650: no console errors
+  ok   S19 return, saved 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S19 return, saved 1366x650: no console errors
+  ok   S20 row answered 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S20 row answered 1366x650: no console errors
+  ok   S20 step 2 chip 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S20 step 2 chip 1366x650: no console errors
+  ok   S20 step 2 with goal reminder 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S20 step 2 with goal reminder 1366x650: no console errors
+  ok   S21 item 1 wrong 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S21 item 1 wrong 1366x650: no console errors
+  ok   S21 item 5 one of two 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S21 item 5 one of two 1366x650: no console errors
+  ok   S21 result 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S21 result 1366x650: no console errors
+  ok   S22 takeaway 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S22 takeaway 1366x650: no console errors
+  ok   S22 finish confirm 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S22 finish confirm 1366x650: no console errors
+  ok   S22 finished 1366x650: band 1075px = panel 1075px, flush, focus panel (focus) gaps 219/219
+  ok   S22 finished 1366x650: no console errors
+  ok   S01 hint 1536x730: no band
+  ok   S01 hint 1536x730: no console errors
+  ok   S01 wrong 1536x730: band 589px = panel 589px, flush
+  ok   S01 wrong 1536x730: no console errors
+  ok   S01 correct 1536x730: band 589px = panel 589px, flush
+  ok   S01 correct 1536x730: no console errors
+  ok   O1 title 1536x730: no band
+  ok   O1 title 1536x730: no console errors
+  ok   O2 L4 open 1536x730: no band
+  ok   O2 L4 open 1536x730: no console errors
+  ok   O2 L1 open 1536x730: no band
+  ok   O2 L1 open 1536x730: no console errors
+  ok   O3 goals 1536x730: no band
+  ok   O3 goals 1536x730: no console errors
+  ok   O3 goal tip 1536x730: no band
+  ok   O3 goal tip 1536x730: no console errors
+  ok   W1 hint 1536x730: no band
+  ok   W1 hint 1536x730: no console errors
+  ok   W1 guess 1536x730: band 563px = panel 563px, flush
+  ok   W1 guess 1536x730: no console errors
+  ok   K1 key idea 1536x730: no band
+  ok   K1 key idea 1536x730: no console errors
+  ok   S02 hint 1536x730: no band, focus panel (focus) gaps 220/220
+  ok   S02 hint 1536x730: no console errors
+  ok   S02 notice 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S02 notice 1536x730: no console errors
+  ok   S02 saved 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S02 saved 1536x730: no console errors
+  ok   S03 hint 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S03 hint 1536x730: no console errors
+  ok   S03 two selected 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S03 two selected 1536x730: no console errors
+  ok   S03 not quite 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S03 not quite 1536x730: no console errors
+  ok   S03 one of two 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S03 one of two 1536x730: no console errors
+  ok   S03 correct 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S03 correct 1536x730: no console errors
+  ok   S03 pause marker 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S03 pause marker 1536x730: no console errors
+  ok   V1 play view 1536x730: no band
+  ok   V1 play view 1536x730: no console errors
+  ok   V1 transcript open 1536x730: no band
+  ok   V1 transcript open 1536x730: no console errors
+  ok   V1 stop, wrong 1536x730: band 563px = panel 563px, flush
+  ok   V1 stop, wrong 1536x730: no console errors
+  ok   V1 stop, right 1536x730: band 563px = panel 563px, flush
+  ok   V1 stop, right 1536x730: no console errors
+  ok   FT2 idle 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   FT2 idle 1536x730: no console errors
+  ok   FT2 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   FT2 wrong 1536x730: no console errors
+  ok   FT2 correct + routes 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   FT2 correct + routes 1536x730: no console errors
+  ok   S04 start 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S04 start 1536x730: no console errors
+  ok   S04 card selected 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S04 card selected 1536x730: no console errors
+  ok   S04 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S04 wrong 1536x730: no console errors
+  ok   S04 done 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S04 done 1536x730: no console errors
+  ok   S05 hint 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S05 hint 1536x730: no console errors
+  ok   S05 wrong (lane) 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S05 wrong (lane) 1536x730: no console errors
+  ok   S05 wrong (event) 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S05 wrong (event) 1536x730: no console errors
+  ok   S05 gateway + chips 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S05 gateway + chips 1536x730: no console errors
+  ok   S06 hint 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S06 hint 1536x730: no console errors
+  ok   S06 left wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S06 left wrong 1536x730: no console errors
+  ok   S06 both right 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S06 both right 1536x730: no console errors
+  ok   S07 tile 5 open 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S07 tile 5 open 1536x730: no console errors
+  ok   S07 question 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S07 question 1536x730: no console errors
+  ok   S07 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S07 wrong 1536x730: no console errors
+  ok   S07 correct 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S07 correct 1536x730: no console errors
+  ok   S08 round 1 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S08 round 1 wrong 1536x730: no console errors
+  ok   S08 round 1 right 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S08 round 1 right 1536x730: no console errors
+  ok   S08 round 3 right 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S08 round 3 right 1536x730: no console errors
+  ok   S08 pause marker 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S08 pause marker 1536x730: no console errors
+  ok   FT3 idle 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   FT3 idle 1536x730: no console errors
+  ok   FT3 correct + routes 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   FT3 correct + routes 1536x730: no console errors
+  ok   V2 play view 1536x730: no band
+  ok   V2 play view 1536x730: no console errors
+  ok   V2 stop 3, wrong 1536x730: band 563px = panel 563px, flush
+  ok   V2 stop 3, wrong 1536x730: no console errors
+  ok   V2 ended 1536x730: no band
+  ok   V2 ended 1536x730: no console errors
+  ok   S09 start 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S09 start 1536x730: no console errors
+  ok   S09 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S09 wrong 1536x730: no console errors
+  ok   S09 done 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S09 done 1536x730: no console errors
+  ok   S10 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S10 wrong 1536x730: no console errors
+  ok   S10 right 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S10 right 1536x730: no console errors
+  ok   S11 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S11 wrong 1536x730: no console errors
+  ok   S11 right 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S11 right 1536x730: no console errors
+  ok   S12 one of two 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S12 one of two 1536x730: no console errors
+  ok   S12 correct 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S12 correct 1536x730: no console errors
+  ok   S12 pause marker 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S12 pause marker 1536x730: no console errors
+  ok   FT4 idle 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   FT4 idle 1536x730: no console errors
+  ok   FT4 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   FT4 wrong 1536x730: no console errors
+  ok   S13 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S13 wrong 1536x730: no console errors
+  ok   S13 right 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S13 right 1536x730: no console errors
+  ok   S14 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S14 wrong 1536x730: no console errors
+  ok   S14 right 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S14 right 1536x730: no console errors
+  ok   S15 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S15 wrong 1536x730: no console errors
+  ok   S15 right 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S15 right 1536x730: no console errors
+  ok   S16 card selected 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S16 card selected 1536x730: no console errors
+  ok   S16 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S16 wrong 1536x730: no console errors
+  ok   S16 done 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S16 done 1536x730: no console errors
+  ok   S17 start 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S17 start 1536x730: no console errors
+  ok   S17 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S17 wrong 1536x730: no console errors
+  ok   S17 pause marker 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S17 pause marker 1536x730: no console errors
+  ok   S18A wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S18A wrong 1536x730: no console errors
+  ok   S18A done 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S18A done 1536x730: no console errors
+  ok   S18 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S18 wrong 1536x730: no console errors
+  ok   S18 step 2 unticked 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S18 step 2 unticked 1536x730: no console errors
+  ok   S18 saved 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S18 saved 1536x730: no console errors
+  ok   S19 brief 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S19 brief 1536x730: no console errors
+  ok   S19 opened 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S19 opened 1536x730: no console errors
+  ok   S19 return, saved 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S19 return, saved 1536x730: no console errors
+  ok   S20 row answered 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S20 row answered 1536x730: no console errors
+  ok   S20 step 2 chip 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S20 step 2 chip 1536x730: no console errors
+  ok   S20 step 2 with goal reminder 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S20 step 2 with goal reminder 1536x730: no console errors
+  ok   S21 item 1 wrong 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S21 item 1 wrong 1536x730: no console errors
+  ok   S21 item 5 one of two 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S21 item 5 one of two 1536x730: no console errors
+  ok   S21 result 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S21 result 1536x730: no console errors
+  ok   S22 takeaway 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S22 takeaway 1536x730: no console errors
+  ok   S22 finish confirm 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S22 finish confirm 1536x730: no console errors
+  ok   S22 finished 1536x730: band 1075px = panel 1075px, flush, focus panel (focus) gaps 220/220
+  ok   S22 finished 1536x730: no console errors
+  ok   S01 hint 1920x950: no band
+  ok   S01 hint 1920x950: no console errors
+  ok   S01 wrong 1920x950: band 589px = panel 589px, flush
+  ok   S01 wrong 1920x950: no console errors
+  ok   S01 correct 1920x950: band 589px = panel 589px, flush
+  ok   S01 correct 1920x950: no console errors
+  ok   O1 title 1920x950: no band
+  ok   O1 title 1920x950: no console errors
+  ok   O2 L4 open 1920x950: no band
+  ok   O2 L4 open 1920x950: no console errors
+  ok   O2 L1 open 1920x950: no band
+  ok   O2 L1 open 1920x950: no console errors
+  ok   O3 goals 1920x950: no band
+  ok   O3 goals 1920x950: no console errors
+  ok   O3 goal tip 1920x950: no band
+  ok   O3 goal tip 1920x950: no console errors
+  ok   W1 hint 1920x950: no band
+  ok   W1 hint 1920x950: no console errors
+  ok   W1 guess 1920x950: band 563px = panel 563px, flush
+  ok   W1 guess 1920x950: no console errors
+  ok   K1 key idea 1920x950: no band
+  ok   K1 key idea 1920x950: no console errors
+  ok   S02 hint 1920x950: no band, focus panel (focus) gaps 190/190
+  ok   S02 hint 1920x950: no console errors
+  ok   S02 notice 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S02 notice 1920x950: no console errors
+  ok   S02 saved 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S02 saved 1920x950: no console errors
+  ok   S03 hint 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S03 hint 1920x950: no console errors
+  ok   S03 two selected 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S03 two selected 1920x950: no console errors
+  ok   S03 not quite 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S03 not quite 1920x950: no console errors
+  ok   S03 one of two 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S03 one of two 1920x950: no console errors
+  ok   S03 correct 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S03 correct 1920x950: no console errors
+  ok   S03 pause marker 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S03 pause marker 1920x950: no console errors
+  ok   V1 play view 1920x950: no band
+  ok   V1 play view 1920x950: no console errors
+  ok   V1 transcript open 1920x950: no band
+  ok   V1 transcript open 1920x950: no console errors
+  ok   V1 stop, wrong 1920x950: band 563px = panel 563px, flush
+  ok   V1 stop, wrong 1920x950: no console errors
+  ok   V1 stop, right 1920x950: band 563px = panel 563px, flush
+  ok   V1 stop, right 1920x950: no console errors
+  ok   FT2 idle 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   FT2 idle 1920x950: no console errors
+  ok   FT2 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   FT2 wrong 1920x950: no console errors
+  ok   FT2 correct + routes 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   FT2 correct + routes 1920x950: no console errors
+  ok   S04 start 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S04 start 1920x950: no console errors
+  ok   S04 card selected 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S04 card selected 1920x950: no console errors
+  ok   S04 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S04 wrong 1920x950: no console errors
+  ok   S04 done 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S04 done 1920x950: no console errors
+  ok   S05 hint 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S05 hint 1920x950: no console errors
+  ok   S05 wrong (lane) 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S05 wrong (lane) 1920x950: no console errors
+  ok   S05 wrong (event) 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S05 wrong (event) 1920x950: no console errors
+  ok   S05 gateway + chips 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S05 gateway + chips 1920x950: no console errors
+  ok   S06 hint 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S06 hint 1920x950: no console errors
+  ok   S06 left wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S06 left wrong 1920x950: no console errors
+  ok   S06 both right 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S06 both right 1920x950: no console errors
+  ok   S07 tile 5 open 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S07 tile 5 open 1920x950: no console errors
+  ok   S07 question 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S07 question 1920x950: no console errors
+  ok   S07 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S07 wrong 1920x950: no console errors
+  ok   S07 correct 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S07 correct 1920x950: no console errors
+  ok   S08 round 1 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S08 round 1 wrong 1920x950: no console errors
+  ok   S08 round 1 right 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S08 round 1 right 1920x950: no console errors
+  ok   S08 round 3 right 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S08 round 3 right 1920x950: no console errors
+  ok   S08 pause marker 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S08 pause marker 1920x950: no console errors
+  ok   FT3 idle 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   FT3 idle 1920x950: no console errors
+  ok   FT3 correct + routes 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   FT3 correct + routes 1920x950: no console errors
+  ok   V2 play view 1920x950: no band
+  ok   V2 play view 1920x950: no console errors
+  ok   V2 stop 3, wrong 1920x950: band 563px = panel 563px, flush
+  ok   V2 stop 3, wrong 1920x950: no console errors
+  ok   V2 ended 1920x950: no band
+  ok   V2 ended 1920x950: no console errors
+  ok   S09 start 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S09 start 1920x950: no console errors
+  ok   S09 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S09 wrong 1920x950: no console errors
+  ok   S09 done 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S09 done 1920x950: no console errors
+  ok   S10 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S10 wrong 1920x950: no console errors
+  ok   S10 right 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S10 right 1920x950: no console errors
+  ok   S11 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S11 wrong 1920x950: no console errors
+  ok   S11 right 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S11 right 1920x950: no console errors
+  ok   S12 one of two 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S12 one of two 1920x950: no console errors
+  ok   S12 correct 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S12 correct 1920x950: no console errors
+  ok   S12 pause marker 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S12 pause marker 1920x950: no console errors
+  ok   FT4 idle 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   FT4 idle 1920x950: no console errors
+  ok   FT4 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   FT4 wrong 1920x950: no console errors
+  ok   S13 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S13 wrong 1920x950: no console errors
+  ok   S13 right 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S13 right 1920x950: no console errors
+  ok   S14 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S14 wrong 1920x950: no console errors
+  ok   S14 right 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S14 right 1920x950: no console errors
+  ok   S15 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S15 wrong 1920x950: no console errors
+  ok   S15 right 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S15 right 1920x950: no console errors
+  ok   S16 card selected 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S16 card selected 1920x950: no console errors
+  ok   S16 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S16 wrong 1920x950: no console errors
+  ok   S16 done 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S16 done 1920x950: no console errors
+  ok   S17 start 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S17 start 1920x950: no console errors
+  ok   S17 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S17 wrong 1920x950: no console errors
+  ok   S17 pause marker 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S17 pause marker 1920x950: no console errors
+  ok   S18A wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S18A wrong 1920x950: no console errors
+  ok   S18A done 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S18A done 1920x950: no console errors
+  ok   S18 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S18 wrong 1920x950: no console errors
+  ok   S18 step 2 unticked 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S18 step 2 unticked 1920x950: no console errors
+  ok   S18 saved 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S18 saved 1920x950: no console errors
+  ok   S19 brief 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S19 brief 1920x950: no console errors
+  ok   S19 opened 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S19 opened 1920x950: no console errors
+  ok   S19 return, saved 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S19 return, saved 1920x950: no console errors
+  ok   S20 row answered 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S20 row answered 1920x950: no console errors
+  ok   S20 step 2 chip 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S20 step 2 chip 1920x950: no console errors
+  ok   S20 step 2 with goal reminder 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S20 step 2 with goal reminder 1920x950: no console errors
+  ok   S21 item 1 wrong 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S21 item 1 wrong 1920x950: no console errors
+  ok   S21 item 5 one of two 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S21 item 5 one of two 1920x950: no console errors
+  ok   S21 result 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S21 result 1920x950: no console errors
+  ok   S22 takeaway 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S22 takeaway 1920x950: no console errors
+  ok   S22 finish confirm 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S22 finish confirm 1920x950: no console errors
+  ok   S22 finished 1920x950: band 1075px = panel 1075px, flush, focus panel (focus) gaps 190/190
+  ok   S22 finished 1920x950: no console errors
+  ok   S01 hint 2560x1080: no band
+  ok   S01 hint 2560x1080: no console errors
+  ok   S01 wrong 2560x1080: band 589px = panel 589px, flush
+  ok   S01 wrong 2560x1080: no console errors
+  ok   S01 correct 2560x1080: band 589px = panel 589px, flush
+  ok   S01 correct 2560x1080: no console errors
+  ok   O1 title 2560x1080: no band
+  ok   O1 title 2560x1080: no console errors
+  ok   O2 L4 open 2560x1080: no band
+  ok   O2 L4 open 2560x1080: no console errors
+  ok   O2 L1 open 2560x1080: no band
+  ok   O2 L1 open 2560x1080: no console errors
+  ok   O3 goals 2560x1080: no band
+  ok   O3 goals 2560x1080: no console errors
+  ok   O3 goal tip 2560x1080: no band
+  ok   O3 goal tip 2560x1080: no console errors
+  ok   W1 hint 2560x1080: no band
+  ok   W1 hint 2560x1080: no console errors
+  ok   W1 guess 2560x1080: band 563px = panel 563px, flush
+  ok   W1 guess 2560x1080: no console errors
+  ok   K1 key idea 2560x1080: no band
+  ok   K1 key idea 2560x1080: no console errors
+  ok   S02 hint 2560x1080: no band, focus panel (focus) gaps 262/262
+  ok   S02 hint 2560x1080: no console errors
+  ok   S02 notice 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S02 notice 2560x1080: no console errors
+  ok   S02 saved 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S02 saved 2560x1080: no console errors
+  ok   S03 hint 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S03 hint 2560x1080: no console errors
+  ok   S03 two selected 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S03 two selected 2560x1080: no console errors
+  ok   S03 not quite 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S03 not quite 2560x1080: no console errors
+  ok   S03 one of two 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S03 one of two 2560x1080: no console errors
+  ok   S03 correct 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S03 correct 2560x1080: no console errors
+  ok   S03 pause marker 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S03 pause marker 2560x1080: no console errors
+  ok   V1 play view 2560x1080: no band
+  ok   V1 play view 2560x1080: no console errors
+  ok   V1 transcript open 2560x1080: no band
+  ok   V1 transcript open 2560x1080: no console errors
+  ok   V1 stop, wrong 2560x1080: band 563px = panel 563px, flush
+  ok   V1 stop, wrong 2560x1080: no console errors
+  ok   V1 stop, right 2560x1080: band 563px = panel 563px, flush
+  ok   V1 stop, right 2560x1080: no console errors
+  ok   FT2 idle 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   FT2 idle 2560x1080: no console errors
+  ok   FT2 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   FT2 wrong 2560x1080: no console errors
+  ok   FT2 correct + routes 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   FT2 correct + routes 2560x1080: no console errors
+  ok   S04 start 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S04 start 2560x1080: no console errors
+  ok   S04 card selected 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S04 card selected 2560x1080: no console errors
+  ok   S04 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S04 wrong 2560x1080: no console errors
+  ok   S04 done 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S04 done 2560x1080: no console errors
+  ok   S05 hint 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S05 hint 2560x1080: no console errors
+  ok   S05 wrong (lane) 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S05 wrong (lane) 2560x1080: no console errors
+  ok   S05 wrong (event) 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S05 wrong (event) 2560x1080: no console errors
+  ok   S05 gateway + chips 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S05 gateway + chips 2560x1080: no console errors
+  ok   S06 hint 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S06 hint 2560x1080: no console errors
+  ok   S06 left wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S06 left wrong 2560x1080: no console errors
+  ok   S06 both right 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S06 both right 2560x1080: no console errors
+  ok   S07 tile 5 open 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S07 tile 5 open 2560x1080: no console errors
+  ok   S07 question 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S07 question 2560x1080: no console errors
+  ok   S07 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S07 wrong 2560x1080: no console errors
+  ok   S07 correct 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S07 correct 2560x1080: no console errors
+  ok   S08 round 1 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S08 round 1 wrong 2560x1080: no console errors
+  ok   S08 round 1 right 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S08 round 1 right 2560x1080: no console errors
+  ok   S08 round 3 right 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S08 round 3 right 2560x1080: no console errors
+  ok   S08 pause marker 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S08 pause marker 2560x1080: no console errors
+  ok   FT3 idle 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   FT3 idle 2560x1080: no console errors
+  ok   FT3 correct + routes 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   FT3 correct + routes 2560x1080: no console errors
+  ok   V2 play view 2560x1080: no band
+  ok   V2 play view 2560x1080: no console errors
+  ok   V2 stop 3, wrong 2560x1080: band 563px = panel 563px, flush
+  ok   V2 stop 3, wrong 2560x1080: no console errors
+  ok   V2 ended 2560x1080: no band
+  ok   V2 ended 2560x1080: no console errors
+  ok   S09 start 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S09 start 2560x1080: no console errors
+  ok   S09 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S09 wrong 2560x1080: no console errors
+  ok   S09 done 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S09 done 2560x1080: no console errors
+  ok   S10 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S10 wrong 2560x1080: no console errors
+  ok   S10 right 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S10 right 2560x1080: no console errors
+  ok   S11 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S11 wrong 2560x1080: no console errors
+  ok   S11 right 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S11 right 2560x1080: no console errors
+  ok   S12 one of two 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S12 one of two 2560x1080: no console errors
+  ok   S12 correct 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S12 correct 2560x1080: no console errors
+  ok   S12 pause marker 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S12 pause marker 2560x1080: no console errors
+  ok   FT4 idle 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   FT4 idle 2560x1080: no console errors
+  ok   FT4 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   FT4 wrong 2560x1080: no console errors
+  ok   S13 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S13 wrong 2560x1080: no console errors
+  ok   S13 right 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S13 right 2560x1080: no console errors
+  ok   S14 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S14 wrong 2560x1080: no console errors
+  ok   S14 right 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S14 right 2560x1080: no console errors
+  ok   S15 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S15 wrong 2560x1080: no console errors
+  ok   S15 right 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S15 right 2560x1080: no console errors
+  ok   S16 card selected 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S16 card selected 2560x1080: no console errors
+  ok   S16 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S16 wrong 2560x1080: no console errors
+  ok   S16 done 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S16 done 2560x1080: no console errors
+  ok   S17 start 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S17 start 2560x1080: no console errors
+  ok   S17 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S17 wrong 2560x1080: no console errors
+  ok   S17 pause marker 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S17 pause marker 2560x1080: no console errors
+  ok   S18A wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S18A wrong 2560x1080: no console errors
+  ok   S18A done 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S18A done 2560x1080: no console errors
+  ok   S18 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S18 wrong 2560x1080: no console errors
+  ok   S18 step 2 unticked 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S18 step 2 unticked 2560x1080: no console errors
+  ok   S18 saved 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S18 saved 2560x1080: no console errors
+  ok   S19 brief 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S19 brief 2560x1080: no console errors
+  ok   S19 opened 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S19 opened 2560x1080: no console errors
+  ok   S19 return, saved 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S19 return, saved 2560x1080: no console errors
+  ok   S20 row answered 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S20 row answered 2560x1080: no console errors
+  ok   S20 step 2 chip 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S20 step 2 chip 2560x1080: no console errors
+  ok   S20 step 2 with goal reminder 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S20 step 2 with goal reminder 2560x1080: no console errors
+  ok   S21 item 1 wrong 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S21 item 1 wrong 2560x1080: no console errors
+  ok   S21 item 5 one of two 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S21 item 5 one of two 2560x1080: no console errors
+  ok   S21 result 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S21 result 2560x1080: no console errors
+  ok   S22 takeaway 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S22 takeaway 2560x1080: no console errors
+  ok   S22 finish confirm 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S22 finish confirm 2560x1080: no console errors
+  ok   S22 finished 2560x1080: band 1075px = panel 1075px, flush, focus panel (focus) gaps 262/262
+  ok   S22 finished 2560x1080: no console errors
+
+3. menu and dialogs
+  ok   menu open 1280x720: band 1075px = panel 1075px, flush
+  ok   menu dialog "help" 1280x720: band 1075px = panel 1075px, flush
+  ok   menu dialog "startover" 1280x720: band 1075px = panel 1075px, flush
+  ok   menu 1280x720: no console errors
+  ok   menu open 1024x576: band 1075px = panel 1075px, flush
+  ok   menu dialog "help" 1024x576: band 1075px = panel 1075px, flush
+  ok   menu dialog "startover" 1024x576: band 1075px = panel 1075px, flush
+  ok   menu 1024x576: no console errors
+  ok   menu open 1366x650: band 1075px = panel 1075px, flush
+  ok   menu dialog "help" 1366x650: band 1075px = panel 1075px, flush
+  ok   menu dialog "startover" 1366x650: band 1075px = panel 1075px, flush
+  ok   menu 1366x650: no console errors
+  ok   menu open 1536x730: band 1075px = panel 1075px, flush
+  ok   menu dialog "help" 1536x730: band 1075px = panel 1075px, flush
+  ok   menu dialog "startover" 1536x730: band 1075px = panel 1075px, flush
+  ok   menu 1536x730: no console errors
+  ok   menu open 1920x950: band 1075px = panel 1075px, flush
+  ok   menu dialog "help" 1920x950: band 1075px = panel 1075px, flush
+  ok   menu dialog "startover" 1920x950: band 1075px = panel 1075px, flush
+  ok   menu 1920x950: no console errors
+  ok   menu open 2560x1080: band 1075px = panel 1075px, flush
+  ok   menu dialog "help" 2560x1080: band 1075px = panel 1075px, flush
+  ok   menu dialog "startover" 2560x1080: band 1075px = panel 1075px, flush
+  ok   menu 2560x1080: no console errors
+
+  text/background pairs rendered (ratio, needed):
+       #0B1E2A on #5AB3AA                  6.86:1  >= 4.5  e.g. "Not scored"
+       #111A20 on #FFFFFF                 17.61:1  >= 4.5  e.g. "Shortlist three chatbot "
+       #16293A on #F7F5F1 (large)         13.65:1  >= 3  e.g. "Intro"
+       #16293A on #F7F5F1                 13.65:1  >= 4.5  e.g. "Decide"
+       #16293A on #FBEAEA                 12.79:1  >= 4.5  e.g. "Output"
+       #16293A on #FBFAF7 (large)         14.24:1  >= 3  e.g. "Choose your first move."
+       #16293A on #FBFAF7                 14.24:1  >= 4.5  e.g. "Case title"
+       #16293A on #FFFFFF (large)         14.87:1  >= 3  e.g. "By the end you hand in a"
+       #16293A on #FFFFFF                 14.87:1  >= 4.5  e.g. "Trigger"
+       #1B2B36 on #DCEEEC                 12.10:1  >= 4.5  e.g. "Requests arrive by Whats"
+       #1B2B36 on #E7E4DD                 11.44:1  >= 4.5  e.g. "The video shows what rea"
+       #1B2B36 on #FBEAEA                 12.49:1  >= 4.5  e.g. "Vendors will ask who ans"
+       #1E4E55 on #CFE6E4                  7.07:1  >= 4.5  e.g. "Today"
+       #1E4E55 on #DCEEEC (large)          7.68:1  >= 3  e.g. "Correct."
+       #255777 on #FBFAF7                  7.43:1  >= 4.5  e.g. "Skip challenge"
+       #255777 on #FFFFFF                  7.75:1  >= 4.5  e.g. "Previous"
+       #2F6A72 on #E1EFEE                  5.19:1  >= 4.5  e.g. "Key idea"
+       #2F6A72 on #F7F5F1                  5.63:1  >= 4.5  e.g. "Where we are"
+       #2F6A72 on #FBFAF7                  5.87:1  >= 4.5  e.g. "Fast track · Chapter 2"
+       #2F6A72 on #FFFFFF (large)          6.13:1  >= 3  e.g. "4"
+       #2F6A72 on #FFFFFF                  6.13:1  >= 4.5  e.g. "It is your entry ticket "
+       #33414B on #E7E4DD (large)          8.28:1  >= 3  e.g. "Hold that thought."
+       #33414B on #F7F5F1                  9.65:1  >= 4.5  e.g. "New technology on a brok"
+       #33414B on #FBFAF7                 10.07:1  >= 4.5  e.g. "We get about 90 requests"
+       #33414B on #FFFFFF                 10.51:1  >= 4.5  e.g. "You map one process as i"
+       #4A5862 on #FFFFFF (large)          7.33:1  >= 3  e.g. "Same mess, faster."
+       #4A5862 on #FFFFFF                  7.33:1  >= 4.5  e.g. "Without mapping"
+       #4D5D68 on #F7F5F1                  6.26:1  >= 4.5  e.g. "workflow redesign drives"
+       #55626C on #F7F5F1                  5.76:1  >= 4.5  e.g. "Start"
+       #55626C on #FBFAF7                  6.01:1  >= 4.5  e.g. "0 / 60"
+       #6A7680 on #FFFFFF (large)          4.65:1  >= 3  e.g. "5"
+       #6A7680 on #FFFFFF                  4.65:1  >= 4.5  e.g. "1"
+       #9FD3CD on #0B1E2A                 10.28:1  >= 4.5  e.g. "Enterprise AI Implementa"
+       #9FD3CD on #0C1D2A (large)         10.33:1  >= 3  e.g. "Watch for:"
+       #9FD3CD on #0C1E2B                 10.29:1  >= 4.5  e.g. "0:04"
+       #A30000 on #FBEAEA (large)          7.06:1  >= 3  e.g. "Not quite."
+       #E6EEF2 on #0B1E2A (large)         14.49:1  >= 3  e.g. "Don't accelerate a broke"
+       #E6EEF2 on #0C1D2A                 14.57:1  >= 4.5  e.g. "what separates a change "
+       #FFFFFF on #0B1E2A (large)         17.03:1  >= 3  e.g. "Process Modeling and Wor"
+       #FFFFFF on #0C1D2A (large)         17.11:1  >= 3  e.g. "New technology runs on a"
+       #FFFFFF on #0C1D2A                 17.11:1  >= 4.5  e.g. "Warm-up"
+       #FFFFFF on #0C1E2B (large)         17.04:1  >= 3  e.g. "Put a chatbot on the HR "
+       #FFFFFF on #0C1E2B                 12.52:1  >= 4.5  e.g. "Dana, HR director · Fict"
+       #FFFFFF on #255777                  7.75:1  >= 4.5  e.g. "1"
+       #FFFFFF on #646B6F                  5.43:1  >= 4.5  e.g. "Spot decision points: te"
+       #FFFFFF on #EE3124 (large)          4.12:1  >= 3  e.g. "Next"
+
+test:fit passed
