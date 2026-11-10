@@ -26,5 +26,11 @@ Sheet: planning/v3-review-sheet-photos2.jpg. The round-1 tech-* photos stay in t
   - W5 hands writing beside a laptop, three-node flow (+ S18B, S19A, S19C, S20B) · S18 hands typing under a lock shield · S20 pen over a page
   - W6 finished map with a check on the last card (+ S21, S21R) · S22 the finished sketch beside a closed laptop at dusk
 
+**Round 4 (Noy, 10 Nov, on the live Overview):** O2/S10/S12 "the glow in the middle is ugly, remove it; around is fine"; W1 "why at the side? centre it, set it off with the frame"; S10 "text ran out of the frame, check all screens"; S19C/S22 "why at the side? why is the photo sharp?"; "no object may sit on another".
+- The radial glow on the dot grid is gone from every screen (S03 keeps its approved one). The turquoise edge stays on real panels only (S10's fill sheet is transparent with no padding: the edge drew a frame tight on its text).
+- All opener cards (W1-W6) are centred, with a 1.5 px turquoise frame and a soft halo.
+- No task at the side: S02, S08B, S15, S18, S20, S22 on the soft ground (ground.tone 'soft', zones.js: photo blurred under a lighter veil), one centred panel; S19C's panel centred. S15: after the answer the proof sits beside the question; S22: the question, then the Lesson 5 bridge under it.
+- tools/check-overflow.mjs (new): every screen, arrival and after a wrong answer, at 1280x720, 1024x576, 1920x950: content out of its panel, overlapping blocks, text off the stage or on the nav row.
+
 Not touched: V1, K1 (liked), every other screen. Old photos stay in the folder (S16 still uses the old paper stack, blurred).
 Checks: check passed, test-fit passed for the 13 touched screens. Review sheet: planning/v3-review-sheet.jpg.

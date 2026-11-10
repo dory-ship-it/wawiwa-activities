@@ -2,6 +2,7 @@
   "$chapterRefs": "FX3: a chapter number in any text is written {chN} (the chapter id) and shown as that chapter's place in chapters + 1 (Intro = 1 ... Wrap-up = 7), so no number is typed twice. S21R's review links take theirs from the screen they open.",
   "$comment": "EAI M1 L4 self-study, pilot slice content. ALL learner-facing text lives here (localization = swap this file). Design lives in src/. Screen text is verbatim from L4_Storyboard_v2.md (2026-10-15). Strings under ui.* marked pilotCopy:true are new UI copy not in the storyboard; Noy reviews them in P5. Schema: see planning/PRD.md section 5.",
   "schemaVersion": "1.0",
+  "$fxV3c": "v3 content pass (10 Nov 2026): tools/v3-content-pass.mjs; W3 worked example, field numbers with their short names, Chapter 6 practice case, W6 check line. Wording only.",
   "$fx8": "FX8 (8 Nov 2026): back to Noy's boards (L4 Screens Intro to Ch2, planning/fx8-board); tools/fx8-content.mjs: S12/S13 click wording, flag count, icons on K4, S16, S17, S20B.",
   "$fx7": "FX7 (8 Nov 2026): the original look rearranged (tools/fx7-content.mjs, src/compose.js, src/fx7.css): photo / cases / wide media, select then Check.",
   "$fx6": "FX6 (8 Nov 2026): the looks (tools/fx6-content.mjs, src/compose.js) and the upgraded V1 film.",
@@ -137,7 +138,7 @@
         "cases": "Next, locked until you answer all five cases",
         "fields": "Next, locked until every field has its card and is checked",
         "video": "Next, locked until the video ends and every stop is answered",
-        "fill": "Next, locked until you choose the right line for Field 7 or use both attempts",
+        "fill": "Next, locked until you choose the right line for Field 7 (Gaps) or use both attempts",
         "metric": "Next, locked until you choose the strongest metric or use both attempts",
         "map": "Next, locked until both risk flags are placed and checked",
         "line": "Next, locked until the Start and End flags are placed and checked",
@@ -698,11 +699,7 @@
         "position": "60% 50%",
         "temp": false
       },
-      "ground": {
-        "kind": "half",
-        "side": "left",
-        "size": "narrow"
-      },
+      "ground": { "kind": "darkblur", "tone": "soft" },
       "hint": "Describe what happens today, not the solution you want.",
       "ghost": {
         "type": "input",
@@ -2057,7 +2054,7 @@
       "stage": {
         "top": {
           "kind": "line",
-          "text": "It goes into workbook Fields 2 and 3 in Chapter {ch5}."
+          "text": "It goes into workbook Fields 2 and 3 (Trigger, Steps), Chapter {ch5}."
         },
         "bottom": {
           "kind": "privacy",
@@ -2141,11 +2138,7 @@
         "position": "72% 50%",
         "temp": false
       },
-      "ground": {
-        "kind": "half",
-        "side": "left",
-        "size": "narrow"
-      }
+      "ground": { "kind": "darkblur", "tone": "soft" }
     },
 
     {
@@ -2164,7 +2157,7 @@
       "minutes": 1,
       "presentation": true,
       "instruction": "Map the HR case from Lesson 1, field by field",
-      "lead": "Repeat questions to HR at a services company of about 400 employees.",
+      "lead": "A worked example before your own case: repeat HR questions at a 400-person company.",
       "points": [
         {
           "icon": "route",
@@ -2310,7 +2303,7 @@
           "cueId": "stop1",
           "storyboardTime": "0:59",
           "t": 77.754,
-          "question": "Which line belongs in Field 2, as the process runs today?",
+          "question": "Which line belongs in Field 2 (Trigger), as the process runs today?",
           "options": [
             {
               "id": "a",
@@ -2362,7 +2355,7 @@
               "id": "c",
               "label": "HR manager keeps the four policies current",
               "correct": false,
-              "feedback": "That is ownership of a knowledge source. It goes in Field 5, next to each policy."
+              "feedback": "That is ownership of a knowledge source. It goes in Field 5 (Sources), next to each policy."
             }
           ],
           "tracking": {
@@ -2501,7 +2494,7 @@
         "icon": "sort"
       },
       "minutes": 4,
-      "instruction": "Drag each card to its part of Field 5.",
+      "instruction": "Drag each card to its part of Field 5 (Sources).",
       "hint": "Drag a card, or click it and then click a column.",
       "layout": "sort-deck",
       "hintShown": true,
@@ -2578,7 +2571,7 @@
           "column": "d",
           "tag": "Field 6: controls",
           "feedback": {
-            "correct": "Kept out: it describes how answers get checked, which is Field 6.",
+            "correct": "Kept out: it describes how answers get checked, which is Field 6 (Controls).",
             "wrong": "This card says nothing about where knowledge comes from, who keeps it, or how sensitive it is."
           }
         },
@@ -2750,7 +2743,7 @@
               "column": "d",
               "tag": "Fields 3 and 6",
               "feedback": {
-                "correct": "Kept out: matching is a step and a manual check, Fields 3 and 6.",
+                "correct": "Kept out: matching is a step and a manual check, Fields 3 and 6 (Steps, Controls).",
                 "wrong": "It names documents, but it says what people do with them."
               }
             },
@@ -3026,7 +3019,7 @@
           "id": "result",
           "icon": "check-circle",
           "title": "A result of the mapping",
-          "text": "Not a weakness of the mapper. Field 7 exists for exactly this."
+          "text": "Not a weakness of the mapper. Field 7 (Gaps) exists for exactly this."
         },
         {
           "id": "next",
@@ -3080,7 +3073,7 @@
         "Date"
       ],
       "field": {
-        "label": "Field 8",
+        "label": "Field 8 (Metric)",
         "icon": "gauge"
       },
       "options": [
@@ -3585,7 +3578,7 @@
       "stage": {
         "top": {
           "kind": "line",
-          "text": "This goes into Field 8 of your workbook in Chapter {ch5}."
+          "text": "This goes into workbook Field 8 (Metric) in Chapter {ch5}."
         },
         "bottom": {
           "kind": "privacy",
@@ -3826,7 +3819,7 @@
       "instruction": "Choose the first question to ask about this bottleneck.",
       "terms": ["bottleneck"],
       "photo": { "src": "assets/img/l4/v2/ch5-s15-stack-hourglass.jpg", "position": "36% 50%", "temp": false },
-      "ground": { "kind": "half", "side": "right" },
+      "ground": { "kind": "darkblur", "tone": "soft" },
       "proof": { "eyebrow": "The car company, per reports", "figure": "-75%", "text": "headcount, once mapping removed the manual matching step" },
       "proof": { "eyebrow": "The car company, per reports", "figure": "-75%", "text": "headcount, once mapping removed the manual matching step" },
       "proof": { "eyebrow": "The car company, per reports", "figure": "-75%", "text": "headcount, once mapping removed the manual matching step" },
@@ -4225,7 +4218,7 @@
         { "id": "5", "label": "Automating a broken process", "icon": "gear-broken", "sub": "speeds up a process nobody fixed" }
       ],
       "cards": [
-        { "id": "a", "text": "Fields 6 and 7 are blank: the map was due within the hour.", "column": "3",
+        { "id": "a", "text": "Fields 6 and 7 (Controls, Gaps) are blank: the map was due within the hour.", "column": "3",
           "feedback": { "correct": "Controls and gaps hold the findings, so skipping them leaves Lesson 5 nothing to protect against.",
             "wrong": "The map has a goal and matches today. Look at which fields were never filled." } },
         { "id": "b", "text": "The map shows how HR intends requests to flow, not how they flow today.", "column": "1",
@@ -4264,7 +4257,7 @@
             },
             {
               "id": "b",
-              "text": "Fields 6 to 8 are empty: the mapper ran out of time.",
+              "text": "Fields 6 to 8 (Controls, Gaps, Metric) are empty: the mapper ran out of time.",
               "column": "3",
               "feedback": {
                 "correct": "Rushed mapping skips the hard fields, which hold the findings Lesson 5 needs.",
@@ -4455,7 +4448,7 @@
       "minutes": 1,
       "presentation": true,
       "instruction": "Map your own case",
-      "lead": "The same eight fields, now on the case you typed at the start.",
+      "lead": "One short practice, then the same eight fields on your own case.",
       "points": [
         {
           "icon": "arrows",
@@ -4513,9 +4506,9 @@
       },
       "minutes": 4,
       "instruction": "Choose the card for each field.",
-      "hint": "Same eight fields, different case.",
+      "hint": "Same eight fields. Your own case comes next.",
       "layout": "focus",
-      "header": "Lesson 1 case: sales call summaries",
+      "header": "Practice case: sales call summaries",
       "columns": [
         {
           "id": "a",
@@ -4654,7 +4647,7 @@
         },
         {
           "id": "c",
-          "label": "Your real map, with Field 5 left empty",
+          "label": "Your real map, with Field 5 (Sources) left empty",
           "correct": false,
           "feedback": "Names can sit in any field, not only Field 5. Steps and handoffs still identify people."
         }
@@ -4681,9 +4674,7 @@
         "position": "50% 50%",
         "temp": false
       },
-      "ground": {
-        "kind": "darkblur"
-      }
+      "ground": { "kind": "darkblur", "tone": "soft" }
     },
 
     {
@@ -4864,17 +4855,17 @@
           {
             "id": "case",
             "from": "S02",
-            "chip": "Field 1"
+            "chip": "Field 1 (Name)"
           },
           {
             "id": "sketch",
             "from": "S08B",
-            "chip": "Fields 2 and 3"
+            "chip": "Fields 2 and 3 (Trigger, Steps)"
           },
           {
             "id": "metric",
             "from": "S12B",
-            "chip": "Field 8"
+            "chip": "Field 8 (Metric)"
           }
         ]
       },
@@ -4981,13 +4972,13 @@
           "trackingId": "L4_S20_1",
           "feedback": {
             "yes": "Every step has an owner. Lesson 5 can place AI or a person next to each one.",
-            "notYet": "A step without a role cannot be improved or monitored. Name the role, or write 'unclear' in Field 7."
+            "notYet": "A step without a role cannot be improved or monitored. Name the role, or write 'unclear' in Field 7 (Gaps)."
           }
         },
         {
           "id": "q2",
           "icon": "clock",
-          "text": "Does Field 4 cover an unavailable receiver?",
+          "text": "Does Field 4 (Handoffs) cover an unavailable receiver?",
           "trackingId": "L4_S20_2",
           "feedback": {
             "yes": "Your handoffs cover the unavailable case. Delays now show up on the map, not in daily work.",
@@ -5045,10 +5036,7 @@
         "position": "62% 50%",
         "temp": false
       },
-      "ground": {
-        "kind": "half",
-        "side": "left"
-      }
+      "ground": { "kind": "darkblur", "tone": "soft" }
     },
 
     {
@@ -5081,7 +5069,7 @@
           "label": "Ideal, not actual",
           "icon": "eye",
           "sub": "maps how it should work",
-          "feedback": "In your workbook: reread Field 3 against a normal day, not the written procedure."
+          "feedback": "In your workbook: reread Field 3 (Steps) against a normal day, not the written procedure."
         },
         {
           "id": "goal",
@@ -5095,7 +5083,7 @@
           "label": "Rushed mapping",
           "icon": "clock",
           "sub": "hard fields skipped",
-          "feedback": "In your workbook: reopen Fields 6 and 7, the ones skipped first."
+          "feedback": "In your workbook: reopen Fields 6 and 7 (Controls, Gaps), the ones skipped first."
         },
         {
           "id": "updated",
@@ -5157,7 +5145,7 @@
       "minutes": 1,
       "presentation": true,
       "instruction": "What you can now do",
-      "lead": "Show it in a short knowledge check.",
+      "lead": "A short check follows: 6 questions, pass mark 80.",
       "points": [
         {
           "icon": "arrows",
@@ -5221,7 +5209,7 @@
           "id": "i1",
           "icon": "speech",
           "trackingId": "L4_S21_1",
-          "stem": "Lesson 1 case: customer service. Field 4 says 'Rep to department.' What is missing?",
+          "stem": "Lesson 1 case: customer service. Field 4 (Handoffs) says 'Rep to department.' What is missing?",
           "options": [
             {
               "id": "a",
@@ -5250,7 +5238,7 @@
           ],
           "b": {
             "trackingId": "L4_S21_1b",
-            "stem": "Lesson 1 case: student inquiries. Field 4 says 'Coordinator to dean's office.' What is missing?",
+            "stem": "Lesson 1 case: student inquiries. Field 4 (Handoffs) says 'Coordinator to dean's office.' What is missing?",
             "options": [
               {
                 "id": "a",
@@ -5357,13 +5345,13 @@
               "id": "b",
               "label": "Nothing until a time log exists",
               "correct": false,
-              "feedback": "Field 8 stays empty. In three months, nobody can show whether anything changed."
+              "feedback": "Field 8 (Metric) stays empty. In three months, nobody can show whether anything changed."
             },
             {
               "id": "c",
               "label": "The target time, once it is set",
               "correct": false,
-              "feedback": "Field 8 now shows where the team hopes to land and nothing about where it stands now."
+              "feedback": "Field 8 (Metric) now shows where the team hopes to land and nothing about where it stands now."
             },
             {
               "id": "d",
@@ -5386,7 +5374,7 @@
                 "id": "b",
                 "label": "Nothing until someone times it",
                 "correct": false,
-                "feedback": "Field 8 stays empty. In three months, nobody can show whether anything changed."
+                "feedback": "Field 8 (Metric) stays empty. In three months, nobody can show whether anything changed."
               },
               {
                 "id": "c",
@@ -5469,7 +5457,7 @@
           "id": "i6",
           "icon": "speech",
           "trackingId": "L4_S21_6",
-          "stem": "Lesson 1 case: student inquiries. Staff answer from admission terms the registrar keeps current. Field 5 owner?",
+          "stem": "Lesson 1 case: student inquiries. Staff answer from admission terms the registrar keeps current. Field 5 (Sources) owner?",
           "options": [
             {
               "id": "a",
@@ -5498,7 +5486,7 @@
           ],
           "b": {
             "trackingId": "L4_S21_6b",
-            "stem": "Lesson 1 case: weekly report. KPIs come from a sheet finance keeps current. Field 5 owner?",
+            "stem": "Lesson 1 case: weekly report. KPIs come from a sheet finance keeps current. Field 5 (Sources) owner?",
             "options": [
               {
                 "id": "a",
@@ -5824,7 +5812,7 @@
         },
         {
           "item": "i4",
-          "stem": "Field 7 unknowns",
+          "stem": "Field 7 (Gaps): unknowns",
           "text": "Why 'unclear' is valid",
           "screen": "S10"
         },
@@ -5894,7 +5882,7 @@
           "id": "b",
           "label": "'Unclear' is a legitimate answer",
           "icon": "help-circle",
-          "feedback": "Not a failure of the mapper, a diagnostic result. Your Field 7 lists what to investigate first."
+          "feedback": "Not a failure of the mapper, a diagnostic result. Your Field 7 (Gaps) lists what to investigate first."
         },
         {
           "id": "c",
@@ -5947,7 +5935,8 @@
         "src": "assets/img/l4/v2/ch7-s22-map-dusk.jpg",
         "position": "62% 40%",
         "temp": false
-      }
+      },
+      "ground": { "kind": "darkblur", "tone": "soft" }
     },
     {
       "id": "END",

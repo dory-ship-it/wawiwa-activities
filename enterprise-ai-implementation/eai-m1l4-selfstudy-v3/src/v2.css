@@ -247,17 +247,22 @@
 /* the openers (W1-W6): the photo blurred behind the card, darker on the card's side, so the card is the one thing to read */
 .w-stage:has(.w-main[data-layout="opener"]) .w-g-full { inset: -28px; filter: blur(9px) saturate(1.05) brightness(.86); }
 .w-stage:has(.w-main[data-layout="opener"]) .w-scene::after { content: ""; position: absolute; inset: 0;
-  background: linear-gradient(90deg, rgba(8, 20, 30, .62), rgba(8, 20, 30, .3) 48%, rgba(8, 20, 30, .08)); }
-.w-main[data-layout="opener"] .w-opener-card { background: rgba(8, 20, 30, .86); border: 1px solid rgba(90, 179, 170, .38);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, .45), 0 0 44px -6px rgba(90, 179, 170, .4); }
+  background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(8, 20, 30, .5), rgba(8, 20, 30, .25)); }
+/* (Noy, 10 Nov round 2: "why at the side?") the card in the middle of the screen, set off by its frame */
+.w-main[data-layout="opener"] .w-opener-card,
+.w-main[data-layout="opener"] .w-opener-card[data-kind="statement"] { left: 50%; top: calc(50% - 6px); transform: translate(-50%, -50%);
+  background: rgba(8, 20, 30, .86); border: 1.5px solid rgba(90, 179, 170, .62);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .45), 0 0 0 6px rgba(90, 179, 170, .08), 0 0 48px -4px rgba(90, 179, 170, .45); }
 
 /* S03: the dot grid gets a soft turquoise light, the card to drag glows, and a line forks from it to the two causes */
 /* lesson-wide (Noy, 10 Nov 2026: "keep it clean"): every dot-grid screen gets the same soft turquoise light,
    its white panel a faint turquoise edge, its icons the turquoise disc. One accent, nothing more. */
-.w-stage[data-ground="dots"] .w-main > .w-sheet-focus { box-shadow: var(--wl-float-shadow), 0 0 0 1px rgba(90, 179, 170, .3), 0 18px 50px -10px rgba(90, 179, 170, .34); }
+/* (Noy, 10 Nov round 2: the glow in the middle of the screen is gone, only S03 keeps its approved one; the
+   edge glow stays, and only on a real panel: S10's fill sheet is transparent with no padding) */
+.w-stage[data-ground="dots"] .w-main > .w-sheet-focus:not(.w-sheet-fill) { box-shadow: var(--wl-float-shadow), 0 0 0 1px rgba(90, 179, 170, .3), 0 18px 50px -10px rgba(90, 179, 170, .34); }
 .w-stage[data-ground="dots"] .w-rule-icon,
 .w-stage[data-ground="dots"] .w-drop-icon { border-radius: 50%; background: var(--wl-turquoise); color: var(--wl-o1-ground); box-shadow: 0 0 16px rgba(90, 179, 170, .5); }
-.w-g-dots { background-image: radial-gradient(ellipse 46% 42% at 50% 38%, rgba(90, 179, 170, .3), transparent 72%), radial-gradient(var(--wl-line-mid) 1.3px, transparent 1.4px);
+.w-stage[data-screen="S03"] .w-g-dots { background-image: radial-gradient(ellipse 46% 42% at 50% 38%, rgba(90, 179, 170, .3), transparent 72%), radial-gradient(var(--wl-line-mid) 1.3px, transparent 1.4px);
   background-size: 100% 100%, 24px 24px; background-repeat: no-repeat, repeat; }
 .w-stage[data-screen="S03"] .w-deck-card { box-shadow: 0 0 0 2px rgba(90, 179, 170, .7), 0 12px 34px rgba(90, 179, 170, .38); }
 .w-stage[data-screen="S03"] .w-drops::before { content: ""; position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); height: 104px; pointer-events: none;
@@ -265,8 +270,26 @@
   filter: drop-shadow(0 0 6px rgba(90, 179, 170, .7)); opacity: .75; }
 .w-stage[data-screen="S03"] .w-main:not(:has(.w-deck-card)) .w-drops::before { opacity: 0; }
 
-/* S18: the question centred on the blurred photo (no longer at the side), the panel lit at its edge */
-.w-stage[data-screen="S18"] .w-g-blur { filter: blur(14px) saturate(1.1); }
-.w-stage[data-screen="S18"] .w-g-veil { background: rgba(8, 20, 30, .5); }
-.w-stage[data-screen="S18"] .w-sheet-right.w-sheet-one { left: 50%; right: auto; top: 50%; width: 720px; transform: translate(-50%, calc(-50% - 20px));
-  box-shadow: 0 24px 60px rgba(0, 0, 0, .4), 0 0 0 1px rgba(90, 179, 170, .45), 0 0 48px -4px rgba(90, 179, 170, .45); }
+/* no task at the side (Noy, 10 Nov: S18, S19C, S22 "why at the side?"): S02, S08B, S15, S18, S20 and S22 sit on the
+   soft ground (ground.tone 'soft': the photo blurred under a lighter veil) with the task in one centred panel,
+   lit at its edge; S19C keeps its light wash, its panel centred too */
+.w-stage[data-tone="soft"] .w-g-blur { filter: blur(14px) saturate(1.1); }
+.w-stage[data-tone="soft"] .w-g-veil { background: rgba(8, 20, 30, .5); }
+.w-stage[data-tone="soft"] .w-main > :is(.w-sheet-focus, .w-open),
+.w-stage[data-tone="soft"] .w-sheet-right.w-sheet-one,
+.w-stage[data-tone="soft"] .w-main > .w-sheet-right,
+.w-stage[data-screen="S19C"] .w-main > .w-sheet-right { box-shadow: 0 24px 60px rgba(0, 0, 0, .4), 0 0 0 1px rgba(90, 179, 170, .45), 0 0 48px -4px rgba(90, 179, 170, .45); }
+.w-stage[data-tone="soft"] .w-sheet-right.w-sheet-one,
+.w-stage[data-tone="soft"] .w-main > .w-sheet-right,
+.w-stage[data-screen="S19C"] .w-main > .w-sheet-right { left: 50%; right: auto; top: 50%; width: 720px; transform: translate(-50%, calc(-50% - 20px)); }
+/* S02: the heading sat on the light half; on the soft ground the whole task (heading, line, form) is one light panel */
+.w-stage[data-tone="soft"] .w-main > .w-open { padding: 26px 32px 28px; border-radius: 18px; background: var(--wl-ivory); }
+/* S15 and S22: two blocks, stacked in reading order in the middle (S15: the question, then the proof after the
+   right answer; S22: the question, then the bridge to Lesson 5 under it) */
+.w-stage[data-tone="soft"]:is([data-screen="S15"], [data-screen="S22"]) .w-main { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding-bottom: 76px; }
+.w-stage[data-tone="soft"]:is([data-screen="S15"], [data-screen="S22"]) .w-main > .w-sheet-right { position: relative; left: auto; top: auto; transform: none; order: 1; }
+.w-stage[data-tone="soft"][data-screen="S22"] .w-main > .w-bridge-card { position: relative; left: auto; top: auto; width: 720px; order: 2; }
+/* S15: after the right answer the proof joins the question as a pair in the middle (stacked it ran past the bar) */
+.w-stage[data-tone="soft"][data-screen="S15"] .w-main { flex-direction: row; gap: 18px; }
+.w-stage[data-tone="soft"][data-screen="S15"] .w-main > .w-sheet-right { width: 640px; }
+.w-stage[data-tone="soft"][data-screen="S15"] .w-proof { position: relative; right: auto; bottom: auto; width: 320px; order: 2; }
