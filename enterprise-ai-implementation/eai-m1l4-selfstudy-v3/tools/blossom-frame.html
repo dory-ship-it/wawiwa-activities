@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Blossom-like player frame (dev only)</title>
+<!-- FX4: a stand-in for Blossom's SCORM player: a top bar, then the package in an iframe, same origin.
+     ?mode=fill   the iframe fills the space under the bar (the usual case)
+     ?mode=wide   the iframe is wider than the window, centred in a clipping box (its left and right edges
+                  are cut off: what Dor's shots of S09 and S13 looked like)
+     ?mode=tall   the iframe is taller than the space under the bar (its foot is cut off)
+     &screen=ID   the lesson screen to open. Not part of the SCORM package. -->
+<link rel="stylesheet" href="blossom-frame.css">
+</head>
+<body>
+<header class="bar"><span class="logo">Blossom</span><span class="title">Lesson 4 · Process Modeling and Workflow Mapping</span><span class="close">Close</span></header>
+<div class="box"><iframe id="lesson" title="Lesson"></iframe></div>
+<script src="blossom-frame.js"></script>
+</body>
+</html>
