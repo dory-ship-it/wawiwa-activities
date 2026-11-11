@@ -5,10 +5,10 @@
 // Review-only strings live here, not in the content: this folder is not part of the SCORM package.
 // Hidden inside an iframe (the thumbnails on review.html carry their own labels).
 // PP1: on an adaptive screen it names the level shown and the goal (review only; the learner never sees it).
-import { h, chapterNo } from '../util.js?v=d1af4854';
-import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=d1af4854';
+import { h, chapterNo } from '../util.js?v=18bb480b';
+import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=18bb480b';
 
-const CSS = new URL('./review.css?v=d1af4854', import.meta.url).href;
+const CSS = new URL('./review.css?v=18bb480b', import.meta.url).href;
 
 export function createToolbar(lesson) {
   if (window.self !== window.top) return { show() {} };

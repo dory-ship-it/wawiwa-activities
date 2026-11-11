@@ -564,6 +564,18 @@ R('S12', 'Click the two fields that show the handoff and its risk. Each click pl
 /* Restored for Dor, 11 Nov 2026 (the cuts were removed from this file): S18 option a keeps the CONFIDENTIAL
    sentence, S20B keeps the one-line definition under each mistake, S18A keeps "Field N" in the labels. */
 
+/* ---------------- S12 as a drawing (design copy, 11 Nov 2026): the words of the flow figure ---------------- */
+{
+  const [a, b] = span('S12');
+  const seg = t.slice(a, b), k = '"dragHelp": "helpFields",';
+  if (seg.split(k).length !== 2) errs.push('S12: dragHelp anchor not found once');
+  const fig = { kind: 'flow', name: 'Repeat HR questions', roles: { from: 'Employee', staff: 'HR staff', manager: 'HR manager' },
+    channels: ['speech', 'mail', 'person'], steps: ['Receive', 'Check', 'Answer'], handoff: 'beyond policy',
+    sources: { docs: [1, 2, 3, 4], count: '4 policies', tag: 'INTERNAL' }, controls: 'Staff judgment',
+    gaps: ['Errors uncounted', 'No single channel'], metric: { now: '35%', goal: '20%', by: '3 months' } };
+  t = t.slice(0, a) + seg.replace(k, () => k + '\n      "figure": ' + JSON.stringify(fig) + ',') + t.slice(b);
+}
+
 if (errs.length) { console.error(errs.join('\n')); process.exit(1); }
 JSON.parse(t);
 fs.writeFileSync(OUT, t);

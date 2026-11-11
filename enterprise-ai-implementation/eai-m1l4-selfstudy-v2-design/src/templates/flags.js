@@ -13,12 +13,12 @@
 // Tracking: one interaction when the last flag is placed, from each flag's FIRST drop:
 //   choice (map)     the first fields, in number order ("4,7"), correct only if both were right
 //   matching (line)  the flag's one-character code and its first step ("s.1,e.5"), SCORM 1.2 matching
-import { h, fmt, reducedMotion } from '../util.js?v=d1af4854';
-import { glyph, icon } from '../icons.js?v=d1af4854';
-import { layout } from './stage.js?v=d1af4854';
-import { dragDrop } from '../drag.js?v=d1af4854';
+import { h, fmt, reducedMotion } from '../util.js?v=18bb480b';
+import { glyph, icon } from '../icons.js?v=18bb480b';
+import { layout } from './stage.js?v=18bb480b';
+import { dragDrop } from '../drag.js?v=18bb480b';
 // (FX5: no Check here any more)
-// import { checkButton } from './decision.js?v=d1af4854';
+// import { checkButton } from './decision.js?v=18bb480b';
 
 export const flags = {
   mount(ctx) {
@@ -30,7 +30,38 @@ export const flags = {
 
     /* ---- the figure card and its drop targets ---- */
     let card, targets;
-    if (map) {
+    if (map && screen.figure) {
+      // DESIGN COPY (S12 as a drawing, 11 Nov 2026): the HR process drawn as one line, employee to HR
+      // staff to HR manager, and the eight fields as the parts of that drawing. Every field is still a
+      // drop target with its number and name; its full text stays as the accessible name. All words
+      // come from screen.figure. No part is drawn differently from the others (nothing points at 4 or 7).
+      const fg = screen.figure;
+      const pin = (n, cls, ...kids) => {
+        const f = screen.map.find((x) => x.n === n);
+        const el = h('div', { class: 'w-target w-flow-pin ' + cls, dataset: { target: String(n) } },
+          h('span', { class: 'w-flow-tag' }, h('span', { class: 'w-step-n', 'aria-hidden': 'true' }, String(n)), h('b', {}, f.title)), ...kids);
+        return { id: String(n), el, chip: null, name: fmt(ui.drag.fieldName, { n, title: f.title }) + ', ' + f.text, f };
+      };
+      const role = (name, text) => h('div', { class: 'w-flow-role' }, h('span', { class: 'w-flow-face', 'aria-hidden': 'true' }, icon(name, { size: 30 })), h('span', {}, text));
+      const wire = () => h('span', { class: 'w-flow-wire', 'aria-hidden': 'true' });
+      const t = {};
+      t[1] = pin(1, 'w-flow-name', h('span', { class: 'w-flow-say' }, fg.name));
+      t[2] = pin(2, 'w-flow-on', h('span', { class: 'w-flow-icons', 'aria-hidden': 'true' }, fg.channels.map((c) => icon(c, { size: 26 }))));
+      t[3] = pin(3, 'w-flow-steps', h('span', { class: 'w-flow-chain' }, fg.steps.flatMap((x, i) => [i ? glyph('g-arrow', { size: 16 }) : null, h('span', { class: 'w-flow-step' }, x)]).filter(Boolean)));
+      t[4] = pin(4, 'w-flow-on', h('span', { class: 'w-flow-say' }, fg.handoff));
+      t[5] = pin(5, 'w-flow-note', h('span', { class: 'w-flow-docs', 'aria-hidden': 'true' }, fg.sources.docs.map(() => icon('document', { size: 24 }))), h('span', { class: 'w-flow-say' }, fg.sources.count, h('span', { class: 'w-flow-stamp' }, fg.sources.tag)));
+      t[6] = pin(6, 'w-flow-note', h('span', { class: 'w-flow-row' }, h('span', { class: 'w-flow-box', 'aria-hidden': 'true' }), h('span', { class: 'w-flow-say' }, fg.controls)));
+      t[7] = pin(7, 'w-flow-note', fg.gaps.map((x) => h('span', { class: 'w-flow-row' }, h('span', { class: 'w-flow-q', 'aria-hidden': 'true' }, icon('help-circle', { size: 20 })), h('span', { class: 'w-flow-say' }, x))));
+      t[8] = pin(8, 'w-flow-note w-flow-metric', h('span', { class: 'w-flow-bars', 'aria-hidden': 'true' }, h('i', { dataset: { bar: 'now' } }), h('i', { dataset: { bar: 'goal' } })),
+        h('span', { class: 'w-flow-say' }, h('span', {}, fg.metric.now), glyph('g-arrow', { size: 16 }), h('b', {}, fg.metric.goal), h('span', { class: 'w-flow-by' }, fg.metric.by)));
+      card = h('div', { class: 'w-flow', role: 'group' },
+        t[1].el,
+        h('div', { class: 'w-flow-line' }, role('person', fg.roles.from), h('div', { class: 'w-flow-link' }, wire(), t[2].el),
+          h('div', { class: 'w-flow-desk' }, role('person', fg.roles.staff), t[3].el),
+          h('div', { class: 'w-flow-link' }, wire(), t[4].el), role('person', fg.roles.manager)),
+        h('div', { class: 'w-flow-notes' }, t[5].el, t[6].el, t[7].el, t[8].el));
+      targets = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => t[n]);
+    } else if (map) {
       const rows = screen.map.map((f) => {
         const el = h('div', { class: 'w-target w-map-field', dataset: { target: String(f.n) } },
           h('span', { class: 'w-step-n', 'aria-hidden': 'true' }, String(f.n)),
