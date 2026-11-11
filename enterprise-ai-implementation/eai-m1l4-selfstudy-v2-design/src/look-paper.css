@@ -1,0 +1,84 @@
+/*
+ * LOOK "PAPER" (design copy pilot, 11 Nov 2026; ?look=v3). A different direction from the lesson's
+ * look and from the two poster looks: a printed page. Warm paper, black ink, one red for the thing
+ * you act on. No glass, no gradients, no shadows, no rounded cards, no blurred photo behind the work.
+ * Photos are printed in one ink (greyscale); diagrams and graphs are line drawings. Look only: every
+ * screen, text, answer and tracking id is the lesson's own. Tuned by hand on O1, K1, W3, S11, S12;
+ * the other screens take the tokens below and are not yet checked one by one.
+ */
+:root {
+  --pp-paper: #F3EFE6; --pp-ink: #111111; --pp-ink-2: #2A2A2A; --pp-ink-3: #5A5A5A; --pp-rule: rgba(17, 17, 17, .22); --pp-red: #D92B1F; --pp-ok: #0F5F54;
+  --wl-stone: var(--pp-paper); --wl-ivory: var(--pp-paper); --wl-white: var(--pp-paper);
+  --wl-ink: var(--pp-ink); --wl-body-ink: var(--pp-ink); --wl-text-2: var(--pp-ink-2); --wl-muted: var(--pp-ink-3); --wl-idle-ink: var(--pp-ink-3);
+  --wl-fb-text: var(--pp-ink); --wl-grey-ink: var(--pp-ink-3); --wl-evidence: var(--pp-ink-3); --wl-grey-line: var(--pp-ink-3);
+  --wl-line: var(--pp-rule); --wl-line-mid: var(--pp-rule); --wl-card-line: var(--pp-rule); --wl-line-strong: var(--pp-ink); --wl-dash: var(--pp-ink-3);
+  --wl-navy: var(--pp-ink); --wl-turquoise: var(--pp-red); --wl-teal: var(--pp-ok); --wl-teal-ink: var(--pp-ok); --wl-red: var(--pp-red);
+  --wl-correct-bg: transparent; --wl-correct-head: var(--pp-ok); --wl-error: var(--pp-red); --wl-error-bg: transparent; --wl-error-head: var(--pp-red);
+  --wl-neutral-bg: transparent; --wl-neutral-line: var(--pp-ink-3); --wl-keypill-bg: transparent; --wl-chip-bg: transparent; --wl-halo: transparent; --wl-press-ring: rgba(17, 17, 17, .08);
+  --wl-float-shadow: none; --wl-card-shadow: none; --wl-panel-shadow: none; --wl-lift-shadow: 6px 6px 0 var(--pp-ink);
+  --wl-radius-card: 0px; --wl-radius-panel: 0px; --wl-radius-btn: 0px;
+  --wl-wash-veil-top: var(--pp-paper); --wl-wash-veil-mid: var(--pp-paper); --wl-wash-veil-low: var(--pp-paper); --wl-wash-veil: var(--pp-paper); --wl-wash-ground: var(--pp-paper); --wl-on-wash: var(--pp-ink-2);
+  --wl-bar-focus-bg: var(--pp-paper); --wl-bar-stage-bg: var(--pp-paper); --wl-stage-ground: var(--pp-paper);
+  --wl-bar-on-dark-rule: var(--pp-rule); --wl-bar-on-dark-text: var(--pp-ink-2); --wl-bar-on-dark-disc: transparent; --wl-bar-on-dark-ring: var(--pp-ink-3); --wl-bar-on-dark-icon: var(--pp-ink-3); --wl-bar-on-dark-link: var(--pp-rule);
+  --wl-glass-text: var(--pp-ink); --wl-aqua-text: var(--pp-ink-2); --wl-on-glass: var(--pp-ink-2); --wl-warm-glass: var(--pp-paper); --wl-quote-glass: var(--pp-paper); --wl-o1-veil: transparent;
+  --wl-drop-bg: var(--pp-paper); --wl-focus: 3px solid var(--pp-red);
+}
+#app, .w-stage { background: var(--pp-paper); color: var(--pp-ink); }
+.w-stage * { border-radius: 0 !important; box-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.w-stage :is(.w-step-n, .w-flow-face, .w-placed-disc, .w-flag-dot, [class*="disc"], [class*="radio"], [class*="dot"]) { border-radius: 50% !important; }
+
+/* the masthead: paper, a hairline under it, ink type */
+.w-stage > .w-bar, .w-stage[data-bar="dark"] > .w-bar { background: var(--pp-paper); border-bottom: 1.5px solid var(--pp-ink); color: var(--pp-ink); }
+.w-bar * { color: var(--pp-ink); }
+
+/* grounds: no blurred photo, no dots, no veil behind the work; a photo is printed in one ink */
+.w-g-blur, .w-g-dots, .w-g-veil { display: none; }
+.w-scene > :not(.w-wash-veil):not(.w-g-veil), .w-scene img { filter: grayscale(1) contrast(1.08); }
+.w-wash-photo, .w-wash-veil { display: none; }
+
+/* type: ink everywhere on the page (the lesson's dark scenes wrote in white); grey only for second lines */
+.w-stage .w-main :not(.w-next):not(.w-next *):not(.w-target-placed):not(.w-target-placed *):not(.w-step-n):not(.w-btn-primary):not(.w-btn-primary *):not(.w-btn-action):not(.w-btn-action *) { color: var(--pp-ink) !important; }
+.w-stage .w-main :is(.w-btn-action, .w-btn-action *, .w-btn-primary, .w-btn-primary *) { color: var(--pp-paper) !important; }
+.w-stage .w-main :is(.w-flow-say, .w-context, .w-flag-lead, .w-task-sub, .w-subline, .w-concept-text, .w-opener-sub, .w-slot-label) { color: var(--pp-ink-2) !important; }
+.w-stage .w-main :is([data-state="wrong"], [data-placed="wrong"]) { color: var(--pp-red) !important; }
+.w-stage .w-instruction { letter-spacing: -.02em; }
+
+/* S12: the drawing as a printed diagram. The line is heavy ink; the parts on it are boxed labels; the
+   parts around it are ruled notes (a rule on top, nothing else) */
+.w-flow { --flow-wire: var(--pp-ink); --flow-edge: var(--pp-ink); --flow-surface: var(--pp-paper); }
+.w-flow-wire { height: 2px; }
+.w-flow-face { border-width: 2px; }
+.w-flow-desk { border: 0; border-top: 2px solid var(--pp-ink); border-bottom: 2px solid var(--pp-ink); }
+.w-flow-pin { border: 1.5px solid var(--pp-ink); }
+.w-flow-note { border: 0; border-top: 2px solid var(--pp-ink); padding-left: 0; background: none; }
+.w-flow-name { border: 0; border-bottom: 2px solid var(--pp-ink); padding-left: 0; }
+.w-flow-pin:hover:not([data-placed]) { background: var(--pp-ink); transform: none; }
+.w-stage .w-main .w-flow-pin:hover:not([data-placed]) * { color: var(--pp-paper) !important; }
+.w-flow-pin:hover:not([data-placed]) .w-step-n { background: var(--pp-paper); }
+.w-stage .w-main .w-flow-pin:hover:not([data-placed]) .w-step-n { color: var(--pp-ink) !important; }
+.w-flow-pin[data-placed]:not([data-placed="wrong"]) { border: 3px solid var(--pp-ok); }
+.w-flow-bars i[data-bar="goal"] { background: var(--pp-red); }
+.w-stage .w-main .w-step-n { color: var(--pp-paper) !important; }
+
+/* S11: the graph in ink, the missing parts in red */
+.w-sheet-metric .w-slots-chart { border: 0; border-left: 2px solid var(--pp-ink); background: none; padding-left: 24px; }
+.w-sheet-metric .w-slots-title { text-align: left; }
+
+.w-stage .w-main .w-step-n { background: var(--pp-ink); }
+.w-fig[data-kind="mess"] :is(.w-fig-lines) { stroke: var(--pp-ink-3) !important; }
+.w-fig[data-kind="mess"] :is(.w-fig-heads) { fill: var(--pp-ink-3) !important; }
+.w-fig[data-kind="lean"] :is(.w-fig-lines) { stroke: var(--pp-red) !important; }
+.w-fig[data-kind="lean"] :is(.w-fig-heads) { fill: var(--pp-red) !important; }
+.w-coach-launcher { border-color: var(--pp-ink) !important; }
+
+/* photo screens: a split page. Words on paper on the left, the photo printed on the right, hard edge */
+.w-g-full, .w-scene-photo { left: 47% !important; right: 0 !important; top: var(--wl-bar-h) !important; bottom: 0 !important; width: auto !important; height: auto !important; inset: var(--wl-bar-h) 0 0 47% !important; }
+.w-scene { clip-path: inset(0); }
+.w-o1-veil { display: none; }
+.w-stage .w-main .w-opener-card, .w-stage .w-main .w-glass { background: none !important; border: 0 !important; }
+.w-main[data-layout="opener"] .w-opener-card { left: 56px; top: 40px; width: 470px; padding: 0; }
+.w-o1-body { width: 500px !important; }
+.w-o1-body .w-instruction { font-size: 54px !important; line-height: 1.02 !important; letter-spacing: -.03em; }
+.w-stage .w-main .w-start, .w-stage .w-main .w-start * { color: var(--pp-paper) !important; }
+.w-stage[data-scene], .w-stage[data-scene] > .w-main { background-color: transparent; }
+.w-stage[data-scene] { background: var(--pp-paper) !important; }

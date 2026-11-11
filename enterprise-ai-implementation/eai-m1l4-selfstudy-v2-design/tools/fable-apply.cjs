@@ -576,6 +576,14 @@ R('S12', 'Click the two fields that show the handoff and its risk. Each click pl
   t = t.slice(0, a) + seg.replace(k, () => k + '\n      "figure": ' + JSON.stringify(fig) + ',') + t.slice(b);
 }
 
+/* ---------------- S11 as a graph (design copy, 11 Nov 2026): the axis name ---------------- */
+{
+  const [a, b] = span('S11');
+  const seg = t.slice(a, b), k = '"slotsTitle": "Checkable later?",';
+  if (seg.split(k).length !== 2) errs.push('S11: slotsTitle anchor not found once');
+  t = t.slice(0, a) + seg.replace(k, () => k + '\n      "chart": ' + JSON.stringify({ kind: 'line', y: 'HR time on repeats' }) + ',') + t.slice(b);
+}
+
 if (errs.length) { console.error(errs.join('\n')); process.exit(1); }
 JSON.parse(t);
 fs.writeFileSync(OUT, t);

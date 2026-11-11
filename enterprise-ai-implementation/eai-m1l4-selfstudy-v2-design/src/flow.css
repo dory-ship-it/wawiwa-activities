@@ -54,3 +54,23 @@
 /* the board sits just under the head so the feedback line clears the footer */
 .w-main[data-layout="flags"] .w-board-flags:has(.w-flow) { top: 163px; }
 @media (prefers-reduced-motion: reduce) { .w-flow-pin { transition: none; } }
+
+/* S11 as a graph (src/templates/decision.js, metricChart): faint before a choice, inked by the choice */
+.w-sheet-metric .w-slots-chart { --chart-ink: var(--wl-ink); --chart-faint: var(--wl-grey-line); --chart-miss: var(--wl-error); padding: 14px 16px 8px; }
+.w-chart { display: block; width: 100%; height: auto; overflow: visible; }
+.w-chart-axis { fill: none; stroke: var(--chart-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.w-chart-axis-name { font: 600 13px var(--wl-font-ui); fill: var(--wl-text-2); }
+.w-chart-trend { fill: none; stroke: var(--chart-faint); stroke-width: 2.5; stroke-dasharray: 3 7; stroke-linecap: round; }
+.w-chart[data-line="true"] .w-chart-trend { stroke: var(--wl-teal); stroke-width: 4; stroke-dasharray: none; }
+.w-chart[data-line="false"] .w-chart-trend { opacity: .35; }
+.w-chart-guide { fill: none; stroke: var(--chart-faint); stroke-width: 1.5; stroke-dasharray: 3 5; }
+.w-chart-tick { fill: none; stroke: var(--chart-faint); stroke-width: 3; stroke-linecap: round; }
+.w-chart-dot { fill: none; stroke: var(--chart-faint); stroke-width: 2.5; stroke-dasharray: 4 4; }
+.w-chart-label { font: 700 16px var(--wl-font-ui); fill: var(--wl-text-2); }
+.w-chart-part[data-on="true"] .w-chart-dot { fill: var(--wl-teal); stroke: var(--wl-teal); stroke-dasharray: none; }
+.w-chart-part[data-on="true"] :is(.w-chart-tick, .w-chart-guide) { stroke: var(--wl-teal); }
+.w-chart-part[data-on="true"] .w-chart-label { fill: var(--chart-ink); }
+.w-chart-part[data-on="false"] .w-chart-dot { stroke: var(--chart-miss); }
+.w-chart-part[data-on="false"] .w-chart-tick { stroke: var(--chart-miss); stroke-dasharray: 2 5; }
+.w-chart-part[data-on="false"] .w-chart-guide { opacity: 0; }
+.w-chart-part[data-on="false"] .w-chart-label { fill: var(--chart-miss); text-decoration: line-through; }

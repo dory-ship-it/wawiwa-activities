@@ -6,9 +6,9 @@
 //           homework link (the content's, as S22's)
 //   footer  Previous only: no Next
 // A presentation screen: nothing is tracked, completion and status stay S22's (Finish).
-import { h, resolveLink } from '../util.js?v=18bb480b';
-import { glyph, icon } from '../icons.js?v=18bb480b';
-import { layout } from './stage.js?v=18bb480b';
+import { h, resolveLink } from '../util.js?v=3ec49313';
+import { glyph, icon } from '../icons.js?v=3ec49313';
+import { layout } from './stage.js?v=3ec49313';
 
 export const end = {
   scene: () => 'end',

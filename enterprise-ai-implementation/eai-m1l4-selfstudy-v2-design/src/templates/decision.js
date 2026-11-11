@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=18bb480b';
-import { glyph, icon } from '../icons.js?v=18bb480b';
-import { attachTip } from '../tooltip.js?v=18bb480b';
-import { letter } from '../tracking/index.js?v=18bb480b';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=18bb480b';
-import { targetSteps } from '../ghost.js?v=18bb480b';
+import { h, fmt, resolveLink } from '../util.js?v=3ec49313';
+import { glyph, icon } from '../icons.js?v=3ec49313';
+import { attachTip } from '../tooltip.js?v=3ec49313';
+import { letter } from '../tracking/index.js?v=3ec49313';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=3ec49313';
+import { targetSteps } from '../ghost.js?v=3ec49313';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -520,6 +520,27 @@ function fill(ctx) {
   oneQuestion(ctx, btns, { onChoose: (i, right) => { slot.textContent = screen.options[i].label; slot.dataset.result = right ? 'correct' : 'wrong'; } });
 }
 
+// The S11 graph (design copy): labels from screen.slots, the axis name from screen.chart.y.
+function metricChart(screen) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs, ...kids) => { const n = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); n.append(...kids.filter((x) => x != null)); return n; };
+  const label = (id) => screen.slots.find((x) => x.id === id).label;
+  const B = [86, 62], T = [318, 138], Y0 = 196;
+  const part = (id, ...kids) => el('g', { class: 'w-chart-part', 'data-slot': id }, ...kids);
+  const svg = el('svg', { class: 'w-chart', viewBox: '0 0 380 240', 'aria-hidden': 'true', focusable: 'false' },
+    el('path', { class: 'w-chart-axis', d: `M46 22V${Y0}H362` }),
+    el('text', { class: 'w-chart-axis-name', x: '46', y: '14' }, screen.chart.y),
+    el('path', { class: 'w-chart-trend', d: `M${B[0]} ${B[1]}L${T[0]} ${T[1]}` }),
+    part('date', el('path', { class: 'w-chart-guide', d: `M${T[0]} ${T[1]}V${Y0}` }), el('path', { class: 'w-chart-tick', d: `M${T[0]} ${Y0 - 7}V${Y0 + 7}` }),
+      el('text', { class: 'w-chart-label', x: String(T[0]), y: String(Y0 + 28), 'text-anchor': 'middle' }, label('date'))),
+    part('baseline', el('circle', { class: 'w-chart-dot', cx: String(B[0]), cy: String(B[1]), r: '9' }), el('text', { class: 'w-chart-label', x: String(B[0] + 18), y: String(B[1] - 10) }, label('baseline'))),
+    part('target', el('circle', { class: 'w-chart-dot', cx: String(T[0]), cy: String(T[1]), r: '9' }), el('text', { class: 'w-chart-label', x: String(T[0] - 20), y: String(T[1] + 26), 'text-anchor': 'end' }, label('target'))));
+  return { el: svg, set(checks) {
+    svg.querySelectorAll('.w-chart-part').forEach((g) => { g.dataset.on = String(!!checks[g.dataset.slot]); });
+    svg.dataset.line = String(!!checks.baseline && !!checks.target);
+  } };
+}
+
 /* ---------- metric (S11), Focus by analogy ---------- */
 function metric(ctx) {
   const { screen, ui, zones } = ctx;
@@ -535,7 +556,7 @@ function metric(ctx) {
       h('span', { class: 'w-slot-label' }, s.label), h('span', { class: 'w-slot-mark', 'aria-hidden': 'true' }), state);
     return { s, el, state };
   });
-  const setSlots = (o) => slots.forEach((x) => {
+  let setSlots = (o) => slots.forEach((x) => {
     const on = !!o.checks[x.s.id];
     x.el.dataset.on = String(on);
     x.el.querySelector('.w-slot-mark').replaceChildren(glyph(on ? 'g-check-b' : 'g-cross', { size: 16 }));
@@ -543,8 +564,15 @@ function metric(ctx) {
   });
   // QA3 (S11 stretch, screen.slotsAfterChoice): the three slots name the rule the stretch holds back, so
   // they keep their place but show only once an answer is chosen, as its check
-  const slotBox = h('div', { class: 'w-slots', 'aria-live': 'polite', dataset: screen.slotsAfterChoice && !ctx.revisit ? { wait: 'true' } : {} },
-    h('p', { class: 'w-slots-title' }, screen.slotsTitle), h('ul', {}, slots.map((x) => x.el)));
+  // DESIGN COPY (S11 as a graph, 11 Nov 2026; screen.chart): the three parts drawn on one small graph, a
+  // start point, an end point and the day it is read. Before a choice all three are faint outlines and
+  // carry no numbers (nothing points at an answer); a choice inks the parts that metric has, marks the
+  // missing ones, and the line between the points is drawn only when both points exist. The tiles stay
+  // in the page for screen readers.
+  const chart = screen.chart ? metricChart(screen) : null;
+  if (chart) { const paint = setSlots; setSlots = (o) => { paint(o); chart.set(o.checks); }; }
+  const slotBox = h('div', { class: 'w-slots' + (chart ? ' w-slots-chart' : ''), 'aria-live': 'polite', dataset: screen.slotsAfterChoice && !ctx.revisit ? { wait: 'true' } : {} },
+    h('p', { class: 'w-slots-title' }, screen.slotsTitle), chart ? chart.el : null, h('ul', chart ? { class: 'w-sr-only' } : {}, slots.map((x) => x.el)));
   // NL3: the explain band on top (S08's), so the field name moves beside the heading as its chip
   layout(ctx, 'focus',
     sheet('focus w-sheet-metric',

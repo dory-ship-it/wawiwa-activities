@@ -2,7 +2,7 @@
 // Shown on hover or keyboard focus, hidden on Escape, linked with aria-describedby.
 // One tip box per stage, positioned in stage px (the stage is scaled as a whole), in the frames'
 // quote-glass look (dark glass, white text, 30cqw wide at most).
-import { h, nextId } from './util.js?v=18bb480b';
+import { h, nextId } from './util.js?v=3ec49313';
 
 let tipBox = null;
 let stageEl = null;
@@ -83,7 +83,7 @@ export function applyTerms(root, terms = [], tooltips = {}) {
     const def = tooltips[term];
     if (!def) continue;
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-      acceptNode: (n) => (n.parentElement.closest('.w-term, .w-sr-only, button, input, textarea') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+      acceptNode: (n) => (n.parentElement.closest('.w-term, .w-sr-only, button, input, textarea, svg') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
     });
     const needle = term.toLowerCase();
     let node;
