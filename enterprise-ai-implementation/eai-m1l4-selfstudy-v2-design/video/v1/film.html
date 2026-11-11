@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>V1 film frame</title>
+<style>
+  @font-face { font-family: Assistant; font-weight: 700; src: url(../../assets/fonts/assistant-latin-700-normal.woff2) format('woff2'); }
+  @font-face { font-family: Assistant; font-weight: 800; src: url(../../assets/fonts/assistant-latin-800-normal.woff2) format('woff2'); }
+  html, body { margin: 0; width: 1280px; height: 720px; overflow: hidden; background: #0e2030; }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  .shot { position: absolute; inset: 0; overflow: hidden; opacity: 0; }
+  .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 50%; }
+  .shot .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #255777, #3E868F); color: #fff; font: 700 28px Assistant, sans-serif; opacity: .9; }
+  #shade { position: absolute; left: 0; right: 0; bottom: 0; height: 220px; opacity: 0;
+    background: linear-gradient(to bottom, rgba(14,32,48,0) 0%, rgba(14,32,48,.55) 55%, rgba(14,32,48,.82) 100%); }
+  #key { position: absolute; left: 72px; right: 72px; bottom: 46px; text-align: center; color: #fff;
+    font: 700 34px/1.2 Assistant, 'Segoe UI', sans-serif; letter-spacing: .2px; text-shadow: 0 1px 3px rgba(0,0,0,.45); }
+  #key .p { display: inline-block; }
+  #key .sep { color: #5AB3AA; padding: 0 .35em; }
+  #title { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0;
+    background: rgba(18,44,62,.55); }
+  #title h1 { margin: 0; color: #fff; font: 800 64px/1.1 Assistant, sans-serif; letter-spacing: .3px; }
+  #title .bar { position: absolute; left: 50%; top: calc(50% + 52px); width: 133px; height: 5px; margin-left: -66px; background: #5AB3AA; }
+  #end { position: absolute; inset: 0; background: #fff; opacity: 0; display: flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="shade"><div id="key"></div></div>
+<div id="title"><h1></h1><div class="bar"></div></div>
+<div id="end"><img alt=""></div>
+<script>
+// Draws the full frame for time t from window.FILM = { timeline, photo, missing }. Deterministic: no timers,
+// no randomness; every value is a function of t.
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ramp = (t, a, b) => clamp((t - a) / (b - a));
+const ease = (x) => x * x * (3 - 2 * x);
+let S = null;
+
+// Camera moves, cycled by shot index: slow push-in, pull-out and drifts (scale, x %, y %).
+const MOVES = [
+  [[1.02, 0, 0], [1.10, 0, -1]],
+  [[1.10, 1.5, 0], [1.03, -1.5, 0]],
+  [[1.04, -2, 0.5], [1.11, 1.5, -0.5]],
+  [[1.11, 0, 1], [1.03, 0, 0]],
+  [[1.03, 2, -0.5], [1.10, -1.5, 0.5]],
+];
+
+function anchor(ref) {
+  const T = S.timeline;
+  if (/^[\d.]+$/.test(ref)) return Number(ref);
+  if (ref === 'brand') return T.brandAt;
+  let m = ref.match(/^(stop\d)\.end$/);
+  if (m) return T.holds.find((h) => h.id === m[1]).end;
+  m = ref.match(/^(c\d+)(?:\.(end)|@([\d.]+))?$/);
+  if (!m) throw new Error('bad anchor ' + ref);
+  const c = T.captions.find((x) => x.id === m[1]);
+  if (!c) throw new Error('no caption ' + m[1]);
+  if (m[2]) return c.end;
+  if (m[3]) return c.start + T.rules.lead + Number(m[3]) * c.speech;
+  return c.start;
+}
+
+window.setFilm = async (film) => {
+  const P = film.photo, T = film.timeline;
+  S = { timeline: T, photo: P, xf: P.crossfade };
+  const stage = document.getElementById('stage');
+  S.shots = P.shots.map((s, i) => {
+    const el = document.createElement('div');
+    el.className = 'shot';
+    if (film.missing.includes(s.id)) {
+      el.innerHTML = `<div class="ph">PLACEHOLDER ${s.id}</div>`;
+    } else {
+      const img = document.createElement('img');
+      img.src = '/' + s.img;
+      el.appendChild(img);
+    }
+    stage.appendChild(el);
+    return { ...s, el, img: el.querySelector('img'), start: anchor(s.at), move: MOVES[i % MOVES.length] };
+  });
+  S.shots.forEach((s, i) => { s.end = i + 1 < S.shots.length ? S.shots[i + 1].start : T.brandAt; });
+  S.keys = P.keys.map((k) => ({
+    from: anchor(k.from), to: Math.max(anchor(k.to), k.minHold ? anchor(k.from) + k.minHold : 0), sep: k.sep || ' · ',
+    parts: k.parts.map((p) => ({ text: p.text, at: anchor(p.at || k.from) })),
+  }));
+  document.querySelector('#title h1').textContent = P.title;
+  const logo = document.querySelector('#end img');
+  logo.src = '/' + P.endCard.logo;
+  logo.style.width = P.endCard.width + 'px';
+  await Promise.all([...document.images].map((im) => im.decode().catch(() => {})));
+  await document.fonts.ready;
+  return { shots: S.shots.map((s) => [s.id, +s.start.toFixed(2), +(s.end - s.start).toFixed(2)]), keys: S.keys.map((k) => [k.parts.map((p) => p.text).join(k.sep), +k.from.toFixed(2), +k.to.toFixed(2)]) };
+};
+
+let lastKey = '';
+window.renderAt = (t) => {
+  const T = S.timeline, xf = S.xf;
+  // shots: each fades in over the crossfade centred on its start and drifts across its whole visible window
+  for (const s of S.shots) {
+    const a = s.start - (s.start > 0 ? xf / 2 : 0), b = s.end + xf / 2;
+    const on = t >= a && t <= b;
+    s.el.style.opacity = on ? (s.start > 0 ? ease(ramp(t, a, a + xf)) : 1) : 0;
+    if (on && s.img) {
+      const k = clamp((t - a) / (b - a)), [p, q] = s.move;
+      const sc = p[0] + (q[0] - p[0]) * k, x = p[1] + (q[1] - p[1]) * k, y = p[2] + (q[2] - p[2]) * k;
+      s.img.style.transform = `scale(${sc.toFixed(5)}) translate(${x.toFixed(4)}%, ${y.toFixed(4)}%)`;
+    }
+  }
+  // title card over shot 00
+  const tEnd = T.titleEnd;
+  document.getElementById('title').style.opacity = ease(ramp(t, 0.2, 0.9)) * (1 - ease(ramp(t, tEnd - 0.8, tEnd - 0.2)));
+  // keyword line
+  const key = S.keys.find((k) => t >= k.from && t <= k.to + 0.35);
+  const shade = document.getElementById('shade'), box = document.getElementById('key');
+  if (key) {
+    shade.style.opacity = ease(ramp(t, key.from, key.from + 0.35)) * (1 - ease(ramp(t, key.to, key.to + 0.35)));
+    const vis = key.parts.filter((p) => t >= p.at);
+    const sig = key.from + '|' + vis.length;
+    if (sig !== lastKey) {
+      box.innerHTML = vis.map((p, i) => (i ? `<span class="sep">${key.sep.trim()}</span>` : '') + `<span class="p"></span>`).join('');
+      box.querySelectorAll('.p').forEach((el, i) => { el.textContent = vis[i].text; });
+      lastKey = sig;
+    }
+    box.querySelectorAll('.p').forEach((el, i) => {
+      const r = ease(ramp(t, vis[i].at, vis[i].at + 0.35));
+      el.style.opacity = r; el.style.transform = `translateY(${((1 - r) * 8).toFixed(2)}px)`;
+      const sep = el.previousElementSibling; if (sep) sep.style.opacity = r;
+    });
+  } else {
+    shade.style.opacity = 0; box.innerHTML = ''; lastKey = '';
+  }
+  // brand end: white card fades in, logo pushes in slowly
+  const end = document.getElementById('end'), [z0, z1] = S.photo.endCard.pushIn;
+  end.style.opacity = ease(ramp(t, T.brandAt, T.brandAt + 0.6));
+  end.querySelector('img').style.transform = `scale(${(z0 + (z1 - z0) * ramp(t, T.brandAt, T.duration)).toFixed(5)})`;
+};
+</script>
+</body>
+</html>

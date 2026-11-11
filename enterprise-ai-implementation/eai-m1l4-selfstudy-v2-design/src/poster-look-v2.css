@@ -1,0 +1,573 @@
+/*
+ * POSTER LOOK V2 "Premium Realistic" (design copy only, 9 Nov 2026), from the V2 artboard of the
+ * "Wawiwa Style Poster": ink ground (#081726 to #0E2B42) with navy and teal glows, glass cards
+ * (white 7%), thin white type with mint accents (#6CC5BB), turquoise Next pill, red only for the
+ * main call to action. Look only: no text, screen or image changes. Chosen by src/skin.js (?look=v2).
+ * The middle block is generated from frame.css / fx7.css / fx8.css / v2.css (every light surface,
+ * navy text and light line), so it follows the lesson's own selectors.
+ */
+:root {
+  --p2-ink-1: #081726; --p2-ink-2: #0E2B42; --p2-mint: #6CC5BB; --p2-turq: #5AB3AA; --p2-on-turq: #06202A;
+  --p2-glass: rgba(255, 255, 255, .07); --p2-glass-hi: rgba(255, 255, 255, .11); --p2-glass-line: rgba(255, 255, 255, .16);
+  --p2-ground: radial-gradient(900px 600px at 12% 10%, rgba(62, 134, 143, .28), transparent 70%),
+               radial-gradient(900px 700px at 92% 85%, rgba(37, 87, 119, .40), transparent 70%),
+               linear-gradient(135deg, #081726 0%, #0E2B42 100%);
+  --wl-ink: #FFFFFF; --wl-body-ink: #E6EEF2; --wl-text-2: #B8CCD6; --wl-muted: #A9BDC7; --wl-idle-ink: #A9BDC7;
+  --wl-fb-text: #E6EEF2; --wl-grey-ink: #B8CCD6; --wl-evidence: #B8CCD6; --wl-grey-line: #8FA3AE;
+  --wl-navy: #5AB3AA;             /* selection, done and outlines read turquoise on ink */
+  --wl-teal: #5AB3AA; --wl-teal-ink: #6CC5BB;
+  --wl-correct-bg: rgba(90, 179, 170, .16); --wl-correct-head: #9FE0D7;
+  --wl-error-bg: rgba(238, 49, 36, .16); --wl-error-head: #FF8A80; --wl-error: #FF6B60;
+  --wl-neutral-bg: rgba(255, 255, 255, .06); --wl-neutral-line: #8FA3AE;
+  --wl-card-shadow: 0 18px 40px rgba(0, 0, 0, .35); --wl-float-shadow: 0 18px 40px rgba(0, 0, 0, .35);
+  --wl-panel-shadow: 0 30px 60px rgba(0, 0, 0, .45);
+  --wl-radius-card: 14px; --wl-radius-panel: 22px; --wl-radius-btn: 999px;
+  --wl-wash-veil-top: rgba(8, 23, 38, .80); --wl-wash-veil-mid: rgba(8, 23, 38, .70); --wl-wash-veil-low: rgba(8, 23, 38, .84);
+  --wl-bar-focus-bg: rgba(8, 20, 32, .62); --wl-bar-stage-bg: rgba(8, 20, 32, .55);
+  --wl-on-wash: #B8CCD6;
+}
+/* generated: every light surface becomes glass */
+#app,
+#boot-error,
+.w-ans,
+.w-ans-icon,
+.w-attempt-discs i,
+.w-backchip,
+.w-backchip:hover,
+.w-bigplay,
+.w-board-flags[data-variant="line"] .w-line-cell[data-ready="true"]:hover .w-line-disc,
+.w-board-flags[data-variant="line"] .w-line-step,
+.w-board-flags[data-variant="map"] .w-map-field,
+.w-bpmn,
+.w-bpmn-key li,
+.w-bpmn-lane[data-tint="true"],
+.w-bpmn-step,
+.w-btn-action,
+.w-btn-action:hover:not(:disabled):not([data-locked="true"]),
+.w-btn-ghost,
+.w-card-item,
+.w-case-card,
+.w-case-now,
+.w-case-slim,
+.w-case-toggle,
+.w-case-toggle:hover,
+.w-chapter:hover:not([aria-disabled="true"]):not([aria-current]),
+.w-chapter[aria-current="step"],
+.w-chapter[aria-current="step"] .w-menu-disc,
+.w-check-mark,
+.w-check-row,
+.w-check-row[data-answer="notYet"] .w-check-mark,
+.w-chip,
+.w-chip-off,
+.w-coach-ava,
+.w-coach-ava-head,
+.w-coach-bubble,
+.w-coach-chip,
+.w-coach-chip:hover,
+.w-coach-frame,
+.w-coach-hint,
+.w-coach-hint::before,
+.w-coach-launcher,
+.w-coach-panel,
+.w-coach-row,
+.w-comp .w-ans,
+.w-comp .w-sheet,
+.w-copy-card,
+.w-deck-card,
+.w-deck-under,
+.w-deliverable,
+.w-dialog,
+.w-dot-s,
+.w-drop,
+.w-drop[data-armed="true"]:hover, .w-target[data-armed="true"]:hover,
+.w-drop[data-over="true"], .w-drop[data-chosen="true"],
+.w-drop[data-over="true"], .w-target[data-over="true"],
+.w-drops[data-count="2"] .w-drop[data-kind="good"],
+.w-end-chip,
+.w-field-chip,
+.w-field-row,
+.w-field-row[data-state="prefilled"],
+.w-field-select,
+.w-fields-pair > .w-field:nth-of-type(1),
+.w-fields-pair > .w-field:nth-of-type(2),
+.w-fig,
+.w-fill-note,
+.w-flag-count,
+.w-g-dots,
+.w-glass .w-attempt-discs i[data-used="true"],
+.w-goal,
+.w-goal-num,
+.w-hint-link:hover,
+.w-hv-away,
+.w-hv-box,
+.w-hv-chip,
+.w-input,
+.w-kc-letter,
+.w-kc-result,
+.w-kcol[data-kind="lean"] .w-kcol-list li[data-icon],
+.w-kcol[data-kind="mess"] .w-kcol-list li[data-icon],
+.w-key-label,
+.w-label-card,
+.w-line-card[data-span="true"] .w-line-cell[data-inside="true"] .w-line-step,
+.w-line-disc,
+.w-line-step,
+.w-link:hover,
+.w-main[data-phase="answer"] .w-tiles .w-tile,
+.w-map-card, .w-line-card,
+.w-map-caret,
+.w-map-disc,
+.w-map-panel,
+.w-map-strip,
+.w-map-today,
+.w-mini,
+.w-mini-dia,
+.w-mini-lanes i:nth-child(2),
+.w-missed-item,
+.w-next-why,
+.w-next-why[data-state="open"],
+.w-pair-card,
+.w-panel,
+.w-panel-close:hover,
+.w-panel-link:hover,
+.w-part,
+.w-part-num,
+.w-pick-tile,
+.w-placed,
+.w-prev,
+.w-proof,
+.w-result-chip,
+.w-result-chip[data-passed="true"],
+.w-round-card,
+.w-rule-card,
+.w-rule-icon,
+.w-rules,
+.w-seek-stop,
+.w-sheet,
+.w-sheet-back .w-pdf-badge,
+.w-sheet-cases .w-ans,
+.w-sheet-cases .w-case-now,
+.w-sheet-fill .w-ans,
+.w-sheet-fill .w-field-row[data-state="active"] .w-field-slot[data-result="correct"],
+.w-sheet-fill .w-field-rows,
+.w-sheet-fill .w-fill-note,
+.w-sheet-metric .w-slots,
+.w-showme,
+.w-showme:hover,
+.w-shown,
+.w-sit-done,
+.w-situation-now,
+.w-slot,
+.w-slot[data-on="false"],
+.w-small-note,
+.w-stage,
+.w-stage .w-band .w-strip,
+.w-stage .w-band .w-strip::before,
+.w-stage .w-x-panel .w-band .w-strip,
+.w-stage .w-x-panel .w-band .w-strip::before,
+.w-stage:is([data-ground="half"], [data-ground="split"]),
+.w-stage:is([data-scene="band"], [data-scene="split"], [data-scene="light"]),
+.w-stage[data-bar="dark"] .w-bar-menu i,
+.w-stage[data-bar="dark"] .w-step-link[data-state="done"],
+.w-stage[data-bar="dark"] .w-step[data-state="current"] .w-step-disc,
+.w-stage[data-bar="dark"] .w-step[data-state="done"] .w-step-disc,
+.w-stage[data-fx7="wide"] > .w-main,
+.w-stage[data-fx7] .w-float .w-strip,
+.w-stage[data-ground="dots"],
+.w-stage[data-ground="half"] .w-sheet-one .w-ans,
+.w-stage[data-scene="focus"],
+.w-stage[data-scene="focus"] .w-float .w-attempt-discs i[data-used="true"],
+.w-stage[data-scene="focus"] .w-float .w-hint-link:hover,
+.w-step-disc,
+.w-steps li,
+.w-stop-kicker .w-chip-dark,
+.w-strip[data-tone="correct"],
+.w-strip[data-tone="neutral"],
+.w-target-chip, .w-target-placed,
+.w-target-placed[data-state="right"] .w-placed-disc,
+.w-target-placed[data-state="wrong"],
+.w-target[data-ready="true"]:hover,
+.w-tile,
+.w-tile-disc,
+.w-tile-icon-wrap,
+.w-time-chip,
+.w-tline[data-active="true"],
+.w-today-chip,
+.w-toggle,
+.w-transcript,
+.w-wb-field,
+.w-wb-page,
+.w-wb-preview,
+.w-wb-rows li,
+.w-wb-rows li[data-notes="true"],
+.w-wb-shot,
+.w-x-head .w-case-card,
+.w-x-panel,
+.w-x-panel .w-ans,
+html, body { background-color: var(--p2-glass); }
+/* generated: navy / teal text becomes mint */
+.w-ans-icon,
+.w-ans[data-result="correct"] .w-ans-tag,
+.w-backchip,
+.w-bigplay,
+.w-board-label .w-target-chip,
+.w-bpmn-branch,
+.w-bridge,
+.w-btn-action,
+.w-btn-ghost,
+.w-case-slim svg,
+.w-case-toggle,
+.w-chain-arrow,
+.w-chapter[aria-current="step"] .w-menu-disc,
+.w-check-mark,
+.w-coach-gotit,
+.w-comp-head .w-glass-kicker,
+.w-deliverable-next,
+.w-drop[data-kind="good"] .w-drop-title,
+.w-eyebrow,
+.w-field-chip,
+.w-field-slot[data-result="correct"],
+.w-fields-pair > .w-field:nth-of-type(1) .w-field-label,
+.w-fields-pair > .w-field:nth-of-type(2) .w-field-label,
+.w-fig[data-kind="lean"],
+.w-figs-arrow,
+.w-fill-note .w-glyph, .w-fill-note svg,
+.w-fix-line svg,
+.w-flag-icon,
+.w-ghost-arrow,
+.w-goal[aria-selected="true"] .w-goal-num,
+.w-hint-link,
+.w-hv-arrow,
+.w-kc-letter,
+.w-key-label,
+.w-label,
+.w-line-arrow,
+.w-line-disc,
+.w-link,
+.w-main:has(.w-rounds) .w-instruction,
+.w-map-strip-icon,
+.w-map-tab[data-status="today"] .w-map-disc,
+.w-map-today,
+.w-next-why[data-state="open"],
+.w-pair-card[data-tone="lean"] b,
+.w-panel-link,
+.w-part-case-label,
+.w-part-case-text,
+.w-parts-arrow,
+.w-placed-tag,
+.w-prev,
+.w-proof-figure,
+.w-result-chip[data-passed="true"],
+.w-resume-play,
+.w-rule-arrow,
+.w-rule-icon,
+.w-rules-label,
+.w-sheet-back .w-pdf-badge,
+.w-sheet-cases .w-sit-kicker,
+.w-showme,
+.w-slot[data-on="true"],
+.w-slot[data-on="true"] .w-slot-icon,
+.w-slot[data-on="true"] .w-slot-mark,
+.w-small-note,
+.w-stage .w-band .w-strip[data-tone="correct"] .w-band-verdict,
+.w-stage .w-main[data-phase="answer"] .w-task-head .w-instruction,
+.w-stage[data-bar="dark"] .w-step[data-state="current"] .w-step-disc,
+.w-stage[data-fx7] .w-float .w-strip[data-tone="correct"] .w-band-verdict,
+.w-stage[data-ground="half"] .w-sheet-one .w-context .w-figure,
+.w-stage[data-scene="focus"] .w-focus-head .w-eyebrow,
+.w-step[data-state="current"] .w-step-disc,
+.w-stop-kicker .w-chip-dark,
+.w-stop-kicker .w-glass-kicker,
+.w-strip[data-tone="correct"] .w-band-verdict,
+.w-strip[data-tone="correct"] .w-strip-icon,
+.w-target-placed[data-state="right"] .w-placed-disc,
+.w-tile-icon,
+.w-tile-icon-wrap .w-tile-icon,
+.w-tile-num,
+.w-tile-open-title,
+.w-time-chip,
+.w-tline-time,
+.w-today-chip,
+.w-toggle,
+.w-wb-icon,
+.w-wb-rows li[data-notes="true"],
+.w-x-head .w-glass-kicker,
+.w-x-head:has(.w-round-top) .w-instruction,
+.w-x-panel .w-strip[data-tone="correct"] .w-band-verdict { color: var(--p2-mint); }
+/* generated: light lines become glass lines */
+.w-ans,
+.w-board-flags[data-variant="line"] .w-line-step,
+.w-board-flags[data-variant="map"] .w-map-field,
+.w-bpmn,
+.w-bpmn-lane,
+.w-bpmn-lane[data-tint="true"],
+.w-btn-ghost,
+.w-card-item,
+.w-case-card,
+.w-case-now,
+.w-case-slim,
+.w-check-mark,
+.w-check-row,
+.w-chip,
+.w-comp .w-sheet,
+.w-comp-head .w-case-card,
+.w-copy-card,
+.w-deck-under,
+.w-deliverable,
+.w-dot-s,
+.w-drop,
+.w-field-row,
+.w-field-select,
+.w-field-slot,
+.w-fig,
+.w-flag-dot,
+.w-goal,
+.w-goal-num,
+.w-input,
+.w-kc-result,
+.w-label-card,
+.w-map-card, .w-line-card,
+.w-map-caret,
+.w-map-disc,
+.w-map-panel,
+.w-map-strip,
+.w-menu-disc,
+.w-mini,
+.w-mini-lanes i,
+.w-missed-item,
+.w-panel-foot,
+.w-part,
+.w-part-case,
+.w-part-num,
+.w-pick-tile,
+.w-placed[data-state="pending"],
+.w-prev,
+.w-round-card,
+.w-rule-card,
+.w-rules,
+.w-sheet-cases .w-case-now,
+.w-sheet-fill .w-field-row[data-state="active"] .w-field-slot,
+.w-sheet-fill .w-field-rows,
+.w-sheet-metric .w-slots,
+.w-shown,
+.w-situation-now,
+.w-slot,
+.w-step-disc,
+.w-steps li,
+.w-target,
+.w-target-chip,
+.w-target-placed[data-state="pending"],
+.w-target[data-placed="pending"],
+.w-tile,
+.w-tile-disc,
+.w-toggle,
+.w-wb-field,
+.w-wb-page,
+.w-wb-preview,
+.w-wb-shot,
+.w-x-head .w-case-card,
+.w-x-panel::after { border-color: var(--p2-glass-line); }
+
+/* ---------- after the generated block: grounds, bar, buttons, glass ---------- */
+html, body, #app { background: #081726; }
+.w-stage, .w-stage:is([data-scene="band"], [data-scene="split"], [data-scene="light"], [data-scene="focus"], [data-scene="plain"]) { background: var(--p2-ground); }
+.w-g-dots { background: var(--p2-ground); }
+.w-wash-veil { background-image: linear-gradient(180deg, var(--wl-wash-veil-top), var(--wl-wash-veil-mid) 60%, var(--wl-wash-veil-low)) !important; }
+.w-stage[data-bar="dark"] > .w-bar, .w-stage[data-scene="focus"][data-bar="dark"] > .w-bar,
+.w-stage[data-ground]:not([data-ground="full"])[data-bar="dark"] > .w-bar,
+.w-stage:is([data-scene="split"], [data-scene="light"])[data-bar="dark"] > .w-bar {
+  background: rgba(8, 20, 32, .62); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .08); }
+.w-stage[data-bar="dark"] .w-step[data-state="done"] .w-step-disc { background: var(--p2-turq); color: var(--p2-on-turq); }
+.w-stage[data-bar="dark"] .w-step[data-state="current"] .w-step-disc { background: #FFFFFF; color: #0B2233; box-shadow: 0 0 0 4px rgba(90, 179, 170, .35); }
+.w-stage[data-bar="dark"] .w-step-disc { background: transparent; border: 1px solid rgba(255, 255, 255, .32); color: #A9BDC7; }
+
+/* headings: thin white, as the V2 titles */
+.w-instruction, .w-panel-title { color: #FFFFFF; font-weight: 300; letter-spacing: -.5px; }
+.w-eyebrow { color: var(--p2-mint); letter-spacing: 2.2px; text-transform: uppercase; font-weight: 700; }
+
+/* glass surfaces: blur and the hairline the poster draws round every card */
+.w-panel, .w-sheet, .w-fig, .w-deliverable, .w-ans, .w-opt, .w-card, .w-float {
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: var(--wl-card-shadow), inset 0 0 0 1px var(--p2-glass-line); }
+
+/* buttons: Next = turquoise pill with ink text; Previous and ghosts = glass outline; red stays for the main call to action */
+.w-next { border-radius: 999px; }
+.w-next[data-locked="false"] { background: var(--p2-turq); color: var(--p2-on-turq); }
+.w-next[data-locked="false"]:hover { background: var(--p2-mint); filter: none; }
+.w-next[data-locked="true"] { background: rgba(255, 255, 255, .12); color: #A9BDC7; }
+.w-prev, .w-btn-ghost { border-radius: 999px; background: rgba(8, 20, 32, .55); border: 1px solid rgba(255, 255, 255, .28); color: #DCE8EE; }
+.w-btn-action { background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .4); color: #FFFFFF; }
+.w-btn-primary { background: var(--p2-turq); color: var(--p2-on-turq); }
+.w-btn-primary:disabled, .w-btn-action:disabled, .w-btn-action[data-locked="true"] { background: rgba(255, 255, 255, .12); color: #A9BDC7; }
+.w-ans-mark, .w-opt-mark { border-color: rgba(255, 255, 255, .55); }
+
+/* fields */
+textarea, input[type="text"] { background: rgba(255, 255, 255, .06) !important; color: #FFFFFF !important; border-color: var(--p2-glass-line) !important; }
+textarea::placeholder, input::placeholder { color: #8FA3AE; }
+
+/* over a full photo (Stage scene, full or half ground) light glass cannot carry text: the glass turns ink */
+.w-stage:is([data-scene="stage"], [data-ground="full"], [data-ground="half"]) {
+  --p2-glass: rgba(8, 23, 38, .78); --p2-glass-hi: rgba(8, 23, 38, .86); }
+
+/* the team's review toolbar (review mode only) keeps its own light colours */
+[class^="rv-"], [class*=" rv-"] { --wl-ink: #16293A; --wl-text-2: #33414B; --wl-navy: #255777; --wl-white: #FFFFFF; --wl-error: #CC0000; }
+/* ---------- the poster's dark scenes in place of the photos (by screen, so content is untouched) ----------
+ * O1 Cover · Intro Ask · Why map Insight · Toolkit Clean · HR demo Collect · Critical eye Query
+ * Build yours Analyze · S21 Visualize · S22 Present · END Impact */
+.w-stage:is([data-screen="O1"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/dark/01.jpg") !important; background-position: 50% 50% !important; } /* Cover */
+.w-stage:is([data-screen="O2"], [data-screen="O3"], [data-screen="S01"], [data-screen="S02"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/dark/02.jpg") !important; background-position: 50% 50% !important; } /* Ask */
+.w-stage:is([data-screen="W3"], [data-screen="V2"], [data-screen="S09"], [data-screen="S10"], [data-screen="K3"], [data-screen="S11"], [data-screen="S12"], [data-screen="S12B"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/dark/03.jpg") !important; background-position: 50% 50% !important; } /* Collect */
+.w-stage:is([data-screen="W2"], [data-screen="K2"], [data-screen="S04"], [data-screen="S05a"], [data-screen="S05b"], [data-screen="S06"], [data-screen="S07"], [data-screen="S08"], [data-screen="S08B"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/dark/04.jpg") !important; background-position: 50% 50% !important; } /* Clean */
+.w-stage:is([data-screen="W4"], [data-screen="S13"], [data-screen="S14"], [data-screen="S15"], [data-screen="K4"], [data-screen="S16"], [data-screen="S17"], [data-screen="S17B"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/dark/05.jpg") !important; background-position: 50% 50% !important; } /* Query */
+.w-stage:is([data-screen="S18A"], [data-screen="S18"], [data-screen="S18B"], [data-screen="S19A"], [data-screen="S19B"], [data-screen="S19C"], [data-screen="S20"], [data-screen="S20B"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/dark/06.jpg") !important; background-position: 50% 50% !important; } /* Analyze */
+.w-stage:is([data-screen="S21"], [data-screen="S21R"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/dark/07.jpg") !important; background-position: 50% 50% !important; } /* Visualize */
+.w-stage:is([data-screen="W1"], [data-screen="V1"], [data-screen="S03"], [data-screen="K1"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/dark/08.jpg") !important; background-position: 50% 50% !important; } /* Insight */
+.w-stage:is([data-screen="S22"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/dark/09.jpg") !important; background-position: 50% 50% !important; } /* Present */
+.w-stage:is([data-screen="END"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/dark/10.jpg") !important; background-position: 50% 50% !important; } /* Impact */
+
+/* =====================================================================================================
+ * PILOT "one screen, one idea" (11 Nov 2026), O1 · K1 · S12 only, dark look only. Lines the pilot takes
+ * off the screen are hidden here, not deleted: the content keeps them (S12's old lead is kept as
+ * leadBeforePilot in content/l4-slice.json), so Noy can approve or undo each cut.
+ * Rules (anthropics/skills frontend-design + Wawiwa): one idea per screen; the picture or drawing carries
+ * the explanation; no label above a heading unless it tells the learner something new; sources as a footnote.
+ * ===================================================================================================== */
+
+/* O1: the cover. Title and one action over the scene; the quote is the coach's first tip already */
+.w-stage[data-screen="O1"] .w-o1-veil { background: linear-gradient(90deg, rgba(8, 23, 38, .94) 0%, rgba(8, 23, 38, .78) 40%, rgba(8, 23, 38, 0) 75%); }
+.w-stage[data-screen="O1"] .w-o1-quote { display: none; }
+.w-stage[data-screen="O1"] .w-o1-body { bottom: 150px; }
+.w-stage[data-screen="O1"] .w-title-program { font: 600 18px/1 var(--wl-font-ui); letter-spacing: .02em; text-transform: none; color: #9FE0D7; }
+.w-stage[data-screen="O1"] .w-instruction { margin-top: 18px; font-size: 72px; line-height: .98; font-weight: 800; letter-spacing: -2px; color: #FFFFFF; }
+.w-stage[data-screen="O1"] .w-title-actions { margin-top: 44px; }
+.w-stage[data-screen="O1"] .w-start { border-radius: 999px; padding: 16px 34px; font-size: 20px; box-shadow: 0 10px 30px rgba(238, 49, 36, .35); }
+
+/* K1: the idea is the two drawings. No pill, no subline; the figures grow and draw on; sources a footnote */
+.w-stage[data-screen="K1"] .w-key-label, .w-stage[data-screen="K1"] .w-concept-text { display: none; }
+.w-stage[data-screen="K1"] .w-focus-head { text-align: center; }
+.w-stage[data-screen="K1"] .w-instruction { font-size: 60px; line-height: 1; font-weight: 800; letter-spacing: -1.5px; color: #FFFFFF; }
+.w-stage[data-screen="K1"] .w-figs { top: 230px; gap: 40px; grid-template-columns: minmax(0, 1fr) 38.4px minmax(0, 1fr); }
+.w-stage[data-screen="K1"] .w-fig { background: transparent !important; border: 0 !important; box-shadow: none !important; -webkit-backdrop-filter: none; backdrop-filter: none;
+  display: flex; flex-direction: column-reverse; align-items: center; gap: 22px; padding: 0; }
+.w-stage[data-screen="K1"] .w-fig-label { display: none; }
+.w-stage[data-screen="K1"] .w-fig-caption { font-size: 28px; font-weight: 700; color: #FFFFFF !important; text-align: center; }
+.w-stage[data-screen="K1"] .w-fig-draw { height: 150px; }
+.w-stage[data-screen="K1"] .w-fig-lines { stroke-width: 4; }
+.w-stage[data-screen="K1"] .w-fig[data-kind="mess"] .w-fig-lines { stroke: #FF6B60 !important; }   /* the poster's thread: red is the problem */
+.w-stage[data-screen="K1"] .w-fig[data-kind="mess"] .w-fig-heads { fill: #FF6B60 !important; }
+.w-stage[data-screen="K1"] .w-fig[data-kind="lean"] .w-fig-lines { stroke: #5AB3AA !important; }
+.w-stage[data-screen="K1"] .w-fig[data-kind="lean"] .w-fig-heads { fill: #5AB3AA !important; }
+.w-stage[data-screen="K1"] .w-figs-arrow { color: #8FA3AE; }
+.w-stage[data-screen="K1"] .w-evidence.w-evidence-pair { bottom: 112px; display: flex; justify-content: center; gap: 36px; }
+.w-stage[data-screen="K1"] .w-ev-card { display: flex; gap: 8px; padding: 0; border: 0; }
+.w-stage[data-screen="K1"] .w-ev-card b { font: 600 15px/1.3 var(--wl-font-ui); letter-spacing: 0; text-transform: none; color: #8FA3AE; }
+.w-stage[data-screen="K1"] .w-ev-card span { font: 400 15px/1.3 var(--wl-font-ui); color: #A9BDC7; }
+
+/* S12: the question and one short line; the eight fields are the picture (number, name, value) */
+.w-stage[data-screen="S12"] .w-task-head .w-context { display: none; }
+.w-stage[data-screen="S12"] .w-instruction { font-size: 44px; font-weight: 800; letter-spacing: -1px; color: #FFFFFF; }
+.w-stage[data-screen="S12"] .w-flag-lead { margin-top: 8px; font: 400 20px/1.4 var(--wl-font-ui); color: #B8CCD6; }
+.w-stage[data-screen="S12"] .w-map-text b { font-size: 21px; color: #FFFFFF; }
+.w-stage[data-screen="S12"] .w-map-text span { color: #A9BDC7; }
+
+/* FABLE PASS */
+/* =====================================================================================================
+ * Calmer and more premium, dark look only (11 Nov 2026). One added block; nothing above it is edited.
+ * Direction, after the pilot (O1, K1, S12): one headline carries the screen; a label above a heading goes
+ * unless it says something new; the panel behind a task goes where the ground is already dark, so the
+ * answers are the only boxes left; cards lose their drop shadows; buttons lose the arrow after their
+ * word; no all-caps tracking, no accent-coloured word inside a headline. No new colours: only the
+ * tokens above and rgb() values of the same ink, white, mint and turquoise.
+ * Lines hidden here instead of rewritten (the template always draws them), each scoped to its screen:
+ *   .w-key-label       O3 "Lesson deliverable"; K2, K3, K4 "Key idea"; S05a "BPMN"
+ *   .w-eyebrow         O2 "Module 1"
+ *   .w-label (head)    S19A "Your workbook"
+ *   .w-privacy         S18B "Leave out names and identifying details." (its checkbox says the same)
+ *   .w-pdf-badge       S19C the document badge above the question (decoration, no text)
+ * ===================================================================================================== */
+:root {
+  --wl-card-shadow: 0 0 0 rgba(0, 0, 0, 0); --wl-float-shadow: 0 14px 34px rgba(0, 0, 0, .30);
+  --fp-line: rgba(255, 255, 255, .12); --fp-fill: rgba(255, 255, 255, .045); --fp-fill-hi: rgba(255, 255, 255, .09);
+  --fp-soft: rgb(184, 204, 214);    /* = --wl-text-2, 10.6:1 on the ink ground */
+}
+
+/* ---- 1. type: sentence case, no tracking, one weight for headlines ---- */
+.w-stage .w-instruction { font-weight: 700; letter-spacing: -.02em; line-height: 1.12; text-wrap: balance; color: rgb(255, 255, 255); }
+.w-eyebrow, .w-label, .w-label span, .w-kcol .w-fig-caption, .w-rules-label, .w-glass-kicker, .w-sit-kicker {
+  text-transform: none; letter-spacing: 0; font-weight: 600; }
+.w-stage .w-label, .w-stage .w-label span { color: var(--fp-soft); font-size: 16px; }
+.w-stage .w-context, .w-stage .w-concept-text { color: var(--fp-soft); }
+.w-end-accent { color: inherit; }
+.w-stage[data-ground="darkblur"] .w-kcol .w-fig-caption { font: 700 24px/1.2 var(--wl-font-ui); letter-spacing: -.01em; text-transform: none; color: rgb(255, 255, 255); }
+.w-stage .w-main:has(.w-rounds) .w-instruction, .w-stage .w-x-head:has(.w-round-top) .w-instruction { color: rgb(255, 255, 255); }
+
+/* ---- 2. labels above headings that add nothing (see the list in the header) ---- */
+.w-stage:is([data-screen="O3"], [data-screen="K2"], [data-screen="K3"], [data-screen="K4"], [data-screen="S05a"]) .w-key-label { display: none; }
+.w-stage[data-screen="O2"] .w-focus-head .w-eyebrow { display: none; }
+.w-stage[data-screen="S19A"] .w-handoff-head .w-label { display: none; }
+.w-stage[data-screen="S18B"] .w-actionbar .w-privacy { display: none; }
+.w-stage[data-screen="S19C"] .w-pdf-badge { display: none; }
+
+/* ---- 3. fewer boxes: on the dark ground the task needs no panel behind it ---- */
+.w-stage[data-scene="focus"] .w-sheet-focus { background: transparent !important; box-shadow: none; border-color: transparent;
+  -webkit-backdrop-filter: none; backdrop-filter: none; }
+.w-stage[data-scene="focus"] .w-sheet-focus .w-instruction { margin-bottom: 28px; }
+/* the cards that stay: one quiet fill, a hairline, no drop shadow, no blur */
+.w-ans, .w-opt, .w-fig, .w-card, .w-card-item, .w-wb-field, .w-check-row, .w-missed-item, .w-copy-card, .w-dlv-card, .w-part,
+.w-tile, .w-drop, .w-map-field, .w-line-step, .w-pick-tile, .w-round-card, .w-rule-card, .w-map-panel, .w-steps li {
+  background-color: var(--fp-fill); border-color: var(--fp-line); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.w-ans:hover:not(:disabled), .w-opt:hover:not(:disabled), .w-tile:hover, .w-pick-tile:hover { background-color: var(--fp-fill-hi); }
+/* over a photo the panel stays, as ink glass with one hairline and a softer shadow */
+.w-stage:is([data-scene="stage"], [data-ground="full"]) :is(.w-sheet, .w-opener-card, .w-case-card) {
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .38), inset 0 0 0 1px var(--fp-line); }
+
+/* small text that sat under 4.5:1 on a tinted or hovered card */
+.w-stage .w-opt-sub, .w-stage .w-ans-two .w-opt-label > span, .w-stage .w-bpmn-lane-label { color: rgb(214, 226, 232); }
+.w-stage .w-bpmn-branch, .w-stage .w-target-chip { color: var(--wl-correct-head); }
+.w-stage .w-step-n, .w-stage .w-wb-n { color: var(--p2-on-turq); }   /* a numeral on a turquoise disc: ink, not white */
+.w-btn-primary:disabled, .w-btn-action:disabled, .w-btn-action[data-locked="true"] { background: rgba(255, 255, 255, .06); color: rgb(214, 226, 232);
+  box-shadow: inset 0 0 0 1px var(--fp-line); }
+
+/* ---- 4. buttons: the word is enough ---- */
+.w-btn > span + svg.w-glyph, .w-link > span + svg.w-glyph, .w-start > span + svg.w-glyph { display: none; }
+.w-btn-primary:not(:disabled) { font-weight: 700; box-shadow: 0 8px 24px rgba(90, 179, 170, .22); }
+.w-link { text-underline-offset: 4px; text-decoration-thickness: 1px; }
+
+/* ---- 5. the hand-in screens: one action each, the headline large ---- */
+.w-stage:is([data-screen="S02"], [data-screen="S18A"], [data-screen="S18"], [data-screen="S18B"], [data-screen="S19A"], [data-screen="S19B"],
+  [data-screen="S19C"], [data-screen="S20"], [data-screen="S20B"], [data-screen="S21R"], [data-screen="S22"]) .w-instruction { font-size: 42px; }
+.w-stage:is([data-screen="S02"], [data-screen="S18B"], [data-screen="S19B"], [data-screen="S19C"], [data-screen="S21R"]) .w-btn-primary {
+  min-height: 54px; padding: 12px 34px; font-size: 20px; }
+
+/* O3: the two things, as two open columns */
+.w-stage[data-screen="O3"] .w-concept-text { margin-top: 14px; font-size: 24px; }
+.w-stage[data-screen="O3"] .w-dlv-pair { margin-top: 28px; }
+.w-stage[data-screen="O3"] .w-dlv-card { background: transparent; border-color: transparent; padding-left: 0; }
+.w-stage[data-screen="O3"] .w-dlv-body b { font-size: 32px; letter-spacing: -.02em; }
+.w-stage[data-screen="O3"] .w-dlv-body span { color: var(--fp-soft); font-size: 20px; }
+.w-stage[data-screen="O3"] .w-dlv-foot { color: var(--fp-soft); }
+
+/* S19A: three steps as a plain numbered list beside the workbook */
+.w-stage[data-screen="S19A"] .w-steps li { background: transparent; border-color: transparent; padding-left: 0; }
+.w-stage[data-screen="S19A"] .w-steps li > span:last-child { font-size: 21px; color: rgb(255, 255, 255); }
+.w-stage[data-screen="S19A"] .w-time-chip { background: transparent; border-color: transparent; color: var(--fp-soft); }
+
+/* S19B: Open workbook is the screen; the notes to copy sit quietly under it */
+.w-stage[data-screen="S19B"] .w-handoff-right { margin-top: 26px; }
+.w-stage[data-screen="S19B"] .w-copy-card { background: transparent; }
+
+/* S20, S21R: rows on hairlines in place of boxes */
+.w-stage[data-screen="S20"] .w-check-row, .w-stage[data-screen="S21R"] .w-missed-item {
+  background: transparent; border-color: transparent; border-bottom-color: var(--fp-line); border-radius: 0; }
+.w-stage[data-screen="S20"] .w-check-q { font-size: 21px; color: rgb(255, 255, 255); }
+.w-stage[data-screen="S21R"] .w-missed-line:empty { display: none; }
+.w-stage[data-screen="S21R"] .w-missed-stem { font-size: 18px; color: rgb(255, 255, 255); }
+
+/* S20B: five names, no definitions (S17 taught them): the cards shrink to fit */
+.w-stage[data-screen="S20B"] .w-sheet .w-risk .w-ans { min-height: 132px; padding: 20px 18px; }
+.w-stage[data-screen="S20B"] .w-sheet .w-risk .w-ans .w-opt-label { font-size: 21px; color: rgb(255, 255, 255); }
+.w-stage[data-screen="S20B"] .w-risk-note { margin-top: 22px; }
+.w-stage[data-screen="S20B"] .w-note-line { color: var(--fp-soft); font-size: 17px; }
+
+/* END: the line, the status, one next step; a soft ink pool under the text so it reads over the scene */
+.w-stage[data-screen="END"] .w-end::before { content: ""; position: absolute; inset: -60px -120px; z-index: -1; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(8, 23, 38, .86), rgba(8, 23, 38, .6) 60%, rgba(8, 23, 38, 0)); }
+.w-stage[data-screen="END"] .w-end-sub { color: var(--fp-soft); font-weight: 400; }

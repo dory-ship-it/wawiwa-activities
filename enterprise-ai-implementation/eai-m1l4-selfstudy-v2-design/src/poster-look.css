@@ -1,0 +1,133 @@
+/*
+ * POSTER LOOK (design copy only, 9 Nov 2026): an alternative skin for the L4 self-study, taken from the
+ * "Wawiwa Style Poster" (From Data to Decision) Style Key. Look only: no text, no screen, no image changes.
+ * Loaded last in index.html, so removing this one <link> brings back the approved Hybrid cinematic look.
+ * Note: these hex values are outside tokens.css, so tools/check.mjs reports them (expected in a design copy).
+ *
+ * Poster Style Key: Navy #255777 (titles, objects) · Teal #3E868F (progress, done) · Turquoise #5AB3AA (fills)
+ * Red #EE3124 (the problem, the CTA) · Wave #E3F2F0 (flowing ground) · Paper #FAFDFD (slide ground)
+ * Assistant 800 two-tone titles, pill buttons, white cards with a soft navy shadow, mint chips.
+ */
+:root {
+  --wl-stone: #FAFDFD;            /* paper: the lesson ground */
+  --wl-ivory: #FFFFFF;
+  --wl-ink: #1F2C36;              /* poster body ink; headings move to navy below */
+  --wl-text-2: #3F3F3F;
+  --wl-muted: #4E6E77;
+  --wl-line: #E6EEF0;
+  --wl-line-strong: #B5CDD3;
+  --wl-line-mid: #B5CDD3;
+  --wl-card-line: #D3E3E6;
+  --wl-dash: #9FC4C9;
+  --wl-idle-ink: #4E6E77;
+  --wl-keypill-bg: #DFF0EE;
+  --wl-chip-bg: #DFF0EE;
+  --wl-correct-bg: #DFF0EE;
+  --wl-neutral-bg: #EEF7F6;
+  --wl-card-shadow: 0 8px 28px rgba(37, 87, 119, .12);
+  --wl-float-shadow: 0 8px 28px rgba(37, 87, 119, .14);
+  --wl-panel-shadow: 0 12px 40px rgba(37, 87, 119, .18);
+  --wl-radius-card: 16px; --wl-radius-panel: 24px; --wl-radius-btn: 999px;
+  --wl-wash-veil-top: rgba(250, 253, 253, .78);
+  --wl-wash-veil-mid: rgba(250, 253, 253, .64);
+  --wl-wash-veil-low: rgba(250, 253, 253, .72);
+  --pl-wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 360' preserveAspectRatio='none'%3E%3Cpath d='M0 0H250C200 50 100 80 0 70Z' fill='%23EEF7F6'/%3E%3Cpath d='M0 262C150 214 300 330 470 278C560 250 610 252 640 262V360H0Z' fill='%23E3F2F0'/%3E%3Cpath d='M0 300C170 270 330 350 640 300V360H0Z' fill='%23D6ECE9'/%3E%3C/svg%3E");
+  --pl-navy: #255777; --pl-teal: #3E868F; --pl-teal-ink: #2F6A72; --pl-mint: #DFF0EE; --pl-mint-ink: #1F4F55;
+}
+
+/* ---------- ground: paper with the poster's waves instead of the dot grid ---------- */
+.w-g-dots { background-color: #FAFDFD; background-image: var(--pl-wave); background-size: 100% 100%; }
+.w-stage:is([data-scene="band"], [data-scene="split"], [data-scene="light"], [data-scene="focus"]) { background: #FAFDFD; }
+.w-wash-veil { background-image: linear-gradient(180deg, var(--wl-wash-veil-top), var(--wl-wash-veil-mid) 60%, var(--wl-wash-veil-low)) !important; }
+
+/* ---------- top bar: light paper bar, navy type (was the dark smoke bar) ---------- */
+.w-stage[data-bar="dark"] > .w-bar,
+.w-stage[data-scene="focus"][data-bar="dark"] > .w-bar,
+.w-stage[data-ground]:not([data-ground="full"])[data-bar="dark"] > .w-bar,
+.w-stage:is([data-scene="split"], [data-scene="light"])[data-bar="dark"] > .w-bar {
+  background: rgba(250, 253, 253, .94); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  box-shadow: 0 2px 18px rgba(37, 87, 119, .10); }
+.w-stage[data-bar="dark"] .w-bar-rule { background: #B5CDD3; }
+.w-stage[data-bar="dark"] .w-bar-menu i { background: var(--pl-navy); }
+.w-stage[data-bar="dark"] .w-bar-of { color: #4E6E77; }
+.w-stage[data-bar="dark"] .w-bar-title { color: var(--pl-navy); letter-spacing: -.3px; }
+
+/* stepper, as on the poster: done = teal disc, current = navy disc, to come = white disc with a mist ring */
+.w-stage[data-bar="dark"] .w-step-disc { background: #FFFFFF; border: 1.5px solid #B5CDD3; color: #4E6E77; }
+.w-stage[data-bar="dark"] .w-step[data-state="done"] .w-step-disc { border: 0; background: var(--pl-teal); color: #FFFFFF; }
+.w-stage[data-bar="dark"] .w-step[data-state="current"] .w-step-disc { border: 0; background: var(--pl-navy); color: #FFFFFF;
+  box-shadow: 0 0 0 4px rgba(90, 179, 170, .35); }
+.w-stage[data-bar="dark"] .w-step-label { color: #4E6E77; }
+.w-stage[data-bar="dark"] .w-step[data-state="current"] .w-step-label { color: var(--pl-navy); font-weight: 800; }
+.w-stage[data-bar="dark"] .w-step-link { background: #B5CDD3; height: 2px; }
+.w-stage[data-bar="dark"] .w-step-link[data-state="done"] { background: var(--pl-teal); }
+
+/* ---------- headings: navy, Assistant 800, tight ---------- */
+.w-instruction, .w-stage[data-scene="focus"] :is(.w-task-head, .w-focus-head, .w-open-head) .w-instruction {
+  color: var(--pl-navy); font-weight: 800; letter-spacing: -.5px; }
+.w-eyebrow, .w-stage[data-scene="focus"] .w-focus-head .w-eyebrow { color: var(--pl-teal-ink); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 800; }
+
+/* ---------- buttons: pills ---------- */
+.w-prev, .w-btn-ghost { border-radius: 999px; border: 1.92px solid var(--pl-navy); color: var(--pl-navy); background: #FFFFFF; font-weight: 700; }
+.w-next { border-radius: 999px; }
+.w-next[data-locked="false"] { background: var(--pl-navy); color: #FFFFFF; }          /* poster: "Next: …" is a navy pill */
+.w-next[data-locked="false"]:hover { background: #1F4A66; filter: none; }
+.w-next[data-locked="true"] { background: #B5CDD3; color: #1F4F55; }
+.w-btn, .w-btn-action, .w-btn-primary { border-radius: 999px; }
+.w-btn-primary { background: var(--pl-navy); }
+
+/* ---------- cards and panels: white, round, soft navy shadow, hairline mint border ---------- */
+:is(.w-fig, .w-deliverable, .w-map-pop, .w-sheet, .w-panel, .w-card, .w-ans, .w-opt) { border-color: #E6EEF0; }
+:is(.w-fig, .w-deliverable) { box-shadow: var(--wl-card-shadow); }
+
+/* ---------- chips and small marks ---------- */
+.w-chip, .w-keypill, .w-key-pill { background: var(--pl-mint); color: var(--pl-mint-ink); border-radius: 999px; }
+.w-dot-s[data-state="done"] { background: var(--pl-teal); }
+.w-goal-num, .w-part-num { border-color: #B5CDD3; color: var(--pl-navy); font-weight: 800; }
+.w-deliverable-icon, .w-map-tab[data-status="done"] .w-map-disc { background: var(--pl-teal); }
+
+/* ---------- second pass ---------- */
+:root { --wl-drop-bg: rgba(255, 255, 255, .92); }
+.w-panel-title { color: var(--pl-navy); letter-spacing: -.5px; }
+
+/* ---------- light illustrations: every veil turns paper, so the scenes stay bright as on the poster ---------- */
+.w-g-veil { background: rgba(250, 253, 253, .70); }
+.w-g-split { background: #FAFDFD; }
+.w-band-veil { background: rgba(250, 253, 253, .78); }
+.w-stage[data-scene="band"] :is(.w-task-head, .w-focus-head, .w-open-head) .w-instruction { color: var(--pl-navy); }
+.w-stage[data-scene="band"] :is(.w-task-head, .w-focus-head, .w-open-head) :is(.w-context, .w-subline, .w-task-sub),
+.w-stage:is([data-ground="darkblur"], [data-ground="split"]) :is(.w-context, .w-subline, .w-task-sub, .w-concept-text, .w-map-title, .w-evidence, .w-bpmn-key p) { color: #3F3F3F; }
+.w-stage:is([data-ground="darkblur"], [data-ground="split"]) :is(.w-task-head, .w-focus-head, .w-open-head) .w-instruction,
+.w-stage:is([data-ground="darkblur"], [data-ground="split"]) :is(.w-map-kicker, .w-evidence b, .w-bpmn-key b) { color: var(--pl-navy); }
+.w-stage:is([data-ground="darkblur"], [data-ground="split"]) .w-focus-head .w-eyebrow { color: var(--pl-teal-ink); }
+/* O1 and END: paper on the left (O1) or behind the centre (END), the scene on the right, navy type, as the poster's cover */
+.w-o1-veil { background: linear-gradient(90deg, rgba(250, 253, 253, .96) 0%, rgba(250, 253, 253, .9) 42%, rgba(250, 253, 253, 0) 72%); }
+.w-stage[data-scene="end"] .w-o1-veil { background: rgba(250, 253, 253, .84); }
+.w-stage:is([data-scene="title"], [data-scene="end"]) { background: #FAFDFD; }
+.w-title-program, .w-end-sub { color: var(--pl-teal-ink); }
+.w-title-quote, .w-end-hint { color: #3F3F3F; }
+.w-end-next-line { color: var(--pl-navy); }
+.w-o1-body :is(h1, h2, .w-title-name, .w-title-text), .w-end :is(h1, h2) { color: var(--pl-navy); }
+/* ---------- the poster's light scenes in place of the photos (by screen, so content is untouched) ----------
+ * O1 Cover · Intro Ask · Why map Insight · Toolkit Clean · HR demo Collect · Critical eye Query
+ * Build yours Analyze · S21 Visualize · S22 Present · END Impact */
+.w-stage:is([data-screen="O1"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/light/01.jpg") !important; background-position: 50% 50% !important; } /* Cover */
+.w-stage:is([data-screen="O2"], [data-screen="O3"], [data-screen="S01"], [data-screen="S02"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/light/02.jpg") !important; background-position: 50% 50% !important; } /* Ask */
+.w-stage:is([data-screen="W3"], [data-screen="V2"], [data-screen="S09"], [data-screen="S10"], [data-screen="K3"], [data-screen="S11"], [data-screen="S12"], [data-screen="S12B"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/light/03.jpg") !important; background-position: 50% 50% !important; } /* Collect */
+.w-stage:is([data-screen="W2"], [data-screen="K2"], [data-screen="S04"], [data-screen="S05a"], [data-screen="S05b"], [data-screen="S06"], [data-screen="S07"], [data-screen="S08"], [data-screen="S08B"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/light/04.jpg") !important; background-position: 50% 50% !important; } /* Clean */
+.w-stage:is([data-screen="W4"], [data-screen="S13"], [data-screen="S14"], [data-screen="S15"], [data-screen="K4"], [data-screen="S16"], [data-screen="S17"], [data-screen="S17B"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/light/05.jpg") !important; background-position: 50% 50% !important; } /* Query */
+.w-stage:is([data-screen="S18A"], [data-screen="S18"], [data-screen="S18B"], [data-screen="S19A"], [data-screen="S19B"], [data-screen="S19C"], [data-screen="S20"], [data-screen="S20B"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/light/06.jpg") !important; background-position: 50% 50% !important; } /* Analyze */
+.w-stage:is([data-screen="S21"], [data-screen="S21R"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/light/07.jpg") !important; background-position: 50% 50% !important; } /* Visualize */
+.w-stage:is([data-screen="W1"], [data-screen="V1"], [data-screen="S03"], [data-screen="K1"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/light/08.jpg") !important; background-position: 50% 50% !important; } /* Insight */
+.w-stage:is([data-screen="S22"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/light/09.jpg") !important; background-position: 50% 50% !important; } /* Present */
+.w-stage:is([data-screen="END"]) :is(.w-g-full, .w-g-half, .w-g-blur, .w-wash-photo, .w-x-photo, .w-band-photo, .w-split-photo, .w-scene-photo) { background-image: url("../assets/img/poster/light/10.jpg") !important; background-position: 50% 50% !important; } /* Impact */
+
+/* ---------- third pass: light O1 / END type, light concept line, the cover scene on the right ---------- */
+.w-stage:is([data-scene="title"], [data-scene="end"]) .w-instruction { color: var(--pl-navy); }
+.w-stage:is([data-ground="darkblur"], [data-ground="split"], [data-scene="focus"]) .w-concept-text { color: #3F3F3F; }
+.w-stage[data-screen="O1"] .w-scene-photo { background-size: 58% auto !important; background-position: 98% 62% !important; background-color: #FAFDFD; }
+.w-stage[data-screen="END"] .w-scene-photo { background-size: cover; }
+.w-stage .w-concept-text { color: #3F3F3F !important; }
+/* the scenes melt into the paper (their white ground disappears), as the poster's mix-blend multiply */
+.w-scene :is(.w-scene-photo, .w-g-full, .w-g-half, .w-x-photo, .w-split-photo, .w-band-photo) { mix-blend-mode: multiply; }
+.w-scene { background: #FAFDFD; }
