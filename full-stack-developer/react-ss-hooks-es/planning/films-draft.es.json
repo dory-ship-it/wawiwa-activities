@@ -1,0 +1,875 @@
+{
+  "_comment": "P0 draft of the five Spanish films, written as data so P2 can pour each film into a LessonFilm content JSON. The `code` beat kind does not exist yet: P1 adds it (spec in STORYBOARD.md, section 3). `_test` names the component in planning/snippet-check/ that ran this exact code in React 19.3 + Vite 8 with StrictMode (ids and test hooks removed for display). The narrator and the app are invented: Valeria is a fictional bootcamp student, Foco is a fictional study app. No real person, partner or SME is named. Practice-card task lines are the current Spanish lesson's wording with only the first letter capitalised.",
+  "films": [
+    {
+      "id": "F1",
+      "slug": "react-hooks-f1-usestate-es",
+      "title": "useState",
+      "topicLabel": "REACT · HOOKS · 1 DE 5",
+      "covers": [
+        1,
+        2,
+        3
+      ],
+      "practice": {
+        "eyebrow": "PRÁCTICA",
+        "code": "HOOKS · 1",
+        "title": "Uso del Estado",
+        "lines": [
+          "Crea un componente con un botón que muestre y oculte un mensaje."
+        ]
+      },
+      "beats": [
+        {
+          "kind": "caption",
+          "text": "Lunes. La demo es el viernes.",
+          "say": "Lunes por la mañana. Valeria tiene hasta el viernes para mostrarle a su grupo de estudio una app que se llama Foco."
+        },
+        {
+          "kind": "caption",
+          "text": "Foco · Pomodoros: 0",
+          "say": "La primera pieza parece fácil: un contador de pomodoros. Cada vez que termina un bloque de estudio, un clic suma uno."
+        },
+        {
+          "kind": "code",
+          "_test": "CounterWithLet",
+          "file": "Foco.jsx",
+          "lines": [
+            "export function Foco() {",
+            "  let pomodoros = 0;",
+            "  return (",
+            "    <div>",
+            "      <p>Pomodoros: {pomodoros}</p>",
+            "      <button onClick={() => { pomodoros = pomodoros + 1; }}>",
+            "        +1",
+            "      </button>",
+            "    </div>",
+            "  );",
+            "}"
+          ],
+          "hl": [
+            2,
+            6
+          ],
+          "output": {
+            "label": "Pantalla, después de 3 clics",
+            "lines": [
+              "Pomodoros: 0"
+            ],
+            "tone": "bad"
+          },
+          "say": "Su primer intento usa una variable normal. Hace clic tres veces, y la pantalla sigue diciendo cero."
+        },
+        {
+          "kind": "caption",
+          "text": "El estado es un dato que, al cambiar, vuelve a dibujar el componente.",
+          "say": "React no se entera de ese cambio. Para que la pantalla cambie, el dato tiene que ser estado: cuando el estado cambia, React vuelve a dibujar el componente."
+        },
+        {
+          "kind": "code",
+          "_test": "PomodoroCounter",
+          "file": "Foco.jsx",
+          "lines": [
+            "import { useState } from 'react';",
+            "",
+            "export function Foco() {",
+            "  const [pomodoros, setPomodoros] = useState(0);",
+            "  return (",
+            "    <div>",
+            "      <p>Pomodoros: {pomodoros}</p>",
+            "      <button onClick={() => setPomodoros(pomodoros + 1)}>",
+            "        +1",
+            "      </button>",
+            "    </div>",
+            "  );",
+            "}"
+          ],
+          "hl": [
+            1,
+            4
+          ],
+          "say": "Valeria importa useState desde react. Le da dos cosas: el valor actual y una función para cambiarlo. El cero es el valor con el que empieza."
+        },
+        {
+          "kind": "code",
+          "_test": "PomodoroCounter",
+          "file": "Foco.jsx",
+          "sameCard": true,
+          "hl": [
+            8
+          ],
+          "output": {
+            "label": "Pantalla, después de 3 clics",
+            "lines": [
+              "Pomodoros: 3"
+            ],
+            "tone": "ok"
+          },
+          "say": "El botón ya no toca una variable. Llama a setPomodoros con el valor nuevo, y React redibuja. Tres clics, tres pomodoros."
+        },
+        {
+          "kind": "code",
+          "_test": "DoneTasksToggle",
+          "file": "Foco.jsx (extracto)",
+          "lines": [
+            "const [showDone, setShowDone] = useState(false);",
+            "",
+            "return (",
+            "  <div>",
+            "    <button onClick={() => setShowDone(!showDone)}>",
+            "      {showDone ? 'Ocultar terminadas' : 'Mostrar terminadas'}",
+            "    </button>",
+            "    {showDone && <p>Repasar arrays</p>}",
+            "  </div>",
+            ");"
+          ],
+          "hl": [
+            1,
+            5
+          ],
+          "say": "Por la tarde, Valeria agrega un botón para mostrar u ocultar las tareas terminadas. Ahora el estado es verdadero o falso, y cada clic lo invierte con el signo de exclamación."
+        },
+        {
+          "kind": "code",
+          "_test": "DoneTasksToggle",
+          "file": "Foco.jsx (extracto)",
+          "sameCard": true,
+          "hl": [
+            6,
+            8
+          ],
+          "output": {
+            "label": "Pantalla, después de 1 clic",
+            "lines": [
+              "[ Ocultar terminadas ]",
+              "Repasar arrays"
+            ],
+            "tone": "ok"
+          },
+          "say": "Si showDone es verdadero, la tarea aparece. Si es falso, React no dibuja nada. El mismo estado decide también el texto del botón."
+        },
+        {
+          "kind": "caption",
+          "text": "Si lo que ves depende de un dato, ese dato es estado.",
+          "say": "Antes de cerrar la laptop, Valeria anota una regla: si lo que se ve en pantalla depende de un dato, ese dato va en useState."
+        },
+        {
+          "kind": "practice",
+          "say": "Tu turno. En la práctica de abajo, predice qué muestra un contador después de tres clics, y luego construye tu propio botón para mostrar y ocultar."
+        },
+        {
+          "kind": "end"
+        }
+      ]
+    },
+    {
+      "id": "F2",
+      "slug": "react-hooks-f2-useeffect-es",
+      "title": "useEffect: cuándo se ejecuta",
+      "topicLabel": "REACT · HOOKS · 2 DE 5",
+      "covers": [
+        4,
+        5,
+        7,
+        8
+      ],
+      "practice": {
+        "eyebrow": "PRÁCTICA",
+        "code": "HOOKS · 2",
+        "title": "Obtener datos",
+        "lines": [
+          "Obtén los datos de la API https://jsonplaceholder.typicode.com/users y muestra el nombre del primer usuario."
+        ]
+      },
+      "beats": [
+        {
+          "kind": "caption",
+          "text": "Martes.",
+          "say": "Martes. Valeria quiere que Foco muestre quién es el compañero de estudio del día. Ese dato no está en su código: vive en una API."
+        },
+        {
+          "kind": "caption",
+          "text": "Efecto secundario: todo lo que actúa fuera del componente.",
+          "say": "Pedir datos a una API es un efecto secundario: algo que actúa fuera del componente, como cambiar el título de la pestaña o escuchar un evento. Para eso existe useEffect."
+        },
+        {
+          "kind": "code",
+          "_test": "skeleton, not runnable on its own; the full version is Partner",
+          "file": "Companero.jsx (extracto)",
+          "lines": [
+            "useEffect(() => {",
+            "  // el efecto",
+            "}, [/* dependencias */]);"
+          ],
+          "hl": [
+            1,
+            2
+          ],
+          "say": "useEffect recibe una función, y React la ejecuta después de dibujar el componente. Junta en un solo lugar lo que antes, en los componentes de clase, hacían tres métodos del ciclo de vida."
+        },
+        {
+          "kind": "table",
+          "title": "¿Cuándo se ejecuta el efecto?",
+          "cols": [
+            "Segundo argumento",
+            "Se ejecuta"
+          ],
+          "rows": [
+            [
+              "sin arreglo",
+              "después de cada render"
+            ],
+            [
+              "[ ]",
+              "solo al montar"
+            ],
+            [
+              "[count]",
+              "al montar y cada vez que count cambia"
+            ]
+          ],
+          "say": "El segundo argumento decide cuándo se repite. Sin arreglo, después de cada render. Con un arreglo vacío, solo al montar. Con count adentro, cada vez que count cambia."
+        },
+        {
+          "kind": "code",
+          "_test": "PartnerNoDeps",
+          "file": "Companero.jsx (extracto)",
+          "lines": [
+            "const [partner, setPartner] = useState(null);",
+            "",
+            "useEffect(() => {",
+            "  fetch('https://jsonplaceholder.typicode.com/users/2')",
+            "    .then((res) => res.json())",
+            "    .then((data) => setPartner(data));",
+            "});"
+          ],
+          "hl": [
+            7
+          ],
+          "output": {
+            "label": "Network",
+            "lines": [
+              "users/2",
+              "users/2",
+              "users/2",
+              "users/2",
+              "…"
+            ],
+            "tone": "bad"
+          },
+          "say": "Su primera versión olvida el arreglo. Llega el dato, el estado cambia, el componente se redibuja, y el efecto vuelve a pedir el dato. Una y otra vez."
+        },
+        {
+          "kind": "caption",
+          "text": "fetch → setPartner → render → fetch → …",
+          "say": "En pantalla todo se ve bien, y por eso es fácil no notarlo. Pero en la pestaña Network, las solicitudes no paran nunca."
+        },
+        {
+          "kind": "code",
+          "_test": "Partner",
+          "file": "Companero.jsx (extracto)",
+          "lines": [
+            "const [partner, setPartner] = useState(null);",
+            "",
+            "useEffect(() => {",
+            "  fetch('https://jsonplaceholder.typicode.com/users/2')",
+            "    .then((res) => res.json())",
+            "    .then((data) => setPartner(data));",
+            "}, []);",
+            "",
+            "return <p>{partner ? `Compañero de hoy: ${partner.name}` : 'Cargando...'}</p>;"
+          ],
+          "hl": [
+            7
+          ],
+          "output": {
+            "label": "Pantalla",
+            "lines": [
+              "Compañero de hoy: Ervin Howell"
+            ],
+            "tone": "ok"
+          },
+          "say": "Un arreglo vacío al final lo arregla. El efecto ya no se repite con cada render: pide el dato al montar, y mientras espera, la pantalla dice cargando."
+        },
+        {
+          "kind": "caption",
+          "text": "En desarrollo, StrictMode monta dos veces a propósito.",
+          "say": "Algo la confunde: en la pestaña Network, la solicitud aparece dos veces. No es un error. En desarrollo, StrictMode monta el componente dos veces a propósito. En producción, se pide una sola vez."
+        },
+        {
+          "kind": "code",
+          "_test": "PomodoroTitle",
+          "file": "Foco.jsx (extracto)",
+          "lines": [
+            "useEffect(() => {",
+            "  document.title = `Pomodoros: ${pomodoros}`;",
+            "}, [pomodoros]);"
+          ],
+          "hl": [
+            3
+          ],
+          "output": {
+            "label": "Título de la pestaña",
+            "lines": [
+              "Pomodoros: 2"
+            ],
+            "tone": "ok"
+          },
+          "say": "Por la tarde, Valeria escribe otro efecto: el título de la pestaña muestra los pomodoros. Pone pomodoros en el arreglo, así el título cambia con cada clic, y solo entonces."
+        },
+        {
+          "kind": "caption",
+          "text": "¿Cuándo debe repetirse este efecto? La respuesta va en el arreglo.",
+          "say": "La regla del martes: antes de escribir un efecto, hay que preguntarse cuándo debe repetirse. La respuesta va en el arreglo."
+        },
+        {
+          "kind": "practice",
+          "say": "Tu turno. En la práctica, decide qué efectos se ejecutan en cada momento, y luego muestra el nombre del primer usuario de la API."
+        },
+        {
+          "kind": "end"
+        }
+      ]
+    },
+    {
+      "id": "F3",
+      "slug": "react-hooks-f3-cleanup-es",
+      "title": "useEffect: limpieza",
+      "topicLabel": "REACT · HOOKS · 3 DE 5",
+      "covers": [
+        4,
+        6,
+        9
+      ],
+      "practice": {
+        "eyebrow": "PRÁCTICA",
+        "code": "HOOKS · 3",
+        "title": "Creación de un Temporizador",
+        "lines": [
+          "Usa setInterval para crear un temporizador y límpialo con clearInterval cuando el componente se desmonte."
+        ]
+      },
+      "beats": [
+        {
+          "kind": "caption",
+          "text": "Miércoles.",
+          "say": "Miércoles. Valeria le agrega a Foco un temporizador que cuenta los segundos de cada bloque de estudio."
+        },
+        {
+          "kind": "code",
+          "_test": "TimerNoCleanup",
+          "file": "Temporizador.jsx (extracto)",
+          "lines": [
+            "const [seconds, setSeconds] = useState(0);",
+            "",
+            "useEffect(() => {",
+            "  setInterval(() => {",
+            "    console.log('tic');",
+            "    setSeconds((s) => s + 1);",
+            "  }, 1000);",
+            "}, []);"
+          ],
+          "hl": [
+            4,
+            7
+          ],
+          "output": {
+            "label": "Pantalla, segundo a segundo",
+            "lines": [
+              "0 → 2 → 4 → 6 → 8"
+            ],
+            "tone": "bad"
+          },
+          "say": "Valeria usa setInterval dentro de un efecto. Pero en desarrollo, el reloj salta de dos en dos."
+        },
+        {
+          "kind": "caption",
+          "text": "Dos montajes, dos intervalos, nadie los detiene.",
+          "say": "StrictMode montó el componente dos veces, y cada montaje dejó un intervalo corriendo. Nadie los detuvo."
+        },
+        {
+          "kind": "code",
+          "_test": "TimerNoCleanup",
+          "file": "Temporizador.jsx (extracto)",
+          "sameCard": true,
+          "hl": [
+            5
+          ],
+          "output": {
+            "label": "Consola, con el temporizador oculto",
+            "lines": [
+              "tic",
+              "tic",
+              "tic",
+              "tic"
+            ],
+            "tone": "bad"
+          },
+          "say": "Y cuando oculta el temporizador, la consola sigue imprimiendo. El componente ya no está, pero sus intervalos sí."
+        },
+        {
+          "kind": "caption",
+          "text": "La limpieza es la función que devuelve el efecto.",
+          "say": "La solución es la limpieza: una función que el efecto devuelve. React la ejecuta antes de repetir el efecto y cuando el componente se desmonta."
+        },
+        {
+          "kind": "code",
+          "_test": "Timer",
+          "file": "Temporizador.jsx (extracto)",
+          "lines": [
+            "useEffect(() => {",
+            "  console.log('Temporizador iniciado');",
+            "  const id = setInterval(() => {",
+            "    setSeconds((s) => s + 1);",
+            "  }, 1000);",
+            "  return () => {",
+            "    clearInterval(id);",
+            "    console.log('Temporizador detenido');",
+            "  };",
+            "}, []);"
+          ],
+          "hl": [
+            3,
+            6,
+            7,
+            8,
+            9
+          ],
+          "output": {
+            "label": "Consola, al montar",
+            "lines": [
+              "Temporizador iniciado",
+              "Temporizador detenido",
+              "Temporizador iniciado"
+            ],
+            "tone": "ok"
+          },
+          "say": "Ella guarda el id del intervalo y devuelve una función que llama a clearInterval. Ahora la consola cuenta la historia: iniciado, detenido, iniciado. Es StrictMode probando la limpieza."
+        },
+        {
+          "kind": "code",
+          "_test": "TimerStale",
+          "file": "Temporizador.jsx (extracto)",
+          "sameCard": true,
+          "hl": [
+            4
+          ],
+          "output": {
+            "label": "Si escribe setSeconds(seconds + 1)",
+            "lines": [
+              "0 → 1 → 1 → 1"
+            ],
+            "tone": "bad"
+          },
+          "say": "Un detalle más: adentro del intervalo, Valeria usa la forma con función, que siempre recibe el valor más reciente. Con seconds más uno, el intervalo recuerda el cero del primer render, y el reloj se queda en uno."
+        },
+        {
+          "kind": "code",
+          "_test": "ScrollWatcher",
+          "file": "Foco.jsx (extracto)",
+          "lines": [
+            "useEffect(() => {",
+            "  const handleScroll = () => console.log('scroll');",
+            "  window.addEventListener('scroll', handleScroll);",
+            "  return () => window.removeEventListener('scroll', handleScroll);",
+            "}, []);"
+          ],
+          "hl": [
+            3,
+            4
+          ],
+          "say": "Por la tarde, Foco escucha el scroll de la página. Es el mismo patrón: addEventListener en el efecto, removeEventListener en la limpieza."
+        },
+        {
+          "kind": "caption",
+          "text": "Sin limpieza: cada scroll se imprime dos veces, y sigue después de cerrar la vista.",
+          "say": "Sin esa limpieza, cada scroll se imprimía dos veces en desarrollo, y seguía imprimiéndose después de cerrar la vista."
+        },
+        {
+          "kind": "caption",
+          "text": "Si un efecto inicia algo, su limpieza lo detiene.",
+          "say": "La regla del miércoles: si un efecto inicia algo, como un intervalo o un listener, su limpieza lo detiene."
+        },
+        {
+          "kind": "practice",
+          "say": "Tu turno. Encuentra la limpieza que le falta a un temporizador que nunca se detiene, constrúyelo en Cursor y compara la consola."
+        },
+        {
+          "kind": "end"
+        }
+      ]
+    },
+    {
+      "id": "F4",
+      "slug": "react-hooks-f4-useref-es",
+      "title": "useRef",
+      "topicLabel": "REACT · HOOKS · 4 DE 5",
+      "covers": [
+        10,
+        11,
+        12
+      ],
+      "practice": {
+        "eyebrow": "PRÁCTICA",
+        "code": "HOOKS · 4",
+        "title": "Uso de Referencias y de useRef",
+        "lines": [
+          "Usa una referencia para acceder a un campo de texto y un botón que, al hacer clic, enfoque el campo.",
+          "Usa useRef para rastrear el valor previo de una variable de estado."
+        ]
+      },
+      "beats": [
+        {
+          "kind": "caption",
+          "text": "Jueves.",
+          "say": "Jueves. El grupo pide dos cosas: un botón que lleve el cursor directo al campo de nueva tarea, y ver cuántos pomodoros había antes del último clic."
+        },
+        {
+          "kind": "caption",
+          "text": "useRef: una caja que React conserva entre renders. Cambiarla no redibuja.",
+          "say": "Las dos se resuelven con useRef. Es una caja con una propiedad, current, que React conserva entre renders. Cambiarla no vuelve a dibujar el componente."
+        },
+        {
+          "kind": "code",
+          "_test": "FocusTask",
+          "file": "NuevaTarea.jsx",
+          "lines": [
+            "import { useRef } from 'react';",
+            "",
+            "export function NuevaTarea() {",
+            "  const inputRef = useRef(null);",
+            "  function handleFocus() {",
+            "    inputRef.current.focus();",
+            "  }",
+            "  return (",
+            "    <div>",
+            "      <input ref={inputRef} type=\"text\" placeholder=\"Nueva tarea\" />",
+            "      <button onClick={handleFocus}>Escribir tarea</button>",
+            "    </div>",
+            "  );",
+            "}"
+          ],
+          "hl": [
+            4,
+            10
+          ],
+          "say": "Valeria crea inputRef con null y lo conecta al campo con el atributo ref. Después de montar, current apunta al elemento real de la página."
+        },
+        {
+          "kind": "code",
+          "_test": "FocusTask",
+          "file": "NuevaTarea.jsx",
+          "sameCard": true,
+          "hl": [
+            6,
+            11
+          ],
+          "output": {
+            "label": "Después del clic",
+            "lines": [
+              "El cursor está en «Nueva tarea»"
+            ],
+            "tone": "ok"
+          },
+          "say": "El botón llama al método focus de esa ref. El cursor salta al campo, sin estado y sin redibujar nada."
+        },
+        {
+          "kind": "code",
+          "_test": "PrevWithLet",
+          "file": "Foco.jsx (extracto)",
+          "lines": [
+            "const [count, setCount] = useState(0);",
+            "let prev;",
+            "",
+            "useEffect(() => {",
+            "  prev = count;",
+            "}, [count]);",
+            "",
+            "return <p>Ahora: {count}, antes: {String(prev)}</p>;"
+          ],
+          "hl": [
+            2,
+            5
+          ],
+          "output": {
+            "label": "Pantalla, después de 3 clics",
+            "lines": [
+              "Ahora: 3, antes: undefined"
+            ],
+            "tone": "bad"
+          },
+          "say": "Para el valor anterior, su primer intento usa una variable normal. Pero cada render crea la variable de nuevo, y la etiqueta «antes» siempre dice undefined."
+        },
+        {
+          "kind": "code",
+          "_test": "PreviousValue",
+          "file": "Foco.jsx (extracto)",
+          "lines": [
+            "const [count, setCount] = useState(0);",
+            "const prevCountRef = useRef(null);",
+            "",
+            "useEffect(() => {",
+            "  prevCountRef.current = count;",
+            "}, [count]);",
+            "",
+            "return <p>Ahora: {count}, antes: {String(prevCountRef.current)}</p>;"
+          ],
+          "hl": [
+            2,
+            5
+          ],
+          "output": {
+            "label": "Pantalla, después de 3 clics",
+            "lines": [
+              "Ahora: 3, antes: 2"
+            ],
+            "tone": "ok"
+          },
+          "say": "Con useRef, la caja sobrevive. Después de cada render, el efecto guarda count en la ref, y el texto muestra el valor de la vez anterior."
+        },
+        {
+          "kind": "caption",
+          "text": "Primero React dibuja y lee la caja. Después, el efecto la actualiza.",
+          "say": "Funciona por el orden. React dibuja primero, leyendo lo que hay en la caja, y solo después el efecto guarda el valor nuevo."
+        },
+        {
+          "kind": "table",
+          "title": "Tres clics en «ref +1», uno en «estado +1»",
+          "cols": [
+            "Cambio",
+            "¿Redibuja?",
+            "Pantalla"
+          ],
+          "rows": [
+            [
+              "refClicks.current += 1 (×3)",
+              "No",
+              "estado: 0 | ref: 0"
+            ],
+            [
+              "setStateClicks(stateClicks + 1)",
+              "Sí",
+              "estado: 1 | ref: 3"
+            ]
+          ],
+          "say": "La diferencia en una línea: cambiar el estado redibuja, cambiar una ref no. La ref sí guardó los tres clics, pero solo se ven cuando algo más redibuja."
+        },
+        {
+          "kind": "caption",
+          "text": "Lo que se ve va en estado. Lo que solo hay que recordar va en una ref.",
+          "say": "La regla del jueves: lo que se ve en pantalla va en estado. Lo que solo hay que recordar, o tocar en la página sin redibujar, va en una ref."
+        },
+        {
+          "kind": "practice",
+          "say": "Tu turno. Decide qué cambios provocan un nuevo render, y luego construye el botón de enfoque y el valor anterior."
+        },
+        {
+          "kind": "end"
+        }
+      ]
+    },
+    {
+      "id": "F5",
+      "slug": "react-hooks-f5-custom-hooks-es",
+      "title": "Hooks personalizados",
+      "topicLabel": "REACT · HOOKS · 5 DE 5",
+      "covers": [
+        13,
+        14,
+        15,
+        16
+      ],
+      "practice": {
+        "eyebrow": "PRÁCTICA",
+        "code": "HOOKS · 5",
+        "title": "Hooks personalizados",
+        "lines": [
+          "Hook personalizado: useLocalStorage: gestiona un estado sincronizado con localStorage.",
+          "Hook personalizado para obtener datos: recupera datos de una API y gestiona los estados de carga y error."
+        ]
+      },
+      "beats": [
+        {
+          "kind": "caption",
+          "text": "Viernes. La demo es a las cinco.",
+          "say": "Viernes. La demo es a las cinco, y Valeria nota que tiene la misma lógica copiada en tres componentes."
+        },
+        {
+          "kind": "caption",
+          "text": "Un hook personalizado es una función que empieza con use y llama a otros hooks.",
+          "say": "La solución es un hook personalizado: una función de JavaScript cuyo nombre empieza con use y que puede llamar a otros hooks."
+        },
+        {
+          "kind": "code",
+          "_test": "TitleWithHook",
+          "file": "useDocumentTitle.js y Foco.jsx (extractos)",
+          "lines": [
+            "export function useDocumentTitle(title) {",
+            "  useEffect(() => {",
+            "    document.title = title;",
+            "  }, [title]);",
+            "}",
+            "",
+            "// en Foco.jsx",
+            "useDocumentTitle(`Pomodoros: ${pomodoros}`);"
+          ],
+          "hl": [
+            1,
+            8
+          ],
+          "say": "El primero es pequeño. Valeria mueve el efecto del título a useDocumentTitle, y en el componente queda una sola línea."
+        },
+        {
+          "kind": "caption",
+          "text": "use… le avisa al linter, y a quien lee, que adentro hay hooks.",
+          "say": "El prefijo use no es decoración. Le avisa al linter, y a quien lea el código, que adentro hay hooks y que se aplican sus reglas."
+        },
+        {
+          "kind": "code",
+          "_test": "Greeting",
+          "file": "useLocalStorage.js (sin imports)",
+          "lines": [
+            "export function useLocalStorage(key, initialValue) {",
+            "  const [storedValue, setStoredValue] = useState(() => {",
+            "    try {",
+            "      const item = window.localStorage.getItem(key);",
+            "      return item ? JSON.parse(item) : initialValue;",
+            "    } catch {",
+            "      return initialValue;",
+            "    }",
+            "  });",
+            "  useEffect(() => {",
+            "    window.localStorage.setItem(key, JSON.stringify(storedValue));",
+            "  }, [key, storedValue]);",
+            "  return [storedValue, setStoredValue];",
+            "}"
+          ],
+          "hl": [
+            2,
+            4,
+            5
+          ],
+          "say": "Después, el nombre de quien usa Foco tiene que sobrevivir a una recarga. useLocalStorage lee el valor guardado una sola vez, al crear el estado."
+        },
+        {
+          "kind": "code",
+          "_test": "Greeting",
+          "file": "useLocalStorage.js (sin imports)",
+          "sameCard": true,
+          "hl": [
+            10,
+            11,
+            12,
+            13
+          ],
+          "say": "Un efecto lo vuelve a guardar cada vez que cambia. Y por fuera, el hook devuelve lo mismo que useState: el valor y la función para cambiarlo."
+        },
+        {
+          "kind": "code",
+          "_test": "Greeting",
+          "file": "Saludo.jsx (extracto)",
+          "lines": [
+            "const [name, setName] = useLocalStorage('userName', '');",
+            "",
+            "return (",
+            "  <div>",
+            "    <h1>Hola, {name || 'invitado'}</h1>",
+            "    <input value={name} onChange={(e) => setName(e.target.value)} />",
+            "  </div>",
+            ");"
+          ],
+          "hl": [
+            1
+          ],
+          "output": {
+            "label": "Después de recargar la página",
+            "lines": [
+              "Hola, Vale"
+            ],
+            "tone": "ok"
+          },
+          "say": "En el componente, una línea: useLocalStorage con la clave userName. Valeria escribe su nombre, recarga la página, y el saludo sigue ahí."
+        },
+        {
+          "kind": "code",
+          "_test": "ApiFixed",
+          "file": "useDataApi.js (sin imports)",
+          "lines": [
+            "export function useDataApi(url) {",
+            "  const [data, setData] = useState(null);",
+            "  const [isLoading, setIsLoading] = useState(true);",
+            "  const [error, setError] = useState(null);",
+            "  useEffect(() => {",
+            "    setIsLoading(true);",
+            "    setError(null);",
+            "    fetch(url)",
+            "      .then((res) => {",
+            "        if (!res.ok) throw new Error(`Error ${res.status}`);",
+            "        return res.json();",
+            "      })",
+            "      .then((json) => setData(json))",
+            "      .catch((err) => setError(err))",
+            "      .finally(() => setIsLoading(false));",
+            "  }, [url]);",
+            "  return { data, isLoading, error };",
+            "}"
+          ],
+          "hl": [
+            2,
+            3,
+            4,
+            17
+          ],
+          "say": "El último es useDataApi. Recibe una URL y devuelve tres cosas: los datos, si todavía está cargando, y si hubo un error."
+        },
+        {
+          "kind": "code",
+          "_test": "ApiOrig",
+          "file": "useDataApi.js (sin imports)",
+          "sameCard": true,
+          "hl": [
+            10
+          ],
+          "output": {
+            "label": "Con /users/999, sin esta línea",
+            "lines": [
+              "Pantalla: {}",
+              "error: null"
+            ],
+            "tone": "bad"
+          },
+          "say": "A las cuatro, Valeria prueba una URL equivocada, y no aparece ningún error. fetch solo falla cuando no hay red: un cuatro cero cuatro llega como una respuesta normal. Por eso ahora revisa la propiedad ok de la respuesta."
+        },
+        {
+          "kind": "code",
+          "_test": "ApiFixed",
+          "file": "useDataApi.js (sin imports)",
+          "sameCard": true,
+          "hl": [
+            15
+          ],
+          "output": {
+            "label": "Con /users/999",
+            "lines": [
+              "Error: Error 404"
+            ],
+            "tone": "ok"
+          },
+          "say": "Y el estado de carga se apaga en finally, dentro de la cadena, cuando la respuesta ya llegó, sea un dato o un error."
+        },
+        {
+          "kind": "caption",
+          "text": "Estado · efectos · limpieza · refs · hooks propios",
+          "say": "A las cinco, Foco funciona. Estado para lo que se ve, efectos para lo que pasa fuera del componente, limpieza para lo que se inicia, refs para lo que no redibuja, y hooks propios para no repetirse."
+        },
+        {
+          "kind": "practice",
+          "say": "Tu turno. Completa useLocalStorage y useDataApi, y ejecuta los dos en Cursor."
+        },
+        {
+          "kind": "end"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+WEBVTT
+
+0
+00:00:00.239 --> 00:00:01.360
+What is Yusref?
+
+1
+00:00:02.210 --> 00:00:03.829
+The Uref hook and react
+
+2
+00:00:04.050 --> 00:00:05.710
+allows you to persistently store
+
+3
+00:00:05.889 --> 00:00:07.190
+a mutable value
+
+4
+00:00:07.369 --> 00:00:09.189
+that does not cause a re-render
+
+5
+00:00:09.369 --> 00:00:10.289
+when it is updated.
+
+6
+00:00:10.890 --> 00:00:13.750
+It can be used to directly access a DOM element
+
+7
+00:00:14.250 --> 00:00:16.049
+or store any mutable value.
+
+8
+00:00:16.850 --> 00:00:17.549
+Why do we use
+
+9
+00:00:17.709 --> 00:00:18.290
+Ysref?
+
+10
+00:00:19.239 --> 00:00:21.620
+To access Dom elements directly.
+
+11
+00:00:22.370 --> 00:00:25.969
+To store previous state values without triggering re-renders.
+
+12
+00:00:26.729 --> 00:00:28.389
+To keep any mutable value
+
+13
+00:00:28.579 --> 00:00:31.059
+that does not need to cause re-renders upon update.
+
+14
+00:00:31.969 --> 00:00:33.500
+How does use ref work?
+
+15
+00:00:34.790 --> 00:00:38.220
+Use ref is similar to instance variables in class components.
+
+16
+00:00:38.549 --> 00:00:41.930
+It provides a container whose current property is mutable
+
+17
+00:00:42.189 --> 00:00:43.610
+and can hold any value,
+
+18
+00:00:43.729 --> 00:00:45.669
+like instance fields and classes.
+
+19
+00:00:46.389 --> 00:00:47.610
+The use ref hook
+
+20
+00:00:47.729 --> 00:00:49.569
+is initialized with a value
+
+21
+00:00:49.750 --> 00:00:51.889
+and returns a mutable ref object.
+
+22
+00:00:52.389 --> 00:00:53.150
+For example,
+
+23
+00:00:53.639 --> 00:00:56.110
+const my ref equals use ref
+
+24
+00:00:56.319 --> 00:00:57.349
+with an initial value.
+
+25
+00:00:58.240 --> 00:00:59.610
+Accessing Dom elements.
+
+26
+00:01:00.389 --> 00:01:03.310
+One common use of Uref is to access DOM elements directly.
+
+27
+00:01:08.940 --> 00:01:09.610
+For example,
+
+28
+00:01:09.940 --> 00:01:10.389
+type
+
+29
+00:01:10.699 --> 00:01:11.839
+const my input
+
+30
+00:01:11.980 --> 00:01:13.680
+equals use ref with null.
+
+31
+00:01:14.059 --> 00:01:15.150
+Then define a function,
+
+32
+00:01:15.540 --> 00:01:17.040
+function focus input.
+
+33
+00:01:17.379 --> 00:01:18.010
+Inside,
+
+34
+00:01:18.379 --> 00:01:20.779
+type my input.curr.focus.
+
+35
+00:01:21.449 --> 00:01:22.330
+In this example,
+
+36
+00:01:22.620 --> 00:01:25.349
+my input is assigned to an element's ref attribute,
+
+37
+00:01:25.650 --> 00:01:27.790
+and calling focus input will focus that element.
+
+38
+00:01:28.839 --> 00:01:30.209
+Storing previous values.
+
+39
+00:01:31.050 --> 00:01:34.750
+Another use of URF is to keep track of previous state values.
+
+40
+00:01:35.169 --> 00:01:38.550
+This is useful in scenarios where you need to compare the current state value
+
+41
+00:01:38.730 --> 00:01:41.489
+with its previous value without causing extra renders.
+
+42
+00:01:49.069 --> 00:01:49.889
+For example,
+
+43
+00:01:50.309 --> 00:01:51.790
+const prev count ref
+
+44
+00:01:51.949 --> 00:01:53.519
+equals use ref.
+
+45
+00:01:53.989 --> 00:01:55.209
+Inside use effect,
+
+46
+00:01:55.470 --> 00:01:55.949
+type
+
+47
+00:01:56.290 --> 00:01:59.230
+prevcount ref.current equals count.
+
+48
+00:02:00.169 --> 00:02:00.529
+Here,
+
+49
+00:02:00.809 --> 00:02:03.230
+Prevcount ref stores the previous value of count.
+
+50
+00:02:03.650 --> 00:02:05.910
+We will explore both examples in more detail later.
+
+51
+00:02:07.500 --> 00:02:08.699
+See you in the next lesson.

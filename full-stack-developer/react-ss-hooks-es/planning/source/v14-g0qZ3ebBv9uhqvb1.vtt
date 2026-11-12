@@ -1,0 +1,217 @@
+WEBVTT
+
+0
+00:00:02.269 --> 00:00:03.339
+Lesson part 6,
+
+1
+00:00:03.960 --> 00:00:04.670
+exercise 1.
+
+2
+00:00:05.230 --> 00:00:07.889
+Create a custom hook called use local storage
+
+3
+00:00:08.148 --> 00:00:10.869
+that manages states synchronized with local storage.
+
+4
+00:00:16.590 --> 00:00:16.940
+OK,
+
+5
+00:00:17.040 --> 00:00:17.739
+let's do it.
+
+6
+00:00:18.280 --> 00:00:18.780
+First,
+
+7
+00:00:19.170 --> 00:00:19.899
+open the file,
+
+8
+00:00:19.959 --> 00:00:21.290
+use local storage.
+
+9
+00:00:21.840 --> 00:00:22.239
+Next,
+
+10
+00:00:22.340 --> 00:00:23.780
+import use state
+
+11
+00:00:23.989 --> 00:00:25.700
+and use effect from react.
+
+12
+00:00:29.790 --> 00:00:30.110
+Now,
+
+13
+00:00:30.389 --> 00:00:32.650
+create a function called use local storage
+
+14
+00:00:33.029 --> 00:00:35.869
+that takes a key and an initial value as arguments.
+
+15
+00:00:41.130 --> 00:00:41.650
+Inside,
+
+16
+00:00:41.770 --> 00:00:43.209
+declare a state variable,
+
+17
+00:00:43.610 --> 00:00:44.169
+type
+
+18
+00:00:44.569 --> 00:00:45.180
+const,
+
+19
+00:00:45.650 --> 00:00:46.450
+stored value,
+
+20
+00:00:46.770 --> 00:00:47.909
+set stored value
+
+21
+00:00:48.069 --> 00:00:49.490
+equals use state.
+
+22
+00:00:50.209 --> 00:00:52.450
+We initialize the state using an arrow function.
+
+23
+00:00:53.139 --> 00:00:54.060
+Inside the function,
+
+24
+00:00:54.139 --> 00:00:56.490
+retrieve the stored item from local storage.
+
+25
+00:00:56.900 --> 00:00:57.400
+Type
+
+26
+00:00:57.819 --> 00:00:58.930
+constant item equals
+
+27
+00:00:59.220 --> 00:01:02.409
+window.local storage.getite
+
+28
+00:01:02.799 --> 00:01:03.700
+with key.
+
+29
+00:01:04.220 --> 00:01:05.260
+If an item exists,
+
+30
+00:01:05.459 --> 00:01:08.180
+parse it using Jason.pars and return it.
+
+31
+00:01:08.860 --> 00:01:09.360
+Otherwise,
+
+32
+00:01:09.980 --> 00:01:11.419
+return the initial value.
+
+33
+00:01:11.819 --> 00:01:12.739
+If there's an error,
+
+34
+00:01:13.069 --> 00:01:15.339
+catch it and return the initial value.
+
+35
+00:01:15.860 --> 00:01:17.599
+Now don't forget the use effect.
+
+36
+00:01:18.059 --> 00:01:19.220
+Inside use effect,
+
+37
+00:01:19.540 --> 00:01:21.040
+set the local storage item
+
+38
+00:01:21.279 --> 00:01:22.959
+whenever the state updates.
+
+39
+00:01:23.459 --> 00:01:24.029
+Type
+
+40
+00:01:24.500 --> 00:01:27.639
+window.local storage.set item,
+
+41
+00:01:28.059 --> 00:01:29.040
+passing the key
+
+42
+00:01:29.220 --> 00:01:30.849
+and Jason.stringify
+
+43
+00:01:31.209 --> 00:01:32.300
+on stored value.
+
+44
+00:01:33.010 --> 00:01:34.910
+In the dependency array include key
+
+45
+00:01:35.089 --> 00:01:36.489
+and stored value.
+
+46
+00:01:36.959 --> 00:01:37.480
+Finally,
+
+47
+00:01:38.010 --> 00:01:39.300
+return stored value
+
+48
+00:01:39.529 --> 00:01:41.129
+and set stored value
+
+49
+00:01:41.489 --> 00:01:43.470
+so they can be used outside the hook.
+
+50
+00:01:43.930 --> 00:01:44.529
+That's it.
+
+51
+00:01:45.150 --> 00:01:46.099
+In the next lesson,
+
+52
+00:01:46.389 --> 00:01:48.660
+we will use this use local storage hook.
+
+53
+00:01:48.900 --> 00:01:49.510
+Goodbye.
