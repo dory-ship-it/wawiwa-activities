@@ -25,6 +25,16 @@
 git -C "/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video" push -u origin engine/code-beat
 ```
 
+## עדכון אחרי ה-push (12 בנובמבר 2026)
+
+דחפת את הענף, ו-"Voice and render" רץ לבד על סרט הבדיקה והצליח (הרצה 43251183964).
+
+- **הקול קיים בחשבון:** "Salvatore - Natural Conversations & Storyteller", מודל `eleven_multilingual_v2`. את המבטא רק אדם יכול לשפוט.
+- **הגופן נטען ב-CI:** פריים מהסרט שרונדר ב-GitHub זהה במראה לפריים המקומי.
+- **קצב הדיבור בספרדית נמדד:** 12.7 תווים בשנייה בממוצע (189 תווים ב-14.9 שניות, שלוש שורות קצרות בלבד). ה-planner מניח 14. כל שלוש השורות חרגו מהזמן שהוקצב להן, ב-0.2 עד 0.63 שניות.
+- **המשמעות ל-P2:** בשורה ארוכה (כ-200 תווים) החריגה תהיה כ-1.5 עד 2.5 שניות לפי אותו קצב, כלומר הקריינות תימשך אחרי שהמצלמה כבר עברה לכרטיס הבא. צריך לתקן את ה-planner לפני P2. זו הערכה משלוש שורות, לא מדידה על סרט מלא.
+- **הסרט עם הקול:** `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/out/ci-enginetest/out/AIFS-EngineTest-CodeBeat.mp4` (לא ב-git).
+
 ## English
 
 ### Done
@@ -80,6 +90,22 @@ A silent local render of the whole test film is at `/Volumes/WawiwaPRO-G40/Wawiw
 - **Motion.** I looked at stills, not at the film playing. The camera easing between `sameCard` steps has not been watched by anyone.
 - **Other composition families** (the v3 films, the cyber films) were not re-rendered. The only shared code touched is `BrightPracticeCard`, whose defaults are unchanged; the AIDA practice frames above cover it.
 - **Skill references.** `references/lesson-films.md` and `references/styles.md` in the `wawiwa-content-os` plugin do not list the `code` beat or the `aifs` style. That is a plugin change with its own version bump and was not done here.
+
+### After the push (12 Nov 2026, run 43251183964)
+
+Dor pushed the branch. "Voice and render" started by itself on the test film and passed. This closes P1 step 4.
+
+| | | |
+|---|---|---|
+| Voice on the account | "Salvatore - Natural Conversations & Storyteller", `eleven_multilingual_v2` | from the run log; the accent is for a person to judge |
+| JetBrains Mono in CI | loaded | a frame of the CI render looks the same as the local still |
+| Film length | 24.38 s | the rendered file |
+| Spanish speaking rate | 12.7 chars/s on average (12.0, 12.4, 13.4) | 189 characters in 14.9 s, three short lines, voice speed 0.98 |
+| Lines longer than their slot | 3 of 3, by 0.20 to 0.63 s | the run's timing warnings |
+
+**What this means for P2.** The planner budgets 14 characters a second. At the measured rate a 200-character line runs about 1.5 to 2.5 s past its slot, so the voice would still be on a card after the camera has left it. The planner needs a Spanish rate before the five films are planned. This is an estimate from three short lines, not a measurement on a full film; it also moves the 11.0-minute total of the P0 estimate up by roughly a tenth for the narrated part.
+
+The film with voice: `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/out/ci-enginetest/out/AIFS-EngineTest-CodeBeat.mp4` (not in git; the artifact on GitHub expires after 7 days).
 
 ### For P2 (content only, no TSX)
 
