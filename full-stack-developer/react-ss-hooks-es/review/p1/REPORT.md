@@ -287,3 +287,21 @@ Run 43431957256 ("Voice and render") passed, on commit `92ca959`. Voice Angie, n
 | End card | -34.1 dB | -39.1 dB |
 
 (Mean level, measured with ffmpeg volumedetect.) The music is 12 dB down and the voice is unchanged. The end card drops less because the short closing sound plays there; it is a sound effect, not part of the score, and it was not changed. Claude did not listen to the film.
+
+---
+
+## עדכון שביעי, 13 בנובמבר 2026: דור אישר, והענף מוזג ל-main
+
+- **אישור:** דור אישר את המראה (עורך כהה עם הקלדה חיה), את הקול (Angie), את המוזיקה השקטה ואת שקף הסיום, וביקש למזג.
+- **מיזוג:** `engine/code-beat` מוזג ל-`main` של wawiwa-video (מיזוג ישר, בלי commit מיזוג). `main` המקומי מקדים את GitHub ב-6 commits ומחכה ל-push של דור. אחרי המיזוג: `tsc` עובר ובדיקות ה-CI עוברות מקומית.
+- **תיקון בטיחות שנמצא לפני המיזוג** (commit `1f62952`): לסרט הבדיקה יש שדה `hold` ב-`deliverables.json`, אבל אף תהליך לא קרא אותו. "Publish to Vimeo" עם ברירת המחדל NEW היה מעלה את סרט הבדיקה ל-Vimeo. עכשיו שורה עם `hold` לא מתפרסמת, לא ב-NEW ולא בשם. נבדק מקומית על שלושה מקרים.
+- **בדיקת הקולות** לא רצה יותר ב-push ל-main, כדי שהמיזוג לא יקריא שוב את כל הקולות.
+- **P1 הסתיים.** P2 לא התחיל.
+
+## Seventh update, 13 Nov 2026: Dor approved, and the branch is merged into main
+
+- **Approval:** Dor approved the look (dark editor with live typing), the voice (Angie), the quiet score and the end card, and asked for the merge.
+- **Merge:** `engine/code-beat` is merged into `main` of wawiwa-video (fast-forward, no merge commit). Local `main` is 6 commits ahead of GitHub and waits for Dor's push. After the merge `tsc` passes and the CI guards pass locally.
+- **A safety fix found before the merge** (commit `1f62952`): the test film carries a `hold` in `deliverables.json`, but no workflow read it. "Publish to Vimeo" with its default, NEW, would have uploaded the test film. A row with a `hold` is now never published, by NEW or by name. Checked locally on three cases.
+- **The voice audition** no longer runs on a push to main, so the merge does not read every voice again.
+- **P1 is finished.** P2 has not started.
