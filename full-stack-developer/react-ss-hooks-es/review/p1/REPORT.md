@@ -35,6 +35,30 @@ git -C "/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video" pus
 - **המשמעות ל-P2:** בשורה ארוכה (כ-200 תווים) החריגה תהיה כ-1.5 עד 2.5 שניות לפי אותו קצב, כלומר הקריינות תימשך אחרי שהמצלמה כבר עברה לכרטיס הבא. צריך לתקן את ה-planner לפני P2. זו הערכה משלוש שורות, לא מדידה על סרט מלא.
 - **הסרט עם הקול:** `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/out/ci-enginetest/out/AIFS-EngineTest-CodeBeat.mp4` (לא ב-git).
 
+## עדכון 13 בנובמבר 2026: דור פסל את המראה ואת הקול, והמנוע נבנה מחדש
+
+דור צפה בסרט הבדיקה והחליט:
+
+- **הקול נפסל.** מספר סיפורים, מסתורי ואיטי מדי. נדרש קול ניטרלי וטכני של מורה שמסביר בקצב טוב.
+- **המראה נפסל.** כרטיס קוד עם שורות מסומנות נראה כמו שקף. נדרש מראה של הקלטת מסך: אדם שמקליד קוד ומסביר תוך כדי.
+- **תיקיית Vimeo של AI Full Stack:** 31257432. נכתבה בשורת הסגנון `aifs`.
+
+מה נבנה (לא נדחף, לא פורסם):
+
+- **עורך קוד במסך מלא עם הקלדה חיה.** השורות שהקריינות מדברת עליהן מוקלדות תו אחר תו, והפלט מופיע בפאנל מעוגן אחרי שההקלדה נגמרת. העורך כללי ואינו חיקוי של מוצר אמיתי.
+- **שדה חדש בקובץ התוכן:** `typed` (אילו שורות מוקלדות בכל צעד). ה-planner מתריע כשיש יותר מ-1.5 שניות של הקלדה בלי קול.
+- **שתי ערכות צבע**, כהה ובהירה, לפי השדה `codeTheme` בשורת הסגנון. כרגע: כהה.
+- **בדיקת קולות ("Voice audition")** שרצה ב-GitHub אחרי push: קוראת שתי שורות אמיתיות בכל קול ספרדי מועמד ומודדת את הקצב של כל אחד.
+
+בדיקות שרצו: `tsc` עבר. 12 מתוך 12 פריימים של סרטי Data Analyst קיימים זהים בייט לבייט ל-main. סקריפט הקולות נבדק מול שרת דמה מקומי בלבד, לא מול ElevenLabs.
+
+לא נבדק: התנועה עצמה (ראיתי תמונות בודדות, לא את הסרט), והסרט עם קול. אין צליל הקלדה.
+
+התמונות: התיקייה `/Volumes/WawiwaPRO-G40/Wawiwa/GitHub/wawiwa-activities/full-stack-developer/react-ss-hooks-es/review/p1/v2-typing`
+הסרט השקט (לא ב-git): `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/out/AIFS-EngineTest-CodeBeat-typing-silent-preview.mp4`
+
+השלכה על P2: הטיוטה של חמשת הסרטים נכתבה לכרטיס עם שורות מסומנות. ב-P2 צריך לבחור לכל צעד אילו שורות מוקלדות, כך שמה שעל המסך לפני ההקלדה הוא קוד הגיוני. ההנחיות: `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/docs/code-beat.md`
+
 ## English
 
 ### Done
@@ -123,3 +147,39 @@ The film with voice: `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/waw
 2. **The voice.** After the push: is the Spanish voice the right accent and pace? If not, a different voice id goes into the content files; it is not a secret.
 3. **The Vimeo folder** for AI Full-Stack Developer: its number, for the style row.
 4. **Merge.** The engine is on the branch `engine/code-beat`. P2 should start from it, or from `main` after it is merged. Which?
+
+## 13 Nov 2026: Dor turned down the look and the voice; the engine was rebuilt
+
+Dor watched the test film and decided:
+
+- **The voice is out.** A storyteller, mysterious and too slow. Wanted: a neutral, technical voice, a teacher who explains at a good pace.
+- **The look is out.** A code card with highlighted lines reads as a slide. Wanted: the look of a screen recording, a person typing code and explaining as they go.
+- **Vimeo folder for AI Full-Stack Developer:** 31257432, now on the `aifs` style row.
+
+What was built (not pushed, not published):
+
+| | |
+|---|---|
+| Editor | Full-frame generic code editor (`src/story/props/CodeProps.tsx`). The camera stands still. Not a look-alike of a real product: no name, logo, activity bar, icon set or window buttons. |
+| Live typing | New field `typed` on a code beat. Lines are typed a character at a time at about 16 a second (up to 30 to fit a beat). A line not yet typed is not on screen. |
+| Output | A panel docked right or under, filled after the typing ends, a line at a time. |
+| Palettes | `codeTheme` on the style row: `dark` (set now) or `light`. A still of each is in `v2-typing/`. |
+| Planner | Holds a code beat long enough for its typing (budget 22 chars/s) and flags more than 1.5 s of typing with no voice. |
+| Bright vignette | Off while an editor fills the frame (`vignette` prop on `BrightFilm`, absent for every other film). |
+| Voice audition | `voice-audition/aifs-es.json`, `scripts/voice-audition.mjs`, workflow "Voice audition". Reads two draft lines in each candidate voice and measures characters a second. |
+| Test film | Now 29.8 s, plain delivery (stability 0.5, style 0.15, speed 1.06), still the old voice until one is chosen. |
+
+Checked: `tsc` passes; CI guards pass locally; 12 of 12 frames of existing Data Analyst films are byte-identical to `main` (same frames as on 12 Nov). The audition script ran against a local fake of the voice service only, not against ElevenLabs.
+
+Not checked: the motion itself (single stills were looked at, not the film), and the film with voice. There is no typing sound.
+
+Part of why the first voice sounded slow was the delivery, not only the voice: the test film had copied the cyber films' dramatic read (stability 0.32, style 0.5, speed 0.98).
+
+### This replaces parts of "For P2" above
+
+1. `voiceId`: not `wfTWLJ20rcMqvU8gIiAB`. Use the id Dor picks after the audition, and a plain `voice` block.
+2. Code beats are no longer "exactly as in the draft". The draft marks lines with `hl`; each beat now also needs a deliberate `typed`, chosen so that what is on screen before the typing is believable code (whole blocks, not a lone opening line). Follow `wawiwa-video/docs/code-beat.md` and the planner's warnings.
+3. `vimeoFolder` is set. Item 7 is done.
+4. The planner's speaking rate is set after the voice is chosen, from the audition's measured pace.
+
+Silent preview of the new look (not in git): `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/out/AIFS-EngineTest-CodeBeat-typing-silent-preview.mp4`
