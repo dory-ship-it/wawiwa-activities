@@ -305,3 +305,21 @@ Run 43431957256 ("Voice and render") passed, on commit `92ca959`. Voice Angie, n
 - **A safety fix found before the merge** (commit `1f62952`): the test film carries a `hold` in `deliverables.json`, but no workflow read it. "Publish to Vimeo" with its default, NEW, would have uploaded the test film. A row with a `hold` is now never published, by NEW or by name. Checked locally on three cases.
 - **The voice audition** no longer runs on a push to main, so the merge does not read every voice again.
 - **P1 is finished.** P2 has not started.
+
+---
+
+## עדכון שמיני, 13 בנובמבר 2026: main נדחף ל-GitHub, והריצה עליו עברה
+
+- **דחיפה:** דור דחף את `main` של wawiwa-video (`2c300f3..1f62952`). GitHub והמחשב זהים.
+- **ריצה:** "Voice and render" מספר 43490308353 על `main` עברה. היא רינדרה רק את סרט הבדיקה (`AIFS-EngineTest-CodeBeat`, קובץ של 5.5 MB), בקול Angie, בלי אזהרות תזמון.
+- **לא רץ:** בדיקת הקולות לא רצה ב-push הזה, כמתוכנן. שום דבר לא עלה ל-Vimeo.
+- **לא נבדק:** הדילוג על `hold` ב-"Publish to Vimeo" עדיין נבדק רק מקומית. הוא ייבדק בפועל בפעם הראשונה שמישהו מפעיל את הפרסום.
+- **הערה:** הריצות הקודמות על `main` (עד 11 בנובמבר) מסומנות כנכשלות כי לא היה סרט חדש לרנדר ("Every film is already published. Nothing to render."). זו לא תקלה במנוע.
+
+## Eighth update, 13 Nov 2026: main is pushed, and its run passed
+
+- **Push:** Dor pushed `main` of wawiwa-video (`2c300f3..1f62952`). GitHub and the Mac are the same.
+- **Run:** "Voice and render" 43490308353 on `main` passed. It rendered only the test film (`AIFS-EngineTest-CodeBeat`, a 5.5 MB file), voice Angie, with no timing warnings.
+- **Did not run:** the voice audition did not run on this push, as intended. Nothing went to Vimeo.
+- **Not checked:** the `hold` skip in "Publish to Vimeo" is still checked only locally. Its first real check is the first time someone runs the publish.
+- **Note:** the earlier runs on `main` (up to 11 Nov) show as failed because there was no new film to render ("Every film is already published. Nothing to render."). That is not an engine fault.
