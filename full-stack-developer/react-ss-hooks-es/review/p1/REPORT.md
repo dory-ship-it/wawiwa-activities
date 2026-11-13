@@ -261,3 +261,29 @@ Dor asked for two fixes after watching the film in Angie's voice.
 - **End card:** the tagline "Skilling the World for AI" sits in three short left-aligned lines under the logo's tail, as on the cover slide of the decks (`endCard` lockup). The red rule is gone. Stills before and after: `v2-typing/08-end-card-before.jpg` and `v2-typing/08-end-card-lockup.jpg`.
 - **Films of other programmes are unchanged:** end-card stills of two v3 films and one Data Analyst film are byte-identical before and after.
 - **Saved:** commit `92ca959` on branch `engine/code-beat` of wawiwa-video (not pushed).
+
+---
+
+## עדכון שישי, 13 בנובמבר 2026: המוזיקה השקטה נמדדה על סרט מרונדר
+
+ריצה 43431957256 ("Voice and render") עברה, על commit `92ca959`. הקול Angie, בלי אזהרות תזמון, 31.0 שניות.
+
+| קטע בסרט | לפני | אחרי |
+|---|---|---|
+| רווח בין שורות, מוזיקה בלבד | ‎-39.3 dB | ‎-51.3 dB |
+| קול מעל מוזיקה | ‎-34.3 dB | ‎-34.5 dB |
+| שקף הסיום | ‎-34.1 dB | ‎-39.1 dB |
+
+(עוצמה ממוצעת, נמדדה ב-ffmpeg volumedetect.) המוזיקה ירדה ב-12 דציבל והקול לא השתנה. בשקף הסיום הירידה קטנה יותר, כי שם מתנגן צליל הסיום הקצר, שהוא אפקט ולא חלק מהמוזיקה, והוא לא שונה. Claude לא האזין לסרט.
+
+## Sixth update, 13 Nov 2026: the quiet score, measured on a rendered film
+
+Run 43431957256 ("Voice and render") passed, on commit `92ca959`. Voice Angie, no timing warnings, 31.0 s.
+
+| Part of the film | Before | After |
+|---|---|---|
+| Gap between lines, music only | -39.3 dB | -51.3 dB |
+| Voice over music | -34.3 dB | -34.5 dB |
+| End card | -34.1 dB | -39.1 dB |
+
+(Mean level, measured with ffmpeg volumedetect.) The music is 12 dB down and the voice is unchanged. The end card drops less because the short closing sound plays there; it is a sound effect, not part of the score, and it was not changed. Claude did not listen to the film.
