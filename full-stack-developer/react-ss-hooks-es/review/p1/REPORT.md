@@ -225,3 +225,19 @@ Silent preview of the new look (not in git): `/Volumes/WawiwaPRO-G40/Wawiwa/Clau
 - **Not checked:** the rate of 13 is derived from the audition. It has not been checked on a film rendered in Angie's voice. The next run, after Dor's push, checks it.
 - **For P2:** every Spanish content file takes Angie's `voiceId`, `charsPerSecond` 13 and the plain-read `voice` block. Details in `wawiwa-video/docs/code-beat.md`.
 - **Saved:** commit `ec7da36` on branch `engine/code-beat` of wawiwa-video (not pushed).
+
+---
+
+## עדכון רביעי, 13 בנובמבר 2026: סרט הבדיקה בקול של Angie
+
+- **הריצה** 43424399111 ("Voice and render") עברה, על commit `ec7da36`. הסרט: 31.0 שניות, 931 פריימים, עם פס קול. היומן מאשר שהקול הוא Angie.
+- **תזמון:** אין אזהרות תזמון. שלוש השורות נמשכו 3.20, 9.89 ו-5.20 שניות, וכולן נכנסות בזמן שהמתכנן נתן להן בקצב 13. בגיליון הפריימים כל כתובית מתמלאת עד הסוף לפני שהיא נעלמת.
+- **לא נבדק:** Claude לא האזין לסרט. את המבטא, הטון והקצב שופט דור.
+- **פתוח:** אישור של דור למראה ולקול, ואז מיזוג של `engine/code-beat` ל-`main`.
+
+## Fourth update, 13 Nov 2026: the test film in Angie's voice
+
+- **Run** 43424399111 ("Voice and render") passed, on commit `ec7da36`. The film: 31.0 s, 931 frames, with a sound track. The log confirms the voice is Angie.
+- **Timing:** no timing warnings. The three lines ran 3.20, 9.89 and 5.20 seconds, and each fits the time the planner gave it at a rate of 13. On the contact sheet every caption fills to its end before it leaves.
+- **Not checked:** Claude did not listen to the film. Accent, tone and pace are for Dor to judge.
+- **Open:** Dor's approval of the look and the voice, then the merge of `engine/code-beat` into `main`.
