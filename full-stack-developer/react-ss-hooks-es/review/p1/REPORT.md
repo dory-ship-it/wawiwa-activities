@@ -205,3 +205,23 @@ Silent preview of the new look (not in git): `/Volumes/WawiwaPRO-G40/Wawiwa/Clau
 - **Test film with voice** (run 43421668861, passed): 29.8 s, 1920 by 1080, with a sound track. Claude looked at a contact sheet of the rendered film (2 frames a second): the typing advances line by line, the output arrives after the typing, and the pointing step works. Claude did not listen to the film.
 - **Known overrun:** with the old voice the narration is longer than the time the planner gave it: the first line by 14 frames, the second by 35 frames, the third fits. On the second line the caption leaves about a second before the voice finishes. This goes away when the planner's speaking rate is set from the chosen voice.
 - **Not done:** no voice is chosen, `voiceId` is unchanged, and the planner's speaking rate is unchanged.
+
+---
+
+## עדכון שלישי, 13 בנובמבר 2026: דור בחר את Angie
+
+- **הקול לסרטים בספרדית:** Angie, `eeTcHFmLuUzCOHvnwvdr` (ספרדית מקסיקנית). בבדיקת הקולות נמדדה 13.9 תווים בשנייה.
+- **קצב דיבור לכל סרט:** המתכנן קורא עכשיו שדה `charsPerSecond` מקובץ התוכן. סרט בלי השדה מתוכנן כמו קודם, לפי 14. כל 24 הסרטים הקיימים תוכננו מחדש בלי שום שינוי.
+- **סרט הבדיקה:** Angie, קצב 13 (מעט מתחת למדידה, כדי שהקול לא יחרוג). האורך עלה מ-29.8 ל-31.0 שניות.
+- **לא נבדק:** הקצב 13 נגזר מבדיקת הקולות. הוא עוד לא נבדק על סרט מרונדר בקול של Angie. זה ייבדק בריצה הבאה, אחרי push של דור.
+- **ל-P2:** בכל קובץ תוכן בספרדית: `voiceId` של Angie, `charsPerSecond` 13, ובלוק `voice` של קריאה עניינית. הפרטים ב-`wawiwa-video/docs/code-beat.md`.
+- **נשמר:** commit `ec7da36` בענף `engine/code-beat` של wawiwa-video (לא נדחף).
+
+## Third update, 13 Nov 2026: Dor chose Angie
+
+- **Voice for the Spanish films:** Angie, `eeTcHFmLuUzCOHvnwvdr` (Mexican Spanish). The audition measured 13.9 characters a second.
+- **A speaking rate per film:** the planner now reads a `charsPerSecond` field from the content file. A film without it is planned as before, at 14. All 24 existing beat-based films were replanned with no change.
+- **Test film:** Angie, rate 13 (a little under the measurement, so the voice does not overrun). Its length went from 29.8 to 31.0 seconds.
+- **Not checked:** the rate of 13 is derived from the audition. It has not been checked on a film rendered in Angie's voice. The next run, after Dor's push, checks it.
+- **For P2:** every Spanish content file takes Angie's `voiceId`, `charsPerSecond` 13 and the plain-read `voice` block. Details in `wawiwa-video/docs/code-beat.md`.
+- **Saved:** commit `ec7da36` on branch `engine/code-beat` of wawiwa-video (not pushed).
