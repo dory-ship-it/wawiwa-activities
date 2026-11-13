@@ -183,3 +183,25 @@ Part of why the first voice sounded slow was the delivery, not only the voice: t
 4. The planner's speaking rate is set after the voice is chosen, from the audition's measured pace.
 
 Silent preview of the new look (not in git): `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/out/AIFS-EngineTest-CodeBeat-typing-silent-preview.mp4`
+
+---
+
+## עדכון שני, 13 בנובמבר 2026: תוצאות אחרי ה-push של דור
+
+- **ערכת צבע:** דור בחר כהה. זו הערכה שכבר מוגדרת.
+- **בדיקת הקולות** (ריצה 43421668968, עברה): 15 קולות ספרדיים קראו את אותן שתי שורות, 9 מהחשבון ו-6 מספריית ElevenLabs. כל ה-15 הוקראו; קולות הספרייה הוקראו בלי שנוספו לחשבון. הטבלה המלאה: `voice-audition-RESULTS.md` בתיקייה הזו.
+- **הקצב שנמדד** (תווים בשנייה, במהירות 1.06): Salvatore הישן 12.9, Angie 13.9, Cristian 14.6, Alejandro 16.4, Daniel Yvker 9.4. המתכנן מניח 14.
+- **רשימה קצרה של Claude, לפי תיאור וקצב בלבד (Claude לא שומע קולות):** Angie, Cristian, Alejandro. דור מקשיב ובוחר.
+- **סרט הבדיקה עם קול** (ריצה 43421668861, עברה): 29.8 שניות, 1920 על 1080, עם פס קול. Claude ראה גיליון פריימים של הסרט המרונדר (2 פריימים בשנייה): ההקלדה מתקדמת שורה אחרי שורה, הפלט מגיע אחרי ההקלדה, וצעד ההצבעה עובד. Claude לא האזין לסרט.
+- **חריגה ידועה:** עם הקול הישן הקריינות ארוכה מהזמן שהמתכנן נתן: השורה הראשונה ב-14 פריימים, השנייה ב-35 פריימים, השלישית נכנסת. בשורה השנייה הכתובית נעלמת כשנייה לפני שהקול מסיים. זה ייפתר כשקצב הדיבור במתכנן ייקבע לפי הקול שייבחר.
+- **לא נעשה:** הקול עוד לא נבחר, `voiceId` לא שונה, וקצב הדיבור במתכנן לא שונה.
+
+## Second update, 13 Nov 2026: results after Dor's push
+
+- **Palette:** Dor chose dark. It is what the style row already says.
+- **Voice audition** (run 43421668968, passed): 15 Spanish voices read the same two lines, 9 from the account and 6 from the ElevenLabs library. All 15 were read; the library voices were read without being added to the account. Full table: `voice-audition-RESULTS.md` in this folder.
+- **Measured pace** (characters a second, at speed 1.06): the old Salvatore 12.9, Angie 13.9, Cristian 14.6, Alejandro 16.4, Daniel Yvker 9.4. The planner assumes 14.
+- **Claude's shortlist, by label and pace only (Claude cannot hear voices):** Angie, Cristian, Alejandro. Dor listens and picks.
+- **Test film with voice** (run 43421668861, passed): 29.8 s, 1920 by 1080, with a sound track. Claude looked at a contact sheet of the rendered film (2 frames a second): the typing advances line by line, the output arrives after the typing, and the pointing step works. Claude did not listen to the film.
+- **Known overrun:** with the old voice the narration is longer than the time the planner gave it: the first line by 14 frames, the second by 35 frames, the third fits. On the second line the caption leaves about a second before the voice finishes. This goes away when the planner's speaking rate is set from the chosen voice.
+- **Not done:** no voice is chosen, `voiceId` is unchanged, and the planner's speaking rate is unchanged.
