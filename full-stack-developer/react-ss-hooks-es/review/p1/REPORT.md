@@ -241,3 +241,23 @@ Silent preview of the new look (not in git): `/Volumes/WawiwaPRO-G40/Wawiwa/Clau
 - **Timing:** no timing warnings. The three lines ran 3.20, 9.89 and 5.20 seconds, and each fits the time the planner gave it at a rate of 13. On the contact sheet every caption fills to its end before it leaves.
 - **Not checked:** Claude did not listen to the film. Accent, tone and pace are for Dor to judge.
 - **Open:** Dor's approval of the look and the voice, then the merge of `engine/code-beat` into `main`.
+
+---
+
+## עדכון חמישי, 13 בנובמבר 2026: מוזיקה שקטה ושקף סיום כמו שקף הפתיחה
+
+דור ביקש שני תיקונים אחרי שראה את הסרט בקול של Angie.
+
+- **מוזיקת הרקע:** הורדה לרבע מהעוצמה הרגילה (`bedLevel` 0.25 בשורת הסגנון של AI Full Stack, בערך 12 דציבל פחות). בסרט הקודם המוזיקה נמדדה רק כ-5 דציבל מתחת לקול ברווחים שבין השורות. העוצמה החדשה עוד לא נמדדה על סרט מרונדר.
+- **שקף הסיום:** הסיסמה "Skilling the World for AI" מסודרת בשלוש שורות קצרות, מיושרות לשמאל, מתחת לזנב של הלוגו, כמו בשקף הפתיחה של המצגות (`endCard` lockup). הפס האדום ירד. תמונות לפני ואחרי: `v2-typing/08-end-card-before.jpg` ו-`v2-typing/08-end-card-lockup.jpg`.
+- **סרטים של תוכניות אחרות לא השתנו:** תמונות של שקף הסיום בשני סרטי v3 ובסרט Data Analyst אחד זהות בייט לבייט לפני ואחרי.
+- **נשמר:** commit `92ca959` בענף `engine/code-beat` של wawiwa-video (לא נדחף).
+
+## Fifth update, 13 Nov 2026: quiet score, and an end card like the deck cover
+
+Dor asked for two fixes after watching the film in Angie's voice.
+
+- **Score:** down to a quarter of the usual level (`bedLevel` 0.25 on the AI Full-Stack style row, about 12 dB less). In the previous film the music measured only about 5 dB under the voice in the gaps between lines. The new level has not been measured on a rendered film yet.
+- **End card:** the tagline "Skilling the World for AI" sits in three short left-aligned lines under the logo's tail, as on the cover slide of the decks (`endCard` lockup). The red rule is gone. Stills before and after: `v2-typing/08-end-card-before.jpg` and `v2-typing/08-end-card-lockup.jpg`.
+- **Films of other programmes are unchanged:** end-card stills of two v3 films and one Data Analyst film are byte-identical before and after.
+- **Saved:** commit `92ca959` on branch `engine/code-beat` of wawiwa-video (not pushed).
