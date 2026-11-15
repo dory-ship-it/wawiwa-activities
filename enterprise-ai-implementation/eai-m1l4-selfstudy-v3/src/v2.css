@@ -298,5 +298,14 @@
 .w-stage[data-tone="soft"][data-screen="S22"] .w-main > .w-bridge-card { position: relative; left: auto; top: auto; width: 720px; order: 2; }
 /* S15: after the right answer the proof joins the question as a pair in the middle (stacked it ran past the bar) */
 .w-stage[data-tone="soft"][data-screen="S15"] .w-main { flex-direction: row; gap: 18px; }
-.w-stage[data-tone="soft"][data-screen="S15"] .w-main > .w-sheet-right { width: 640px; }
+.w-stage[data-tone="soft"][data-screen="S15"] .w-main > .w-sheet-right { width: 820px; } /* QH1: wider for the larger case line (was 640px) */
 .w-stage[data-tone="soft"][data-screen="S15"] .w-proof { position: relative; right: auto; bottom: auto; width: 320px; order: 2; }
+
+/* QH1 (Noy, 15 Nov 2026): on the question screens with a case line over the question (S01, S14, S15, S18) the case
+   was small and grey and the question huge. Now one weight for both: the case in ink, the question just under it in
+   teal ink and a little smaller, so the eye reads the case and lands on what to do. */
+.w-stage:is([data-screen="S01"], [data-screen="S14"], [data-screen="S15"], [data-screen="S18"]) .w-main .w-context {
+  font: 700 28px/1.25 var(--wl-font-ui); letter-spacing: -.3px; color: var(--wl-ink); margin-bottom: 6px; }
+.w-stage:is([data-screen="S01"], [data-screen="S14"], [data-screen="S15"], [data-screen="S18"]) .w-main .w-instruction {
+  font-size: 26px; line-height: 1.2; letter-spacing: -.2px; color: var(--wl-teal-ink); }
+.w-stage:is([data-screen="S01"], [data-screen="S14"], [data-screen="S15"], [data-screen="S18"]) .w-main .w-instruction .w-term { color: inherit; }
