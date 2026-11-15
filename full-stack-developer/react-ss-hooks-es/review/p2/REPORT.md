@@ -199,3 +199,27 @@ Dor pushed branch `content/react-hooks-es`. "Voice and render" run 43692109951 p
 - **The fix** is data in the content file (a longer beat or a shorter line) and a re-render. Best done together with Dor's notes after he watches, in one run.
 - **Not checked:** Claude did not hear the films or watch them in motion. Dor has not watched yet.
 - **The files** (not in git): `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/out/react-hooks-es-run-43692109951/`
+
+---
+
+## עדכון, 15 בנובמבר 2026: דור אישר את הסרטים, והתיקון לשש השורות
+
+- **אישור:** דור אישר את חמשת הסרטים ואת המראה של תרגול P-1 (הוא כתב "מאושר", וכשנשאל בחר "הסרטים וגם P-1").
+- **שתי החלטות נוספות שלו:** לתקן את שש השורות ולרנדר שוב; ולהשאיר את סרט 5 כמו שהוא (בלי צעד הסבר נוסף ל-`useDataApi`).
+- **מה נמצא:** רצועת הכתוביות מציגה שורה רק למשך הזמן שתוכנן לה. בשש השורות הקול המשיך 0.3 עד 0.7 שניות אחרי שהכתובית כבר ירדה.
+- **התיקון הוא במנוע, לא בתוכן** (commit `4d08de9`, ענף `engine/caption-holds-voice` של wawiwa-video, מוזג לענף `content/react-hooks-es` ב-`0130dda`): שלב הקול מאריך רק את הכתובית של שורה כזו, עד סוף הקול ועוד 6 פריימים, ולעולם לא מעבר לסוף הצעד שלה. הצעדים, המצלמה ואורך הסרטים לא משתנים. אף קובץ תוכן לא שונה.
+- **נבדק** על התוכנית האמיתית של חמשת הסרטים ועל אורכי הקול שנמדדו בריצה 43692109951: הכתובית מוארכת בשש השורות האלה ובשורה אחת בסרט 1 (חריגה קטנה מתחת לסף האזהרה); אין כתובית קצרה מהקול שלה, אין חפיפה עם השורה הבאה, ואין כתובית שנמשכת מעבר לצעד. `tsc` עובר, ו-planner על חמשת הסרטים נותן אותה תוצאה.
+- **לא נבדק:** התיקון לא רץ עדיין ב-GitHub Actions, ואף אחד לא צפה בתוצאה. זה ייבדק בריצה הבאה, אחרי ה-push של דור.
+- **משפיע גם על** כל סרט שיעור אחר שבנוי מ-`beats[]`, אבל רק כשמרנדרים אותו מחדש עם קול. סרטים שכבר פורסמו לא משתנים.
+- **ממצא נוסף, לא תוקן:** "Publish to Vimeo" מקריא את הקול מחדש ולא משתמש בהקראה השמורה של "Voice and render". כלומר הסרט שעולה ל-Vimeo הוא הקראה חדשה באותו קול, לא הקובץ שדור צפה בו. כך זה עובד בכל סרטי הסטודיו עד היום.
+
+## Update, 15 Nov 2026: Dor approved the films, and the fix for the six lines
+
+- **Approval:** Dor approved the five films and the look of practice P-1 (he wrote "מאושר", and when asked chose "the films and P-1").
+- **Two more decisions of his:** fix the six lines and render again; leave film 5 as it is (no extra beat explaining `useDataApi`).
+- **What was found:** the caption band shows a line only for the time planned for it. On the six lines the voice went on for 0.3 to 0.7 s after the caption had gone.
+- **The fix is in the engine, not in the content** (commit `4d08de9`, branch `engine/caption-holds-voice` of wawiwa-video, merged into `content/react-hooks-es` as `0130dda`): the voice pass lengthens only that line's caption, to the end of the voice plus 6 frames, never past the end of its beat. Beats, camera and film lengths do not change. No content file was changed.
+- **Checked** on the five films' real plans and the voice lengths measured in run 43692109951: the caption is lengthened on those six lines and on one line of film 1 (a small overrun under the warning threshold); no caption is shorter than its voice, none overlaps the next line, none runs past its beat. `tsc` passes, and the planner gives the same result on the five films.
+- **Not checked:** the fix has not run in GitHub Actions yet, and nobody has watched the result. The next run, after Dor's push, is that check.
+- **It also affects** every other lesson film built from `beats[]`, but only when one is rendered again with voice. Published films do not change.
+- **Another finding, not fixed:** "Publish to Vimeo" reads the voice again and does not use the saved reading from "Voice and render". So the film that goes to Vimeo is a new reading in the same voice, not the file Dor watched. This is how every studio film has been published so far.
