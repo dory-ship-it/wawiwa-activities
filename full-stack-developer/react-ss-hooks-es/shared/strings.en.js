@@ -29,6 +29,24 @@ window.RH_SHARED = {
     mismatch: "Not a match.",
     /* Titles of the two closing screens */
     solutionTitle: "One possible solution",
-    takeawayTitle: "In short"
+    takeawayTitle: "In short",
+    /* Options you mark and then check (multi): the line under "Incorrect." */
+    retryMulti: "Look at each option and try again.",
+    /* Lines you click into the mock console (order) */
+    console: "Console",
+    remove: "remove",
+    retryOrder: "Remove a line and try again.",
+    /* Pasted console (paste) */
+    pasteLabel: "Your console",
+    compare: "Compare",
+    expected: "Expected",
+    yours: "What you pasted",
+    match: "It matches.",
+    notFound: "No output found.",
+    /* A code card with more than one file: the name of the group of file buttons, for screen readers */
+    files: "Files",
+    /* Check-in: "Question 2 of 5" */
+    questionWord: "Question",
+    of: "of"
   }
 };
