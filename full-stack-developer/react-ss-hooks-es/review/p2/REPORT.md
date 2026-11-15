@@ -223,3 +223,43 @@ Dor pushed branch `content/react-hooks-es`. "Voice and render" run 43692109951 p
 - **Not checked:** the fix has not run in GitHub Actions yet, and nobody has watched the result. The next run, after Dor's push, is that check.
 - **It also affects** every other lesson film built from `beats[]`, but only when one is rendered again with voice. Published films do not change.
 - **Another finding, not fixed:** "Publish to Vimeo" reads the voice again and does not use the saved reading from "Voice and render". So the film that goes to Vimeo is a new reading in the same voice, not the file Dor watched. This is how every studio film has been published so far.
+
+---
+
+## עדכון, 15 בנובמבר 2026: הרינדור החוזר, והקול שעולה ל-Vimeo
+
+**הרינדור החוזר** (ריצה 43702353127, commit `0130dda`) עבר על חמשת הסרטים.
+
+- **אותו קול:** כל 54 השורות נלקחו מההקראות השמורות, אף שורה לא הוקראה מחדש. רצועת הקריינות של סרט 3 זהה לזו של הריצה הקודמת; בסרט 5 היא זהה ב-156 השניות הראשונות ושונה רק בשקט שבסוף.
+- **הכתוביות:** הוארכו בדיוק בשורות שנחזו: סרט 1 שורה אחת (4), סרט 3 ארבע שורות (2, 5, 7, 9), סרט 5 שתי שורות (8, 11). בסרטים 2 ו-4 אין שינוי. אין אזהרות תזמון.
+- **נבדק בתמונה:** אותו פריים בסרט 3 (שנייה 99.27) לפני ואחרי. לפני: אין כתובית. אחרי: הכתובית על המסך.
+- **אורך הסרטים** לא השתנה (136.7 ו-160.8 שניות).
+- **לא נבדק:** Claude לא שמע את הסרטים. דור עוד לא צפה בסרטים 3 ו-5 אחרי התיקון.
+
+**הקול שעולה ל-Vimeo** (commit `0128ea4`, ענף `engine/publish-watched-voice`, מוזג לענף הסרטים ב-`f56b07e`; לא נדחף):
+
+- **הבעיה:** "Publish to Vimeo" הקריא כל שורה מחדש, כך שהסרט ב-Vimeo היה הקראה שאף אחד לא שמע. אותו דבר קרה במיזוג ל-`main`, כי ה-cache של הקול שייך לענף אחד.
+- **התיקון:** ההקראות של הרינדור האחרון של כל סרט נשמרות ב-pre-release בשם `voice-takes` (לא נספר במכסת האחסון של Actions, לא פג, ולא שייך לענף). "Voice and render" ו-"Publish to Vimeo" מחזירים אותן לפני שלב הקול. שורה שלא שונתה לא מוקראת פעמיים. אם שורה הוקראה מחדש בפרסום, הריצה מזהירה וכותבת את זה בסיכום.
+- **נבדק מקומית** מול תחליף לכלי `gh`: שמירה, החזרה, שורה שהשתנתה, ואין מה לשמור. המצב "עוד לא נשמר כלום" נבדק מול ה-repo האמיתי.
+- **לא נבדק:** ריצה ב-GitHub Actions. הבדיקה היא שני ה-push הבאים: ענף הסרטים (שומר את ההקראות), ואז `main` (אמור להחזיר אותן ולא להקריא אף שורה).
+
+**התרגולים באוויר:** דור דחף את `main` של wawiwa-activities (`259c82b`). הפריסה ל-GitHub Pages עברה, ו-12 הדפים (שישה בספרדית, שישה באנגלית) עונים 200.
+
+## Update, 15 Nov 2026: the re-render, and the voice that goes to Vimeo
+
+**The re-render** (run 43702353127, commit `0130dda`) passed on all five films.
+
+- **Same voice:** all 54 lines came from the kept clips, none was read again. Film 3's narration track is identical to the previous run's; film 5's is identical for the first 156 seconds and differs only in the silence at the end.
+- **Captions:** held on exactly the lines predicted: film 1 one line (4), film 3 four lines (2, 5, 7, 9), film 5 two lines (8, 11). Films 2 and 4 are unchanged. No timing warnings.
+- **Checked on a picture:** the same frame of film 3 (99.27 s) before and after. Before: no caption. After: the caption is on screen.
+- **Film lengths** did not change (136.7 and 160.8 s).
+- **Not checked:** Claude did not hear the films. Dor has not watched films 3 and 5 after the fix yet.
+
+**The voice that goes to Vimeo** (commit `0128ea4`, branch `engine/publish-watched-voice`, merged into the films branch as `f56b07e`; not pushed):
+
+- **The problem:** "Publish to Vimeo" had every line read again, so the film on Vimeo was a take nobody had heard. A merge to `main` did the same, because the Actions cache that holds the clips belongs to one branch.
+- **The fix:** the clips of each film's last render are kept on a pre-release called `voice-takes` (not counted in the Actions storage quota, does not expire, not tied to a branch). "Voice and render" and "Publish to Vimeo" bring them back before the voice pass. An unchanged line is never read twice. If a line is read again while publishing, the run warns and says so in its summary.
+- **Checked locally** against a stand-in for `gh`: save, restore, a changed line, nothing to keep. The nothing-kept case was checked against the real repository.
+- **Not checked:** a run in GitHub Actions. The check is the next two pushes: the films branch (keeps the clips), then `main` (should bring them back and read no line).
+
+**The practices are live:** Dor pushed `main` of wawiwa-activities (`259c82b`). The GitHub Pages deploy passed, and the 12 pages (six Spanish, six English) answer 200.
