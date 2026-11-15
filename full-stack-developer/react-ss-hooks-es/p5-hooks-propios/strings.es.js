@@ -102,7 +102,7 @@ window.RH_PAGE = {
       type: "steps",
       step: 2,
       /* The task, word for word from the current Spanish lesson */
-      task: "Hook personalizado: useLocalStorage: gestiona un estado sincronizado con localStorage.",
+      task: "Hook personalizado useLocalStorage: gestiona un estado sincronizado con localStorage.",
       steps: [
         "Crea `src/useLocalStorage.js`.",
         "Úsalo en un saludo con la clave `userName`.",
@@ -231,7 +231,7 @@ window.RH_PAGE = {
           ]
         }
       ],
-      note: "Cursor puede marcar “set-state-in-effect” en `setIsLoading(true)`. Es una advertencia de estilo de React; el hook funciona. Hay formas sin ella, más avanzadas."
+      note: "Cursor puede marcar «set-state-in-effect» en `setIsLoading(true)`. Es una advertencia de estilo de React; el hook funciona. Hay formas sin ella, más avanzadas."
     },
     {
       id: "resumen",

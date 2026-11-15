@@ -120,7 +120,7 @@ window.RH_PAGE = {
       missing: [
         {
           line: 1,
-          text: "Al ocultar no se imprimió “Temporizador detenido”: revisa que el efecto devuelva la función de limpieza."
+          text: "Al ocultar no se imprimió «Temporizador detenido»: revisa que el efecto devuelva la función de limpieza."
         }
       ],
       other: "Recarga, espera 3 segundos, oculta, muestra y copia toda la consola.",
@@ -209,7 +209,7 @@ window.RH_PAGE = {
       points: [
         "**Si un efecto inicia algo, su limpieza lo detiene.**",
         "**React limpia antes de repetir el efecto, al desmontar y, en desarrollo, en cada montaje de prueba.**",
-        "**Dentro de un intervalo, usa la forma con función** `s => s + 1`."
+        "**Dentro de un intervalo, usa la forma con función** `(s) => s + 1`."
       ],
       back: "Continúa abajo con el siguiente video."
     }

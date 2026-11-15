@@ -97,7 +97,7 @@ window.RH_PAGE = {
       id: "tarea-storage",
       type: "steps",
       step: 2,
-      task: "Custom hook: useLocalStorage: manage a state synchronized with localStorage.",
+      task: "Custom hook useLocalStorage: manage a state synchronized with localStorage.",
       steps: [
         "Create `src/useLocalStorage.js`.",
         "Use it in a greeting with the key `userName`.",

@@ -196,7 +196,7 @@ window.RH_PAGE = {
       points: [
         "**If an effect starts something, its cleanup stops it.**",
         "**React cleans up before repeating the effect, on unmount and, in development, on every test mount.**",
-        "**Inside an interval, use the function form** `s => s + 1`."
+        "**Inside an interval, use the function form** `(s) => s + 1`."
       ],
       back: "Continue below with the next video."
     }

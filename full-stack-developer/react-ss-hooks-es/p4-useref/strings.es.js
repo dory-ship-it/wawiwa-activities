@@ -94,7 +94,7 @@ window.RH_PAGE = {
       id: "compara",
       type: "value",
       step: 3,
-      question: "Después de 5 clics, ¿qué número dice “antes”?",
+      question: "Después de 5 clics, ¿qué número dice «antes»?",
       expected: ["4"],
       ok: "",
       hints: [
@@ -163,7 +163,7 @@ window.RH_PAGE = {
           ]
         }
       ],
-      note: "Cursor puede marcar “Cannot access refs during render”. La guía actual de React prefiere no leer refs al dibujar; aquí lo hacemos a propósito, porque la tarea pide useRef."
+      note: "Cursor puede marcar «Cannot access refs during render». La guía actual de React prefiere no leer refs al dibujar; aquí lo hacemos a propósito, porque la tarea pide useRef."
     },
     {
       id: "resumen",
