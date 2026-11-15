@@ -263,3 +263,23 @@ Dor pushed branch `content/react-hooks-es`. "Voice and render" run 43692109951 p
 - **Not checked:** a run in GitHub Actions. The check is the next two pushes: the films branch (keeps the clips), then `main` (should bring them back and read no line).
 
 **The practices are live:** Dor pushed `main` of wawiwa-activities (`259c82b`). The GitHub Pages deploy passed, and the 12 pages (six Spanish, six English) answer 200.
+
+---
+
+## עדכון, 15 בנובמבר 2026: הכול ב-`main`, וההקראות ששמענו נשמרות עד הפרסום
+
+- **אישור:** דור אישר את סרטים 3 ו-5 אחרי התיקון לכתוביות, והחליט על הטמעה לפי יחס 1000:560 (Q4).
+- **מיזוג:** ענף `content/react-hooks-es` מוזג ל-`main` של wawiwa-video, וששת התרגולים נרשמו ב-`deliverables.json` עם קישור של כל סרט לתרגול שלו (commit `5827fa6`). דור דחף את `main`.
+- **התיקון לפרסום נבדק בריצות אמיתיות:**
+  - ריצה 43704635414 (ענף הסרטים) שמרה את ההקראות של חמשת הסרטים ב-pre-release `voice-takes`. החזרה שלהן מה-repo נתנה 54 קטעים, שאורכם זהה לריצה שדור צפה בה.
+  - ריצה 43705120101 (`main`) החזירה אותן. שלב הקול ארך שנייה עד שתיים לסרט, לעומת 8 עד 12 שניות בריצה הראשונה שבה כל שורה הוקראה. 54 הקטעים שנשמרו אחריה זהים בייט לבייט לאלה שנשמרו לפניה. כלומר אף שורה לא הוקראה מחדש ב-`main`.
+- **לא נבדק עדיין:** אותו מנגנון בתוך "Publish to Vimeo". הפרסום הראשון הוא הבדיקה; הסיכום של הריצה יגיד כמה שורות נלקחו מהרינדור האחרון וכמה הוקראו מחדש.
+
+## Update, 15 Nov 2026: everything is on `main`, and the takes we heard are kept through to publishing
+
+- **Approval:** Dor approved films 3 and 5 after the caption fix, and decided on the 1000:560 ratio embed (Q4).
+- **Merge:** branch `content/react-hooks-es` is merged into `main` of wawiwa-video, and the six practices are registered in `deliverables.json` with each film paired to its practice (commit `5827fa6`). Dor pushed `main`.
+- **The publish fix was checked in real runs:**
+  - Run 43704635414 (the films branch) kept the clips of the five films on the `voice-takes` pre-release. Restoring them from the repository gave 54 clips whose lengths equal the run Dor watched.
+  - Run 43705120101 (`main`) brought them back. The voice step took one to two seconds a film, against 8 to 12 seconds in the first run, where every line was read. The 54 clips kept after it are byte for byte the ones kept before it. So no line was read again on `main`.
+- **Not checked yet:** the same mechanism inside "Publish to Vimeo". The first publish is that check; the run's summary will say how many lines came from the last render and how many were read again.
