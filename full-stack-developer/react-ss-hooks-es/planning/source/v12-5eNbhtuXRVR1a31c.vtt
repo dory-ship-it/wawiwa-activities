@@ -1,0 +1,165 @@
+WEBVTT
+
+0
+00:00:00.009 --> 00:00:00.970
+Exercise 2,
+
+1
+00:00:01.289 --> 00:00:04.429
+use Uref to track the previous value of a state variable
+
+2
+00:00:04.650 --> 00:00:06.329
+and show how it changes over time.
+
+3
+00:00:08.100 --> 00:00:08.310
+OK,
+
+4
+00:00:08.430 --> 00:00:09.369
+let's solve it.
+
+5
+00:00:09.789 --> 00:00:12.029
+We have a component called previous value display.
+
+6
+00:00:16.799 --> 00:00:17.190
+First,
+
+7
+00:00:17.309 --> 00:00:18.479
+import use effect,
+
+8
+00:00:18.719 --> 00:00:19.389
+use ref,
+
+9
+00:00:19.600 --> 00:00:21.020
+and use state from react.
+
+10
+00:00:24.649 --> 00:00:25.090
+Next,
+
+11
+00:00:25.250 --> 00:00:27.149
+declare a state variable called count
+
+12
+00:00:27.450 --> 00:00:28.670
+and set it to 0
+
+13
+00:00:28.850 --> 00:00:29.809
+using use state.
+
+14
+00:00:30.610 --> 00:00:31.090
+Then
+
+15
+00:00:31.489 --> 00:00:33.250
+declare a variable prevco ref
+
+16
+00:00:33.439 --> 00:00:35.229
+and initialize it with use ref.
+
+17
+00:00:35.770 --> 00:00:36.220
+Now,
+
+18
+00:00:36.409 --> 00:00:37.610
+let's use use effect.
+
+19
+00:00:38.310 --> 00:00:39.650
+Inside the use effect,
+
+20
+00:00:39.909 --> 00:00:41.290
+set prev count ref current
+
+21
+00:00:41.450 --> 00:00:43.470
+equal to the current value of count.
+
+22
+00:00:44.110 --> 00:00:46.729
+Add count to the dependency array,
+
+23
+00:00:47.080 --> 00:00:49.950
+so the effect runs whenever count changes.
+
+24
+00:00:50.659 --> 00:00:52.139
+In the return statement,
+
+25
+00:00:52.500 --> 00:00:54.200
+display the current count
+
+26
+00:00:54.459 --> 00:00:55.919
+and the previous count.
+
+27
+00:00:56.500 --> 00:00:57.659
+For the previous count,
+
+28
+00:00:58.060 --> 00:01:00.180
+use prevcount ref.current.
+
+29
+00:01:01.180 --> 00:01:01.729
+Finally,
+
+30
+00:01:02.150 --> 00:01:03.950
+add a button to increment the count.
+
+31
+00:01:04.998 --> 00:01:07.819
+Set the buttons on click attribute to update the count
+
+32
+00:01:08.049 --> 00:01:09.259
+using set count
+
+33
+00:01:09.528 --> 00:01:11.208
+and increment it by one.
+
+34
+00:01:11.689 --> 00:01:12.869
+Let's see it in action.
+
+35
+00:01:13.629 --> 00:01:15.190
+When we click increment,
+
+36
+00:01:15.589 --> 00:01:17.449
+we can see both the current count
+
+37
+00:01:17.750 --> 00:01:19.470
+and the previous count displayed.
+
+38
+00:01:20.300 --> 00:01:21.750
+That's all for this lesson.
+
+39
+00:01:22.220 --> 00:01:23.190
+Have a good day
+
+40
+00:01:23.500 --> 00:01:25.139
+and see you in the next lesson.

@@ -1,0 +1,121 @@
+WEBVTT
+
+0
+00:00:00.009 --> 00:00:01.000
+Exercise 2,
+
+1
+00:00:01.370 --> 00:00:05.289
+create a timer using set interval and clear it when the component unmounts.
+
+2
+00:00:06.079 --> 00:00:06.300
+OK,
+
+3
+00:00:06.360 --> 00:00:06.980
+let's do it.
+
+4
+00:00:07.239 --> 00:00:09.279
+We have a component called XC2.
+
+5
+00:00:10.010 --> 00:00:10.960
+Inside the component,
+
+6
+00:00:11.010 --> 00:00:13.229
+we have a counter with count set to 0
+
+7
+00:00:13.430 --> 00:00:15.170
+and a function set count to update it.
+
+8
+00:00:15.939 --> 00:00:16.350
+Next,
+
+9
+00:00:16.459 --> 00:00:17.979
+we return the timer value,
+
+10
+00:00:18.110 --> 00:00:18.989
+which is the count.
+
+11
+00:00:19.760 --> 00:00:20.020
+Now,
+
+12
+00:00:20.319 --> 00:00:21.479
+let's add the use effect.
+
+13
+00:00:22.180 --> 00:00:23.579
+Inside the use effect,
+
+14
+00:00:23.860 --> 00:00:25.739
+declare a timer using set interval.
+
+15
+00:00:26.430 --> 00:00:29.870
+The set interval function increments the counter by 1 every second.
+
+16
+00:00:30.629 --> 00:00:31.940
+To prevent memory leaks,
+
+17
+00:00:32.189 --> 00:00:34.069
+don't forget to return a cleanup function.
+
+18
+00:00:34.720 --> 00:00:36.259
+The cleanup function uses
+
+19
+00:00:36.560 --> 00:00:38.419
+clear interval to stop the timer
+
+20
+00:00:38.560 --> 00:00:40.159
+when the component unmounts.
+
+21
+00:00:40.830 --> 00:00:41.880
+Let's see it in action.
+
+22
+00:00:42.720 --> 00:00:43.830
+We'll open the terminal,
+
+23
+00:00:44.119 --> 00:00:46.840
+run the project again using NPM RundDev,
+
+24
+00:00:47.319 --> 00:00:50.000
+and take the URL to open it in the browser.
+
+25
+00:00:59.650 --> 00:01:00.349
+And now
+
+26
+00:01:00.540 --> 00:01:02.110
+you can see the timer working,
+
+27
+00:01:02.279 --> 00:01:04.129
+incrementing every second.
+
+28
+00:01:04.888 --> 00:01:05.589
+Have a good day
+
+29
+00:01:06.050 --> 00:01:07.650
+and see you in the next lesson.

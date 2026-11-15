@@ -1,0 +1,249 @@
+WEBVTT
+
+0
+00:00:01.429 --> 00:00:02.900
+Let's continue with use effect.
+
+1
+00:00:03.779 --> 00:00:05.510
+We have the Jason placeholder site.
+
+2
+00:00:05.869 --> 00:00:07.269
+This is the API we'll use,
+
+3
+00:00:07.550 --> 00:00:09.130
+and we want to fetch a specific post,
+
+4
+00:00:09.310 --> 00:00:09.810
+for example,
+
+5
+00:00:10.149 --> 00:00:10.829
+post one.
+
+6
+00:00:15.800 --> 00:00:17.579
+I'm going to fetch the title from this post.
+
+7
+00:00:17.840 --> 00:00:18.840
+Let's see it in action.
+
+8
+00:00:25.020 --> 00:00:25.340
+First,
+
+9
+00:00:25.440 --> 00:00:26.500
+import react,
+
+10
+00:00:26.780 --> 00:00:27.459
+use state,
+
+11
+00:00:27.739 --> 00:00:29.079
+and use effect from react.
+
+12
+00:00:29.579 --> 00:00:29.979
+Second,
+
+13
+00:00:30.260 --> 00:00:31.500
+declare the state variables.
+
+14
+00:00:32.339 --> 00:00:33.648
+Type const,
+
+15
+00:00:33.659 --> 00:00:34.699
+open square brackets,
+
+16
+00:00:34.938 --> 00:00:35.368
+data,
+
+17
+00:00:35.578 --> 00:00:36.159
+comma,
+
+18
+00:00:36.379 --> 00:00:37.039
+set data,
+
+19
+00:00:37.339 --> 00:00:39.819
+close square brackets equals use state
+
+20
+00:00:40.019 --> 00:00:41.458
+with null as the initial value.
+
+21
+00:00:42.159 --> 00:00:42.599
+Now,
+
+22
+00:00:42.799 --> 00:00:44.139
+let's write the use effect.
+
+23
+00:00:44.590 --> 00:00:45.119
+Type
+
+24
+00:00:45.360 --> 00:00:46.040
+use effect,
+
+25
+00:00:46.279 --> 00:00:47.200
+open parentheses,
+
+26
+00:00:47.349 --> 00:00:48.240
+arrow function,
+
+27
+00:00:48.520 --> 00:00:49.900
+open curly brace.
+
+28
+00:00:50.279 --> 00:00:50.720
+Inside,
+
+29
+00:00:50.799 --> 00:00:52.000
+use the fetch method.
+
+30
+00:00:52.430 --> 00:00:53.060
+Type
+
+31
+00:00:53.520 --> 00:00:53.979
+fetch,
+
+32
+00:00:54.080 --> 00:00:55.110
+open parentheses,
+
+33
+00:00:55.360 --> 00:00:56.439
+URL in quotes,
+
+34
+00:00:56.799 --> 00:01:03.540
+which is HTTPS colonjason placeholder.typicode.com/posts/1
+
+35
+00:01:04.199 --> 00:01:04.919
+parentheses.
+
+36
+00:01:05.760 --> 00:01:06.760
+Then chain then
+
+37
+00:01:07.160 --> 00:01:08.620
+with response arrowresponse.
+
+38
+00:01:08.879 --> 00:01:09.319
+Jason.
+
+39
+00:01:10.250 --> 00:01:10.919
+Chain another,
+
+40
+00:01:11.169 --> 00:01:11.669
+then
+
+41
+00:01:12.010 --> 00:01:13.750
+with data arrow set data,
+
+42
+00:01:14.190 --> 00:01:14.930
+passing data.
+
+43
+00:01:15.769 --> 00:01:17.029
+Close the curly brace
+
+44
+00:01:17.250 --> 00:01:19.930
+and add a second argument with an empty dependency array.
+
+45
+00:01:20.800 --> 00:01:21.120
+Now,
+
+46
+00:01:21.389 --> 00:01:24.559
+let's update the return statement to display the fetched data.
+
+47
+00:01:25.040 --> 00:01:25.470
+Type
+
+48
+00:01:25.930 --> 00:01:26.459
+return
+
+49
+00:01:26.760 --> 00:01:26.970
+data,
+
+50
+00:01:28.160 --> 00:01:29.180
+data.title
+
+51
+00:01:29.480 --> 00:01:30.059
+colon
+
+52
+00:01:30.440 --> 00:01:31.000
+loading.
+
+53
+00:01:31.800 --> 00:01:33.139
+When the data is loaded,
+
+54
+00:01:33.370 --> 00:01:35.169
+it will display the title of the post.
+
+55
+00:01:35.930 --> 00:01:36.959
+Otherwise it will show
+
+56
+00:01:37.239 --> 00:01:38.080
+loading.
+
+57
+00:01:38.500 --> 00:01:39.410
+You can see it here.
+
+58
+00:01:39.699 --> 00:01:41.419
+The title of the post is displayed.
+
+59
+00:01:44.400 --> 00:01:45.750
+That's all for this lesson.
+
+60
+00:01:46.080 --> 00:01:46.980
+Have a good day
+
+61
+00:01:47.160 --> 00:01:48.559
+and see you in the next lesson.

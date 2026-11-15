@@ -1,0 +1,229 @@
+WEBVTT
+
+0
+00:00:00.050 --> 00:00:01.970
+Let's look at another use effect example,
+
+1
+00:00:02.210 --> 00:00:03.289
+Windows scroll.
+
+2
+00:00:03.650 --> 00:00:04.530
+In this example,
+
+3
+00:00:04.809 --> 00:00:07.880
+I want to log a message whenever the user scrolls on the page.
+
+4
+00:00:08.289 --> 00:00:09.050
+How can we do that?
+
+5
+00:00:09.750 --> 00:00:12.189
+We'll create a component called Window scroll.
+
+6
+00:00:12.630 --> 00:00:12.930
+First,
+
+7
+00:00:13.140 --> 00:00:14.949
+import use effect from React.
+
+8
+00:00:18.309 --> 00:00:18.790
+Next,
+
+9
+00:00:19.030 --> 00:00:20.370
+let's write the component.
+
+10
+00:00:20.909 --> 00:00:21.430
+Type
+
+11
+00:00:21.659 --> 00:00:22.700
+export function.
+
+12
+00:00:23.459 --> 00:00:27.639
+Window scroll open parenthesis close parenthesis open curly brace.
+
+13
+00:00:27.979 --> 00:00:29.049
+Inside the component,
+
+14
+00:00:29.299 --> 00:00:30.840
+use the use effect hook.
+
+15
+00:00:31.299 --> 00:00:31.950
+Type
+
+16
+00:00:32.380 --> 00:00:36.200
+use effect open parentheses arrow function open curly brace.
+
+17
+00:00:37.099 --> 00:00:37.569
+Now,
+
+18
+00:00:37.900 --> 00:00:40.419
+define a function to handle the scroll event.
+
+19
+00:00:40.860 --> 00:00:41.400
+Type
+
+20
+00:00:41.939 --> 00:00:43.080
+const handle scroll
+
+21
+00:00:43.180 --> 00:00:45.979
+equals arrow function open curly brace.
+
+22
+00:00:46.659 --> 00:00:47.880
+Inside the function,
+
+23
+00:00:48.180 --> 00:00:50.840
+add a console.log statement to log the message
+
+24
+00:00:51.299 --> 00:00:52.299
+Windows scrolled.
+
+25
+00:00:53.090 --> 00:00:53.569
+Then
+
+26
+00:00:53.930 --> 00:00:54.569
+use the Window.
+
+27
+00:00:54.930 --> 00:00:56.229
+add event listener method
+
+28
+00:00:56.369 --> 00:00:59.209
+to attach the scroll event to the handle scroll function.
+
+29
+00:01:05.930 --> 00:01:06.470
+Finally,
+
+30
+00:01:06.680 --> 00:01:09.639
+we need to clean up the event listener to avoid memory leaks.
+
+31
+00:01:10.279 --> 00:01:12.330
+Inside the use effect function,
+
+32
+00:01:12.839 --> 00:01:14.160
+return a cleanup function.
+
+33
+00:01:15.190 --> 00:01:15.849
+Type,
+
+34
+00:01:16.309 --> 00:01:17.050
+return window.
+
+35
+00:01:17.760 --> 00:01:18.209
+Remove
+
+36
+00:01:18.550 --> 00:01:19.370
+event listener.
+
+37
+00:01:19.830 --> 00:01:20.910
+Open parentheses,
+
+38
+00:01:21.029 --> 00:01:21.910
+scroll.
+
+39
+00:01:22.309 --> 00:01:22.830
+Handle scroll,
+
+40
+00:01:22.930 --> 00:01:23.750
+close parentheses.
+
+41
+00:01:24.489 --> 00:01:26.680
+Close all curly braces in parentheses.
+
+42
+00:01:27.169 --> 00:01:27.599
+Now,
+
+43
+00:01:27.739 --> 00:01:29.690
+let's add a return statement for the component.
+
+44
+00:01:30.250 --> 00:01:30.879
+Type
+
+45
+00:01:31.370 --> 00:01:32.970
+return open parentheses.
+
+46
+00:01:33.449 --> 00:01:33.930
+Div.
+
+47
+00:01:34.250 --> 00:01:35.010
+Inside the div,
+
+48
+00:01:35.250 --> 00:01:36.989
+add an H1 with the text
+
+49
+00:01:37.250 --> 00:01:38.559
+Windows scroll log.
+
+50
+00:01:39.080 --> 00:01:41.110
+Save the file and refresh the app.
+
+51
+00:01:41.529 --> 00:01:42.129
+When you scroll,
+
+52
+00:01:42.209 --> 00:01:43.309
+you'll see the message
+
+53
+00:01:43.569 --> 00:01:44.589
+Window scrolled
+
+54
+00:01:44.720 --> 00:01:45.849
+logged in the console.
+
+55
+00:01:51.519 --> 00:01:52.639
+That's all for this lesson.
+
+56
+00:01:53.440 --> 00:01:56.000
+Have a good day and see you in the next lesson.

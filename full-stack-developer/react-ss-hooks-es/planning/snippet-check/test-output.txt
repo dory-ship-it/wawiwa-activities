@@ -1,0 +1,163 @@
+
+## PomodoroCounter
+  [mount] out="Pomodoros: 0" reqs=0 title="hooks-lab"
+  [3 clicks] out="Pomodoros: 3" reqs=0 title="hooks-lab"
+
+## DoneTasksToggle
+  [mount] out="(no #out)" reqs=0 title="hooks-lab"
+  [1 click] out="Repasar arrays" reqs=0 title="hooks-lab"
+  [2 clicks] out="(no #out)" reqs=0 title="hooks-lab"
+
+## DoubleClickPredict
+  [mount] out="0" reqs=0 title="hooks-lab"
+  [3 clicks] out="3" reqs=0 title="hooks-lab"
+
+## DoubleClickUpdater
+  [mount] out="0" reqs=0 title="hooks-lab"
+  [3 clicks] out="6" reqs=0 title="hooks-lab"
+
+## ShowHideMessage
+  [mount] out="Este es un mensaje." reqs=0 title="hooks-lab"
+  [3 clicks] out="(no #out)" reqs=0 title="hooks-lab"
+
+## OrigCounter
+  [mount] out="0" reqs=0 title="hooks-lab"
+  [2 clicks] out="2" reqs=0 title="hooks-lab"
+
+## PartnerNoDeps
+  [mount] out="Ervin Howell" reqs=49777 title="hooks-lab"
+  [after 2 s (mocked API)] out="Ervin Howell" reqs=54776 title="hooks-lab"
+
+## Partner
+  [mount] out="Compañero de hoy: Ervin Howell" reqs=2 title="hooks-lab"
+  [after 1.5 s] out="Compañero de hoy: Ervin Howell" reqs=2 title="hooks-lab"
+
+## PomodoroTitle
+  [mount] out="0" reqs=0 title="Pomodoros: 0"
+  [2 clicks] out="2" reqs=0 title="Pomodoros: 2"
+
+## ThreeEffects
+  [mount] out="0" reqs=0 title="hooks-lab" logs=["A: sin arreglo","B: arreglo vacío","C: depende de count","A: sin arreglo","B: arreglo vacío","C: depende de count"]
+  [click +1] out="1" reqs=0 title="hooks-lab" logs=["A: sin arreglo","C: depende de count"]
+  [typed 2 letters] out="1" reqs=0 title="hooks-lab" logs=["A: sin arreglo","A: sin arreglo"]
+
+## FirstUser
+  [mount] out="Leanne Graham" reqs=2 title="hooks-lab"
+  [after 1.5 s] out="Leanne Graham" reqs=2 title="hooks-lab"
+
+## OrigPost
+  [mount] out="sunt aut facere repellat provident occaecati excepturi optio reprehenderit" reqs=2 title="hooks-lab"
+  [after 1.5 s] out="sunt aut facere repellat provident occaecati excepturi optio reprehenderit" reqs=2 title="hooks-lab"
+
+## TimerNoCleanup
+  [mount] out="0" reqs=0 title="hooks-lab"
+  [after ~3 s] out="8" reqs=0 title="hooks-lab" logs=["tic","tic","tic","tic","tic","tic","tic","tic"]
+  [unmount] out="(no #out)" reqs=0 title="hooks-lab"
+  [2 s after unmount] out="(no #out)" reqs=0 title="hooks-lab" logs=["tic","tic","tic","tic"]
+
+## TimerStale
+  [mount] out="0" reqs=0 title="hooks-lab"
+  [after ~3 s] out="1" reqs=0 title="hooks-lab"
+
+## Timer
+  [mount] out="0" reqs=0 title="hooks-lab" logs=["Temporizador iniciado","Temporizador detenido","Temporizador iniciado"]
+  [after ~3 s] out="4" reqs=0 title="hooks-lab"
+  [unmount] out="(no #out)" reqs=0 title="hooks-lab" logs=["Temporizador detenido"]
+  [2 s after unmount] out="(no #out)" reqs=0 title="hooks-lab"
+
+## ScrollNoCleanup
+  [mount] out="Desplázate" reqs=0 title="hooks-lab"
+  [3 scrolls] out="Desplázate" reqs=0 title="hooks-lab" logs=["scroll","scroll","scroll","scroll","scroll","scroll"]
+  [unmount] out="(no #out)" reqs=0 title="hooks-lab" logs=["scroll","scroll"]
+  [2 scrolls after unmount] out="(no #out)" reqs=0 title="hooks-lab"
+
+## ScrollWatcher
+  [mount] out="Desplázate" reqs=0 title="hooks-lab"
+  [3 scrolls] out="Desplázate" reqs=0 title="hooks-lab" logs=["scroll","scroll","scroll"]
+  [unmount] out="(no #out)" reqs=0 title="hooks-lab"
+  [2 scrolls after unmount] out="(no #out)" reqs=0 title="hooks-lab"
+
+## OrigCleanupSlide
+  [mount] out="slide" reqs=0 title="hooks-lab" logs=["Timer stopped."]
+  [after ~2 s] out="slide" reqs=0 title="hooks-lab" logs=["Timer running...","Timer running...","Timer running..."]
+  [unmount] out="(no #out)" reqs=0 title="hooks-lab" logs=["Timer stopped."]
+
+## OrigWindowScroll
+  [mount] out="Window scroll log" reqs=0 title="hooks-lab"
+  [3 scroll attempts] out="Window scroll log" reqs=0 title="hooks-lab"
+   eval = false
+  [page taller than window?] out="Window scroll log" reqs=0 title="hooks-lab"
+
+## FocusTask
+  [mount] out="(no #out)" reqs=0 title="hooks-lab"
+  [click] out="(no #out)" reqs=0 title="hooks-lab"
+   eval = "inp"
+  [focused element] out="(no #out)" reqs=0 title="hooks-lab"
+
+## PrevWithLet
+  [mount] out="Ahora: 0, antes: undefined" reqs=0 title="hooks-lab"
+  [3 clicks] out="Ahora: 3, antes: undefined" reqs=0 title="hooks-lab"
+
+## PreviousValue
+  [mount] out="Ahora: 0, antes: null" reqs=0 title="hooks-lab"
+  [1 click] out="Ahora: 1, antes: 0" reqs=0 title="hooks-lab"
+  [3 clicks] out="Ahora: 3, antes: 2" reqs=0 title="hooks-lab"
+
+## OrigPrevious
+  [mount] out="Now: 0, Before: undefined" reqs=0 title="hooks-lab"
+  [1 click] out="Now: 1, Before: 0" reqs=0 title="hooks-lab"
+
+## RefVsState
+  [mount] out="estado: 0 | ref: 0" reqs=0 title="hooks-lab"
+  [ref +1 x3] out="estado: 0 | ref: 0" reqs=0 title="hooks-lab"
+  [state +1] out="estado: 1 | ref: 3" reqs=0 title="hooks-lab"
+
+## TitleWithHook
+  [mount] out="0" reqs=0 title="Pomodoros: 0"
+  [2 clicks] out="2" reqs=0 title="Pomodoros: 2"
+
+## Greeting
+  [mount] out="Hola, invitado" reqs=0 title="hooks-lab"
+  [typed] out="Hola, Vale" reqs=0 title="hooks-lab"
+   eval = "\"Vale\""
+  [storage] out="Hola, Vale" reqs=0 title="hooks-lab"
+  [after reload] out="Hola, Vale" reqs=0 title="hooks-lab"
+  [clear] out="Hola, invitado" reqs=0 title="hooks-lab"
+   eval = "\"\""
+  [storage after clear] out="Hola, invitado" reqs=0 title="hooks-lab"
+
+## ApiOrig
+  [mount] out="{\"id\":1,\"name\":\"Leanne Graham\",\"username\":\"Bret\",\"email\":\"Si" reqs=3 title="hooks-lab"
+  [ok url] out="{\"id\":1,\"name\":\"Leanne Graham\",\"username\":\"Bret\",\"email\":\"Si" reqs=3 title="hooks-lab"
+   eval = "empty,empty,loading,loading,data,data,data,data"
+  [states] out="{\"id\":1,\"name\":\"Leanne Graham\",\"username\":\"Bret\",\"email\":\"Si" reqs=3 title="hooks-lab"
+
+## ApiOrig
+  [mount] out="{}" reqs=3 title="hooks-lab" logs=["Failed to load resource: the server responded with a status of 404 ()","Failed to load resource: the server responded with a status of 404 ()"]
+  [404 url] out="{}" reqs=3 title="hooks-lab"
+   eval = "empty,empty,loading,loading,data,data,data,data"
+  [states] out="{}" reqs=3 title="hooks-lab"
+
+## ApiNarrated
+  [mount] out="{\"id\":1,\"name\":\"Leanne Graham\",\"username\":\"Bret\",\"email\":\"Si" reqs=3 title="hooks-lab"
+  [ok url] out="{\"id\":1,\"name\":\"Leanne Graham\",\"username\":\"Bret\",\"email\":\"Si" reqs=3 title="hooks-lab"
+   eval = "empty,empty,empty,empty,data,data,data,data"
+  [states] out="{\"id\":1,\"name\":\"Leanne Graham\",\"username\":\"Bret\",\"email\":\"Si" reqs=3 title="hooks-lab"
+
+## ApiNarrated
+  [mount] out="{}" reqs=3 title="hooks-lab" logs=["Failed to load resource: the server responded with a status of 404 ()","Failed to load resource: the server responded with a status of 404 ()"]
+  [404 url] out="{}" reqs=3 title="hooks-lab"
+   eval = "empty,empty,empty,empty,data,data,data,data"
+  [states] out="{}" reqs=3 title="hooks-lab"
+
+## ApiFixed
+  [mount] out="{\"id\":1,\"name\":\"Leanne Graham\",\"username\":\"Bret\",\"email\":\"Si" reqs=3 title="hooks-lab"
+  [ok url] out="{\"id\":1,\"name\":\"Leanne Graham\",\"username\":\"Bret\",\"email\":\"Si" reqs=3 title="hooks-lab"
+   eval = "loading,loading,data,data,data,data"
+  [states] out="{\"id\":1,\"name\":\"Leanne Graham\",\"username\":\"Bret\",\"email\":\"Si" reqs=3 title="hooks-lab"
+
+## ApiFixed
+  [mount] out="Error: Error 404" reqs=3 title="hooks-lab" logs=["Failed to load resource: the server responded with a status of 404 ()","Failed to load resource: the server responded with a status of 404 ()"]
+  [404 url] out="Error: Error 404" reqs=3 title="hooks-lab"
+   eval = "loading,loading,error,error,error,error"
+  [states] out="Error: Error 404" reqs=3 title="hooks-lab"
