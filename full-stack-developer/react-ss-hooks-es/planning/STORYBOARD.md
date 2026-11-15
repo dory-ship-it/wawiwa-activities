@@ -394,3 +394,8 @@ The old lesson stays live until Dor approves the new one.
 | Q1 | The intro video says "try the exercises first, then check yourself with the videos". The planned order is film → practice. | Keep film → practice, and add one Rise text line under the intro: «Mira el video de cada hook y después practica.» |
 | Q2 | `wawiwa-activities/CLAUDE.md` says practice films and pages "never reveal answers", but the work-order asks each practice to show a solution after the learner tries, and F3/F4/F5 teach the same pattern the task asks for. | Allow it for self-study: the solution sits behind «Ver solución», only after the learner answered or pressed «Lo construí». The films use different data from the tasks wherever they can (D3). |
 | Q3 | S5, S10 and S11 need the SME (S5 and S11 are lint warnings on patterns the course tasks require). | Forward section 6.3 as is. |
+
+### Decisions on these questions
+
+- **Q2, decided by Dor on 15 Nov 2026: yes, the practices show a solution.** It sits behind «Ver solución» and opens only after the learner answered or pressed «Lo construí», as recommended above. This is an exception for self-study (no trainer in the room); the rule in `wawiwa-activities/CLAUDE.md` still holds for the films, which use different data from the tasks wherever they can (D3).
+- Q1 and Q3 are still open.
