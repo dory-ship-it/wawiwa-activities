@@ -1,0 +1,1487 @@
+/* Frame: stage, shell (scene, top bar, footer), components and layouts of the "Hybrid cinematic" look
+   (NL1). Visual source of truth: planning/design-reference/hybrid-cinematic/screens-intro-ch2.html.
+   Every value is the frames' own: their cqw x 12.8 = stage px. The stage is a fixed 720 px high box,
+   1280 px wide (up to 1600 on a wide window, --w-stage-w), scaled as a whole by src/engine.js, so the
+   frames' ratios hold at any window size. Colours only through src/tokens.css. No text below 14px. */
+
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; background: var(--wl-stone); overflow: hidden; }
+body { font-family: var(--wl-font-ui); color: var(--wl-ink); }
+em, i, cite, address, dfn, var { font-style: normal; } /* no italics anywhere */
+
+#app { position: fixed; inset: 0; overflow: hidden; background: var(--wl-stone); }
+#boot-error { position: fixed; inset: 0; display: grid; place-content: center; gap: 4px; padding: 24px; text-align: center;
+  font: 600 18px/1.4 var(--wl-font-ui); color: var(--wl-ink); background: var(--wl-stone); }
+#boot-error p { margin: 0; }
+
+.w-small-note { position: absolute; left: 0; right: 0; top: 0; height: 40px; margin: 0; display: flex; align-items: center; justify-content: center;
+  font: 500 15px/1.2 var(--wl-font-label); color: var(--wl-navy); background: var(--wl-keypill-bg); }
+
+/* ---------- stage: the frames' .scr (Assistant, line-height 1.6, #111A20 text) ---------- */
+.w-stage { --w-x: calc(var(--w-stage-w, 1280px) - 1280px);
+  position: absolute; left: 0; top: 0; width: var(--w-stage-w, 1280px); height: 720px; transform-origin: 0 0; overflow: hidden;
+  background: var(--wl-stone); font-family: var(--wl-font-ui); line-height: 1.6; color: var(--wl-body-ink); }
+.w-stage[data-scene="stage"] { background: var(--wl-stage-ground); }
+.w-stage:is([data-scene="title"], [data-scene="end"]) { background: var(--wl-o1-ground); }
+.w-stage[data-scene="plain"] { background: var(--wl-stage-ground); } /* FX2 A: the video's clean ground */
+.w-stage *, .w-stage *::before, .w-stage *::after { box-sizing: border-box; }
+.w-stage button { font-family: inherit; }
+:where(.w-stage) p { margin: 0; } /* no specificity: any class's own margin wins */
+
+.w-sr-only { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.w-stage :focus-visible { outline: var(--wl-focus); outline-offset: var(--wl-focus-offset); }
+.w-stage :focus:not(:focus-visible) { outline: none; } /* the ring is for keyboard users only, never after a mouse click */
+.w-instruction:focus, .w-stop-q:focus { outline: none; } /* programmatic focus targets, not operable controls */
+.w-glyph { flex: none; display: block; }
+
+/* ---------- scene: Stage photo, Focus wash, O1 ---------- */
+.w-scene { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+/* FX1 (Kit 13): the Stage photo runs behind the bar (the bar is dark translucent over it) */
+.w-scene-photo { position: absolute; inset: 0; background-size: cover; background-repeat: no-repeat; }
+.w-scene-full { top: 0; }
+.w-scene-photo[data-mirror="true"], .w-wash-photo[data-mirror="true"] { scale: -1 1; } /* QA1: a screen's photo flipped (scale, so the push-in transform still runs) */
+.w-o1-veil { position: absolute; inset: 0; background: var(--wl-o1-veil); }
+/* FX3: less blur, so the photo reads as a place, under a dark veil in the bar's tone; the stage ground
+   is the veil's average tone, so the contrast check measures text on the wash against it */
+.w-stage[data-scene="focus"] { background: var(--wl-wash-ground); }
+.w-wash-photo { position: absolute; inset: -38.4px; background-size: cover; background-repeat: no-repeat; filter: blur(5.12px) saturate(.9); }
+.w-wash-veil { position: absolute; inset: 0; background: var(--wl-wash-veil); }
+/* FX3: text that sits straight on the dark wash (no panel or card under it) turns light: headings
+   white, lines, labels and the eyebrow the on-wash white */
+.w-stage[data-scene="focus"] :is(.w-task-head, .w-focus-head, .w-open-head) .w-instruction,
+.w-stage[data-scene="focus"] :is(.w-map-kicker, .w-evidence b, .w-bpmn-key b) { color: var(--wl-white); }
+.w-stage[data-scene="focus"] :is(.w-task-head, .w-focus-head, .w-open-head) :is(.w-context, .w-subline, .w-concept-text, .w-task-sub),
+.w-stage[data-scene="focus"] :is(.w-map-title, .w-evidence, .w-bpmn-key p, .w-sdeck .w-deck-count, .w-float .w-attempts) { color: var(--wl-on-wash); }
+.w-stage[data-scene="focus"] .w-focus-head .w-eyebrow { color: var(--wl-on-wash); }
+.w-stage[data-scene="focus"] .w-float .w-attempt-discs i { border-color: var(--wl-white); background: transparent; }
+.w-stage[data-scene="focus"] .w-float .w-attempt-discs i[data-used="true"] { background: var(--wl-white); }
+
+/* ---------- top bar: y 0 to 80.64 (FX1: theme-kit13-topbar.html, Round 5 Kit 13; its cqw x 12.8;
+   FX2 C: on every screen, O1 and END included, and 17% lower: logo, chapter label and steps with it) ---------- */
+.w-bar { position: absolute; left: 0; top: 0; width: 100%; height: var(--wl-bar-h); z-index: 4; display: flex; align-items: center; gap: 13.44px; padding: 0 23.04px;
+  background: var(--wl-bar-stage-bg); }
+/* the dark bar: every screen (FX3: Focus too), over the photo or the Focus wash */
+.w-stage[data-bar="dark"] > .w-bar { background: var(--wl-bar-stage-bg); border-bottom: 0; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.w-stage[data-scene="title"] > .w-footer { display: none; }
+.w-bar-logo { flex: none; width: 70.4px; height: auto; }
+.w-bar-rule { flex: none; width: 1px; height: 32px; background: var(--wl-line-mid); }
+.w-bar-menu { flex: none; width: 44px; height: 44px; margin: 0 -0.88px; display: grid; place-content: center; gap: 4.224px; padding: 0; border: 0;
+  border-radius: var(--wl-radius-btn); background: transparent; cursor: pointer; }
+.w-bar-menu i { display: block; width: 23.04px; height: 2.56px; background: var(--wl-ink); }
+.w-bar-chapter { flex: none; display: grid; min-width: 153.6px; line-height: 1.15; white-space: nowrap; }
+.w-bar-of { font: 500 14.08px/1.15 var(--wl-font-label); color: var(--wl-muted); }
+.w-bar-title { font: 800 20.48px/1.15 var(--wl-font-ui); color: var(--wl-ink); }
+.w-saved { flex: none; font: 500 14.08px/1.2 var(--wl-font-label); color: var(--wl-error); }
+.w-steps-bar { margin: 0 0 0 auto; padding: 0; list-style: none; display: flex; align-items: flex-start; }
+.w-step { flex: none; width: 71.68px; display: flex; flex-direction: column; align-items: center; gap: 3.84px; }
+.w-step-disc { width: var(--wl-step-d); height: var(--wl-step-d); border-radius: 50%; display: grid; place-items: center;
+  background: var(--wl-white); border: 1px solid var(--wl-line-strong); color: var(--wl-idle-ink); }
+.w-step[data-state="done"] .w-step-disc { border: 0; background: var(--wl-navy); color: var(--wl-white); }
+.w-step[data-state="current"] .w-step-disc { border: 0; box-shadow: 0 0 0 3.2px var(--wl-turquoise), 0 0 0 7.68px var(--wl-halo); color: var(--wl-teal-ink); }
+.w-step-label { font: 500 14.08px/normal var(--wl-font-ui); color: var(--wl-muted); white-space: nowrap; }
+.w-step[data-state="current"] .w-step-label { font-weight: 700; color: var(--wl-ink); }
+.w-step-link { flex: 1; min-width: 17.92px; height: 2.56px; margin-top: 16px; background: var(--wl-line-mid); }
+.w-step-link[data-state="done"] { background: var(--wl-navy); }
+/* the dark bar: white on it; done = white disc with an ink check, to come = translucent white disc */
+.w-stage[data-bar="dark"] .w-bar-rule { background: var(--wl-bar-on-dark-rule); }
+.w-stage[data-bar="dark"] .w-bar-menu i { background: var(--wl-white); }
+.w-stage[data-bar="dark"] .w-bar-of { color: var(--wl-bar-on-dark-text); }
+.w-stage[data-bar="dark"] .w-bar-title { color: var(--wl-white); }
+.w-stage[data-bar="dark"] .w-step-disc { background: var(--wl-bar-on-dark-disc); border-color: var(--wl-bar-on-dark-ring); color: var(--wl-bar-on-dark-icon); }
+.w-stage[data-bar="dark"] .w-step[data-state="done"] .w-step-disc { background: var(--wl-white); color: var(--wl-ink); }
+.w-stage[data-bar="dark"] .w-step[data-state="current"] .w-step-disc { background: var(--wl-white); color: var(--wl-teal-ink); }
+.w-stage[data-bar="dark"] .w-step-label { color: var(--wl-bar-on-dark-text); }
+.w-stage[data-bar="dark"] .w-step[data-state="current"] .w-step-label { color: var(--wl-white); }
+.w-stage[data-bar="dark"] .w-step-link { background: var(--wl-bar-on-dark-link); }
+.w-stage[data-bar="dark"] .w-step-link[data-state="done"] { background: var(--wl-white); }
+
+/* ---------- main: y 80.64 to 720, under the bar on every screen ---------- */
+.w-main { position: absolute; left: 0; top: var(--wl-bar-h); width: 100%; height: calc(720px - var(--wl-bar-h)); z-index: 1; overflow: hidden; }
+
+/* ---------- footer: Previous bottom-left, Next bottom-right ---------- */
+.w-footer { position: absolute; left: 23.04px; right: 23.04px; bottom: 17.92px; z-index: 4; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
+.w-footer > button { pointer-events: auto; }
+.w-prev { margin: 0; padding: 10.24px 23.04px; border: 1px solid var(--wl-line-strong); border-radius: 7.68px; background: var(--wl-white);
+  font: 600 17.92px/normal var(--wl-font-ui); color: var(--wl-navy); cursor: pointer; }
+.w-prev:hover:not([aria-disabled="true"]) { border-color: var(--wl-navy); }
+.w-prev[aria-disabled="true"] { color: var(--wl-muted); cursor: default; }
+/* Next: 18.7px bold (white on red needs large text: 18.66px bold); the line box keeps the frames' height (17.92px Assistant, line-height normal) */
+.w-next { margin: 0; display: inline-flex; align-items: center; gap: 7.68px; padding: 10.24px 33.28px; border: 0; border-radius: 7.68px;
+  font: var(--wl-fw-next) var(--wl-fs-next)/23.44px var(--wl-font-ui); color: var(--wl-white); cursor: pointer; }
+.w-next[data-locked="true"] { padding: 10.24px 28.16px; background: var(--wl-neutral-line); cursor: not-allowed; }
+.w-next[data-locked="false"] { background: var(--wl-red); }
+.w-next[data-locked="false"]:hover { filter: brightness(.92); }
+
+/* ---------- buttons ---------- */
+.w-btn { margin: 0; display: inline-flex; align-items: center; justify-content: center; gap: 7.68px; min-height: 44px; border-radius: var(--wl-radius-btn);
+  font-family: var(--wl-font-ui); cursor: pointer; white-space: nowrap; text-decoration: none; }
+/* the panel's action (Save, Check, Resume): navy outline; locked = grey with a lock (Check, Resume) */
+.w-btn-action { padding: 7.68px 15.36px; border: 1.92px solid var(--wl-navy); background: var(--wl-white); font: 700 17.28px/normal var(--wl-font-ui); color: var(--wl-navy); }
+.w-btn-action:hover:not(:disabled):not([data-locked="true"]) { background: var(--wl-keypill-bg); }
+.w-btn-action:disabled, .w-btn-action[data-locked="true"] { padding: 7.68px 17.92px; border: 0; background: var(--wl-neutral-line); color: var(--wl-white); cursor: not-allowed; }
+.w-btn-lock { display: none; }
+.w-btn-action:disabled .w-btn-lock, .w-btn-action[data-locked="true"] .w-btn-lock { display: block; }
+.w-resume-play { color: var(--wl-navy); }
+.w-btn-action[data-locked="true"] .w-resume-play { display: none; }
+/* secondary (the frames' Previous look): Open Homework 1, the help question, the strip's routes */
+.w-btn-ghost { padding: 10.24px 23.04px; border: 1px solid var(--wl-line-strong); border-radius: 7.68px; background: var(--wl-white);
+  font: 600 17.92px/normal var(--wl-font-ui); color: var(--wl-navy); }
+.w-btn-ghost:hover { border-color: var(--wl-navy); }
+.w-help-btn { position: relative; }
+.w-help-btn:hover, .w-help-btn:focus-visible { border: 2.56px solid var(--wl-navy); }
+.w-link { min-height: 44px; padding: 0 10.24px; white-space: nowrap; border: 0; border-radius: var(--wl-radius-btn); background: none; font: 600 16.64px/normal var(--wl-font-ui); color: var(--wl-navy);
+  text-decoration: underline; text-underline-offset: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 6.4px; }
+.w-link:hover { background: var(--wl-keypill-bg); }
+/* Show me: white, 2 px navy border, the hand and the label */
+.w-showme { flex: none; margin: 0; display: inline-flex; align-items: center; gap: 7.68px; min-height: 44px; padding: 7.68px 15.36px; border: 1.92px solid var(--wl-navy);
+  border-radius: var(--wl-radius-btn); background: var(--wl-white); font: 700 17.28px/normal var(--wl-font-ui); color: var(--wl-navy); cursor: pointer; white-space: nowrap; }
+.w-showme:hover { background: var(--wl-keypill-bg); }
+
+/* ---------- panel (the ivory sheet): hugs its content, centred between the bar and the footer ---------- */
+/* (centred between the bar and the footer: half of main less half the footer's 72.32; 275.2 under the FX1 bar) */
+.w-sheet { position: absolute; top: calc((720px - var(--wl-bar-h)) / 2 - 36.16px); transform: translateY(-50%); z-index: 2; display: flex; flex-direction: column; overflow: visible;
+  padding: 28.16px 30.72px; border-radius: var(--wl-radius-panel); background: var(--wl-ivory); box-shadow: var(--wl-panel-shadow); }
+.w-sheet-right { right: 30.72px; }
+.w-sheet-46 { width: 588.8px; }
+.w-sheet-44 { width: 563.2px; }
+.w-sheet-focus { left: 50%; width: min(1075.2px, calc(100% - 204.8px)); transform: translate(-50%, -50%); }
+.w-context { font: 400 19.2px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-sheet .w-instruction { margin: 17.92px 0; font: 800 38.4px/1.05 var(--wl-font-ui); letter-spacing: -1.024px; color: var(--wl-ink); }
+.w-sheet-focus .w-instruction { margin: 15.36px 0 20.48px; }
+.w-sheet > .w-instruction:first-child { margin-top: 0; }
+.w-sheet-title { margin: 0 0 17.92px; font: 800 28.16px/normal var(--wl-font-ui); color: var(--wl-ink); }
+.w-head-row { display: flex; align-items: baseline; justify-content: space-between; gap: 20.48px; margin: 15.36px 0 7.68px; }
+.w-sheet > .w-head-row:first-child { margin-top: 0; }
+.w-head-row .w-instruction, .w-sheet .w-head-row .w-instruction { margin: 0; }
+/* FX1 B1: a question's heading with its tools on the right ("Show me how", a field chip); the
+   heading keeps its own margins */
+.w-head-tools { flex: none; display: inline-flex; align-items: center; gap: 12.8px; }
+.w-head-tools:empty { display: none; }
+.w-sheet .w-head-q { align-items: center; margin: 17.92px 0; }
+.w-sheet-focus .w-head-q { margin: 15.36px 0 20.48px; }
+.w-sheet > .w-head-q:first-child { margin-top: 0; }
+.w-round-top { display: flex; align-items: center; justify-content: space-between; gap: 12.8px; }
+.w-sheet .w-head-metric { align-items: center; margin: 12.8px 0 5.12px; } /* S11: NL3's row, one line with the chip and "Show me how" */
+/* FX1: "Show me how" and the attempt marker on the card over the photo (S01's glass, S14 / S15's case card) */
+.w-card-tools { display: flex; align-items: center; gap: 17.92px; margin-top: 17.92px; }
+.w-card-tools .w-attempts { margin: 0; }
+.w-glass .w-card-tools .w-attempts { color: var(--wl-on-glass); }
+.w-glass .w-attempt-discs i { border-color: var(--wl-white); background: transparent; }
+.w-glass .w-attempt-discs i[data-used="true"] { background: var(--wl-white); }
+.w-subline { margin: 0 0 20.48px; font: 400 19.2px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-label { margin: 0 0 6.4px; font: 600 14.72px/normal var(--wl-font-label); letter-spacing: .04em; color: var(--wl-teal-ink); }
+
+/* ---------- dark glass (the quote card, the warm-up / video / stop card) ---------- */
+.w-glass { position: absolute; z-index: 2; margin: 0; border-radius: 15.36px; background: var(--wl-quote-glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: var(--wl-white); }
+.w-glass-top { left: 43.52px; top: 35.84px; width: 563.2px; padding: 28.16px 30.72px; background: var(--wl-warm-glass); }
+.w-glass-kicker { display: flex; align-items: center; gap: 12.8px; color: var(--wl-turquoise); }
+.w-glass-label { font: 700 17.92px/normal var(--wl-font-ui); color: var(--wl-white); }
+.w-chip-dark { font: 600 14.72px/normal var(--wl-font-label); border-radius: 5.12px; padding: 2.56px 10.24px; background: var(--wl-turquoise); color: var(--wl-o1-ground); }
+.w-glass-top .w-instruction { margin: 15.36px 0 0; font: 800 39.68px/1.15 var(--wl-font-ui); letter-spacing: -.64px; color: var(--wl-white); }
+.w-gq { fill: var(--wl-turquoise); stroke: none; }
+/* S01: the character's quote, bottom left on the photo */
+.w-quote-glass { left: 43.52px; bottom: 102.4px; width: 512px; padding: 25.6px 30.72px; }
+.w-quote { margin: 0; }
+.w-quote-1 { margin: 12.8px 0 0; font: 800 37.12px/1.2 var(--wl-font-ui); letter-spacing: -.64px; color: var(--wl-white); }
+.w-attrib { margin-top: 15.36px; font: 500 16.64px/normal var(--wl-font-label); color: var(--wl-on-glass); }
+
+/* ---------- answer cards ---------- */
+.w-ans-list { display: grid; gap: 12.8px; }
+.w-ans-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12.8px 20.48px; }
+.w-ans-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.w-main[data-layout="stage-decision"] .w-ans-list { gap: 10.24px; }
+.w-opt { position: relative; margin: 0; text-align: left; cursor: pointer; transition: border-color .15s; }
+.w-opt[aria-disabled="true"] { cursor: default; }
+.w-ans { width: 100%; display: flex; align-items: center; gap: 16.64px; padding: 12.8px 19.2px; border: 1px solid var(--wl-card-line); border-radius: var(--wl-radius-card);
+  background: var(--wl-white); font: 600 20.48px/normal var(--wl-font-ui); color: var(--wl-body-ink); }
+.w-ans-mark, .w-opt-mark { flex: none; width: 29.44px; height: 29.44px; display: grid; place-items: center; border: 2.56px solid var(--wl-navy); border-radius: 50%; color: var(--wl-white); }
+.w-ans-multi .w-ans-mark { border-radius: 6.4px; }
+.w-opt-label { flex: 1 1 auto; min-width: 0; }
+.w-ans:not([data-result="correct"]):not([data-result="wrong"]):not([aria-disabled="true"]):hover { border-color: var(--wl-navy); }
+/* selected (warm-up guess, a picked card): navy outline and dot; several (S03): the navy square with a check */
+.w-ans[aria-checked="true"], .w-ans[aria-pressed="true"]:not([data-result="correct"]):not([data-result="wrong"]) { border: 3.2px solid var(--wl-navy); }
+.w-ans[aria-checked="true"] .w-ans-mark::after, .w-ans:not(.w-ans-multi *)[aria-pressed="true"]:not([data-result="correct"]):not([data-result="wrong"]) .w-ans-mark:empty::after {
+  content: ""; width: 14.08px; height: 14.08px; border-radius: 50%; background: var(--wl-navy); }
+.w-ans-multi .w-ans[aria-pressed="true"]:not([data-result="correct"]):not([data-result="wrong"]) .w-ans-mark { background: var(--wl-navy); }
+/* correct: teal border and filled check; wrong: red border and filled cross (never colour alone) */
+.w-ans[data-result="correct"] { border: 3.2px solid var(--wl-teal); }
+.w-ans[data-result="correct"] .w-opt-mark { border-color: var(--wl-teal); background: var(--wl-teal); }
+.w-ans[data-result="wrong"] { border: 3.2px solid var(--wl-error); }
+.w-ans[data-result="wrong"] .w-opt-mark { border-color: var(--wl-error); background: var(--wl-error); }
+/* FX1 B2: on S01 two cards can carry the thick border (the right one shown, the last wrong one): the
+   padding gives back the border's 2.2px, so the panel keeps its height (41cqw) */
+.w-sheet-46 .w-ans[data-result="correct"], .w-sheet-46 .w-ans[data-result="wrong"] { padding: 10.6px 17px; }
+/* glossary terms: a dotted underline (#55626C, offset .35cqw) */
+.w-term-static, .w-term { text-decoration: underline dotted var(--wl-muted); text-underline-offset: 4.48px; }
+.w-term { cursor: help; border-radius: 2px; }
+
+/* ---------- band: the hint row (hint, tool) and the feedback strip flush to the panel's foot ---------- */
+.w-band { flex: none; margin: 0 -30.72px -28.16px; display: flex; flex-direction: column; }
+.w-band[data-empty="true"] { display: none; }
+.w-band-row { margin-top: 17.92px; padding: 0 30.72px 28.16px; display: flex; align-items: center; justify-content: space-between; gap: 15.36px; }
+.w-band[data-strip="on"] .w-band-row { padding-bottom: 0; }
+.w-band-hint { font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+.w-band-tool { margin-left: auto; display: flex; gap: 12.8px; }
+.w-band-tool:empty { display: none; }
+/* FX1 B2: the attempt marker, two small discs and "Attempt 1 of 2" (the S04 counter's type) */
+.w-attempts { margin: 0 0 0 auto; flex: none; display: inline-flex; align-items: center; gap: 8.96px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); white-space: nowrap; }
+.w-attempts:not([hidden]) + .w-band-tool { margin-left: 0; }
+.w-attempt-discs { display: inline-flex; gap: 5.12px; }
+.w-attempt-discs i { width: 12.8px; height: 12.8px; border-radius: 50%; border: 1.92px solid var(--wl-navy); background: var(--wl-white); }
+.w-attempt-discs i[data-used="true"] { background: var(--wl-navy); }
+.w-float .w-band-row { margin-top: 0; padding: 0 0 10.24px; }
+.w-strip { display: none; margin-top: 17.92px; padding: 16.64px 30.72px; gap: 15.36px; align-items: flex-start; border-top: 3.84px solid; border-radius: 0 0 var(--wl-radius-panel) var(--wl-radius-panel); }
+.w-band[data-strip="on"] .w-strip { display: flex; }
+.w-strip[data-tone="correct"] { background: var(--wl-correct-bg); border-top-color: var(--wl-teal); }
+.w-strip[data-tone="wrong"] { background: var(--wl-error-bg); border-top-color: var(--wl-error); }
+.w-strip[data-tone="neutral"] { background: var(--wl-neutral-bg); border-top-color: var(--wl-neutral-line); }
+.w-strip-icon { flex: none; display: grid; }
+.w-strip[data-tone="correct"] .w-strip-icon { color: var(--wl-teal-ink); }
+.w-strip[data-tone="wrong"] .w-strip-icon { color: var(--wl-error); }
+.w-strip[data-tone="neutral"] .w-strip-icon { color: var(--wl-grey-ink); }
+.w-gd { fill: currentColor; stroke: none; }
+.w-gm { fill: none; stroke: var(--wl-white); }
+.w-strip-body { flex: 1 1 auto; min-width: 0; }
+.w-band-live { margin: 0; }
+.w-band-verdict { display: block; font: 800 23.04px/normal var(--wl-font-ui); }
+.w-strip[data-tone="correct"] .w-band-verdict { color: var(--wl-correct-head); }
+.w-strip[data-tone="wrong"] .w-band-verdict { color: var(--wl-error-head); }
+.w-strip[data-tone="neutral"] .w-band-verdict { color: var(--wl-text-2); }
+.w-band-text { display: block; margin-top: 2.56px; font: 400 18.56px/1.45 var(--wl-font-ui); color: var(--wl-fb-text); }
+.w-band-actions { flex: none; align-self: center; display: flex; flex-direction: column; gap: 7.68px; }
+.w-band-actions:empty { display: none; }
+
+/* ---------- tooltip: the quote-glass card ---------- */
+.w-tip { position: absolute; z-index: 50; max-width: 384px; padding: 17.92px 20.48px; border-radius: 15.36px; background: var(--wl-quote-glass);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font: 400 18.56px/1.45 var(--wl-font-ui); color: var(--wl-white); white-space: pre-line; pointer-events: none; }
+
+/* ---------- Focus heads (O2, O3, K1): the small teal label and the large h1 ---------- */
+.w-focus-head { position: absolute; left: max(64px, calc((100% - 1152px) / 2)); right: max(64px, calc((100% - 1152px) / 2)); top: 38.4px; }
+.w-eyebrow { display: inline-flex; align-items: center; gap: 8.96px; font: 700 16.64px/normal var(--wl-font-ui); color: var(--wl-teal-ink); }
+.w-focus-head .w-instruction { margin: 15.36px 0 0; font: 800 56.32px/1 var(--wl-font-ui); letter-spacing: -1.792px; color: var(--wl-ink); }
+
+/* ---------- O1 title (dark, under the dark bar: FX2 C, the bar's logo replaces O1's own) ---------- */
+.w-o1-body { position: absolute; left: 64px; bottom: 102.4px; width: 742.4px; z-index: 2; }
+.w-title-program { font: 600 17.28px/normal var(--wl-font-label); letter-spacing: .06em; color: var(--wl-aqua-text); }
+.w-main[data-layout="title"] .w-instruction { margin: 15.36px 0 0; font: 800 69.12px/1.02 var(--wl-font-ui); letter-spacing: -2.304px; color: var(--wl-white); }
+.w-o1-quote { margin-top: 28.16px; display: flex; gap: 15.36px; align-items: flex-start; }
+.w-o1-quote > svg { margin-top: 5.12px; }
+.w-title-quote { font: 600 26.88px/1.3 var(--wl-font-ui); color: var(--wl-glass-text); }
+.w-title-actions { margin-top: 35.84px; display: flex; }
+.w-start { margin: 0; display: inline-flex; align-items: center; gap: 10.24px; padding: 15.36px 33.28px; border: 0; border-radius: 8.96px; background: var(--wl-red);
+  font: 700 23.04px/normal var(--wl-font-ui); color: var(--wl-white); cursor: pointer; }
+.w-start:hover { filter: brightness(.92); }
+
+/* ---------- FX2 G: END, the closing screen (the films' branded end card): centred on O1's dark photo ---------- */
+.w-end { position: absolute; left: 50%; top: calc((720px - var(--wl-bar-h)) / 2 - 36.16px); width: min(921.6px, calc(100% - 204.8px)); transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; text-align: center; }
+.w-end-logo { width: 112.64px; height: auto; margin-bottom: 25.6px; }
+.w-main[data-layout="end"] .w-instruction { margin: 0; font: 800 76.8px/1.02 var(--wl-font-ui); letter-spacing: -2.304px; color: var(--wl-white); }
+.w-end-accent { color: var(--wl-turquoise); }
+.w-end-sub { margin-top: 15.36px; font: 600 20.48px/1.35 var(--wl-font-label); letter-spacing: .02em; color: var(--wl-aqua-text); }
+.w-end-status { margin-top: 30.72px; display: flex; flex-direction: column; align-items: center; gap: 10.24px; }
+.w-end-chip { display: inline-flex; align-items: center; gap: 8.96px; padding: 6.4px 17.92px; border-radius: 7.68px; background: var(--wl-neutral-bg);
+  font: 700 19.2px/normal var(--wl-font-ui); color: var(--wl-ink); }
+.w-end-chip[data-passed="true"] { background: var(--wl-turquoise); color: var(--wl-o1-ground); }
+.w-end-hint { font: 400 18.56px/1.4 var(--wl-font-ui); color: var(--wl-glass-text); }
+.w-end-next { margin-top: 30.72px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12.8px 20.48px; }
+.w-end-next-line { font: 600 20.48px/1.35 var(--wl-font-ui); color: var(--wl-white); }
+
+/* ---------- O2 module map ---------- */
+.w-map { position: absolute; left: 0; right: 0; top: 241.92px; height: 153.6px; }
+.w-map-tabs { position: relative; height: 100%; margin: 0 auto; }
+.w-map-line { position: absolute; top: 39.3px; height: 3.2px; background: var(--wl-line-mid); }
+.w-map-line-done { background: var(--wl-navy); }
+.w-map-tab { position: absolute; top: 0; width: 204.8px; margin: 0; padding: 0; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center;
+  gap: 11.52px; text-align: center; cursor: pointer; }
+.w-map-disc { width: 81.92px; height: 81.92px; border-radius: 50%; display: grid; place-items: center; background: var(--wl-white); border: 1px solid var(--wl-line-strong);
+  font: 600 30.72px/normal var(--wl-font-ui); color: var(--wl-idle-ink); }
+.w-map-tab[data-status="done"] .w-map-disc { border: 0; background: var(--wl-navy); color: var(--wl-white); }
+.w-map-tab[data-status="today"] .w-map-disc { border: 0; box-shadow: 0 0 0 7.68px var(--wl-turquoise), 0 0 0 17.92px var(--wl-halo); font-weight: 800; color: var(--wl-teal-ink); }
+.w-map-tab:hover .w-map-disc { outline: 2px solid var(--wl-navy); outline-offset: 3px; }
+.w-map-today { position: absolute; top: -43.52px; padding: 3.2px 10.24px; border-radius: 5.12px; background: var(--wl-chip-bg); font: 600 14.72px/normal var(--wl-font-label); color: var(--wl-correct-head); }
+.w-map-labels { display: grid; gap: 2.56px; }
+.w-map-kicker { font: 700 20.48px/normal var(--wl-font-ui); color: var(--wl-ink); }
+.w-map-tab[aria-selected="true"] .w-map-kicker { font-weight: 800; }
+.w-map-title { font: 400 17.28px/normal var(--wl-font-label); color: var(--wl-muted); }
+.w-map-panel { position: absolute; left: 50%; transform: translateX(-50%); width: min(1075.2px, calc(100% - 204.8px)); top: 435.2px; padding: 19.2px 25.6px;
+  border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); }
+.w-map-caret { position: absolute; top: -12.16px; width: 23.04px; height: 23.04px; background: var(--wl-white); border-left: 1px solid var(--wl-line); border-top: 1px solid var(--wl-line); transform: rotate(45deg); }
+.w-map-panel-text { font: 400 22.4px/1.45 var(--wl-font-ui); color: var(--wl-text-2); text-align: center; }
+
+/* ---------- O3 goals ---------- */
+.w-deliverable, .w-goals, .w-figs, .w-evidence { position: absolute; left: 50%; transform: translateX(-50%); width: min(1152px, calc(100% - 128px)); }
+.w-deliverable { top: 177.92px; display: flex; align-items: center; gap: 20.48px; padding: 20.48px 25.6px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); }
+.w-deliverable-icon { flex: none; width: 56.32px; height: 56.32px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-navy); color: var(--wl-white); }
+.w-deliverable-text { font: 400 22.4px/1.45 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-deliverable-text b { font-weight: 700; color: var(--wl-ink); }
+.w-deliverable-next { font-weight: 600; color: var(--wl-teal-ink); }
+.w-goals { top: 325.12px; margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20.48px; }
+.w-goal { position: relative; min-height: 92.16px; margin: 0; display: flex; align-items: center; gap: 12.8px; padding: 15.36px 17.92px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel);
+  background: var(--wl-white); text-align: left; cursor: pointer; }
+.w-goal:hover { border-color: var(--wl-navy); }
+/* FX1 D2: the open goal (the O2 station's selected look: navy border, card shadow) and its detail card */
+.w-goal[aria-selected="true"] { border: 2.56px solid var(--wl-navy); box-shadow: var(--wl-card-shadow); }
+.w-goal[aria-selected="true"] .w-goal-num { border-color: var(--wl-navy); color: var(--wl-navy); }
+.w-goal-num { flex: none; }
+.w-goal .w-goal-label { font-size: 17.92px; } /* two lines at most in a row of five tiles (the S10 field name size) */
+.w-goal-panel { top: 445.44px; width: min(1152px, calc(100% - 128px)); }
+.w-goal-panel .w-map-panel-text { text-align: left; }
+/* FX1 D1: O2's "Click to open" cue above the first station not open (the ghost chip's look) */
+.w-map-cue { position: absolute; top: -43.52px; padding: 3.2px 10.24px; border-radius: 6.4px; background: var(--wl-navy); font: 700 15.36px/normal var(--wl-font-ui); color: var(--wl-white); white-space: nowrap; }
+.w-goal-num { width: 40.96px; height: 40.96px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--wl-line-strong); background: var(--wl-white);
+  font: 600 17.92px/normal var(--wl-font-ui); color: var(--wl-idle-ink); }
+.w-goal-label { font: 800 20.48px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+
+/* ---------- K1 key idea ---------- */
+.w-key-label { display: inline-flex; align-items: center; gap: 8.96px; padding: 6.4px 15.36px 6.4px 10.24px; border-radius: 25.6px; background: var(--wl-keypill-bg);
+  font: 700 16.64px/normal var(--wl-font-ui); color: var(--wl-teal-ink); }
+.w-concept-text { margin-top: 12.8px; max-width: 844.8px; font: 400 22.4px/1.45 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-figs { top: 261.12px; display: grid; grid-template-columns: minmax(0, 1fr) 38.4px minmax(0, 1fr); align-items: center; gap: 12.8px; }
+.w-figs-arrow { color: var(--wl-navy); }
+.w-fig { margin: 0; display: grid; gap: 10.24px; padding: 19.2px 25.6px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); }
+.w-fig-text { display: grid; gap: 6.4px; }
+.w-fig-label { font: 600 14.72px/normal var(--wl-font-label); letter-spacing: .04em; }
+.w-fig-caption { font: 800 26.88px/normal var(--wl-font-ui); }
+.w-fig[data-kind="mess"] { color: var(--wl-grey-ink); }
+.w-fig[data-kind="lean"] { color: var(--wl-teal-ink); }
+.w-fig-draw { display: block; width: 100%; height: 97.28px; }
+.w-fig-lines { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.w-fig-heads { stroke: none; }
+.w-fig[data-kind="mess"] .w-fig-lines { stroke: var(--wl-grey-line); }
+.w-fig[data-kind="mess"] .w-fig-heads { fill: var(--wl-grey-line); }
+.w-fig[data-kind="lean"] .w-fig-lines { stroke: var(--wl-teal-ink); }
+.w-fig[data-kind="lean"] .w-fig-heads { fill: var(--wl-teal-ink); }
+.w-evidence { bottom: 107.52px; display: flex; justify-content: space-between; align-items: baseline; gap: 20px; font: 400 17.28px/normal var(--wl-font-label); color: var(--wl-evidence); }
+.w-evidence b { font-weight: 700; color: var(--wl-ink); }
+.w-evidence-source { white-space: nowrap; }
+
+/* ---------- K2 key idea: three parts on a line, the case toggle ---------- */
+/* FX1 E1: the cards, then the toggle under them at full width (one column, 18.5cqw from the top of main) */
+.w-parts-wrap { position: absolute; left: 50%; transform: translateX(-50%); width: min(1152px, calc(100% - 128px)); top: 236.8px; display: grid; gap: 12.8px; }
+/* with the case lines shown the cards, then the toggle, stay clear of Previous / Next */
+.w-parts-wrap .w-part { gap: 7.68px; padding: 15.36px 25.6px; }
+.w-parts { display: grid; grid-template-columns: minmax(0, 1fr) 38.4px minmax(0, 1fr) 38.4px minmax(0, 1fr); align-items: center; gap: 12.8px; }
+.w-parts-arrow { color: var(--wl-navy); }
+.w-part { margin: 0; align-self: stretch; display: grid; gap: 12.8px; align-content: start; padding: 20.48px 25.6px; border: 1px solid var(--wl-line);
+  border-radius: var(--wl-radius-panel); background: var(--wl-white); }
+.w-part-num { width: 40.96px; height: 40.96px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--wl-line-strong); background: var(--wl-white);
+  font: 600 17.92px/normal var(--wl-font-ui); color: var(--wl-idle-ink); }
+.w-part-body { display: grid; gap: 5.12px; }
+.w-part-title { font: 800 26.88px/normal var(--wl-font-ui); color: var(--wl-ink); }
+.w-part-text { min-height: 53.76px; font: 400 19.2px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-part-case { display: grid; gap: 3.84px; padding-top: 12.8px; border-top: 1px solid var(--wl-line); }
+.w-part-case-label { font: 600 14.72px/normal var(--wl-font-label); letter-spacing: .04em; color: var(--wl-teal-ink); }
+.w-part-case-text { font: 700 20.48px/1.3 var(--wl-font-ui); color: var(--wl-teal-ink); }
+/* the toggle: the Show me outline (no icon); pressed = a thicker navy border and a soft ring */
+.w-case-toggle { position: relative; width: 100%; margin: 0; display: inline-flex; align-items: center; justify-content: center; gap: 7.68px; min-height: 44px; padding: 7.68px 15.36px;
+  border: 1.92px solid var(--wl-navy); border-radius: var(--wl-radius-btn); background: var(--wl-white); font: 700 17.28px/normal var(--wl-font-ui); color: var(--wl-navy); cursor: pointer; white-space: nowrap; }
+.w-case-toggle:hover { background: var(--wl-keypill-bg); }
+.w-case-toggle[aria-pressed="true"] { border-width: 2.56px; box-shadow: 0 0 0 3.84px var(--wl-press-ring); }
+
+/* ---------- NL3 K4 key idea, by analogy: K1's two figure cards side by side (no arrow), a list each ---------- */
+.w-figs-two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 25.6px; align-items: stretch; }
+.w-kcol { align-content: start; gap: 15.36px; padding: 23.04px 25.6px; }
+.w-kcol-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 12.8px; }
+.w-kcol-list li { display: flex; gap: 12.8px; align-items: flex-start; font: 400 20.48px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-kcol-list b { font-weight: 700; color: var(--wl-ink); }
+.w-kcol-mark { flex: none; width: 25.6px; height: 25.6px; margin-top: 2.56px; display: grid; place-items: center; border-radius: 50%; color: var(--wl-white); }
+.w-kcol[data-kind="lean"] .w-kcol-mark { background: var(--wl-teal); }
+.w-kcol[data-kind="mess"] .w-kcol-mark { background: var(--wl-grey-ink); }
+
+/* ---------- S02 input ---------- */
+.w-form-task { display: flex; flex-direction: column; }
+.w-fields { display: grid; grid-template-columns: 384px minmax(0, 1fr); gap: 25.6px; }
+.w-field { display: grid; gap: 6.4px; align-content: start; }
+.w-field-label { font: 600 20.48px/normal var(--wl-font-ui); color: var(--wl-ink); }
+.w-input { display: block; width: 100%; min-height: 56.32px; margin: 0; padding: 12.8px 19.2px; border: 1px solid var(--wl-card-line); border-radius: var(--wl-radius-card);
+  background: var(--wl-white); font: 400 20.48px/1.4 var(--wl-font-ui); color: var(--wl-ink); resize: none; }
+textarea.w-input { height: 115.2px; min-height: 115.2px; }
+.w-input::placeholder { color: var(--wl-idle-ink); opacity: 1; }
+.w-input:focus, .w-input.w-ghost-on { border: 3.2px solid var(--wl-navy); outline: none; }
+.w-counter { justify-self: end; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+.w-actionbar { display: flex; align-items: center; gap: 15.36px; margin-top: 15.36px; }
+/* S08B: three fields on a line, an arrow between each two */
+.w-fields-chain { gap: 15.36px; } /* the columns from each field's width (src/templates/input.js) */
+.w-fields-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.w-btn-end { margin-left: auto; }
+/* FX1 D4 (S02): the head above the panel, the panel below it, the whole group centred between the bar
+   and the footer; the help row of small links; Save as the primary filled navy button */
+.w-open { position: absolute; left: 50%; top: calc((720px - var(--wl-bar-h)) / 2 - 36.16px); width: min(1075.2px, calc(100% - 204.8px)); transform: translate(-50%, -50%); z-index: 2; display: flex; flex-direction: column; gap: 20.48px; }
+.w-open > .w-sheet { position: relative; left: auto; top: auto; width: auto; transform: none; }
+.w-open-head { padding: 0 30.72px; }
+.w-open-head .w-head-q { margin: 7.68px 0 0; }
+.w-open-head .w-instruction { font: 800 38.4px/1.05 var(--wl-font-ui); letter-spacing: -1.024px; color: var(--wl-ink); }
+.w-open-head .w-subline { margin: 6.4px 0 0; }
+.w-sheet-open .w-helprow { display: flex; align-items: center; gap: 12.8px; margin-left: -10.24px; }
+.w-sheet-open .w-actionbar { margin-top: 20.48px; }
+.w-link-small { font: 600 15.36px/normal var(--wl-font-ui); }
+.w-link-small.w-help-btn:hover, .w-link-small.w-help-btn:focus-visible { border: 0; }
+.w-btn-primary { padding: 7.68px 25.6px; border: 0; background: var(--wl-navy); font: 700 17.28px/normal var(--wl-font-ui); color: var(--wl-white); }
+.w-btn-primary:hover:not(:disabled) { filter: brightness(1.12); }
+.w-btn-primary:disabled { background: var(--wl-neutral-line); cursor: not-allowed; }
+.w-btn-primary:disabled .w-btn-lock { display: block; }
+/* S17B: the learner's earlier text, read-only (the S19 sketch's stone box) */
+.w-shown { margin-top: 5.12px; padding: 6.4px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-stone);
+  font: 400 15.36px/1.35 var(--wl-font-ui); color: var(--wl-text-2); overflow-wrap: anywhere; }
+.w-shown span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; } /* two lines on screen (S19's sketch type), the full text for screen readers */
+.w-chain-arrow { align-self: center; margin-top: 22.72px; display: grid; color: var(--wl-navy); }
+.w-privacy { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 7.68px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+
+/* ---------- V1, V2 video (FX2 A: a page under the bar; the film in a bounded 16:9 frame) ---------- */
+/* the column (heading block, frame, player bar) and the side panel (transcript or stop) bottom-aligned
+   in one row, centred on the stage. Sizes in stage px from main's height:
+     --v-room   main below the column's top and its heading, less the player bar
+     closed     the frame about 60% of the stage width, at most as high as main allows (the bar may reach
+                the stage foot here: Previous and Next stay clear at its sides)
+     open/stop  about 55%, and the bar stays clear above Previous / Next (72.32 = 17.92 + 44 + 10.4) */
+.w-main[data-layout="video"] { --v-top: 17.92px; --v-head: 104.96px; --v-ctrl: 51.2px; --v-gap: 20.48px;
+  --v-room: calc(720px - var(--wl-bar-h) - var(--v-top) - var(--v-head) - var(--v-ctrl));
+  --v-w: min(calc(var(--w-stage-w, 1280px) * .6), calc((var(--v-room) - 17.92px) * 16 / 9)); }
+.w-main[data-layout="video"]:is([data-side="open"], [data-side="stop"]) { --v-w: min(calc(var(--w-stage-w, 1280px) * .55), calc((var(--v-room) - 72.32px) * 16 / 9)); }
+.w-player { position: absolute; left: 0; right: 0; top: var(--v-top); display: flex; justify-content: center; align-items: flex-end; gap: var(--v-gap); }
+.w-player-col { flex: none; width: var(--v-w); }
+/* the heading block: the instruction (h1), the meta line, "Watch for:" */
+.w-video-head { height: var(--v-head); }
+.w-video-head .w-instruction { margin: 0; font: 800 30.72px/1.15 var(--wl-font-ui); letter-spacing: -.512px; color: var(--wl-white); }
+.w-video-meta { margin-top: 6.4px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-on-glass); }
+.w-video-title { font-weight: 700; color: var(--wl-white); }
+.w-guiding { margin-top: 5.12px; font: 400 18.56px/1.35 var(--wl-font-ui); color: var(--wl-glass-text); }
+.w-guiding b { font-weight: 700; color: var(--wl-aqua-text); }
+/* QA1: in the narrower column (a stop or the transcript open) the heading block keeps its height: the
+   h1 on one line, a touch smaller, and "Watch for" smaller too, so neither slips under the frame */
+.w-main[data-layout="video"]:is([data-side="open"], [data-side="stop"]) .w-video-head .w-instruction { font-size: 26.88px; white-space: nowrap; }
+.w-main[data-layout="video"]:is([data-side="open"], [data-side="stop"]) .w-guiding { font-size: 16.64px; line-height: 1.3; }
+/* the frame: never cropped (contain), the picture uncovered but for the caption and the ready Play disc */
+.w-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 15.36px 15.36px 0 0; background: var(--wl-o1-ground); }
+.w-video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; background: var(--wl-o1-ground); }
+.w-player[data-phase="playing"] .w-bigplay { display: none; }
+.w-bigplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 89.6px; height: 89.6px; margin: 0; padding: 0 0 0 6.4px; border: 0; border-radius: 50%; display: grid; place-items: center;
+  background: var(--wl-white); box-shadow: 0 0 0 6.4px var(--wl-turquoise), 0 0 0 15.36px var(--wl-halo); color: var(--wl-teal-ink); cursor: pointer; }
+.w-caption { position: absolute; left: 50%; bottom: 12.8px; z-index: 1; width: max-content; max-width: calc(100% - 51.2px); transform: translateX(-50%); padding: 6.4px 17.92px; border-radius: 10.24px;
+  background: var(--wl-quote-glass); font: 700 20.48px/1.3 var(--wl-font-ui); color: var(--wl-white); text-align: center; }
+/* QA1: off the film's own labels (media.captionPlaces): the top edge, or one side of the picture
+   (V2: the left 60%, beside the film's AS-IS map panel) */
+.w-caption[data-place^="top"] { top: 12.8px; bottom: auto; }
+.w-caption[data-place="top-left"], .w-caption[data-place="bottom-left"] { left: 30%; max-width: 56%; }
+.w-caption[data-place="top-right"] { left: 75%; max-width: 46%; }
+/* the player bar: under the picture, attached to the frame, as wide */
+.w-controls { height: var(--v-ctrl); display: flex; align-items: center; gap: 17.92px; padding: 0 17.92px; border-radius: 0 0 15.36px 15.36px; background: var(--wl-o1-ground); }
+.w-play-btn, .w-tool { flex: none; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--wl-radius-btn); background: transparent; color: var(--wl-white); cursor: pointer; }
+.w-play-btn { width: 44px; margin: 0 -6.64px; }
+.w-tool { min-width: 44px; }
+.w-mute, .w-tr { margin: 0 -7.92px; }
+.w-tr[aria-pressed="true"] { color: var(--wl-turquoise); }
+.w-cc-chip { padding: 2.56px 10.24px; border-radius: 5.12px; background: var(--wl-turquoise); font: 600 14.72px/normal var(--wl-font-label); color: var(--wl-o1-ground); }
+.w-cc[aria-pressed="false"] .w-cc-chip { background: transparent; box-shadow: inset 0 0 0 1.5px var(--wl-white); color: var(--wl-white); }
+.w-time { flex: none; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-white); white-space: nowrap; }
+.w-seek { position: relative; flex: 1 1 auto; height: 44px; cursor: pointer; touch-action: none; border-radius: var(--wl-radius-btn); }
+.w-seek-track { position: absolute; left: 0; right: 0; top: 20.4px; height: 3.2px; border-radius: 2.56px; background: var(--wl-neutral-line); }
+.w-seek-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2.56px; background: var(--wl-turquoise); }
+.w-seek-stop { position: absolute; top: -6.08px; width: 15.36px; height: 15.36px; margin-left: -7.68px; border-radius: 50%; background: var(--wl-white); box-shadow: 0 0 0 2.56px var(--wl-turquoise); }
+.w-seek-stop[data-done="true"] { background: var(--wl-turquoise); }
+.w-controls[data-stop="true"] { opacity: .75; }
+/* the side panel: about 40% of the stage (38%, within the stage less 2 x 35.84 gutters) */
+.w-transcript, .w-stop-view { flex: none; width: min(calc(var(--w-stage-w, 1280px) * .38), calc(var(--w-stage-w, 1280px) - 71.68px - var(--v-w) - var(--v-gap))); }
+/* the transcript: as high as the frame and the bar, scrolling inside */
+.w-transcript { height: calc(var(--v-w) * 9 / 16 + var(--v-ctrl)); display: flex; flex-direction: column; border-radius: var(--wl-radius-panel);
+  background: var(--wl-ivory); box-shadow: var(--wl-panel-shadow); color: var(--wl-ink); }
+.w-transcript-head { margin: 0; padding: 15.36px 20.48px 6.4px; font: 800 20.48px/normal var(--wl-font-ui); }
+.w-transcript-list { flex: 1 1 auto; overflow-y: auto; padding: 0 10.24px 10.24px; font: 400 16.64px/1.45 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-tline { margin: 0 0 4px; padding: 6.4px 10.24px; border-radius: 7.68px; }
+.w-tline[data-active="true"] { background: var(--wl-keypill-bg); color: var(--wl-ink); }
+.w-tline-time { display: block; font: 500 14.08px/normal var(--wl-font-label); color: var(--wl-teal-ink); }
+/* the stop panel: in the transcript's place, its foot level with the bar's, as high as its content
+   (at most the column: heading, frame and bar) */
+.w-stop-view .w-stop-panel { position: relative; left: auto; right: auto; top: auto; width: 100%; max-height: calc(var(--v-head) + var(--v-w) * 9 / 16 + var(--v-ctrl)); transform: none;
+  padding: 20.48px 25.6px 23.04px; }
+.w-stop-view .w-stop-panel .w-band { margin: 0 -25.6px -23.04px; }
+.w-stop-view .w-band-row { padding: 0 25.6px 23.04px; }
+.w-stop-view .w-strip { padding: 12.8px 25.6px; }
+.w-stop-view .w-band-verdict { font-size: 20.48px; }
+.w-stop-view .w-band-text { font-size: 16.64px; line-height: 1.4; }
+.w-stop-kicker .w-glass-kicker { color: var(--wl-teal-ink); }
+.w-stop-kicker .w-glass-label { color: var(--wl-ink); }
+.w-stop-kicker .w-chip-dark { background: var(--wl-chip-bg); color: var(--wl-correct-head); }
+.w-stop-q { margin: 10.24px 0 15.36px; font: 800 24.32px/1.2 var(--wl-font-ui); letter-spacing: -.384px; color: var(--wl-ink); }
+.w-stop-view .w-ans-list { gap: 8.96px; }
+.w-stop-view .w-ans { padding: 8.96px 15.36px; gap: 12.8px; font-size: 17.92px; line-height: 1.3; }
+.w-stop-view .w-ans[data-result="correct"], .w-stop-view .w-ans[data-result="wrong"] { padding: 6.76px 13.16px; }
+.w-stop-tools { margin-top: 15.36px; justify-content: flex-end; }
+
+/* ================== styled by analogy (no frame yet; interaction and text unchanged) ================== */
+/* NL3 S14, S15 on Stage: the case card on the photo (a white figure card, top left, the S01 quote's
+   width), the panel right at 50%; S14's handoff visual: two lanes as BPMN step boxes, the receiver's
+   greyed out (K1's grey) with a neutral "Away" chip */
+.w-sheet-50 { width: 640px; }
+/* FX3 S18: the whole question on one panel (situation line, heading, answers, band): wider and a
+   one-line heading, so it stays clear of the bar and of Previous / Next */
+.w-sheet-one { width: min(716.8px, calc(100% - 512px)); padding-top: 23.04px; }
+.w-sheet-one .w-instruction { margin: 10.24px 0 15.36px; font-size: 33.28px; }
+.w-case-card { position: absolute; z-index: 2; left: 43.52px; top: 35.84px; width: 512px; margin: 0; display: grid; gap: 15.36px; padding: 23.04px 25.6px;
+  border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
+.w-case-card .w-rules { margin: 0; }
+.w-case-card .w-label { margin: 0 0 -7.68px; }
+.w-case-line { font: 600 22.4px/1.45 var(--wl-font-ui); color: var(--wl-ink); }
+.w-hv { display: flex; align-items: center; gap: 10.24px; margin-top: 7.68px; }
+.w-hv-box { position: relative; flex: 1 1 0; min-height: 64px; display: grid; place-items: center; padding: 10.24px; border: 2.432px solid var(--wl-teal-ink); border-radius: 7.68px;
+  background: var(--wl-white); font: 600 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); text-align: center; }
+.w-hv-away { border-style: dashed; border-color: var(--wl-grey-line); background: var(--wl-stone); color: var(--wl-grey-ink); }
+.w-hv-chip { position: absolute; top: -13.44px; right: 10.24px; padding: 2.56px 10.24px; border-radius: 5.12px; background: var(--wl-neutral-bg); font: 600 14.72px/normal var(--wl-font-label); color: var(--wl-text-2); }
+.w-hv-arrow { flex: none; color: var(--wl-navy); }
+
+/* progress dots (S04 cards, S08 rounds, S21 items) */
+.w-dots { display: flex; gap: 8px; }
+.w-dot-s { width: 12.8px; height: 12.8px; border-radius: 50%; border: 1px solid var(--wl-line-strong); background: var(--wl-white); }
+.w-dot-s[data-state="current"] { border: 0; box-shadow: 0 0 0 2.56px var(--wl-turquoise); }
+.w-dot-s[data-state="done"] { border: 0; background: var(--wl-navy); }
+
+/* S06 one situation at a time (NL2 frames): the hint line, the raised situation card, the done card */
+.w-sheet-sit > .w-instruction { margin-bottom: 0; }
+.w-hintline { margin: 10.24px 0 17.92px; /* NL3: 20.48 -> 17.92, situation 2 with a two-line strip stays within 41cqw */ display: flex; gap: 7.68px; align-items: center; font: 400 19.2px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-hintline > svg { color: var(--wl-muted); }
+.w-sit-row { display: flex; gap: 20.48px; align-items: flex-start; }
+.w-situation-now { flex: 1; display: grid; gap: 10.24px; padding: 19.2px 25.6px; /* NL3: from 15.36 / 23.04, the panel within 41cqw with both situations right */ border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white);
+  box-shadow: var(--wl-card-shadow); }
+.w-sit-kicker { font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+.w-sit-text { font: 800 28.16px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+/* FX1 E4 (S06): the visual fork: the situation (and its still) on top, the path splitting into the two
+   answers, each answer with a mini preview of its format */
+.w-sit-head { display: flex; align-items: center; justify-content: space-between; gap: 12.8px; min-height: 22px; }
+.w-sit-head .w-attempts { margin-left: auto; }
+.w-sit-top { display: flex; align-items: center; gap: 17.92px; }
+/* (the panel stays within 41cqw: the still is two text lines high, the fork short, the card's gaps 7.68) */
+.w-situation-now:has(.w-sit-fork) { gap: 7.68px; }
+.w-sheet-sit .w-hintline { margin: 6.4px 0 12.8px; }
+.w-ans-two .w-mini { height: 44.8px; }
+.w-sit-still { flex: none; width: 74.24px; height: 41.76px; border-radius: 7.68px; object-fit: cover; }
+.w-sit-fork { display: block; width: 100%; height: 14.08px; margin: 0 0 -6.4px; fill: none; stroke: var(--wl-teal-ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.w-sit-fork path { vector-effect: non-scaling-stroke; }
+.w-mini { flex: none; position: relative; width: 76.8px; height: 51.2px; padding: 5.12px 6.4px; border: 1px solid var(--wl-line); border-radius: 6.4px; background: var(--wl-stone); }
+.w-mini-table { display: grid; grid-template-rows: repeat(8, 1fr); gap: 2.56px; }
+.w-mini-table i { display: block; border-radius: 1.28px; background: linear-gradient(90deg, var(--wl-teal-ink) 0 28%, transparent 28% 36%, var(--wl-line-strong) 36% 100%); }
+.w-mini-lanes { display: grid; grid-template-rows: repeat(3, 1fr); padding: 0; overflow: hidden; }
+.w-mini-lanes i { display: block; border-bottom: 1px solid var(--wl-line-strong); }
+.w-mini-lanes i:nth-child(2) { background: var(--wl-keypill-bg); }
+.w-mini-lanes i:last-of-type { border-bottom: 0; }
+.w-mini-dia { position: absolute; left: 50%; top: 50%; width: 12.8px; height: 12.8px; margin: -6.4px 0 0 -6.4px; border: 1.92px solid var(--wl-teal-ink); background: var(--wl-white); transform: rotate(45deg); }
+.w-mini-lanes::before { content: ""; position: absolute; left: 8px; right: 8px; top: 50%; border-top: 1.92px solid var(--wl-teal-ink); }
+.w-ans-two .w-opt-label { display: grid; gap: 1.28px; }
+.w-ans-two .w-opt-label b { font: 700 20.48px/normal var(--wl-font-ui); color: var(--wl-ink); }
+.w-ans-two .w-opt-label span { font: 400 17.28px/normal var(--wl-font-ui); color: var(--wl-muted); }
+.w-sit-done { width: 166.4px; flex: none; display: grid; gap: 7.68px; align-content: start; padding: 15.36px 17.92px; border: 2.56px solid var(--wl-teal); border-radius: var(--wl-radius-panel);
+  background: var(--wl-white); opacity: .9; }
+.w-sit-done-answer { display: flex; gap: 7.68px; align-items: center; font: 700 17.92px/normal var(--wl-font-ui); color: var(--wl-ink); }
+@media (prefers-reduced-motion: no-preference) {
+  .w-sit-in { animation: w-sit-in .4s var(--wl-ease-enter) both; }
+  .w-sit-row > .w-sit-done:last-of-type { animation: w-pop .4s var(--wl-ease-enter) both; }
+}
+@keyframes w-sit-in { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: none; } }
+
+/* S08 rounds (NL2 frames): the rules band, the round on the left, the answers on the right */
+.w-rules { margin-bottom: 20.48px; display: flex; align-items: center; gap: 17.92px; padding: 14.08px 20.48px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); }
+.w-rules-label { font: 700 19.2px/normal var(--wl-font-ui); color: var(--wl-teal-ink); white-space: nowrap; }
+.w-rule { display: inline-flex; align-items: center; gap: 7.68px; font: 700 19.2px/normal var(--wl-font-ui); color: var(--wl-ink); white-space: nowrap; }
+.w-rule-n { width: 28.16px; height: 28.16px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-navy); font: 800 14.08px/normal var(--wl-font-ui); color: var(--wl-white); }
+/* NL3, by analogy: the band with definitions (S09, S11): the label on its own line, the items in a grid,
+   each wrapping in its cell (S11: an arrow between them); one definition alone (S14, S15) is one line */
+.w-rules-grid { display: grid; gap: 10.24px; align-items: start; }
+.w-rules-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8.96px 20.48px; align-items: start; }
+.w-rules-items[data-chain="true"] { grid-template-columns: repeat(5, auto); justify-content: start; gap: 8.96px 12.8px; align-items: center; }
+.w-sheet .w-rules-grid { margin-bottom: 10.24px; padding: 8.96px 20.48px; gap: 5.12px; }
+/* S11 with its band: the metric task a little tighter, so the panel stays within 41cqw (the slots are
+   status, not targets) */
+.w-sheet:has(.w-rules-grid) .w-metric { gap: 10.24px; }
+.w-sheet:has(.w-rules-grid) .w-slot { min-height: 36px; }
+.w-rules-grid .w-rule { align-items: flex-start; white-space: normal; }
+.w-rules-grid .w-rule-n { flex: none; }
+.w-rule-body { font: 400 17.92px/1.35 var(--wl-font-ui); color: var(--wl-ink); }
+.w-rule-body b { font-weight: 700; }
+.w-rule-arrow { color: var(--wl-navy); }
+.w-rules-def { display: block; font: 400 19.2px/1.4 var(--wl-font-ui); color: var(--wl-ink); }
+.w-rules-def .w-rules-label { white-space: normal; }
+/* FX1 E6 (S08): the three rule cards in a row (the answers), the map strip under them */
+.w-rounds { display: grid; gap: 15.36px; }
+.w-sheet .w-round-top + .w-instruction { margin: 6.4px 0 15.36px; }
+.w-rule-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15.36px; }
+.w-rule-card { position: relative; margin: 0; display: flex; align-items: center; gap: 12.8px; padding: 12.8px 51.2px 12.8px 15.36px; text-align: left;
+  border: 1px solid var(--wl-card-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); cursor: pointer; }
+.w-rule-card:not([data-result="correct"]):not([data-result="wrong"]):not([aria-disabled="true"]):hover { border-color: var(--wl-navy); }
+.w-rule-icon { flex: none; width: 51.2px; height: 51.2px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-keypill-bg); color: var(--wl-teal-ink); }
+.w-rule-name { font: 800 20.48px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-rule-card .w-rule-mark { position: absolute; top: 50%; right: 15.36px; margin-top: -14.72px; }
+.w-rule-card[data-result="correct"] { border: 3.2px solid var(--wl-teal); }
+.w-rule-card[data-result="wrong"] { border: 3.2px solid var(--wl-error); }
+.w-rule-card[data-lit="true"] { box-shadow: 0 0 0 5.12px var(--wl-halo); }
+.w-rule-card[data-result="correct"] .w-opt-mark { border-color: var(--wl-teal); background: var(--wl-teal); }
+.w-rule-card[data-result="wrong"] .w-opt-mark { border-color: var(--wl-error); background: var(--wl-error); }
+.w-map-strip { margin: 0; display: flex; align-items: center; gap: 15.36px; padding: 12.8px 20.48px; border: 1px solid var(--wl-line); border-left: 5.12px solid var(--wl-teal-ink); border-radius: var(--wl-radius-card); background: var(--wl-white); }
+.w-map-strip-icon { flex: none; color: var(--wl-teal-ink); }
+.w-map-strip-body { display: grid; gap: 5.12px; justify-items: start; }
+.w-round-left { display: grid; gap: 12.8px; align-content: start; } /* NL3: 15.36 -> 12.8, with the rules band's margin, keeps the panel within 41cqw when "Next round" sits in the strip */
+.w-sheet > .w-rules:first-child:not(.w-rules-grid) { margin-bottom: 17.92px; }
+.w-round-count, .w-round-hint { font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+.w-sheet .w-round-left .w-instruction { margin: 0; font-size: 33.28px; }
+.w-round-card { display: grid; gap: 10.24px; padding: 17.92px 20.48px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); }
+.w-field-chip { justify-self: start; padding: 3.2px 10.24px; border-radius: 5.12px; background: var(--wl-chip-bg); font: 600 14.72px/normal var(--wl-font-label); color: var(--wl-correct-head); }
+.w-round-line { font: 600 21.76px/1.35 var(--wl-font-ui); color: var(--wl-ink); }
+
+/* S10 fill */
+.w-fill, .w-metric { display: flex; flex-direction: column; gap: 12.8px; }
+.w-field-rows { display: flex; flex-direction: column; gap: 6.4px; }
+.w-field-row { min-height: 48px; display: flex; align-items: center; gap: 12.8px; padding: 6.4px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
+.w-field-name { flex: none; font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-field-value { font: 400 17.92px/1.3 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-field-row[data-state="prefilled"] { background: var(--wl-stone); }
+.w-field-row[data-state="active"] { border: 2.56px solid var(--wl-navy); }
+.w-field-slot { flex: 1 1 auto; min-height: 26px; border-bottom: 2px solid var(--wl-line-strong); font: 600 17.92px/1.4 var(--wl-font-ui); color: var(--wl-ink); }
+.w-field-slot[data-result="correct"] { border-bottom-color: var(--wl-teal); color: var(--wl-teal-ink); }
+.w-field-slot[data-result="wrong"] { border-bottom-color: var(--wl-error); }
+.w-fill .w-ans, .w-metric .w-ans { padding: 10.24px 15.36px; font-size: 18.56px; line-height: 1.4; }
+
+/* S11 metric: the "Checkable later?" slots */
+.w-slots { display: flex; align-items: center; gap: 15.36px; }
+.w-slots[data-wait="true"] { visibility: hidden; } /* QA3: S11 stretch, the slots appear with the first answer */
+.w-slots-title { font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-slots ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 10.24px; }
+.w-slot { min-width: 132px; min-height: 44px; display: flex; align-items: center; gap: 7.68px; padding: 0 12.8px; border: 1px solid var(--wl-line-strong); border-radius: var(--wl-radius-card);
+  background: var(--wl-white); font: 600 16.64px/1.2 var(--wl-font-ui); color: var(--wl-ink); }
+.w-slot-mark { flex: none; display: grid; color: var(--wl-idle-ink); }
+.w-slot[data-on="true"] { border: 2.56px solid var(--wl-teal); color: var(--wl-teal-ink); }
+.w-slot[data-on="true"] .w-slot-mark { color: var(--wl-teal-ink); }
+.w-slot[data-on="false"] { background: var(--wl-stone); color: var(--wl-text-2); }
+
+
+/* NL4 S18B: the checkbox at the left of the input panel's action row */
+.w-input-check { margin-left: 9px; }
+.w-checkline { min-height: 44px; display: flex; align-items: center; gap: 10.24px; font: 600 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); cursor: pointer; }
+/* a 44 px target that draws a 26 px box, filled navy with a white check when ticked */
+.w-checkbox { flex: none; appearance: none; width: 44px; height: 44px; margin: 0 -9px; border: 0; border-radius: var(--wl-radius-btn); cursor: pointer;
+  background: linear-gradient(var(--wl-white), var(--wl-white)) center / 20.88px 20.88px no-repeat, linear-gradient(var(--wl-navy), var(--wl-navy)) center / 26px 26px no-repeat; }
+.w-checkbox:checked { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 16px 16px no-repeat,
+  linear-gradient(var(--wl-navy), var(--wl-navy)) center / 26px 26px no-repeat; }
+
+/* S19 handoff (NL4: document view): head, steps + workbook preview | copy cards, the bottom row */
+.w-sheet-doc { padding: 12.8px 30.72px 28.16px; } /* the bottom stays the sheet's: the strip sits flush to the panel's foot */
+/* FX2 E: tighter, so the panel with Open workbook in its own row and a strip stays within 41cqw */
+.w-sheet-doc .w-handoff-grid { gap: 17.92px; }
+.w-sheet-doc .w-copy-grid { gap: 5.12px; }
+.w-sheet-doc .w-copy-card { padding-top: 3.84px; padding-bottom: 5.12px; }
+.w-sheet-doc .w-handoff-right .w-label { margin-bottom: 3.84px; }
+.w-sheet-doc .w-strip { padding-top: 12.8px; padding-bottom: 12.8px; }
+.w-sheet-doc .w-handoff-head { margin-bottom: 3.84px; }
+.w-handoff-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15.36px; margin-bottom: 7.68px; }
+.w-handoff-head .w-label { margin: 0 0 2.56px; }
+.w-sheet .w-handoff-head .w-instruction { margin: 0; font-size: 28.8px; }
+.w-time-chip { flex: none; display: inline-flex; align-items: center; gap: 6.4px; padding: 2.56px 10.24px; border-radius: 5.12px; background: var(--wl-chip-bg); font: 600 14.72px/normal var(--wl-font-label); color: var(--wl-correct-head); }
+/* FX3: the brief column leads (a little wider: every workbook field name on one line), the copy cards secondary */
+.w-handoff-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 23.04px; align-items: start; }
+.w-handoff-left { display: flex; flex-direction: column; gap: 7.68px; }
+/* the steps as a plain numbered list here (no boxes), so the brief stays short */
+.w-handoff-left .w-steps { gap: 3.84px; }
+.w-handoff-left .w-steps li { min-height: 28.16px; padding: 0; border: 0; background: none; font-size: 16.64px; }
+.w-handoff-left .w-step-n { width: 26.88px; height: 26.88px; font-size: 14px; }
+.w-handoff-hint { font: 400 16.64px/1.35 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-handoff-right .w-label { margin: 0 0 6.4px; }
+/* the workbook preview: a small page with its eight field rows; the rows the notes go into marked */
+.w-wb-preview { position: relative; margin: 0; padding: 8.96px 12.8px 8.96px 46.08px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
+.w-wb-icon { position: absolute; left: 12.8px; top: 10.24px; color: var(--wl-navy); }
+.w-wb-rows { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); grid-auto-flow: column; /* FX3: the longer names (5, 7) in the wider column */ grid-template-rows: repeat(4, auto); gap: 3.84px 10.24px; }
+.w-wb-rows li { min-width: 0; display: flex; align-items: center; gap: 6.4px; padding: 1.28px 6.4px; border-radius: 5.12px; background: var(--wl-stone); font: 500 14px/1.25 var(--wl-font-label); color: var(--wl-muted); }
+.w-wb-rows b { flex: none; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-line); font: 700 14px/1 var(--wl-font-ui); color: var(--wl-ink); }
+.w-wb-rows span { flex: 1 1 auto; min-width: 0; } /* FX3: every field name in full (it may wrap), never cut */
+.w-wb-rows li[data-notes="true"] { background: var(--wl-keypill-bg); color: var(--wl-teal-ink); }
+.w-wb-rows li[data-notes="true"] b { background: var(--wl-navy); color: var(--wl-white); }
+/* the copy cards, 2 x 2: the card's name over its field chip, Copy on the right, then one line per part */
+.w-copy-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8.96px; }
+.w-copy-card { min-width: 0; display: flex; flex-direction: column; gap: 3.84px; padding: 7.68px 10.24px 8.96px 12.8px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
+.w-copy-head { display: flex; align-items: center; gap: 7.68px; }
+.w-copy-id { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2.56px; }
+.w-copy-title { max-width: 100%; font: 700 15.36px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-copy-id .w-field-chip { max-width: 100%; }
+.w-copy-rows .w-sketch-row { line-height: 1.25; }
+.w-chip-off { background: var(--wl-neutral-bg); color: var(--wl-grey-ink); }
+.w-copy-btn { margin-left: auto; padding: 3.84px 12.8px; font-size: 15.36px; }
+.w-copy-btn:disabled { padding: 3.84px 12.8px; }
+.w-copy-rows { margin: 0; }
+.w-copy-rows dd[data-empty="true"] { color: var(--wl-muted); }
+/* FX3: Open workbook, the main action, under the brief, the coach line beside it; the return line under them */
+.w-handoff-open { margin-top: 2.56px; display: flex; flex-wrap: wrap; align-items: center; gap: 6.4px 17.92px; }
+.w-return-line { flex: 1 1 100%; font: 700 16.64px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-col-handoff .w-handoff-open .w-privacy { margin: 0; }
+.w-sketch-list { margin: 0 0 5.12px; display: grid; gap: 1.28px; }
+.w-sketch-list:last-child { margin-bottom: 0; }
+.w-sketch-row { display: flex; gap: 5.12px; min-width: 0; font: 400 15.36px/1.35 var(--wl-font-ui); }
+.w-sketch-row dt { flex: none; font-weight: 600; color: var(--wl-ink); }
+.w-sketch-row dd { flex: 1 1 auto; min-width: 0; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--wl-text-2); }
+.w-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 6.4px; }
+.w-steps li { min-height: 38.4px; /* NL3: from 44 and 6.4px padding (text, not targets), so S19 with the sketch and notes stays within 41cqw */ display: flex; align-items: center; gap: 12.8px; padding: 3.2px 12.8px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white);
+  font: 600 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-step-n { flex: none; width: 30.72px; height: 30.72px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-navy); font: 800 15.36px/1 var(--wl-font-ui); color: var(--wl-white); }
+a.w-btn { text-decoration: none; }
+
+/* S20 self-check (NL4: the three questions as a checklist figure, each row's mark ticks on Yes) */
+.w-selfcheck { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8.96px; }
+.w-check-row { display: flex; align-items: center; gap: 15.36px; padding: 10.24px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
+.w-check-mark { flex: none; width: 38.4px; height: 38.4px; display: grid; place-items: center; border: 2px solid var(--wl-line-strong); border-radius: 7.68px; background: var(--wl-stone); color: var(--wl-navy); }
+.w-check-row[data-answer="yes"] .w-check-mark { border-color: var(--wl-teal); background: var(--wl-teal); color: var(--wl-white); }
+.w-check-row[data-answer="notYet"] .w-check-mark { border-style: dashed; border-color: var(--wl-navy); background: var(--wl-white); }
+.w-check-row[data-answer="yes"] { border-color: var(--wl-teal); }
+.w-checklist .w-check-row { padding-top: 6.4px; padding-bottom: 6.4px; }
+.w-fix-line { margin-top: 8.96px; display: flex; align-items: center; gap: 10.24px; font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-fix-line svg { flex: none; color: var(--wl-navy); }
+/* S20B: the five mistakes, name and one-line definition */
+.w-opt-sub { display: block; margin-top: 2.56px; font: 400 16.64px/1.3 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-risk .w-ans { padding: 6.4px 15.36px; align-items: flex-start; }
+.w-options.w-risk { gap: 8.96px 15.36px; }
+.w-sheet .w-subline:has(+ .w-risk) { margin-bottom: 10.24px; }
+.w-sheet .w-head-q:has(+ .w-subline + .w-risk) { margin-bottom: 7.68px; }
+.w-sheet .w-risk + .w-risk-note { margin-top: 7.68px; display: flex; align-items: center; justify-content: space-between; gap: 15.36px; }
+.w-risk-note .w-link { margin-right: -10.24px; }
+/* FX2 D1 (S17): the case card (S06's raised situation card), then the five mistakes (S20B's cards) */
+.w-sheet-cases .w-head-q { margin-bottom: 12.8px; }
+.w-case-now { display: grid; gap: 6.4px; margin-bottom: 15.36px; padding: 14.08px 23.04px; border: 1px solid var(--wl-line); border-left: 5.12px solid var(--wl-navy); border-radius: var(--wl-radius-panel);
+  background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
+.w-case-now-text { font: 700 23.04px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-sheet-cases .w-ans { font-size: 18.56px; line-height: 1.25; }
+.w-sheet-cases .w-opt-sub { font-size: 15.36px; }
+/* FX2 D2 (S18A): the workbook rows (S19's preview look, larger): number, field and line, the card's select */
+.w-wb-fields { list-style: none; margin: 0; padding: 0; display: grid; gap: 8.96px; }
+.w-wb-field { display: grid; grid-template-columns: 35.84px minmax(0, 1fr) minmax(0, 1.25fr) 29.44px; align-items: center; gap: 15.36px; padding: 5.12px 15.36px;
+  border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
+.w-wb-n { width: 35.84px; height: 35.84px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-navy); font: 800 17.92px/1 var(--wl-font-ui); color: var(--wl-white); }
+.w-wb-name { display: grid; gap: 1.28px; min-width: 0; }
+.w-wb-label { font: 700 19.2px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-wb-sub { font: 400 15.36px/1.3 var(--wl-font-label); color: var(--wl-muted); }
+.w-field-select { width: 100%; min-height: 44px; margin: 0; padding: 6.4px 12.8px; border: 1px solid var(--wl-card-line); border-radius: var(--wl-radius-card); background: var(--wl-white);
+  font: 600 17.28px/1.3 var(--wl-font-ui); color: var(--wl-body-ink); cursor: pointer; }
+.w-field-select:hover:not(:disabled) { border-color: var(--wl-navy); }
+.w-field-select:disabled { opacity: 1; color: var(--wl-body-ink); cursor: default; }
+.w-wb-field .w-row-mark { visibility: hidden; }
+.w-wb-field[data-result="correct"] { border: 2.56px solid var(--wl-teal); padding: 3.84px 14.08px; }
+.w-wb-field[data-result="wrong"] { border: 2.56px solid var(--wl-error); padding: 3.84px 14.08px; }
+.w-wb-field[data-shown="true"] { border-style: dashed; }
+.w-wb-field:is([data-result="correct"], [data-result="wrong"]) .w-row-mark { visibility: visible; }
+.w-wb-field[data-result="correct"] .w-row-mark { border-color: var(--wl-teal); background: var(--wl-teal); }
+.w-wb-field[data-result="wrong"] .w-row-mark { border-color: var(--wl-error); background: var(--wl-error); }
+.w-sheet-fields .w-head-q { margin-bottom: 15.36px; }
+/* FX3 S18A: the four cards, lettered A to D, in a column left of the rows (read first) */
+.w-fields-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr); gap: 17.92px; align-items: start; }
+.w-card-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 7.68px; }
+.w-card-item { min-height: 50px; display: flex; align-items: center; gap: 10.24px; padding: 5.12px 12.8px; border: 1px solid var(--wl-card-line); border-radius: var(--wl-radius-card); background: var(--wl-white);
+  font: 600 17.28px/1.25 var(--wl-font-ui); color: var(--wl-body-ink); }
+.w-sheet-fields .w-wb-fields { gap: 7.68px; }
+.w-check-q { flex: 1 1 auto; font: 600 18.56px/1.35 var(--wl-font-ui); color: var(--wl-ink); }
+.w-toggles { flex: none; display: flex; gap: 7.68px; }
+.w-toggle { min-width: 104px; min-height: 44px; padding: 0 17.92px; border: 1px solid var(--wl-line-strong); border-radius: 7.68px; background: var(--wl-white);
+  font: 700 16.64px/1 var(--wl-font-ui); color: var(--wl-navy); cursor: pointer; }
+.w-toggle:hover { border-color: var(--wl-navy); }
+.w-toggle[aria-pressed="true"] { border: 3.2px solid var(--wl-navy); }
+.w-chips { display: flex; flex-wrap: wrap; gap: 10.24px; }
+.w-chip { min-height: 48px; padding: 0 17.92px; border: 1px solid var(--wl-card-line); border-radius: var(--wl-radius-card); background: var(--wl-white); font: 600 17.92px/1.2 var(--wl-font-ui);
+  color: var(--wl-body-ink); cursor: pointer; }
+.w-chip:hover { border-color: var(--wl-navy); }
+.w-chip[aria-pressed="true"] { border: 3.2px solid var(--wl-navy); }
+.w-note-line { font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+
+/* S21 knowledge check */
+.w-kc-head { display: flex; align-items: center; justify-content: space-between; gap: 20.48px; }
+.w-kc-head .w-instruction, .w-sheet .w-kc-head .w-instruction { margin: 0; }
+/* QZ3: the question is the heading, what to do is a small line beside the dots */
+.w-kc-ask { margin: 0; font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-sheet.w-kc .w-instruction { margin: 10.24px 0 0; font-size: 30.72px; line-height: 1.2; letter-spacing: -.6px; }
+.w-kc-body { margin-top: 15.36px; display: flex; flex-direction: column; gap: 12.8px; }
+.w-kc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12.8px 20.48px; }
+.w-kc-opt { font-size: 18.56px; line-height: 1.4; }
+.w-kc-letter { flex: none; width: 29.44px; height: 29.44px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-keypill-bg); font: 800 15.36px/1 var(--wl-font-ui); color: var(--wl-teal-ink); }
+.w-kc-opt .w-opt-mark:empty { display: none; }
+.w-kc-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(4, auto); grid-auto-flow: column; gap: 8.96px 20.48px; }
+.w-kc-result { min-height: 156px; display: flex; align-items: center; justify-content: center; padding: 25.6px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); }
+.w-kc-result-line { font: 800 30.72px/1.25 var(--wl-font-ui); letter-spacing: -.4px; color: var(--wl-ink); text-align: center; }
+
+/* S22 close */
+.w-takeaways { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15.36px; }
+.w-takeaway { align-items: flex-start; font-size: 18.56px; line-height: 1.4; }
+.w-close2 { display: flex; flex-direction: column; gap: 10.24px; }
+.w-close-line { font: 600 18.56px/1.4 var(--wl-font-ui); color: var(--wl-ink); }
+.w-close-actions { margin-top: 6.4px; display: flex; flex-wrap: wrap; gap: 10.24px; }
+.w-close-actions .w-btn[aria-disabled="true"] { border: 0; background: var(--wl-neutral-line); color: var(--wl-white); cursor: default; }
+
+/* NL4 S21R check result: the score ring left, the verdict, the missed items and Retake right */
+.w-result-grid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 30.72px; align-items: start; }
+.w-ring { position: relative; width: 179.2px; height: 179.2px; margin: 0; }
+.w-ring-svg { display: block; width: 100%; height: 100%; }
+.w-ring-track { fill: none; stroke: var(--wl-line); stroke-width: 15px; }
+.w-ring-arc { fill: none; stroke: var(--wl-navy); stroke-width: 15px; stroke-linecap: round; }
+.w-ring[data-passed="true"] .w-ring-arc { stroke: var(--wl-teal); }
+.w-ring-tick { stroke: var(--wl-ink); stroke-width: 3px; }
+.w-ring-num { position: absolute; inset: 0; display: grid; place-items: center; font: 800 51.2px/1 var(--wl-font-ui); letter-spacing: -1px; color: var(--wl-ink); }
+.w-result-body { min-width: 0; display: flex; flex-direction: column; }
+.w-sheet .w-result-body .w-instruction { margin: 0 0 12.8px; font-size: 33.28px; }
+.w-result-verdict { display: flex; align-items: center; flex-wrap: wrap; gap: 7.68px 12.8px; }
+.w-result-chip { display: inline-flex; align-items: center; gap: 6.4px; padding: 3.84px 12.8px; border-radius: 5.12px; background: var(--wl-neutral-bg); font: 700 15.36px/normal var(--wl-font-label); color: var(--wl-ink); }
+.w-result-chip[data-passed="true"] { background: var(--wl-correct-bg); color: var(--wl-correct-head); }
+.w-result-line { font: 600 19.2px/1.35 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-missed { list-style: none; margin: 15.36px 0 0; padding: 0; display: grid; gap: 6.4px; }
+.w-missed:has(> .w-missed-item:nth-child(5)) { grid-template-columns: repeat(2, minmax(0, 1fr)); } /* QZ1: five or six missed, two columns, so the panel stays in main */
+.w-missed-item { display: flex; align-items: center; gap: 12.8px; padding: 6.4px 6.4px 6.4px 15.36px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); }
+.w-missed-text { flex: 1 1 auto; min-width: 0; }
+.w-missed-stem { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 600 15.36px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-missed-line { font: 400 15.36px/1.3 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-review-link { flex: none; }
+.w-result-actions { margin-top: 15.36px; }
+
+/* NL4 S22 on Stage: the bridge line on the case card over the photo, the panel right */
+.w-bridge { display: flex; align-items: flex-start; gap: 15.36px; color: var(--wl-navy); }
+.w-bridge svg { flex: none; margin-top: 3.2px; }
+.w-sheet.w-close-panel .w-instruction { font-size: 30.72px; letter-spacing: -.6px; }
+.w-close-panel .w-takeaways { grid-template-columns: minmax(0, 1fr); gap: 10.24px; }
+.w-close-panel .w-takeaway { padding: 10.24px 17.92px; }
+.w-close-panel .w-close-actions { flex-direction: column; align-items: stretch; }
+
+/* NL4: "Back to the check" in the footer, right of Previous */
+.w-backchip { margin: 0 auto 0 12.8px; display: inline-flex; align-items: center; gap: 6.4px; min-height: 44px; padding: 0 17.92px 0 12.8px; border: 1.92px solid var(--wl-navy); border-radius: 22px;
+  background: var(--wl-white); font: 700 16.64px/normal var(--wl-font-ui); color: var(--wl-navy); cursor: pointer; }
+.w-backchip[hidden] { display: none; }
+.w-backchip:hover { background: var(--wl-keypill-bg); }
+
+/* NL4 E2: the slim "Your case" card at the top of a form panel: on the context line's row, at its right
+   (S02, whose context line stands above the panel: the panel's top right, beside the field labels) */
+.w-case-row { display: flex; align-items: center; justify-content: space-between; gap: 20.48px; }
+.w-case-row .w-context { flex: 1 1 auto; min-width: 0; }
+.w-case-slim { flex: 0 1 auto; max-width: 45%; margin: 0; display: inline-flex; align-items: center; gap: 8.96px; padding: 2.56px 15.36px 2.56px 10.24px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card);
+  background: var(--wl-white); font: 700 16.64px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-sheet-open > .w-case-slim { position: absolute; top: 22.4px; right: 30.72px; max-width: 34%; } /* clear of "The problem today" */
+.w-case-slim svg { flex: none; color: var(--wl-teal-ink); }
+.w-case-slim span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+/* NL4 E2 (S03): the two video-case stills as small thumbnails above the cards */
+.w-case-thumbs { display: flex; gap: 15.36px; margin: -5.12px 0 15.36px; }
+.w-case-thumb { margin: 0; display: flex; align-items: center; gap: 10.24px; font: 600 15.36px/1.3 var(--wl-font-label); color: var(--wl-muted); }
+.w-case-thumb-img { flex: none; width: 96px; height: 54px; border-radius: 7.68px; object-fit: cover; box-shadow: var(--wl-card-shadow); }
+
+/* empty answer marks: a navy ring where shown; hidden on tiles until a state (S07, S12) */
+.w-opt-mark:empty { border-color: var(--wl-navy); }
+.w-pick-tile .w-opt-mark:empty { display: none; }
+
+/* S07 eight tiles (NL2 frames), on the Focus wash: number disc + task icon + title; open = its definition */
+.w-task-head.w-task-head-col { display: block; }
+.w-tiles { position: absolute; left: max(51.2px, calc((100% - 1177.6px) / 2)); right: max(51.2px, calc((100% - 1177.6px) / 2)); top: 125.44px;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 17.92px; }
+.w-tile { min-height: 145.92px; margin: 0; display: grid; gap: 12.8px; align-content: start; padding: 17.92px 20.48px; border: 1px solid var(--wl-line); border-radius: 15.36px;
+  background: var(--wl-white); text-align: left; cursor: pointer; }
+.w-tile[aria-disabled="true"] { cursor: default; }
+.w-tile:not([data-open="true"]):not([data-result]):not([aria-disabled="true"]):hover { border-color: var(--wl-navy); }
+.w-tile-row { display: flex; gap: 10.24px; align-items: center; }
+.w-tile-disc { flex: none; width: 35.84px; height: 35.84px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--wl-line-strong); background: var(--wl-white);
+  font: 600 16.64px/normal var(--wl-font-ui); color: var(--wl-idle-ink); }
+.w-tile-disc:has(svg) { border: 0; background: var(--wl-navy); color: var(--wl-white); }
+.w-tile-icon { color: var(--wl-navy); }
+/* FX1 E5: the icon in a soft round tile, no number; the done check a small badge in the corner; the flip */
+.w-tile { position: relative; padding-top: 14.08px; padding-bottom: 14.08px; gap: 8.96px; } /* the round icon tile is taller than the number disc */
+/* FX1: the row above the strip (the attempt marker, "Show me how") sits under an open tile of the second row;
+   the float is centred, clear of Previous and Next */
+.w-main[data-layout="tiles"] .w-float-tiles { top: 476.16px; }
+.w-tile-icon-wrap { flex: none; width: 56.32px; height: 56.32px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-keypill-bg); }
+.w-tile-icon-wrap .w-tile-icon { color: var(--wl-teal-ink); }
+.w-tile[data-open="true"] .w-tile-icon-wrap { display: none; }
+.w-tile .w-tile-disc { position: absolute; top: 10.24px; right: 10.24px; width: 25.6px; height: 25.6px; }
+.w-tile .w-tile-disc:empty { display: none; }
+.w-tiles[data-phase="answer"] .w-tile-disc { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .w-tile-flip { animation: w-tile-flip .38s var(--wl-ease-enter); }
+}
+@keyframes w-tile-flip { from { transform: perspective(800px) rotateY(-90deg); } to { transform: perspective(800px) rotateY(0); } }
+.w-tile-title { font: 800 20.48px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-tile-open-title { font: 800 17.92px/normal var(--wl-font-ui); color: var(--wl-teal-ink); }
+.w-tile-text { font: 400 17.92px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-tile:not([data-open="true"]) .w-tile-open-title, .w-tile:not([data-open="true"]) .w-tile-text, .w-tile[data-open="true"] .w-tile-icon, .w-tile[data-open="true"] > .w-tile-title { display: none; }
+.w-tile[data-open="true"] { border: 2.56px solid var(--wl-navy); box-shadow: var(--wl-card-shadow); }
+.w-tile .w-tile-mark { display: none; margin-left: auto; }
+.w-tiles[data-phase="answer"] .w-tile-mark { display: grid; }
+.w-tile[data-result="correct"] { border: 3.2px solid var(--wl-teal); }
+.w-tile[data-result="wrong"] { border: 3.2px solid var(--wl-error); }
+.w-tile[data-result="correct"] .w-opt-mark { border-color: var(--wl-teal); background: var(--wl-teal); }
+.w-tile[data-result="wrong"] .w-opt-mark { border-color: var(--wl-error); background: var(--wl-error); }
+.w-float-tiles { left: 50%; width: min(819.2px, calc(100% - 102.4px)); transform: translateX(-50%); top: 448px; }
+/* the field number of the S21 tiles */
+.w-tile-num { font: 800 20.48px/1 var(--wl-font-ui); color: var(--wl-teal-ink); }
+
+/* the S21 tiles (the S12 pick panel went to the flags template in NL3) */
+.w-pick-tile { position: relative; min-height: 52px; display: flex; align-items: center; gap: 10.24px; padding: 6.4px 38px 6.4px 12.8px; border: 1px solid var(--wl-card-line);
+  border-radius: var(--wl-radius-card); background: var(--wl-white); font: 600 16.64px/1.25 var(--wl-font-ui); color: var(--wl-body-ink); }
+.w-pick-tile:not([data-result="correct"]):not([data-result="wrong"]):not([aria-disabled="true"]):hover { border-color: var(--wl-navy); }
+.w-pick-tile[aria-pressed="true"]:not([data-result="correct"]):not([data-result="wrong"]) { border: 3.2px solid var(--wl-navy); }
+.w-pick-tile[data-result="correct"] { border: 3.2px solid var(--wl-teal); }
+.w-pick-tile[data-result="wrong"] { border: 3.2px solid var(--wl-error); }
+.w-pick-tile .w-tile-num { font-size: 17.92px; }
+.w-pick-tile .w-opt-mark { position: absolute; right: 8px; bottom: 6px; width: 22px; height: 22px; border: 0; }
+.w-pick-tile[data-result="correct"] .w-opt-mark { background: var(--wl-teal); }
+.w-pick-tile[data-result="wrong"] .w-opt-mark { background: var(--wl-error); }
+.w-figure { font-weight: 800; color: var(--wl-ink); }
+
+/* ---------- NL2: practice on the Focus wash without a panel (S04, S05b, S07) ---------- */
+/* the task head: the instruction left, Show me right, 4cqw from the edges (centred on a wide stage) */
+.w-task-head { position: absolute; left: max(51.2px, calc((100% - 1177.6px) / 2)); right: max(51.2px, calc((100% - 1177.6px) / 2)); top: 30.72px;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 20.48px; }
+.w-task-head .w-instruction { margin: 0; font: 800 33.28px/normal var(--wl-font-ui); letter-spacing: -.64px; color: var(--wl-ink); }
+.w-task-sub { margin-top: 7.68px; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+/* a deck with the hint line (S16): "Show me how" stays right of the heading (as S09), so the deck never
+   covers it (FX2: S18A, the screen this was for, left the deck; S16 now uses it) */
+.w-main[data-layout="sort-deck"] .w-task-head.w-task-head-col { display: flex; align-items: flex-start; }
+/* the off-panel feedback strip: the strip component, all corners rounded, the head inline, a card shadow */
+.w-float { position: absolute; z-index: 2; }
+.w-float .w-band { margin: 0; }
+.w-float .w-strip { margin-top: 0; padding: 12.8px 23.04px; gap: 12.8px; align-items: center; border-top-width: 3.84px; border-radius: 15.36px; box-shadow: var(--wl-card-shadow); }
+.w-float .w-strip-icon svg { width: 28.16px; height: 28.16px; }
+.w-float .w-band-live { font: 400 18.56px/1.4 var(--wl-font-ui); color: var(--wl-fb-text); }
+.w-float .w-band-verdict { display: inline; font: 800 20.48px/normal var(--wl-font-ui); }
+.w-float .w-band-text { display: inline; margin: 0; font: inherit; color: inherit; }
+
+/* NL3 (S04, S09, S16, S17): the strip beside the deck (right), so it never covers the counter; the
+   explain band on the deck's other side (S09); a wide deck for long cases (S17). The columns' top is
+   set from the tallest card, strip and band (src/templates/sortdeck.js). */
+.w-main[data-layout="sort-deck"] { --deck-w: 435.2px; --deck-edge: max(51.2px, calc((100% - 1177.6px) / 2)); }
+.w-float-beside { left: calc(50% + var(--deck-w) / 2 + 20.48px); right: var(--deck-edge); }
+/* FX3 (S04, S16: no explain band): the deck left under the heading, the strip wide beside it */
+.w-sdeck.w-sdeck-left { left: var(--deck-edge); transform: none; }
+.w-float-beside.w-float-wide { left: calc(var(--deck-edge) + var(--deck-w) + 30.72px); }
+.w-deck-band { position: absolute; top: 102.4px; left: var(--deck-edge); right: calc(50% + var(--deck-w) / 2 + 20.48px); }
+.w-deck-band .w-rules { margin: 0; padding: 12.8px 15.36px; }
+.w-deck-band .w-rules-label { font-size: 17.92px; white-space: normal; }
+.w-deck-band .w-rules-items { grid-template-columns: minmax(0, 1fr); gap: 6.4px; }
+.w-deck-band .w-rule-n { display: none; } /* the levels' order reads top down ("from open to closed") */
+.w-deck-band .w-rule-body { font-size: 15.36px; }
+.w-head-chip { align-self: center; flex: none; }
+/* four columns (S09, S16): a little closer, so each column is wider */
+.w-drops[data-count="4"] { gap: 15.36px; }
+
+/* the sort deck (S04): one card at a time, two offset cards behind it, the counter under it */
+.w-sdeck { position: absolute; left: 50%; top: 102.4px; width: var(--deck-w, 435.2px); transform: translateX(-50%); }
+.w-deck-stack { position: relative; }
+.w-deck-stack[data-done="true"] { visibility: hidden; }
+.w-deck-under { position: absolute; inset: 0; border: 1px solid var(--wl-line); border-radius: 15.36px; background: var(--wl-white); }
+.w-deck-under-2 { transform: translate(11.52px, 11.52px); }
+.w-deck-under-1 { transform: translate(5.76px, 5.76px); }
+.w-deck-card { position: relative; width: 100%; margin: 0; display: flex; align-items: center; gap: 15.36px; padding: 15.36px 23.04px; border: 2.56px solid var(--wl-navy);
+  border-radius: 15.36px; background: var(--wl-white); box-shadow: var(--wl-card-shadow); text-align: left; cursor: grab; touch-action: none; }
+.w-deck-card[aria-pressed="true"] { box-shadow: var(--wl-card-shadow), 0 0 0 3.84px var(--wl-press-ring); }
+.w-dragging { z-index: 20; cursor: grabbing; box-shadow: 0 25.6px 51.2px rgba(15, 42, 61, .22); }
+.w-grip { color: var(--wl-neutral-line); }
+.w-deck-text { font: 800 23.04px/1.25 var(--wl-font-ui); color: var(--wl-ink); } /* FX2 B: the deck smaller, the columns get the room */
+.w-deck-count { margin-top: 12.8px; text-align: center; font: 500 15.36px/normal var(--wl-font-label); color: var(--wl-muted); }
+/* QA3: the empty deck's place: "All n cards placed." and Check, centred where the card was */
+.w-deck-check { position: absolute; left: 0; right: 0; top: 12.8px; display: flex; flex-direction: column; align-items: center; gap: 10.24px; }
+.w-deck-check[hidden] { display: none; }
+.w-deck-done-note { margin: 0; font: 700 17.92px/1.3 var(--wl-font-ui); color: var(--wl-on-wash, var(--wl-ink)); }
+/* drop columns: dashed, title and subtitle, fixed from the top (they grow down with the placed cards) */
+.w-drops { position: absolute; left: max(51.2px, calc((100% - 1177.6px) / 2)); right: max(51.2px, calc((100% - 1177.6px) / 2)); top: 314.88px;
+  display: grid; gap: 20.48px; align-items: start; }
+.w-drop { min-height: 166.4px; padding: 14.08px 17.92px; border: 2.56px dashed var(--wl-dash); border-radius: 15.36px; background: var(--wl-drop-bg); }
+.w-drop[data-armed="true"] { cursor: pointer; }
+.w-drop[data-over="true"], .w-drop[data-chosen="true"] { border-style: solid; border-color: var(--wl-navy); background: var(--wl-keypill-bg); }
+.w-drop-title { display: block; font: 800 23.04px/1.2 var(--wl-font-ui); color: var(--wl-ink); }
+.w-drop-sub { display: block; margin-top: 2.56px; font: 400 15.36px/1.3 var(--wl-font-label); color: var(--wl-muted); }
+.w-drop-cards { list-style: none; margin: 0; padding: 0; }
+.w-placed { margin-top: 7.68px; display: flex; align-items: center; gap: 8.96px; padding: 5.12px 10.24px; border: 2.56px solid var(--wl-teal); border-radius: 10.24px; background: var(--wl-white);
+  font: 600 17.28px/1.3 var(--wl-font-ui); color: var(--wl-ink); } /* FX3: 15.36 -> 17.28 px (dense columns stay the fallback) */
+/* FX2 B: the card's own text, two lines at most; a dense column (it would reach Previous / Next): one line */
+.w-placed-text { min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+.w-drop[data-dense="true"] .w-placed { margin-top: 5.12px; padding-top: 2.56px; padding-bottom: 2.56px; }
+.w-drop[data-dense="true"] .w-placed-text { -webkit-line-clamp: 1; }
+.w-placed-disc { flex: none; width: 22.4px; height: 22.4px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-teal); color: var(--wl-white); }
+/* FX1 E2: a card placed but not checked yet (white, the card line, no mark); a card shown in its right
+   place after the last attempt (the check, the whole chip a button for its explanation) */
+.w-placed[data-state="pending"] { border-color: var(--wl-line-strong); }
+.w-drop-cards { display: flex; flex-wrap: wrap; column-gap: 6.4px; }
+.w-drop-cards > .w-placed { flex: 1 1 100%; min-width: 0; }
+.w-placed-explain { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 8.96px; width: calc(100% + 20.48px); min-height: 44px; margin: 0 -10.24px; padding: 2.56px 10.24px; cursor: pointer; }
+.w-placed-explain:focus-visible { outline: var(--wl-focus); outline-offset: 4px; }
+.w-placed:has(.w-placed-explain) { border-style: dashed; }
+.w-drops[data-done="true"] .w-drop { cursor: default; padding-bottom: 12.8px; }
+/* a shown card's whole chip is its 44px explain button */
+.w-placed:has(.w-placed-explain) { padding-top: 0; padding-bottom: 0; }
+.w-placed:has(.w-placed-explain) .w-placed-explain { margin-top: 0; margin-bottom: 0; }
+
+/* the BPMN diagram (S05a, S05b): a white figure card 60cqw x 25.4cqw; inside it 1 diagram unit = .1cqw */
+.w-board { position: absolute; }
+.w-board-key { left: max(64px, calc((100% - 1152px) / 2)); right: max(64px, calc((100% - 1152px) / 2)); top: 197.12px; }
+.w-board-label { left: max(51.2px, calc((100% - 1177.6px) / 2)); right: max(51.2px, calc((100% - 1177.6px) / 2)); top: 120.32px; }
+.w-bpmn { position: relative; width: 768px; height: 325.12px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); }
+.w-bpmn > * { position: absolute; }
+.w-bpmn-lane { height: 94.72px; display: flex; align-items: center; border-top: 1px solid var(--wl-line); }
+.w-bpmn-lane[data-tint="true"] { background: var(--wl-keypill-bg); border-bottom: 1px solid var(--wl-line); }
+.w-bpmn-lane-label { width: 102.4px; padding-left: 10.24px; font: 600 15.36px/1.2 var(--wl-font-ui); color: var(--wl-muted); }
+.w-bpmn-rule { width: 1px; background: var(--wl-line); }
+.w-bpmn-svg { inset: 0; width: 100%; height: 100%; }
+.w-bpmn-flows { fill: none; stroke: var(--wl-teal-ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.w-bpmn-head { fill: var(--wl-teal-ink); }
+.w-bpmn-shape { fill: var(--wl-white); stroke: var(--wl-teal-ink); stroke-linejoin: round; }
+.w-bpmn-step { height: 53.76px; display: grid; place-items: center; text-align: center; border: 2.432px solid var(--wl-teal-ink); border-radius: 7.68px; background: var(--wl-white);
+  font: 600 14.72px/1.15 var(--wl-font-ui); color: var(--wl-ink); }
+.w-bpmn-label { font: 600 14.72px/1.2 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-bpmn-label-c { text-align: center; }
+.w-bpmn-branch { font: 700 14.72px/1.2 var(--wl-font-ui); color: var(--wl-teal-ink); }
+.w-bpmn-marker, .w-bpmn-key-n { width: 30.72px; height: 30.72px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-navy);
+  font: 800 16.64px/normal var(--wl-font-ui); color: var(--wl-white); }
+.w-bpmn-marker { box-shadow: 0 0 0 3.2px var(--wl-white); }
+.w-bpmn-key { position: absolute; left: 806.4px; right: 0; top: 20.48px; margin: 0; padding: 0; list-style: none; display: grid; gap: 25.6px; }
+.w-bpmn-key li { display: flex; gap: 15.36px; align-items: flex-start; }
+.w-bpmn-key-n { flex: none; }
+.w-bpmn-key p { font: 400 20.48px/1.45 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-bpmn-key b { font-weight: 800; color: var(--wl-ink); }
+/* S05b: dashed targets with their "Drop here" chip; placed = solid teal with the label and a check */
+.w-target { border: 2.56px dashed var(--wl-dash); border-radius: 11.52px; }
+.w-target[data-armed="true"] { cursor: pointer; }
+.w-target[data-over="true"], .w-target[data-chosen="true"] { border-style: solid; border-color: var(--wl-navy); background: var(--wl-press-ring); }
+.w-target[data-placed="true"], .w-target[data-placed="right"], .w-target[data-placed="shown"] { border-style: solid; border-color: var(--wl-teal); background: transparent; }
+/* FX1 E2: placed, not checked yet (the card line, no mark); shown after the last attempt (dashed teal) */
+.w-target[data-placed="pending"] { border-style: solid; border-color: var(--wl-line-strong); background: transparent; }
+.w-target[data-placed="shown"] { border-style: dashed; }
+.w-target-placed[data-state="pending"] { border-color: var(--wl-line-strong); }
+.w-target-placed[data-state="shown"] { border-style: dashed; }
+/* FX1 E3 (S05b): the diagram zoomed into the board's free space (same proportions), the tray beside it;
+   the places in a turquoise dashed outline with "Drop here", a gentle pulse while a label is picked up */
+.w-board-label { --z: 1.15; }
+.w-bpmn-zoom { width: calc(768px * var(--z)); height: calc(325.12px * var(--z)); }
+.w-bpmn-zoom > .w-bpmn { transform: scale(var(--z)); transform-origin: 0 0; }
+.w-board-label .w-label-tray, .w-board-label .w-float-tray { left: calc(768px * var(--z) + 25.6px); }
+.w-board-label .w-target:not([data-placed]) { border-color: var(--wl-turquoise); }
+.w-board-label .w-target-chip { border-color: var(--wl-turquoise); color: var(--wl-teal-ink); pointer-events: auto; } /* the chip takes a click-to-drop too (src/drag.js) */
+.w-board-label .w-target[data-armed="true"] ~ .w-target-chip { cursor: pointer; }
+@media (prefers-reduced-motion: no-preference) {
+  .w-board-label .w-target[data-armed="true"]:not([data-placed]) { animation: w-drop-pulse 1.6s ease-in-out infinite; }
+}
+@keyframes w-drop-pulse { 0%, 100% { box-shadow: 0 0 0 0 var(--wl-halo); } 50% { box-shadow: 0 0 0 7.68px var(--wl-halo); } }
+.w-target-chip, .w-target-placed { transform: translate(-50%, -50%); pointer-events: none; background: var(--wl-white); border-radius: 7.68px; }
+.w-target-chip { width: 97.28px; padding: 1.28px 0; border: 1.92px dashed var(--wl-dash); text-align: center; font: 500 14.08px/normal var(--wl-font-label); color: var(--wl-muted); }
+.w-target-placed { display: inline-flex; align-items: center; gap: 6.4px; padding: 2.56px 8.96px; border: 2.56px solid var(--wl-teal); white-space: nowrap;
+  font: 700 15.36px/normal var(--wl-font-ui); color: var(--wl-ink); }
+.w-placed-disc-s { width: 20.48px; height: 20.48px; }
+.w-label-tray { position: absolute; left: 819.2px; right: 0; top: 0; display: grid; gap: 15.36px; }
+.w-label-card { margin: 0; display: flex; align-items: center; gap: 15.36px; padding: 16.64px 23.04px; border: 1px solid var(--wl-line); border-radius: 15.36px; background: var(--wl-white);
+  font: 800 25.6px/normal var(--wl-font-ui); color: var(--wl-ink); text-align: left; cursor: grab; touch-action: none; }
+.w-label-card[aria-pressed="true"] { border: 2.56px solid var(--wl-navy); box-shadow: var(--wl-card-shadow); }
+.w-float-tray { left: 819.2px; right: 0; top: 250.88px; }
+
+/* NL3 flags (S12 map, S13 line), by analogy with S05b: the figure card left (the S05b diagram's
+   768px), the flags right (S05b's label cards with a flag), the strip under them; the drop targets
+   are S05b's (dashed; over = navy; placed = solid teal with the flag chip and its check) */
+.w-board-flags { left: max(51.2px, calc((100% - 1177.6px) / 2)); right: max(51.2px, calc((100% - 1177.6px) / 2)); top: 120.32px; }
+.w-map-card, .w-line-card { width: 768px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); }
+.w-flag-side { position: absolute; left: 819.2px; right: 0; top: 0; display: grid; gap: 15.36px; align-content: start; }
+.w-flag-side .w-label-tray, .w-flag-side .w-float { position: static; }
+.w-flag-icon { color: var(--wl-navy); }
+.w-target .w-target-placed { position: absolute; transform: none; }
+/* S12: the eight fields in two columns, each field a drop target */
+.w-map-card { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8.96px 15.36px; padding: 15.36px; }
+.w-map-col { display: grid; gap: 8.96px; align-content: start; }
+.w-map-field { position: relative; display: flex; gap: 10.24px; align-items: flex-start; min-height: 44px; padding: 7.68px 12.8px 8.96px; }
+.w-map-text { display: grid; gap: 1.28px; font: 400 15.36px/1.35 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-map-text b { font-weight: 700; color: var(--wl-ink); }
+.w-map-field .w-step-n { margin-top: 1.28px; }
+.w-map-field .w-target-placed { right: 7.68px; top: -14.08px; }
+/* S13: the five steps of the process line across the board, a drop slot above each (level); the
+   flags side by side under it, the strip beside them */
+.w-board-flags[data-variant="line"] .w-line-card { width: auto; }
+.w-board-flags[data-variant="line"] .w-flag-side { position: static; margin-top: 20.48px; grid-template-columns: 563.2px minmax(0, 1fr); align-items: start; gap: 20.48px; }
+.w-board-flags[data-variant="line"] .w-flag-tray { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.w-line-card { padding: 20.48px 23.04px; }
+.w-line { display: flex; align-items: stretch; gap: 10.24px; }
+.w-line-cell { flex: 1 1 0; min-width: 0; display: grid; grid-template-rows: 51.2px 1fr; gap: 10.24px; }
+.w-line-slot { position: relative; display: grid; place-items: center; }
+.w-line-slot .w-target-chip, .w-line-slot .w-target-placed { position: static; transform: none; }
+.w-line-step { display: grid; gap: 7.68px; align-content: start; padding: 10.24px 12.8px; border: 2.432px solid var(--wl-teal-ink); border-radius: 7.68px;
+  background: var(--wl-white); font: 600 17.92px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.w-line-arrow { flex: none; display: flex; align-items: center; padding-top: 61.44px; color: var(--wl-navy); } /* level with the step boxes, under the slots */
+
+/* ---------- side menu (frame "O2 Side menu open") ---------- */
+.w-menu-overlay { position: absolute; inset: 0; z-index: 30; }
+.w-menu-scrim { position: absolute; inset: 0; background: var(--wl-scrim); }
+.w-panel { position: absolute; left: 0; top: 0; bottom: 0; width: 358.4px; display: flex; flex-direction: column; padding: 28.16px; background: var(--wl-ivory); box-shadow: var(--wl-menu-shadow); }
+.w-panel-head { display: flex; align-items: center; justify-content: space-between; }
+.w-panel-logo { width: 84.48px; height: auto; }
+.w-panel-close { width: 44px; height: 44px; margin: -7.92px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--wl-radius-btn); background: transparent; color: var(--wl-ink); cursor: pointer; }
+.w-panel-close:hover { background: var(--wl-keypill-bg); }
+.w-panel-title { margin: 28.16px 0 23.04px; font: 800 25.6px/1.15 var(--wl-font-ui); color: var(--wl-ink); }
+.w-chapters { list-style: none; margin: 0; padding: 0; display: grid; gap: 5.12px; }
+.w-chapter { width: 100%; margin: 0; display: flex; align-items: center; gap: 15.36px; padding: 14.08px 15.36px; border: 0; border-radius: var(--wl-radius-card); background: transparent; text-align: left; cursor: pointer; }
+.w-chapter[aria-disabled="true"] { cursor: default; }
+.w-chapter:hover:not([aria-disabled="true"]):not([aria-current]) { background: var(--wl-white); }
+.w-chapter[aria-current="step"] { background: var(--wl-white); box-shadow: 0 0 0 1px var(--wl-line); }
+.w-menu-disc { flex: none; width: 30.72px; height: 30.72px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--wl-line-strong); font: 600 15.36px/normal var(--wl-font-ui); color: var(--wl-idle-ink); }
+.w-chapter[aria-current="step"] .w-menu-disc { border: 0; background: var(--wl-white); box-shadow: 0 0 0 3.2px var(--wl-turquoise); font-weight: 800; color: var(--wl-teal-ink); }
+.w-chapter[data-status="done"] .w-menu-disc { border: 0; background: var(--wl-navy); color: var(--wl-white); }
+.w-chapter-title { flex: 1 1 auto; font: 600 20.48px/normal var(--wl-font-ui); color: var(--wl-muted); }
+.w-chapter[data-status="done"] .w-chapter-title { color: var(--wl-ink); }
+.w-chapter[aria-current="step"] .w-chapter-title { font-weight: 800; color: var(--wl-ink); }
+.w-panel-foot { margin: auto -12px 0; padding-top: 6.4px; display: flex; gap: 4px; border-top: 1px solid var(--wl-line); }
+.w-panel-link { min-height: 44px; padding: 0 12px; border: 0; border-radius: var(--wl-radius-btn); background: transparent; font: 500 15.36px/1 var(--wl-font-label); color: var(--wl-navy); cursor: pointer; white-space: nowrap; }
+.w-panel-link:hover { background: var(--wl-white); }
+
+/* ---------- in-page dialog (help, start over confirm, resume prompt) ---------- */
+.w-dialog-overlay { position: absolute; inset: 0; z-index: 60; display: grid; place-items: center; background: var(--wl-scrim); }
+.w-dialog { width: 580px; padding: 28.16px 30.72px; border-radius: var(--wl-radius-panel); background: var(--wl-ivory); box-shadow: var(--wl-panel-shadow); }
+.w-dialog-text { margin: 0 0 8px; font: 800 25.6px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-dialog-note { margin: 0; font: 400 17.28px/1.45 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-dialog-actions { display: flex; justify-content: flex-end; gap: 12.8px; margin-top: 23.04px; }
+.w-dialog-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.w-help { list-style: disc; padding-left: 20px; font: 400 17.28px/1.45 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-help li { margin: 6px 0; }
+
+/* ---------- ghost hand: the frames' white hand with an ink outline, a soft teal ripple ---------- */
+.w-ghost { position: absolute; left: 0; top: 0; z-index: 55; width: 58.88px; height: 58.88px; pointer-events: none; }
+.w-ghost-hand { position: relative; display: block; fill: var(--wl-hand-fill); stroke: var(--wl-ink); stroke-width: 1.3; filter: drop-shadow(0 3.84px 6.4px rgba(0, 0, 0, .3)); }
+.w-ghost-ripple { position: absolute; left: 0; top: -18.6px; width: 52px; height: 52px; border: 3px solid var(--wl-teal); border-radius: 50%; opacity: 0; }
+.w-ghost-static .w-ghost-ripple { opacity: .45; }
+.w-ghost-arrow { position: absolute; left: -38px; top: -34px; color: var(--wl-navy); transform: rotate(40deg); }
+/* FX1 B1: the chip that travels with the hand ("Pick one"; the kit's "Drag down to a column" chip) */
+.w-ghost-chip { position: absolute; left: 48px; top: 44px; font: 700 15.36px/normal var(--wl-font-ui); color: var(--wl-white); background: var(--wl-navy); border-radius: 6.4px; padding: 3.84px 10.24px; white-space: nowrap; }
+
+/* ---------- CO1: the Wawiwa AI Coach (src/coach/coach.js), approved design, stage px ---------- */
+/* launcher: in the bar after the chapter name; a 56 px white disc, 3 px turquoise ring, the robot 46 px */
+.w-coach-launcher { flex: none; position: relative; width: 56px; height: 56px; margin-left: 18px; padding: 0; display: grid; place-items: center;
+  border: 3px solid var(--wl-turquoise); border-radius: 50%; background: var(--wl-white); cursor: pointer; }
+.w-stage .w-coach-launcher:focus-visible { outline: 3px solid var(--wl-white); outline-offset: 3px; } /* on the dark bar */
+/* locked (the knowledge check): 60%, grey ring, a lock badge bottom right */
+.w-coach-launcher[data-locked="true"] { opacity: .6; border-color: var(--wl-coach-grip); }
+.w-coach-lock { position: absolute; right: -5px; bottom: -5px; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%;
+  background: var(--wl-coach-grip); color: var(--wl-white); box-shadow: 0 0 0 2px var(--wl-white); }
+.w-coach-lock[hidden] { display: none; }
+
+/* panel: 340 wide, 536 high (Noy: down to the foot of the page, its content at the top); dock left (24) or right (24), top 96: y 96 to 632;
+   opaque; above main (1) and the footer (4), below the menu (30) and the dialogs (60) */
+.w-coach-panel { position: absolute; top: 96px; left: 24px; z-index: 10; width: 340px; height: 536px; display: flex; flex-direction: column;
+  border-radius: 18px; overflow: hidden; background: var(--wl-coach-ground); box-shadow: 0 10px 30px rgba(0, 0, 0, .35); }
+.w-coach-panel[data-dock="r"] { left: auto; right: 24px; }
+.w-coach-panel[hidden], .w-coach-panel [hidden] { display: none; }
+.w-coach-panel:focus { outline: none; } /* the dialog itself takes the focus on open; its controls show the ring */
+.w-coach-panel[data-dragging="true"] { cursor: grabbing; }
+/* CO2: Dor's live coach page, the whole body under the header (340 wide, the rest of the 536) */
+.w-coach-frame { flex: 1 1 auto; min-height: 0; display: block; width: 340px; border: 0; background: var(--wl-coach-ground); }
+.w-coach-head { flex: none; display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--wl-coach-head); }
+/* grip and close: 44 px targets, 34 px in the header's height */
+.w-coach-grip, .w-coach-close { flex: none; width: 44px; height: 44px; margin: -5px 0; padding: 0; display: grid; place-items: center; border: 0; border-radius: 10px; background: transparent; }
+.w-coach-grip { margin-left: -10px; margin-right: -8px; color: var(--wl-coach-grip); cursor: grab; touch-action: none; }
+.w-coach-close { margin-left: auto; margin-right: -8px; color: var(--wl-white); cursor: pointer; }
+.w-stage .w-coach-head :focus-visible { outline: 3px solid var(--wl-white); outline-offset: -3px; }
+.w-coach-ava-head { flex: none; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-white); }
+.w-coach-title { margin: 0; font: 800 16px/1.2 var(--wl-font-ui); color: var(--wl-white); }
+
+/* body: the messages */
+.w-coach-log { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 14px 14px 12px;
+  font: 400 15px/1.4 var(--wl-font-ui); color: var(--wl-body-ink); }
+.w-coach-msg { display: flex; align-items: flex-end; gap: 8px; }
+.w-coach-msg[data-from="you"] { justify-content: flex-end; }
+.w-coach-ava { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border: 1.5px solid var(--wl-turquoise); border-radius: 50%; background: var(--wl-white); }
+.w-coach-bubble { max-width: 240px; margin: 0; padding: 9px 12px; border: 1px solid var(--wl-coach-line); border-radius: 16px 16px 16px 4px; background: var(--wl-white); }
+.w-coach-msg[data-from="you"] .w-coach-bubble { border-color: var(--wl-navy); border-radius: 16px 16px 4px 16px; background: var(--wl-navy); color: var(--wl-white); }
+.w-coach-notice { margin: 0; padding: 8px 12px; border-radius: 12px; background: var(--wl-coach-notice-bg); color: var(--wl-coach-notice); }
+.w-coach-dots { display: inline-flex; gap: 5px; padding: 6px 2px; vertical-align: middle; }
+.w-coach-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--wl-turquoise); }
+/* the chip: the learner's ready-made question (offline: "What do I do here?"), on the learner's side */
+.w-coach-chips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.w-coach-chip { min-height: 44px; padding: 6px 16px; border: 1.5px solid var(--wl-turquoise); border-radius: 22px; background: var(--wl-white);
+  font: 500 14px/1.2 var(--wl-font-label); color: var(--wl-coach-chip); cursor: pointer; }
+.w-coach-chip:hover { background: var(--wl-keypill-bg); }
+
+/* footer: offline (tips) the chip only, under the messages; live the input pill, the send button (a 34 px
+   disc in a 44 px target) and the privacy line */
+.w-coach-foot { flex: none; padding: 0 14px 14px; }
+.w-coach-foot[data-mode="live"] { padding: 10px 12px 12px; border-top: 1px solid var(--wl-coach-line); }
+.w-coach-foot[data-mode="tips"] .w-coach-live, .w-coach-foot[data-mode="live"] .w-coach-chips { display: none; }
+.w-coach-row { display: flex; align-items: center; gap: 4px; height: 48px; padding: 0 2px 0 16px; border: 1.5px solid var(--wl-turquoise); border-radius: 24px; background: var(--wl-white); }
+.w-coach-row:focus-within { outline: var(--wl-focus); outline-offset: 2px; }
+.w-coach-input { flex: 1; min-width: 0; height: 44px; padding: 0; border: 0; background: transparent; font: 400 14px/1.2 var(--wl-font-label); color: var(--wl-body-ink); }
+.w-stage .w-coach-input:focus-visible { outline: none; } /* the pill shows the ring */
+.w-coach-input::placeholder { color: var(--wl-coach-hint); opacity: 1; }
+.w-coach-send { flex: none; width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; cursor: pointer; }
+.w-coach-send-disc { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-navy); color: var(--wl-white); }
+.w-coach-row[data-off="true"] { border-color: var(--wl-coach-off-line); background: var(--wl-coach-off-bg); }
+.w-coach-send:disabled { cursor: default; }
+.w-coach-send:disabled .w-coach-send-disc { background: var(--wl-coach-off-send); }
+.w-coach-privacy { display: flex; align-items: center; gap: 6px; margin: 8px 4px 0; font: 400 12px/1.3 var(--wl-font-label); color: var(--wl-coach-meta); }
+.w-coach-privacy .w-glyph { flex: none; }
+
+/* the first-use hint: under the launcher, its arrow pointing up at it */
+.w-coach-hint { position: absolute; top: 90px; z-index: 10; display: flex; align-items: center; gap: 6px; padding: 2px 4px 2px 16px;
+  border: 2px solid var(--wl-turquoise); border-radius: 14px; background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
+.w-coach-hint[hidden] { display: none; }
+.w-coach-hint::before { content: ""; position: absolute; left: 21px; top: -8px; width: 12px; height: 12px; transform: rotate(45deg);
+  border-left: 2px solid var(--wl-turquoise); border-top: 2px solid var(--wl-turquoise); background: var(--wl-white); }
+.w-coach-hint p { margin: 0; font: 600 16px/1.3 var(--wl-font-ui); color: var(--wl-ink); white-space: nowrap; }
+.w-coach-gotit { min-width: 44px; min-height: 44px; padding: 0 10px; border: 0; background: transparent; font: 700 15px/1.2 var(--wl-font-ui); color: var(--wl-navy);
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .w-coach-panel:not([hidden]) { animation: w-coach-in .22s var(--wl-ease-enter) both; }
+  .w-coach-dots i { animation: w-coach-dot 1.2s ease-in-out infinite both; }
+  .w-coach-dots i:nth-child(2) { animation-delay: .15s; }
+  .w-coach-dots i:nth-child(3) { animation-delay: .3s; }
+  .w-coach-launcher[data-demo="pulse"] { animation: w-pulse-ring .55s ease-in-out 2 both; } /* the goals screen's demo */
+}
+@keyframes w-coach-in { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }
+@keyframes w-coach-dot { 0%, 80%, 100% { opacity: .35; } 40% { opacity: 1; } }
+
+/* ---------- motion: push-in once, draw-on, the strip's slide-up; nothing ambient ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .w-push { animation: w-push var(--wl-dur-push) var(--wl-ease-enter) both; }
+  .w-stage .draw path, .w-stage .draw rect, .w-stage .draw circle { stroke-dasharray: 600; animation: w-draw var(--wl-dur-draw) ease-out both; }
+  .w-strip-in { animation: w-fb-in var(--wl-dur-fb) cubic-bezier(.2, .8, .2, 1); }
+  .w-bpmn-marker { animation: w-pop .35s var(--wl-ease-enter) both; } /* S05a: the markers one by one (delay per marker) */
+  /* FX1 B3: the build-up on entry, once (src/templates/stage.js buildUp: --b-delay per element) */
+  .w-build { animation: w-build-in .42s var(--wl-ease-enter) var(--b-delay, 0ms) both; }
+  .w-build-line { transform-origin: 0 50%; animation: w-line-in .6s ease-out var(--b-delay, 0ms) both; }
+  .w-pulse-once { animation: w-pulse-once 1.2s ease-in-out var(--b-delay, 0ms) 1 both; }
+  .w-pulse-twice:not([aria-pressed="true"]) { animation: w-pulse-ring 1.1s ease-in-out var(--b-delay, 0ms) 2 both; } /* K2's toggle: twice, once */
+}
+@keyframes w-pulse-ring { 0%, 100% { box-shadow: 0 0 0 0 var(--wl-halo); } 50% { box-shadow: 0 0 0 7.68px var(--wl-halo), 0 0 0 1.92px var(--wl-turquoise); } }
+@keyframes w-build-in { from { opacity: 0; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
+@keyframes w-line-in { from { scale: 0 1; } to { scale: 1 1; } }
+@keyframes w-pulse-once { 0%, 100% { box-shadow: 0 0 0 0 var(--wl-halo); } 50% { box-shadow: 0 0 0 10.24px var(--wl-halo); } }
+@keyframes w-pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+@keyframes w-push { from { transform: scale(1.08); } to { transform: scale(1); } }
+@keyframes w-draw { from { stroke-dashoffset: 600; } to { stroke-dashoffset: 0; } }
+@keyframes w-fb-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .w-stage *, .w-stage *::before, .w-stage *::after { transition: none !important; animation: none !important; }
+}
+
+/* ---------- FX4 (Dor's pilot review, 5 Nov 2026): fixes pass, same look ---------- */
+/* the line beside Next: locked = what is missing; open = what comes next. A light pill, so it reads on
+   any scene (photo, wash, video ground) */
+.w-next-wrap { display: flex; align-items: center; gap: 12.8px; pointer-events: none; }
+.w-next-wrap > button { pointer-events: auto; }
+.w-next-why { max-width: 460px; padding: 7.68px 14.08px; border-radius: 7.68px; background: var(--wl-ivory); box-shadow: var(--wl-card-shadow);
+  font: 600 16px/1.3 var(--wl-font-label); color: var(--wl-ink); }
+.w-next-why[data-state="open"] { background: var(--wl-correct-bg); color: var(--wl-correct-head); }
+/* the video: the player bar runs to the footer, so the line sits above Next, right of the film */
+.w-main[data-layout="video"] ~ .w-footer .w-next-wrap { flex-direction: column; align-items: flex-end; gap: 8.96px; }
+.w-main[data-layout="video"] ~ .w-footer { align-items: flex-end; }
+.w-main[data-layout="video"] ~ .w-footer .w-next-why { max-width: 220px; }
+/* (with the transcript or a stop panel open on the right, that space is taken: the line steps aside; at a
+   stop the panel itself says why Resume is locked) */
+.w-main[data-layout="video"]:is([data-side="open"], [data-side="stop"]) ~ .w-footer .w-next-why { display: none; }
+/* Next: Wawiwa turquoise (was red). White on turquoise is 2.5:1, so the label is ink (6.0:1, AA) */
+.w-next[data-locked="false"] { background: var(--wl-turquoise); color: var(--wl-ink); }
+.w-next[data-locked="false"]:hover { filter: brightness(.94); }
+@media (prefers-reduced-motion: no-preference) {
+  .w-next-on { animation: w-next-on 1.4s ease-out 1 both; }
+}
+@keyframes w-next-on { 0% { box-shadow: 0 0 0 0 var(--wl-halo); } 40% { box-shadow: 0 0 0 10.24px var(--wl-halo), 0 0 0 3.2px var(--wl-turquoise); } 100% { box-shadow: 0 0 0 0 var(--wl-halo); } }
+/* a locked Check says why, beside it */
+.w-check-why { align-self: center; font: 500 15.36px/1.3 var(--wl-font-label); color: var(--wl-muted); white-space: nowrap; }
+.w-stage[data-scene="focus"] .w-float .w-check-why { color: var(--wl-on-wash); }
+.w-resume-why { flex: 1 1 auto; white-space: normal; text-align: right; }
+/* top bar: "Chapter N of 7" and the step discs about 1.5x */
+.w-bar-of { font-size: 20.48px; line-height: 1.1; }
+.w-stage .w-steps-bar { --wl-step-d: 48.64px; }
+.w-step { width: 76.8px; gap: 2.56px; }
+.w-step-link { margin-top: 23.04px; }
+.w-step-label { line-height: 1.1; }
+/* drop places: bigger, and they light up under the pointer while a card is picked up (click to place) */
+.w-drop { min-height: 192px; }
+.w-drop[data-armed="true"], .w-target[data-armed="true"] { border-color: var(--wl-navy); }
+.w-drop[data-armed="true"]:hover, .w-target[data-armed="true"]:hover { border-style: solid; border-color: var(--wl-navy); background: var(--wl-keypill-bg); }
+/* the Hint link (the hint is not printed until it is asked for) and the hint it opens */
+.w-band-hint { display: inline-flex; align-items: center; gap: 8.96px; min-width: 0; }
+.w-hint-link { flex: none; display: inline-flex; align-items: center; gap: 6.4px; min-height: 44px; margin: 0 0 0 -8.96px; padding: 0 8.96px; border: 0; border-radius: var(--wl-radius-btn);
+  background: none; font: 600 16px/normal var(--wl-font-ui); color: var(--wl-navy); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.w-hint-link:hover { background: var(--wl-keypill-bg); }
+.w-stage[data-done="true"] :is(.w-hint-link, .w-showme) { display: none; }
+.w-hint-link.w-gone { display: none; }
+/* a narrow tray (S05b, the flags): the Hint, the Check reason and Check wrap instead of overflowing */
+.w-float .w-band-row { flex-wrap: wrap; row-gap: 6.4px; }
+.w-float .w-check-why { white-space: normal; flex: 1 1 140px; text-align: right; }
+.w-hint-text { font: 500 16px/1.35 var(--wl-font-label); color: var(--wl-text-2); }
+.w-stage[data-scene="focus"] .w-float .w-hint-link, .w-stage[data-scene="focus"] .w-float .w-hint-text { color: var(--wl-white); }
+.w-stage[data-scene="focus"] .w-float .w-hint-link:hover { background: var(--wl-bar-on-dark-disc); }
+/* ---------- FX5 (Noy, 8 Nov 2026) ---------- */
+/* the feedback is its own card, apart from the question box: under the panel, a gap between them; the
+   panel moves up by half the card (zones.js placeCard sets --fb-shift), so both stay centred */
+.w-sheet .w-band { margin: 0 -30.72px 0; }
+.w-sheet .w-band-row, .w-sheet .w-band[data-strip="on"] .w-band-row { padding-bottom: 0; }
+.w-sheet[data-fb="on"] { margin-top: calc(-1 * var(--fb-shift, 0px)); }
+.w-sheet .w-band .w-strip { position: absolute; left: 0; right: 0; top: calc(100% + 15.36px); margin: 0; border-top: 0; border-left: 7.68px solid;
+  border-radius: var(--wl-radius-panel); box-shadow: var(--wl-panel-shadow); }
+.w-float .w-strip { border-top: 0; border-left: 7.68px solid; border-radius: var(--wl-radius-panel); box-shadow: var(--wl-panel-shadow); }
+.w-stage .w-band .w-strip[data-tone="correct"] { border-left-color: var(--wl-teal); }
+.w-stage .w-band .w-strip[data-tone="wrong"] { border-left-color: var(--wl-error); }
+.w-stage .w-band .w-strip[data-tone="neutral"] { border-left-color: var(--wl-neutral-line); }
+/* the looks a task screen can take (screen.look), besides the blurred photo (focus) and the full photo (stage):
+   band   the photo as a band at the top (behind the bar and the heading), the task on the light ground
+   split  the photo on the left, the task on the light ground on the right
+   light  a clean light ground, no photo */
+.w-stage:is([data-scene="band"], [data-scene="split"], [data-scene="light"]) { background: var(--wl-stone); }
+.w-band-photo { position: absolute; left: 0; right: 0; top: 0; height: 288px; background-size: cover; background-repeat: no-repeat; }
+.w-band-veil { position: absolute; left: 0; right: 0; top: 0; height: 288px; background: var(--wl-wash-veil); }
+.w-split-photo { position: absolute; left: 0; top: 0; bottom: 0; width: 36%; background-size: cover; background-repeat: no-repeat; }
+.w-stage:is([data-scene="split"], [data-scene="light"])[data-bar="dark"] > .w-bar { background: var(--wl-stage-ground); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.w-stage[data-scene="band"] :is(.w-task-head, .w-focus-head, .w-open-head) .w-instruction { color: var(--wl-white); }
+.w-stage[data-scene="band"] :is(.w-task-head, .w-focus-head, .w-open-head) :is(.w-context, .w-subline, .w-task-sub) { color: var(--wl-on-wash); }
+.w-stage[data-scene="split"] .w-sheet-focus { left: calc(36% + 40px); right: 40px; width: auto; transform: translateY(-50%); }
+/* S02: the heading first, then the context line with the Homework 1 button beside it */
+.w-open-ctx { display: flex; align-items: center; gap: 17.92px; margin-top: 10.24px; }
+.w-open-ctx .w-context { flex: 1 1 auto; min-width: 0; }
+.w-hw-btn { flex: none; gap: 8.96px; }
+/* S05a: the key stands out: white cards, turquoise numbers (on the diagram too) */
+.w-bpmn-marker, .w-bpmn-key-n { width: 38.4px; height: 38.4px; background: var(--wl-turquoise); color: var(--wl-o1-ground); font-size: 19.2px; }
+.w-bpmn-key { gap: 12.8px; }
+.w-bpmn-key li { align-items: center; padding: 14.08px 17.92px; border-radius: var(--wl-radius-card); background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
+.w-stage[data-scene] .w-main .w-bpmn-key li p { font-size: 19.2px; color: var(--wl-text-2); }
+.w-stage[data-scene] .w-main .w-bpmn-key li b { color: var(--wl-ink); }
+/* S07: the question looks different from the tiles before it */
+.w-q-chip { display: inline-block; margin-bottom: 6.4px; padding: 2.56px 12.8px; border-radius: 5.12px; background: var(--wl-turquoise); font: 700 15.36px/1.4 var(--wl-font-label); color: var(--wl-o1-ground); }
+.w-stage .w-main[data-phase="answer"] .w-task-head .w-instruction { color: var(--wl-teal-ink); } /* (on the light ground: teal ink, 6:1) */
+.w-main[data-phase="answer"] .w-tiles .w-tile { min-height: 96px; background: var(--wl-ivory); }
+.w-main[data-phase="answer"] .w-tiles .w-tile-icon-wrap { display: none; }
+.w-main[data-phase="answer"] .w-tiles .w-tile .w-opt-mark { width: 32px; height: 32px; }
+/* S08: the rule question in turquoise ink; the map line to judge, larger, on a turquoise edge */
+.w-main:has(.w-rounds) .w-instruction { color: var(--wl-teal-ink); }
+.w-map-strip { border-left-width: 9px; border-left-color: var(--wl-turquoise); padding: 17.92px 23.04px; }
+.w-round-line { font-size: 24.32px; font-weight: 700; }
+/* S10: left the workbook page (the note, Field 6 filled, Field 7's blank); right the four lines */
+.w-sheet-fill .w-fill { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 25.6px; align-items: start; }
+.w-wb-page { display: grid; gap: 12.8px; padding: 17.92px; border-radius: var(--wl-radius-card); background: var(--wl-white); border: 1px solid var(--wl-line); box-shadow: var(--wl-card-shadow); }
+.w-fill-note { display: flex; gap: 10.24px; align-items: flex-start; padding: 10.24px 12.8px; border-radius: 7.68px; background: var(--wl-keypill-bg); font: 600 18.56px/1.4 var(--wl-font-ui); color: var(--wl-ink); }
+.w-fill-note .w-glyph, .w-fill-note svg { flex: none; color: var(--wl-teal-ink); }
+.w-sheet-fill .w-field-row { flex-direction: column; align-items: stretch; gap: 4px; }
+.w-sheet-fill .w-field-row[data-state="active"] .w-field-slot { min-height: 34px; }
+/* S11: left the four metrics; right the "Checkable later?" gauge: three big icon tiles */
+.w-sheet-metric .w-metric { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 25.6px; align-items: start; }
+.w-sheet-metric .w-slots { flex-direction: column; align-items: stretch; gap: 12.8px; padding: 17.92px; border-radius: var(--wl-radius-card); background: var(--wl-white); border: 1px solid var(--wl-line); box-shadow: var(--wl-card-shadow); }
+.w-sheet-metric .w-slots-title { font-size: 19.2px; text-align: center; }
+.w-sheet-metric .w-slots ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10.24px; }
+.w-sheet-metric .w-slot { min-width: 0; min-height: 112px; flex-direction: column; justify-content: center; gap: 6.4px; padding: 10.24px 6.4px; text-align: center; }
+.w-slot-icon { display: grid; color: var(--wl-idle-ink); }
+.w-slot[data-on="true"] .w-slot-icon { color: var(--wl-teal-ink); }
+.w-sheet-metric .w-slot-label { font: 700 16.64px/1.2 var(--wl-font-ui); }
+/* S14 / S15: the situation in the panel, the handoff drawing beside its line */
+.w-sheet-one .w-case-row { margin-bottom: 4px; }
+.w-hv-inline { flex: 0 0 300px; margin: 0; }
+.w-hv-inline .w-hv-box { min-height: 48px; padding: 6.4px; font-size: 16px; }
+/* Check: centred under the task, and filled (the main action) once it can be pressed */
+.w-sheet .w-band-row:has([data-action="check"]) { justify-content: center; }
+.w-sheet .w-band-row:has([data-action="check"]) .w-band-tool { margin-left: 0; }
+.w-btn-action[data-action="check"]:not(:disabled) { min-width: 160px; border-color: var(--wl-navy); background: var(--wl-navy); color: var(--wl-white); }
+.w-btn-action[data-action="check"]:not(:disabled):hover { background: var(--wl-ink); }
+/* the sort (Rise style): the deck centred, its feedback card centred under it, the piles lower */
+.w-float.w-float-under { position: absolute; left: 50%; width: min(720px, calc(100% - 204.8px)); transform: translateX(-50%); }
+.w-float-under .w-band-row { display: none; }
+.w-main[data-layout="sort-deck"] .w-sdeck { top: 112px; }
+.w-main[data-layout="sort-deck"] .w-drop { min-height: 220px; }
+.w-placed[data-state="wrong"] { border-color: var(--wl-error); background: var(--wl-error-bg); }
+.w-placed[data-state="wrong"] .w-placed-disc { background: var(--wl-error); }
+@media (prefers-reduced-motion: no-preference) {
+  .w-placed[data-state="wrong"], .w-target-placed[data-state="wrong"] { animation: w-shake .38s ease-in-out 1; }
+  .w-placed[data-state="right"] { animation: w-pop .3s var(--wl-ease-enter) 1; }
+}
+@keyframes w-shake { 0%, 100% { translate: 0 0; } 25% { translate: -6px 0; } 75% { translate: 6px 0; } }
+/* labels and flags: where a label went is clear at once: solid teal (right), red (wrong, a moment) */
+.w-target[data-placed="right"] { background: var(--wl-halo); } /* see-through: the diagram under it stays readable */
+.w-target[data-placed="wrong"] { border-style: solid; border-color: var(--wl-error); background: transparent; }
+.w-target-placed[data-state="right"] { background: var(--wl-teal-ink); border-color: var(--wl-teal-ink); color: var(--wl-white); } /* white on teal ink: 6.1:1 */
+.w-target-placed[data-state="right"] .w-placed-disc { background: var(--wl-white); color: var(--wl-teal-ink); }
+.w-target-placed[data-state="wrong"] { border-color: var(--wl-error); color: var(--wl-error-head); background: var(--wl-white); }
+.w-target-placed[data-state="wrong"] .w-placed-disc { background: var(--wl-error); }
+/* flags: the next flag a click places glows; the free targets show they take it */
+.w-flag-card[data-active="true"] { border: 2.56px solid var(--wl-turquoise); box-shadow: 0 0 0 5.12px var(--wl-halo); }
+.w-target[data-ready="true"] { cursor: pointer; border-color: var(--wl-navy); }
+.w-target[data-ready="true"]:hover { border-style: solid; background: var(--wl-keypill-bg); }
+/* S19A (the brief): the line and three steps left, the workbook's screenshot right */
+.w-sheet-brief { padding-bottom: 28.16px; }
+.w-sheet-brief .w-handoff-head { margin-bottom: 15.36px; }
+.w-sheet .w-sheet-brief .w-instruction, .w-sheet-brief .w-handoff-head .w-instruction { font-size: 38.4px; }
+.w-brief-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 30.72px; align-items: center; }
+.w-brief-left { display: grid; gap: 17.92px; }
+.w-brief-left .w-steps { gap: 10.24px; }
+.w-brief-left .w-steps li { font-size: 19.2px; }
+.w-wb-shot { margin: 0; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); overflow: hidden; box-shadow: var(--wl-card-shadow); background: var(--wl-white); }
+.w-wb-shot-img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+/* S19B (open): one column */
+.w-sheet-open1 { padding-top: 28.16px; }
+.w-sheet-open1 .w-handoff-head .w-instruction { font-size: 38.4px; }
+.w-sheet-open1 .w-handoff-head { margin-bottom: 17.92px; }
+.w-sheet-open1 .w-handoff-grid { grid-template-columns: minmax(0, 1fr); gap: 25.6px; }
+.w-sheet-open1 .w-copy-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12.8px; }
+/* S19C (back from the workbook): the question, Yes / Not yet, the reopen link after Not yet */
+.w-sheet-back { width: min(720px, calc(100% - 204.8px)); }
+.w-pdf-choice { display: flex; gap: 15.36px; }
+.w-pdf-choice .w-btn { min-width: 140.8px; }
+.w-pdf-choice .w-btn[aria-pressed="true"].w-btn-ghost { border: 2.56px solid var(--wl-navy); }
+.w-pdf-fix { display: grid; gap: 12.8px; justify-items: start; margin-top: 20.48px; }
+/* FX5: the video's speed: a gear (a badge with any speed but Normal) and its menu above it */
+.w-speed-wrap { position: relative; flex: none; }
+.w-speed { position: relative; }
+.w-speed-badge { position: absolute; right: -2px; top: 2px; padding: 0 4px; border-radius: 4px; background: var(--wl-turquoise); font: 700 14px/1.2 var(--wl-font-label); color: var(--wl-o1-ground); }
+.w-speed-badge:empty { display: none; }
+.w-speed-menu { position: absolute; right: -8px; bottom: calc(100% + 10px); z-index: 6; min-width: 168px; padding: 8px 0; border-radius: var(--wl-radius-card);
+  background: var(--wl-quote-glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: var(--wl-panel-shadow); }
+.w-speed-head { margin: 0; padding: 4px 16px 8px; font: 600 14px/1.2 var(--wl-font-label); color: var(--wl-on-glass); }
+.w-speed-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 16px; border: 0; background: none; font: 600 16px/1 var(--wl-font-ui); color: var(--wl-white); text-align: left; cursor: pointer; }
+.w-speed-item:hover, .w-speed-item:focus-visible { background: var(--wl-bar-on-dark-disc); }
+.w-speed-tick { width: 16px; display: grid; color: var(--wl-aqua-text); visibility: hidden; }
+.w-speed-item[aria-checked="true"] .w-speed-tick { visibility: visible; }
+/* a checked card's tag: why it belongs in that column (one short line, teal ink) */
+.w-placed-body { min-width: 0; display: grid; }
+.w-placed-tag { font: 600 14px/1.25 var(--wl-font-label); color: var(--wl-teal-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.w-drop[data-dense="true"] .w-placed-tag { line-height: 1.1; } /* a full column keeps the tags; the card text takes one line */
+/* S13: each whole step is the drop target (no separate "Drop here" slot) */
+.w-line-cell.w-target { padding: 6.4px; border-radius: 11.52px; grid-template-rows: 44.8px 1fr; gap: 6.4px; }
+.w-target-empty { visibility: hidden; }
+.w-line-arrow { padding-top: 67.84px; }
+
+/* ---------- FX6 (Noy, 8 Nov 2026): the composition of a question screen (src/compose.js) ----------
+   On a light ground, read left to right: the head (instruction first, then its context) and the task in a
+   white card with its feedback card under it; the photo framed, never under an object. Top-aligned, so
+   the feedback card appearing under the task moves nothing. */
+.w-comp { position: absolute; left: max(56px, calc((100% - 1376px) / 2)); right: max(56px, calc((100% - 1376px) / 2)); top: 38.4px; bottom: 92px;
+  display: grid; column-gap: 48px; align-items: start; }
+.w-comp[data-look="text"], .w-comp[data-look="framed"] { grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); }
+.w-comp[data-look="photo"] { grid-template-columns: minmax(0, .6fr) minmax(0, 1.4fr); }
+.w-comp[data-look="photo-right"] { grid-template-columns: minmax(0, 1.4fr) minmax(0, .6fr); }
+.w-comp-stack { display: grid; gap: 22.4px; align-content: start; min-width: 0; }
+.w-comp-photo { margin: 0; align-self: stretch; min-height: 0; border-radius: var(--wl-radius-panel); overflow: hidden; box-shadow: var(--wl-card-shadow); background: var(--wl-line); }
+.w-comp-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.w-comp-img[data-mirror="true"] { scale: -1 1; }
+/* (framed: the photo takes the head column's room that is left, 120 to 236 px, never past its foot) */
+.w-comp[data-look="framed"] .w-comp-head { align-self: stretch; display: flex; flex-direction: column; }
+.w-comp[data-look="framed"] .w-comp-head > * { flex: none; }
+.w-comp[data-look="framed"] .w-comp-head > .w-comp-photo { flex: 0 1 236px; min-height: 120px; max-height: 236px; margin-top: 10px; align-self: stretch; }
+/* the head: instruction largest, in ink; a turquoise rule marks where reading starts */
+.w-comp-head { display: grid; gap: 14px; align-content: start; min-width: 0; min-height: 0; padding-left: 20.48px; border-left: 5.12px solid var(--wl-turquoise); }
+.w-comp-stack > .w-comp-head { padding-left: 17.92px; }
+.w-stage .w-comp-head .w-instruction { margin: 0; font: 800 36px/1.12 var(--wl-font-ui); letter-spacing: -.8px; color: var(--wl-ink); }
+.w-comp-stack .w-comp-head .w-instruction { font-size: 32px; }
+.w-comp-head .w-head-row { margin: 0; flex-direction: column; align-items: flex-start; gap: 14px; }
+.w-comp-head .w-head-tools { flex-wrap: wrap; }
+.w-comp-head .w-context { margin: 0; font-size: 19.2px; line-height: 1.45; color: var(--wl-text-2); }
+.w-comp-head .w-label { margin: 0; }
+.w-comp-head .w-case-row { flex-direction: column; align-items: flex-start; }
+.w-comp-head .w-hv-inline { flex: none; width: 100%; max-width: 360px; }
+.w-comp-head .w-case-thumbs { margin: 0; }
+/* a warm-up's kicker and a quote stand in the head as plain blocks (no glass over a photo any more) */
+.w-comp-head .w-glass { position: static; width: auto; margin: 0; padding: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; color: var(--wl-ink); box-shadow: none; }
+.w-comp-head .w-glass-kicker { color: var(--wl-teal-ink); margin-bottom: 10px; }
+.w-comp-head .w-glass-label { color: var(--wl-ink); }
+.w-comp-head .w-glass .w-instruction { margin: 0; }
+.w-comp-head .w-quote-glass { padding: 18px 22px; border-radius: var(--wl-radius-card); background: var(--wl-stage-ground); color: var(--wl-white); }
+.w-comp-head .w-quote-glass .w-quote-1 { margin-top: 4px; font-size: 22px; line-height: 1.25; color: var(--wl-white); }
+.w-comp-head .w-quote-glass .w-attrib { margin-top: 8px; font-size: 15px; }
+.w-comp-head .w-case-thumbs { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.w-comp-head .w-case-thumb { display: flex; align-items: center; gap: 14px; margin: 0; }
+.w-comp-head .w-case-thumb img { flex: none; width: 132px; height: 74px; object-fit: cover; border-radius: 8px; }
+.w-comp-head .w-case-thumb figcaption { font: 600 16px/1.3 var(--wl-font-label); color: var(--wl-text-2); }
+.w-comp-head .w-quote-glass .w-attrib { color: var(--wl-on-glass); }
+.w-comp-head .w-quote-glass .w-glyph { width: 32px; height: auto; }
+.w-comp-head .w-case-card { position: static; width: auto; margin: 0; padding: 16px 20px; box-shadow: none; border: 1px solid var(--wl-line); }
+/* the task: the screen's panel as a white card, its feedback card under it */
+.w-comp .w-sheet { position: relative; top: auto; left: auto; right: auto; bottom: auto; transform: none; width: auto; max-width: none; margin: 0;
+  padding: 24px 26px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
+.w-comp .w-sheet[data-fb="on"] { margin-top: 0; }
+.w-comp .w-sheet .w-band { margin: 0; }
+.w-comp .w-sheet .w-band-row { padding: 0; }
+.w-comp .w-sheet .w-band .w-strip { top: calc(100% + 14px); }
+.w-comp .w-sheet-title { display: none; } /* a warm-up's "Make your best guess.": the instruction says it */
+.w-comp .w-ans-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.w-comp .w-sheet > :first-child { margin-top: 0; }
+.w-comp .w-ans { background: var(--wl-white); }

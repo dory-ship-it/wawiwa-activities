@@ -1,0 +1,216 @@
+/* FX8 (Noy, 8 Nov 2026: "go back to my design in Artifacts and design every screen from it"): the layer
+   that returns the lesson to Noy's boards, "L4 Screens Intro to Ch2" (Intro to Chapter 3) and
+   planning/fx8-board (Chapters 4 to 7). It replaces FX7's src/fx7.css (one cream panel on every screen).
+   Kept from 8 Nov: the translucent dark bar, the feedback bubble under the answers, the Your answer /
+   Right answer tags, select then Check. Colours only through src/tokens.css. */
+
+/* ---------- Focus: the chapter photo as a light wash (FX3's dark veil retired) ---------- */
+.w-stage[data-scene="focus"] { background: var(--wl-stone); }
+.w-stage[data-scene="focus"] .w-wash-photo { inset: -44.8px; filter: blur(14px) saturate(1); }
+.w-stage[data-scene="focus"] .w-wash-veil { background: linear-gradient(180deg, var(--wl-wash-veil-top), var(--wl-wash-veil-mid) 60%, var(--wl-wash-veil-low)); }
+/* FX3's light text on the dark wash goes back to ink */
+.w-stage[data-scene="focus"] :is(.w-task-head, .w-focus-head, .w-open-head) .w-instruction,
+.w-stage[data-scene="focus"] :is(.w-map-kicker, .w-evidence b, .w-bpmn-key b) { color: var(--wl-ink); }
+.w-stage[data-scene="focus"] :is(.w-task-head, .w-focus-head, .w-open-head) :is(.w-context, .w-subline, .w-concept-text, .w-task-sub),
+.w-stage[data-scene="focus"] :is(.w-map-title, .w-evidence, .w-bpmn-key p, .w-sdeck .w-deck-count, .w-float .w-attempts) { color: var(--wl-text-2); }
+.w-stage[data-scene="focus"] .w-focus-head .w-eyebrow { color: var(--wl-teal-ink); }
+.w-stage[data-scene="focus"] .w-float .w-attempt-discs i { border-color: var(--wl-navy); background: transparent; }
+.w-stage[data-scene="focus"] .w-float .w-attempt-discs i[data-used="true"] { background: var(--wl-navy); }
+
+/* ---------- the feedback: a message bubble under the answers, inside the panel (8 Nov, v6-light) ----------
+   (Noy: never stuck to the bottom, never the wrong answer's red, room from the answers, never like an
+   answer: no border, the verdict its own heading line, a notch pointing up at the answers) */
+.w-stage .w-sheet .w-band { margin: 0; }
+.w-stage .w-sheet .w-band-row, .w-stage .w-sheet .w-band[data-strip="on"] .w-band-row { padding: 0; }
+.w-stage .w-sheet[data-fb="on"] { margin-top: 0; }
+.w-stage .w-band .w-strip { position: relative; inset: auto; margin: 22px 0 0; padding: 13px 22px 15px 18px; gap: 13px; align-items: flex-start;
+  border: 0; border-radius: 16px; background: var(--wl-neutral-bg); box-shadow: none; }
+.w-stage .w-band .w-strip::before { content: ""; position: absolute; left: 30px; top: -9px; width: 18px; height: 18px; transform: rotate(45deg);
+  border-radius: 3px 0 0 0; background: var(--wl-neutral-bg); }
+.w-stage .w-band .w-strip-icon { width: 30px; height: 28px; place-content: center; }
+.w-stage .w-band .w-strip-icon svg { width: 28px; height: 28px; }
+.w-stage .w-band .w-band-verdict { display: block; font: 800 21px/28px var(--wl-font-ui); color: var(--wl-ink); }
+.w-stage .w-band .w-strip[data-tone="wrong"] .w-band-verdict { color: var(--wl-error-head); }
+.w-stage .w-band .w-strip[data-tone="correct"] .w-band-verdict { color: var(--wl-correct-head); }
+.w-stage .w-band .w-band-text { display: block; margin-top: 3px; font: 400 18px/1.42 var(--wl-font-ui); color: var(--wl-fb-text); }
+/* a sort's, a label's or a flag's feedback floats where its template puts it: the same bubble, lifted */
+.w-stage .w-float .w-strip { box-shadow: var(--wl-card-shadow); }
+.w-stage .w-float .w-strip::before { display: none; }
+.w-stage .w-float .w-band-verdict { display: inline; font-size: 20px; }
+.w-stage .w-float .w-band-text { display: inline; margin: 0 0 0 6px; }
+.w-stage[data-scene="focus"] .w-float :is(.w-hint-link, .w-hint-text) { color: var(--wl-ink); }
+.w-stage[data-scene="focus"] .w-float .w-hint-link:hover { background: var(--wl-keypill-bg); }
+
+/* the state in words on a marked answer (stage.js paintAnswer) */
+.w-ans-tag { flex: none; margin-left: auto; padding-left: 12px; font: 700 15px/1.2 var(--wl-font-ui); }
+.w-ans[data-result="wrong"] .w-ans-tag { color: var(--wl-error-head); }
+.w-ans[data-result="correct"] .w-ans-tag { color: var(--wl-correct-head); }
+/* the picked one before Check (S08's rule cards, S07's tiles) */
+:is(.w-rule-card, .w-tile)[aria-pressed="true"]:not([data-result="correct"]):not([data-result="wrong"]) { border: 3.2px solid var(--wl-navy); }
+
+/* Check: bottom right of the panel (the board's S03 and S21), filled once it can be pressed */
+.w-stage .w-sheet .w-band-row:has([data-action="check"]) { justify-content: flex-end; margin-top: 18px; }
+.w-stage .w-sheet .w-band-row:has([data-action="check"]) .w-band-tool { margin-left: auto; }
+
+/* ---------- drag (S04, S05b, S09, S16; Noy: "the object disappears behind the categories") ----------
+   The card being dragged is lifted above everything on the screen: every box it sits in rises with it
+   (the deck is its own stacking context, painted under the columns that follow it), with a deeper
+   shadow and a slight tilt; the column under the pointer lights up navy. */
+.w-main :has(.w-dragging) { z-index: 30; }
+.w-dragging { z-index: 40; box-shadow: var(--wl-lift-shadow); rotate: -2deg; }
+.w-drop[data-over="true"], .w-target[data-over="true"] { border-color: var(--wl-navy); background: var(--wl-keypill-bg); box-shadow: 0 0 0 4px var(--wl-press-ring); }
+
+/* ---------- an option with an icon (S17, S20B, S22): the icon in a tile where the marker sits ---------- */
+.w-ans-icon { flex: none; width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: var(--wl-keypill-bg); color: var(--wl-teal-ink); }
+.w-ans[data-icon] .w-ans-mark { display: none; }
+.w-ans[data-icon]:is([data-result="correct"], [data-result="wrong"]) .w-ans-mark { display: grid; }
+.w-ans[data-icon]:is([data-result="correct"], [data-result="wrong"]) .w-ans-icon { display: none; }
+.w-ans[data-icon][aria-pressed="true"] .w-ans-icon, .w-ans[data-icon][aria-checked="true"] .w-ans-icon { background: var(--wl-navy); color: var(--wl-white); }
+
+/* ---------- K4: each kind with its icon in a disc, on a tinted row ---------- */
+.w-kcol-list li[data-icon] { display: flex; align-items: center; gap: 16px; padding: 15px 18px; border-radius: 12px; }
+.w-kcol[data-kind="lean"] .w-kcol-list li[data-icon] { background: var(--wl-correct-bg); }
+.w-kcol[data-kind="mess"] .w-kcol-list li[data-icon] { background: var(--wl-stone); }
+.w-kcol-icon { flex: none; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; color: var(--wl-white); background: var(--wl-teal-ink); }
+.w-kcol[data-kind="mess"] .w-kcol-icon { background: var(--wl-grey-ink); }
+.w-kcol-body { display: grid; gap: 1px; min-width: 0; }
+.w-kcol-body b { font: 700 20px/1.25 var(--wl-font-ui); color: var(--wl-ink); }
+.w-kcol-body span { font: 400 16px/1.3 var(--wl-font-label); color: var(--wl-muted); }
+.w-kcol:has(li[data-icon]) .w-kcol-list { display: grid; gap: 10px; }
+
+/* ---------- sort columns with an icon (S16): good-fit kinds teal, Poor fit grey ---------- */
+.w-drop-icon { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 10px; color: var(--wl-white); background: var(--wl-teal-ink); }
+.w-drop[data-kind="poor"] .w-drop-icon { background: var(--wl-grey-ink); }
+.w-drop[data-kind="good"] { border-color: var(--wl-teal); }
+.w-drop[data-kind="good"] .w-drop-title { color: var(--wl-teal-ink); }
+.w-drop[data-kind="poor"] .w-drop-title { color: var(--wl-grey-ink); }
+
+/* ---------- flags (S12 map, S13 line): click a field or a step; no tray ---------- */
+.w-flag-tray { display: none; }
+.w-flag-lead { margin: 8px 0 0; font: 400 20px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-flag-lead b { color: var(--wl-ink); }
+.w-main[data-layout="flags"] .w-board-flags { top: 192px; }
+.w-board-flags .w-flag-side { position: static; display: block; margin-top: 18px; }
+.w-board-flags .w-flag-side .w-float { position: static; max-width: 760px; }
+.w-flag-count { display: inline-flex; align-items: center; gap: 12px; padding: 10px 18px 10px 12px; border-radius: 14px; background: var(--wl-white); box-shadow: var(--wl-float-shadow); }
+.w-flag-dots { display: flex; gap: 6px; }
+.w-flag-dot { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; border: 2px dashed var(--wl-dash); color: var(--wl-idle-ink); }
+.w-flag-dot[data-on="true"] { border: 0; background: var(--wl-teal-ink); color: var(--wl-white); }
+.w-flag-count-text { font: 700 18px/1.2 var(--wl-font-ui); color: var(--wl-ink); white-space: nowrap; }
+/* S12: the eight fields 4 x 2, in reading order (the two columns of four flow into one grid) */
+.w-board-flags[data-variant="map"] .w-map-card { width: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; padding: 0; border: 0; background: none; }
+.w-board-flags[data-variant="map"] .w-map-col { display: contents; }
+.w-board-flags[data-variant="map"] .w-map-field { min-height: 118px; padding: 14px 16px; border: 1px solid var(--wl-line); border-radius: 14px; background: var(--wl-white); box-shadow: var(--wl-float-shadow);
+  flex-direction: column; gap: 8px; cursor: pointer; }
+.w-board-flags[data-variant="map"] .w-map-field .w-step-n { width: 30px; height: 30px; font-size: 15px; }
+.w-board-flags[data-variant="map"] .w-map-text { display: grid; gap: 4px; }
+.w-board-flags[data-variant="map"] .w-map-text b { font: 800 18px/1.2 var(--wl-font-ui); color: var(--wl-ink); }
+.w-board-flags[data-variant="map"] .w-map-text span { font: 400 16px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
+.w-board-flags[data-variant="map"] .w-map-field:hover:not([data-placed]) { border-color: var(--wl-navy); }
+/* S13: the five steps larger, the line full width */
+.w-board-flags[data-variant="line"] .w-line-card { padding: 22px 24px; box-shadow: var(--wl-float-shadow); }
+.w-board-flags[data-variant="line"] .w-line-step { min-height: 128px; padding: 14px 16px; font: 700 20px/1.3 var(--wl-font-ui); color: var(--wl-ink); cursor: pointer; }
+.w-board-flags[data-variant="line"] .w-flag-side { display: block; }
+
+/* K4: the rows a little tighter so both columns end above the footer */
+.w-kcol-list li[data-icon] { padding: 10px 16px; gap: 14px; }
+.w-kcol-icon { width: 42px; height: 42px; }
+.w-kcol-body b { font-size: 19px; }
+
+/* ---------- S19C on Stage: the check-in panel right of the photo, a PDF badge on top ---------- */
+.w-sheet-back.w-sheet-right { top: 50%; bottom: auto; transform: translateY(-50%); width: 560px; padding: 34px 40px; display: grid; justify-items: center; text-align: center; gap: 6px; }
+.w-sheet-back .w-pdf-badge { width: 100px; height: 100px; margin-bottom: 14px; border-radius: 24px; display: grid; place-items: center; background: var(--wl-keypill-bg); color: var(--wl-teal-ink); }
+.w-sheet-back .w-instruction { font-size: 38px; line-height: 1.1; }
+.w-sheet-back .w-pdf-choice { margin-top: 22px; justify-content: center; }
+.w-sheet-back .w-pdf-choice .w-btn { min-width: 150px; min-height: 52px; font-size: 20px; }
+.w-sheet-back .w-pdf-fix { justify-items: center; }
+
+/* ---------- S19A: the workbook in a laptop frame ---------- */
+.w-sheet-brief .w-wb-shot { position: relative; overflow: visible; padding: 12px 12px 0; border: 0; border-radius: 16px 16px 0 0; background: var(--wl-coach-head); box-shadow: none; margin-bottom: 18px; }
+.w-sheet-brief .w-wb-shot-img { border-radius: 4px 4px 0 0; }
+.w-sheet-brief .w-wb-shot::after { content: ""; position: absolute; left: -26px; right: -26px; bottom: -18px; height: 18px; border-radius: 0 0 20px 20px; background: var(--wl-line-strong); box-shadow: var(--wl-card-shadow); }
+
+/* ---------- S17B: two coloured halves, AI teal, a person navy ---------- */
+.w-fields-pair { gap: 20px; }
+.w-fields-pair > .w-field { padding: 16px 18px; border-radius: 14px; }
+.w-fields-pair > .w-field:nth-of-type(1) { background: var(--wl-correct-bg); }
+.w-fields-pair > .w-field:nth-of-type(2) { background: var(--wl-stone); }
+.w-fields-pair > .w-field:nth-of-type(1) .w-field-label { color: var(--wl-teal-ink); font-size: 20px; }
+.w-fields-pair > .w-field:nth-of-type(2) .w-field-label { color: var(--wl-navy); font-size: 20px; }
+
+/* ---------- S13: the steps on one process line, an icon disc each, no dashed boxes ---------- */
+.w-board-flags[data-variant="line"] { top: 250px; }
+.w-board-flags[data-variant="line"] .w-line-card { position: relative; padding: 0; border: 0; background: none; box-shadow: none; }
+.w-board-flags[data-variant="line"] .w-line { position: relative; gap: 18px; }
+.w-board-flags[data-variant="line"] .w-line::before { content: ""; position: absolute; left: 40px; right: 40px; top: 95px; height: 6px; border-radius: 3px; background: var(--wl-line-strong); }
+.w-board-flags[data-variant="line"] .w-line-arrow { display: none; }
+.w-board-flags[data-variant="line"] .w-line-cell.w-target { position: relative; grid-template-rows: 44px 84px auto; gap: 12px; justify-items: center; padding: 0; border: 0; background: none; box-shadow: none; }
+.w-line-disc { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; background: var(--wl-white); border: 2px solid var(--wl-navy); color: var(--wl-navy); box-shadow: var(--wl-float-shadow); }
+.w-board-flags[data-variant="line"] .w-line-step { width: 100%; min-height: 120px; justify-items: center; text-align: center; border: 1px solid var(--wl-line); background: var(--wl-white); box-shadow: var(--wl-float-shadow); border-radius: 14px; }
+.w-board-flags[data-variant="line"] .w-line-cell[data-ready="true"]:hover .w-line-disc { background: var(--wl-keypill-bg); }
+.w-board-flags[data-variant="line"] .w-line-cell:is([data-placed="right"], [data-placed="shown"]) .w-line-disc { background: var(--wl-teal-ink); border-color: var(--wl-teal-ink); color: var(--wl-white); }
+.w-board-flags[data-variant="line"] .w-line-cell:is([data-placed="right"], [data-placed="shown"]) .w-line-step { border: 3px solid var(--wl-teal); }
+.w-board-flags[data-variant="line"] .w-line-cell[data-placed="wrong"] .w-line-step { border: 3px solid var(--wl-error); }
+.w-board-flags[data-variant="line"] .w-line-cell .w-target-placed { position: static; }
+
+/* ---------- S10 (the board): heading and the situation left, the map's two fields right, the four
+   answers 2 x 2 across, on the wash (no panel) ---------- */
+.w-sheet-fill.w-sheet-focus { left: 64px; right: 64px; width: auto; transform: translateY(-50%); padding: 0; background: none; border: 0; box-shadow: none;
+  display: grid; grid-template-columns: minmax(0, 1fr) 500px; column-gap: 40px; row-gap: 18px; align-items: start; }
+.w-sheet-fill > .w-head-row { grid-column: 1; grid-row: 1; margin: 0; }
+.w-sheet-fill .w-instruction { font-size: 40px; line-height: 1.08; letter-spacing: -.6px; }
+.w-sheet-fill .w-fill, .w-sheet-fill .w-wb-page { display: contents; }
+.w-sheet-fill .w-fill-note { grid-column: 1; grid-row: 2; align-self: start; padding: 18px 20px; gap: 14px; border-radius: 16px; background: var(--wl-white); box-shadow: var(--wl-float-shadow); font-size: 20px; }
+.w-sheet-fill .w-fill-note > svg { width: 44px; height: 44px; padding: 10px; border-radius: 50%; background: var(--wl-navy); color: var(--wl-white); }
+.w-sheet-fill .w-field-rows { grid-column: 2; grid-row: 1 / span 2; display: grid; gap: 12px; padding: 18px 20px; border-radius: 18px; border: 1px solid var(--wl-line); background: var(--wl-white); box-shadow: var(--wl-float-shadow); }
+.w-sheet-fill .w-field-row { padding: 10px 14px; }
+.w-sheet-fill .w-field-row[data-state="active"] .w-field-slot { min-height: 40px; border: 2.5px dashed var(--wl-dash); border-radius: 10px; padding: 6px 12px; }
+.w-sheet-fill .w-field-row[data-state="active"] .w-field-slot[data-result="correct"] { border: 2px solid var(--wl-teal); background: var(--wl-correct-bg); }
+.w-sheet-fill > .w-fill .w-options, .w-sheet-fill .w-options { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 8px; }
+.w-sheet-fill .w-ans { min-height: 58px; background: var(--wl-white); font-size: 19px; }
+.w-sheet-fill > .w-band { grid-column: 1 / -1; grid-row: 4; }
+
+/* ---------- S17 (the board): the case as a file card left, under the heading; the five mistakes
+   stacked right, each with its icon; on the wash ---------- */
+.w-sheet-cases.w-sheet-focus { left: 64px; right: 64px; width: auto; transform: translateY(-50%); padding: 0; background: none; border: 0; box-shadow: none;
+  display: grid; grid-template-columns: 470px minmax(0, 1fr); column-gap: 44px; row-gap: 20px; align-items: start; }
+.w-sheet-cases > .w-head-row { grid-column: 1; grid-row: 1; margin: 0; }
+.w-sheet-cases .w-instruction { font-size: 36px; line-height: 1.1; letter-spacing: -.5px; }
+.w-sheet-cases .w-case-now { grid-column: 1; grid-row: 2; padding: 20px 24px; border-radius: 16px; border: 1px solid var(--wl-line); border-left: 1px solid var(--wl-line); background: var(--wl-white);
+  box-shadow: var(--wl-float-shadow), 10px 10px 0 -1px var(--wl-white), 10px 10px 0 0 var(--wl-line); }
+.w-sheet-cases .w-case-now-text { font: 700 25px/1.35 var(--wl-font-ui); color: var(--wl-ink); margin-top: 12px; }
+.w-sheet-cases .w-sit-kicker { font: 800 17px/1.2 var(--wl-font-ui); color: var(--wl-navy); }
+.w-sheet-cases .w-options { grid-column: 2; grid-row: 1 / span 3; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.w-sheet-cases .w-ans { min-height: 64px; background: var(--wl-white); }
+.w-sheet-cases > .w-band { grid-column: 2; grid-row: 4; }
+
+/* ---------- S20B (the board): the same five mistakes as tiles, five across, the icon on top ---------- */
+.w-sheet:has(> .w-risk-note) .w-options.w-risk { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.w-sheet:has(> .w-risk-note) .w-risk .w-ans { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 12px; min-height: 176px; padding: 18px 16px; }
+.w-sheet:has(> .w-risk-note) .w-risk .w-ans .w-ans-icon { width: 46px; height: 46px; border-radius: 12px; }
+.w-sheet:has(> .w-risk-note) .w-risk .w-ans .w-opt-label { font-size: 19px; line-height: 1.25; }
+.w-sheet:has(> .w-risk-note) .w-risk .w-ans .w-ans-tag { margin-left: 0; padding-left: 0; }
+
+/* the translucent dark bar over the light Focus wash: darker, so its white text keeps AA (test-fit) */
+.w-stage[data-scene="focus"][data-bar="dark"] > .w-bar { background: var(--wl-bar-focus-bg); }
+/* the sort's columns end above Previous / Next (test-fit) */
+.w-main[data-layout="sort-deck"] .w-drop { min-height: 176px; }
+
+/* the bubble a little more compact, so a panel with its feedback stays within its height (test-fit) */
+.w-stage .w-band .w-strip { margin-top: 16px; padding: 10px 18px 12px 14px; gap: 11px; }
+.w-stage .w-band .w-band-verdict { font-size: 19px; line-height: 24px; }
+.w-stage .w-band .w-band-text { font-size: 16.5px; line-height: 1.4; }
+.w-stage .w-sheet .w-band-row:has([data-action="check"]) { margin-top: 12px; }
+/* S12 / S13: higher on the screen, so the feedback under them ends above Previous / Next */
+.w-main[data-layout="flags"] .w-board-flags { top: 172px; }
+.w-board-flags[data-variant="map"] .w-map-field { min-height: 100px; padding: 12px 14px; }
+.w-board-flags[data-variant="line"] { top: 196px; }
+.w-board-flags[data-variant="line"] .w-line-step { min-height: 100px; }
+.w-board-flags .w-flag-side { margin-top: 12px; }
+
+/* Stage panels start under the bar (the board's S01: 9.4cqw from the top) and grow down, so a long case
+   line plus its feedback never pushes the panel up out of the screen (test-fit, S14 stretch) */
+.w-stage[data-scene="stage"] .w-sheet-right:not(.w-sheet-back) { top: 36px; transform: none; }
+/* a chapter with 9 steps (Toolkit): the steps a little narrower, clear of the coach launcher (test-fit) */
+.w-steps-bar:has(> :nth-child(17)) .w-step { width: 60px; }
+.w-steps-bar:has(> :nth-child(17)) .w-step-link { min-width: 12px; }
