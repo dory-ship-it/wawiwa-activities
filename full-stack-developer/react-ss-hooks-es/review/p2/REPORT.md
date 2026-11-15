@@ -157,3 +157,129 @@ The films were built on the storyboard as written. If the SME answers S5 or S11 
 - **P3** has not started. It needs Q2 answered.
 - **The plugin's video skill** (`wawiwa-content-os/skills/wawiwa-video/references/lesson-films.md`) still does not list the `code` beat, `typed`, or the `aifs` style. That is a plugin change with its own version bump, not part of P2.
 - **Not registered as practices yet:** `videos[].practice` and `activity` are null on the five rows until P3 builds the practice pages.
+
+---
+
+## עדכון, 15 בנובמבר 2026: חמשת הסרטים רונדרו עם קול
+
+דור דחף את הענף `content/react-hooks-es`. הריצה "Voice and render" מספר 43692109951 עברה על כל חמשת הסרטים, בקול Angie. שום דבר לא פורסם.
+
+| סרט | אורך אמיתי (נמדד בקובץ) | אזהרות תזמון |
+|---|---|---|
+| F1 useState | 127.8 שניות | אין |
+| F2 useEffect: cuándo se ejecuta | 155.9 שניות | אין |
+| F3 useEffect: limpieza | 136.7 שניות | 4 שורות (2, 5, 7, 9) |
+| F4 useRef | 128.4 שניות | אין |
+| F5 Hooks personalizados | 160.8 שניות | 2 שורות (8, 11) |
+| **סך הכול** | **709.6 שניות, 11.8 דקות** | 6 מתוך 54 שורות |
+
+- **האורכים** זהים לחישוב של ה-planner, כצפוי: ה-planner קובע את אורך הסרט, והקול נכנס לתוכו.
+- **שש השורות** ארוכות מהזמן שתוכנן להן ב-0.34 עד 0.71 שניות (10 עד 22 פריימים). הקול מסתיים בתוך ההפסקה שבסוף הצעד, לא אחריה. לא נבדק אם הכתובית יורדת לפני שהקול מסתיים בשורות האלה.
+- **קצב הדיבור האמיתי** (תווים לשנייה, לפי קובצי הכתוביות): ממוצע 13.8 עד 14.7 לסרט; השורה האיטית ביותר 11.8. הקצב 13 מחזיק ב-48 מתוך 54 שורות.
+- **התיקון** הוא נתון בקובץ התוכן (להאריך את הצעד או לקצר את השורה) ורינדור חוזר. מומלץ לעשות אותו יחד עם ההערות של דור אחרי הצפייה, בריצה אחת.
+- **לא נבדק:** Claude לא שמע את הסרטים ולא צפה בהם בתנועה. דור עוד לא צפה.
+- **הקבצים** (לא ב-git): `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/out/react-hooks-es-run-43692109951/`
+
+## Update, 15 Nov 2026: the five films are rendered with voice
+
+Dor pushed branch `content/react-hooks-es`. "Voice and render" run 43692109951 passed on all five films, voice Angie. Nothing was published.
+
+| Film | Real length (measured on the file) | Timing warnings |
+|---|---|---|
+| F1 useState | 127.8 s | none |
+| F2 useEffect: cuándo se ejecuta | 155.9 s | none |
+| F3 useEffect: limpieza | 136.7 s | 4 lines (cues 2, 5, 7, 9) |
+| F4 useRef | 128.4 s | none |
+| F5 Hooks personalizados | 160.8 s | 2 lines (cues 8, 11) |
+| **Total** | **709.6 s, 11.8 min** | 6 of 54 lines |
+
+- **The lengths** equal the planner's arithmetic, as expected: the planner fixes the film's length and the voice is placed inside it.
+- **The six lines** run 0.34 to 0.71 s (10 to 22 frames) longer than the time planned for them. The voice ends inside the pause at the end of the beat, not after it. Whether the caption leaves before the voice ends on those lines was not checked.
+- **The real speaking rate** (characters a second, from the caption files): 13.8 to 14.7 on average per film; the slowest line is 11.8. The rate of 13 holds on 48 of 54 lines.
+- **The fix** is data in the content file (a longer beat or a shorter line) and a re-render. Best done together with Dor's notes after he watches, in one run.
+- **Not checked:** Claude did not hear the films or watch them in motion. Dor has not watched yet.
+- **The files** (not in git): `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/out/react-hooks-es-run-43692109951/`
+
+---
+
+## עדכון, 15 בנובמבר 2026: דור אישר את הסרטים, והתיקון לשש השורות
+
+- **אישור:** דור אישר את חמשת הסרטים ואת המראה של תרגול P-1 (הוא כתב "מאושר", וכשנשאל בחר "הסרטים וגם P-1").
+- **שתי החלטות נוספות שלו:** לתקן את שש השורות ולרנדר שוב; ולהשאיר את סרט 5 כמו שהוא (בלי צעד הסבר נוסף ל-`useDataApi`).
+- **מה נמצא:** רצועת הכתוביות מציגה שורה רק למשך הזמן שתוכנן לה. בשש השורות הקול המשיך 0.3 עד 0.7 שניות אחרי שהכתובית כבר ירדה.
+- **התיקון הוא במנוע, לא בתוכן** (commit `4d08de9`, ענף `engine/caption-holds-voice` של wawiwa-video, מוזג לענף `content/react-hooks-es` ב-`0130dda`): שלב הקול מאריך רק את הכתובית של שורה כזו, עד סוף הקול ועוד 6 פריימים, ולעולם לא מעבר לסוף הצעד שלה. הצעדים, המצלמה ואורך הסרטים לא משתנים. אף קובץ תוכן לא שונה.
+- **נבדק** על התוכנית האמיתית של חמשת הסרטים ועל אורכי הקול שנמדדו בריצה 43692109951: הכתובית מוארכת בשש השורות האלה ובשורה אחת בסרט 1 (חריגה קטנה מתחת לסף האזהרה); אין כתובית קצרה מהקול שלה, אין חפיפה עם השורה הבאה, ואין כתובית שנמשכת מעבר לצעד. `tsc` עובר, ו-planner על חמשת הסרטים נותן אותה תוצאה.
+- **לא נבדק:** התיקון לא רץ עדיין ב-GitHub Actions, ואף אחד לא צפה בתוצאה. זה ייבדק בריצה הבאה, אחרי ה-push של דור.
+- **משפיע גם על** כל סרט שיעור אחר שבנוי מ-`beats[]`, אבל רק כשמרנדרים אותו מחדש עם קול. סרטים שכבר פורסמו לא משתנים.
+- **ממצא נוסף, לא תוקן:** "Publish to Vimeo" מקריא את הקול מחדש ולא משתמש בהקראה השמורה של "Voice and render". כלומר הסרט שעולה ל-Vimeo הוא הקראה חדשה באותו קול, לא הקובץ שדור צפה בו. כך זה עובד בכל סרטי הסטודיו עד היום.
+
+## Update, 15 Nov 2026: Dor approved the films, and the fix for the six lines
+
+- **Approval:** Dor approved the five films and the look of practice P-1 (he wrote "מאושר", and when asked chose "the films and P-1").
+- **Two more decisions of his:** fix the six lines and render again; leave film 5 as it is (no extra beat explaining `useDataApi`).
+- **What was found:** the caption band shows a line only for the time planned for it. On the six lines the voice went on for 0.3 to 0.7 s after the caption had gone.
+- **The fix is in the engine, not in the content** (commit `4d08de9`, branch `engine/caption-holds-voice` of wawiwa-video, merged into `content/react-hooks-es` as `0130dda`): the voice pass lengthens only that line's caption, to the end of the voice plus 6 frames, never past the end of its beat. Beats, camera and film lengths do not change. No content file was changed.
+- **Checked** on the five films' real plans and the voice lengths measured in run 43692109951: the caption is lengthened on those six lines and on one line of film 1 (a small overrun under the warning threshold); no caption is shorter than its voice, none overlaps the next line, none runs past its beat. `tsc` passes, and the planner gives the same result on the five films.
+- **Not checked:** the fix has not run in GitHub Actions yet, and nobody has watched the result. The next run, after Dor's push, is that check.
+- **It also affects** every other lesson film built from `beats[]`, but only when one is rendered again with voice. Published films do not change.
+- **Another finding, not fixed:** "Publish to Vimeo" reads the voice again and does not use the saved reading from "Voice and render". So the film that goes to Vimeo is a new reading in the same voice, not the file Dor watched. This is how every studio film has been published so far.
+
+---
+
+## עדכון, 15 בנובמבר 2026: הרינדור החוזר, והקול שעולה ל-Vimeo
+
+**הרינדור החוזר** (ריצה 43702353127, commit `0130dda`) עבר על חמשת הסרטים.
+
+- **אותו קול:** כל 54 השורות נלקחו מההקראות השמורות, אף שורה לא הוקראה מחדש. רצועת הקריינות של סרט 3 זהה לזו של הריצה הקודמת; בסרט 5 היא זהה ב-156 השניות הראשונות ושונה רק בשקט שבסוף.
+- **הכתוביות:** הוארכו בדיוק בשורות שנחזו: סרט 1 שורה אחת (4), סרט 3 ארבע שורות (2, 5, 7, 9), סרט 5 שתי שורות (8, 11). בסרטים 2 ו-4 אין שינוי. אין אזהרות תזמון.
+- **נבדק בתמונה:** אותו פריים בסרט 3 (שנייה 99.27) לפני ואחרי. לפני: אין כתובית. אחרי: הכתובית על המסך.
+- **אורך הסרטים** לא השתנה (136.7 ו-160.8 שניות).
+- **לא נבדק:** Claude לא שמע את הסרטים. דור עוד לא צפה בסרטים 3 ו-5 אחרי התיקון.
+
+**הקול שעולה ל-Vimeo** (commit `0128ea4`, ענף `engine/publish-watched-voice`, מוזג לענף הסרטים ב-`f56b07e`; לא נדחף):
+
+- **הבעיה:** "Publish to Vimeo" הקריא כל שורה מחדש, כך שהסרט ב-Vimeo היה הקראה שאף אחד לא שמע. אותו דבר קרה במיזוג ל-`main`, כי ה-cache של הקול שייך לענף אחד.
+- **התיקון:** ההקראות של הרינדור האחרון של כל סרט נשמרות ב-pre-release בשם `voice-takes` (לא נספר במכסת האחסון של Actions, לא פג, ולא שייך לענף). "Voice and render" ו-"Publish to Vimeo" מחזירים אותן לפני שלב הקול. שורה שלא שונתה לא מוקראת פעמיים. אם שורה הוקראה מחדש בפרסום, הריצה מזהירה וכותבת את זה בסיכום.
+- **נבדק מקומית** מול תחליף לכלי `gh`: שמירה, החזרה, שורה שהשתנתה, ואין מה לשמור. המצב "עוד לא נשמר כלום" נבדק מול ה-repo האמיתי.
+- **לא נבדק:** ריצה ב-GitHub Actions. הבדיקה היא שני ה-push הבאים: ענף הסרטים (שומר את ההקראות), ואז `main` (אמור להחזיר אותן ולא להקריא אף שורה).
+
+**התרגולים באוויר:** דור דחף את `main` של wawiwa-activities (`259c82b`). הפריסה ל-GitHub Pages עברה, ו-12 הדפים (שישה בספרדית, שישה באנגלית) עונים 200.
+
+## Update, 15 Nov 2026: the re-render, and the voice that goes to Vimeo
+
+**The re-render** (run 43702353127, commit `0130dda`) passed on all five films.
+
+- **Same voice:** all 54 lines came from the kept clips, none was read again. Film 3's narration track is identical to the previous run's; film 5's is identical for the first 156 seconds and differs only in the silence at the end.
+- **Captions:** held on exactly the lines predicted: film 1 one line (4), film 3 four lines (2, 5, 7, 9), film 5 two lines (8, 11). Films 2 and 4 are unchanged. No timing warnings.
+- **Checked on a picture:** the same frame of film 3 (99.27 s) before and after. Before: no caption. After: the caption is on screen.
+- **Film lengths** did not change (136.7 and 160.8 s).
+- **Not checked:** Claude did not hear the films. Dor has not watched films 3 and 5 after the fix yet.
+
+**The voice that goes to Vimeo** (commit `0128ea4`, branch `engine/publish-watched-voice`, merged into the films branch as `f56b07e`; not pushed):
+
+- **The problem:** "Publish to Vimeo" had every line read again, so the film on Vimeo was a take nobody had heard. A merge to `main` did the same, because the Actions cache that holds the clips belongs to one branch.
+- **The fix:** the clips of each film's last render are kept on a pre-release called `voice-takes` (not counted in the Actions storage quota, does not expire, not tied to a branch). "Voice and render" and "Publish to Vimeo" bring them back before the voice pass. An unchanged line is never read twice. If a line is read again while publishing, the run warns and says so in its summary.
+- **Checked locally** against a stand-in for `gh`: save, restore, a changed line, nothing to keep. The nothing-kept case was checked against the real repository.
+- **Not checked:** a run in GitHub Actions. The check is the next two pushes: the films branch (keeps the clips), then `main` (should bring them back and read no line).
+
+**The practices are live:** Dor pushed `main` of wawiwa-activities (`259c82b`). The GitHub Pages deploy passed, and the 12 pages (six Spanish, six English) answer 200.
+
+---
+
+## עדכון, 15 בנובמבר 2026: הכול ב-`main`, וההקראות ששמענו נשמרות עד הפרסום
+
+- **אישור:** דור אישר את סרטים 3 ו-5 אחרי התיקון לכתוביות, והחליט על הטמעה לפי יחס 1000:560 (Q4).
+- **מיזוג:** ענף `content/react-hooks-es` מוזג ל-`main` של wawiwa-video, וששת התרגולים נרשמו ב-`deliverables.json` עם קישור של כל סרט לתרגול שלו (commit `5827fa6`). דור דחף את `main`.
+- **התיקון לפרסום נבדק בריצות אמיתיות:**
+  - ריצה 43704635414 (ענף הסרטים) שמרה את ההקראות של חמשת הסרטים ב-pre-release `voice-takes`. החזרה שלהן מה-repo נתנה 54 קטעים, שאורכם זהה לריצה שדור צפה בה.
+  - ריצה 43705120101 (`main`) החזירה אותן. שלב הקול ארך שנייה עד שתיים לסרט, לעומת 8 עד 12 שניות בריצה הראשונה שבה כל שורה הוקראה. 54 הקטעים שנשמרו אחריה זהים בייט לבייט לאלה שנשמרו לפניה. כלומר אף שורה לא הוקראה מחדש ב-`main`.
+- **לא נבדק עדיין:** אותו מנגנון בתוך "Publish to Vimeo". הפרסום הראשון הוא הבדיקה; הסיכום של הריצה יגיד כמה שורות נלקחו מהרינדור האחרון וכמה הוקראו מחדש.
+
+## Update, 15 Nov 2026: everything is on `main`, and the takes we heard are kept through to publishing
+
+- **Approval:** Dor approved films 3 and 5 after the caption fix, and decided on the 1000:560 ratio embed (Q4).
+- **Merge:** branch `content/react-hooks-es` is merged into `main` of wawiwa-video, and the six practices are registered in `deliverables.json` with each film paired to its practice (commit `5827fa6`). Dor pushed `main`.
+- **The publish fix was checked in real runs:**
+  - Run 43704635414 (the films branch) kept the clips of the five films on the `voice-takes` pre-release. Restoring them from the repository gave 54 clips whose lengths equal the run Dor watched.
+  - Run 43705120101 (`main`) brought them back. The voice step took one to two seconds a film, against 8 to 12 seconds in the first run, where every line was read. The 54 clips kept after it are byte for byte the ones kept before it. So no line was read again on `main`.
+- **Not checked yet:** the same mechanism inside "Publish to Vimeo". The first publish is that check; the run's summary will say how many lines came from the last render and how many were read again.
