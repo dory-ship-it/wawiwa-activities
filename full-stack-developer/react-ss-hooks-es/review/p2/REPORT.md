@@ -157,3 +157,45 @@ The films were built on the storyboard as written. If the SME answers S5 or S11 
 - **P3** has not started. It needs Q2 answered.
 - **The plugin's video skill** (`wawiwa-content-os/skills/wawiwa-video/references/lesson-films.md`) still does not list the `code` beat, `typed`, or the `aifs` style. That is a plugin change with its own version bump, not part of P2.
 - **Not registered as practices yet:** `videos[].practice` and `activity` are null on the five rows until P3 builds the practice pages.
+
+---
+
+## עדכון, 15 בנובמבר 2026: חמשת הסרטים רונדרו עם קול
+
+דור דחף את הענף `content/react-hooks-es`. הריצה "Voice and render" מספר 43692109951 עברה על כל חמשת הסרטים, בקול Angie. שום דבר לא פורסם.
+
+| סרט | אורך אמיתי (נמדד בקובץ) | אזהרות תזמון |
+|---|---|---|
+| F1 useState | 127.8 שניות | אין |
+| F2 useEffect: cuándo se ejecuta | 155.9 שניות | אין |
+| F3 useEffect: limpieza | 136.7 שניות | 4 שורות (2, 5, 7, 9) |
+| F4 useRef | 128.4 שניות | אין |
+| F5 Hooks personalizados | 160.8 שניות | 2 שורות (8, 11) |
+| **סך הכול** | **709.6 שניות, 11.8 דקות** | 6 מתוך 54 שורות |
+
+- **האורכים** זהים לחישוב של ה-planner, כצפוי: ה-planner קובע את אורך הסרט, והקול נכנס לתוכו.
+- **שש השורות** ארוכות מהזמן שתוכנן להן ב-0.34 עד 0.71 שניות (10 עד 22 פריימים). הקול מסתיים בתוך ההפסקה שבסוף הצעד, לא אחריה. לא נבדק אם הכתובית יורדת לפני שהקול מסתיים בשורות האלה.
+- **קצב הדיבור האמיתי** (תווים לשנייה, לפי קובצי הכתוביות): ממוצע 13.8 עד 14.7 לסרט; השורה האיטית ביותר 11.8. הקצב 13 מחזיק ב-48 מתוך 54 שורות.
+- **התיקון** הוא נתון בקובץ התוכן (להאריך את הצעד או לקצר את השורה) ורינדור חוזר. מומלץ לעשות אותו יחד עם ההערות של דור אחרי הצפייה, בריצה אחת.
+- **לא נבדק:** Claude לא שמע את הסרטים ולא צפה בהם בתנועה. דור עוד לא צפה.
+- **הקבצים** (לא ב-git): `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/out/react-hooks-es-run-43692109951/`
+
+## Update, 15 Nov 2026: the five films are rendered with voice
+
+Dor pushed branch `content/react-hooks-es`. "Voice and render" run 43692109951 passed on all five films, voice Angie. Nothing was published.
+
+| Film | Real length (measured on the file) | Timing warnings |
+|---|---|---|
+| F1 useState | 127.8 s | none |
+| F2 useEffect: cuándo se ejecuta | 155.9 s | none |
+| F3 useEffect: limpieza | 136.7 s | 4 lines (cues 2, 5, 7, 9) |
+| F4 useRef | 128.4 s | none |
+| F5 Hooks personalizados | 160.8 s | 2 lines (cues 8, 11) |
+| **Total** | **709.6 s, 11.8 min** | 6 of 54 lines |
+
+- **The lengths** equal the planner's arithmetic, as expected: the planner fixes the film's length and the voice is placed inside it.
+- **The six lines** run 0.34 to 0.71 s (10 to 22 frames) longer than the time planned for them. The voice ends inside the pause at the end of the beat, not after it. Whether the caption leaves before the voice ends on those lines was not checked.
+- **The real speaking rate** (characters a second, from the caption files): 13.8 to 14.7 on average per film; the slowest line is 11.8. The rate of 13 holds on 48 of 54 lines.
+- **The fix** is data in the content file (a longer beat or a shorter line) and a re-render. Best done together with Dor's notes after he watches, in one run.
+- **Not checked:** Claude did not hear the films or watch them in motion. Dor has not watched yet.
+- **The files** (not in git): `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/out/react-hooks-es-run-43692109951/`
