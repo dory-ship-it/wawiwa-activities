@@ -97,26 +97,64 @@ As the work-order plans it (section 8) and the storyboard lists it (section 7). 
 | 1 | Video | The existing Spanish intro video of the current lesson (about 12 s), kept as is |
 | — | (Q1, open) | Possibly one text line under the intro video. Not decided; do not add until Dor answers Q1 |
 | 2 | Text / divider | «¡COMENZAMOS!» |
-| 3 | Video | F1 useState: composition `AIFS-ReactHooks-T1-UseState-ES`, Vimeo: **not published yet** (127.8 s, measured in P2) |
+| 3 | Video | F1 useState: composition `AIFS-ReactHooks-T1-UseState-ES`, Vimeo **1246984757** (embed code in "Film embed codes" below) (127.8 s, measured in P2) |
 | 4 | Embed | P-1 useState (row 1 of the embed table) |
 | 5 | Continue | |
-| 6 | Video | F2 useEffect, cuándo se ejecuta: `AIFS-ReactHooks-T2-UseEffect-ES`, Vimeo: **not published yet** (155.9 s) |
+| 6 | Video | F2 useEffect, cuándo se ejecuta: `AIFS-ReactHooks-T2-UseEffect-ES`, Vimeo **1246986859** (embed code in "Film embed codes" below) (155.9 s) |
 | 7 | Embed | P-2 useEffect (row 2) |
 | 8 | Continue | |
-| 9 | Video | F3 useEffect, limpieza: `AIFS-ReactHooks-T3-Cleanup-ES`, Vimeo: **not published yet** (136.7 s) |
+| 9 | Video | F3 useEffect, limpieza: `AIFS-ReactHooks-T3-Cleanup-ES`, Vimeo **1246988522** (embed code in "Film embed codes" below) (136.7 s) |
 | 10 | Embed | P-3 Limpieza (row 3) |
 | 11 | Continue | |
-| 12 | Video | F4 useRef: `AIFS-ReactHooks-T4-UseRef-ES`, Vimeo: **not published yet** (128.4 s) |
+| 12 | Video | F4 useRef: `AIFS-ReactHooks-T4-UseRef-ES`, Vimeo **1246990616** (embed code in "Film embed codes" below) (128.4 s) |
 | 13 | Embed | P-4 useRef (row 4) |
 | 14 | Continue | |
-| 15 | Video | F5 Hooks personalizados: `AIFS-ReactHooks-T5-CustomHooks-ES`, Vimeo: **not published yet** (160.8 s) |
+| 15 | Video | F5 Hooks personalizados: `AIFS-ReactHooks-T5-CustomHooks-ES`, Vimeo **1246992680** (embed code in "Film embed codes" below) (160.8 s) |
 | 16 | Embed | P-5 Hooks personalizados (row 5) |
 | 17 | Continue | |
 | 18 | Embed | Check-in (row 6), closes the lesson |
 
 Film lengths are from the P2 report (measured on the rendered files, run 43692109951, before the caption fix that is being re-rendered; the fix does not change film lengths, per P2).
 
+### Film embed codes (published 15 Nov 2026)
+
+The five films are on Vimeo, unlisted ("Publish to Vimeo" run 43705499834). For each film, paste its code into a Rise 360 **Embed** block, once. A later fix to a film replaces the same Vimeo video, so nothing is pasted again.
+
+The voice on Vimeo is the reading Dor watched: the publish run brought back all 54 narration clips of the last render and read none again.
+
+**F1 useState** (`AIFS-ReactHooks-T1-UseState-ES`, Vimeo 1246984757)
+
+```html
+<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1246984757?h=202ffa62d1&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="React Hooks 1 de 5: useState"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+```
+
+**F2 useEffect, cuándo se ejecuta** (`AIFS-ReactHooks-T2-UseEffect-ES`, Vimeo 1246986859)
+
+```html
+<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1246986859?h=dcbfb77992&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="React Hooks 2 de 5: useEffect, cuándo se ejecuta"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+```
+
+**F3 useEffect, limpieza** (`AIFS-ReactHooks-T3-Cleanup-ES`, Vimeo 1246988522)
+
+```html
+<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1246988522?h=fab192a4e1&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="React Hooks 3 de 5: useEffect, limpieza"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+```
+
+**F4 useRef** (`AIFS-ReactHooks-T4-UseRef-ES`, Vimeo 1246990616)
+
+```html
+<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1246990616?h=e791b02839&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="React Hooks 4 de 5: useRef"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+```
+
+**F5 Hooks personalizados** (`AIFS-ReactHooks-T5-CustomHooks-ES`, Vimeo 1246992680)
+
+```html
+<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1246992680?h=b5cc44fdfc&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="React Hooks 5 de 5: hooks personalizados"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+```
+
 ### deliverables.json rows (for whoever next edits wawiwa-video; not written by this phase)
+
+**Done on 15 Nov 2026** (wawiwa-video `5827fa6`): the six rows are registered and each film is paired with its practice.
 
 Add to `practices` in `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/deliverables.json`. The section name is new; `make-practice-pages.mjs` places an unknown section after the known ones, or add it to `SECTION_ORDER`.
 
