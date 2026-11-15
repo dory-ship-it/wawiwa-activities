@@ -11,7 +11,7 @@
 .w-g-half { top: 0; bottom: 0; width: 44%; }
 .w-stage[data-side="left"] .w-g-half { left: 0; }
 .w-stage[data-side="right"] .w-g-half { right: 0; }
-.w-g-blur { inset: -64px; filter: blur(26px) saturate(1.15); }
+.w-g-blur { inset: -64px; filter: blur(6px) saturate(1.15); } /* BL2 (Noy, 15 Nov): much less blur (26px, then 16px) */
 .w-g-veil { position: absolute; inset: 0; background: rgba(10, 26, 38, .8); }
 .w-g-split { position: absolute; left: 0; top: 0; bottom: 0; width: 44%; overflow: hidden; background: var(--wl-stage-ground); }
 .w-g-dots { position: absolute; inset: 0; background-color: var(--wl-stone); background-image: radial-gradient(var(--wl-line-mid) 1.3px, transparent 1.4px); background-size: 24px 24px; }
@@ -56,11 +56,11 @@
   display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
 .w-stage[data-ground="darkblur"] .w-kcol { margin: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; display: grid; gap: 12px; }
 .w-stage[data-ground="darkblur"] .w-kcol .w-fig-caption { margin: 0; font: 700 15px/1.2 var(--wl-font-ui); letter-spacing: 1.6px; text-transform: uppercase; color: var(--wl-aqua-text); }
-.w-stage[data-ground="darkblur"] .w-kcol[data-kind="mess"] .w-fig-caption { color: var(--wl-glass-text); }
+.w-stage[data-ground="darkblur"] .w-kcol[data-kind="mess"] .w-fig-caption { color: var(--wl-coral); } /* CR1 */
 .w-stage[data-ground="darkblur"] .w-kcol:has(li[data-icon]) .w-kcol-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0; padding: 0; }
 .w-stage[data-ground="darkblur"] .w-kcol-list li[data-icon] { padding: 22px 22px; gap: 16px; border-radius: 14px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .14); }
 .w-stage[data-ground="darkblur"] .w-kcol-icon { width: 52px; height: 52px; background: var(--wl-turquoise); color: var(--wl-o1-ground); }
-.w-stage[data-ground="darkblur"] .w-kcol[data-kind="mess"] .w-kcol-icon { background: none; border: 2px solid var(--wl-on-glass); color: var(--wl-white); }
+.w-stage[data-ground="darkblur"] .w-kcol[data-kind="mess"] .w-kcol-icon { background: var(--wl-coral-soft); border: 2px solid var(--wl-coral); color: var(--wl-coral); } /* CR1 */
 .w-stage[data-ground="darkblur"] .w-kcol-body b { font-size: 19px; color: var(--wl-white); }
 .w-stage[data-ground="darkblur"] .w-kcol-body span { font: 400 16px/1.35 var(--wl-font-ui); color: var(--wl-glass-text); }
 
@@ -186,8 +186,9 @@
 .w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig-label { color: var(--wl-aqua-text); text-transform: uppercase; letter-spacing: 1.4px; }
 .w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="mess"] .w-fig-caption { color: var(--wl-glass-text); }
 .w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="lean"] .w-fig-caption { color: var(--wl-white); }
-.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="mess"] .w-fig-lines { stroke: var(--wl-glass-text); }
-.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="mess"] .w-fig-heads { fill: var(--wl-glass-text); }
+.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="mess"] .w-fig-label { color: var(--wl-coral); } /* CR1 */
+.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="mess"] .w-fig-lines { stroke: var(--wl-coral); } /* CR1 */
+.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="mess"] .w-fig-heads { fill: var(--wl-coral); } /* CR1 */
 .w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="lean"] .w-fig-lines { stroke: var(--wl-turquoise); }
 .w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="lean"] .w-fig-heads { fill: var(--wl-turquoise); }
 .w-stage[data-ground="darkblur"] .w-figs-arrow { color: var(--wl-aqua-text); }
@@ -245,7 +246,7 @@
 /* O1: the photo softened a little, so the title is the first thing read */
 .w-stage[data-screen="O1"] .w-scene-photo { inset: -20px; filter: blur(4px) saturate(1.05); }
 /* the openers (W1-W6): the photo blurred behind the card, darker on the card's side, so the card is the one thing to read */
-.w-stage:has(.w-main[data-layout="opener"]) .w-g-full { inset: -28px; filter: blur(9px) saturate(1.05) brightness(.86); }
+.w-stage:has(.w-main[data-layout="opener"]) .w-g-full { inset: -28px; filter: blur(5px) saturate(1.05) brightness(.86); } /* BL1: was 9px */
 .w-stage:has(.w-main[data-layout="opener"]) .w-scene::after { content: ""; position: absolute; inset: 0;
   background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(8, 20, 30, .5), rgba(8, 20, 30, .25)); }
 /* (Noy, 10 Nov round 2: "why at the side?") the card in the middle of the screen, set off by its frame */
@@ -253,6 +254,12 @@
 .w-main[data-layout="opener"] .w-opener-card[data-kind="statement"] { left: 50%; top: calc(50% - 6px); transform: translate(-50%, -50%);
   background: rgba(8, 20, 30, .86); border: 1.5px solid rgba(90, 179, 170, .62);
   box-shadow: 0 24px 60px rgba(0, 0, 0, .45), 0 0 0 6px rgba(90, 179, 170, .08), 0 0 48px -4px rgba(90, 179, 170, .45); }
+/* BL2: the other openers sharper still (W4 and W6 keep 5px, approved) */
+.w-stage:not([data-screen="W4"]):not([data-screen="W6"]):has(.w-main[data-layout="opener"]) .w-g-full { filter: blur(3px) saturate(1.05) brightness(.86); }
+/* LP1 (Noy, 15 Nov): W4 and W6, the card on the left so the photo shows on the right; the veil darker on the card's side only */
+.w-stage:is([data-screen="W4"], [data-screen="W6"]) .w-main[data-layout="opener"] .w-opener-card { left: 64px; transform: translateY(-50%); }
+.w-stage:is([data-screen="W4"], [data-screen="W6"]):has(.w-main[data-layout="opener"]) .w-scene::after {
+  background: linear-gradient(90deg, rgba(8, 20, 30, .6) 0%, rgba(8, 20, 30, .38) 45%, rgba(8, 20, 30, .1) 100%); }
 
 /* S03: the dot grid gets a soft turquoise light, the card to drag glows, and a line forks from it to the two causes */
 /* lesson-wide (Noy, 10 Nov 2026: "keep it clean"): every dot-grid screen gets the same soft turquoise light,
@@ -273,7 +280,7 @@
 /* no task at the side (Noy, 10 Nov: S18, S19C, S22 "why at the side?"): S02, S08B, S15, S18, S20 and S22 sit on the
    soft ground (ground.tone 'soft': the photo blurred under a lighter veil) with the task in one centred panel,
    lit at its edge; S19C keeps its light wash, its panel centred too */
-.w-stage[data-tone="soft"] .w-g-blur { filter: blur(14px) saturate(1.1); }
+.w-stage[data-tone="soft"] .w-g-blur { filter: blur(5px) saturate(1.1); } /* BL2: was 14px, then 9px */
 .w-stage[data-tone="soft"] .w-g-veil { background: rgba(8, 20, 30, .5); }
 .w-stage[data-tone="soft"] .w-main > :is(.w-sheet-focus, .w-open),
 .w-stage[data-tone="soft"] .w-sheet-right.w-sheet-one,
