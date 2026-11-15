@@ -12,9 +12,9 @@
   - כל קטעי הקוד רצו שוב באפליקציית Vite + React אמיתית: 26 כרטיסים, 156 בדיקות, אפס כשלים.
   - הגהה בספרדית (פנייה ב-tú, ניקוד, ¿¡): תוקנו ארבעה דברים קטנים (פירוט באנגלית למטה). זו הגהה של Claude, לא של דובר ספרדית.
 - **זמן לתרגול:** תרגול P-1 מההתחלה עד הסוף לקח ל-Claude 59 שניות. זה לא זמן של לומד: Claude יודע את התשובות וכותב קוד מיד. **זמן הלומד לא נמדד.** כדי למדוד אותו צריך אדם אחד (למשל נוי או סטודנט) שיעבור תרגול אחד עם שעון.
-- **קוד ההטמעה ל-Cowork:** טבלה עם שורה לכל בלוק למטה, עם גובה 576 לכל השישה (נמדד לפי הכלל ב-`/Volumes/WawiwaPRO-G40/Wawiwa/GitHub/wawiwa-activities/CLAUDE.md`).
+- **קוד ההטמעה ל-Cowork:** טבלה עם שורה לכל בלוק למטה. ההטמעה היא לפי יחס 1000:560, כמו שבחרת (Q4). הגובה לפי הכלל ב-`/Volumes/WawiwaPRO-G40/Wawiwa/GitHub/wawiwa-activities/CLAUDE.md` נמדד (576) ונשמר ברישום.
 - **סדר השיעור החדש ב-Rise:** בטבלה למטה. חמשת הסרטים עוד לא ב-Vimeo, ולכן בטבלה הם מופיעים בשם הקומפוזיציה ובלי מספר Vimeo.
-- **שאלה חדשה אחת אליך (Q4):** הדפים שומרים על יחס קבוע. בעמודה צרה של 760 פיקסלים, עם גובה קבוע של 576, נשאר רווח ריק של כ-150 פיקסלים סביב הכרטיס. אפשר במקום זה להטמיע לפי יחס (כמו בבלוק של GenAI for Marketing S1), ואז אין רווח בשום רוחב. זו החלטה שלך. לא בדקתי איך זה נראה בתוך Rise.
+- **החלטה Q4 (דור, 15 בנובמבר 2026): הטמעה לפי יחס.** בדקתי: ברוחב 1000 וברוחב 760 הכרטיס ממלא את המסגרת, ואין רווח ריק. לא בדקתי בתוך Rise.
 - **שאלות שעדיין פתוחות (לא נגעתי):** Q1 (שורת טקסט ב-Rise מתחת לסרטון הפתיחה), ושאלות ה-SME‏ S5, S10, S11.
 - **מה עוד לא נבדק:**
   - העתקה אמיתית של הקונסול מ-Chrome DevTools לתוך מסכי ההדבקה (P-2 מסך 4, P-3 מסך 5). זה דורש יד אנושית ב-DevTools. דקה אחת.
@@ -22,9 +22,8 @@
   - הגהה של דובר ספרדית.
 - **מה צריך ממך:**
   1. לעשות push ל-`main` של `/Volumes/WawiwaPRO-G40/Wawiwa/GitHub/wawiwa-activities` ב-GitHub Desktop. אחרי זה הדפים עולים לאוויר.
-  2. להחליט על Q4 (גובה קבוע או יחס).
-  3. לרשום את ששת הדפים ב-`/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/deliverables.json`. לא נגעתי בקובץ (סשן אחר עובד שם). השורות המדויקות כתובות למטה, בסעיף "deliverables.json rows".
-  4. אחרי שתאשר את הסרטים לפרסום: מספרי Vimeo, ואז Cowork בונה את השיעור ליד הישן.
+  2. לרשום את ששת הדפים ב-`/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/deliverables.json`. לא נגעתי בקובץ (סשן אחר עובד שם). השורות המדויקות כתובות למטה, בסעיף "deliverables.json rows".
+  3. אחרי שתאשר את הסרטים לפרסום: מספרי Vimeo, ואז Cowork בונה את השיעור ליד הישן.
 - **סקיל או תדריך:** Cowork צריך את הדוח הזה (טבלת ההטמעה וסדר השיעור). לא צריך סקיל חדש עכשיו.
 - **איפה זה שמור:** commit מקומי ב-`main` של `/Volumes/WawiwaPRO-G40/Wawiwa/GitHub/wawiwa-activities`. הדוח: `/Volumes/WawiwaPRO-G40/Wawiwa/GitHub/wawiwa-activities/full-stack-developer/react-ss-hooks-es/review/p4/REPORT.md`. לא נדחף.
 
@@ -72,26 +71,22 @@ After the fixes, P-3, P-4 and P-5 were rebuilt and checked again (fit, axe, text
 
 Live only after Dor pushes `main` of wawiwa-activities and the Pages deploy succeeds.
 
-`embedHeight` by `wawiwa-activities/CLAUDE.md`: the page in an iframe 100% wide in a column 1000 and 760 px wide, Assistant installed. The card measured 1000 x 560.0 at 1000 and 760 x 425.6 at 760; the taller is 560, plus 16 = **576**, the same for all six pages (they share one 1000 x 560 canvas). Measured with `review/p4/tools/p4.mjs`.
+**Embed form: a ratio box (Q4, decided by Dor on 15 Nov 2026).** The box keeps the page's 1000:560 ratio at any column width. Measured with `review/p4/tools/ratio-check.mjs` (raw: `review/p4/ratio-output.txt`): at a 1000 px column the frame is 1000 x 560 and the card fills it; at 760 px the frame is 760 x 426 and the card 760 x 425.6 (0.4 px of rounding). Not seen inside Rise.
 
-| # | Block | URL | Width | Height | Title | Iframe code |
-|---|---|---|---|---|---|---|
-| 1 | P-1 useState | https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p1-usestate/ | 100% | 576 | Práctica 1 · useState | `<iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p1-usestate/" title="Práctica 1 · useState" width="100%" height="576" style="border:0;" loading="lazy"></iframe>` |
-| 2 | P-2 useEffect | https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p2-useeffect/ | 100% | 576 | Práctica 2 · useEffect | `<iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p2-useeffect/" title="Práctica 2 · useEffect" width="100%" height="576" style="border:0;" loading="lazy"></iframe>` |
-| 3 | P-3 Limpieza | https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p3-limpieza/ | 100% | 576 | Práctica 3 · Limpieza | `<iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p3-limpieza/" title="Práctica 3 · Limpieza" width="100%" height="576" style="border:0;" loading="lazy"></iframe>` |
-| 4 | P-4 useRef | https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p4-useref/ | 100% | 576 | Práctica 4 · useRef | `<iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p4-useref/" title="Práctica 4 · useRef" width="100%" height="576" style="border:0;" loading="lazy"></iframe>` |
-| 5 | P-5 Hooks personalizados | https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p5-hooks-propios/ | 100% | 576 | Práctica 5 · Hooks personalizados | `<iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p5-hooks-propios/" title="Práctica 5 · Hooks personalizados" width="100%" height="576" style="border:0;" loading="lazy"></iframe>` |
-| 6 | Check-in | https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/checkin/ | 100% | 576 | Autoevaluación: Hooks de React | `<iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/checkin/" title="Autoevaluación: Hooks de React" width="100%" height="576" style="border:0;" loading="lazy"></iframe>` |
+For the record, `embedHeight` by `wawiwa-activities/CLAUDE.md`: the page in an iframe 100% wide in a column 1000 and 760 px wide, Assistant installed. The card measured 1000 x 560.0 at 1000 and 760 x 425.6 at 760; the taller is 560, plus 16 = **576**, the same for all six pages (they share one 1000 x 560 canvas). Measured with `review/p4/tools/p4.mjs`.
+
+| # | Block | URL | Size | Title | Embed code |
+|---|---|---|---|---|---|
+| 1 | P-1 useState | https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p1-usestate/ | 100% wide, ratio 1000:560 | Práctica 1 · useState | `<div style="position:relative;padding:56.000% 0 0 0;"><iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p1-usestate/" title="Práctica 1 · useState" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" loading="lazy"></iframe></div>` |
+| 2 | P-2 useEffect | https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p2-useeffect/ | 100% wide, ratio 1000:560 | Práctica 2 · useEffect | `<div style="position:relative;padding:56.000% 0 0 0;"><iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p2-useeffect/" title="Práctica 2 · useEffect" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" loading="lazy"></iframe></div>` |
+| 3 | P-3 Limpieza | https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p3-limpieza/ | 100% wide, ratio 1000:560 | Práctica 3 · Limpieza | `<div style="position:relative;padding:56.000% 0 0 0;"><iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p3-limpieza/" title="Práctica 3 · Limpieza" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" loading="lazy"></iframe></div>` |
+| 4 | P-4 useRef | https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p4-useref/ | 100% wide, ratio 1000:560 | Práctica 4 · useRef | `<div style="position:relative;padding:56.000% 0 0 0;"><iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p4-useref/" title="Práctica 4 · useRef" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" loading="lazy"></iframe></div>` |
+| 5 | P-5 Hooks personalizados | https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p5-hooks-propios/ | 100% wide, ratio 1000:560 | Práctica 5 · Hooks personalizados | `<div style="position:relative;padding:56.000% 0 0 0;"><iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p5-hooks-propios/" title="Práctica 5 · Hooks personalizados" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" loading="lazy"></iframe></div>` |
+| 6 | Check-in | https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/checkin/ | 100% wide, ratio 1000:560 | Autoevaluación: Hooks de React | `<div style="position:relative;padding:56.000% 0 0 0;"><iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/checkin/" title="Autoevaluación: Hooks de React" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" loading="lazy"></iframe></div>` |
 
 The English pages are the same URLs with `index.en.html` at the end; they are not part of this lesson.
 
-**Q4 for Dor (design decision, not decided here): fixed height or ratio.** The pages are a fixed-ratio canvas, centred in the frame on a transparent page. With height 576, a 1000 px column shows the card edge to edge (8 px above and below), but a 760 px column shows it 425.6 px tall with about 150 px of empty space split above and below (measured on the card; not seen inside Rise). The other way, already used for the GenAI for Marketing S1 player (`embedRatio` in `deliverables.json`), wraps the iframe in a box with the page's ratio, so there is no empty space at any width:
-
-```html
-<div style="position:relative;padding:56.000% 0 0 0;"><iframe src="https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p1-usestate/" title="Práctica 1 · useState" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" loading="lazy"></iframe></div>
-```
-
-If Dor picks the ratio, every row above takes this form with its own URL and title, and the `deliverables.json` rows below add `"embedRatio": "1000:560"`.
+**Why the ratio box (Q4).** With a fixed height of 576 a 760 px column showed the card 425.6 px tall with about 150 px of empty space around it. The ratio box, already used for the GenAI for Marketing S1 player (`embedRatio` in `deliverables.json`), has none. Dor chose it on 15 Nov 2026.
 
 ### Rise lesson order for Cowork
 
@@ -126,13 +121,15 @@ Film lengths are from the P2 report (measured on the rendered files, run 4369210
 Add to `practices` in `/Volumes/WawiwaPRO-G40/Wawiwa/Claude Wawiwa/Curriculum/wawiwa-video/deliverables.json`. The section name is new; `make-practice-pages.mjs` places an unknown section after the known ones, or add it to `SECTION_ORDER`.
 
 ```json
-{"folder": "react-ss-hooks-es/p1-usestate", "title": "Práctica 1 · useState", "code": null, "section": "AI Full-Stack Developer · Español (React)", "url": "https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p1-usestate/", "embedHeight": 576, "superseded": false},
-{"folder": "react-ss-hooks-es/p2-useeffect", "title": "Práctica 2 · useEffect", "code": null, "section": "AI Full-Stack Developer · Español (React)", "url": "https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p2-useeffect/", "embedHeight": 576, "superseded": false},
-{"folder": "react-ss-hooks-es/p3-limpieza", "title": "Práctica 3 · Limpieza", "code": null, "section": "AI Full-Stack Developer · Español (React)", "url": "https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p3-limpieza/", "embedHeight": 576, "superseded": false},
-{"folder": "react-ss-hooks-es/p4-useref", "title": "Práctica 4 · useRef", "code": null, "section": "AI Full-Stack Developer · Español (React)", "url": "https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p4-useref/", "embedHeight": 576, "superseded": false},
-{"folder": "react-ss-hooks-es/p5-hooks-propios", "title": "Práctica 5 · Hooks personalizados", "code": null, "section": "AI Full-Stack Developer · Español (React)", "url": "https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p5-hooks-propios/", "embedHeight": 576, "superseded": false},
-{"folder": "react-ss-hooks-es/checkin", "title": "Autoevaluación: Hooks de React", "code": null, "section": "AI Full-Stack Developer · Español (React)", "url": "https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/checkin/", "embedHeight": 576, "superseded": false}
+{"folder": "react-ss-hooks-es/p1-usestate", "title": "Práctica 1 · useState", "code": null, "section": "AI Full-Stack Developer · Español (React)", "url": "https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p1-usestate/", "embedHeight": 576, "embedRatio": "1000:560", "superseded": false},
+{"folder": "react-ss-hooks-es/p2-useeffect", "title": "Práctica 2 · useEffect", "code": null, "section": "AI Full-Stack Developer · Español (React)", "url": "https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p2-useeffect/", "embedHeight": 576, "embedRatio": "1000:560", "superseded": false},
+{"folder": "react-ss-hooks-es/p3-limpieza", "title": "Práctica 3 · Limpieza", "code": null, "section": "AI Full-Stack Developer · Español (React)", "url": "https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p3-limpieza/", "embedHeight": 576, "embedRatio": "1000:560", "superseded": false},
+{"folder": "react-ss-hooks-es/p4-useref", "title": "Práctica 4 · useRef", "code": null, "section": "AI Full-Stack Developer · Español (React)", "url": "https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p4-useref/", "embedHeight": 576, "embedRatio": "1000:560", "superseded": false},
+{"folder": "react-ss-hooks-es/p5-hooks-propios", "title": "Práctica 5 · Hooks personalizados", "code": null, "section": "AI Full-Stack Developer · Español (React)", "url": "https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/p5-hooks-propios/", "embedHeight": 576, "embedRatio": "1000:560", "superseded": false},
+{"folder": "react-ss-hooks-es/checkin", "title": "Autoevaluación: Hooks de React", "code": null, "section": "AI Full-Stack Developer · Español (React)", "url": "https://dory-ship-it.github.io/wawiwa-activities/full-stack-developer/react-ss-hooks-es/checkin/", "embedHeight": 576, "embedRatio": "1000:560", "superseded": false}
 ```
+
+`embedRatio` makes `make-practice-pages.mjs` print the ratio box; `embedHeight` stays as the measured value.
 
 To pair each film with its practice on the embed sheet, set `"activity"` on the five film rows (branch `content/react-hooks-es`, all `null` today) to the `folder` above: T1 → `react-ss-hooks-es/p1-usestate`, T2 → `react-ss-hooks-es/p2-useeffect`, T3 → `react-ss-hooks-es/p3-limpieza`, T4 → `react-ss-hooks-es/p4-useref`, T5 → `react-ss-hooks-es/p5-hooks-propios`. Then `npm run pages` and check it prints `also refreshed in …`.
 
@@ -141,12 +138,11 @@ To pair each film with its practice on the embed sheet, set `"activity"` on the 
 | # | Question | Where it is defined | Screens that would change |
 |---|---|---|---|
 | Q1 | A Rise text line under the intro video («Mira el video de cada hook y después practica.»), since the intro says "exercises first" and the lesson runs film → practice | `planning/STORYBOARD.md` section 9 | Rise only; possibly the return line on the last screen of each practice |
-| Q4 | Fixed height 576 or a ratio box (above) | this report | the embed code only |
 | S5 | Previous value: keep reading the ref during render, or keep it in state | STORYBOARD section 6.3 | P-4 screens 4 to 6 |
 | S10 | An `ignore` flag in `useDataApi` for a URL that changes mid-request | STORYBOARD section 6.3 | P-5 screen 9 |
 | S11 | `setIsLoading(true)` / `setError(null)` at the top of the effect, or the lint-clean alternative | STORYBOARD section 6.3 | P-5 screens 5 and 9 |
 
-Decided earlier and not reopened: the solution behind «Ver solución» (Dor, 15 Nov 2026); the look of P-1 and the five films (Dor, 15 Nov 2026).
+Decided: Q4, the ratio box (Dor, 15 Nov 2026). Decided earlier and not reopened: the solution behind «Ver solución» (Dor, 15 Nov 2026); the look of P-1 and the five films (Dor, 15 Nov 2026).
 
 ### Tools and how to rerun
 
