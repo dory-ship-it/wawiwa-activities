@@ -40,6 +40,37 @@ Tests after this round: check passed; test:fit passed (608); check-overflow 198 
 
 Tests after round 3: check passed; walk passed (181); test:scorm passed; test:review passed; test:fit and check-overflow passed on S05, S07, S11B at every size (the other screens are unchanged since the full run of round 2).
 
+### Template sync (15 Nov 2026): "Design changes from EAI L4 v3, to apply to the Digital Marketing lessons"
+
+The lesson runs on the same engine and the same class names, and its copies of the template's three stylesheets (`frame.css`, `fx8.css`, `v2.css`) had never been edited. So they were replaced with the template's current files, which brings every change at once.
+
+| Change in the template | In this lesson |
+|---|---|
+| 1. CR1, problem / fix colours | The three tokens are in `src/tokens.css` and the rules came with the stylesheets. Nothing uses coral yet: no Phase 1 screen contrasts a problem with a fix. The later chapters (the simulations) may. |
+| 2. BL2, background photos almost sharp | Applied (dark ground 6 px, light wash 5 px, soft ground 5 px, openers 3 px). Not visible yet, because the photos are placeholder gradients. It will matter as soon as the real photos are in. |
+| 3. LP1, opener card on the left | Not applied. In the template the rule is keyed to its own screens W4 and W6; this lesson's W4 shares the id by chance, so `dm.css` keeps it centred like W3. Decide per photo once the real photos exist (the card is now 900 wide, by your round 2 note). |
+| 4. QH1, case line and question in one weight | Applied to S11B with the template's exact values (case line 28 px bold ink, question 26 px teal ink). It replaces the round 3 version, which had a turquoise rule beside the line. |
+| 5. OV1, nothing covers anything | The play button on V1 moved below the film's title (it sat on the placeholder's title). `check-overflow` already runs at the three sizes. |
+| 6. Not adopted from the pilot | Nothing to do. |
+
+Tests after the sync: check passed; test:fit passed (608); check-overflow 198 states, 0 problems; walk passed (181); test:scorm passed; test:review passed. Screenshots retaken.
+
+### O2, the doubled numbers (Noy, 15 Nov 2026)
+
+The number showed twice on O2 (in the disc and again under it). Now it is in the disc only, and the name alone sits under it, in bold. A done component shows its check in the disc, so 01 and 02 carry no number; the line that opens under each one still says "Done last session...". No deck text was added. Tests: check, walk (182), test:fit and check-overflow on O2 pass.
+
+### V1, the real film (Noy, 15 Nov 2026)
+
+The film Noy sent (`S9-_sOsll_pp7OmzG2URsw.mp4`, 1920x1080, 1:43.5, with sound) is now V1: `assets/video/v1.mp4` (the same file, re-wrapped so it starts playing before it is fully loaded). The placeholder stays in `assets/video/temp/`, unused. This replaces section 3.2 below (the placeholder and the 2:30 question).
+
+- **Stops: 0:42 and 1:24.** The film holds on a "?" mark twice (about 40.5 to 43.5 s and 82.5 to 85.5 s); the lesson pauses in the middle of each hold, so the frozen picture is the film's own question frame.
+- **Captions are a DRAFT.** I could not listen to the film. The captions (`assets/video/v1.en.vtt`) and the transcript are the production script (slide 12 and its notes), timed to the four segments as they appear on screen. They were not checked against the narration, and the film's opening and recap have no captions. `npm run check` prints this as a WARNING. Please send the film's own captions file, or tell me to transcribe the audio (the ElevenLabs transcription costs credits, so I did not run it unasked).
+- **One thing to look at in stop 2.** When the film pauses at 1:24, its own keyword "Before the campaign" is on the frozen picture, and that is the right answer to "When does the tracking go in?". In stop 1 the keyword comes after the question, so nothing is given away there.
+- No poster: before Play the player shows the film's first frame. (The title-card frame as a poster put the Play button on the title's underline.)
+- The SCORM package is now 14.8 MB with the film.
+
+Tests after the film: check passed (WARNING: draft captions); walk passed (182); test:scorm passed; test:review passed; test:fit and check-overflow passed on V1 at every size.
+
 ## 1. What was built
 
 - A fork of `enterprise-ai-implementation/eai-m1l4-selfstudy-v3` (the template, untouched) without its planning, review, node_modules, dist, EAI photos, prompts, temp images and films. Kept: fonts, logo, `src/`, `tools/`, `index.html`, `review.html`, `package.json`, `package-lock.json`.

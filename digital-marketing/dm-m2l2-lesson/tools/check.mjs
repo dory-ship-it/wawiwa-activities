@@ -233,7 +233,10 @@ if (allowed.length) {
 }
 // the key line: one sentence of the trainer's, at most 15 words, at most one per screen view
 const keyByScreen = content.screens.map((s) => { const list = []; (function c(v) { if (Array.isArray(v)) v.forEach(c); else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) { if (k === 'keyLine' && typeof x === 'string') list.push(x); else c(x); } })(s); return [s.id, list]; }).filter(([, l]) => l.length);
-const longKey = keyByScreen.flatMap(([id, l]) => l.filter((t) => words(t) > 15).map((t) => `${id}: ${words(t)} words`));
+// (a slide's own line kept word for word may be longer: screen.keyLineWhy says so, listed as a WARNING)
+const whyOf = (id) => content.screens.find((s) => s.id === id).keyLineWhy;
+const longKey = keyByScreen.flatMap(([id, l]) => l.filter((t) => words(t) > 15 && !whyOf(id)).map((t) => `${id}: ${words(t)} words`));
+keyByScreen.filter(([id, l]) => whyOf(id) && l.some((t) => words(t) > 15)).forEach(([id]) => console.log(`  WARNING ${id}: key line over 15 words: ${whyOf(id)}`));
 const manyKey = keyByScreen.filter(([, l]) => l.length > 1).map(([id, l]) => `${id}: ${l.length} key lines`);
 longKey.length || manyKey.length ? fail('key lines: ' + [...longKey, ...manyKey].join('; '))
   : ok(`key lines: ${keyByScreen.length} screens, one each, at most 15 words (${keyByScreen.map(([id, l]) => id + ' ' + words(l[0])).join(', ')})`);
@@ -352,8 +355,23 @@ for (const s of videos) {
   const ts = (s.stops || []).map((x) => x.t);
   if (ts.some((t, i) => !(t > 0) || t >= m.duration || (i && t <= ts[i - 1]))) { mediaFails++; fail(`${s.id}: stop times ${ts.join(', ')} must rise and sit inside ${m.duration}s`); }
   if (m.temp) tempMedia.push(...files.map((p) => `${s.id}: ${p}`));
+  // the film's cue file decides the duration and the stops (media.cues): the content must equal it, never a typed time
+  if (m.cues) {
+    if (!existsSync(join(ROOT, m.cues))) { mediaFails++; fail(`${s.id}: cue file missing ${m.cues}`); }
+    else {
+      const cue = JSON.parse(read(join(ROOT, m.cues)));
+      const want = (s.stops || []).map((x) => cue.stops.find((y) => y.id === x.cueId)?.t);
+      if (cue.duration !== m.duration || want.join() !== ts.join()) { mediaFails++; fail(`${s.id}: duration ${m.duration} and stops ${ts.join(', ')} differ from ${m.cues} (${cue.duration}; ${want.join(', ')})`); }
+    }
+  }
 }
 if (!mediaFails) ok(`${videos.length} videos: media and captions exist, stop times in order (${videos.map((s) => s.id + ' ' + s.stops.map((x) => x.t + 's').join('/')).join(', ')})`);
+// a film whose captions were written from the script and not checked against its audio (media.captionsDraft)
+const draftCaps = videos.filter((s) => s.media?.captionsDraft);
+if (draftCaps.length) {
+  console.log(`  WARNING ${draftCaps.length} film(s) with DRAFT captions (written from the production script, not checked against the audio; replace with the film's own captions):`);
+  draftCaps.forEach((s) => console.log(`          ${s.id}: ${s.media.captions[0].src}`));
+}
 if (tempMedia.length) {
   console.log(`  WARNING ${tempMedia.length} temp video files in use (silent placeholders from tools/make-placeholder-video.mjs, replace with the films):`);
   tempMedia.forEach((t) => console.log('          ' + t));
@@ -457,6 +475,7 @@ google.length || missingFace.length || lacking.length
     if (!c || !c.kind) { bad.push(`${s.id} no coach.kind`); continue; }
     if (!lines[c.kind]) bad.push(`${s.id} kind ${c.kind} has no opening line`);
     if (!SCREEN_TYPES[c.kind]) bad.push(`${s.id} kind ${c.kind} is not a known kind`);
+    if (c.kind === 'locked') { if (c.tip) bad.push(`${s.id} is locked and has a tip`); continue; } // the scored check: no hints
     if (!c.tip) bad.push(`${s.id} no tip`);
     else if (c.tipDrafted) { if (words(c.tip) > 20) bad.push(`${s.id} drafted tip ${words(c.tip)} words`); }
     else if (c.tip !== s.hint) bad.push(`${s.id} tip is not its hint word for word`);

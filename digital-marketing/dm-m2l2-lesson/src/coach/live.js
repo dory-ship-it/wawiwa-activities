@@ -11,7 +11,7 @@
 // No SCORM call, nothing stored: the learner's own-case fields go to the page as they are (raw: the page
 // gates and redacts them), only on own-case screens. Never in review mode or with ?live=0 (the tests
 // that run without the network).
-import { h, chapterNo } from '../util.js?v=14cc3672';
+import { h, chapterNo } from '../util.js?v=28bf4305';
 
 // DM M2 L2, Phase 1: NOT WIRED. The live AI coach for Digital Marketing waits for Dor's confirmation, so there is
 // no coach page URL here and the engine starts the coach with live: false (offline tips only). When it is

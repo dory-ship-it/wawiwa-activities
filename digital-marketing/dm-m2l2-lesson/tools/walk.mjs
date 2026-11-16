@@ -172,8 +172,11 @@ await arrive(page, 'O2');
     await press(page, 'ArrowRight', S.O2.stations.indexOf(st));
     await press(page, 'Enter');
     const t = await text(page, '.w-map-panel-text');
-    expect(t === st.text, `O2: ${st.kicker} ${st.title} opens "${t}"`);
+    expect(t === st.text, `O2: ${st.n} ${st.kicker} opens "${t}"`);
   }
+  // (Noy, 15 Nov 2026) the number shows once, in the disc; under it the name only
+  const twice = await page.evaluate(() => [...document.querySelectorAll('.w-map-labels')].some((l) => /\d/.test(l.textContent)));
+  expect(!twice, 'O2: no number under a disc (the number is in the disc only)');
   const marks = await page.evaluate(() => [...document.querySelectorAll('.w-map-tab')].map((b) => b.dataset.status).join());
   expect(open0 === 'c3' && marks === 'done,done,today,next' && !(await page.$('.w-map-cue')), `O2: 03 open on arrival, statuses ${marks}, no "later" chip`);
   await expectLayout(page, 'O2 04 open');
@@ -388,22 +391,303 @@ await arrive(page, 'K3');
   const k = await page.evaluate(() => ({ key: document.querySelector('.d-keyline-xl p').textContent, line: document.querySelector('.d-close-line').textContent, board: [...document.querySelectorAll('.d-board-node')].map((n) => n.dataset.status).join() }));
   expect(k.key === S.K3.keyLine && k.line === S.K3.line && k.board === 'done,done,done,done', `K3: the key line, the board ${k.board} (all four), "${k.line}"`);
   await goNext(page);
-  await expectBand(page, 'K3 end of this part', { state: 'pause', text: UI.sliceEnd });
-  expect(await page.evaluate(() => window.__l4.current) === 'K3', 'K3: the last screen of this part, the lesson stays on it');
-  await expectLayout(page, 'K3 end of this part');
+}
+
+/* ---------- Phase 2: chapters 4 to 7 ---------- */
+// a graded question of dm2.js: the option, then Check; the feedback card and the marks
+async function answer2(p, what, options, id, { sel = '.d2-opt', wrongText = null, marked = true } = {}) {
+  const o = options.find((x) => x.id === id), right = options.find((x) => x.correct);
+  await act(p, `${sel}[data-id="${id}"]`, ' ');
+  await act(p, '[data-action="check"]');
+  const marks = await p.evaluate((s) => Object.fromEntries([...document.querySelectorAll(s)].map((b) => [b.dataset.id, b.dataset.state || ''])), sel);
+  if (marked) expect(marks[right.id] === 'right' && (o.correct || marks[id] === 'wrong'), `${what}: one try; ${o.correct ? 'right' : 'wrong, the right answer marked'} (${JSON.stringify(marks)})`);
+  await expectBand(p, what, o.correct ? { state: 'correct', text: o.feedback, verdict: UI.feedback.correctPrefix } : { state: 'wrong', text: wrongText ?? o.feedback, verdict: UI.feedback.revealed });
+  await expectLayout(p, what);
+}
+const opener = async (p, id) => { await arrive(p, id); expect(await p.evaluate(() => !!document.querySelector('.d-opener-num svg') && document.querySelectorAll('.w-stop').length > 0), `${id}: the opener with its icon in the square and the icons under the line`); await goNext(p); };
+
+/* From analysis to a work plan */
+await opener(page, 'W5');
+await arrive(page, 'S14');
+{
+  const s = S.S14;
+  expect((await page.$$('.d2-cl-row')).length === 8 && (await page.evaluate(() => document.querySelector('[data-action="done"]').disabled)), 'S14: the eight challenges of the slide as a list, Done waits for a mark');
+  await act(page, '.d2-cl-row[data-item="c3"]', ' ');
+  await act(page, '.d2-cl-row[data-item="c6"]');
+  await act(page, '[data-action="done"]');
+  expect((await text(page, '.d2-cl-closing .d-keyline p')) === s.closing.keyLine && (await text(page, '.d2-cl-closing .d-closing-line')) === s.closing.line, `S14: the closing card: "${s.closing.keyLine}" and "${s.closing.line}"`);
+  await expectOpen(page, 'S14', { focused: true });
+  await expectLayout(page, 'S14 done');
+  await goNext(page);
+}
+await arrive(page, 'S15');
+{
+  const s = S.S15;
+  for (const [i, r] of s.rows.entries()) {
+    await act(page, `.d2-rt-ch[data-row="${r.id}"]`);
+    const n = await nextState(page);
+    if (i === 0 || i === 8) expect(n.locked === (i < 8), `S15: Next ${i < 8 ? 'still locked' : 'unlocked'} after ${i + 1} of 9`);
+  }
+  const cells = await page.evaluate(() => [...document.querySelectorAll('.d2-rt-does')].map((x) => x.lastChild.textContent));
+  expect(s.rows.every((r, i) => cells[i] === r.does) && (await text(page, '.d2-rt-foot .d-keyline p')) === s.keyLine, 'S15: all nine middle cells open with the slide\'s wording, the key line under the table');
+  await expectLayout(page, 'S15 all open');
+  await goNext(page);
+}
+await arrive(page, 'S15B');
+{
+  const R = S.S15B.situations, picks = ['b', 'b', 'c'];
+  for (const [k, r] of R.entries()) {
+    expect((await text(page, '.d2-q')) === r.text, `S15B round ${k + 1}: "${r.text}"`);
+    await answer2(page, `S15B round ${k + 1}`, r.options, picks[k]);
+    if (k < 2) { expect(await isActive(page, '[data-action="nextRound"]'), `S15B round ${k + 1}: focus on "${UI.buttons.nextRound}"`); await press(page, 'Enter'); }
+  }
+  await expectOpen(page, 'S15B', { focused: true });
+  await goNext(page);
+}
+await arrive(page, 'S16');
+{
+  const s = S.S16;
+  for (let i = 0; i < 3; i++) await act(page, '[data-action="more"]');
+  const v = await page.evaluate(() => ({ shown: [...document.querySelectorAll('.d2-stage')].filter((x) => !x.hidden).length, more: document.querySelector('[data-action="more"]').hidden, key: document.querySelector('.d2-box .d-keyline p').textContent, lines: document.querySelectorAll('.d2-box-line').length }));
+  expect(v.shown === 4 && v.more && v.key === s.box.keyLine && v.lines === 2, `S16: the four stages one by one, the box "${s.box.label}" with its key line and two lines`);
+  await expectLayout(page, 'S16 all stages');
+  await goNext(page);
+}
+await arrive(page, 'S17');
+{
+  const s = S.S17;
+  expect(await page.evaluate(() => [...document.querySelectorAll('.d2-b td')].every((td) => td.dataset.filled !== 'true')), 'S17: only the Area column is filled on arrival');
+  for (let i = 1; i <= 5; i++) {
+    await act(page, '.d2-b-head[data-state="next"]');
+    const n = await nextState(page);
+    if (i === 1 || i === 5) expect(n.locked === (i < 5), `S17: Next ${i < 5 ? 'still locked' : 'unlocked'} after column ${i} of 5`);
+  }
+  const t = await page.evaluate(() => ({ cells: [...document.querySelectorAll('.d2-b tbody tr:not(.d2-b-total)')].map((tr) => [...tr.children].map((c) => c.textContent)), total: document.querySelector('.d2-b-total td:last-child').textContent, chips: [...document.querySelectorAll('.d2-b-chip')].map((c) => c.textContent) }));
+  expect(JSON.stringify(t.cells) === JSON.stringify(s.rows) && t.total === s.total.value && t.chips.join('|') === s.columns.slice(1).map((c) => c.chip).join('|'), `S17: the table as on the slide, total ${t.total}, a source chip under each header`);
+  await expectLayout(page, 'S17 all columns');
+  await goNext(page);
+}
+await arrive(page, 'S17C');
+{
+  const R = S.S17C.situations, picks = ['a', 'b', 'a'];
+  expect((await text(page, '.d2-lead')) === S.S17C.lead, `S17C: "${S.S17C.lead}"`);
+  for (const [k, r] of R.entries()) {
+    const right = r.options.find((o) => o.correct);
+    await answer2(page, `S17C question ${k + 1}`, r.options, picks[k], { wrongText: right.label });
+    const chat = await page.evaluate(() => [...document.querySelectorAll('.d2-msg')].map((m) => m.dataset.who + ':' + m.querySelector('p span').textContent));
+    const want = [`client:${r.text}`, `you:${r.options.find((o) => o.id === picks[k]).label}`, ...(picks[k] === right.id ? [] : [`client:${r.why}`])];
+    expect(JSON.stringify(chat) === JSON.stringify(want), `S17C question ${k + 1}: the chat is ${chat.length} lines${picks[k] === right.id ? '' : ', the client pushes back'}`);
+    if (k < 2) await act(page, '[data-action="nextRound"]');
+  }
+  await expectOpen(page, 'S17C', { focused: true });
+  await goNext(page);
+}
+await workbookStop(page, 'WB4');
+
+/* Simulations */
+await opener(page, 'W6');
+for (const [id, pickId] of [['S20', 'ppc'], ['S22', 'ppc'], ['S24', 'social']]) {
+  const s = S[id];
+  await arrive(page, id);
+  expect((await page.$$('.d2-file .d2-bullets li')).length === s.facts.length && (await text(page, '.d2-case-second')) === s.second, `${id}: the case file (${s.facts.length} lines), the two questions of the slide`);
+  await answer2(page, `${id} answer`, s.options, pickId, { marked: false });
+  expect((await page.evaluate(() => document.querySelector('.d2-yours').dataset.state)) === (s.options.find((o) => o.id === pickId).correct ? 'right' : 'wrong'), `${id}: one try, the learner's answer marked beside the answer`);
+  const a = await page.evaluate(() => ({ title: document.querySelector('.d2-answer-title').textContent, bullets: [...document.querySelectorAll('.d2-answer .d2-bullets li')].map((x) => x.textContent), key: document.querySelector('.d2-answer .d-keyline p').textContent, options: !!document.querySelector('.d2-opts') }));
+  expect(a.title === s.answer.title && JSON.stringify(a.bullets) === JSON.stringify(s.answer.bullets) && a.key === s.answer.keyLine && !a.options, `${id}: "${a.title}" takes the place of the answers, with its key line`);
+  await expectOpen(page, id, { focused: true });
+  await goNext(page);
+}
+await arrive(page, 'K5');
+await goNext(page);
+await arrive(page, 'S26');
+{
+  const s = S.S26;
+  await act(page, '[data-action="transcript"]');
+  const tr = await page.evaluate(() => [...document.querySelectorAll('.d2-pod-tr p')].map((x) => x.textContent.replace(/^[^:]+: /, '')));
+  expect(JSON.stringify(tr) === JSON.stringify(s.podcast.script.map((l) => l.text)), `S26: the transcript holds the whole script (${tr.length} lines)`);
+  await press(page, 'Enter');
+  await page.waitForFunction(() => document.querySelector('.d2-audio').readyState >= 1);
+  await act(page, '[data-action="audioPlay"]');
+  await page.evaluate(() => { const a = document.querySelector('.d2-audio'); a.muted = true; a.currentTime = 66; });
+  await wait(700);
+  const now = await page.evaluate(() => ({ cap: document.querySelector('.d2-pod-cap').textContent, obs: document.querySelector('.d2-obs[data-now="true"]')?.dataset.obs, locked: document.querySelector('.w-next').dataset.locked }));
+  expect(now.obs === '4' && now.cap.length > 0 && now.locked === 'true', `S26: at 1:06 observation ${now.obs} is highlighted, the caption reads "${now.cap}", Next still locked`);
+  await page.evaluate(() => { const a = document.querySelector('.d2-audio'); a.currentTime = a.duration - 0.4; a.play(); });
+  await page.waitForFunction(() => document.querySelector('.w-next').dataset.locked === 'false', { timeout: 15000 }).catch(() => {});
+  await expectOpen(page, 'S26 heard to the end');
+  await expectLayout(page, 'S26 ended');
+  await goNext(page);
+}
+await arrive(page, 'S26B');
+{
+  await act(page, '.d2-poll-opt[data-id="disagree"]', ' ');
+  await expectBand(page, 'S26B', { state: 'neutral', text: S.S26B.feedback.any });
+  await expectOpen(page, 'S26B');
+  await goNext(page);
+}
+
+/* The marketing funnel */
+await opener(page, 'W7');
+await arrive(page, 'V2');
+{
+  const s = S.V2;
+  await page.waitForFunction(() => document.querySelector('.w-video').readyState >= 2);
+  await act(page, '[data-action="bigplay"]');
+  for (const [i, st] of s.stops.entries()) {
+    await fast(page, () => !document.querySelector('.w-stop-view').hidden, `V2 stop ${i + 1}`);
+    const pickId = i === 0 ? 'b' : 'b'; // stop 1 wrong (600), stop 2 right
+    const o = st.options.find((x) => x.id === pickId);
+    expect((await text(page, '.w-stop-q')) === st.question, `V2 stop ${i + 1}: "${st.question}"`);
+    await act(page, `.w-stop-view .w-opt[data-id="${pickId}"]`);
+    await act(page, '.w-stop-view [data-action="check"]');
+    await expectBand(page, `V2 stop ${i + 1} ${o.correct ? 'right' : 'wrong'}`, o.correct ? { state: 'correct', text: o.feedback, verdict: UI.feedback.correctPrefix } : { state: 'wrong', text: o.feedback, verdict: UI.feedback.revealed });
+    await expectLayout(page, `V2 stop ${i + 1} answered`);
+    await press(page, 'Enter');
+  }
+  await fast(page, () => document.querySelector('.w-next').dataset.locked === 'false', 'V2 end');
+  await expectOpen(page, 'V2 ended');
+  await goNext(page);
+}
+await arrive(page, 'S28');
+{
+  const counts = () => page.evaluate(() => [...document.querySelectorAll('.d2-fn-count')].map((x) => x.textContent).join(' > '));
+  expect((await counts()) === '1,000 > 80 > 20 > 6', `S28: six sales worked backwards (${await counts()})`);
+  await act(page, '[data-action="more"]');
+  expect((await counts()) === '1,167 > 93 > 23 > 7', `S28: seven sales (${await counts()})`);
+  await expectOpen(page, 'S28 after one change');
+  await expectLayout(page, 'S28 changed');
+  await goNext(page);
+}
+await arrive(page, 'S30');
+{
+  const R = S.S30.situations, picks = ['b', 'd', 'a'];
+  for (const [k, r] of R.entries()) {
+    expect((await page.evaluate(() => document.querySelector('.d2-dt').dataset.col)) === String(r.column), `S30 round ${k + 1}: "${r.text}", column ${S.S30.head[r.column]} highlighted`);
+    await answer2(page, `S30 round ${k + 1}`, r.options, picks[k], { sel: '.d2-dt-src' });
+    if (k < 2) await act(page, '[data-action="nextRound"]');
+  }
+  await act(page, '[data-action="dot"]', 'Enter', { back: true });
+  expect((await page.evaluate(() => { const n = document.querySelector('.d2-dt-note'); return n.hidden ? null : n.textContent; })) === S.S30.dotNote, `S30: a "·" cell says "${S.S30.dotNote}"`);
+  expect((await text(page, '.d2-dt-side .d-keyline p')) === S.S30.keyLine, 'S30: the slide\'s bottom line as the key line after round 3');
+  await expectOpen(page, 'S30');
+  await expectLayout(page, 'S30 done');
+  await goNext(page);
+}
+await arrive(page, 'S32');
+{
+  const s = S.S32;
+  for (const [i, id] of ['channels', 'ads', 'geo', 'measure'].entries()) {
+    await act(page, `.d2-ig-el[data-el="${id}"]`);
+    const r = s.right.find((x) => x.id === id);
+    const v = await page.evaluate(() => ({ cap: document.querySelector('.d2-ig-cap-text').textContent, lit: [...document.querySelectorAll('.d2-ig-src[data-lit="true"]')].map((x) => x.dataset.src).sort().join(), lines: document.querySelectorAll('.d2-ig-lines path[data-lit="true"]').length }));
+    expect(v.cap === r.text && v.lit === [...r.from].sort().join() && v.lines === r.from.length, `S32 ${r.title}: "${v.cap}", from ${v.lit} (${v.lines} line${v.lines > 1 ? 's' : ''} lit)`);
+    const n = await nextState(page);
+    if (i >= 2) expect(n.locked === (i < 3), `S32: Next ${i < 3 ? 'still locked' : 'unlocked'} after ${i + 1} elements`);
+  }
+  await expectLayout(page, 'S32 four open');
+  await goNext(page);
+}
+await arrive(page, 'S32B');
+{
+  for (const [row, n] of Object.entries({ a: 2, b: 4, c: 1, d: 3 })) await page.select(`.w-field-select[data-row="${row}"]`, String(n));
+  await act(page, '[data-action="check"]');
+  await expectBand(page, 'S32B', { state: 'correct', text: UI.feedback.allPlaced, verdict: UI.feedback.correctPrefix });
+  await expectLayout(page, 'S32B right');
+  await goNext(page);
+}
+await arrive(page, 'S33');
+{
+  const s = S.S33;
+  expect((await page.$$('.d2-slide-list li')).length === s.list.length, `S33: the slide's ${s.list.length} lines beside the question`);
+  await act(page, '.d2-poll-opt[data-id="now"]', ' ');
+  await expectBand(page, 'S33', { state: 'neutral', text: s.options[0].feedback });
+  expect((await text(page, '.d2-poll-after .d-keyline p')) === s.keyLine, `S33: the key line "${s.keyLine}"`);
+  await expectLayout(page, 'S33 chosen');
+  await goNext(page);
+}
+await arrive(page, 'K6');
+expect((await text(page, '.d-keyline-xl p')) === S.K6.keyLine && !(await page.$('.d-board')), 'K6: the closing quote, no board');
+await goNext(page);
+
+/* Wrap-up */
+await opener(page, 'W8');
+{
+  const s = S.CHK, picks = ['b', 'b', 'c', 'b', 'a']; // four right of five: 80, the pass mark
+  await page.waitForFunction(() => window.__l4.current === 'CHK');
+  await press(page, 'Shift');
+  for (const [k, it] of s.items.entries()) {
+    const head = await page.evaluate(() => ({ h: document.querySelector('#w-instruction').textContent, n: document.querySelectorAll('.w-kc-opt').length, coach: document.querySelector('.w-coach-launcher')?.getAttribute('aria-label') }));
+    expect(head.h === it.stem && head.n === it.options.length, `CHK item ${k + 1}: "${it.stem.slice(0, 50)}..." (${head.n} answers)`);
+    if (k === 0) { expect(head.coach === UI.coach.openLocked, `CHK: the coach is locked ("${head.coach}")`); await expectLayout(page, 'CHK item 1'); }
+    await act(page, `.w-kc-opt[data-id="${picks[k]}"]`);
+    await act(page, `[data-action="${k < 4 ? 'nextQuestion' : 'check'}"]`);
+    if (k < 4) expect(!(await band(page)).on, `CHK item ${k + 1}: no feedback during the check`);
+  }
+  await expectOpen(page, 'CHK finished (the review of the answers)');
+  await expectLayout(page, 'CHK review');
+  await goNext(page);
+  await page.waitForFunction(() => window.__l4.current === 'CHKR');
+  const r = await page.evaluate(() => ({ h: document.querySelector('#w-instruction').textContent, chip: document.querySelector('.w-result-chip').textContent.trim(), missed: [...document.querySelectorAll('.w-missed-item')].map((x) => x.dataset.item || x.textContent).length, links: [...document.querySelectorAll('.w-review-link')].map((x) => x.textContent.trim()) }));
+  expect(r.h === '4 of 5 right (80 of 100). Pass mark: 80.' && r.chip === S.CHKR.passed.chip && r.missed === 0, `CHKR: "${r.h}" ${r.chip} (the missed items and their review links show only when not passed, as in the template)`);
+  await expectLayout(page, 'CHKR passed');
+  await goNext(page);
+}
+await arrive(page, 'S35');
+{
+  for (let i = 0; i < 3; i++) await act(page, '[data-action="more"]');
+  const v = await page.evaluate(() => ({ shown: [...document.querySelectorAll('.d2-stage')].filter((x) => !x.hidden).map((x) => x.lastChild.textContent), board: [...document.querySelectorAll('.d-board-node')].map((n) => n.dataset.status).join() }));
+  expect(JSON.stringify(v.shown) === JSON.stringify(S.S35.stages) && v.board === 'done,done,done,done', 'S35: the four sentences of the slide, the board with all four ticked');
+  await expectLayout(page, 'S35 all four');
+  await goNext(page);
+}
+await arrive(page, 'S36');
+{
+  const s = S.S36;
+  const steps = await page.evaluate(() => [...document.querySelectorAll('.d2-home-steps li')].map((li) => li.lastChild.textContent));
+  expect(steps.length === 5 && steps[3] === s.steps[3].keyLine + s.steps[3].rest && (await text(page, '.d2-home .d-keyline p')) === s.steps[3].keyLine, 'S36: the five instructions of the slide, the fourth as the key line');
+  await tabTo(page, '[data-action="open"]');
+  const a = await page.evaluate(() => { const l = document.activeElement; return { target: l.target, rel: l.rel, href: l.href }; });
+  const url = await newTabFrom(page);
+  expect(url.startsWith(C.links.homework) && a.href === C.links.homework && a.target === '_blank' && /noopener/.test(a.rel), `S36: "${UI.buttons.openHomework}" opened ${url || '(no tab)'} in a new tab`);
+  await expectBand(page, 'S36 opened', { state: 'notice', text: s.openFeedback });
+  await expectOpen(page, 'S36');
+  await expectLayout(page, 'S36 opened');
+  await goNext(page);
+}
+await arrive(page, 'S38');
+{
+  const s = S.S38;
+  await act(page, '.d2-poll-opt[data-id="c2"]', ' ');
+  const v = await page.evaluate(() => ({ title: document.querySelector('.d2-nextup h2').textContent, lines: [...document.querySelectorAll('.d2-nextup p')].map((x) => x.textContent), fin: window.__l4.state.fin }));
+  expect(v.title === s.after.title && v.lines[0] === s.after.text && v.lines[1] === s.after.coach && v.fin === 'passed', `S38: then "${v.title}", "${v.lines[1]}"; the lesson is finished (${v.fin})`);
+  await expectOpen(page, 'S38');
+  await expectLayout(page, 'S38 chosen');
+  await goNext(page);
+}
+{
+  await page.waitForFunction(() => window.__l4.current === 'END');
+  const e = await page.evaluate(() => ({ h: document.querySelector('#w-instruction').textContent, chip: document.querySelector('.w-end-chip').textContent.trim(), link: document.querySelector('.w-end-link')?.href, next: getComputedStyle(document.querySelector('.w-next')).display }));
+  expect(e.h.replace(/\s+/g, ' ').trim() === S.END.instruction && e.chip === S.END.passed.chip && e.link === C.links.homework, `END: "${e.h.replace(/\s+/g, ' ').trim()}", ${e.chip}, the home practice link`);
+  await expectLayout(page, 'END');
 }
 
 /* ---------- tracking: one first-attempt event per interaction, nothing from the neutral tasks ---------- */
 console.log('\ntracking events');
-const IDS = ['M2L2_S07_1', 'M2L2_S11B_1', 'M2L2_V1_1', 'M2L2_V1_2'];
+const IDS = C.screens.flatMap((s) => [...(s.tracking || []), ...(s.stops || []).map((st) => st.tracking)]).map((x) => x.id);
+const SCORED = C.screens.flatMap((s) => (s.tracking || []).filter((x) => x.scored).map((x) => x.id));
 {
   const ev = await events(page);
   const answers = ev.filter((e) => e.kind === 'answer');
   const got = Object.fromEntries(answers.map((e) => [e.trackingId, `${e.type}:${e.response}:${e.result}`]));
   expect(answers.length === IDS.length && IDS.every((id) => got[id]), `${answers.length} first-attempt events: ${Object.entries(got).map(([k, v]) => k + ' ' + v).join(' | ')}`);
-  expect(got.M2L2_S07_1?.startsWith('matching:') && got.M2L2_S07_1.endsWith(':wrong') && got.M2L2_S11B_1 === 'choice:a:wrong' && got.M2L2_V1_1 === 'choice:b:correct' && got.M2L2_V1_2 === 'choice:a:wrong',
-    'the first answers as walked: S07 matching wrong (one miss), S11B a wrong, V1 stop 1 b correct, stop 2 a wrong');
-  expect(answers.every((e) => e.scored === false) && ev.filter((e) => e.kind === 'retry').map((e) => e.trackingId).join() === 'M2L2_S07_1', 'all practice (not scored); the one retry is the S07 card placed again');
+  expect(got.M2L2_S07_1?.startsWith('matching:') && got.M2L2_S07_1.endsWith(':wrong') && got.M2L2_S11B_1 === 'choice:a:wrong' && got.M2L2_V1_1 === 'choice:b:correct' && got.M2L2_V1_2 === 'choice:a:wrong' && got.M2L2_S32B_1 === 'matching:1.c,2.a,3.d,4.b:correct',
+    'the first answers as walked: S07 matching wrong (one miss), S11B a wrong, V1 stop 1 b correct, stop 2 a wrong, S32B matching correct');
+  expect(answers.every((e) => e.scored === SCORED.includes(e.trackingId)) && SCORED.length === 5 && ev.filter((e) => e.kind === 'retry').map((e) => e.trackingId).join() === 'M2L2_S07_1', 'the five items of the check are scored, everything else is practice; the one retry is the S07 card placed again');
+  const g2 = Object.fromEntries(answers.map((e) => [e.trackingId, e.result]));
+  expect(['M2L2_S15B_2', 'M2L2_S17C_1', 'M2L2_S20_1', 'M2L2_V2_1', 'M2L2_S30_3', 'M2L2_CHK_5'].every((id) => g2[id] === 'wrong') && answers.filter((e) => e.result === 'wrong').length === 9, `the wrong answers as walked (${answers.filter((e) => e.result === 'wrong').map((e) => e.trackingId.slice(5)).join(', ')})`);
+  expect(!ev.some((e) => /S14|S26|S28|S33|S38/.test(e.trackingId || '')), 'S14, S26B, S28, S33 and S38 are neutral: no tracking event');
+  const fin = ev.filter((e) => e.kind === 'finish');
+  expect(fin.length === 1 && fin[0].status === 'passed' && fin[0].score === 80, `one finish event: ${fin[0]?.status}, score ${fin[0]?.score}`);
   expect(!ev.some((e) => /S05|S06/.test(e.trackingId || '')), 'S05 and S06 are neutral: no tracking event');
   const st = await page.evaluate(() => window.__l4.state);
   expect(st.g.S05?.a && st.g.S06?.c && st.g.K1?.v?.length === 8 && st.d.length === C.lesson.slice.length, `the neutral answers live in the state only (S05 ${JSON.stringify(st.g.S05.a)}, S06 ${JSON.stringify(st.g.S06.c)}); ${st.d.length} screens done`);
@@ -422,7 +706,7 @@ console.log('\nmenu and coach');
 {
   await act(page, '.w-bar-menu', 'Enter', { back: true });
   const m = await page.evaluate(() => ({ open: !document.querySelector('.w-menu-overlay').hidden, rows: [...document.querySelectorAll('.w-chapter')].map((b) => b.dataset.status + ':' + b.querySelector('.w-chapter-title').textContent), title: document.querySelector('.w-panel-title').textContent }));
-  expect(m.open && m.title === C.lesson.title && m.rows.length === C.chapters.length && m.rows.slice(0, 3).every((r) => r.startsWith('done:')) && m.rows.slice(3).every((r) => r.startsWith('notInPilot:')),
+  expect(m.open && m.title === C.lesson.title && m.rows.length === C.chapters.length && m.rows.every((r) => r.startsWith('done:')),
     `menu: ${m.rows.length} chapters (${m.rows.join(', ')})`);
   await expectLayout(page, 'menu open');
   await press(page, 'Escape');
@@ -480,25 +764,25 @@ async function scormChecks(p) {
   // words, sent as fill-in so an LMS report can be read; result, latency, time and weighting 0 (practice)
   const clean = (s) => String(s).replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 250);
   const bad = rows.filter((r) => { const e = evs.find((x) => x.t === tidOf(r.id));
-    return !e || r.id !== e.report.id || r.type !== 'fill-in' || r.response !== clean(e.report.response) || r.pattern !== clean(e.report.correct) || r.weighting !== '0'
+    return !e || r.id !== e.report.id || r.type !== 'fill-in' || r.response !== clean(e.report.response) || r.pattern !== clean(e.report.correct) || r.weighting !== (SCORED.includes(e.t) ? '1' : '0')
       || !['correct', 'wrong'].includes(r.result) || r.result !== e.result || !r.latency || !r.time || r.id.length > 255 || /\s/.test(r.id) || r.response.length > 250; });
-  expect(!bad.length, 'SCORM: every interaction carries its question in the id, the answer and the correct answer in words, its result, latency, time and weighting 0 (practice)' + (bad.length ? ': ' + bad.map((r) => r.id).join(', ') : ''));
+  expect(!bad.length, 'SCORM: every interaction carries its question in the id, the answer and the correct answer in words, its result, latency, time and weighting (1 for the five items of the check, 0 for practice)' + (bad.length ? ': ' + bad.map((r) => r.id).join(', ') : ''));
   rows.forEach((r) => console.log(`  note ${r.id} | ${r.result} | answered "${r.response.slice(0, 70)}${r.response.length > 70 ? '...' : ''}"`));
-  expect(m.statuses.length && m.statuses.every((s) => s === 'incomplete') && d['cmi.core.lesson_status'] === 'incomplete' && d['cmi.core.score.raw'] === undefined && d['cmi.core.exit'] === 'suspend',
-    `SCORM: lesson_status ${d['cmi.core.lesson_status']} (no scored check in this phase, so never passed or completed), no score, exit "${d['cmi.core.exit']}"`);
+  expect(m.statuses.length && m.statuses.every((s) => s === 'incomplete' || s === 'passed') && d['cmi.core.lesson_status'] === 'passed' && String(d['cmi.core.score.raw']) === '80' && d['cmi.core.exit'] === 'suspend',
+    `SCORM: lesson_status ${d['cmi.core.lesson_status']} (only ever incomplete or passed: ${[...new Set(m.statuses)].join(', ')}), score.raw ${d['cmi.core.score.raw']} (min ${d['cmi.core.score.min']}, max ${d['cmi.core.score.max']}), exit "${d['cmi.core.exit']}"`);
   expect(/^\d{4}:\d{2}:\d{2}\.\d{2}$/.test(d['cmi.core.session_time'] || '') && m.finished, `SCORM: session_time ${d['cmi.core.session_time']}, LMSFinish once`);
   const susp = d['cmi.suspend_data'] || '';
   const { decode } = await import('../src/state.js');
   const st = decode(susp);
-  expect(susp.length < 4096 && st.s === 'K3' && st.d.length === C.lesson.slice.length && st.g.S05?.a && st.g.S06?.c && Object.keys(st.a).length === IDS.length,
+  expect(susp.length < 4096 && st.s === 'END' && st.d.length === C.lesson.slice.length && st.g.S05?.a && st.g.S06?.c && Object.keys(st.a).length === IDS.length,
     `SCORM: suspend_data ${susp.length} chars (limit 4096): the place, ${st.d.length} done screens, ${Object.keys(st.a).length} first answers, the S05 and S06 answers (kept here only, never an interaction)`);
-  expect(d['cmi.core.lesson_location'] === 'K3', `SCORM: lesson_location "${d['cmi.core.lesson_location']}" = the saved place`);
+  expect(d['cmi.core.lesson_location'] === 'END', `SCORM: lesson_location "${d['cmi.core.lesson_location']}" = the saved place`);
 
   console.log('\nSCORM relaunch (entry=resume)');
   const r = await open('', { lms: { 'cmi.core.entry': 'resume', 'cmi.suspend_data': susp, 'cmi.core.lesson_location': d['cmi.core.lesson_location'], 'cmi.core.lesson_status': d['cmi.core.lesson_status'] } });
   const back = await r.evaluate(() => ({ at: window.__l4.current, dialog: !!document.querySelector('.w-dialog [data-action="resume"]'), done: window.__l4.state.d.length, mock: window.__scormMock.report() }));
-  expect(back.at === 'K3' && back.dialog && back.done === C.lesson.slice.length, `SCORM resume: lands on ${back.at} with the resume prompt, ${back.done} screens done`);
-  expect(back.mock.data['cmi.core.lesson_status'] === 'incomplete' && !back.mock.errors.length && back.mock.count === 0, 'SCORM resume: lesson_status stays incomplete, no interaction written again');
+  expect(back.at === 'END' && back.done === C.lesson.slice.length, `SCORM resume: lands on ${back.at}${back.dialog ? ' with the resume prompt' : ''}, ${back.done} screens done`);
+  expect(back.mock.data['cmi.core.lesson_status'] === 'passed' && !back.mock.errors.length && back.mock.count === 0, 'SCORM resume: lesson_status stays passed, no interaction written again');
   await press(r, 'Enter');
   const tiles = await r.evaluate(() => { window.__l4.go('S05'); return [...document.querySelectorAll('.d-tile-sum')].map((x) => x.textContent).join(' | '); });
   expect(tiles.split(' | ').every((t) => t.length > 0), `SCORM resume: S05 shows the saved answers (${tiles})`);

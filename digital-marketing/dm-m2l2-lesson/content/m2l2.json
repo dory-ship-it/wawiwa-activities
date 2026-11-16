@@ -9,7 +9,7 @@
     "title": "Strategy and Research: Building the Plan",
     "lang": "en",
     "dir": "ltr",
-    "contentVersion": "P1 R2, 15 Nov 2026 (Opening, Component 3, Component 4; review round 2)",
+    "contentVersion": "P2, 15 Nov 2026 (all seven chapters)",
     "pilot": true,
     "slice": [
       "O1",
@@ -29,14 +29,47 @@
       "S11B",
       "V1",
       "WB3",
-      "K3"
+      "K3",
+      "W5",
+      "S14",
+      "S15",
+      "S15B",
+      "S16",
+      "S17",
+      "S17C",
+      "WB4",
+      "W6",
+      "S20",
+      "S22",
+      "S24",
+      "K5",
+      "S26",
+      "S26B",
+      "W7",
+      "V2",
+      "S28",
+      "S30",
+      "S32",
+      "S32B",
+      "S33",
+      "K6",
+      "W8",
+      "CHK",
+      "CHKR",
+      "S35",
+      "S36",
+      "S38",
+      "END"
     ],
     "completion": {
       "rule": "finish",
       "statusWhenNotPassed": "incomplete",
       "passMark": 80,
-      "scoredScreens": [],
-      "$comment": "Phase 1 has no scored check: every interaction is practice (weighting 0). The rule stays the template's until the wrap-up chapter exists; until then the lesson status stays incomplete."
+      "pointsPerItem": 20,
+      "scoredScreens": [
+        "CHK"
+      ],
+      "$comment": "The template's PK1 rules: lesson_status is only ever incomplete or passed. Any attempt of the check at or over the pass mark sets passed (sticky). Five items at 20 points each: 4 of 5 passes. score.raw is the latest attempt."
     },
     "lmsReport": {
       "skip": []
@@ -68,7 +101,18 @@
       "gap": "Gap",
       "allDimensions": "All dimensions",
       "nextItem": "Next: {name}",
-      "no": "No"
+      "no": "No",
+      "nextQuestion": "Next question",
+      "finishCheck": "Finish the check",
+      "nextAnswer": "Next answer",
+      "retake": "Retake now",
+      "backToCheck": "Back to the check",
+      "openHomework": "Open the home practice",
+      "nextRound": "Next round",
+      "nextStage": "Show the next stage",
+      "nextSentence": "Show the next sentence",
+      "send": "Send",
+      "fillColumn": "Fill this column"
     },
     "attempts": {
       "label": "Attempt {i} of {n}"
@@ -116,7 +160,22 @@
         "questionCards": "Next, locked until you mark all six questions",
         "dimensionMap": "Next, locked until you explore all eight dimensions",
         "goalCards": "Next, locked until you open all five goal types",
-        "default": "Next, locked until you finish this screen"
+        "default": "Next, locked until you finish this screen",
+        "checklist": "Next, locked until you mark at least one challenge and press Done",
+        "revealTable": "Next, locked until you open all nine channels",
+        "quiz": "Next, locked until all three rounds are answered",
+        "builder": "Next, locked until all five columns are filled",
+        "client": "Next, locked until you answer the three questions of the client",
+        "caseFile": "Next, locked until you commit to an answer",
+        "podcast": "Next, locked until the audio ends",
+        "poll": "Next, locked until you choose",
+        "funnelCalc": "Next, locked until you change the number of sales once",
+        "dataTable": "Next, locked until all three rounds are answered",
+        "infographic": "Next, locked until you open four elements of the plan",
+        "fields": "Next, locked until every row has its card and is checked",
+        "check": "Next, locked until you finish the check",
+        "homeStop": "Next, locked until you open the home practice",
+        "last": "Next, locked: this is the last screen of the lesson"
       },
       "need": {
         "single": "Choose an answer, then Check.",
@@ -129,7 +188,21 @@
         "questionCards": "Mark all six questions to continue.",
         "dimensionMap": "Explore all eight dimensions to continue.",
         "goalCards": "Open all five goal types to continue.",
-        "default": "Finish this screen to continue."
+        "default": "Finish this screen to continue.",
+        "checklist": "Mark at least one challenge, then press Done.",
+        "revealTable": "Open all nine channels to continue.",
+        "quiz": "Answer all three rounds to continue.",
+        "builder": "Fill all five columns to continue.",
+        "client": "Answer the three questions to continue.",
+        "caseFile": "Choose an answer, then Check.",
+        "podcast": "Listen to the end to continue.",
+        "poll": "Choose one to continue.",
+        "funnelCalc": "Change the number of sales once to continue.",
+        "dataTable": "Answer all three rounds to continue.",
+        "infographic": "Open four elements to continue.",
+        "fields": "Choose a card for every row, then Check.",
+        "check": "Finish the check to continue.",
+        "homeStop": "Open the home practice to continue."
       },
       "needCards": "Place {n} more cards.",
       "needCards1": "Place the last card.",
@@ -144,14 +217,21 @@
     },
     "checkWhy": {
       "pick": "Pick {n} first",
-      "one": "Choose one first"
+      "one": "Choose one first",
+      "fields": "Fill every row first",
+      "red": "Change the red ones first",
+      "reply": "Choose a reply first",
+      "row": "Click a row first"
     },
     "progress": {
       "card": "Card {i} of {n}",
       "deck": "{i} of {n}",
       "deckDone": "All {n} cards placed.",
       "opened": "{i} of {n} opened",
-      "item": "{i} of {n}"
+      "item": "{i} of {n}",
+      "question": "Question {i} of {n}",
+      "round": "Round {i} of {n}",
+      "turn": "Question {i} of {n}"
     },
     "drag": {
       "help": "Drag the card to a column, or press 1 to {n} to choose a column and Enter to drop it. Escape cancels.",
@@ -212,7 +292,7 @@
     "startOverConfirm": "Start over? This clears your answers and your place in this lesson.",
     "startOverLmsNote": "Answers already sent to your course record stay there.",
     "videoResumeNote": "The video continues after the right answer.",
-    "sliceEnd": "End of this part. The work plan chapter comes next.",
+    "sliceEnd": "End of the lesson.",
     "newTabNote": "Opens in a new tab",
     "smallScreenNote": "This lesson works best on a computer.",
     "logoAlt": "Wawiwa",
@@ -242,7 +322,9 @@
         "idea": "Questions about this idea? Ask me.",
         "practice": "Stuck? Ask me.",
         "workbook": "Fill this part in the workbook, then come back here.",
-        "hello": "Hi, I'm here if you need me."
+        "hello": "Hi, I'm here if you need me.",
+        "review": "Want to go over a question? Ask me.",
+        "locked": "No hints during the check."
       },
       "offlinePlaceholder": "Tips only for now",
       "inputLabel": "Ask the coach",
@@ -255,13 +337,15 @@
       "tipChip": "What do I do here?",
       "demo": "Hi, I'm your AI coach. Stuck on a screen? Open me here.",
       "demoOn": "WB0",
-      "reviewQuestion": "Where do I start with this one?"
+      "reviewQuestion": "Where do I start with this one?",
+      "locked": "No hints during the check. I'm back after you finish it.",
+      "openLocked": "Open the coach. Paused during the check."
     },
     "help": [
       "Read the heading on each screen: it tells you what to do.",
       "Feedback appears in a card under each task.",
       "Use Tab and Enter or Space to work without a mouse. Escape closes the menu.",
-      "The video stops for questions. Captions and a transcript are under the video.",
+      "The videos and the audio stop for questions or have a transcript beside them.",
       "Your place is saved. You can leave and come back."
     ],
     "dm": {
@@ -282,11 +366,45 @@
       "mapHint": "Pick a dimension",
       "opened": "opened",
       "where": "Where the answer lives",
-      "newTab": "Opens in a new tab"
+      "newTab": "Opens in a new tab",
+      "seen": "I have seen this",
+      "example": "Example",
+      "youReply": "You",
+      "client": "Client",
+      "rightReply": "The right reply",
+      "caseFile": "Case file",
+      "yourAnswer": "Your answer",
+      "salesNeeded": "Sales you need",
+      "fewer": "One sale fewer",
+      "more": "One sale more",
+      "noCost": "no media cost",
+      "research": "Your research",
+      "plan": "The work plan",
+      "comesFrom": "Where it comes from",
+      "yourView": "Your view",
+      "filled": "filled",
+      "hiddenCell": "Click to see"
+    },
+    "chooseCard": "Choose a card",
+    "audio": {
+      "play": "Play",
+      "pause": "Pause",
+      "seek": "Seek",
+      "seekText": "{t} of {d}",
+      "speed": "Playback speed {x} times. Press to change.",
+      "speedChip": "{x}×",
+      "transcript": "Transcript",
+      "captions": "Captions",
+      "now": "Now",
+      "voiceA": "Voice one",
+      "voiceB": "Voice two",
+      "controls": "Audio controls",
+      "seekAhead": "You can move ahead only to the part you have already heard."
     }
   },
   "links": {
-    "workbook": "https://dory-ship-it.github.io/wawiwa-activities/digital-marketing/dm-m2l2-selfstudy/"
+    "workbook": "https://dory-ship-it.github.io/wawiwa-activities/digital-marketing/dm-m2l2-selfstudy/",
+    "homework": "https://dory-ship-it.github.io/wawiwa-activities/digital-marketing/dm-m2l2-home/"
   },
   "tooltips": {},
   "characters": {},
@@ -361,40 +479,94 @@
       "id": "ch4",
       "n": 3,
       "title": "From analysis to a work plan",
-      "photo": null,
-      "minutes": 34,
-      "screens": [],
-      "inSlice": false,
+      "photo": {
+        "src": "assets/img/temp/ch4-work-plan.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch4-work-plan.md"
+      },
+      "minutes": 42,
+      "screens": [
+        "W5",
+        "S14",
+        "S15",
+        "S15B",
+        "S16",
+        "S17",
+        "S17C",
+        "WB4"
+      ],
+      "inSlice": true,
       "pauseMarker": null
     },
     {
       "id": "ch5",
       "n": 4,
       "title": "Simulations",
-      "photo": null,
-      "minutes": 46,
-      "screens": [],
-      "inSlice": false,
+      "photo": {
+        "src": "assets/img/temp/ch5-simulations.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch5-simulations.md"
+      },
+      "minutes": 25,
+      "screens": [
+        "W6",
+        "S20",
+        "S22",
+        "S24",
+        "K5",
+        "S26",
+        "S26B"
+      ],
+      "inSlice": true,
       "pauseMarker": null
     },
     {
       "id": "ch6",
       "n": 5,
       "title": "The marketing funnel",
-      "photo": null,
-      "minutes": 40,
-      "screens": [],
-      "inSlice": false,
+      "photo": {
+        "src": "assets/img/temp/ch6-funnel.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch6-funnel.md"
+      },
+      "minutes": 22,
+      "screens": [
+        "W7",
+        "V2",
+        "S28",
+        "S30",
+        "S32",
+        "S32B",
+        "S33",
+        "K6"
+      ],
+      "inSlice": true,
       "pauseMarker": null
     },
     {
       "id": "ch7",
       "n": 6,
-      "title": "Close",
-      "photo": null,
-      "minutes": 16,
-      "screens": [],
-      "inSlice": false,
+      "title": "Wrap-up",
+      "photo": {
+        "src": "assets/img/temp/ch7-wrap-up.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch7-wrap-up.md"
+      },
+      "minutes": 15,
+      "screens": [
+        "W8",
+        "CHK",
+        "CHKR",
+        "S35",
+        "S36",
+        "S38",
+        "END"
+      ],
+      "inSlice": true,
       "pauseMarker": null
     }
   ],
@@ -460,22 +632,21 @@
       "stations": [
         {
           "id": "c1",
-          "kicker": "01",
-          "title": "Competition",
+          "kicker": "Competition",
           "status": "done",
-          "text": "Done last session. You have a market map."
+          "text": "Done last session. You have a market map.",
+          "n": "01"
         },
         {
           "id": "c2",
-          "kicker": "02",
-          "title": "Demand",
+          "kicker": "Demand",
           "status": "done",
-          "text": "Done last session. You have a spreadsheet."
+          "text": "Done last session. You have a spreadsheet.",
+          "n": "02"
         },
         {
           "id": "c3",
-          "kicker": "03",
-          "title": "Where we are",
+          "kicker": "Where we are",
           "status": "today",
           "n": "03",
           "open": true,
@@ -483,8 +654,7 @@
         },
         {
           "id": "c4",
-          "kicker": "04",
-          "title": "Our goals",
+          "kicker": "Our goals",
           "status": "next",
           "n": "04",
           "text": "Today. With a number and a date on them."
@@ -494,7 +664,8 @@
       "sources": [
         "s2",
         "s2 notes (the board, first two ticked)"
-      ]
+      ],
+      "r2": "Noy, 15 Nov 2026: the number is in the disc only (a done component shows its check there); the name alone sits under it"
     },
     {
       "id": "O3",
@@ -1580,20 +1751,21 @@
         "showMe": false
       },
       "media": {
-        "$comment": "Phase 1: a silent placeholder from tools/make-placeholder-video.mjs. The real film comes through Dor's pipeline: swap src, poster, captions, duration, length and the stops' t, set temp false.",
-        "src": "assets/video/temp/v1-placeholder.mp4",
-        "poster": null,
+        "$comment": "The real film (Noy approved it, 15 Nov 2026): 1920x1080, 1:43.5, with sound. Captions: the film's own file, 35 cues timed from the narration audio. duration and stops[].t come from assets/video/v1.cues.json (written by the film's build, never typed by hand): each stop sits 0.2 s after the last word before it, where the film dims and shows its \"?\" mark. Film sources and README: Self- Study/Digital Marketing/M2L2-V1-film.",
+        "src": "assets/video/v1.mp4",
+        "poster": "assets/video/v1-poster.jpg",
         "captions": [
           {
             "lang": "en",
             "label": "English",
-            "src": "assets/video/temp/v1-placeholder.en.vtt"
+            "src": "assets/video/v1.en.vtt"
           }
         ],
-        "duration": 150,
-        "length": "2:30",
-        "temp": true,
-        "captionPlaces": []
+        "duration": 103.5,
+        "length": "1:43",
+        "temp": false,
+        "captionPlaces": [],
+        "cues": "assets/video/v1.cues.json"
       },
       "stopLayout": {
         "still": "left-40",
@@ -1604,8 +1776,8 @@
         {
           "id": "stop1",
           "cueId": "stop1",
-          "storyboardTime": "1:14",
-          "t": 74,
+          "storyboardTime": "0:42",
+          "t": 42.06,
           "question": "Your first dashboard is rough. What now?",
           "options": [
             {
@@ -1633,8 +1805,8 @@
         {
           "id": "stop2",
           "cueId": "stop2",
-          "storyboardTime": "2:22",
-          "t": 142,
+          "storyboardTime": "1:24",
+          "t": 84.16,
           "question": "When does the tracking go in?",
           "options": [
             {
@@ -1662,62 +1834,106 @@
       ],
       "advance": "after-video-end",
       "production": {
-        "lengthTarget": "about 2:30: title card, four segments (one per principle), brand end",
+        "status": "produced. This block records the film as delivered; the film's own README has the full detail",
+        "length": "1:43.5",
         "titleCard": "Four principles, before we plan anything",
-        "note": "Narration and keywords are taken only from slide 12 and its speaker notes. Spoken at a normal pace the narration alone runs about one minute; the rest of the 2:30 is the title card, the on-screen builds and the two stops. Longer narration needs new script, which Noy approves first.",
-        "rules": [
-          "on-screen text = the keywords below only",
-          "no text in photos",
-          "Wawiwa brand colours and logo unchanged"
-        ],
+        "note": "The four principles and their \"what it means in practice\" lines are slide 12 and its notes, word for word. The opening and closing lines are Noy's wording. Stop 1 sits before \"Start measuring badly...\" (the first plan had it after the whole segment), so the film answers the question after the learner does.",
         "segments": [
           {
             "n": 1,
-            "time": "0:06",
-            "principle": "Measure whether the goals were met, do not only act.",
-            "narration": "Measure whether the goals were met, do not only act. Activity is not evidence. If you cannot name the number that proves a goal happened, it was an aspiration.",
+            "time": "0:00",
+            "part": "cold open",
+            "narration": "You have a goal: fifteen percent more orders by March, at the same cost per order. A good goal. But how will you know you bought it?",
+            "onScreen": [
+              "15% more orders by March"
+            ]
+          },
+          {
+            "n": 2,
+            "time": "0:12",
+            "part": "title",
+            "narration": "Four principles, before we plan anything.",
+            "onScreen": [
+              "Four principles, before we plan anything"
+            ]
+          },
+          {
+            "n": 3,
+            "time": "0:17",
+            "part": "principle 1",
+            "narration": "Principle one: measure whether the goals were met, do not only act. Activity is not evidence. If you cannot name the number that proves a goal happened, it was an aspiration.",
             "onScreen": [
               "Measure, do not only act",
               "Activity is not evidence"
             ]
           },
           {
-            "n": 2,
-            "time": "0:40",
-            "principle": "Measurement starts tactical and intuitive, then matures into precise insight.",
-            "narration": "Measurement starts tactical and intuitive, then matures into precise insight. Nobody's first dashboard is right. Start measuring badly rather than not at all, and sharpen it every month.",
+            "n": 4,
+            "time": "0:31",
+            "part": "principle 2",
+            "narration": "Principle two: measurement starts tactical and intuitive, then matures into precise insight. Nobody's first dashboard is right. Start measuring badly rather than not at all, and sharpen it every month.",
             "onScreen": [
               "Tactical, then precise",
-              "Sharpen it every month"
+              "Start measuring badly"
             ],
-            "stopAfter": "stop1"
+            "stopInside": "stop1, after \"Nobody's first dashboard is right.\""
           },
           {
-            "n": 3,
-            "time": "1:14",
-            "principle": "Understand what works, what does not, which campaign failed, and which investment was profitable.",
-            "narration": "Understand what works, what does not, which campaign failed, and which investment was profitable. All four, not just the first. A plan that only reports successes cannot be optimised.",
+            "n": 5,
+            "time": "0:51",
+            "part": "principle 3",
+            "narration": "Principle three: understand what works, what does not, which campaign failed, and which investment was profitable. All four, not just the first. A plan that only reports successes cannot be optimised.",
             "onScreen": [
               "What works, what does not",
-              "All four, not just the first"
+              "All four, not just the first",
+              "Works",
+              "Does not",
+              "Campaign failed",
+              "Profitable"
             ]
           },
           {
-            "n": 4,
-            "time": "1:48",
-            "principle": "Building the measurement infrastructure is a necessary step before any marketing activity begins.",
-            "narration": "Building the measurement infrastructure is a necessary step before any marketing activity begins. Set it up before the campaign. Data you do not collect today cannot be analysed in the future. Nobody sets up tracking retroactively.",
+            "n": 6,
+            "time": "1:06",
+            "part": "principle 4",
+            "narration": "Principle four: building the measurement infrastructure is a necessary step before any marketing activity begins. Set it up before the campaign. Nobody sets up tracking retroactively. Data you do not collect today cannot be analysed in the future.",
             "onScreen": [
               "Infrastructure first",
-              "Before the campaign"
+              "Before the campaign",
+              "TODAY",
+              "FUTURE"
             ],
             "stopAfter": "stop2"
+          },
+          {
+            "n": 7,
+            "time": "1:26",
+            "part": "close",
+            "narration": "So before you spend anything, the tracking goes in. Now open your workbook: write your goal, and how and from when you will measure it.",
+            "onScreen": [
+              "the four principle names again",
+              "15% more orders by March"
+            ]
+          },
+          {
+            "n": 8,
+            "time": "1:37",
+            "part": "brand end card",
+            "narration": "",
+            "onScreen": [
+              "Wawiwa logo",
+              "Skilling the World for AI",
+              "DIGITAL MARKETING SPECIALIST",
+              "M2 · L2 · SELF-STUDY"
+            ]
           }
         ]
       },
       "sources": [
         "s12",
-        "s12 notes"
+        "s12 notes",
+        "s11 notes (the goal example in the film's opening)",
+        "the film's README (Self- Study/Digital Marketing/M2L2-V1-film/README.md)"
       ],
       "showTitle": false,
       "r2": "Noy, 15 Nov 2026: the title line and the \"Watch for\" line are off the screen; the title stays as the film's own title card (production.titleCard)"
@@ -1847,6 +2063,2892 @@
       "sources": [
         "s12",
         "s12 notes (tick the fourth component off the board, all four are now done)"
+      ]
+    },
+    {
+      "id": "W5",
+      "chapter": "ch4",
+      "template": "opener",
+      "step": {
+        "verb": "Overview",
+        "icon": "overview"
+      },
+      "minutes": 1,
+      "presentation": true,
+      "coach": {
+        "kind": "idea",
+        "tip": "Four components are researched. This is where they turn into something a client can sign.",
+        "tipDrafted": true
+      },
+      "squareIcon": "forms",
+      "instruction": "From analysis to a work plan",
+      "lead": "The challenges, the channels, the methodology, and a plan with a budget on the bottom row.",
+      "points": [
+        {
+          "icon": "gear-broken"
+        },
+        {
+          "icon": "fork"
+        },
+        {
+          "icon": "stairs"
+        },
+        {
+          "icon": "document"
+        }
+      ],
+      "photo": {
+        "src": "assets/img/temp/ch4-work-plan.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch4-work-plan.md"
+      },
+      "ground": {
+        "kind": "full"
+      },
+      "tracking": [],
+      "sources": [
+        "s13",
+        "s13 notes"
+      ]
+    },
+    {
+      "id": "S14",
+      "chapter": "ch4",
+      "template": "checklist",
+      "locked": "checklist",
+      "step": {
+        "verb": "Challenges",
+        "icon": "gear-broken"
+      },
+      "minutes": 5,
+      "coach": {
+        "kind": "practice",
+        "tip": "Think of a job you have had. Which of these eight did you already meet there?",
+        "tipDrafted": true
+      },
+      "eyebrow": "Building an online marketing work plan",
+      "instruction": "Mark the challenges you have already seen in a job.",
+      "pilotCopy": [
+        "instruction",
+        "hint",
+        "the toggle and Done"
+      ],
+      "hint": "Mark at least one, then press Done.",
+      "ground": {
+        "kind": "dots"
+      },
+      "closing": {
+        "line": "'Everything is urgent' and 'following the buzz' get the most hands, every time.",
+        "keyLine": "Short sales cycles against long ones is the one nobody expects."
+      },
+      "tracking": [],
+      "suspend": [
+        "marked challenges (not reported to SCORM)"
+      ],
+      "sources": [
+        "s14",
+        "s14 notes",
+        "trainer guide block 5 (the key line)"
+      ],
+      "challenges": [
+        {
+          "id": "c1",
+          "text": "A thorough understanding of the market, including competitors, demand and our own status. It is a lot of work and it is where most plans are already weak."
+        },
+        {
+          "id": "c2",
+          "text": "Discrepancies between what different functions inside the organisation want."
+        },
+        {
+          "id": "c3",
+          "text": "Short sales cycles against long ones. A plan built for one fails on the other."
+        },
+        {
+          "id": "c4",
+          "text": "Disparities between the strategy and the ability to actually execute it."
+        },
+        {
+          "id": "c5",
+          "text": "Execution competence: the inability to adapt to a market that is changing quickly."
+        },
+        {
+          "id": "c6",
+          "text": "“Everything is urgent”: no prioritisation in the work plan."
+        },
+        {
+          "id": "c7",
+          "text": "Following the buzz and reacting to the hype."
+        },
+        {
+          "id": "c8",
+          "text": "Measuring and monitoring capabilities, or the absence of them."
+        }
+      ],
+      "words": {
+        "max": 119,
+        "why": "slide 14's eight challenges stay on screen word for word"
+      }
+    },
+    {
+      "id": "S15",
+      "chapter": "ch4",
+      "template": "revealTable",
+      "locked": "revealTable",
+      "step": {
+        "verb": "Channels",
+        "icon": "fork"
+      },
+      "minutes": 5,
+      "coach": {
+        "kind": "idea",
+        "tip": "Read down the table, one line each. You do not need to count the channels or memorise them.",
+        "tipDrafted": true
+      },
+      "eyebrow": "Multiple channels, each measured continuously",
+      "instruction": "Open each channel to see what it does for the plan.",
+      "pilotCopy": [
+        "instruction",
+        "hint"
+      ],
+      "hint": "Click a channel to open its line. Open all nine.",
+      "ground": {
+        "kind": "blur"
+      },
+      "ghost": {
+        "type": "rows"
+      },
+      "head": [
+        "Channel",
+        "What it does for the plan",
+        "Taught in"
+      ],
+      "rows": [
+        {
+          "id": "ppc",
+          "channel": "Paid traffic · PPC, PPV, PPM",
+          "does": "Buys attention today, and stops the day the budget stops",
+          "taught": "Module 6"
+        },
+        {
+          "id": "seo",
+          "channel": "Search engine optimisation",
+          "does": "Slow to start, compounds, keeps working unpaid",
+          "taught": "Module 5"
+        },
+        {
+          "id": "media",
+          "channel": "Media buying",
+          "does": "Placements bought directly. Reach without an auction",
+          "taught": "Module 8"
+        },
+        {
+          "id": "social",
+          "channel": "Social media",
+          "does": "Creates demand that did not exist yet. Facebook, LinkedIn, Instagram",
+          "taught": "Modules 7 and 8"
+        },
+        {
+          "id": "pr",
+          "channel": "PR",
+          "does": "Third-party credibility. Hard to buy, hard to measure",
+          "taught": "Module 7"
+        },
+        {
+          "id": "forums",
+          "channel": "Forums and blogs",
+          "does": "Where the market already talks. Cheap, slow, high trust",
+          "taught": "Module 7"
+        },
+        {
+          "id": "video",
+          "channel": "Video",
+          "does": "The format every other channel now wants",
+          "taught": "Module 4"
+        },
+        {
+          "id": "comp",
+          "channel": "Competitions",
+          "does": "A spike in list growth, rarely a spike in customers",
+          "taught": "Module 7"
+        },
+        {
+          "id": "aff",
+          "channel": "Affiliation",
+          "does": "Someone else sells for you and takes a cut. Pay on result",
+          "taught": "Module 9"
+        }
+      ],
+      "keyLine": "Create continuing synergy between the channels.",
+      "small": "Social sharing helps SEO, organic optimisation helps paid keyword conversion.",
+      "tracking": [],
+      "suspend": [
+        "opened rows"
+      ],
+      "sources": [
+        "s15",
+        "s15 notes"
+      ],
+      "words": {
+        "max": 149,
+        "why": "slide 15's table, nine rows and three columns, word for word"
+      }
+    },
+    {
+      "id": "S15B",
+      "chapter": "ch4",
+      "template": "quiz",
+      "variant": "pair",
+      "locked": "quiz",
+      "step": {
+        "verb": "Check",
+        "icon": "decide"
+      },
+      "minutes": 3,
+      "coach": {
+        "kind": "practice",
+        "tip": "Each channel does a different job. Recall the middle column of the table.",
+        "tipDrafted": true
+      },
+      "instruction": "Pick the channel.",
+      "pilotCopy": [
+        "instruction",
+        "the three questions (built from the middle column of the slide 15 table)"
+      ],
+      "hint": "Recall what each channel does for the plan.",
+      "photo": {
+        "src": "assets/img/temp/ch4-work-plan.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch4-work-plan.md"
+      },
+      "ground": {
+        "kind": "darkblur",
+        "tone": "soft"
+      },
+      "situations": [
+        {
+          "id": "r1",
+          "text": "Which channel stops the day the budget stops?",
+          "trackingId": "M2L2_S15B_1",
+          "options": [
+            {
+              "id": "a",
+              "label": "Search engine optimisation",
+              "correct": false,
+              "feedback": "Slow to start, compounds, keeps working unpaid."
+            },
+            {
+              "id": "b",
+              "label": "Paid traffic",
+              "correct": true,
+              "feedback": "Buys attention today, and stops the day the budget stops."
+            },
+            {
+              "id": "c",
+              "label": "Forums and blogs",
+              "correct": false,
+              "feedback": "Where the market already talks. Cheap, slow, high trust."
+            }
+          ]
+        },
+        {
+          "id": "r2",
+          "text": "Which one compounds and keeps working unpaid?",
+          "trackingId": "M2L2_S15B_2",
+          "options": [
+            {
+              "id": "a",
+              "label": "Search engine optimisation",
+              "correct": true,
+              "feedback": "Slow to start, compounds, keeps working unpaid."
+            },
+            {
+              "id": "b",
+              "label": "Media buying",
+              "correct": false,
+              "feedback": "Placements bought directly. Reach without an auction."
+            },
+            {
+              "id": "c",
+              "label": "Competitions",
+              "correct": false,
+              "feedback": "A spike in list growth, rarely a spike in customers."
+            }
+          ]
+        },
+        {
+          "id": "r3",
+          "text": "Which one creates demand that did not exist yet?",
+          "trackingId": "M2L2_S15B_3",
+          "options": [
+            {
+              "id": "a",
+              "label": "Affiliation",
+              "correct": false,
+              "feedback": "Someone else sells for you and takes a cut. Pay on result."
+            },
+            {
+              "id": "b",
+              "label": "PR",
+              "correct": false,
+              "feedback": "Third-party credibility. Hard to buy, hard to measure."
+            },
+            {
+              "id": "c",
+              "label": "Social media",
+              "correct": true,
+              "feedback": "Creates demand that did not exist yet."
+            }
+          ]
+        }
+      ],
+      "tracking": [
+        {
+          "id": "M2L2_S15B_1",
+          "type": "choice",
+          "correctResponse": "b",
+          "scored": false,
+          "bloom": "Understand",
+          "result": "graded"
+        },
+        {
+          "id": "M2L2_S15B_2",
+          "type": "choice",
+          "correctResponse": "a",
+          "scored": false,
+          "bloom": "Understand",
+          "result": "graded"
+        },
+        {
+          "id": "M2L2_S15B_3",
+          "type": "choice",
+          "correctResponse": "c",
+          "scored": false,
+          "bloom": "Understand",
+          "result": "graded"
+        }
+      ],
+      "sources": [
+        "s15"
+      ]
+    },
+    {
+      "id": "S16",
+      "chapter": "ch4",
+      "template": "stages",
+      "step": {
+        "verb": "Method",
+        "icon": "stairs"
+      },
+      "minutes": 4,
+      "presentation": true,
+      "coach": {
+        "kind": "idea",
+        "tip": "Admitting the limits of your research makes you more useful to a client, not less.",
+        "tipDrafted": true
+      },
+      "eyebrow": "Methodology",
+      "instruction": "Collecting information, analysing it, building a plan",
+      "pilotCopy": [
+        "the button"
+      ],
+      "more": "nextStage",
+      "stages": [
+        "Stage one. Define our goal and our objectives.",
+        "Stage two. Analyse the competitors' online activity.",
+        "Stage three. Characterise the market, the competition and the demand.",
+        "Stage four. Formulate the strategy and the optimal course of action to reach those objectives."
+      ],
+      "box": {
+        "label": "Managing expectations",
+        "keyLine": "Do not expect to analyse all of the data.",
+        "lines": [
+          "This field carries very large quantities of information, takes a lot of experience, and involves a lot of tedious work.",
+          "Recommendation: have a professional market research conducted when the decision is large enough to justify it."
+        ]
+      },
+      "boxNote": "the first line of the slide box is \"Do not expect to analyse all of the data, or to understand every meaning in it.\"; the key line is its first half (work order)",
+      "ground": {
+        "kind": "dots"
+      },
+      "tracking": [],
+      "sources": [
+        "s16",
+        "s16 notes"
+      ],
+      "words": {
+        "max": 88,
+        "why": "slide 16's two blocks word for word: the four stages and the managing-expectations box"
+      }
+    },
+    {
+      "id": "S17",
+      "chapter": "ch4",
+      "template": "builder",
+      "locked": "builder",
+      "step": {
+        "verb": "Plan",
+        "icon": "forms"
+      },
+      "minutes": 8,
+      "coach": {
+        "kind": "practice",
+        "tip": "Go column by column, not row by row. Each column comes from a component you already researched.",
+        "tipDrafted": true
+      },
+      "eyebrow": "Example: one year, six channels, $24,000",
+      "instruction": "Fill the plan column by column.",
+      "pilotCopy": [
+        "instruction",
+        "hint",
+        "the label \"Example\""
+      ],
+      "hint": "Click the next column header to fill it, left to right.",
+      "ground": {
+        "kind": "blur"
+      },
+      "ghost": {
+        "type": "builder"
+      },
+      "columns": [
+        {
+          "id": "area",
+          "label": "Area"
+        },
+        {
+          "id": "status",
+          "label": "Current status",
+          "chip": "From Component 3"
+        },
+        {
+          "id": "goal",
+          "label": "Goal",
+          "chip": "From Component 4"
+        },
+        {
+          "id": "gap",
+          "label": "Gap",
+          "chip": "The arithmetic between them"
+        },
+        {
+          "id": "action",
+          "label": "Required action",
+          "chip": "From Components 1 and 2"
+        },
+        {
+          "id": "budget",
+          "label": "Budget",
+          "chip": "Only then, a number"
+        }
+      ],
+      "rows": [
+        [
+          "Organic · SEO",
+          "No traffic today",
+          "1,000 users per month",
+          "1,000 users",
+          "Keyword research, content and optimisation. 4 articles a month",
+          "$3,000"
+        ],
+        [
+          "Paid · PPC",
+          "None today",
+          "1,000 visits per month",
+          "1,000 visits",
+          "Creating and managing the campaigns",
+          "$8,000"
+        ],
+        [
+          "Social networks",
+          "Unmanaged business page",
+          "Managed page, regular posts, CTA",
+          "The whole channel",
+          "Posting and sharing content on the business page",
+          "$3,000"
+        ],
+        [
+          "Newsletter",
+          "No customer base",
+          "500 subscribers plus a monthly send",
+          "500 subscribers",
+          "Register form on the site, list building",
+          "$1,000"
+        ],
+        [
+          "Referral",
+          "None today",
+          "500 clicks per month",
+          "500 visitors",
+          "Publishing content and articles on relevant websites",
+          "$4,000"
+        ],
+        [
+          "Direct · brand",
+          "No branding",
+          "1,000 visits per month",
+          "1,000 clicks",
+          "Brand exposure, building converting brand traffic",
+          "$5,000"
+        ]
+      ],
+      "total": {
+        "label": "TOTAL",
+        "value": "$24,000"
+      },
+      "tracking": [],
+      "suspend": [
+        "filled columns"
+      ],
+      "sources": [
+        "s17",
+        "s17 notes",
+        "trainer guide block 5"
+      ],
+      "words": {
+        "max": 148,
+        "why": "slide 17's work plan table, six columns and six rows, word for word"
+      }
+    },
+    {
+      "id": "S17C",
+      "chapter": "ch4",
+      "template": "client",
+      "variant": "pair",
+      "locked": "client",
+      "step": {
+        "verb": "Client",
+        "icon": "speech"
+      },
+      "minutes": 4,
+      "coach": {
+        "kind": "practice",
+        "tip": "Every figure in the plan has to name the evidence that produced it.",
+        "tipDrafted": true
+      },
+      "lead": "You present this plan to a client. Answer three questions.",
+      "instruction": "Choose your reply.",
+      "pilotCopy": [
+        "lead (the framing is invented)",
+        "instruction",
+        "the client lines and the wrong replies (built from the hands-on practice and the s17 notes)"
+      ],
+      "hint": "Pick the reply you could defend.",
+      "photo": {
+        "src": "assets/img/temp/ch4-work-plan.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch4-work-plan.md"
+      },
+      "ground": {
+        "kind": "blur"
+      },
+      "situations": [
+        {
+          "id": "t1",
+          "text": "Where does the $8,000 for PPC come from?",
+          "why": "Round-number budgets nobody can defend. Price it off the bid data.",
+          "trackingId": "M2L2_S17C_1",
+          "options": [
+            {
+              "id": "a",
+              "label": "It is the round number we usually start with",
+              "correct": false,
+              "feedback": "Round-number budgets nobody can defend. Price it off the bid data."
+            },
+            {
+              "id": "b",
+              "label": "From the bid data in our keyword spreadsheet and what we estimated competitors spend",
+              "correct": true,
+              "feedback": "Round-number budgets nobody can defend. Price it off the bid data."
+            },
+            {
+              "id": "c",
+              "label": "It is our best estimate of what PPC needs",
+              "correct": false,
+              "feedback": "Round-number budgets nobody can defend. Price it off the bid data."
+            }
+          ]
+        },
+        {
+          "id": "t2",
+          "text": "Is everything in the $24,000?",
+          "why": "The total never includes management time. Say it before the client asks.",
+          "trackingId": "M2L2_S17C_2",
+          "options": [
+            {
+              "id": "a",
+              "label": "Yes, everything is included",
+              "correct": false,
+              "feedback": "The total never includes management time. Say it before the client asks."
+            },
+            {
+              "id": "b",
+              "label": "No: managing the plan, monitoring, optimisation, vendor management, graphics, design, hosting and security are outside it",
+              "correct": true,
+              "feedback": "The total never includes management time. Say it before the client asks."
+            },
+            {
+              "id": "c",
+              "label": "Only the design is missing",
+              "correct": false,
+              "feedback": "The total never includes management time. Say it before the client asks."
+            }
+          ]
+        },
+        {
+          "id": "t3",
+          "text": "This line names no evidence. What happens to it?",
+          "why": "A plan line that cannot name its evidence gets you fired in month three.",
+          "trackingId": "M2L2_S17C_3",
+          "options": [
+            {
+              "id": "a",
+              "label": "It comes out of the plan",
+              "correct": true,
+              "feedback": "A plan line that cannot name its evidence gets you fired in month three."
+            },
+            {
+              "id": "b",
+              "label": "We keep it and check it later",
+              "correct": false,
+              "feedback": "A plan line that cannot name its evidence gets you fired in month three."
+            },
+            {
+              "id": "c",
+              "label": "We lower its budget",
+              "correct": false,
+              "feedback": "A plan line that cannot name its evidence gets you fired in month three."
+            }
+          ]
+        }
+      ],
+      "tracking": [
+        {
+          "id": "M2L2_S17C_1",
+          "type": "choice",
+          "correctResponse": "b",
+          "scored": false,
+          "bloom": "Apply",
+          "result": "graded"
+        },
+        {
+          "id": "M2L2_S17C_2",
+          "type": "choice",
+          "correctResponse": "b",
+          "scored": false,
+          "bloom": "Apply",
+          "result": "graded"
+        },
+        {
+          "id": "M2L2_S17C_3",
+          "type": "choice",
+          "correctResponse": "a",
+          "scored": false,
+          "bloom": "Apply",
+          "result": "graded"
+        }
+      ],
+      "sources": [
+        "s17",
+        "s17 notes",
+        "L2 hands-on practice steps 7, 8, 9 and \"Where people get stuck\""
+      ]
+    },
+    {
+      "id": "WB4",
+      "chapter": "ch4",
+      "template": "workbookStop",
+      "step": {
+        "verb": "Workbook",
+        "icon": "workbook"
+      },
+      "minutes": 12,
+      "presentation": true,
+      "coach": {
+        "kind": "workbook",
+        "tip": "Price each row off your own data, then say out loud what the total does not include.",
+        "tipDrafted": true
+      },
+      "instruction": "Workbook time · Part 4 of 4",
+      "line": "Go back to your workbook tab and fill 4. The work plan: three rows, where each budget came from, what the total leaves out, and the line with no evidence.",
+      "again": "Closed the tab?",
+      "part": 4,
+      "image": {
+        "src": "assets/img/temp/workbook-stop.jpg",
+        "alt": "A laptop on a desk with the workbook page open.",
+        "prompt": "assets/img/prompts/workbook-stop.md",
+        "temp": true,
+        "position": "50% 50%"
+      },
+      "ground": {
+        "kind": "darkblur",
+        "tone": "soft"
+      },
+      "photo": {
+        "src": "assets/img/temp/workbook-stop.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/workbook-stop.md"
+      },
+      "handoff": {
+        "activity": "dm-m2l2-selfstudy",
+        "href": "@links.workbook",
+        "newTab": true,
+        "rel": "noopener noreferrer"
+      },
+      "openFeedback": "The workbook is open in a new tab. This lesson keeps your place.",
+      "pilotCopy": [
+        "instruction",
+        "line",
+        "again",
+        "openFeedback"
+      ],
+      "tracking": [],
+      "suspend": [
+        "opened"
+      ],
+      "sources": [
+        "workbook section \"4. The work plan\"",
+        "L2 hands-on practice steps 6 to 9"
+      ]
+    },
+    {
+      "id": "W6",
+      "chapter": "ch5",
+      "template": "opener",
+      "step": {
+        "verb": "Overview",
+        "icon": "overview"
+      },
+      "minutes": 1,
+      "presentation": true,
+      "coach": {
+        "kind": "idea",
+        "tip": "Commit to an answer before you see it. The commitment is what makes the answer stick.",
+        "tipDrafted": true
+      },
+      "squareIcon": "route",
+      "instruction": "Simulations and scenarios",
+      "lead": "Three real situations from the source lecture. Commit to an answer before the answer appears.",
+      "points": [
+        {
+          "icon": "compass"
+        },
+        {
+          "icon": "coin"
+        },
+        {
+          "icon": "users"
+        },
+        {
+          "icon": "key-idea"
+        }
+      ],
+      "photo": {
+        "src": "assets/img/temp/ch5-simulations.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch5-simulations.md"
+      },
+      "ground": {
+        "kind": "full"
+      },
+      "tracking": [],
+      "sources": [
+        "s19",
+        "s19 notes"
+      ]
+    },
+    {
+      "id": "S20",
+      "chapter": "ch5",
+      "template": "caseFile",
+      "locked": "caseFile",
+      "step": {
+        "verb": "Case 1",
+        "icon": "compass"
+      },
+      "minutes": 6,
+      "coach": {
+        "kind": "practice",
+        "tip": "Look at the demand first: does it exist, and what shape does it have?",
+        "tipDrafted": true
+      },
+      "eyebrow": "Simulation one",
+      "title": "An industrial product, for the international market",
+      "facts": [
+        "A company produces a high-tech industrial product for the international market.",
+        "It has four direct competitors, each with thousands of monthly visitors and marketing budgets in the thousands of dollars.",
+        "The company itself gets about 1,000 monthly views and only a few leads from potential customers.",
+        "Its product is technologically superior and has a real technological edge.",
+        "Initial keyword research shows high demand on technological keywords, with a long tail."
+      ],
+      "instruction": "What is the optimal strategy?",
+      "second": "What are the correct courses of action?",
+      "pilotCopy": [
+        "the three answer buttons SEO, PPC, Social (the three answers of the source lecture)",
+        "hint"
+      ],
+      "hint": "Commit to one answer, then press Check.",
+      "photo": {
+        "src": "assets/img/temp/ch5-simulations.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch5-simulations.md"
+      },
+      "ground": {
+        "kind": "blur"
+      },
+      "options": [
+        {
+          "id": "seo",
+          "label": "SEO",
+          "correct": true,
+          "feedback": "The demand already exists and has a long tail."
+        },
+        {
+          "id": "ppc",
+          "label": "PPC",
+          "correct": false,
+          "feedback": "The demand already exists and has a long tail."
+        },
+        {
+          "id": "social",
+          "label": "Social",
+          "correct": false,
+          "feedback": "The demand already exists and has a long tail."
+        }
+      ],
+      "answer": {
+        "title": "Answer: SEO",
+        "bullets": [
+          "With the help of the company's own people, produce a large volume of content aimed at the market's demand.",
+          "Run a proper keyword research first, then direct the team to create content that answers that demand."
+        ],
+        "keyLine": "Content compounds while a budget gap does not close.",
+        "small": "It will take months, at the very least."
+      },
+      "tracking": [
+        {
+          "id": "M2L2_S20_1",
+          "type": "choice",
+          "correctResponse": "a",
+          "scored": false,
+          "bloom": "Evaluate",
+          "result": "graded"
+        }
+      ],
+      "sources": [
+        "s20",
+        "s21",
+        "s20 notes",
+        "s21 notes"
+      ],
+      "words": {
+        "max": 134,
+        "why": "slides 20 and 21: the case and its answer word for word"
+      }
+    },
+    {
+      "id": "S22",
+      "chapter": "ch5",
+      "template": "caseFile",
+      "locked": "caseFile",
+      "step": {
+        "verb": "Case 2",
+        "icon": "coin"
+      },
+      "minutes": 6,
+      "coach": {
+        "kind": "practice",
+        "tip": "One line in the case changes how much you can pay to win a customer. Find it.",
+        "tipDrafted": true
+      },
+      "eyebrow": "Simulation two",
+      "title": "A new product, in a competitive domestic market",
+      "facts": [
+        "A company is launching a new product into Israel's competitive market. The product is genuinely valuable and offers significant advantages.",
+        "There is no customer awareness of the new product in the domestic market.",
+        "Direct competitors receive thousands of organic users per month, while offering an inferior product at a higher price. No budgets are allocated to marketing.",
+        "The product has focused keywords with search volumes of about 10,000 per month in the domestic market.",
+        "The product is ongoing: a single purchase guarantees additional revenue over an extended period."
+      ],
+      "instruction": "What is the optimal strategy?",
+      "second": "What does the recurring revenue change about the answer?",
+      "pilotCopy": [
+        "the three answer buttons SEO, PPC, Social (the three answers of the source lecture)",
+        "hint"
+      ],
+      "hint": "Commit to one answer, then press Check.",
+      "photo": {
+        "src": "assets/img/temp/ch5-simulations.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch5-simulations.md"
+      },
+      "ground": {
+        "kind": "blur"
+      },
+      "options": [
+        {
+          "id": "seo",
+          "label": "SEO",
+          "correct": false,
+          "feedback": "The demand is focused, and the recurring revenue pays for the click many times over."
+        },
+        {
+          "id": "ppc",
+          "label": "PPC",
+          "correct": true,
+          "feedback": "The demand is focused, and the recurring revenue pays for the click many times over."
+        },
+        {
+          "id": "social",
+          "label": "Social",
+          "correct": false,
+          "feedback": "The demand is focused, and the recurring revenue pays for the click many times over."
+        }
+      ],
+      "answer": {
+        "title": "Answer: PPC",
+        "bullets": [
+          "Why wait, when you can generate income and take market share immediately?",
+          "It requires some financial resources, but it will show a profit."
+        ],
+        "keyLine": "The recurring revenue line is the clue.",
+        "compare": {
+          "label": "Same question, opposite answer",
+          "items": [
+            "The demand is focused, not long-tail",
+            "The competitors are not defending with budget",
+            "The customer lifetime value is high"
+          ]
+        },
+        "small": "PPC stops the day the money stops. Fund SEO in parallel from month one."
+      },
+      "tracking": [
+        {
+          "id": "M2L2_S22_1",
+          "type": "choice",
+          "correctResponse": "b",
+          "scored": false,
+          "bloom": "Evaluate",
+          "result": "graded"
+        }
+      ],
+      "sources": [
+        "s22",
+        "s23",
+        "s22 notes",
+        "s23 notes"
+      ],
+      "words": {
+        "max": 167,
+        "why": "slides 22 and 23: the case and its answer word for word"
+      }
+    },
+    {
+      "id": "S24",
+      "chapter": "ch5",
+      "template": "caseFile",
+      "locked": "caseFile",
+      "step": {
+        "verb": "Case 3",
+        "icon": "users"
+      },
+      "minutes": 6,
+      "coach": {
+        "kind": "practice",
+        "tip": "Every tool you learned so far measures demand that already exists. What if there is none?",
+        "tipDrafted": true
+      },
+      "eyebrow": "Simulation three",
+      "title": "A pre-investment startup, with no demand",
+      "facts": [
+        "A local startup with a five-person team, selling a service to a community, before any significant investment.",
+        "The benefit of the service is that it has well-liked features that help the ordinary person.",
+        "There is no market awareness of the service or the solution.",
+        "There are no meaningful search volumes on focused keywords."
+      ],
+      "instruction": "Where do you go when there is nothing to capture?",
+      "second": "What would you refuse to spend money on here?",
+      "pilotCopy": [
+        "the three answer buttons SEO, PPC, Social (the three answers of the source lecture)",
+        "hint"
+      ],
+      "hint": "Commit to one answer, then press Check.",
+      "photo": {
+        "src": "assets/img/temp/ch5-simulations.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch5-simulations.md"
+      },
+      "ground": {
+        "kind": "blur"
+      },
+      "options": [
+        {
+          "id": "seo",
+          "label": "SEO",
+          "correct": false,
+          "feedback": "Every tool taught today measures existing demand, and here there is none."
+        },
+        {
+          "id": "ppc",
+          "label": "PPC",
+          "correct": false,
+          "feedback": "Every tool taught today measures existing demand, and here there is none."
+        },
+        {
+          "id": "social",
+          "label": "Social",
+          "correct": true,
+          "feedback": "Every tool taught today measures existing demand, and here there is none."
+        }
+      ],
+      "answer": {
+        "title": "Answer: Social",
+        "bullets": [
+          "If the solution is genuinely that beneficial to people, let them tell the world about it.",
+          "Market education is expensive. This is the situation where you have no alternative."
+        ],
+        "keyLine": "Without demand, SEO and PPC have nothing to capture."
+      },
+      "tracking": [
+        {
+          "id": "M2L2_S24_1",
+          "type": "choice",
+          "correctResponse": "c",
+          "scored": false,
+          "bloom": "Evaluate",
+          "result": "graded"
+        }
+      ],
+      "sources": [
+        "s24",
+        "s25",
+        "s24 notes",
+        "s25 notes"
+      ],
+      "words": {
+        "max": 101,
+        "why": "slides 24 and 25: the case and its answer word for word"
+      }
+    },
+    {
+      "id": "K5",
+      "chapter": "ch5",
+      "template": "twoCols",
+      "step": {
+        "verb": "The rule",
+        "icon": "key-idea"
+      },
+      "minutes": 2,
+      "presentation": true,
+      "coach": {
+        "kind": "idea",
+        "tip": "Ask of any channel: does it harvest demand that exists, or create demand that does not?",
+        "tipDrafted": true
+      },
+      "instruction": "The rule behind the three cases",
+      "pilotCopy": [
+        "instruction",
+        "the two column names Harvest and Create (from the s25 notes sentence)"
+      ],
+      "cols": [
+        {
+          "id": "harvest",
+          "icon": "search",
+          "title": "Harvest",
+          "text": "SEO and PPC harvest existing demand."
+        },
+        {
+          "id": "create",
+          "icon": "spark",
+          "title": "Create",
+          "text": "Social and content create it."
+        }
+      ],
+      "keyLine": "Creating demand costs far more than harvesting it.",
+      "photo": {
+        "src": "assets/img/temp/ch5-simulations.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch5-simulations.md"
+      },
+      "ground": {
+        "kind": "darkblur"
+      },
+      "tracking": [],
+      "sources": [
+        "s25 notes"
+      ]
+    },
+    {
+      "id": "S26",
+      "chapter": "ch5",
+      "template": "podcast",
+      "locked": "podcast",
+      "step": {
+        "verb": "Listen",
+        "icon": "volume"
+      },
+      "minutes": 3,
+      "coach": {
+        "kind": "idea",
+        "tip": "Listen for the one you disagree with. The argument is the value.",
+        "tipDrafted": true
+      },
+      "eyebrow": "A few broad observations",
+      "instruction": "Listen: things worth arguing about",
+      "pilotCopy": [
+        "instruction",
+        "hint",
+        "the opening line and the closing line of the script"
+      ],
+      "hint": "Press Play and listen to the end. The transcript is beside the player.",
+      "ground": {
+        "kind": "dots"
+      },
+      "observations": [
+        "Market education is an expensive strategy. Where demand exists, concentrate on it and find a focused way to meet it.",
+        "Long-tail organic traffic takes a lot of time and a lot of newly created content. It is not a shortcut.",
+        "Competing against major players, monopolies or dominant players is hard. Think partnerships, a different business model, or a large budget.",
+        "Viral marketing and social networks are not stable or predictable business models.",
+        "Spread the investment across several marketing channels.",
+        "Build continuing synergy between the channels: social sharing helps SEO, organic optimisation helps paid keyword conversion, and so on.",
+        "It is difficult to get results if the website or the online activity does not have a clear purpose."
+      ],
+      "media": {
+        "$comment": "Phase 2: a silent placeholder from tools/make-placeholder-audio.mjs (it also writes the captions and the cue file from the script below). The real audio is produced separately and replaces assets/audio/p1.mp3, p1.en.vtt and p1.cues.json; then set temp false and duration from the cue file.",
+        "src": "assets/audio/p1.mp3",
+        "captions": [
+          {
+            "lang": "en",
+            "label": "English",
+            "src": "assets/audio/p1.en.vtt"
+          }
+        ],
+        "cues": "assets/audio/p1.cues.json",
+        "duration": 120,
+        "length": "2:00",
+        "temp": true
+      },
+      "podcast": {
+        "voices": {
+          "A": "reads each observation word for word from slide 26",
+          "B": "only asks the question the speaker notes ask; never adds a fact"
+        },
+        "note": "Two voices, no names, no faces. Voice A closes on the last observation as the bridge to Module 3.",
+        "script": [
+          {
+            "voice": "A",
+            "text": "A few broad observations, and things worth arguing about."
+          },
+          {
+            "voice": "A",
+            "obs": 1,
+            "text": "Market education is an expensive strategy. Where demand exists, concentrate on it and find a focused way to meet it."
+          },
+          {
+            "voice": "A",
+            "obs": 2,
+            "text": "Long-tail organic traffic takes a lot of time and a lot of newly created content. It is not a shortcut."
+          },
+          {
+            "voice": "A",
+            "obs": 3,
+            "text": "Competing against major players, monopolies or dominant players is hard. Think partnerships, a different business model, or a large budget."
+          },
+          {
+            "voice": "A",
+            "obs": 4,
+            "text": "Viral marketing and social networks are not stable or predictable business models."
+          },
+          {
+            "voice": "B",
+            "obs": 4,
+            "text": "Is virality really not a business model?"
+          },
+          {
+            "voice": "A",
+            "obs": 5,
+            "text": "Spread the investment across several marketing channels."
+          },
+          {
+            "voice": "A",
+            "obs": 6,
+            "text": "Build continuing synergy between the channels: social sharing helps SEO, organic optimisation helps paid keyword conversion, and so on."
+          },
+          {
+            "voice": "A",
+            "obs": 7,
+            "text": "It is difficult to get results if the website or the online activity does not have a clear purpose."
+          },
+          {
+            "voice": "A",
+            "obs": 7,
+            "text": "Next module you build that website."
+          }
+        ]
+      },
+      "tracking": [],
+      "suspend": [
+        "heard to the end"
+      ],
+      "sources": [
+        "s26",
+        "s26 notes",
+        "s37 (the closing line)"
+      ],
+      "words": {
+        "max": 121,
+        "why": "slide 26's seven observations stay on screen word for word, beside the player"
+      }
+    },
+    {
+      "id": "S26B",
+      "chapter": "ch5",
+      "template": "poll",
+      "locked": "poll",
+      "step": {
+        "verb": "Your view",
+        "icon": "speech"
+      },
+      "minutes": 1,
+      "coach": {
+        "kind": "idea",
+        "tip": "There is no clean answer here. Take a side and know why.",
+        "tipDrafted": true
+      },
+      "eyebrow": "Observation 4",
+      "quote": "Viral marketing and social networks are not stable or predictable business models.",
+      "instruction": "Where do you stand?",
+      "pilotCopy": [
+        "instruction",
+        "the three answers",
+        "the feedback line"
+      ],
+      "hint": "Choose one. Nothing here is scored.",
+      "options": [
+        {
+          "id": "agree",
+          "label": "Agree"
+        },
+        {
+          "id": "unsure",
+          "label": "Not sure"
+        },
+        {
+          "id": "disagree",
+          "label": "Disagree"
+        }
+      ],
+      "feedback": {
+        "any": "The author's view is on the slide. The argument is the value."
+      },
+      "photo": {
+        "src": "assets/img/temp/ch5-simulations.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch5-simulations.md"
+      },
+      "ground": {
+        "kind": "darkblur",
+        "tone": "soft"
+      },
+      "tracking": [],
+      "suspend": [
+        "the pick (not reported to SCORM)"
+      ],
+      "sources": [
+        "s26",
+        "s26 notes",
+        "s33 (the argument is the value)"
+      ]
+    },
+    {
+      "id": "W7",
+      "chapter": "ch6",
+      "template": "opener",
+      "step": {
+        "verb": "Overview",
+        "icon": "overview"
+      },
+      "minutes": 1,
+      "presentation": true,
+      "coach": {
+        "kind": "idea",
+        "tip": "This is what turns a work plan into something that can be optimised rather than just spent.",
+        "tipDrafted": true
+      },
+      "squareIcon": "filter",
+      "instruction": "The marketing funnel",
+      "lead": "Every source has a cost, every source has a value, and both have to be measurable per source.",
+      "points": [
+        {
+          "icon": "watch"
+        },
+        {
+          "icon": "gauge"
+        },
+        {
+          "icon": "chart"
+        },
+        {
+          "icon": "route"
+        }
+      ],
+      "photo": {
+        "src": "assets/img/temp/ch6-funnel.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch6-funnel.md"
+      },
+      "ground": {
+        "kind": "full"
+      },
+      "tracking": [],
+      "sources": [
+        "s27",
+        "s27 notes"
+      ]
+    },
+    {
+      "id": "V2",
+      "chapter": "ch6",
+      "template": "video",
+      "step": {
+        "verb": "Watch",
+        "icon": "watch"
+      },
+      "minutes": 3,
+      "coach": {
+        "kind": "idea",
+        "tip": "Follow one number through the funnel, then ask what a sale costs.",
+        "tipDrafted": true
+      },
+      "instruction": "Watch the video. Answer the questions when it stops.",
+      "pilotCopy": [
+        "instruction",
+        "the two stop questions and their answers (built from s28, s29 and their notes)"
+      ],
+      "title": "The funnel, and what a sale costs",
+      "showTitle": false,
+      "photo": {
+        "src": "assets/img/temp/ch6-funnel.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch6-funnel.md"
+      },
+      "ground": {
+        "kind": "darkblur"
+      },
+      "ghost": {
+        "type": "stop",
+        "target": "options-sweep",
+        "showMe": false
+      },
+      "media": {
+        "$comment": "Phase 2: a silent placeholder from tools/make-placeholder-video.mjs. The real film is produced separately and dropped in with the same contract as V1: v2.mp4, v2.en.vtt, v2.cues.json, v2-poster.jpg; then set temp false, add cues, and take duration and the stops from the cue file.",
+        "src": "assets/video/temp/v2-placeholder.mp4",
+        "poster": null,
+        "captions": [
+          {
+            "lang": "en",
+            "label": "English",
+            "src": "assets/video/temp/v2-placeholder.en.vtt"
+          }
+        ],
+        "duration": 90,
+        "length": "1:30",
+        "temp": true,
+        "captionPlaces": []
+      },
+      "stopLayout": {
+        "still": "left-40",
+        "panel": "right-60",
+        "feedbackIn": "feedback-row"
+      },
+      "stops": [
+        {
+          "id": "stop1",
+          "cueId": "stop1",
+          "storyboardTime": "0:45",
+          "t": 45,
+          "question": "To get 6 sales at these rates, how many impressions do you need?",
+          "options": [
+            {
+              "id": "a",
+              "label": "100",
+              "correct": false,
+              "feedback": "Work it backwards: 6 ÷ 0.6% = 1,000 impressions."
+            },
+            {
+              "id": "b",
+              "label": "600",
+              "correct": false,
+              "feedback": "Work it backwards: 6 ÷ 0.6% = 1,000 impressions."
+            },
+            {
+              "id": "c",
+              "label": "1,000",
+              "correct": true,
+              "feedback": "Six sales at 0.6% is 1,000 impressions. That is how a media budget gets sized."
+            }
+          ],
+          "tracking": {
+            "id": "M2L2_V2_1",
+            "type": "choice",
+            "correctResponse": "c",
+            "scored": false,
+            "bloom": "Apply",
+            "result": "graded"
+          }
+        },
+        {
+          "id": "stop2",
+          "cueId": "stop2",
+          "storyboardTime": "1:25",
+          "t": 85,
+          "question": "A sale costs $150 in marketing. The customer is worth $120. Does the channel work?",
+          "options": [
+            {
+              "id": "a",
+              "label": "Yes, if the creative is good",
+              "correct": false,
+              "feedback": "Creative cannot fix it: the sale costs more than the customer is worth."
+            },
+            {
+              "id": "b",
+              "label": "No, not at these numbers",
+              "correct": true,
+              "feedback": "At $120 a customer it does not, no matter how good the creative is."
+            }
+          ],
+          "tracking": {
+            "id": "M2L2_V2_2",
+            "type": "choice",
+            "correctResponse": "b",
+            "scored": false,
+            "bloom": "Evaluate",
+            "result": "graded"
+          }
+        }
+      ],
+      "advance": "after-video-end",
+      "production": {
+        "lengthTarget": "about 1:30: title card, four segments, brand end",
+        "titleCard": "The funnel, and what a sale costs",
+        "note": "Narration and keywords only from slides 28 and 29 and their speaker notes. Same visual setting as V1 (the small skincare brand studio).",
+        "segments": [
+          {
+            "n": 1,
+            "time": "0:05",
+            "narration": "The funnel is made up of the actions that users, or potential customers, have to take. It is the result of the marketing strategy, not a separate thing from it.",
+            "onScreen": [
+              "The funnel",
+              "The result of the strategy"
+            ]
+          },
+          {
+            "n": 2,
+            "time": "0:22",
+            "narration": "Impression. Engagement. Action. Goal fulfilled. Some users leave the funnel with every extra click or action you ask of them. Every extra step you add loses people, so a step has to earn its place. If you need six sales, work it backwards.",
+            "onScreen": [
+              "Impression 100%",
+              "Engagement 8%",
+              "Action 2%",
+              "Goal fulfilled 0.6%"
+            ],
+            "stopAfter": "stop1"
+          },
+          {
+            "n": 3,
+            "time": "0:47",
+            "narration": "All traffic sources bring value. Every one of them. Every traffic source has a cost, including the ones that look free. Content costs time and time costs money. Operate by a clear economic model, or you cannot tell a good channel from a bad one.",
+            "onScreen": [
+              "Every source has a cost",
+              "A clear economic model"
+            ]
+          },
+          {
+            "n": 4,
+            "time": "1:05",
+            "narration": "If a lead costs 30 dollars and one in five leads becomes a sale, a sale costs 150 dollars in marketing. If the customer is worth 400 dollars, the channel works.",
+            "onScreen": [
+              "$30 a lead",
+              "One in five",
+              "$150 a sale"
+            ],
+            "stopAfter": "stop2"
+          }
+        ]
+      },
+      "sources": [
+        "s28",
+        "s28 notes",
+        "s29",
+        "s29 notes"
+      ]
+    },
+    {
+      "id": "S28",
+      "chapter": "ch6",
+      "template": "funnelCalc",
+      "locked": "funnelCalc",
+      "step": {
+        "verb": "Calculate",
+        "icon": "gauge"
+      },
+      "minutes": 3,
+      "coach": {
+        "kind": "practice",
+        "tip": "Change the number of sales and watch how many impressions it takes to get there.",
+        "tipDrafted": true
+      },
+      "eyebrow": "What it actually is",
+      "instruction": "Set the sales you need, and read the funnel backwards.",
+      "pilotCopy": [
+        "instruction",
+        "hint",
+        "the stepper \"Sales you need\"",
+        "the label \"Illustrative rates\""
+      ],
+      "hint": "Use the plus and minus buttons, or type a number from 1 to 100.",
+      "ground": {
+        "kind": "dots"
+      },
+      "lines": [
+        "The funnel is made up of the actions that users, or potential customers, have to take. It is the result of the marketing strategy, not a separate thing from it.",
+        "Some users leave the funnel with every extra click or action you ask of them. That is the whole design constraint."
+      ],
+      "stages": [
+        {
+          "n": "01",
+          "name": "Impression",
+          "sub": "The ad, the result, the post is seen",
+          "rate": 100
+        },
+        {
+          "n": "02",
+          "name": "Engagement",
+          "sub": "A click. The first action they take",
+          "rate": 8
+        },
+        {
+          "n": "03",
+          "name": "Action",
+          "sub": "A form, a call, a step into the site",
+          "rate": 2
+        },
+        {
+          "n": "04",
+          "name": "Goal fulfilled",
+          "sub": "The conversion that pays for it all",
+          "rate": 0.6
+        }
+      ],
+      "stepper": {
+        "label": "Sales you need",
+        "value": 6,
+        "min": 1,
+        "max": 100
+      },
+      "ratesLabel": "Illustrative rates",
+      "keyLine": "Every extra step you add loses people, so a step has to earn its place.",
+      "tracking": [],
+      "suspend": [
+        "the number chosen"
+      ],
+      "sources": [
+        "s28",
+        "s28 notes"
+      ],
+      "words": {
+        "max": 119,
+        "why": "slide 28's two lines and its four-stage funnel word for word"
+      }
+    },
+    {
+      "id": "S30",
+      "chapter": "ch6",
+      "template": "dataTable",
+      "variant": "pair",
+      "locked": "dataTable",
+      "step": {
+        "verb": "Report",
+        "icon": "chart"
+      },
+      "minutes": 5,
+      "coach": {
+        "kind": "practice",
+        "tip": "Read two rows against each other. A cheap lead is not yet a cheap sale.",
+        "tipDrafted": true
+      },
+      "eyebrow": "The weekly report: one table, every source, every week",
+      "instruction": "Click a row of the table to answer.",
+      "pilotCopy": [
+        "instruction",
+        "hint",
+        "the three questions and the lines for rounds 1 and 2 (read off the table)"
+      ],
+      "hint": "Read the highlighted column, click a row, then press Check.",
+      "ground": {
+        "kind": "dots"
+      },
+      "head": [
+        "Source",
+        "No answer",
+        "Continued",
+        "Sale",
+        "Total",
+        "Cost",
+        "Cost / lead",
+        "Cost / sale"
+      ],
+      "rows": [
+        [
+          "Google Ads",
+          "40",
+          "35",
+          "12",
+          "87",
+          "$2,400",
+          "$27.60",
+          "$200"
+        ],
+        [
+          "Facebook leads",
+          "65",
+          "30",
+          "5",
+          "100",
+          "$1,500",
+          "$15.00",
+          "$300"
+        ],
+        [
+          "Campaign 04",
+          "18",
+          "12",
+          "3",
+          "33",
+          "$600",
+          "$18.20",
+          "$200"
+        ],
+        [
+          "Instagram",
+          "22",
+          "9",
+          "1",
+          "32",
+          "$350",
+          "$10.90",
+          "$350"
+        ],
+        [
+          "WhatsApp",
+          "6",
+          "15",
+          "8",
+          "29",
+          "·",
+          "·",
+          "·"
+        ],
+        [
+          "Direct",
+          "4",
+          "11",
+          "7",
+          "22",
+          "·",
+          "·",
+          "·"
+        ],
+        [
+          "Manual entry",
+          "3",
+          "8",
+          "4",
+          "15",
+          "·",
+          "·",
+          "·"
+        ]
+      ],
+      "total": [
+        "GRAND TOTAL",
+        "158",
+        "120",
+        "40",
+        "318",
+        "$4,850",
+        "$15.30",
+        "$121"
+      ],
+      "dotNote": "No media cost. The brand work and the sales time behind it were not free.",
+      "keyLine": "Cost per lead is what most people report. Cost per sale is what decides the budget.",
+      "situations": [
+        {
+          "id": "r1",
+          "text": "Which source brings the most leads?",
+          "column": 4,
+          "why": "Facebook leads: 100 leads in total, the most on the sheet.",
+          "trackingId": "M2L2_S30_1",
+          "options": [
+            {
+              "id": "a",
+              "label": "Google Ads",
+              "correct": false,
+              "feedback": "Facebook leads: 100 leads in total, the most on the sheet."
+            },
+            {
+              "id": "b",
+              "label": "Facebook leads",
+              "correct": true,
+              "feedback": "Facebook leads: 100 leads in total, the most on the sheet."
+            },
+            {
+              "id": "c",
+              "label": "Campaign 04",
+              "correct": false,
+              "feedback": "Facebook leads: 100 leads in total, the most on the sheet."
+            },
+            {
+              "id": "d",
+              "label": "Instagram",
+              "correct": false,
+              "feedback": "Facebook leads: 100 leads in total, the most on the sheet."
+            },
+            {
+              "id": "e",
+              "label": "WhatsApp",
+              "correct": false,
+              "feedback": "Facebook leads: 100 leads in total, the most on the sheet."
+            },
+            {
+              "id": "f",
+              "label": "Direct",
+              "correct": false,
+              "feedback": "Facebook leads: 100 leads in total, the most on the sheet."
+            },
+            {
+              "id": "g",
+              "label": "Manual entry",
+              "correct": false,
+              "feedback": "Facebook leads: 100 leads in total, the most on the sheet."
+            }
+          ]
+        },
+        {
+          "id": "r2",
+          "text": "Which source has the cheapest cost per lead?",
+          "column": 6,
+          "why": "Instagram: $10.90 a lead, the cheapest on the sheet.",
+          "trackingId": "M2L2_S30_2",
+          "options": [
+            {
+              "id": "a",
+              "label": "Google Ads",
+              "correct": false,
+              "feedback": "Instagram: $10.90 a lead, the cheapest on the sheet."
+            },
+            {
+              "id": "b",
+              "label": "Facebook leads",
+              "correct": false,
+              "feedback": "Instagram: $10.90 a lead, the cheapest on the sheet."
+            },
+            {
+              "id": "c",
+              "label": "Campaign 04",
+              "correct": false,
+              "feedback": "Instagram: $10.90 a lead, the cheapest on the sheet."
+            },
+            {
+              "id": "d",
+              "label": "Instagram",
+              "correct": true,
+              "feedback": "Instagram: $10.90 a lead, the cheapest on the sheet."
+            },
+            {
+              "id": "e",
+              "label": "WhatsApp",
+              "correct": false,
+              "feedback": "Instagram: $10.90 a lead, the cheapest on the sheet."
+            },
+            {
+              "id": "f",
+              "label": "Direct",
+              "correct": false,
+              "feedback": "Instagram: $10.90 a lead, the cheapest on the sheet."
+            },
+            {
+              "id": "g",
+              "label": "Manual entry",
+              "correct": false,
+              "feedback": "Instagram: $10.90 a lead, the cheapest on the sheet."
+            }
+          ]
+        },
+        {
+          "id": "r3",
+          "text": "And which has the most expensive cost per sale?",
+          "column": 7,
+          "why": "Cheap per lead, the worst on the sheet per sale.",
+          "trackingId": "M2L2_S30_3",
+          "options": [
+            {
+              "id": "a",
+              "label": "Google Ads",
+              "correct": false,
+              "feedback": "Cheap per lead, the worst on the sheet per sale."
+            },
+            {
+              "id": "b",
+              "label": "Facebook leads",
+              "correct": false,
+              "feedback": "Cheap per lead, the worst on the sheet per sale."
+            },
+            {
+              "id": "c",
+              "label": "Campaign 04",
+              "correct": false,
+              "feedback": "Cheap per lead, the worst on the sheet per sale."
+            },
+            {
+              "id": "d",
+              "label": "Instagram",
+              "correct": true,
+              "feedback": "Cheap per lead, the worst on the sheet per sale."
+            },
+            {
+              "id": "e",
+              "label": "WhatsApp",
+              "correct": false,
+              "feedback": "Cheap per lead, the worst on the sheet per sale."
+            },
+            {
+              "id": "f",
+              "label": "Direct",
+              "correct": false,
+              "feedback": "Cheap per lead, the worst on the sheet per sale."
+            },
+            {
+              "id": "g",
+              "label": "Manual entry",
+              "correct": false,
+              "feedback": "Cheap per lead, the worst on the sheet per sale."
+            }
+          ]
+        }
+      ],
+      "sourceIssue": "The s30 speaker notes and the trainer guide say Facebook leads has the cheapest cost per lead and the most expensive cost per sale. The table shows Instagram on both ($10.90 against $15.00 a lead; $350 against $300 a sale). The screen is built from the table. For the SME.",
+      "tracking": [
+        {
+          "id": "M2L2_S30_1",
+          "type": "choice",
+          "correctResponse": "b",
+          "scored": false,
+          "bloom": "Analyze",
+          "result": "graded"
+        },
+        {
+          "id": "M2L2_S30_2",
+          "type": "choice",
+          "correctResponse": "d",
+          "scored": false,
+          "bloom": "Analyze",
+          "result": "graded"
+        },
+        {
+          "id": "M2L2_S30_3",
+          "type": "choice",
+          "correctResponse": "d",
+          "scored": false,
+          "bloom": "Analyze",
+          "result": "graded"
+        }
+      ],
+      "sources": [
+        "s30",
+        "s30 notes"
+      ],
+      "keyLineWhy": "slide 30's own bottom line, word for word (16 words; the key line rule is 15)",
+      "words": {
+        "max": 105,
+        "why": "slide 30's table, eight columns and eight rows, word for word"
+      }
+    },
+    {
+      "id": "S32",
+      "chapter": "ch6",
+      "template": "infographic",
+      "locked": "infographic",
+      "step": {
+        "verb": "Map",
+        "icon": "route"
+      },
+      "minutes": 4,
+      "coach": {
+        "kind": "idea",
+        "tip": "Every element of the plan goes back to evidence you produced. If it cannot, it comes out.",
+        "tipDrafted": true
+      },
+      "eyebrow": "From research to a work plan",
+      "instruction": "Click an element of the plan to see where it comes from.",
+      "pilotCopy": [
+        "instruction",
+        "hint",
+        "the short names of the five research blocks",
+        "the strip (slide 31 in six words)"
+      ],
+      "hint": "Open at least four elements.",
+      "ground": {
+        "kind": "dots"
+      },
+      "ghost": {
+        "type": "elements"
+      },
+      "strip": {
+        "label": "The research defines:",
+        "items": [
+          "sources",
+          "allocation",
+          "timetable",
+          "resources",
+          "result model",
+          "measurement method"
+        ]
+      },
+      "left": [
+        {
+          "id": "one",
+          "title": "Component One",
+          "sub": "competition, market map"
+        },
+        {
+          "id": "two",
+          "title": "Component Two",
+          "sub": "demand, keyword data"
+        },
+        {
+          "id": "three",
+          "title": "Component Three",
+          "sub": "where we are"
+        },
+        {
+          "id": "four",
+          "title": "Component Four",
+          "sub": "goals"
+        },
+        {
+          "id": "principles",
+          "title": "The four principles",
+          "sub": ""
+        }
+      ],
+      "right": [
+        {
+          "id": "channels",
+          "title": "The marketing channels we want to operate in",
+          "from": [
+            "one"
+          ],
+          "text": "The nine channels, filtered by the market map"
+        },
+        {
+          "id": "ads",
+          "title": "Advertising budgets",
+          "from": [
+            "two",
+            "one"
+          ],
+          "text": "Bid data from the Keyword Planner, and competitor spend"
+        },
+        {
+          "id": "content",
+          "title": "Budgets for content creation and marketing materials",
+          "from": [
+            "one"
+          ],
+          "text": "The content volume the competitors are producing"
+        },
+        {
+          "id": "geo",
+          "title": "Geography",
+          "from": [
+            "two"
+          ],
+          "text": "The country data from the demand research"
+        },
+        {
+          "id": "messages",
+          "title": "Central messages",
+          "from": [
+            "one"
+          ],
+          "text": "The gap the market map showed"
+        },
+        {
+          "id": "audience",
+          "title": "Main target audience",
+          "from": [
+            "two",
+            "one"
+          ],
+          "text": "Who the demand data and the market map say is actually buying"
+        },
+        {
+          "id": "measure",
+          "title": "Tactics and strategies for monitoring and measuring",
+          "from": [
+            "principles"
+          ],
+          "text": "The four measurement principles, decided up front"
+        }
+      ],
+      "min": 4,
+      "keyLine": "If you cannot fill the right column, the line comes out.",
+      "tracking": [],
+      "suspend": [
+        "opened elements"
+      ],
+      "sources": [
+        "s31",
+        "s31 notes",
+        "s32",
+        "s32 notes"
+      ],
+      "words": {
+        "max": 104,
+        "why": "slide 32's seven elements word for word, joined to the five research blocks, under the slide 31 strip"
+      }
+    },
+    {
+      "id": "S32B",
+      "chapter": "ch6",
+      "template": "decision",
+      "variant": "fields",
+      "attempts": 2,
+      "step": {
+        "verb": "Match",
+        "icon": "arrows"
+      },
+      "minutes": 3,
+      "coach": {
+        "kind": "practice",
+        "tip": "For each element ask: which research produced the evidence for it?",
+        "tipDrafted": true
+      },
+      "instruction": "Choose where each element comes from.",
+      "pilotCopy": [
+        "hint",
+        "the two feedback lines"
+      ],
+      "hint": "Every element of the plan goes back to your research.",
+      "layout": "focus",
+      "header": "The work plan: what it has to contain",
+      "columns": [
+        {
+          "id": "a",
+          "label": "Advertising budgets",
+          "n": 1
+        },
+        {
+          "id": "b",
+          "label": "Geography",
+          "n": 2
+        },
+        {
+          "id": "c",
+          "label": "Central messages",
+          "n": 3
+        },
+        {
+          "id": "d",
+          "label": "Tactics for monitoring and measuring",
+          "n": 4
+        }
+      ],
+      "cards": [
+        {
+          "n": 1,
+          "text": "The gap the market map showed",
+          "column": "c",
+          "feedback": {
+            "correct": "Placed: this is the evidence that element comes from.",
+            "wrong": "Ask which part of your research produced this evidence."
+          }
+        },
+        {
+          "n": 2,
+          "text": "Bid data from the Keyword Planner, and competitor spend",
+          "column": "a",
+          "feedback": {
+            "correct": "Placed: this is the evidence that element comes from.",
+            "wrong": "Ask which part of your research produced this evidence."
+          }
+        },
+        {
+          "n": 3,
+          "text": "The four measurement principles, decided up front",
+          "column": "d",
+          "feedback": {
+            "correct": "Placed: this is the evidence that element comes from.",
+            "wrong": "Ask which part of your research produced this evidence."
+          }
+        },
+        {
+          "n": 4,
+          "text": "The country data from the demand research",
+          "column": "b",
+          "feedback": {
+            "correct": "Placed: this is the evidence that element comes from.",
+            "wrong": "Ask which part of your research produced this evidence."
+          }
+        }
+      ],
+      "advance": "after-check",
+      "ground": {
+        "kind": "dots"
+      },
+      "tracking": [
+        {
+          "id": "M2L2_S32B_1",
+          "type": "matching",
+          "correctResponse": "1.c,2.a,3.d,4.b",
+          "scored": false,
+          "bloom": "Apply",
+          "result": "graded"
+        }
+      ],
+      "sources": [
+        "s32"
+      ]
+    },
+    {
+      "id": "S33",
+      "chapter": "ch6",
+      "template": "poll",
+      "variant": "list",
+      "locked": "poll",
+      "step": {
+        "verb": "Discuss",
+        "icon": "speech"
+      },
+      "minutes": 2,
+      "coach": {
+        "kind": "idea",
+        "tip": "There is no clean answer. Whichever you choose, start collecting data today.",
+        "tipDrafted": true
+      },
+      "eyebrow": "Measuring the value of our traffic sources",
+      "instruction": "What are our goals, first and foremost?",
+      "pilotCopy": [
+        "the two answers (the two halves of the third slide line)",
+        "the feedback for \"immediate goals\"",
+        "hint"
+      ],
+      "hint": "Choose one. Nothing here is scored.",
+      "list": [
+        "A more complex goal needs more time and more resources, and measuring it gets harder and more sophisticated.",
+        "Immediate goals and simple analytics, against long-term goals and CRM or ERP systems.",
+        "If we do not start collecting data today, we cannot analyse it in the future."
+      ],
+      "listNote": "the slide has four lines; the first is the question and stands as the heading, so the screen does not say it twice",
+      "options": [
+        {
+          "id": "now",
+          "label": "Immediate goals, simple analytics",
+          "feedback": "Start here, and start collecting data today."
+        },
+        {
+          "id": "long",
+          "label": "Long-term goals, CRM or ERP",
+          "feedback": "A more complex goal needs more time and more resources, and measuring it gets harder and more sophisticated."
+        }
+      ],
+      "keyLine": "The cheapest hour a marketer ever spends is the one before the campaign starts.",
+      "photo": {
+        "src": "assets/img/temp/ch6-funnel.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch6-funnel.md"
+      },
+      "ground": {
+        "kind": "blur"
+      },
+      "tracking": [],
+      "suspend": [
+        "the pick (not reported to SCORM)"
+      ],
+      "sources": [
+        "s33",
+        "s33 notes"
+      ],
+      "words": {
+        "max": 67,
+        "why": "slide 33's lines word for word beside the question"
+      }
+    },
+    {
+      "id": "K6",
+      "chapter": "ch6",
+      "template": "closing",
+      "variant": "quote",
+      "step": {
+        "verb": "Close",
+        "icon": "flag"
+      },
+      "minutes": 1,
+      "presentation": true,
+      "endOfChapter": true,
+      "coach": {
+        "kind": "idea",
+        "tip": "The website, the list and the brand are yours. Every channel should point at them.",
+        "tipDrafted": true
+      },
+      "instruction": "The closing thought",
+      "pilotCopy": [
+        "instruction"
+      ],
+      "keyLine": "The focus of all activity across all channels is on our core assets.",
+      "line": "The website, the list and the brand. Everything else is rented.",
+      "photo": {
+        "src": "assets/img/temp/ch6-funnel.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch6-funnel.md"
+      },
+      "ground": {
+        "kind": "darkblur"
+      },
+      "tracking": [],
+      "sources": [
+        "s34",
+        "s34 notes"
+      ]
+    },
+    {
+      "id": "W8",
+      "chapter": "ch7",
+      "template": "opener",
+      "step": {
+        "verb": "Overview",
+        "icon": "overview"
+      },
+      "minutes": 1,
+      "presentation": true,
+      "coach": {
+        "kind": "idea",
+        "tip": "Five questions, pass mark 80. You can retake the check.",
+        "tipDrafted": true
+      },
+      "squareIcon": "flag",
+      "instruction": "Wrap-up",
+      "lead": "A short check, the summary, and your home practice.",
+      "points": [
+        {
+          "icon": "check"
+        },
+        {
+          "icon": "list"
+        },
+        {
+          "icon": "document"
+        }
+      ],
+      "photo": {
+        "src": "assets/img/temp/ch7-wrap-up.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch7-wrap-up.md"
+      },
+      "ground": {
+        "kind": "full"
+      },
+      "tracking": [],
+      "sources": [
+        "work order section 4, W8 (new)"
+      ],
+      "pilotCopy": [
+        "instruction",
+        "lead"
+      ]
+    },
+    {
+      "id": "CHK",
+      "chapter": "ch7",
+      "template": "check",
+      "step": {
+        "verb": "Check",
+        "icon": "check"
+      },
+      "minutes": 6,
+      "coach": {
+        "kind": "locked"
+      },
+      "instruction": "Choose one answer.",
+      "reviewInstruction": "Your answers, with feedback",
+      "pilotCopy": [
+        "the five questions and their answers (work order)",
+        "the feedback line of every answer (written from the deck, the notes and the practice PDF)"
+      ],
+      "layout": "wide",
+      "items": [
+        {
+          "id": "i1",
+          "trackingId": "M2L2_CHK_1",
+          "stem": "Which line belongs in the third column of the insight table for Geographical location?",
+          "options": [
+            {
+              "id": "a",
+              "label": "Countries and regions",
+              "correct": false,
+              "feedback": "That is a possible value: what you read off the data."
+            },
+            {
+              "id": "b",
+              "label": "Where the market is, and where we should be focusing our activity",
+              "correct": true,
+              "feedback": "The third column is the insight: a decision you take from the data."
+            },
+            {
+              "id": "c",
+              "label": "Number of websites and webpages",
+              "correct": false,
+              "feedback": "That is a possible value, for digital asset scope."
+            },
+            {
+              "id": "d",
+              "label": "From Google: empirical quantitative data",
+              "correct": false,
+              "feedback": "That is a possible value, for consumer demand."
+            }
+          ]
+        },
+        {
+          "id": "i2",
+          "trackingId": "M2L2_CHK_2",
+          "stem": "A line in your work plan cannot name the evidence that produced it. What happens to it?",
+          "options": [
+            {
+              "id": "a",
+              "label": "Keep it and mark it as a guess",
+              "correct": false,
+              "feedback": "A guess is still a line with no evidence. It comes out."
+            },
+            {
+              "id": "b",
+              "label": "It comes out of the plan",
+              "correct": true,
+              "feedback": "A row with no evidence comes out of the plan."
+            },
+            {
+              "id": "c",
+              "label": "Move it to the end",
+              "correct": false,
+              "feedback": "Its place in the plan does not give it evidence."
+            },
+            {
+              "id": "d",
+              "label": "Halve its budget",
+              "correct": false,
+              "feedback": "A smaller budget is still a budget nobody can defend."
+            }
+          ]
+        },
+        {
+          "id": "i3",
+          "trackingId": "M2L2_CHK_3",
+          "stem": "When does the tracking go in?",
+          "options": [
+            {
+              "id": "a",
+              "label": "After the first results",
+              "correct": false,
+              "feedback": "Data you did not collect before the results cannot be analysed."
+            },
+            {
+              "id": "b",
+              "label": "When the budget is approved",
+              "correct": false,
+              "feedback": "Approval is not the moment. The tracking goes in before the campaign."
+            },
+            {
+              "id": "c",
+              "label": "Before the campaign starts",
+              "correct": true,
+              "feedback": "Nobody sets up tracking retroactively."
+            },
+            {
+              "id": "d",
+              "label": "At the end of the quarter",
+              "correct": false,
+              "feedback": "By then the data you did not collect is gone."
+            }
+          ]
+        },
+        {
+          "id": "i4",
+          "trackingId": "M2L2_CHK_4",
+          "stem": "SEO and PPC harvest existing demand. Which situation calls for creating demand?",
+          "options": [
+            {
+              "id": "a",
+              "label": "High search volume, weak competitors",
+              "correct": false,
+              "feedback": "That demand exists: harvest it with SEO or PPC."
+            },
+            {
+              "id": "b",
+              "label": "No search volume and no awareness of the solution",
+              "correct": true,
+              "feedback": "Without demand, SEO and PPC have nothing to capture."
+            },
+            {
+              "id": "c",
+              "label": "Long-tail technical demand",
+              "correct": false,
+              "feedback": "Long-tail demand exists: that is a case for SEO."
+            },
+            {
+              "id": "d",
+              "label": "A focused keyword with recurring revenue",
+              "correct": false,
+              "feedback": "Focused demand with recurring revenue is a case for PPC."
+            }
+          ]
+        },
+        {
+          "id": "i5",
+          "trackingId": "M2L2_CHK_5",
+          "stem": "A lead costs $40 and one lead in four becomes a sale. A customer is worth $120. Does the channel work?",
+          "options": [
+            {
+              "id": "a",
+              "label": "Yes, the leads are cheap",
+              "correct": false,
+              "feedback": "Cheap leads are not the test. Cost per sale decides."
+            },
+            {
+              "id": "b",
+              "label": "No: a sale costs $160",
+              "correct": true,
+              "feedback": "At $40 a lead and one in four, a sale costs $160. The customer is worth $120."
+            },
+            {
+              "id": "c",
+              "label": "Yes: a sale costs $120",
+              "correct": false,
+              "feedback": "Four leads at $40 make $160 a sale, not $120."
+            },
+            {
+              "id": "d",
+              "label": "You cannot tell without the cost per lead",
+              "correct": false,
+              "feedback": "You have it: $40 a lead, and one sale in four."
+            }
+          ]
+        }
+      ],
+      "advance": "after-all-items",
+      "shuffleOnRetake": true,
+      "ground": {
+        "kind": "dots"
+      },
+      "tracking": [
+        {
+          "id": "M2L2_CHK_1",
+          "type": "choice",
+          "correctResponse": "b",
+          "scored": true,
+          "bloom": "Understand",
+          "result": "graded"
+        },
+        {
+          "id": "M2L2_CHK_2",
+          "type": "choice",
+          "correctResponse": "b",
+          "scored": true,
+          "bloom": "Understand",
+          "result": "graded"
+        },
+        {
+          "id": "M2L2_CHK_3",
+          "type": "choice",
+          "correctResponse": "c",
+          "scored": true,
+          "bloom": "Understand",
+          "result": "graded"
+        },
+        {
+          "id": "M2L2_CHK_4",
+          "type": "choice",
+          "correctResponse": "b",
+          "scored": true,
+          "bloom": "Apply",
+          "result": "graded"
+        },
+        {
+          "id": "M2L2_CHK_5",
+          "type": "choice",
+          "correctResponse": "b",
+          "scored": true,
+          "bloom": "Apply",
+          "result": "graded"
+        }
+      ],
+      "sources": [
+        "s8, s9 (item 1)",
+        "s32 notes, hands-on practice step 9 (item 2)",
+        "s12, s12 notes (item 3)",
+        "s25, s25 notes (item 4)",
+        "s29 (item 5; the numbers are new, the method is the slide's)"
+      ]
+    },
+    {
+      "id": "CHKR",
+      "chapter": "ch7",
+      "template": "result",
+      "presentation": true,
+      "step": {
+        "verb": "Score",
+        "icon": "gauge"
+      },
+      "minutes": 1,
+      "coach": {
+        "kind": "review",
+        "tip": "Missed one? Open its chapter from the link, then retake the check.",
+        "tipDrafted": true
+      },
+      "instruction": "{x} of {n} right ({p} of 100). Pass mark: 80.",
+      "from": "CHK",
+      "pilotCopy": [
+        "the passed and not-passed lines",
+        "the short names of the missed items"
+      ],
+      "passed": {
+        "chip": "Passed",
+        "text": "You can turn research into a plan and say what a sale costs."
+      },
+      "notPassed": {
+        "chip": "Not passed yet",
+        "text": "Review, then retake the check."
+      },
+      "reviewLabel": "Review Chapter {n}",
+      "missed": [
+        {
+          "item": "i1",
+          "stem": "The third column",
+          "text": "Value or insight",
+          "screen": "K1"
+        },
+        {
+          "item": "i2",
+          "stem": "A line with no evidence",
+          "text": "Evidence for every line",
+          "screen": "S17C"
+        },
+        {
+          "item": "i3",
+          "stem": "When the tracking goes in",
+          "text": "Measure before the campaign",
+          "screen": "V1"
+        },
+        {
+          "item": "i4",
+          "stem": "Creating demand",
+          "text": "Harvest or create",
+          "screen": "K5"
+        },
+        {
+          "item": "i5",
+          "stem": "What a sale costs",
+          "text": "The economic principle",
+          "screen": "V2"
+        }
+      ],
+      "ringAlt": "{p} of 100",
+      "photo": {
+        "src": "assets/img/temp/ch7-wrap-up.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch7-wrap-up.md"
+      },
+      "ground": {
+        "kind": "darkblur"
+      },
+      "tracking": [],
+      "suspend": [
+        "attempt",
+        "lastScore",
+        "passed"
+      ],
+      "sources": [
+        "the template's result screen (S21R)"
+      ]
+    },
+    {
+      "id": "S35",
+      "chapter": "ch7",
+      "template": "stages",
+      "variant": "summary",
+      "step": {
+        "verb": "Summary",
+        "icon": "list"
+      },
+      "minutes": 3,
+      "presentation": true,
+      "coach": {
+        "kind": "idea",
+        "tip": "Read the four sentences as they are. Each one is a block of the lecture.",
+        "tipDrafted": true
+      },
+      "eyebrow": "Summary",
+      "instruction": "Four sentences that carry the whole lecture",
+      "pilotCopy": [
+        "the button"
+      ],
+      "more": "nextSentence",
+      "stages": [
+        "Before any other online marketing activity, the first step is market research, to understand the nature of the market, the customers and the competitors.",
+        "Gathering and analysing data is what forms the basis for genuinely understanding our market.",
+        "We can create a strategy and a work plan only after a market analysis that accounts for the competitors, the market's attributes, and the organisation's ability to respond.",
+        "We then formulate and manage a work plan that builds a marketing funnel with a range of powerful, quantifiable traffic sources."
+      ],
+      "board": {
+        "nodes": [
+          {
+            "id": "c1",
+            "n": "01",
+            "title": "Competition",
+            "status": "done"
+          },
+          {
+            "id": "c2",
+            "n": "02",
+            "title": "Demand",
+            "status": "done"
+          },
+          {
+            "id": "c3",
+            "n": "03",
+            "title": "Where we are",
+            "status": "done"
+          },
+          {
+            "id": "c4",
+            "n": "04",
+            "title": "Our goals",
+            "status": "done"
+          }
+        ]
+      },
+      "ground": {
+        "kind": "blur"
+      },
+      "photo": {
+        "src": "assets/img/temp/ch7-wrap-up.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch7-wrap-up.md"
+      },
+      "tracking": [],
+      "sources": [
+        "s35",
+        "s35 notes"
+      ],
+      "words": {
+        "max": 95,
+        "why": "slide 35's four sentences word for word, with the four-node board"
+      }
+    },
+    {
+      "id": "S36",
+      "chapter": "ch7",
+      "template": "homeStop",
+      "locked": "homeStop",
+      "step": {
+        "verb": "Home practice",
+        "icon": "document"
+      },
+      "minutes": 2,
+      "coach": {
+        "kind": "workbook",
+        "tip": "The fourth instruction is the standard: every line names its evidence.",
+        "tipDrafted": true
+      },
+      "eyebrow": "Home practice · Due before Module 3",
+      "instruction": "Open the home practice",
+      "pilotCopy": [
+        "instruction",
+        "line",
+        "openFeedback"
+      ],
+      "steps": [
+        "Complete the eight-dimension insight table for your own business, with a required insight written in the third column of every row.",
+        "Write three goals, each with a number and a date. Not “more sales”.",
+        "Build the full work plan in the shape of the example: area, current status, goal, gap, required action, budget. Six rows minimum, and a total.",
+        {
+          "keyLine": "Every line of it names the evidence from your own research that produced it.",
+          "rest": "A line with no evidence comes out."
+        },
+        "Draw your weekly report table with your own traffic sources in the first column, even though it is empty. You will fill it in from Module 6 onward."
+      ],
+      "line": "Upload the four files to the course.",
+      "image": {
+        "src": "assets/img/temp/workbook-stop.jpg",
+        "alt": "A laptop on a desk with the workbook page open.",
+        "prompt": "assets/img/prompts/workbook-stop.md",
+        "temp": true,
+        "position": "50% 50%"
+      },
+      "handoff": {
+        "activity": "dm-m2l2-home",
+        "href": "@links.homework",
+        "newTab": true,
+        "rel": "noopener noreferrer"
+      },
+      "openFeedback": "The home practice is open in a new tab. This lesson keeps your place.",
+      "ground": {
+        "kind": "darkblur",
+        "tone": "soft"
+      },
+      "photo": {
+        "src": "assets/img/temp/workbook-stop.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/workbook-stop.md"
+      },
+      "tracking": [],
+      "suspend": [
+        "opened"
+      ],
+      "sources": [
+        "s36",
+        "s36 notes",
+        "L2 home practice"
+      ],
+      "words": {
+        "max": 121,
+        "why": "slide 36's five instructions word for word"
+      }
+    },
+    {
+      "id": "S38",
+      "chapter": "ch7",
+      "template": "poll",
+      "variant": "reflect",
+      "locked": "poll",
+      "step": {
+        "verb": "Reflect",
+        "icon": "lightbulb"
+      },
+      "minutes": 2,
+      "coach": {
+        "kind": "idea",
+        "tip": "Name the hardest component now. It is where your home practice needs the most time.",
+        "tipDrafted": true
+      },
+      "instruction": "Which of the four components will be hardest in your own market?",
+      "pilotCopy": [
+        "hint",
+        "the coach line"
+      ],
+      "hint": "Choose one. Nothing here is scored.",
+      "options": [
+        {
+          "id": "c1",
+          "label": "Competition"
+        },
+        {
+          "id": "c2",
+          "label": "Demand"
+        },
+        {
+          "id": "c3",
+          "label": "Where we are"
+        },
+        {
+          "id": "c4",
+          "label": "Our goals"
+        }
+      ],
+      "after": {
+        "title": "Module 3 Lesson 1, WordPress and the landing page",
+        "text": "Bring the work plan. The first page you build comes straight off it.",
+        "coach": "Still unclear? Ask the coach."
+      },
+      "finishes": true,
+      "photo": {
+        "src": "assets/img/temp/ch7-wrap-up.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch7-wrap-up.md"
+      },
+      "ground": {
+        "kind": "blur"
+      },
+      "tracking": [],
+      "suspend": [
+        "the pick (not reported to SCORM)"
+      ],
+      "sources": [
+        "s37",
+        "s38",
+        "s38 notes"
+      ]
+    },
+    {
+      "id": "END",
+      "chapter": "ch7",
+      "template": "end",
+      "step": {
+        "verb": "Finish",
+        "icon": "finish"
+      },
+      "presentation": true,
+      "minutes": 0,
+      "coach": {
+        "kind": "hello",
+        "tip": "Keep the work plan. Module 3 builds the pages it names.",
+        "tipDrafted": true
+      },
+      "instruction": "Lesson complete",
+      "accent": "complete",
+      "sub": "Strategy and Research: Building the Plan · Module 2 · Lesson 2",
+      "passed": {
+        "chip": "Passed"
+      },
+      "notPassed": {
+        "chip": "Not passed yet",
+        "hint": "You can retake the check in Wrap-up at any time."
+      },
+      "next": "See you in Module 3 Lesson 1, WordPress and the landing page.",
+      "homework": {
+        "href": "@links.homework"
+      },
+      "pilotCopy": [
+        "instruction",
+        "the status chips and the retake hint (the template's)"
+      ],
+      "advance": "none",
+      "tracking": [],
+      "photo": {
+        "src": "assets/img/temp/ch7-wrap-up.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "prompt": "assets/img/prompts/ch7-wrap-up.md"
+      },
+      "sources": [
+        "s39",
+        "the template's end screen"
       ]
     }
   ]

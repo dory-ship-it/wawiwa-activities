@@ -1,0 +1,283 @@
+# DM M2 L2 self-study lesson: Phase 2 report
+
+Chapters 4 to 7 (deck slides 13 to 39) and the V1 film drop-in. 16 Nov 2026.
+Nothing is committed and nothing is pushed. No other lesson folder and no workbook was touched.
+
+Review page: http://localhost:8140/review.html (48 screens, all seven chapters).
+Shots of every state of the new screens: `planning/shots-p2/` (93 shots and 16 contact sheets `_sheet-N.png`).
+
+## 1. What was built
+
+| Chapter | Screens |
+|---|---|
+| 4. From analysis to a work plan | W5, S14, S15, S15B, S16, S17, S17C, WB4 |
+| 5. Simulations | W6, S20, S22, S24, K5, S26, S26B |
+| 6. The marketing funnel | W7, V2, S28, S30, S32, S32B, S33, K6 |
+| 7. Wrap-up | W8, CHK, CHKR, S35, S36, S38, END |
+
+30 new screens; the lesson is now 48 screens. Slide 18 (the break) is dropped. No chapter label shows a block number and no screen shows minutes.
+
+**V1 drop-in.** The four files from `M2L2-V1-film` are in `assets/video/` (v1.mp4, v1.en.vtt, v1.cues.json, v1-poster.jpg). Captions are on by default. The two stops are read from the cue file (42.06 s and 84.16 s); `npm run check` fails if the content and the cue file disagree. The stop questions and feedback are unchanged. (The V1 section of REPORT-P1.md that speaks of draft captions and no poster is superseded by this.)
+
+**New templates** (`src/templates/dm2.js`, styles in the "Phase 2" part of `src/dm.css`), one kind of practice each:
+
+| Screen | Practice | The slide's structure kept |
+|---|---|---|
+| S14 | checklist (toggle each row, Done) | the eight challenges as one vertical list, slide order and wording |
+| S15 | reveal table | the three-column table, nine rows; "Taught in" visible from the start |
+| S15B | three rounds, one try each | (built from the table's middle column) |
+| S16 | stages shown one by one | four stages left, the "Managing expectations" box right |
+| S17 | column builder | the six-column table with its TOTAL row, values in dollars |
+| S17C | client scenario (chat) | (built from the practice PDF and the s17 notes) |
+| S20, S22, S24 | case file, commit, reveal | the case as the slide's bullet list, the answer slide's bullets |
+| K5 | two columns (dark, no coral) | two columns |
+| S26 | podcast with captions and transcript | the seven observations as a numbered list |
+| S26B, S33, S38 | poll (neutral) | S33 beside the slide's lines |
+| V2 | video with two stops | (placeholder film) |
+| S28 | calculator | the two lines and the four-stage funnel |
+| S30 | live data table, three rounds | the table exactly (8 columns, 7 sources and GRAND TOTAL) and its bottom line |
+| S32 | interactive infographic | slide 32's two columns, joined to the research blocks |
+| S32B | match (the template's "fields") | |
+| CHK, CHKR, END | the template's scored check, result and end | |
+| S35 | sentences one by one, with the four-node board all ticked | the four sentences as a numbered list |
+| S36 | home practice stop | the five instructions as a numbered list |
+
+Openers W5 to W8 use the W3/W4 opener with an icon in the weighted square (clipboard, route, funnel, flag).
+
+## 2. Source issue for the SME (S30)
+
+The slide 30 speaker notes and the trainer guide say: "Facebook leads produce the most leads and the cheapest cost per lead, and the most expensive cost per sale."
+The table on the slide shows something else:
+
+| | Cost / lead | Cost / sale |
+|---|---|---|
+| Facebook leads | $15.00 | $300 |
+| Instagram | $10.90 (the cheapest) | $350 (the most expensive) |
+
+The same notes then say "Instagram looks cheap per lead at 10.9 and is the worst channel on the sheet at 350 a sale", which agrees with the table. The screen is built from the table: round 2 and round 3 both answer Instagram. Facebook leads is right only for round 1 (most leads, 100). Someone should correct the notes or the table.
+
+## 3. Where a screen is not exactly the work order, and why
+
+1. **Openers W5 to W8: icons, not a word list.** The work order gives a list ("Challenges · Channels · Method · The plan"). In review round 2 Noy asked W3 and W4 to keep the icons only because the words felt unnecessary, and the uniform look wins: W5 to W8 show the icons under the line, no words. The words are one line of JSON away (`points[].title`) if Noy wants them back.
+2. **S14: the feedback line sits in the closing card, not in the feedback strip.** Eight rows at the template's minimum target height (44 px) fill the screen, so after Done the key line and the "most hands" line appear together in one closing card at the bottom centre, the same way S05 and S06 close.
+3. **S15: the key line and its small line sit in the strip between Previous and Next**, under the table, for the same reason (nine rows of 44 px).
+4. **S16: the key line is the first half of the box's first sentence.** The slide says "Do not expect to analyse all of the data, or to understand every meaning in it." The work order asks for "Do not expect to analyse all of the data." as the key line; the second half of the sentence is not shown.
+5. **S30: the key line has 16 words** (the rule is 15). It is the slide's own bottom line word for word, as ordered. `npm run check` lists it as a warning.
+6. **S30: the question of round 3** starts with "And" as ordered; the "no media cost" note opens in the side panel when a "·" cell is clicked.
+7. **S33: the slide has four lines; three are in the list.** The first line of the slide is the question itself and is the heading, so it is not printed twice. The heading keeps the slide's wording, "What are our goals, first and foremost?" (the work order wrote "your goals").
+8. **S33 and S26B: the slide's last line** ("Take it as an open discussion. There is no clean answer and the argument is the value.") is a trainer instruction and is not shown; "The argument is the value." is in the S26B feedback as ordered.
+9. **CHKR: the missed items and their "Review Chapter N" links show only when the check is not passed**, as in the template. A learner who passes with four of five sees the score and "Passed" only.
+10. **S32: Component Three and Component Four have no connector**, because slide 32 traces no element to them. They are in the left column as ordered.
+11. **S28: counts that are not whole numbers are rounded** (impressions up, the middle stages to the nearest): 7 sales gives 1,167, 93, 23, 7.
+12. **S26 podcast, S26B, S33, S38: the pick can be changed** (neutral, nothing is scored or sent).
+13. **END photo.** The deck's cover photo puts a face under the centred text, so END uses the wrap-up placeholder ground until the real image exists.
+
+## 4. pilotCopy: every new string (for Noy)
+
+Everything else on the new screens is the deck, the speaker notes, the trainer guide or the practice PDFs.
+
+### Instructions, hints and framing
+
+| Screen | What | Text |
+|---|---|---|
+| S14 | instruction | "Mark the challenges you have already seen in a job." |
+| S14 | hint | "Mark at least one, then press Done." |
+| S14 | toggle label | "I have seen this" |
+| S15 | instruction | "Open each channel to see what it does for the plan." |
+| S15 | hint | "Click a channel to open its line. Open all nine." |
+| S15 | closed cell | "Click to see" |
+| S15B | instruction | "Pick the channel." |
+| S15B | hint | "Recall what each channel does for the plan." |
+| S15B | the three questions | as in the work order |
+| S16 | button | "Show the next stage" |
+| S17 | instruction | "Fill the plan column by column." |
+| S17 | hint | "Click the next column header to fill it, left to right." |
+| S17 | the five source chips | as in the work order |
+| S17C | framing | "You present this plan to a client. Answer three questions." |
+| S17C | instruction | "Choose your reply." |
+| S17C | hint | "Pick the reply you could defend." |
+| S17C | labels | "Client", "You" |
+| S17C | the client's questions, the replies and the pushbacks | as in the work order |
+| WB4 | heading, line | "Workbook time · Part 4 of 4", "Go back to your workbook tab and fill 4. The work plan: three rows, where each budget came from, what the total leaves out, and the line with no evidence." |
+| S20, S22, S24 | the three answers | "SEO", "PPC", "Social" |
+| S20, S22, S24 | hint | "Commit to one answer, then press Check." |
+| S20, S22, S24 | labels | "Case file", "Your answer" |
+| S20 | feedback | "The demand already exists and has a long tail." |
+| S22 | feedback | "The demand is focused, and the recurring revenue pays for the click many times over." |
+| S22 | strip | "Same question, opposite answer": "The demand is focused, not long-tail", "The competitors are not defending with budget", "The customer lifetime value is high" (from the s23 notes) |
+| S24 | feedback | "Every tool taught today measures existing demand, and here there is none." (s25 notes) |
+| K5 | heading, column names | "The rule behind the three cases", "Harvest", "Create" |
+| S26 | instruction | "Listen: things worth arguing about" |
+| S26 | hint | "Press Play and listen to the end. The transcript is beside the player." |
+| S26 | script, opening line | "A few broad observations, and things worth arguing about." (the slide's title and the chapter's line) |
+| S26 | script, the question | "Is virality really not a business model?" (s26 notes) |
+| S26 | script, closing line | "Next module you build that website." |
+| S26 | player labels | "Play", "Pause", "Transcript", "Captions", "Voice one", "Voice two", "You can move ahead only to the part you have already heard." |
+| S26B | instruction, answers | "Where do you stand?", "Agree", "Not sure", "Disagree" |
+| S26B | feedback | "The author's view is on the slide. The argument is the value." |
+| S26B, S33, S38 | hint | "Choose one. Nothing here is scored." |
+| V2 | instruction | "Watch the video. Answer the questions when it stops." |
+| V2 | the two stop questions, answers and feedback | as in the work order |
+| S28 | instruction | "Set the sales you need, and read the funnel backwards." |
+| S28 | hint | "Use the plus and minus buttons, or type a number from 1 to 100." |
+| S28 | labels | "Sales you need", "Illustrative rates", "One sale fewer", "One sale more" |
+| S30 | instruction | "Click a row of the table to answer." |
+| S30 | hint | "Read the highlighted column, click a row, then press Check." |
+| S30 | the three questions | as in the work order |
+| S30 | feedback, round 1 | "Facebook leads: 100 leads in total, the most on the sheet." |
+| S30 | feedback, round 2 | "Instagram: $10.90 a lead, the cheapest on the sheet." |
+| S30 | feedback, round 3 | "Cheap per lead, the worst on the sheet per sale." |
+| S32 | instruction | "Click an element of the plan to see where it comes from." |
+| S32 | hint | "Open at least four elements." |
+| S32 | labels | "Your research", "The work plan", "Where it comes from" |
+| S32 | research blocks | "Component One: competition, market map", "Component Two: demand, keyword data", "Component Three: where we are", "Component Four: goals", "The four principles" |
+| S32 | strip | "The research defines: sources, allocation, timetable, resources, result model, measurement method" |
+| S32B | instruction | "Choose where each element comes from." |
+| S32B | hint | "Every element of the plan goes back to your research." |
+| S32B | feedback | "Placed: this is the evidence that element comes from.", "Ask which part of your research produced this evidence." |
+| S33 | the two answers | "Immediate goals, simple analytics", "Long-term goals, CRM or ERP" |
+| S33 | feedback, immediate | "Start here, and start collecting data today." |
+| K6 | heading | "The closing thought" |
+| W8 | title, line | "Wrap-up", "A short check, the summary, and your home practice." |
+| S35 | heading, button | "Four sentences that carry the whole lecture" (s35 notes), "Show the next sentence" |
+| S36 | heading and button | "Open the home practice" |
+| S36 | line | "Upload the four files to the course." |
+| S36 | after the button | "The home practice is open in a new tab. This lesson keeps your place." |
+| S38 | coach line | "Still unclear? Ask the coach." |
+| END | heading, chips, hint | "Lesson complete", "Passed", "Not passed yet", "You can retake the check in Wrap-up at any time." |
+| END | next line | "See you in Module 3 Lesson 1, WordPress and the landing page." |
+| all rounds | buttons | "Check", "Choose first", "Next round", "Next question", "Done" |
+
+### The check (CHK) and its result (CHKR)
+
+The five questions and their answers are the work order's. The feedback line of every answer is new, written from the sources:
+
+| Item | Answer | Feedback |
+|---|---|---|
+| 1 | a | "That is a possible value: what you read off the data." |
+| 1 | b (right) | "The third column is the insight: a decision you take from the data." |
+| 1 | c | "That is a possible value, for digital asset scope." |
+| 1 | d | "That is a possible value, for consumer demand." |
+| 2 | a | "A guess is still a line with no evidence. It comes out." |
+| 2 | b (right) | "A row with no evidence comes out of the plan." |
+| 2 | c | "Its place in the plan does not give it evidence." |
+| 2 | d | "A smaller budget is still a budget nobody can defend." |
+| 3 | a | "Data you did not collect before the results cannot be analysed." |
+| 3 | b | "Approval is not the moment. The tracking goes in before the campaign." |
+| 3 | c (right) | "Nobody sets up tracking retroactively." |
+| 3 | d | "By then the data you did not collect is gone." |
+| 4 | a | "That demand exists: harvest it with SEO or PPC." |
+| 4 | b (right) | "Without demand, SEO and PPC have nothing to capture." |
+| 4 | c | "Long-tail demand exists: that is a case for SEO." |
+| 4 | d | "Focused demand with recurring revenue is a case for PPC." |
+| 5 | a | "Cheap leads are not the test. Cost per sale decides." |
+| 5 | b (right) | "At $40 a lead and one in four, a sale costs $160. The customer is worth $120." |
+| 5 | c | "Four leads at $40 make $160 a sale, not $120." |
+| 5 | d | "You have it: $40 a lead, and one sale in four." |
+
+CHK: "Choose one answer.", "Your answers, with feedback", "Question {i} of {n}", "Next question", "Finish the check", "Next answer".
+CHKR: "{x} of {n} right ({p} of 100). Pass mark: 80.", "Passed": "You can turn research into a plan and say what a sale costs.", "Not passed yet": "Review, then retake the check.", "Review Chapter {n}", "Retake now". Missed items: "The third column / Value or insight", "A line with no evidence / Evidence for every line", "When the tracking goes in / Measure before the campaign", "Creating demand / Harvest or create", "What a sale costs / The economic principle".
+Coach during the check: "No hints during the check. I'm back after you finish it."
+
+### Coach tips (one per screen, drafted, at most 20 words)
+
+| Screen | Tip |
+|---|---|
+| W5 | "Four components are researched. This is where they turn into something a client can sign." |
+| S14 | "Think of a job you have had. Which of these eight did you already meet there?" |
+| S15 | "Read down the table, one line each. You do not need to count the channels or memorise them." |
+| S15B | "Each channel does a different job. Recall the middle column of the table." |
+| S16 | "Admitting the limits of your research makes you more useful to a client, not less." |
+| S17 | "Go column by column, not row by row. Each column comes from a component you already researched." |
+| S17C | "Every figure in the plan has to name the evidence that produced it." |
+| WB4 | "Price each row off your own data, then say out loud what the total does not include." |
+| W6 | "Commit to an answer before you see it. The commitment is what makes the answer stick." |
+| S20 | "Look at the demand first: does it exist, and what shape does it have?" |
+| S22 | "One line in the case changes how much you can pay to win a customer. Find it." |
+| S24 | "Every tool you learned so far measures demand that already exists. What if there is none?" |
+| K5 | "Ask of any channel: does it harvest demand that exists, or create demand that does not?" |
+| S26 | "Listen for the one you disagree with. The argument is the value." |
+| S26B | "There is no clean answer here. Take a side and know why." |
+| W7 | "This is what turns a work plan into something that can be optimised rather than just spent." |
+| V2 | "Follow one number through the funnel, then ask what a sale costs." |
+| S28 | "Change the number of sales and watch how many impressions it takes to get there." |
+| S30 | "Read two rows against each other. A cheap lead is not yet a cheap sale." |
+| S32 | "Every element of the plan goes back to evidence you produced. If it cannot, it comes out." |
+| S32B | "For each element ask: which research produced the evidence for it?" |
+| S33 | "There is no clean answer. Whichever you choose, start collecting data today." |
+| K6 | "The website, the list and the brand are yours. Every channel should point at them." |
+| W8 | "Five questions, pass mark 80. You can retake the check." |
+| CHKR | "Missed one? Open its chapter from the link, then retake the check." |
+| S35 | "Read the four sentences as they are. Each one is a block of the lecture." |
+| S36 | "The fourth instruction is the standard: every line names its evidence." |
+| S38 | "Name the hardest component now. It is where your home practice needs the most time." |
+| END | "Keep the work plan. Module 3 builds the pages it names." |
+
+The live coach is still not wired (offline tips only).
+
+## 5. Tracking and completion
+
+- 24 interactions in all (4 from Phase 1, 20 new): S15B 1 to 3, S17C 1 to 3, S20, S22, S24, V2 1 and 2, S30 1 to 3, S32B (matching), CHK 1 to 5.
+- Only the five items of the check are scored (20 points each, weighting 1). Pass mark 80: four of five passes. The first answer counts; a retake reshuffles the answers; the coach is locked during the check.
+- Completion by the template's rules: `lesson_status` is only ever `incomplete` or `passed`; passed is sticky; `score.raw` is the latest attempt.
+- Neutral, kept in suspend data only and never sent: S14, S15, S16, S17, S26, S26B, S28, S32, S33, S35, S36, S38.
+- The lesson is finished when the learner answers S38 (the last screen before END).
+
+## 6. Placeholders still in the lesson
+
+| What | Where | To replace |
+|---|---|---|
+| V2 film | `assets/video/temp/v2-placeholder.mp4` and `.en.vtt` (1:30, silent, stops at 0:45 and 1:25) | drop in `v2.mp4`, `v2.en.vtt`, `v2.cues.json`, `v2-poster.jpg` with the same contract as V1, then point `V2.media` at them (temp false, cues, duration from the cue file). The folder `M2L2-V2-film` already holds `v2.cues.json` and `v2.en.vtt` (duration 122.8 s, stops at 58.66 s and 98.76 s) but no `v2.mp4` yet, so it was not wired. |
+| S26 podcast | `assets/audio/p1.mp3` (2:00, silent), `p1.en.vtt`, `p1.cues.json`, made by `tools/make-placeholder-audio.mjs` from the script in the content (`S26.podcast.script`) | replace the three files with the same names; the cue file is `{ id, duration, items: [{ t, end, voice, obs, text }] }` (the player takes the caption and the highlighted observation from it); then set `S26.media.temp` false and `duration` |
+| 10 images | `assets/img/temp/*.jpg` (plain gradients) | each has its prompt in `assets/img/prompts/`. All ten prompts (the six of Phase 1 too) now describe one setting, the films': the bright studio of a small direct-to-consumer skincare brand (packing table, plain bottles, kraft parcels, laptop with a blurred store, phone on a small tripod), hands at work, no faces, names, logos or text. W7: parcels lined up from many to few. Workbook stops and the home practice: the same laptop-and-notebook frame. |
+
+**Before students see the V1 film:** the README in `M2L2-V1-film` says a person must check the commercial licence of the image and video models it was made with (Z-Image Turbo, Wan 2.2).
+
+## 7. Word budgets
+
+Template budgets: practice 35 words, presentation 45, feedback 20. 14 new screens are over the budget because the work order keeps the slide's text word for word. Each states its own limit and reason in the content (`words: { max, why }`) and `npm run check` lists it as a warning. Fullest view of each:
+
+| Screen | Words | Why |
+|---|---|---|
+| S14 | 119 | slide 14's eight challenges |
+| S15 | 149 | slide 15's table, nine rows and three columns |
+| S16 | 88 | slide 16's four stages and the box |
+| S17 | 148 | slide 17's work plan table |
+| S20 | 134 | slides 20 and 21, the case and its answer |
+| S22 | 167 | slides 22 and 23, the case and its answer |
+| S24 | 101 | slides 24 and 25, the case and its answer |
+| S26 | 121 | slide 26's seven observations |
+| S28 | 119 | slide 28's two lines and the funnel |
+| S30 | 105 | slide 30's table |
+| S32 | 104 | slide 32's seven elements and the research blocks |
+| S33 | 67 | slide 33's lines |
+| S35 | 95 | slide 35's four sentences |
+| S36 | 121 | slide 36's five instructions |
+
+(Phase 1's five, O3, S05, S06, K1 and K2, are unchanged.) No feedback line is over 20 words.
+
+## 8. Tests
+
+Last full run: 16 Nov 2026, after the last change.
+
+| Test | Result |
+|---|---|
+| `npm run check` | passed. Warnings only: the 19 screens over the standard word budget (5 from Phase 1, 14 new), the S30 key line of 16 words, the 2 temp video files of V2, the temp images |
+| `npm run test:fit` (1280x720 and 1024x576) | passed, 1456 checks: band, clipping, contrast, text at least 14 px, targets at least 44 px, the coach launcher and panel on every screen |
+| `npm run check:overflow` (1280x720, 1024x576, 1920x950) | 474 screen states, 0 problems. Run before the last change, which only narrowed the step discs in the top bar of the eight-step chapters; not run again after it |
+| `npm run walk` (keyboard only, all 48 screens) | passed, 382 checks. Walked with 9 wrong answers on purpose; the check ends on 4 of 5, score 80, passed |
+| `npm run test:scorm` | passed. 24 interactions, each sent once; weighting 1 for the five items of the check and 0 for practice; `lesson_status` only ever incomplete or passed, ending passed; `score.raw` 80; suspend data 1689 characters of 4096; resume lands on END |
+| `npm run test:review` | passed, 48 of 48 thumbnails |
+| `npm run package` | `dist/dm-m2l2-lesson-scorm12.zip`, 14.96 MB |
+
+Fixed on the way: the feedback card touched the content on 11 states (the screens that end in a feedback card now keep clear of a two-line card); text under 14 px and targets under 44 px on S14, S15, S16, S17, S17C, S26, S30, S32, S35 and S36; white text on the teal of the funnel's last stage (4.19:1, now on the darker teal); the coach launcher against the eight step discs of chapter 4 (the step discs of an eight-step chapter are 66 px wide instead of 76.8).
+
+Not tested: the package in a real LMS (Blossom), a screen reader, a phone or tablet, and the real V2 film and podcast audio (they do not exist yet).
+
+## 9. Open questions for Noy
+
+1. WB1 to WB4 still leave Next open (honour system). A small "I filled it" gate is possible if wanted.
+2. Openers W5 to W8: icons only (as W3, W4) or the work order's word list?
+3. CHKR: should a learner who passed with a miss also see the missed item and its review link?
+4. S30: who corrects the notes (or the table) for the Facebook leads / Instagram mismatch?
+5. The V2 film and the podcast audio are placeholders; the images are placeholders.

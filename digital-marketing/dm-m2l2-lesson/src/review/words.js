@@ -48,7 +48,27 @@ export function screenViews(s, content, { options = true } = {}) {
       ...s.dimensions.map((d) => [s.id + ' detail ' + d.id, [...(s.showList ? names : []), d.n, d.name, d.question, content.ui.dm.values, ...d.values, content.ui.dm.insight, d.insight, s.keyLine]])];
   }
   if (s.template === 'goalCards') return s.goals.map((g) => [s.id + ' ' + g.id + ' open', [s.eyebrow, ...s.goals.flatMap((x) => [x.n, x.title]), g.text, g.keyLine]]);
-  if (s.template === 'closing') return [[s.id, [...(s.questions || []), s.keyLine, s.line, ...s.board.nodes.map((n) => n.title)]]];
+  if (s.template === 'closing') return [[s.id, [...(s.questions || []), s.keyLine, s.line, ...(s.board?.nodes || []).map((n) => n.title)]]];
+  // Phase 2 templates (src/templates/dm2.js)
+  if (s.template === 'checklist') return [[s.id, [s.eyebrow, ...s.challenges.map((x) => x.text)]], [s.id + ' done', [s.eyebrow, ...s.challenges.map((x) => x.text), s.closing.keyLine]]];
+  if (s.template === 'revealTable') return [[s.id + ' all rows open', [s.eyebrow, ...s.head, ...s.rows.flatMap((r) => [r.channel, r.does, r.taught]), s.keyLine, s.small]]];
+  if (s.template === 'quiz') return s.situations.map((x) => [`${s.id} ${x.id}`, [x.text, ...opt(x.options.map((o) => o.label))]]);
+  if (s.template === 'client') return s.situations.map((x) => [`${s.id} ${x.id}`, [s.lead, x.text, x.why, ...opt(x.options.map((o) => o.label))]]);
+  if (s.template === 'stages') return [[s.id, [s.eyebrow, ...s.stages, ...(s.box ? [s.box.label, s.box.keyLine, ...s.box.lines] : []), ...(s.board?.nodes || []).map((n) => n.title)]]];
+  if (s.template === 'builder') return [[s.id + ' all filled', [s.eyebrow, ...s.columns.flatMap((c) => [c.label, c.chip]), ...s.rows.flat(), s.total.label, s.total.value]]];
+  if (s.template === 'caseFile') {
+    const file = [s.eyebrow, s.title, ...s.facts], a = s.answer;
+    return [[s.id + ' question', [...file, s.second, ...opt(s.options.map((o) => o.label))]],
+      [s.id + ' answer', [...file, a.title, ...a.bullets, a.keyLine, a.compare?.label, ...(a.compare?.items || []), a.small]]];
+  }
+  if (s.template === 'twoCols') return [[s.id, [...s.cols.flatMap((c) => [c.title, c.text]), s.keyLine]]];
+  if (s.template === 'podcast') return [[s.id, [s.eyebrow, ...s.observations]]];
+  if (s.template === 'poll') return [[s.id, [s.eyebrow, s.quote, ...(s.list || []), ...opt(s.options.map((o) => o.label))]],
+    [s.id + ' chosen', [s.eyebrow, s.quote, ...(s.list || []), s.keyLine, s.after?.title, s.after?.text, s.after?.coach, ...opt(s.options.map((o) => o.label))]]];
+  if (s.template === 'funnelCalc') return [[s.id, [s.eyebrow, ...s.lines, ...s.stages.flatMap((x) => [x.n, x.name, x.sub, String(x.rate)]), s.stepper.label, s.ratesLabel, s.keyLine]]];
+  if (s.template === 'dataTable') return s.situations.map((x, k) => [`${s.id} ${x.id}`, [s.eyebrow, x.text, ...s.head, ...s.rows.flat(), ...s.total, k === s.situations.length - 1 ? s.keyLine : null]]);
+  if (s.template === 'infographic') return s.right.map((r) => [`${s.id} ${r.id} open`, [s.eyebrow, s.strip.label, ...s.strip.items, content.ui.dm.research, content.ui.dm.plan, ...s.left.flatMap((l) => [l.title, l.sub]), ...s.right.map((x) => x.title), content.ui.dm.comesFrom, r.title, r.text, s.keyLine]]);
+  if (s.template === 'homeStop') return [[s.id, [s.eyebrow, ...s.steps.flatMap((x) => (typeof x === 'string' ? [x] : [x.keyLine, x.rest])), s.line]]];
   if (s.template === 'video') return [[s.id, [s.showTitle === false ? '' : s.title, s.guidingQuestion]], ...(s.stops || []).map((st) => [`${s.id} ${st.id}`, [st.question, ...opt(st.options.map((o) => o.label))]])];
   // FX4: S19 in three screens: the brief (S19A), the back question (S19C)
   if (s.template === 'handoff' && s.variant === 'brief') return [[s.id, [s.eyebrow, s.chip, s.text, ...s.steps.map((x) => x.text)]]];
@@ -162,6 +182,7 @@ export function screenFeedback(s, content) {
     ...(s.stops || []).flatMap((st) => st.options.map((o) => [`${s.id} ${st.id} option ${o.id}`, o.feedback])),
     ...Object.entries(s.states || {}).flatMap(([k, st]) => Object.entries(st).filter(([f, v]) => /Feedback$/.test(f) && typeof v === 'string').map(([f, v]) => [`${s.id} ${k}.${f}`, v])),
     // DM M2 L2: the lines a neutral task closes with, and a sort card's tag (shown on the placed card)
+    [s.id + ' closing line', s.closing?.line], [s.id + ' dotNote', s.dotNote],
     [s.id + ' closing ifGap', s.closing?.ifGap], [s.id + ' closing ifMissing', s.closing?.ifMissing?.text],
     ...(s.cards || []).filter((c) => c.tag).map((c) => [s.id + ' card ' + (c.id ?? c.n) + ' tag', c.tag]),
     ...(s.rows || []).filter((r) => r.feedback).flatMap((r) => Object.entries(r.feedback).map(([k, v]) => [`${s.id} ${r.id} ${k}`, v])),

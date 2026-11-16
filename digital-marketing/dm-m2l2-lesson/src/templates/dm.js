@@ -19,22 +19,22 @@
 // Shared parts: keyLine() (one sentence of the trainer's, in the quote style: a turquoise rule and larger
 // type; at most one per screen) and boardEl() (the four components).
 // Nothing here is graded or sent to the LMS: answers live in the screen's flags (suspend data) only.
-import { h, fmt, resolveLink, reducedMotion } from '../util.js?v=14cc3672';
-import { glyph, icon } from '../icons.js?v=14cc3672';
-import { layout, sheet, picture, arrowNav } from './stage.js?v=14cc3672';
+import { h, fmt, resolveLink, reducedMotion } from '../util.js?v=28bf4305';
+import { glyph, icon } from '../icons.js?v=28bf4305';
+import { layout, sheet, picture, arrowNav } from './stage.js?v=28bf4305';
 
 /* ---------- shared parts ---------- */
 // fill(el, ...children): replaceChildren without the empty ones (replaceChildren(null) would print "null")
-const fill = (el, ...children) => el.replaceChildren(...children.flat().filter((c) => c !== null && c !== undefined && c !== false));
+export const fill = (el, ...children) => el.replaceChildren(...children.flat().filter((c) => c !== null && c !== undefined && c !== false));
 export const keyLine = (text, kind = '') => h('figure', { class: ('d-keyline ' + kind).trim() }, h('p', {}, text));
 
-const headOf = (ctx, eyebrow = null, ...more) => h('div', { class: 'd-head' }, eyebrow ? h('p', { class: 'd-eyebrow' }, eyebrow) : null, ctx.zones.instruction, more);
+export const headOf = (ctx, eyebrow = null, ...more) => h('div', { class: 'd-head' }, eyebrow ? h('p', { class: 'd-eyebrow' }, eyebrow) : null, ctx.zones.instruction, more);
 // the band (the hint for screen readers; a feedback card when a screen has one), centred under the task
-const floatBand = (ctx, kind = '') => h('div', { class: ('w-float d-float ' + kind).trim() }, ctx.zones.band);
+export const floatBand = (ctx, kind = '') => h('div', { class: ('w-float d-float ' + kind).trim() }, ctx.zones.band);
 // what is still missing, for the line a twice-pressed locked Next shows
-const needLeft = (ctx, n) => ctx.need(n > 0 ? fmt(n === 1 ? ctx.ui.footer.needLeft1 : ctx.ui.footer.needLeft, { n }) : '');
+export const needLeft = (ctx, n) => ctx.need(n > 0 ? fmt(n === 1 ? ctx.ui.footer.needLeft1 : ctx.ui.footer.needLeft, { n }) : '');
 // the hand rests beside an element, never on its text (fx, fy: where in the element's box, 0 to 1)
-const beside = (el, fx, fy) => () => { const r = el.getBoundingClientRect(); return r.width ? { x: r.left + fx * r.width, y: r.top + fy * r.height } : null; };
+export const beside = (el, fx, fy) => () => { const r = el.getBoundingClientRect(); return r.width ? { x: r.left + fx * r.width, y: r.top + fy * r.height } : null; };
 
 // The four components on a line (slide 2). nodes: [{ id, n, title, status: done | now | next }].
 // tick: the node that gets its check now, with one short pop (none with reduced motion, none on a revisit).
@@ -497,6 +497,14 @@ export const goalCards = {
 export const closing = {
   mount(ctx) {
     const { screen, zones } = ctx;
+    // K6 (slide 34): the deck's closing quote alone, no board
+    if (screen.variant === 'quote') {
+      layout(ctx, 'dm-close', h('div', { class: 'd-close d-close-key d-close-quote' },
+        h('div', { class: 'd-head' }, zones.instruction), keyLine(screen.keyLine, 'd-keyline-xl'),
+        screen.line ? h('p', { class: 'd-close-line' }, screen.line) : null), floatBand(ctx, 'd-float-end'));
+      zones.setFeedback({ state: 'hint', text: '' });
+      return { unmount() {} };
+    }
     const board = boardEl(ctx, screen.board);
     const boardCard = h('div', { class: 'd-close-board' }, board.el);
     if (screen.variant === 'keyline') {

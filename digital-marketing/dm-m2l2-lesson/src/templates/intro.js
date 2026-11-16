@@ -24,11 +24,11 @@
 //                    term in bold, its line after it) with a check or a cross mark.
 // Title, module map, goals and key idea are presentation screens (screen.presentation): the engine
 // marks them done on arrival, so Next never locks. All text comes from the content.
-import { h } from '../util.js?v=14cc3672';
-import { glyph, icon } from '../icons.js?v=14cc3672';
-import { scaleOf } from '../ghost.js?v=14cc3672';
-import { letter } from '../tracking/index.js?v=14cc3672';
-import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst, buildUp } from './stage.js?v=14cc3672';
+import { h } from '../util.js?v=28bf4305';
+import { glyph, icon } from '../icons.js?v=28bf4305';
+import { scaleOf } from '../ghost.js?v=28bf4305';
+import { letter } from '../tracking/index.js?v=28bf4305';
+import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst, buildUp } from './stage.js?v=28bf4305';
 
 /* ---------- title (O1) ---------- */
 export const title = {
@@ -246,11 +246,12 @@ export const opener = {
     const end = screen.end ? h('p', { class: 'w-opener-end' }, screen.end) : null;
     // DM (W3, W4): the component's number with real weight, a large turquoise square beside the title
     // (screen.number), and its small label above the title (screen.label)
-    const head = screen.number
-      ? h('div', { class: 'd-opener-head' }, h('span', { class: 'd-opener-num', 'aria-hidden': 'true' }, screen.number),
+    // (Phase 2, W5 to W8: an icon in the square instead of a number, screen.squareIcon)
+    const head = screen.number || screen.squareIcon
+      ? h('div', { class: 'd-opener-head' }, h('span', { class: 'd-opener-num', 'aria-hidden': 'true' }, screen.number || icon(screen.squareIcon, { size: 96 })),
         h('div', { class: 'd-opener-title' }, screen.label ? h('p', { class: 'd-opener-label' }, screen.label) : null, zones.instruction))
       : zones.instruction;
-    layout(ctx, 'opener', h('section', { class: 'w-glass w-opener-card', dataset: screen.statement ? { kind: 'statement' } : screen.number ? { kind: 'numbered' } : {} },
+    layout(ctx, 'opener', h('section', { class: 'w-glass w-opener-card', dataset: screen.statement ? { kind: 'statement' } : screen.number || screen.squareIcon ? { kind: 'numbered' } : {} },
       head, lead, stops.length ? h('ul', { class: 'w-stops', 'aria-hidden': (screen.points || []).some((p) => p.title) ? null : 'true', dataset: { plain: String(!(screen.points || []).some((p) => p.text)), icons: String(!(screen.points || []).some((p) => p.title)) } }, stops) : null, end));
     if (!ctx.revisit) buildUp([lead, ...stops, end], { start: 150, step: 170 });
     return { unmount() {} };
