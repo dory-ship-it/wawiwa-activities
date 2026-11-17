@@ -3,10 +3,10 @@
 // index.html?screen=ID&review=1 at 1280 x 720, scaled to 25%), loaded only when it nears the viewport.
 // Under each: id, template, word count (red over 45). A click opens the screen full size in review
 // mode in a new tab. Filters: All, one chapter, Over word limit, Paths (PP1). Review-only strings live here.
-import { h, chapterNo, resolveChapterRefs } from '../util.js?v=28bf4305';
-import { reviewOrder } from '../engine.js?v=28bf4305';
-import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=28bf4305';
-import { JOURNEYS, variantOf } from '../adapt.js?v=28bf4305';
+import { h, chapterNo, resolveChapterRefs } from '../util.js?v=ec879c8d';
+import { reviewOrder } from '../engine.js?v=ec879c8d';
+import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=ec879c8d';
+import { JOURNEYS, variantOf } from '../adapt.js?v=ec879c8d';
 
 const root = document.getElementById('review');
 const res = await fetch(new URL('../../content/m2l2.json', import.meta.url), { cache: 'no-cache' }); // asked fresh on every load

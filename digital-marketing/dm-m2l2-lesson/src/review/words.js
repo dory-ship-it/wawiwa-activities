@@ -68,7 +68,7 @@ export function screenViews(s, content, { options = true } = {}) {
   if (s.template === 'funnelCalc') return [[s.id, [s.eyebrow, ...s.lines, ...s.stages.flatMap((x) => [x.n, x.name, x.sub, String(x.rate)]), s.stepper.label, s.ratesLabel, s.keyLine]]];
   if (s.template === 'dataTable') return s.situations.map((x, k) => [`${s.id} ${x.id}`, [s.eyebrow, x.text, ...s.head, ...s.rows.flat(), ...s.total, k === s.situations.length - 1 ? s.keyLine : null]]);
   if (s.template === 'infographic') return s.right.map((r) => [`${s.id} ${r.id} open`, [s.eyebrow, s.strip.label, ...s.strip.items, content.ui.dm.research, content.ui.dm.plan, ...s.left.flatMap((l) => [l.title, l.sub]), ...s.right.map((x) => x.title), content.ui.dm.comesFrom, r.title, r.text, s.keyLine]]);
-  if (s.template === 'homeStop') return [[s.id, [s.eyebrow, ...s.steps.flatMap((x) => (typeof x === 'string' ? [x] : [x.keyLine, x.rest])), s.line]]];
+  if (s.template === 'homeStop') return [[s.id, [s.eyebrow, ...s.steps, s.keyLine, s.line]]];
   if (s.template === 'video') return [[s.id, [s.showTitle === false ? '' : s.title, s.guidingQuestion]], ...(s.stops || []).map((st) => [`${s.id} ${st.id}`, [st.question, ...opt(st.options.map((o) => o.label))]])];
   // FX4: S19 in three screens: the brief (S19A), the back question (S19C)
   if (s.template === 'handoff' && s.variant === 'brief') return [[s.id, [s.eyebrow, s.chip, s.text, ...s.steps.map((x) => x.text)]]];

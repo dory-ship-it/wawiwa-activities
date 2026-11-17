@@ -298,12 +298,6 @@
 .w-stage[data-screen="S11B"] .w-main .w-instruction { font-size: 26px; line-height: 1.2; letter-spacing: -.2px; color: var(--wl-teal-ink); }
 .w-stage[data-screen="S11B"] .w-main .w-instruction .w-term { color: inherit; }
 
-/* ---------- The template's LP1 rule (the opener card on the left) is keyed to its own screens W4 and W6. This
-   lesson's W4 shares the id by chance: it stays centred, as W3, with the centred veil and the sharper photo,
-   until its real photo exists (then decide per photo). ---------- */
-.w-stage[data-screen="W4"] .w-main[data-layout="opener"] .w-opener-card[data-kind="numbered"] { left: 50%; transform: translate(-50%, -50%); }
-.w-stage[data-screen="W4"]:has(.w-main[data-layout="opener"]) .w-scene::after { background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(8, 20, 30, .5), rgba(8, 20, 30, .25)); }
-.w-stage[data-screen="W4"]:has(.w-main[data-layout="opener"]) .w-g-full { filter: blur(3px) saturate(1.05) brightness(.86); }
 .w-main[data-layout="sort-deck"] .w-drops[data-count="2"] .w-drop-cards { grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: 6px; }
 .w-main[data-layout="sort-deck"] .w-drops[data-count="2"] .w-placed { margin-top: 6px; font-size: 16.5px; line-height: 1.25; }
 .w-main[data-layout="sort-deck"] .w-drops[data-count="2"] .w-placed-tag { white-space: normal; overflow: visible; }
@@ -321,7 +315,7 @@
 .d2-small { margin: 0; font: 400 16px/1.4 var(--wl-font-ui); color: var(--wl-text-2); }
 .d2-box-label { margin: 0; font: 700 14px/normal var(--wl-font-label); letter-spacing: .05em; text-transform: uppercase; color: var(--wl-teal-ink); }
 .d2-panel { padding: 26px 30px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); box-shadow: var(--wl-panel-shadow); }
-.d2 .d2-panel .w-instruction, .d2-case-ask .w-instruction, .d2-poll-ask .w-instruction { margin: 0; font: 800 32px/1.15 var(--wl-font-ui); letter-spacing: -.6px; color: var(--wl-ink); }
+.d2 .d2-panel .w-instruction, .d2-case-ask .w-instruction, .d2-poll-ask .w-instruction { margin: 0; color: var(--wl-ink); }
 .d2-center { display: grid; justify-items: center; align-content: start; }
 .d2-prog { margin: 0; font: 700 14.5px/normal var(--wl-font-label); letter-spacing: .04em; color: var(--wl-teal-ink); }
 .d2-q { margin: 0; font: 700 25px/1.25 var(--wl-font-ui); letter-spacing: -.3px; color: var(--wl-ink); outline: none; }
@@ -431,16 +425,26 @@
 .d2-b-total td[data-filled="false"] { background: var(--wl-ivory); }
 
 /* ---------- S20, S22, S24: the case file and its answer ---------- */
-.d2-case { top: 26px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 36px; align-items: start; }
-.d2-file { display: grid; gap: 12px; padding: 24px 28px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); box-shadow: var(--wl-panel-shadow); }
+.d2-case { top: 22px; display: grid; grid-template-columns: minmax(0, 1.22fr) minmax(0, 1fr); gap: 40px; align-items: center; align-content: center; }
+/* after the answer: one centred column (the case folded to its title, the answer, then the lines beyond the slide) */
+.d2-case[data-view="answer"], .d2-case[data-view="case"] { grid-template-columns: minmax(0, 860px); justify-content: center; gap: 16px; }
+.d2-case[data-view="answer"] .d2-file { padding: 14px 22px; box-shadow: var(--wl-card-shadow); }
+.d2-case[data-view="answer"] .d2-file-title { font-size: 19px; letter-spacing: 0; }
+.d2-file-top { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.d2-file-top > div { display: grid; gap: 6px; }
+.d2-file-toggle { flex: none; margin: 0; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 16px; border: 1.92px solid var(--wl-navy); border-radius: 22px; background: var(--wl-white); font: 700 15.5px/normal var(--wl-font-ui); color: var(--wl-navy); cursor: pointer; }
+.d2-answer-more { display: grid; gap: 10px; justify-items: start; padding: 0 6px; }
+.d2-answer-more .d2-compare { border: 1px solid var(--wl-line); background: var(--wl-white); }
+.d2-answer-more .d2-compare li { background: var(--wl-neutral-bg); }
+.d2-answer-more .d2-small { font-size: 17px; color: var(--wl-ink); }
+.d2-file { display: grid; gap: 16px; padding: 28px 32px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); box-shadow: var(--wl-panel-shadow); }
 .d2-file-kicker { margin: 0; display: flex; align-items: center; gap: 8px; font: 700 14px/normal var(--wl-font-label); letter-spacing: .05em; text-transform: uppercase; color: var(--wl-teal-ink); }
 .d2-file-title { margin: 0; font: 800 25px/1.2 var(--wl-font-ui); letter-spacing: -.4px; color: var(--wl-ink); }
-.d2-bullets { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
-.d2-bullets li { position: relative; padding-left: 20px; font: 400 17.5px/1.38 var(--wl-font-ui); color: var(--wl-body-ink); }
+.d2-bullets { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.d2-bullets li { position: relative; padding-left: 20px; font: 400 16px/1.4 var(--wl-font-ui); color: var(--wl-body-ink); }
 .d2-bullets li::before { content: ""; position: absolute; left: 2px; top: .52em; width: 8px; height: 8px; border-radius: 50%; background: var(--wl-turquoise); }
-.d2-case-ask { display: grid; gap: 16px; padding: 26px 30px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); box-shadow: var(--wl-panel-shadow); }
-.d2-case-ask .w-instruction { font-size: 30px; }
-.d2-case-second { margin: 0; font: 600 20px/1.3 var(--wl-font-ui); color: var(--wl-teal-ink); }
+.d2-case-ask { display: grid; gap: 18px; padding: 30px 34px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); box-shadow: var(--wl-panel-shadow); }
+.d2-case-second { margin: 0; font: 400 18px/1.35 var(--wl-font-ui); color: var(--wl-text-2); }
 .d2-opts-row .d2-opt { justify-content: flex-start; min-height: 64px; font-size: 20px; font-weight: 700; }
 .d2-answer { display: grid; gap: 13px; animation: d-rise var(--wl-dur-fb) var(--wl-ease-enter); }
 .d2-answer-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
@@ -595,9 +599,15 @@
 .d2-home-steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
 .d2-home-steps li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 12px; align-items: start; font: 400 16.5px/1.38 var(--wl-font-ui); color: var(--wl-body-ink); }
 .d2-home-n { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-navy); font: 800 14px/1 var(--wl-font-ui); color: var(--wl-white); }
-.d2-home-key { display: grid; gap: 4px; }
+.d2-home-body > .d-keyline { margin-left: 38px; }
 .d2-home-foot { display: flex; align-items: center; gap: 22px; margin-top: 4px; }
 
+/* the number of a done component stays on its disc; a small check says it is done (O2, the four-node board) */
+.w-map-disc, .d-board-disc { position: relative; }
+.d-done-badge { position: absolute; right: 0; top: 0; width: 28px; height: 28px; display: grid; place-items: center; border: 2.5px solid var(--wl-white); border-radius: 50%; background: var(--wl-turquoise); color: var(--wl-o1-ground); }
+.d-board-disc .d-done-badge { width: 23px; height: 23px; border-width: 2px; }
+/* the workbook stops show the workbook's own first page, from its top left */
+.d-wb-img[src$=".png"] { object-position: 0 0; }
 /* K6: the closing quote alone */
 .d-close-quote { gap: 26px; }
 .d-close-quote .d-close-line { width: min(900px, 100%); padding-left: 37px; font-size: 24px; }
@@ -605,3 +615,45 @@
 .d-opener-num svg { width: 96px; height: 96px; }
 /* a chapter of eight steps under a long chapter name (From analysis to a work plan): the steps a little closer, so the bar's parts fit */
 .w-bar:has(li:nth-child(15)) .w-step { width: 66px; }
+/* HS1 (review, 16 Nov 2026): one heading. Every action or question heading is 38px / 800, by layout and never by
+   screen id. Not these: the case screen with a context line (S11B), the chapter openers, the video screens, the
+   title (O1), the map (O2), the closing key-line screens (their heading is a label) and END. */
+.w-stage .w-main .w-sheet-wb .w-instruction, .w-stage .w-main .d2 .w-instruction, .w-stage .w-main[data-layout="sort-deck"] .w-instruction,
+.w-stage .w-main .w-result-grid .w-instruction, .w-stage .w-main .w-sheet-fields .w-instruction { font: 800 38px/1.12 var(--wl-font-ui); letter-spacing: -.8px; }
+/* one heading position: a heading without an eyebrow starts where a heading under an eyebrow starts */
+.w-main > .d-head:not(:has(.d-eyebrow)):not(.d-dim-head) { padding-top: 28.6px; }
+/* (Noy, 16 Nov 2026) the workbook's own page inside a laptop, at every workbook stop and on the home practice: the
+   template's S19A frame (a dark bezel rounded at the top, the base under it) */
+.d-wb-grid { grid-template-columns: 430px minmax(0, 1fr); }
+.d-wb-shot, .d2-home-shot { position: relative; overflow: visible; height: auto; margin: 0 26px 18px; padding: 12px 12px 0; border: 0; border-radius: 16px 16px 0 0; background: var(--wl-coach-head); }
+.d-wb-shot .d-wb-img, .d2-home-shot .d-wb-img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: 0 0; border-radius: 4px 4px 0 0; }
+.d-wb-shot::after, .d2-home-shot::after { content: ""; position: absolute; left: -26px; right: -26px; bottom: -18px; height: 18px; border-radius: 0 0 20px 20px; background: var(--wl-line-strong); box-shadow: var(--wl-card-shadow); }
+.d2-home.d2-panel, .d2 > .d2-home { grid-template-columns: 340px minmax(0, 1fr); }
+/* EM1 (Noy, 16 Nov 2026: "empty, a little boring"; and: not one photo behind many screens). What fills a screen is
+   its own graphics, the template's answer for its S03: an icon in a turquoise disc on each row, a line that joins the
+   steps, and a faint turquoise edge on the white panel of a light screen. By block, never by screen id. */
+.d2-disc { flex: none; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-turquoise); color: var(--wl-o1-ground); box-shadow: 0 0 14px rgba(90, 179, 170, .45); }
+.w-stage[data-ground="dots"] :is(.d2-b, .d2-dt, .d2-dt-side, .d2-fn-left, .d2-box, .d2-pod-side, .d2-ig-cap:not([data-empty="true"]), .d-closing, .d-goal-panel, .d-qc[data-focus="active"]) {
+  box-shadow: var(--wl-float-shadow), 0 0 0 1px rgba(90, 179, 170, .3), 0 18px 50px -10px rgba(90, 179, 170, .34); }
+/* S14: an icon for each challenge, between the tick box and the line */
+.d2-cl-row { grid-template-columns: 26px 32px minmax(0, 1fr) auto; }
+/* S15: an icon for each channel */
+.d2-rt-ch { display: flex; align-items: center; gap: 12px; }
+.d2-rt-ch .d2-disc { width: 30px; height: 30px; }
+/* S16, S35: the stages on one line, joined */
+.d2-stage { position: relative; }
+.d2-stage + .d2-stage::before { content: ""; position: absolute; left: 33px; top: -13px; width: 3px; height: 13px; border-radius: 2px; background: var(--wl-turquoise); }
+.w-stage[data-screen="S35"] .d2-stage + .d2-stage::before { left: 31px; top: -10px; height: 10px; }
+.d2-stage-n { background: var(--wl-turquoise); color: var(--wl-o1-ground); box-shadow: 0 0 14px rgba(90, 179, 170, .45); }
+/* S28: the slide's two lines, the stepper and the key line are one panel beside the funnel */
+.d2-fn-left { padding: 22px 26px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); }
+.d2-fn-left .d2-step { box-shadow: none; background: var(--wl-ivory); }
+.d2-funnel { align-items: center; }
+/* S26: the seven observations in a panel beside the player */
+.d2-pod-side { padding: 14px 16px; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-panel); background: var(--wl-white); }
+.d2-pod-side .d2-pod-tr { padding: 4px 8px; border: 0; }
+.d2-obs-n { background: var(--wl-turquoise); color: var(--wl-o1-ground); }
+/* S32: an icon for each research block; the connector lines in turquoise */
+.d2-ig-src { grid-template-columns: 32px minmax(0, 1fr); align-items: center; column-gap: 12px; }
+.d2-ig-src-text { display: grid; gap: 2px; }
+.d2-ig-lines path { stroke: var(--wl-turquoise); opacity: .4; }

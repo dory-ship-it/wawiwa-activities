@@ -6,9 +6,9 @@
 //           homework link (the content's, as S22's)
 //   footer  Previous only: no Next
 // A presentation screen: nothing is tracked, completion and status stay S22's (Finish).
-import { h, resolveLink } from '../util.js?v=28bf4305';
-import { glyph, icon } from '../icons.js?v=28bf4305';
-import { layout } from './stage.js?v=28bf4305';
+import { h, resolveLink } from '../util.js?v=ec879c8d';
+import { glyph, icon } from '../icons.js?v=ec879c8d';
+import { layout } from './stage.js?v=ec879c8d';
 
 export const end = {
   scene: () => 'end',
@@ -27,9 +27,9 @@ export const end = {
     layout(ctx, 'end', h('section', { class: 'w-end' },
       h('img', { class: 'w-end-logo', src: 'assets/logo/wawiwa-logo.png', alt: ui.logoAlt, width: '271', height: '102' }),
       zones.instruction,
-      h('p', { class: 'w-end-sub' }, screen.sub),
+      screen.sub ? h('p', { class: 'w-end-sub' }, screen.sub) : null,
       h('div', { class: 'w-end-status' }, chip, !passed && st.hint ? h('p', { class: 'w-end-hint' }, st.hint) : null),
-      h('div', { class: 'w-end-next' }, h('p', { class: 'w-end-next-line' }, screen.next), homework)));
+      h('div', { class: 'w-end-next' }, screen.next ? h('p', { class: 'w-end-next-line' }, screen.next) : null, homework)));
     zones.setFeedback({ state: 'idle' });
     zones.nextBtn.hidden = true; // Previous only
     return { unmount() { zones.nextBtn.hidden = false; } };

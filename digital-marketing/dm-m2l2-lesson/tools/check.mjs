@@ -194,6 +194,16 @@ for (const f of srcFiles.filter((p) => p.endsWith('.js') && !relative(ROOT, p).s
 if (!sentenceHits) ok('no English sentences in src/*.js string literals');
 const italics = srcFiles.filter((p) => p.endsWith('.css') && /font-style:\s*italic|font:\s*italic/.test(read(p)));
 italics.length ? fail('italics in ' + italics.map((p) => relative(ROOT, p)).join(', ')) : ok('no italics in src/*.css');
+// (review, 16 Nov 2026) the template's own style files (frame.css, fx8.css, v2.css) style some screens by id. Those ids
+// are other screens in this lesson (S14, S15, S22, W4, W6 ...), so no such rule may be left in them; only O1, the
+// title screen in both lessons. A screen-id rule of this lesson's own lives in dm.css.
+{
+  const stray = ['frame.css', 'fx8.css', 'v2.css'].flatMap((f) => [...new Set((read(join(ROOT, 'src', f)).match(/data-screen="[^"]+"/g) || []).filter((m) => m !== 'data-screen="O1"'))].map((m) => `${f} ${m}`));
+  stray.length ? fail('template style files style a screen by id (the id is another screen here): ' + stray.join(', ')) : ok('no template rule keyed to a screen id but O1');
+  const own = [...new Set((read(join(ROOT, 'src', 'dm.css')).match(/data-screen="([^"]+)"/g) || []).map((m) => m.slice(13, -1)))];
+  const unknown = own.filter((id) => !content.screens.some((s) => s.id === id));
+  unknown.length ? fail('dm.css styles a screen id that is not in the content: ' + unknown.join(', ')) : ok(`dm.css styles by id only this lesson's screens (${own.join(', ')})`);
+}
 
 /* 8. boot fallback copy */
 const html = read(join(ROOT, 'index.html'));

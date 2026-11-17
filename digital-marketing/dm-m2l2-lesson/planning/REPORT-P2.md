@@ -6,6 +6,34 @@ Nothing is committed and nothing is pushed. No other lesson folder and no workbo
 Review page: http://localhost:8140/review.html (48 screens, all seven chapters).
 Shots of every state of the new screens: `planning/shots-p2/` (93 shots and 16 contact sheets `_sheet-N.png`).
 
+## 0. After the report: review rounds 4 and 5 (16 Nov 2026)
+
+Where this section and a later section disagree, this section is the current state. Shots of every changed screen: `planning/shots-r4/` (82 shots, 14 contact sheets).
+
+**Noy's notes (round 4)**
+- O2 and the four-node board (K2, K3, S35): a done component keeps its number; a small turquoise check on the disc says it is done.
+- Workbook stops WB0 to WB4: the picture is now a real screenshot of the workbook's first page, inside a laptop frame (the template's S19A frame). S36 shows the home practice page the same way. The blurred ground behind the panel is still the placeholder.
+- S20, S22, S24: calmer and centred. Before the answer the case file and the question sit side by side in the middle of the screen. After the answer the case folds to its title (a "Show the case" button opens it again, "Back to the answer" closes it), the answer card stands alone in the middle, and the lines that go beyond the answer slide (S22's "Same question, opposite answer", the small lines) sit under the card. Case bullets are 16px.
+- END: the programme line and the "See you in Module 3" line are gone (the next lesson is named on S38). Left: the heading, the status chip, the retake hint when not passed, the home practice button.
+
+**The review list (round 5)**
+1. S17C: each right reply has its own affirming line; the wrong replies keep the client's pushback. New pilotCopy: "A budget priced off the bid data and competitor spend is one you can defend." / "Management, design and hosting sit outside the total, and the client hears it from you first." / "A line that cannot name its evidence comes out of the plan."
+2. Root cause of the small S14 and S15 headings: `src/v2.css` (from the template) styled screens by id. Every rule keyed to the template's own ids was taken out of it (S01, S03, S13, S14, S15, S18, S19C, S22, K4, W4, W6); only O1, the title screen in both lessons, is left. `frame.css` and `fx8.css` had none. `npm run check` now fails if such a rule comes back (for example after a template sync), and if `dm.css` styles an id that is not in the content. A side effect: W6 no longer sits at the left; all six openers are centred the same way.
+3. One heading: every action or question heading is 38px / 800, set by layout and not by screen id. Exceptions as listed in the review: S11B, the openers, the video screens, O1, O2, END, and the closing key-line screens (their heading is a label). One heading position: a heading without an eyebrow now starts at the same y as a heading under an eyebrow. Headings inside a centred panel (workbook stops, cases, polls, check) move with their panel.
+4. S36: items 1 to 5 are one plain list. The key line is under the list: "A line with no evidence comes out." (the second sentence of the slide's fourth instruction; item 4 keeps the first).
+5. Coverage: the slide 12 note is on K3, in the note's words: "The principle that costs organisations the most money: nobody sets up tracking retroactively. Next: the work plan." (it replaces "All four components are on the board."). K1 dimension 4 was checked against slide 7: the slide itself has a statement there, not a question ("Advertising budgets: we can now build initial models."), so it stays.
+6. Case bullets at 16px: done.
+
+**V2 film: the real one is in.** `assets/video/v2.mp4`, `v2.en.vtt`, `v2.cues.json`, `v2-poster.jpg` (2:02; stops from the cue file at 58.66 s and 98.76 s; identical to the files in `M2L2-V2-film`). The stop questions and feedback are the work order's. The film's README words stop 2 as "The customer is worth $120. Does the channel work?"; the lesson keeps the work order's longer wording. The same licence note as V1 applies (Z-Image Turbo, Wan 2.2), and the README asks that a person watch the whole film and check that the founder reads as the same person in both plates.
+
+**Tests after all of this (16 Nov 2026):** `check` passed; `check:overflow` 474 states at three sizes, 0 problems (run before the laptop frame; the six screens with the frame were run again after it, 0 problems); `test:fit` passed (1456 checks); `walk` passed (382 checks); `test:scorm` passed; `test:review` passed.
+
+**Round 7 (Noy, 16 Nov 2026: "many screens are empty and a little boring"; and: not one photo behind many screens).** The grounds are as they were. What fills a screen is its own graphics, the template's answer for its S03: an icon in a turquoise disc for each of S14's eight challenges, S15's nine channels and S32's five research blocks; the stages of S16 and S35 numbered in turquoise discs and joined by a line; S26's observations and S28's text, stepper and key line in a white panel; a faint turquoise edge on the white panels of the light screens. The icons are decoration (not content, hidden from screen readers). After it: `check` passed, `check:overflow` 474 states, 0 problems, `test:fit`, `walk`, `test:scorm` and `test:review` passed. Shots: `planning/shots-now/`.
+
+Images: six real chapter photos are in (ch2 to ch7, wired by another session). Still plain gradients: `ch1-opening` (O2, O3), `workbook-stop` (the ground behind WB0 to WB4 and S36), `ch2-dimensions` (K1, K2), `ch3-measurement` (S11B, V1, K3). Screens that would gain from a photo of their own instead of the chapter's: S15B, S17C, K5, S26B, S33, K6, S38, END.
+
+Still a placeholder: the S26 podcast audio.
+
 ## 1. What was built
 
 | Chapter | Screens |

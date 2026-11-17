@@ -20,11 +20,11 @@
 //   infographic  (S32)  research blocks left, plan elements right, connector lines between them.
 //   homeStop     (S36)  the home practice: the slide's five instructions and the link (new tab).
 // Graded answers go out once (ctx.answer); everything else lives in the screen's flags (suspend data).
-import { h, fmt, resolveLink } from '../util.js?v=28bf4305';
-import { glyph, icon } from '../icons.js?v=28bf4305';
-import { letter } from '../tracking/index.js?v=28bf4305';
-import { layout, picture, arrowNav } from './stage.js?v=28bf4305';
-import { keyLine, boardEl, fill, headOf, floatBand, needLeft, beside } from './dm.js?v=28bf4305';
+import { h, fmt, resolveLink } from '../util.js?v=ec879c8d';
+import { glyph, icon } from '../icons.js?v=ec879c8d';
+import { letter } from '../tracking/index.js?v=ec879c8d';
+import { layout, picture, arrowNav } from './stage.js?v=ec879c8d';
+import { keyLine, boardEl, fill, headOf, floatBand, needLeft, beside } from './dm.js?v=ec879c8d';
 
 /* ---------- shared parts ---------- */
 const SVG = 'http://www.w3.org/2000/svg';
@@ -113,7 +113,7 @@ export const checklist = {
     const ready = () => { doneBtn.disabled = !marked.size; label.textContent = marked.size ? ui.buttons.done : ui.dm.chooseFirst; };
     const rows = screen.challenges.map((it) => {
       const b = h('button', { class: 'd2-cl-row', type: 'button', 'aria-pressed': String(marked.has(it.id)), dataset: { item: it.id } },
-        h('span', { class: 'd2-cl-box', 'aria-hidden': 'true' }, glyph('g-check-b', { size: 14 })), h('span', { class: 'd2-cl-text' }, it.text), h('span', { class: 'd2-cl-tag' }, ui.dm.seen));
+        h('span', { class: 'd2-cl-box', 'aria-hidden': 'true' }, glyph('g-check-b', { size: 14 })), it.icon ? h('span', { class: 'd2-disc', 'aria-hidden': 'true' }, icon(it.icon, { size: 18 })) : null, h('span', { class: 'd2-cl-text' }, it.text), h('span', { class: 'd2-cl-tag' }, ui.dm.seen));
       b.addEventListener('click', () => {
         if (marked.has(it.id)) marked.delete(it.id); else marked.add(it.id);
         b.setAttribute('aria-pressed', String(marked.has(it.id)));
@@ -146,7 +146,7 @@ export const revealTable = {
     const rows = screen.rows.map((r) => {
       const outId = 'd2-rt-out-' + r.id;
       const out = h('div', { class: 'd2-rt-does', id: outId, 'aria-live': 'polite' }, h('span', { class: 'd2-rt-closed', 'aria-hidden': 'true' }, icon('eye', { size: 17 }), h('span', {}, ui.dm.hiddenCell)));
-      const b = h('button', { class: 'd2-rt-ch', type: 'button', 'aria-expanded': 'false', 'aria-controls': outId, dataset: { row: r.id } }, r.channel);
+      const b = h('button', { class: 'd2-rt-ch', type: 'button', 'aria-expanded': 'false', 'aria-controls': outId, dataset: { row: r.id } }, r.icon ? h('span', { class: 'd2-disc', 'aria-hidden': 'true' }, icon(r.icon, { size: 18 })) : null, h('span', {}, r.channel));
       const el = h('div', { class: 'd2-rt-row', dataset: { open: 'false' } }, b, out, h('span', { class: 'd2-rt-chip' }, h('span', { class: 'w-sr-only' }, screen.head[2] + ': '), r.taught));
       const open = (live) => {
         if (el.dataset.open === 'true') return;
@@ -331,6 +331,9 @@ export const builder = {
 };
 
 /* ---------- caseFile (S20, S22, S24) ---------- */
+// (Noy, 16 Nov 2026: the screens were crowded and sat at the top) two calm views, centred. Before the answer: the case
+// file beside the question. After it: the answer alone in the middle (the case folds to its title, with a button that
+// shows it again), and the lines that go beyond the answer slide under the card.
 export const caseFile = {
   mount(ctx) {
     const { screen, ui, zones } = ctx;
@@ -339,6 +342,27 @@ export const caseFile = {
     const slot = h('div', { class: 'd2-slot' });
     const list = optionList(ctx, screen.options, screen.instruction);
     list.el.classList.add('d2-opts-row');
+    const facts = h('ul', { class: 'd2-bullets' }, screen.facts.map((t) => h('li', {}, t)));
+    const toggleText = h('span', {});
+    const toggle = btn('d2-file-toggle', 'showCase', icon('eye', { size: 18 }), toggleText);
+    toggle.hidden = true;
+    const file = h('section', { class: 'd2-file' },
+      h('div', { class: 'd2-file-top' }, h('div', {}, h('p', { class: 'd2-file-kicker' }, icon('folder', { size: 18 }), h('span', {}, ui.dm.caseFile + ' · ' + screen.eyebrow)), h('h2', { class: 'd2-file-title' }, screen.title)), toggle),
+      facts);
+    const more = h('div', { class: 'd2-answer-more', hidden: true });
+    const ask = h('div', { class: 'd2-case-ask' }, zones.instruction, second, slot);
+    const el = body('case', file, ask, more);
+    el.dataset.view = 'question';
+    // after the answer: "answer" (the case folded) or "case" (the case open again, the answer waits)
+    const view = (v) => {
+      el.dataset.view = v;
+      facts.hidden = v === 'answer';
+      ask.hidden = v === 'case';
+      more.hidden = v !== 'answer' || !more.childNodes.length;
+      toggleText.textContent = v === 'case' ? ui.dm.backToAnswer : ui.dm.showCase;
+      toggle.setAttribute('aria-expanded', String(v === 'case'));
+    };
+    toggle.addEventListener('click', () => view(el.dataset.view === 'case' ? 'answer' : 'case'));
     function reveal(i) {
       const o = screen.options[i];
       second.hidden = true;
@@ -346,17 +370,17 @@ export const caseFile = {
         h('div', { class: 'd2-answer-top' }, h('h2', { class: 'd2-answer-title' }, a.title),
           h('span', { class: 'd2-yours', dataset: { state: o.correct ? 'right' : 'wrong' } }, glyph(o.correct ? 'g-check-b' : 'g-cross', { size: 13 }), h('span', {}, ui.dm.yourAnswer + ': ' + o.label))),
         h('ul', { class: 'd2-bullets' }, a.bullets.map((t) => h('li', {}, t))),
-        keyLine(a.keyLine, 'd-keyline-s'),
-        a.compare ? h('div', { class: 'd2-compare' }, h('p', { class: 'd2-box-label' }, a.compare.label), h('ul', {}, a.compare.items.map((t) => h('li', {}, t)))) : null,
-        a.small ? h('p', { class: 'd2-small' }, a.small) : null));
+        keyLine(a.keyLine, 'd-keyline-s')));
+      fill(more, a.compare ? h('div', { class: 'd2-compare' }, h('p', { class: 'd2-box-label' }, a.compare.label), h('ul', {}, a.compare.items.map((t) => h('li', {}, t)))) : null,
+        a.small ? h('p', { class: 'd2-small' }, a.small) : null);
+      toggle.hidden = false;
+      view('answer');
     }
     const was = ctx.flags.get('a') ?? null;
     const g = graded(ctx, { options: screen.options, trackingId: screen.tracking[0].id, list, was,
       onAnswer: (i) => { ctx.flags.set('a', i); reveal(i); finish(ctx, true); } });
     fill(slot, list.el, g.foot);
-    const file = h('section', { class: 'd2-file' }, h('p', { class: 'd2-file-kicker' }, icon('folder', { size: 18 }), h('span', {}, ui.dm.caseFile + ' · ' + screen.eyebrow)),
-      h('h2', { class: 'd2-file-title' }, screen.title), h('ul', { class: 'd2-bullets' }, screen.facts.map((t) => h('li', {}, t))));
-    layout(ctx, 'dm2-case', body('case', file, h('div', { class: 'd2-case-ask' }, zones.instruction, second, slot)), floatBand(ctx));
+    layout(ctx, 'dm2-case', el, floatBand(ctx));
     if (!g.settled) zones.setFeedback({ state: 'hint', text: screen.hint });
     else { reveal(was ?? screen.options.findIndex((o) => o.correct)); finish(ctx, false); }
     return { unmount() {} };
@@ -587,7 +611,7 @@ export const infographic = {
   mount(ctx) {
     const { screen, ui, zones } = ctx;
     const opened = new Set(ctx.revisit ? screen.right.map((r) => r.id) : ctx.flags.get('o') || []);
-    const left = screen.left.map((l) => h('li', { class: 'd2-ig-src', dataset: { src: l.id, lit: 'false' } }, h('b', {}, l.title), l.sub ? h('span', {}, l.sub) : null));
+    const left = screen.left.map((l) => h('li', { class: 'd2-ig-src', dataset: { src: l.id, lit: 'false' } }, l.icon ? h('span', { class: 'd2-disc', 'aria-hidden': 'true' }, icon(l.icon, { size: 18 })) : null, h('span', { class: 'd2-ig-src-text' }, h('b', {}, l.title), l.sub ? h('span', {}, l.sub) : null)));
     const svg = document.createElementNS(SVG, 'svg');
     svg.setAttribute('class', 'd2-ig-lines');
     svg.setAttribute('aria-hidden', 'true');
@@ -656,11 +680,10 @@ export const homeStop = {
     const { screen, ui, zones, content } = ctx;
     const open = h('a', { class: 'w-btn w-btn-primary d-wb-open', href: resolveLink(content, screen.handoff.href), target: '_blank', rel: screen.handoff.rel, dataset: { action: 'open' } },
       h('span', {}, ui.buttons.openHomework), icon('external-link', { size: 20 }), h('span', { class: 'w-sr-only' }, ' (' + ui.newTabNote + ')'));
-    const steps = screen.steps.map((s, i) => h('li', {}, h('span', { class: 'd2-home-n', 'aria-hidden': 'true' }, String(i + 1)),
-      typeof s === 'string' ? h('span', {}, s) : h('span', { class: 'd2-home-key' }, keyLine(s.keyLine, 'd-keyline-s'), h('span', {}, s.rest))));
+    const steps = screen.steps.map((s, i) => h('li', {}, h('span', { class: 'd2-home-n', 'aria-hidden': 'true' }, String(i + 1)), h('span', {}, s)));
     layout(ctx, 'dm2-home', body('home', h('section', { class: 'd2-panel d2-home' },
       h('figure', { class: 'd2-home-shot' }, picture(screen.image, 'd-wb-img')),
-      h('div', { class: 'd2-home-body' }, h('p', { class: 'd-eyebrow' }, screen.eyebrow), zones.instruction, h('ol', { class: 'd2-home-steps' }, steps),
+      h('div', { class: 'd2-home-body' }, h('p', { class: 'd-eyebrow' }, screen.eyebrow), zones.instruction, h('ol', { class: 'd2-home-steps' }, steps), keyLine(screen.keyLine, 'd-keyline-s'),
         h('div', { class: 'd2-home-foot' }, open, h('p', { class: 'd2-small' }, screen.line))))), floatBand(ctx));
     zones.setFeedback({ state: 'hint', text: '' });
     const opened = (live) => { finish(ctx, false); if (live) zones.setFeedback({ state: 'notice', text: screen.openFeedback }); };

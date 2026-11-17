@@ -24,11 +24,11 @@
 //                    term in bold, its line after it) with a check or a cross mark.
 // Title, module map, goals and key idea are presentation screens (screen.presentation): the engine
 // marks them done on arrival, so Next never locks. All text comes from the content.
-import { h } from '../util.js?v=28bf4305';
-import { glyph, icon } from '../icons.js?v=28bf4305';
-import { scaleOf } from '../ghost.js?v=28bf4305';
-import { letter } from '../tracking/index.js?v=28bf4305';
-import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst, buildUp } from './stage.js?v=28bf4305';
+import { h } from '../util.js?v=ec879c8d';
+import { glyph, icon } from '../icons.js?v=ec879c8d';
+import { scaleOf } from '../ghost.js?v=ec879c8d';
+import { letter } from '../tracking/index.js?v=ec879c8d';
+import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst, buildUp } from './stage.js?v=ec879c8d';
 
 /* ---------- title (O1) ---------- */
 export const title = {
@@ -66,7 +66,9 @@ export const moduleMap = {
 
     const tabs = stations.map((st, i) => {
       const isToday = st.status === 'today';
-      const disc = h('span', { class: 'w-map-disc', 'aria-hidden': 'true' }, st.status === 'done' ? glyph('g-check', { size: 40.96 }) : st.n || String(i + 1));
+      // (Noy, 16 Nov 2026: the numbers 1 and 2 are the components, they stay; done = a small check on the disc)
+      const disc = h('span', { class: 'w-map-disc', 'aria-hidden': 'true' }, st.status === 'done' && !st.n ? glyph('g-check', { size: 40.96 }) : st.n || String(i + 1),
+        st.status === 'done' && st.n ? h('span', { class: 'd-done-badge' }, glyph('g-check-b', { size: 15 })) : null);
       const tab = h('button', { class: 'w-map-tab', type: 'button', role: 'tab', id: 'w-map-tab-' + st.id, 'aria-selected': 'false', 'aria-controls': panelId, tabindex: '-1',
         dataset: { station: st.id, status: st.status } },
         isToday ? h('span', { class: 'w-map-today', 'aria-hidden': 'true' }, mm.today) : null,

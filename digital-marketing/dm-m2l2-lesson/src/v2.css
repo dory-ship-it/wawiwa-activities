@@ -135,16 +135,6 @@
 
 /* ---------- motion, only on the screens that need it ---------- */
 @media (prefers-reduced-motion: no-preference) {
-  /* S13: the process line draws, then the five steps rise one by one (under 1.5 s) */
-  .w-stage[data-screen="S13"] .w-board-flags[data-variant="line"] .w-line::before { transform-origin: left center; animation: v2-grow .8s var(--wl-ease-enter) both; }
-  .w-stage[data-screen="S13"] .w-line-cell { animation: v2-rise .42s var(--wl-ease-enter) both; }
-  .w-stage[data-screen="S13"] .w-line-cell:nth-of-type(2) { animation-delay: .12s; }
-  .w-stage[data-screen="S13"] .w-line-cell:nth-of-type(3) { animation-delay: .24s; }
-  .w-stage[data-screen="S13"] .w-line-cell:nth-of-type(4) { animation-delay: .36s; }
-  .w-stage[data-screen="S13"] .w-line-cell:nth-of-type(5) { animation-delay: .48s; }
-  /* K4: the good-fit row, then the poor-fit row */
-  .w-stage[data-screen="K4"] .w-kcol { animation: v2-rise .45s var(--wl-ease-enter) both; }
-  .w-stage[data-screen="K4"] .w-kcol + .w-kcol { animation-delay: .35s; }
   /* S17: the case card slides in with each new case */
   .w-stage .w-sheet-cases .w-case-now { animation: v2-in-left .4s var(--wl-ease-enter) both; }
   /* S15: the proof rises in once the answer is right */
@@ -242,6 +232,10 @@
 .w-stage[data-ground="half"][data-side="left"][data-size="narrow"] .w-main > .w-sheet-focus { left: calc(30% + 56px); right: 56px; }
 .w-stage[data-ground="half"] .w-sheet-focus .w-head-row .w-instruction { font-size: 30px; line-height: 1.15; }
 
+/* DM M2 L2 (16 Nov 2026): this file comes from the EAI L4 template. Its rules keyed to the template's own screen ids
+   (S01, S03, S13, S14, S15, S18, S19C, S22, K4, W4, W6) were taken out here, because the same ids are other screens in
+   this lesson. Only O1 (the title screen in both lessons) is left. After a template sync, take them out again;
+   tools/check.mjs fails if one comes back. */
 /* ---------- v3 review (Noy, 10 Nov 2026): blur, focus, the turquoise glow (planning/V3-REVIEW-FIXES.md) ---------- */
 /* O1: the photo softened a little, so the title is the first thing read */
 .w-stage[data-screen="O1"] .w-scene-photo { inset: -20px; filter: blur(4px) saturate(1.05); }
@@ -254,12 +248,8 @@
 .w-main[data-layout="opener"] .w-opener-card[data-kind="statement"] { left: 50%; top: calc(50% - 6px); transform: translate(-50%, -50%);
   background: rgba(8, 20, 30, .86); border: 1.5px solid rgba(90, 179, 170, .62);
   box-shadow: 0 24px 60px rgba(0, 0, 0, .45), 0 0 0 6px rgba(90, 179, 170, .08), 0 0 48px -4px rgba(90, 179, 170, .45); }
-/* BL2: the other openers sharper still (W4 and W6 keep 5px, approved) */
-.w-stage:not([data-screen="W4"]):not([data-screen="W6"]):has(.w-main[data-layout="opener"]) .w-g-full { filter: blur(3px) saturate(1.05) brightness(.86); }
-/* LP1 (Noy, 15 Nov): W4 and W6, the card on the left so the photo shows on the right; the veil darker on the card's side only */
-.w-stage:is([data-screen="W4"], [data-screen="W6"]) .w-main[data-layout="opener"] .w-opener-card { left: 64px; transform: translateY(-50%); }
-.w-stage:is([data-screen="W4"], [data-screen="W6"]):has(.w-main[data-layout="opener"]) .w-scene::after {
-  background: linear-gradient(90deg, rgba(8, 20, 30, .6) 0%, rgba(8, 20, 30, .38) 45%, rgba(8, 20, 30, .1) 100%); }
+/* BL2: the openers sharper still */
+.w-stage:has(.w-main[data-layout="opener"]) .w-g-full { filter: blur(3px) saturate(1.05) brightness(.86); }
 
 /* S03: the dot grid gets a soft turquoise light, the card to drag glows, and a line forks from it to the two causes */
 /* lesson-wide (Noy, 10 Nov 2026: "keep it clean"): every dot-grid screen gets the same soft turquoise light,
@@ -269,13 +259,6 @@
 .w-stage[data-ground="dots"] .w-main > .w-sheet-focus:not(.w-sheet-fill) { box-shadow: var(--wl-float-shadow), 0 0 0 1px rgba(90, 179, 170, .3), 0 18px 50px -10px rgba(90, 179, 170, .34); }
 .w-stage[data-ground="dots"] .w-rule-icon,
 .w-stage[data-ground="dots"] .w-drop-icon { border-radius: 50%; background: var(--wl-turquoise); color: var(--wl-o1-ground); box-shadow: 0 0 16px rgba(90, 179, 170, .5); }
-.w-stage[data-screen="S03"] .w-g-dots { background-image: radial-gradient(ellipse 46% 42% at 50% 38%, rgba(90, 179, 170, .3), transparent 72%), radial-gradient(var(--wl-line-mid) 1.3px, transparent 1.4px);
-  background-size: 100% 100%, 24px 24px; background-repeat: no-repeat, repeat; }
-.w-stage[data-screen="S03"] .w-deck-card { box-shadow: 0 0 0 2px rgba(90, 179, 170, .7), 0 12px 34px rgba(90, 179, 170, .38); }
-.w-stage[data-screen="S03"] .w-drops::before { content: ""; position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); height: 104px; pointer-events: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 104' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='rgb(90,179,170)' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M500 0 V34 Q500 52 482 52 H268 Q250 52 250 70 V100'/%3E%3Cpath d='M500 34 Q500 52 518 52 H732 Q750 52 750 70 V100'/%3E%3C/g%3E%3C/svg%3E") center / 100% 100% no-repeat;
-  filter: drop-shadow(0 0 6px rgba(90, 179, 170, .7)); opacity: .75; }
-.w-stage[data-screen="S03"] .w-main:not(:has(.w-deck-card)) .w-drops::before { opacity: 0; }
 
 /* no task at the side (Noy, 10 Nov: S18, S19C, S22 "why at the side?"): S02, S08B, S15, S18, S20 and S22 sit on the
    soft ground (ground.tone 'soft': the photo blurred under a lighter veil) with the task in one centred panel,
@@ -284,28 +267,8 @@
 .w-stage[data-tone="soft"] .w-g-veil { background: rgba(8, 20, 30, .5); }
 .w-stage[data-tone="soft"] .w-main > :is(.w-sheet-focus, .w-open),
 .w-stage[data-tone="soft"] .w-sheet-right.w-sheet-one,
-.w-stage[data-tone="soft"] .w-main > .w-sheet-right,
-.w-stage[data-screen="S19C"] .w-main > .w-sheet-right { box-shadow: 0 24px 60px rgba(0, 0, 0, .4), 0 0 0 1px rgba(90, 179, 170, .45), 0 0 48px -4px rgba(90, 179, 170, .45); }
+.w-stage[data-tone="soft"] .w-main > .w-sheet-right { box-shadow: 0 24px 60px rgba(0, 0, 0, .4), 0 0 0 1px rgba(90, 179, 170, .45), 0 0 48px -4px rgba(90, 179, 170, .45); }
 .w-stage[data-tone="soft"] .w-sheet-right.w-sheet-one,
-.w-stage[data-tone="soft"] .w-main > .w-sheet-right,
-.w-stage[data-screen="S19C"] .w-main > .w-sheet-right { left: 50%; right: auto; top: 50%; width: 720px; transform: translate(-50%, calc(-50% - 20px)); }
+.w-stage[data-tone="soft"] .w-main > .w-sheet-right { left: 50%; right: auto; top: 50%; width: 720px; transform: translate(-50%, calc(-50% - 20px)); }
 /* S02: the heading sat on the light half; on the soft ground the whole task (heading, line, form) is one light panel */
 .w-stage[data-tone="soft"] .w-main > .w-open { padding: 26px 32px 28px; border-radius: 18px; background: var(--wl-ivory); }
-/* S15 and S22: two blocks, stacked in reading order in the middle (S15: the question, then the proof after the
-   right answer; S22: the question, then the bridge to Lesson 5 under it) */
-.w-stage[data-tone="soft"]:is([data-screen="S15"], [data-screen="S22"]) .w-main { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding-bottom: 76px; }
-.w-stage[data-tone="soft"]:is([data-screen="S15"], [data-screen="S22"]) .w-main > .w-sheet-right { position: relative; left: auto; top: auto; transform: none; order: 1; }
-.w-stage[data-tone="soft"][data-screen="S22"] .w-main > .w-bridge-card { position: relative; left: auto; top: auto; width: 720px; order: 2; }
-/* S15: after the right answer the proof joins the question as a pair in the middle (stacked it ran past the bar) */
-.w-stage[data-tone="soft"][data-screen="S15"] .w-main { flex-direction: row; gap: 18px; }
-.w-stage[data-tone="soft"][data-screen="S15"] .w-main > .w-sheet-right { width: 820px; } /* QH1: wider for the larger case line (was 640px) */
-.w-stage[data-tone="soft"][data-screen="S15"] .w-proof { position: relative; right: auto; bottom: auto; width: 320px; order: 2; }
-
-/* QH1 (Noy, 15 Nov 2026): on the question screens with a case line over the question (S01, S14, S15, S18) the case
-   was small and grey and the question huge. Now one weight for both: the case in ink, the question just under it in
-   teal ink and a little smaller, so the eye reads the case and lands on what to do. */
-.w-stage:is([data-screen="S01"], [data-screen="S14"], [data-screen="S15"], [data-screen="S18"]) .w-main .w-context {
-  font: 700 28px/1.25 var(--wl-font-ui); letter-spacing: -.3px; color: var(--wl-ink); margin-bottom: 6px; }
-.w-stage:is([data-screen="S01"], [data-screen="S14"], [data-screen="S15"], [data-screen="S18"]) .w-main .w-instruction {
-  font-size: 26px; line-height: 1.2; letter-spacing: -.2px; color: var(--wl-teal-ink); }
-.w-stage:is([data-screen="S01"], [data-screen="S14"], [data-screen="S15"], [data-screen="S18"]) .w-main .w-instruction .w-term { color: inherit; }

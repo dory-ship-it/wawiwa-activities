@@ -535,7 +535,7 @@ await arrive(page, 'V2');
   await act(page, '[data-action="bigplay"]');
   for (const [i, st] of s.stops.entries()) {
     await fast(page, () => !document.querySelector('.w-stop-view').hidden, `V2 stop ${i + 1}`);
-    const pickId = i === 0 ? 'b' : 'b'; // stop 1 wrong (600), stop 2 right
+    const pickId = 'b'; // stop 1 wrong (600), stop 2 right
     const o = st.options.find((x) => x.id === pickId);
     expect((await text(page, '.w-stop-q')) === st.question, `V2 stop ${i + 1}: "${st.question}"`);
     await act(page, `.w-stop-view .w-opt[data-id="${pickId}"]`);
@@ -644,7 +644,7 @@ await arrive(page, 'S36');
 {
   const s = S.S36;
   const steps = await page.evaluate(() => [...document.querySelectorAll('.d2-home-steps li')].map((li) => li.lastChild.textContent));
-  expect(steps.length === 5 && steps[3] === s.steps[3].keyLine + s.steps[3].rest && (await text(page, '.d2-home .d-keyline p')) === s.steps[3].keyLine, 'S36: the five instructions of the slide, the fourth as the key line');
+  expect(JSON.stringify(steps) === JSON.stringify(s.steps) && (await text(page, '.d2-home-body > .d-keyline p')) === s.keyLine, 'S36: the five instructions of the slide as one list, the key line under it');
   await tabTo(page, '[data-action="open"]');
   const a = await page.evaluate(() => { const l = document.activeElement; return { target: l.target, rel: l.rel, href: l.href }; });
   const url = await newTabFrom(page);

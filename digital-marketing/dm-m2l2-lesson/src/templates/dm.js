@@ -19,9 +19,9 @@
 // Shared parts: keyLine() (one sentence of the trainer's, in the quote style: a turquoise rule and larger
 // type; at most one per screen) and boardEl() (the four components).
 // Nothing here is graded or sent to the LMS: answers live in the screen's flags (suspend data) only.
-import { h, fmt, resolveLink, reducedMotion } from '../util.js?v=28bf4305';
-import { glyph, icon } from '../icons.js?v=28bf4305';
-import { layout, sheet, picture, arrowNav } from './stage.js?v=28bf4305';
+import { h, fmt, resolveLink, reducedMotion } from '../util.js?v=ec879c8d';
+import { glyph, icon } from '../icons.js?v=ec879c8d';
+import { layout, sheet, picture, arrowNav } from './stage.js?v=ec879c8d';
 
 /* ---------- shared parts ---------- */
 // fill(el, ...children): replaceChildren without the empty ones (replaceChildren(null) would print "null")
@@ -47,7 +47,8 @@ export function boardEl(ctx, { nodes, tick = null }) {
     const li = h('li', { class: 'd-board-node', dataset: { node: nd.id } }, disc, h('span', { class: 'd-board-name' }, nd.title), sr);
     const paint = (status) => {
       li.dataset.status = status;
-      disc.replaceChildren(status === 'done' ? glyph('g-check', { size: 26 }) : nd.n);
+      // (Noy, 16 Nov 2026: the number stays on a done component; a small check says it is done)
+      fill(disc, nd.n, status === 'done' ? h('span', { class: 'd-done-badge' }, glyph('g-check-b', { size: 13 })) : null);
       sr.textContent = ', ' + word[status];
     };
     paint(nd.status);
