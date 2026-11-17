@@ -8,30 +8,30 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=ec879c8d';
-import { createZones } from './zones.js?v=ec879c8d';
-import { createMenu, openDialog } from './menu.js?v=ec879c8d';
-import { initTooltips, applyTerms } from './tooltip.js?v=ec879c8d';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=ec879c8d';
-import { decision } from './templates/decision.js?v=ec879c8d';
-import { input } from './templates/input.js?v=ec879c8d';
-import { sortDeck } from './templates/sortdeck.js?v=ec879c8d';
-import { bpmn } from './templates/bpmn.js?v=ec879c8d';
-import { flags } from './templates/flags.js?v=ec879c8d';
-import { explorer } from './templates/explorer.js?v=ec879c8d';
-import { video } from './templates/video.js?v=ec879c8d';
-import { handoff } from './templates/handoff.js?v=ec879c8d';
-import { check } from './templates/check.js?v=ec879c8d';
-import { result } from './templates/result.js?v=ec879c8d';
-import { end } from './templates/end.js?v=ec879c8d';
-import { title, moduleMap, goals, warmup, opener, deliverable, concept, keyParts, keyColumns } from './templates/intro.js?v=ec879c8d';
-import { createGhost, stopGhost } from './ghost.js?v=ec879c8d';
-import { createTracking } from './tracking/index.js?v=ec879c8d';
-import { describe } from './tracking/describe.js?v=ec879c8d';
-import { createCoach } from './coach/coach.js?v=ec879c8d';
-import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=ec879c8d';
-import { bring, workbookStop, questionTiles, questionCards, dimensionMap, goalCards, closing } from './templates/dm.js?v=ec879c8d';
-import { checklist, revealTable, quiz, client, stages, builder, caseFile, twoCols, podcast, poll, funnelCalc, dataTable, infographic, homeStop } from './templates/dm2.js?v=ec879c8d';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=98466210';
+import { createZones } from './zones.js?v=98466210';
+import { createMenu, openDialog } from './menu.js?v=98466210';
+import { initTooltips, applyTerms } from './tooltip.js?v=98466210';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=98466210';
+import { decision } from './templates/decision.js?v=98466210';
+import { input } from './templates/input.js?v=98466210';
+import { sortDeck } from './templates/sortdeck.js?v=98466210';
+import { bpmn } from './templates/bpmn.js?v=98466210';
+import { flags } from './templates/flags.js?v=98466210';
+import { explorer } from './templates/explorer.js?v=98466210';
+import { video } from './templates/video.js?v=98466210';
+import { handoff } from './templates/handoff.js?v=98466210';
+import { check } from './templates/check.js?v=98466210';
+import { result } from './templates/result.js?v=98466210';
+import { end } from './templates/end.js?v=98466210';
+import { title, moduleMap, goals, warmup, opener, deliverable, concept, keyParts, keyColumns } from './templates/intro.js?v=98466210';
+import { createGhost, stopGhost } from './ghost.js?v=98466210';
+import { createTracking } from './tracking/index.js?v=98466210';
+import { describe } from './tracking/describe.js?v=98466210';
+import { createCoach } from './coach/coach.js?v=98466210';
+import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=98466210';
+import { bring, workbookStop, questionTiles, questionCards, dimensionMap, goalCards, closing } from './templates/dm.js?v=98466210';
+import { checklist, revealTable, quiz, client, stages, builder, caseFile, twoCols, podcast, poll, funnelCalc, dataTable, infographic, homeStop } from './templates/dm2.js?v=98466210';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -229,7 +229,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=ec879c8d').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=98466210').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -289,10 +289,11 @@ class Lesson {
     // (the chapter photo as a light wash), as in Noy's boards; content "scene" may move a Focus screen to Stage
     // v2 (Noy, 9 Nov 2026): a screen may name its ground from the kit (screen.ground: { kind, side });
     // the template's scene still decides the text colours and panels
-    this.zones.setScene(mode, screen.photo || chapter?.photo || null, screen.ground || null);
+    // (Noy, 17 Nov 2026: K1 with no photo at all) photo: false = no photo, not even the chapter's
+    this.zones.setScene(mode, screen.photo === false ? null : screen.photo || chapter?.photo || null, screen.ground || null);
     // QA1: the next screen's photo loads now, so it is there when that screen opens (no dark gap)
     const after = this.screens[this.order[this.order.indexOf(id) + 1]];
-    const afterPhoto = after && (after.photo || this.chapters.find((c) => c.id === after.chapter)?.photo);
+    const afterPhoto = after && after.photo !== false && (after.photo ||this.chapters.find((c) => c.id === after.chapter)?.photo);
     if (afterPhoto?.src && !this.thumb) new Image().src = afterPhoto.src;
     const done = this.doneSet();
     this.shownAt = performance.now();

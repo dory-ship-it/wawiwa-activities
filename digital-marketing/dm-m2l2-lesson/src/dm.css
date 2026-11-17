@@ -657,3 +657,75 @@
 .d2-ig-src { grid-template-columns: 32px minmax(0, 1fr); align-items: center; column-gap: 12px; }
 .d2-ig-src-text { display: grid; gap: 2px; }
 .d2-ig-lines path { stroke: var(--wl-turquoise); opacity: .4; }
+
+/* ==================== PL1 (Noy, 17 Nov 2026): the layout adapts to the photo ====================
+   A photo may say where it is calm (photo.place in the content: left-upper, left-middle, left-lower, right-upper,
+   right-middle, right-lower, center; src/zones.js copies it to stage[data-place]). The screen's text block goes to
+   that side ("text at the side"), the veil is dark on that side only and the photo is blurred less, so its subject
+   stays in view. No place, or center: everything as before. By layout and ground, never by screen id. */
+.w-stage[data-place^="left"] { --pl-dir: 90deg; }
+.w-stage[data-place^="right"] { --pl-dir: 270deg; }
+.w-stage[data-place$="upper"] { --pl-y: -30px; }
+.w-stage[data-place$="lower"] { --pl-y: 30px; }
+
+/* the ground: less blur, the veil on the text side only */
+.w-stage[data-ground="darkblur"]:is([data-place^="left"], [data-place^="right"]) .w-g-blur { inset: -20px; filter: blur(2.5px) saturate(1.1); }
+.w-stage[data-ground="darkblur"]:is([data-place^="left"], [data-place^="right"]) .w-g-veil {
+  background: linear-gradient(var(--pl-dir), rgba(10, 26, 38, .9) 0%, rgba(10, 26, 38, .8) 36%, rgba(10, 26, 38, .3) 62%, rgba(10, 26, 38, .06) 100%); }
+.w-stage[data-ground="darkblur"][data-tone="soft"]:is([data-place^="left"], [data-place^="right"]) .w-g-veil {
+  background: linear-gradient(var(--pl-dir), rgba(8, 20, 30, .6) 0%, rgba(8, 20, 30, .45) 45%, rgba(8, 20, 30, .12) 72%, rgba(8, 20, 30, 0) 100%); }
+
+/* the opener: the card at the side, the photo darker on the card's side only */
+.w-stage:is([data-place^="left"], [data-place^="right"]) .w-main[data-layout="opener"] .w-opener-card,
+.w-stage:is([data-place^="left"], [data-place^="right"]) .w-main[data-layout="opener"] .w-opener-card[data-kind="statement"] {
+  top: calc(50% - 6px + var(--pl-y, 0px)); transform: translateY(-50%); }
+.w-stage[data-place^="left"] .w-main[data-layout="opener"] .w-opener-card,
+.w-stage[data-place^="left"] .w-main[data-layout="opener"] .w-opener-card[data-kind="statement"] { left: var(--d-edge); right: auto; }
+.w-stage[data-place^="right"] .w-main[data-layout="opener"] .w-opener-card,
+.w-stage[data-place^="right"] .w-main[data-layout="opener"] .w-opener-card[data-kind="statement"] { left: auto; right: var(--d-edge); }
+.w-stage:is([data-place^="left"], [data-place^="right"]):has(.w-main[data-layout="opener"]) .w-g-full { filter: blur(2.5px) saturate(1.05) brightness(.9); }
+.w-stage:is([data-place^="left"], [data-place^="right"]):has(.w-main[data-layout="opener"]) .w-scene::after {
+  background: linear-gradient(var(--pl-dir), rgba(8, 20, 30, .62) 0%, rgba(8, 20, 30, .45) 55%, rgba(8, 20, 30, .08) 82%, rgba(8, 20, 30, 0) 100%); }
+
+/* the closing key line (with or without the board): one column 640 wide at the side */
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d-close-key { gap: 24px; justify-content: safe center; }
+.w-stage[data-place^="left"] .d-close-key { align-items: flex-start; }
+.w-stage[data-place^="right"] .d-close-key { align-items: flex-end; }
+.w-stage[data-place$="upper"] .d-close-key { padding-bottom: 60px; }
+.w-stage[data-place$="lower"] .d-close-key { padding-top: 60px; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d-close-key :is(.d-head, .d-keyline-xl, .d-close-board, .d-close-line) { width: min(640px, 100%); }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d-close-key .d-keyline-xl { padding-left: 26px; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d-close-key .d-keyline-xl p { font-size: 40px; letter-spacing: -.9px; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d-close-key .d-close-board { padding: 24px 14px 22px; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d-close-quote .d-close-line { padding-left: 33px; }
+
+/* two columns (twoCols): the heading, the columns and the key line in one block 640 wide at the side */
+.w-stage:is([data-place^="left"], [data-place^="right"]) .w-main[data-layout="dm2-cols"] > :is(.d-head, .d2) { width: min(640px, calc(100% - 2 * var(--d-edge))); }
+.w-stage[data-place^="left"] .w-main[data-layout="dm2-cols"] > :is(.d-head, .d2) { right: auto; }
+.w-stage[data-place^="right"] .w-main[data-layout="dm2-cols"] > :is(.d-head, .d2) { left: auto; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d2-cols .d2-cols { gap: 16px; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d2-cols .d2-col { padding: 22px 22px 24px; align-content: start; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d2-cols .d2-col h2 { font-size: 30px; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d2-cols .d2-col p { font-size: 19px; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d2-cols .d-keyline-xl p { font-size: 32px; letter-spacing: -.7px; }
+
+/* the centred task panel (a quiz, a neutral question, a case with one panel): 640 wide at the side; the answers of a
+   neutral question stacked; the feedback card under the panel's right part, clear of Previous / Next */
+.w-stage[data-place^="left"] .w-main:is([data-layout="dm2-quiz"], [data-layout="dm2-poll"]) .d2:not(.d2-poll-list) { justify-items: start; }
+.w-stage[data-place^="right"] .w-main:is([data-layout="dm2-quiz"], [data-layout="dm2-poll"]) .d2:not(.d2-poll-list) { justify-items: end; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d2-quiz,
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d2-poll:not(.d2-poll-list) .d2-panel { width: min(640px, 100%); }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d2-quiz .d2-q { font-size: 24px; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d2-poll:not(.d2-poll-list) .d2-poll-opts { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d2-poll:not(.d2-poll-list) .d2-poll-opts[data-n="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d2-poll:not(.d2-poll-list) .d2-poll-opt { min-height: 54px; }
+.w-stage[data-place$="upper"] .d2-poll:not(.d2-poll-list) { padding-bottom: 60px; }
+.w-stage[data-place$="lower"] .d2-poll:not(.d2-poll-list) { padding-top: 60px; }
+.w-stage:is([data-place^="left"], [data-place^="right"]) .w-main:is([data-layout="dm2-quiz"], [data-layout="dm2-poll"]):not(:has(.d2-poll-list)) .d-float { width: 494px; transform: none; }
+.w-stage[data-place^="left"] .w-main:is([data-layout="dm2-quiz"], [data-layout="dm2-poll"]):not(:has(.d2-poll-list)) .d-float { left: calc(var(--d-edge) + 146px); }
+.w-stage[data-place^="right"] .w-main:is([data-layout="dm2-quiz"], [data-layout="dm2-poll"]):not(:has(.d2-poll-list)) .d-float { left: auto; right: calc(var(--d-edge) + 146px); }
+/* (the case with one panel keeps its width and its height: it only moves to the side) */
+.w-stage[data-tone="soft"][data-place^="left"] .w-sheet-right.w-sheet-one,
+.w-stage[data-tone="soft"][data-place^="left"] .w-main > .w-sheet-right { left: var(--d-edge); right: auto; transform: translateY(calc(-50% - 20px)); }
+.w-stage[data-tone="soft"][data-place^="right"] .w-sheet-right.w-sheet-one,
+.w-stage[data-tone="soft"][data-place^="right"] .w-main > .w-sheet-right { left: auto; right: var(--d-edge); transform: translateY(calc(-50% - 20px)); }

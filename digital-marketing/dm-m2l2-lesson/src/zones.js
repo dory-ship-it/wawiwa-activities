@@ -10,8 +10,8 @@
 // every new screen) and the band: the hint row (hint text, the band's tool such as Check or Resume)
 // and the feedback strip (aria-live polite) flush to the bottom edges of the panel it sits in.
 // No learner-facing text here: every string arrives from the content JSON.
-import { h, fmt, reducedMotion } from './util.js?v=ec879c8d';
-import { glyph, icon } from './icons.js?v=ec879c8d';
+import { h, fmt, reducedMotion } from './util.js?v=98466210';
+import { glyph, icon } from './icons.js?v=98466210';
 
 const TONE = { correct: 'correct', neutral: 'neutral', wrong: 'wrong', notice: 'neutral', guess: 'neutral', partial: 'neutral', pause: 'neutral' };
 const LEAD = { correct: 'g-ok-disc', wrong: 'g-no-disc', neutral: 'guess' };
@@ -46,6 +46,9 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
     // (v3, Noy 10 Nov 2026: no task at the side) tone 'soft' = the photo blurred under a lighter veil, the
     // task panel centred on it (v2.css)
     if (ground?.tone) stage.dataset.tone = ground.tone; else delete stage.dataset.tone;
+    // PL1 (Noy, 17 Nov 2026: the layout adapts to the photo) place = where the photo is calm, so where the
+    // screen's text block goes (left-upper ... right-lower, center); none = centred, as before (dm.css)
+    if (photo?.place) stage.dataset.place = photo.place; else delete stage.dataset.place;
     const key = mode + '|' + kind + '|' + (ground?.side || '') + '|' + (photo?.src || '') + (photo?.mirror ? '|mirror' : '');
     if (key === lastScene) return; // the same photo in the same mode stays still (push-in once)
     lastScene = key;
