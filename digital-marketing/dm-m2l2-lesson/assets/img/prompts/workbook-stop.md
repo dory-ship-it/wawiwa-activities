@@ -1,6 +1,6 @@
 # Image slot: workbook-stop
 
-Status: PLACEHOLDER (assets/img/temp/workbook-stop.jpg is a plain gradient, temp: true). Noy chooses the final direction; the real image then replaces the file and temp becomes false.
+Status: FINAL (17 Nov 2026). assets/img/m2l2/workbook-stop.jpg; the picture that was made, its prompt direction, seed and crop are in Self- Study\Digital Marketing\M2L2-images\manifest.md. The sections below are the first placeholder brief and are superseded.
 
 ## Where it is used
 Every workbook stop (WB0 to WB4) and the home practice (S36): the picture inside the panel and the blurred ground behind it. One image for all stops, so the learner recognises the stop at once.

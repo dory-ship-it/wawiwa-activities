@@ -1,6 +1,6 @@
 # Image slot: ch2-dimensions
 
-Status: PLACEHOLDER (assets/img/temp/ch2-dimensions.jpg is a plain gradient, temp: true). Noy chooses the final direction; the real image then replaces the file and temp becomes false.
+Status: DROPPED (17 Nov 2026). K1 and K2 have no photo (Noy). The placeholder file is no longer used.
 
 ## Where it is used
 Chapter 2: the ground of K1 (the eight dimensions) and S07.

@@ -1,6 +1,6 @@
 # Image slot: ch1-opening
 
-Status: PLACEHOLDER (assets/img/temp/ch1-opening.jpg is a plain gradient, temp: true). Noy chooses the final direction; the real image then replaces the file and temp becomes false.
+Status: FINAL (17 Nov 2026). assets/img/m2l2/ch1-opening.jpg; the picture that was made, its prompt direction, seed and crop are in Self- Study\Digital Marketing\M2L2-images\manifest.md. The sections below are the first placeholder brief and are superseded.
 
 ## Where it is used
 Chapter 1 (Opening): the ground of O2, O3 and the opening screens.
