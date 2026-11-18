@@ -152,7 +152,8 @@ async function fast(p, done, what) {
 
 /* ---------- the path ---------- */
 console.log(SCORM ? '\nmain path in an LMS (mock SCORM 1.2 API)' : '\nmain path, keyboard only');
-const page = await open('?reset=1', { lms: SCORM ? {} : null });
+// (18 Nov 2026: the live coach is wired) ?live=0: the walk runs without the network, on the coach's offline tips
+const page = await open('?reset=1&live=0', { lms: SCORM ? {} : null });
 if (SCORM) expect(await page.evaluate(() => window.__l4.tracking.mode) === 'scorm12', 'SCORM: the API is found, the scorm12 adapter runs');
 
 /* Opening */

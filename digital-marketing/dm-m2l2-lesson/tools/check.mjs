@@ -470,13 +470,16 @@ google.length || missingFace.length || lacking.length
   const net = coachFiles.filter((f) => NET.test(stripComments(read(f))));
   const urls = coachFiles.flatMap((f) => (stripComments(read(f)).match(/https?:\/\/[^'"`\s)]*/g) || []).map((u) => [relative(ROOT, f), u]));
   const proxy = [...srcFiles, join(ROOT, 'index.html'), contentPath].filter((f) => /proxy|workers\.dev|\.lambda-url\./i.test(read(f)));
-  const liveOff = /createCoach\([^;]*\blive: false\b/.test(stripComments(read(join(ROOT, 'src', 'engine.js')))) && /export const COACH_URL = null;/.test(read(join(ROOT, 'src', 'coach', 'live.js')));
-  net.length || urls.length || proxy.length || !liveOff || !coachFiles.some((f) => f.endsWith('transport.js'))
-    ? fail(`coach: network code in ${net.map((f) => relative(ROOT, f)).join(', ') || '-'}; URLs ${urls.map(([f, u]) => f + ' ' + u).join(', ') || '-'}; proxy URL in ${proxy.map((f) => relative(ROOT, f)).join(', ') || '-'}; live coach off: ${liveOff}`)
-    : ok(`coach: offline only. No network code and no URL in ${coachFiles.length} src/coach files, COACH_URL null, the engine passes live: false, no proxy URL in src, index.html or content`);
-  const CSP = "default-src 'self'; img-src 'self' data:; media-src 'self'; font-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'";
+  // (Noy, 18 Nov 2026: the live coach is wired, as in the template's CO2) the one URL allowed is the lesson's
+  // coach page, once, in src/coach/live.js (an iframe, not a request)
+  const COACH_URL = 'https://dory-ship-it.github.io/wawiwa-activities/digital-marketing/dm-m2l2-coach/';
+  const badUrls = urls.filter(([f, u]) => u !== COACH_URL || !f.endsWith('live.js'));
+  net.length || badUrls.length || urls.length !== 1 || proxy.length || !coachFiles.some((f) => f.endsWith('transport.js'))
+    ? fail(`coach: network code in ${net.map((f) => relative(ROOT, f)).join(', ') || '-'}; URLs ${urls.map(([f, u]) => f + ' ' + u).join(', ') || '-'}; proxy URL in ${proxy.map((f) => relative(ROOT, f)).join(', ') || '-'}`)
+    : ok(`coach: no network code in ${coachFiles.length} src/coach files (one transport, ask()); one URL, the coach page, in live.js; no proxy URL in src, index.html or content`);
+  const CSP = "default-src 'self'; img-src 'self' data:; media-src 'self'; font-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; frame-src https://dory-ship-it.github.io; object-src 'none'; base-uri 'self'; form-action 'none'";
   const csp = read(join(ROOT, 'index.html')).match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];
-  csp === CSP ? ok("CSP: frame-src 'none' (no live coach page), everything else same-origin only") : fail(`CSP is ${csp}`);
+  csp === CSP ? ok('CSP: frame-src https://dory-ship-it.github.io (the live coach), the rest unchanged') : fail(`CSP is ${csp}`);
   const lines = content.ui.coach?.lines || {};
   const slice = content.lesson.slice.map((id) => content.screens.find((s) => s.id === id));
   const bad = [];

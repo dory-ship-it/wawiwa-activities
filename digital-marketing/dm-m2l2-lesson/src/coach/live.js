@@ -11,13 +11,12 @@
 // No SCORM call, nothing stored: the learner's own-case fields go to the page as they are (raw: the page
 // gates and redacts them), only on own-case screens. Never in review mode or with ?live=0 (the tests
 // that run without the network).
-import { h, chapterNo } from '../util.js?v=bdadc8c5';
+import { h, chapterNo } from '../util.js?v=3549480d';
 
-// DM M2 L2, Phase 1: NOT WIRED. The live AI coach for Digital Marketing waits for Dor's confirmation, so there is
-// no coach page URL here and the engine starts the coach with live: false (offline tips only). When it is
-// approved: set COACH_URL, pass live: true in src/engine.js and allow the page's origin in the CSP frame-src.
-export const COACH_URL = null;
-export const COACH_ORIGIN = null;
+// DM M2 L2 (Noy, 18 Nov 2026: wired; she reports Dor's approval): the lesson's own coach page, built in Practice
+// Studio from activities/dm-m2l2-coach (the pack is planning/coach-pack-for-dor.md).
+export const COACH_URL = 'https://dory-ship-it.github.io/wawiwa-activities/digital-marketing/dm-m2l2-coach/';
+export const COACH_ORIGIN = new URL(COACH_URL).origin;
 export const READY_MS = 8000;
 
 // CO1's coach.kind to the page's screen types
