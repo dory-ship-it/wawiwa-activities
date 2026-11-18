@@ -10,6 +10,16 @@ Shots of every state of the new screens: `planning/shots-p2/` (93 shots and 16 c
 
 Where this section and a later section disagree, this section is the current state. Shots of every changed screen: `planning/shots-r4/` (82 shots, 14 contact sheets).
 
+**Round 10 (Noy, 18 Nov 2026): clearer interactions, full screen on the films.** Newer than Round 9. Not committed.
+- O3: the row that opens to the key line looks like the other open rows (`src/dm.css`, `.d-bring-out .d-keyline`).
+- S32B: no separate lettered list. Four rows, each "item, comes from, a list of the evidence in full" (`bank: false`, `join`, `choose` in the content; `fields()` in `src/templates/decision.js`; `FI1` in `src/dm.css`). Tracking unchanged.
+- Headings that now say what to do: S05, S11, K1, S17 (listed as pilotCopy where the slide title changed).
+- Films: a Full screen button in the bar (`src/templates/video.js`, `FS1` in `src/dm.css`, `ui.video.fullscreen`). The player column goes full screen; a question stop leaves it. No button where the embed does not allow full screen (Rise and Blossom iframes need `allowfullscreen`: not tested there). The same change is in `enterprise-ai-implementation/eai-m1l4-selfstudy-v3` (its `frame.css`).
+- Films: the big Play button is in the middle of the picture, a dark see-through disc with a white triangle (Noy: as players do; it may cover the title card). DM only.
+- Tests on stamp `511dd810`: `check` passed; `check:overflow` on S05, S11, K1, S17, S32B, V1, V2: 135 states, 0 problems (before the Play button change); `walk` passed; full screen tried in a real browser on V1 (enter, play, leaves at stop 1, no errors). Not run: `test:fit`, `test:scorm`, `test:review`, full overflow.
+- EAI lesson, stamp `7ebc84de`: `check` passed, full screen tried on V1 (same result); the Play button change is there too (its `frame.css`). Its `walk` fails on O1 and O2 and then stops, before any film: the committed version (HEAD 4edaea1, unpacked to a scratch folder) fails the same way, so it is not from this change. Follow-up for whoever owns the EAI lesson.
+- Play button, both lessons: a thin light ring was added so the disc shows on a dark first frame. DM stamp `5e2dce79`, `check` passed; `walk` and overflow were not re-run after the Play button CSS.
+
 **Round 9 (Noy, 18 Nov 2026): the live coach is wired.** Newer than Round 8. Nothing is committed or pushed.
 - Coach page: built in Practice Studio (`drafts/dm-m2l2-coach`, published to `activities/dm-m2l2-coach`, built with `config/center.coach-live.json`) and copied to `wawiwa-activities/digital-marketing/dm-m2l2-coach/index.html`. Its texts (system prompt, 48 screen notes, grounding) are `planning/coach-pack-for-dor.md`, a draft Noy has not yet read line by line.
 - Lesson: `src/coach/live.js` (COACH_URL), `src/engine.js` (live except in review mode and with `?live=0`), `index.html` (CSP `frame-src https://dory-ship-it.github.io`), `tools/check.mjs` section 16 (as the template's CO2), `tools/walk.mjs` (runs with `?live=0`).

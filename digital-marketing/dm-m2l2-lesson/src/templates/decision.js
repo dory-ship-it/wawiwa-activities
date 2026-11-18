@@ -37,12 +37,12 @@
 //                     steps: three takeaway cards (any one), then the homework line with Open homework
 //                     (new tab), Download my lesson record and Finish lesson.
 // State is never colour alone: a check or cross mark with a label, the verdict word in the strip.
-import { h, fmt, resolveLink } from '../util.js?v=6ef8a83d';
-import { glyph, icon } from '../icons.js?v=6ef8a83d';
-import { attachTip } from '../tooltip.js?v=6ef8a83d';
-import { letter } from '../tracking/index.js?v=6ef8a83d';
-import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=6ef8a83d';
-import { targetSteps } from '../ghost.js?v=6ef8a83d';
+import { h, fmt, resolveLink } from '../util.js?v=5e2dce79';
+import { glyph, icon } from '../icons.js?v=5e2dce79';
+import { attachTip } from '../tooltip.js?v=5e2dce79';
+import { letter } from '../tracking/index.js?v=5e2dce79';
+import { layout, sheet, contextLine, ruleLabel, arrowNav, privacyLine, paintAnswer, explainBand, buildUp, picture, progressDots } from './stage.js?v=5e2dce79';
+import { targetSteps } from '../ghost.js?v=5e2dce79';
 
 const isStage = (screen) => screen.variant === 'single' && screen.stage?.top?.kind === 'character';
 const isCase = (screen) => screen.variant === 'single' && screen.scene === 'stage' && !isStage(screen);
@@ -761,23 +761,28 @@ function fields(ctx) {
   // FX3: the four cards as a visible lettered list (A to D, the S21 letter badges) above the rows; each
   // select lists the same letter and text (the value stays the card's key, so tracking is unchanged)
   const L = (i) => letter(i).toUpperCase();
-  const cardList = h('ol', { class: 'w-card-list' }, cardsList.map((c, i) => h('li', { class: 'w-card-item' },
+  // (Noy, 18 Nov 2026, S32B: "is this a bank to fill? simplify") screen.bank === false: no separate lettered
+  // list beside the rows (it read as a second thing to operate). Each row is one question: the item, the
+  // joining words (screen.join, "comes from") and a list of the answers in full; nothing else on the panel.
+  const solo = screen.bank === false;
+  const cardList = solo ? null : h('ol', { class: 'w-card-list' }, cardsList.map((c, i) => h('li', { class: 'w-card-item' },
     h('span', { class: 'w-kc-letter', 'aria-hidden': 'true' }, L(i)), h('span', {}, h('span', { class: 'w-sr-only' }, L(i) + ' '), c.text))));
   const rows = screen.columns.map((col) => {
-    const sel = h('select', { class: 'w-field-select', dataset: { row: col.id }, 'aria-label': col.sub ? col.label + ': ' + col.sub : col.label },
-      h('option', { value: '' }, ui.chooseCard), cardsList.map((c, i) => h('option', { value: key(c) }, `${L(i)}. ${c.text}`)));
+    const sel = h('select', { class: 'w-field-select', dataset: { row: col.id }, 'aria-label': (col.sub ? col.label + ': ' + col.sub : col.label) + (solo && screen.join ? ' ' + screen.join : '') },
+      h('option', { value: '' }, screen.choose || ui.chooseCard), cardsList.map((c, i) => h('option', { value: key(c) }, solo ? c.text : `${L(i)}. ${c.text}`)));
     const mark = h('span', { class: 'w-opt-mark w-row-mark', 'aria-hidden': 'true' });
     const state = h('span', { class: 'w-sr-only', 'aria-live': 'polite' });
     const el = h('li', { class: 'w-wb-field', dataset: { row: col.id } },
       h('b', { class: 'w-wb-n', 'aria-hidden': 'true' }, col.n ? String(col.n) : glyph('g-cross', { size: 14.08 })), // "Not AS-IS": no field number
       h('span', { class: 'w-wb-name' }, h('span', { class: 'w-wb-label' }, col.label), col.sub ? h('span', { class: 'w-wb-sub' }, col.sub) : null),
+      solo && screen.join ? h('span', { class: 'w-wb-join', 'aria-hidden': 'true' }, screen.join) : null,
       sel, mark, state);
     return { col, sel, el, mark, state };
   });
   const check = checkButton(ui, ui.buttons.check, () => doCheck(), ui.checkWhy.fields);
   const head = h('div', { class: 'w-head-row w-head-q' }, zones.instruction, h('span', { class: 'w-head-tools' }, screen.header ? h('span', { class: 'w-field-chip' }, screen.header) : null));
   // (the list in a column left of the rows, read first: above them the panel ran past its 41cqw limit)
-  layout(ctx, 'focus', sheet('focus w-sheet-fields', head, h('div', { class: 'w-fields-grid' }, cardList,
+  layout(ctx, 'focus', sheet('focus w-sheet-fields', head, h('div', { class: 'w-fields-grid' + (solo ? ' w-fields-solo' : '') }, cardList,
     h('ol', { class: 'w-wb-fields', dataset: { interaction: '' } }, rows.map((x) => x.el))), zones.band));
   zones.setHintVisible(true); // the hint on the band's row, beside the attempt marker and Check
   zones.setFeedback({ state: 'hint', text: screen.hint });

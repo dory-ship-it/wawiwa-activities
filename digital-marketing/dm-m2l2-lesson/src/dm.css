@@ -291,9 +291,11 @@
 .w-main[data-layout="sort-deck"]:has(.d-float-sort) .w-drops[data-count="2"] .w-placed { margin-top: 5px; padding: 3px 10px; font-size: 16px; line-height: 1.22; }
 .w-main[data-layout="sort-deck"]:has(.d-float-sort) .w-drops[data-count="2"] .w-drop-cards { margin-top: 2px; }
 
-/* ---------- Videos: the films' posters are their title cards (the title, a rule and four dots in the middle of the
-   frame). The Play button sits under them, clear of all three (OV1: nothing covers anything). ---------- */
-.w-bigplay { top: 85%; width: 76px; height: 76px; }
+/* ---------- Videos (Noy, 18 Nov 2026): the big Play button works the way players do: in the middle of the picture,
+   a dark see-through disc with a white triangle, over whatever the first frame shows. On a film this is the one
+   place where a control may sit on the picture (it goes as soon as the film plays). ---------- */
+.w-bigplay { top: 50%; width: 88px; height: 88px; background: rgba(8, 20, 30, .66); box-shadow: 0 0 0 2px rgba(255, 255, 255, .6), 0 2px 14px rgba(8, 20, 30, .35); color: var(--wl-white); }
+.w-bigplay:hover { background: rgba(8, 20, 30, .82); }
 
 /* ---------- S11B: the template's QH1 rule (EAI L4 v3, 15 Nov 2026: the case line and the question in one weight),
    with the template's own values. In the template the rule is keyed to its screen ids; here to this lesson's. ---------- */
@@ -743,3 +745,17 @@
 .w-stage[data-tone="soft"][data-place^="left"] .w-main > .w-sheet-right { left: var(--d-edge); right: auto; transform: translateY(calc(-50% - 20px)); }
 .w-stage[data-tone="soft"][data-place^="right"] .w-sheet-right.w-sheet-one,
 .w-stage[data-tone="soft"][data-place^="right"] .w-main > .w-sheet-right { left: auto; right: var(--d-edge); transform: translateY(calc(-50% - 20px)); }
+
+/* ---------- FS1 (Noy, 18 Nov 2026): the film in full screen ---------- */
+/* the player column is the full-screen element: its heading goes, the picture takes the room, the bar stays under it */
+.w-fs { margin: 0 -7.92px; }
+.w-player-col:fullscreen { display: flex; flex-direction: column; background: var(--wl-o1-ground); }
+.w-player-col:fullscreen .w-video-head { display: none; }
+.w-player-col:fullscreen .w-frame { flex: 1 1 auto; min-height: 0; aspect-ratio: auto; border-radius: 0; }
+.w-player-col:fullscreen .w-controls { flex: none; height: 64px; border-radius: 0; }
+.w-player-col:fullscreen .w-caption { bottom: 2.4vh; font-size: max(22px, 1.9vw); }
+/* ---------- FI1 (Noy, 18 Nov 2026): the rows-with-a-list task without a separate bank ---------- */
+/* one column: each row is a question (number, the item, "comes from", the list of answers in full) */
+.w-fields-grid.w-fields-solo { grid-template-columns: minmax(0, 1fr); }
+.w-fields-solo .w-wb-field { grid-template-columns: 35.84px minmax(0, 1fr) max-content minmax(0, 1.7fr) 29.44px; min-height: 60px; }
+.w-wb-join { font: 500 16px/normal var(--wl-font-ui); color: var(--wl-muted); }.w-player-col:fullscreen .w-tr { display: none; } /* the transcript panel sits beside the column */

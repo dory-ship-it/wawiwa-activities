@@ -24,11 +24,11 @@
 //                    term in bold, its line after it) with a check or a cross mark.
 // Title, module map, goals and key idea are presentation screens (screen.presentation): the engine
 // marks them done on arrival, so Next never locks. All text comes from the content.
-import { h } from '../util.js?v=637ff427';
-import { glyph, icon } from '../icons.js?v=637ff427';
-import { scaleOf } from '../ghost.js?v=637ff427';
-import { letter } from '../tracking/index.js?v=637ff427';
-import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst, buildUp } from './stage.js?v=637ff427';
+import { h } from '../util.js?v=7ebc84de';
+import { glyph, icon } from '../icons.js?v=7ebc84de';
+import { scaleOf } from '../ghost.js?v=7ebc84de';
+import { letter } from '../tracking/index.js?v=7ebc84de';
+import { layout, sheet, glassKicker, arrowNav, focusHead, splitFirst, buildUp } from './stage.js?v=7ebc84de';
 
 /* ---------- title (O1) ---------- */
 export const title = {

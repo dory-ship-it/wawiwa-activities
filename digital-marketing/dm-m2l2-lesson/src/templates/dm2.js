@@ -20,11 +20,11 @@
 //   infographic  (S32)  research blocks left, plan elements right, connector lines between them.
 //   homeStop     (S36)  the home practice: the slide's five instructions and the link (new tab).
 // Graded answers go out once (ctx.answer); everything else lives in the screen's flags (suspend data).
-import { h, fmt, resolveLink } from '../util.js?v=6ef8a83d';
-import { glyph, icon } from '../icons.js?v=6ef8a83d';
-import { letter } from '../tracking/index.js?v=6ef8a83d';
-import { layout, picture, arrowNav } from './stage.js?v=6ef8a83d';
-import { keyLine, boardEl, fill, headOf, floatBand, needLeft, beside } from './dm.js?v=6ef8a83d';
+import { h, fmt, resolveLink } from '../util.js?v=5e2dce79';
+import { glyph, icon } from '../icons.js?v=5e2dce79';
+import { letter } from '../tracking/index.js?v=5e2dce79';
+import { layout, picture, arrowNav } from './stage.js?v=5e2dce79';
+import { keyLine, boardEl, fill, headOf, floatBand, needLeft, beside } from './dm.js?v=5e2dce79';
 
 /* ---------- shared parts ---------- */
 const SVG = 'http://www.w3.org/2000/svg';

@@ -19,12 +19,12 @@
 // media.duration, stops[].t. Swapping the real film in is a change of those paths and times only.
 // Seeking forward never passes the part already watched or the next unanswered stop (the slider
 // clamps, a polite note says why).
-import { h, fmt, nextId } from '../util.js?v=6ef8a83d';
-import { glyph, icon } from '../icons.js?v=6ef8a83d';
-import { letter } from '../tracking/index.js?v=6ef8a83d';
-import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=6ef8a83d';
-import { targetSteps } from '../ghost.js?v=6ef8a83d';
-import { checkButton } from './decision.js?v=6ef8a83d';
+import { h, fmt, nextId } from '../util.js?v=5e2dce79';
+import { glyph, icon } from '../icons.js?v=5e2dce79';
+import { letter } from '../tracking/index.js?v=5e2dce79';
+import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=5e2dce79';
+import { targetSteps } from '../ghost.js?v=5e2dce79';
+import { checkButton } from './decision.js?v=5e2dce79';
 
 const SEEK_STEP = 5, SEEK_PAGE = 15, AT_STOP = 0.05, AT_END = 0.3;
 // FX4 (Dor): playback speed in the player bar, 1 to 2, kept for the session (every video plays at the
@@ -120,8 +120,22 @@ export const video = {
     document.addEventListener('pointerdown', outside, true);
     vid.addEventListener('loadedmetadata', applyRate); // (a new source resets the rate in some browsers)
     applyRate();
-    const controls = h('div', { class: 'w-controls', role: 'group', 'aria-label': v.controls }, playBtn, timeText, seek, speedWrap, ccBtn, muteBtn, trBtn, limitNote);
+    // (Noy, 18 Nov 2026: enlarge the film) Full screen: the picture and its bar fill the screen (the column
+    // is the full-screen element; dm.css hides its heading there). Left at a question stop, whose panel sits
+    // beside the column. No button where the page may not go full screen (an embed without allowfullscreen).
+    const fsBtn = document.fullscreenEnabled ? tool('w-fs', v.fullscreen, icon('maximize', { size: 25.6 }), false) : null;
+    const controls = h('div', { class: 'w-controls', role: 'group', 'aria-label': v.controls }, playBtn, timeText, seek, speedWrap, ccBtn, muteBtn, trBtn, fsBtn, limitNote);
     const col = h('div', { class: 'w-player-col' }, head, frame, controls);
+    const leaveFull = () => { if (document.fullscreenElement === col) document.exitFullscreen().catch(() => {}); };
+    const onFull = () => {
+      const on = document.fullscreenElement === col;
+      fsBtn.setAttribute('aria-pressed', String(on));
+      fsBtn.setAttribute('aria-label', on ? v.exitFullscreen : v.fullscreen);
+    };
+    if (fsBtn) {
+      fsBtn.addEventListener('click', () => { if (document.fullscreenElement === col) leaveFull(); else col.requestFullscreen().catch(() => {}); });
+      document.addEventListener('fullscreenchange', onFull);
+    }
 
     /* ---- transcript (the light panel, right) ---- */
     const trList = h('div', { class: 'w-transcript-list' });
@@ -245,6 +259,7 @@ export const video = {
     function enterStop(s) {
       if (atStop) return;
       atStop = s;
+      leaveFull(); // the question panel sits beside the column
       vid.pause();
       vid.currentTime = s.t;
       const i = stops.indexOf(s);
@@ -340,6 +355,6 @@ export const video = {
     }
     render();
     if (ctx.revisit) { stops.forEach((s) => answered.add(s.id)); done = true; ctx.unlockNext({ focus: false }); render(); }
-    return { unmount() { document.removeEventListener('pointerdown', outside, true); vid.pause(); vid.removeAttribute('src'); vid.load(); delete zones.main.dataset.side; } };
+    return { unmount() { leaveFull(); document.removeEventListener('fullscreenchange', onFull); document.removeEventListener('pointerdown', outside, true); vid.pause(); vid.removeAttribute('src'); vid.load(); delete zones.main.dataset.side; } };
   },
 };

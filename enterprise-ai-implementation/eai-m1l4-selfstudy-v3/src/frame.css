@@ -456,8 +456,12 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 15.36px 15.36px 0 0; background: var(--wl-o1-ground); }
 .w-video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; background: var(--wl-o1-ground); }
 .w-player[data-phase="playing"] .w-bigplay { display: none; }
-.w-bigplay { position: absolute; left: 50%; top: 74%; /* OV1 (15 Nov): below the film title card, not on it */ transform: translate(-50%, -50%); width: 89.6px; height: 89.6px; margin: 0; padding: 0 0 0 6.4px; border: 0; border-radius: 50%; display: grid; place-items: center;
-  background: var(--wl-white); box-shadow: 0 0 0 6.4px var(--wl-turquoise), 0 0 0 15.36px var(--wl-halo); color: var(--wl-teal-ink); cursor: pointer; }
+/* (Noy, 18 Nov 2026) the big Play button works the way players do: in the middle of the picture, a dark see-through
+   disc with a white triangle, over whatever the first frame shows (it goes as soon as the film plays). Before: a white
+   disc with a turquoise ring at 74%, below the film title card (OV1, 15 Nov). */
+.w-bigplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 89.6px; height: 89.6px; margin: 0; padding: 0 0 0 6.4px; border: 0; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(8, 20, 30, .66); box-shadow: 0 0 0 2px rgba(255, 255, 255, .6), 0 2px 14px rgba(8, 20, 30, .35); color: var(--wl-white); cursor: pointer; }
+.w-bigplay:hover { background: rgba(8, 20, 30, .82); }
 .w-caption { position: absolute; left: 50%; bottom: 12.8px; z-index: 1; width: max-content; max-width: calc(100% - 51.2px); transform: translateX(-50%); padding: 6.4px 17.92px; border-radius: 10.24px;
   background: var(--wl-quote-glass); font: 700 20.48px/1.3 var(--wl-font-ui); color: var(--wl-white); text-align: center; }
 /* QA1: off the film's own labels (media.captionPlaces): the top edge, or one side of the picture
@@ -470,7 +474,15 @@ textarea.w-input { height: 115.2px; min-height: 115.2px; }
 .w-play-btn, .w-tool { flex: none; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--wl-radius-btn); background: transparent; color: var(--wl-white); cursor: pointer; }
 .w-play-btn { width: 44px; margin: 0 -6.64px; }
 .w-tool { min-width: 44px; }
-.w-mute, .w-tr { margin: 0 -7.92px; }
+.w-mute, .w-tr, .w-fs { margin: 0 -7.92px; }
+/* FS1 (Noy, 18 Nov 2026): the film in full screen. The player column is the full-screen element: its heading
+   goes, the picture takes the room, the bar stays under it; the transcript button goes (its panel is beside the column) */
+.w-player-col:fullscreen { display: flex; flex-direction: column; background: var(--wl-o1-ground); }
+.w-player-col:fullscreen .w-video-head { display: none; }
+.w-player-col:fullscreen .w-frame { flex: 1 1 auto; min-height: 0; aspect-ratio: auto; border-radius: 0; }
+.w-player-col:fullscreen .w-controls { flex: none; height: 64px; border-radius: 0; }
+.w-player-col:fullscreen .w-caption { bottom: 2.4vh; font-size: max(22px, 1.9vw); }
+.w-player-col:fullscreen .w-tr { display: none; }
 .w-tr[aria-pressed="true"] { color: var(--wl-turquoise); }
 .w-cc-chip { padding: 2.56px 10.24px; border-radius: 5.12px; background: var(--wl-turquoise); font: 600 14.72px/normal var(--wl-font-label); color: var(--wl-o1-ground); }
 .w-cc[aria-pressed="false"] .w-cc-chip { background: transparent; box-shadow: inset 0 0 0 1.5px var(--wl-white); color: var(--wl-white); }
