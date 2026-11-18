@@ -3,10 +3,10 @@
 //   tiles   (S07)  NL2: on the Focus wash, a 4 x 2 grid of tiles that open in place; after all eight the
 //                  heading becomes the question and the tiles answer it (one question, two attempts).
 // Tracking: tiles = the field number of the first answer. Retries as retry events.
-import { h, fmt } from '../util.js?v=3549480d';
-import { glyph } from '../icons.js?v=3549480d';
-import { layout, arrowNav, paintAnswer } from './stage.js?v=3549480d';
-import { checkButton } from './decision.js?v=3549480d';
+import { h, fmt } from '../util.js?v=6ef8a83d';
+import { glyph } from '../icons.js?v=6ef8a83d';
+import { layout, arrowNav, paintAnswer } from './stage.js?v=6ef8a83d';
+import { checkButton } from './decision.js?v=6ef8a83d';
 
 export const explorer = {
   mount(ctx) {
