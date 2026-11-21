@@ -279,15 +279,20 @@ await arrive(page, 'K1');
   await act(page, '[data-action="explore"]');
   for (const [i, d] of dims.entries()) {
     const v = await page.evaluate(() => ({ focus: document.activeElement?.className, q: document.querySelector('.d-dim-q').textContent, kicker: document.querySelector('.d-dim-detail .d-dim-kicker').textContent,
-      chips: [...document.querySelectorAll('.d-dim-chips li')].map((x) => x.textContent), insight: document.querySelector('.d-dim-insight').textContent, key: document.querySelector('.d-dim-block .d-keyline p').textContent,
-      current: document.querySelector('.d-dim-list') ? 'list' : null, next: document.querySelector('.d-dim-next').hidden ? null : document.querySelector('.d-dim-next').textContent.trim() }));
-    const wantNext = dims[i + 1] ? UI.buttons.nextItem.replace('{name}', dims[i + 1].name) : null;
-    expect(v.focus === 'd-dim-q' && v.q === d.question && v.kicker === `${d.n} · ${d.name}` && v.chips.join('|') === d.values.join('|') && v.insight === d.insight && v.key === S.K1.keyLine && v.current === null && v.next === wantNext,
-      `K1 detail ${d.n}: focus on the question, no list of names, values [${v.chips.join(', ')}], the insight, the key line${v.next ? `, "${v.next}"` : ', no Next link'}`);
+      chips: [...document.querySelectorAll('.d-dim-chips li')].map((x) => x.textContent), insight: document.querySelector('.d-dim-insight').textContent, key: document.querySelector('.d-dim-map .d-keyline p').textContent, flow: document.querySelectorAll('.d-dim-step').length,
+      current: document.querySelector('.d-dim-list') ? 'list' : null, next: document.querySelector('.d-dim-detail .d-dim-next') ? 'link' : null }));
+    const wantNext = null; // (20 Nov 2026) the detail has one control, "All dimensions"; the map picks the next dimension
+    expect(v.focus === 'd-dim-q' && v.q === d.question && v.kicker === `${d.n} · ${d.name}` && v.chips.join('|') === d.values.join('|') && v.insight === d.insight && v.key === S.K1.keyLine && v.flow === 3 && v.current === null && v.next === wantNext,
+      `K1 detail ${d.n}: focus on the question, no list of names, three steps, values [${v.chips.join(', ')}], the insight, the key line under the map, no Next link`);
     const n = await nextState(page);
     expect(n.locked === (i < dims.length - 1), `K1: Next ${i < dims.length - 1 ? 'still locked' : 'unlocked'} after ${i + 1} of 8`);
     if (i === 0) await expectLayout(page, 'K1 detail 01');
-    if (dims[i + 1]) await act(page, '[data-action="nextDimension"]');
+    if (dims[i + 1]) {
+      await act(page, '[data-action="allDimensions"]', 'Enter', { back: true });
+      const card = await page.evaluate(() => document.querySelector('.d-dim-card .d-dim-kicker').textContent);
+      expect(card === `${dims[i + 1].n} · ${dims[i + 1].name}`, `K1: back on the map, the card is on "${card}"`);
+      await act(page, '[data-action="explore"]');
+    }
   }
   await expectLayout(page, 'K1 detail 08');
   await act(page, '[data-action="allDimensions"]', 'Enter', { back: true });
@@ -490,7 +495,7 @@ await opener(page, 'W6');
 for (const [id, pickId] of [['S20', 'ppc'], ['S22', 'ppc'], ['S24', 'social']]) {
   const s = S[id];
   await arrive(page, id);
-  expect((await page.$$('.d2-file .d2-bullets li')).length === s.facts.length && (await text(page, '.d2-case-second')) === s.second, `${id}: the case file (${s.facts.length} lines), the two questions of the slide`);
+  expect((await page.$$('.d2-file .d2-facts .d2-fact-text')).length === s.facts.length && (await text(page, '.d2-case-second')) === s.second, `${id}: the case file (${s.facts.length} lines), the two questions of the slide`);
   await answer2(page, `${id} answer`, s.options, pickId, { marked: false });
   expect((await page.evaluate(() => document.querySelector('.d2-yours').dataset.state)) === (s.options.find((o) => o.id === pickId).correct ? 'right' : 'wrong'), `${id}: one try, the learner's answer marked beside the answer`);
   const a = await page.evaluate(() => ({ title: document.querySelector('.d2-answer-title').textContent, bullets: [...document.querySelectorAll('.d2-answer .d2-bullets li')].map((x) => x.textContent), key: document.querySelector('.d2-answer .d-keyline p').textContent, options: !!document.querySelector('.d2-opts') }));
@@ -503,16 +508,14 @@ await goNext(page);
 await arrive(page, 'S26');
 {
   const s = S.S26;
-  await act(page, '[data-action="transcript"]');
-  const tr = await page.evaluate(() => [...document.querySelectorAll('.d2-pod-tr p')].map((x) => x.textContent.replace(/^[^:]+: /, '')));
+  const tr = await page.evaluate(() => [...document.querySelectorAll('.d2-pod-tr p')].map((x) => x.textContent.replace(/^\d*[^:]+: /, '')));
   expect(JSON.stringify(tr) === JSON.stringify(s.podcast.script.map((l) => l.text)), `S26: the transcript holds the whole script (${tr.length} lines)`);
-  await press(page, 'Enter');
   await page.waitForFunction(() => document.querySelector('.d2-audio').readyState >= 1);
   await act(page, '[data-action="audioPlay"]');
-  await page.evaluate(() => { const a = document.querySelector('.d2-audio'); a.muted = true; a.currentTime = 66; });
+  await page.evaluate(() => { const a = document.querySelector('.d2-audio'); a.muted = true; a.currentTime = 28.5; }); // (21 Nov 2026: the produced audio is 0:57; observation 4 is spoken at 0:27 to 0:32)
   await wait(700);
-  const now = await page.evaluate(() => ({ cap: document.querySelector('.d2-pod-cap').textContent, obs: document.querySelector('.d2-obs[data-now="true"]')?.dataset.obs, locked: document.querySelector('.w-next').dataset.locked }));
-  expect(now.obs === '4' && now.cap.length > 0 && now.locked === 'true', `S26: at 1:06 observation ${now.obs} is highlighted, the caption reads "${now.cap}", Next still locked`);
+  const now = await page.evaluate(() => ({ cap: document.querySelector('.d2-tr-line[data-now="true"]')?.textContent || '', obs: document.querySelector('.d2-tr-line[data-now="true"]')?.dataset.obs, locked: document.querySelector('.w-next').dataset.locked }));
+  expect(now.obs === '4' && now.cap.length > 0 && now.locked === 'true', `S26: at 0:28 observation ${now.obs} is highlighted, the line being spoken reads "${now.cap}", Next still locked`);
   await page.evaluate(() => { const a = document.querySelector('.d2-audio'); a.currentTime = a.duration - 0.4; a.play(); });
   await page.waitForFunction(() => document.querySelector('.w-next').dataset.locked === 'false', { timeout: 15000 }).catch(() => {});
   await expectOpen(page, 'S26 heard to the end');
@@ -599,10 +602,10 @@ await arrive(page, 'S32B');
 await arrive(page, 'S33');
 {
   const s = S.S33;
-  expect((await page.$$('.d2-slide-list li')).length === s.list.length, `S33: the slide's ${s.list.length} lines beside the question`);
+  expect((await page.$$('.d2-slide-list li')).length === 0 && (await page.$$('.d2-duel-opt')).length === 2, 'S33: two cards to choose between, the slide\'s lines wait for the choice');
   await act(page, '.d2-poll-opt[data-id="now"]', ' ');
   await expectBand(page, 'S33', { state: 'neutral', text: s.options[0].feedback });
-  expect((await text(page, '.d2-poll-after .d-keyline p')) === s.keyLine, `S33: the key line "${s.keyLine}"`);
+  expect((await text(page, '.d2-poll-after .d-keyline p')) === s.keyLine && (await page.$$('.d2-poll-after .d2-slide-list li')).length === s.list.length, `S33: after the choice, the slide's ${s.list.length} lines and the key line "${s.keyLine}"`);
   await expectLayout(page, 'S33 chosen');
   await goNext(page);
 }
@@ -629,7 +632,7 @@ await opener(page, 'W8');
   await goNext(page);
   await page.waitForFunction(() => window.__l4.current === 'CHKR');
   const r = await page.evaluate(() => ({ h: document.querySelector('#w-instruction').textContent, chip: document.querySelector('.w-result-chip').textContent.trim(), missed: [...document.querySelectorAll('.w-missed-item')].map((x) => x.dataset.item || x.textContent).length, links: [...document.querySelectorAll('.w-review-link')].map((x) => x.textContent.trim()) }));
-  expect(r.h === '4 of 5 right (80 of 100). Pass mark: 80.' && r.chip === S.CHKR.passed.chip && r.missed === 0, `CHKR: "${r.h}" ${r.chip} (the missed items and their review links show only when not passed, as in the template)`);
+  expect(r.h === 'You got 4 of 5 right.' && r.chip === S.CHKR.passed.chip && r.missed === 0, `CHKR: "${r.h}" ${r.chip} (the missed items and their review links show only when not passed, as in the template)`);
   await expectLayout(page, 'CHKR passed');
   await goNext(page);
 }

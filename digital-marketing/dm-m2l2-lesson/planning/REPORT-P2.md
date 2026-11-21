@@ -10,6 +10,28 @@ Shots of every state of the new screens: `planning/shots-p2/` (93 shots and 16 c
 
 Where this section and a later section disagree, this section is the current state. Shots of every changed screen: `planning/shots-r4/` (82 shots, 14 contact sheets).
 
+**Round 11 (Noy, 20 Nov 2026): calmer screens, part 1.** Newer than Round 10. Not committed. A copy of `src`, `content`, `tools` and the two pages as they were before this round: `Desktop/Wawiwa/_backup-dm-m2l2-lesson-2026-11-20` (outside the repo); the last pushed commit is c7e9eab.
+- SP1: the body starts 32 px under the heading block on the `d2` layouts, the tiles and the question cards (it was 1 to 12 px). The client conversation (S17C) and the data table (S30) keep a smaller step, so they stay clear of the feedback band.
+- CX1: the line over a heading is a tag (17 px, tinted), not small print. Films: the heading sits just over the picture.
+- CHKR: the heading is "You got x of n right."; the score and the pass mark are a small line under it (`passNote`).
+- S20, S22, S24 (SIM1): the tag "Simulation n of 3"; each fact of the case is a row with an icon and a two-word label (`factTags`, pilot copy; the facts stay word for word). Word budgets +2.
+- S26 (POD1): the side list of the seven observations and the caption box are gone. One text beside the player, always open: the script line by line, the line being spoken marked, the observations numbered. The audio is still the silent placeholder.
+- S26B: the tag says "From the podcast: observation 4 of 7"; the three answers are one row.
+- K1 (DIM1): a dimension's detail is one flow: icon and name as the title, then three steps (the question, possible values, required insight). One control, "All dimensions"; back on the map the card is on the next dimension not yet explored. The key line is under the map, once.
+- Tests on stamp `671c762e`: `check` passed, `walk` passed (K1, S20 to S24, S26 and CHKR expectations updated in `tools/walk.mjs` and `tools/states.mjs`). Full overflow: running when this was written. Not run: `test:fit`, `test:scorm`, `test:review`.
+- Part 2, same day:
+  - S15 (CH1): nine channel cards (icon, name, module chip; what the channel does opens on a click), no table and no column headings. CSS only.
+  - S17 (PLAN1): heading "Build the example plan, one column at a time."; one button under the table, "Add the next column: {name}" (`cta`); the column headings read as headings; empty cells are plain.
+  - S14 (CL1): the eight challenges as four by two tiles with a check box; "I have seen this" stays for screen readers. After Done the tiles give the closing card room.
+  - S16 (ST1): heading "Open the four stages."; the stages are a row of steps that fill in one by one (`flow: "row"`), the managing-expectations box comes under them after the fourth. Word budget 95.
+  - S28 (FUN1): the control first (navy card), the slide's two lines under it, smaller; tag "What the funnel is".
+  - S33 (DUEL1): two large cards with an icon (`duel`); the slide's three lines and the key line come after the choice. Tag: the slide's question.
+  - S07 (SORT1): in a sorted column only the card placed last shows its reason line.
+- Tests on stamp after part 2: `check` passed, `walk` passed (S33 expectations updated). Full overflow: started when this was written; an earlier run of the day found the S15 and S17 heads touching their old tables, both since rebuilt.
+- Full overflow after part 2: 471 states, 0 problems.
+- Podcast (21 Nov 2026): produced with ElevenLabs, ten takes, one per script line. Voice A "Laura" (the films' voice), voice B "Roger" for the one question. `assets/audio/p1.mp3` is 0:57 (56.62 s, mono, 96 kbps, -16 LUFS); `p1.en.vtt` and `p1.cues.json` are timed from the takes; `media.temp` is false and the settings are in `media.$comment`. The placeholder was 2:00. `tools/walk.mjs` now seeks to 0:28 for observation 4. After it: `check` passed, `walk` passed. Not listened to by a person yet. The takes and the build script are in the session's scratch folder only.
+- Not done: S38 (Noy asked whether it is needed; it carries the lesson's finish, so removing it needs the finish moved and the walk rewritten), S11B heading sizes (not yet compared).
+
 **Round 10 (Noy, 18 Nov 2026): clearer interactions, full screen on the films.** Newer than Round 9. Not committed.
 - O3: the row that opens to the key line looks like the other open rows (`src/dm.css`, `.d-bring-out .d-keyline`).
 - S32B: no separate lettered list. Four rows, each "item, comes from, a list of the evidence in full" (`bank: false`, `join`, `choose` in the content; `fields()` in `src/templates/decision.js`; `FI1` in `src/dm.css`). Tracking unchanged.

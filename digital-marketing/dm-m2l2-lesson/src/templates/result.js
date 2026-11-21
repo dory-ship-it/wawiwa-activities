@@ -8,9 +8,9 @@
 //           in the footer), then "Retake now" (the whole check, at once)
 // Next is open either way (a presentation screen): below 80 the learner may finish as failed and come
 // back to retake. Nothing is tracked here: the attempt's score went out when S21 ended (ctx.checkDone).
-import { h, fmt, chapterNo } from '../util.js?v=5e2dce79';
-import { glyph, icon } from '../icons.js?v=5e2dce79';
-import { layout, sheet } from './stage.js?v=5e2dce79';
+import { h, fmt, chapterNo } from '../util.js?v=a089d641';
+import { glyph, icon } from '../icons.js?v=a089d641';
+import { layout, sheet } from './stage.js?v=a089d641';
 
 const R = 64, C = 2 * Math.PI * R; // the ring, in its 160 x 160 box
 
@@ -62,7 +62,9 @@ export const result = {
     }
 
     layout(ctx, 'focus', sheet('focus w-sheet-wide w-result',
-      h('div', { class: 'w-result-grid', dataset: { interaction: '' } }, figure, h('div', { class: 'w-result-body' }, zones.instruction, parts)),
+      h('div', { class: 'w-result-grid', dataset: { interaction: '' } }, figure, h('div', { class: 'w-result-body' }, zones.instruction,
+        // (Noy, 20 Nov 2026: the pass mark was as loud as the score) the pass mark is a small line under the heading
+        screen.passNote ? h('p', { class: 'd-pass-note' }, fmt(screen.passNote, { x: sc.x, n: sc.n, p })) : null, parts)),
       zones.band));
     zones.setFeedback({ state: 'idle' });
     return { unmount() {} };

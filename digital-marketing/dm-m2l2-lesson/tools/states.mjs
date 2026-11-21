@@ -39,7 +39,7 @@ export async function dimension(p, i) {
 }
 export async function allDimensions(p) {
   await dimension(p, 0);
-  for (let i = 1; i < 8; i++) await click(p, '[data-action="nextDimension"]');
+  for (let i = 1; i < 8; i++) { await click(p, '[data-action="allDimensions"]'); await click(p, '[data-action="explore"]'); }
 }
 export async function allGoals(p) { await p.evaluate(() => document.querySelectorAll('.d-goal').forEach((b) => b.click())); }
 
@@ -215,7 +215,6 @@ export const STATES = [
   ['S26', 'ready', async () => {}],
   ['S26', 'observation 1', async (p) => audioAt(p, 8)],
   ['S26', 'observation 4, the question', async (p) => audioAt(p, 66)],
-  ['S26', 'transcript open', async (p) => click(p, '[data-action="transcript"]')],
   ['S26', 'ended', audioEnd],
   ['S26B', 'question', async () => {}],
   ['S26B', 'chosen', async (p) => click(p, '.d2-poll-opt[data-id="unsure"]')],

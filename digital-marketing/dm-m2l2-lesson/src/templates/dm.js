@@ -19,9 +19,9 @@
 // Shared parts: keyLine() (one sentence of the trainer's, in the quote style: a turquoise rule and larger
 // type; at most one per screen) and boardEl() (the four components).
 // Nothing here is graded or sent to the LMS: answers live in the screen's flags (suspend data) only.
-import { h, fmt, resolveLink, reducedMotion } from '../util.js?v=5e2dce79';
-import { glyph, icon } from '../icons.js?v=5e2dce79';
-import { layout, sheet, picture, arrowNav } from './stage.js?v=5e2dce79';
+import { h, fmt, resolveLink, reducedMotion } from '../util.js?v=a089d641';
+import { glyph, icon } from '../icons.js?v=a089d641';
+import { layout, sheet, picture, arrowNav } from './stage.js?v=a089d641';
 
 /* ---------- shared parts ---------- */
 // fill(el, ...children): replaceChildren without the empty ones (replaceChildren(null) would print "null")
@@ -338,7 +338,8 @@ export const dimensionMap = {
     const cardQ = h('p', { class: 'd-dim-cardq' });
     const exploreBtn = h('button', { class: 'w-btn d-dim-explore', type: 'button', dataset: { action: 'explore' } }, h('span', {}, ui.buttons.explore), glyph('g-arrow', { size: 19.2 }));
     const card = h('section', { class: 'd-dim-card', id: 'd-dim-card', hidden: true, 'aria-live': 'polite' }, caret, h('div', { class: 'd-dim-cardtext' }, cardKicker, cardQ), exploreBtn);
-    const mapView = h('div', { class: 'd-dim-map', dataset: { interaction: '' } }, track, card);
+    // (Noy, 20 Nov 2026) the key line is said once, under the map, not again inside each of the eight details
+    const mapView = h('div', { class: 'd-dim-map', dataset: { interaction: '' } }, track, card, keyLine(screen.keyLine, 'd-keyline-s'));
 
     /* ---- view 2: the detail ---- */
     const backBtn = h('button', { class: 'd-dim-back', type: 'button', dataset: { action: 'allDimensions' } }, icon('chevron-left', { size: 20 }), h('span', {}, ui.buttons.allDimensions));
@@ -357,10 +358,15 @@ export const dimensionMap = {
     const dotsEl = h('div', { class: 'd-dim-dots', role: 'img' }, dots);
     const nextText = h('span', {});
     const nextBtn = h('button', { class: 'd-dim-next', type: 'button', dataset: { action: 'nextDimension' } }, nextText, glyph('g-arrow', { size: 18 }));
-    const detail = h('article', { class: 'd-dim-detail' }, dKicker, dQ,
-      h('div', { class: 'd-dim-layer' }, h('p', { class: 'd-dim-label' }, ui.dm.values), dChips),
-      h('div', { class: 'd-dim-block' }, h('p', { class: 'd-dim-label' }, ui.dm.insight), dInsight, keyLine(screen.keyLine, 'd-keyline-s')),
-      h('div', { class: 'd-dim-foot' }, dotsEl, nextBtn));
+    // (Noy, 20 Nov 2026: "a screen full of words, many small headings, no focus; only a Back button") one dimension,
+    // one flow to read left to right: its icon and name as the title, then three steps (the question, what we see,
+    // what we decide), each with its icon. The only control is "All dimensions"; the map picks the next one.
+    const dIcon = h('span', { class: 'd-dim-bigicon', 'aria-hidden': 'true' });
+    const step = (cls, ic, label, bodyEl) => h('section', { class: 'd-dim-step ' + cls },
+      h('p', { class: 'd-dim-label' }, h('span', { class: 'd-dim-stepicon', 'aria-hidden': 'true' }, icon(ic, { size: 20 })), h('span', {}, label)), bodyEl);
+    const arrow = () => h('span', { class: 'd-dim-arrow', 'aria-hidden': 'true' }, icon('chevron-right', { size: 26 }));
+    const detail = h('article', { class: 'd-dim-detail d-dim-flow' }, h('div', { class: 'd-dim-title' }, dIcon, dKicker),
+      h('div', { class: 'd-dim-steps' }, step('d-dim-s1', 'help-circle', ui.dm.question, dQ), arrow(), step('d-dim-s2', 'eye', ui.dm.values, dChips), arrow(), step('d-dim-s3', 'lightbulb', ui.dm.insight, dInsight)));
     // (Noy, 15 Nov 2026: "only the right side needs to stay") the list of the eight names is not shown in the
     // detail view; the dots, "Next: ..." and "All dimensions" move between dimensions. Set screen.showList to
     // bring the list back.
@@ -398,6 +404,7 @@ export const dimensionMap = {
       visited.add(d.id);
       if (first && !ctx.revisit) ctx.flags.set('v', [...visited]);
       dKicker.textContent = `${d.n} · ${d.name}`;
+      dIcon.replaceChildren(icon(d.icon, { size: 34 }));
       dQ.textContent = d.question;
       dChips.replaceChildren(...d.values.map((v) => h('li', {}, v)));
       dInsight.textContent = d.insight;
@@ -418,7 +425,11 @@ export const dimensionMap = {
       mapView.hidden = false;
       backBtn.hidden = true;
       zones.main.dataset.view = 'map';
-      const i = Math.max(0, cur);
+      // back on the map, the card is already on the next dimension not yet explored (the one just read, when all are)
+      const from = Math.max(0, cur);
+      const order = [...dims.keys()].map((k) => (from + 1 + k) % dims.length);
+      const todo = order.find((k) => !visited.has(dims[k].id));
+      const i = todo === undefined ? from : todo;
       cur = -1;
       mark();
       select(i);

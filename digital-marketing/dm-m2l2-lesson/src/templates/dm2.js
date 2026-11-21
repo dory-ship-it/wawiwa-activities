@@ -20,11 +20,11 @@
 //   infographic  (S32)  research blocks left, plan elements right, connector lines between them.
 //   homeStop     (S36)  the home practice: the slide's five instructions and the link (new tab).
 // Graded answers go out once (ctx.answer); everything else lives in the screen's flags (suspend data).
-import { h, fmt, resolveLink } from '../util.js?v=5e2dce79';
-import { glyph, icon } from '../icons.js?v=5e2dce79';
-import { letter } from '../tracking/index.js?v=5e2dce79';
-import { layout, picture, arrowNav } from './stage.js?v=5e2dce79';
-import { keyLine, boardEl, fill, headOf, floatBand, needLeft, beside } from './dm.js?v=5e2dce79';
+import { h, fmt, resolveLink } from '../util.js?v=a089d641';
+import { glyph, icon } from '../icons.js?v=a089d641';
+import { letter } from '../tracking/index.js?v=a089d641';
+import { layout, picture, arrowNav } from './stage.js?v=a089d641';
+import { keyLine, boardEl, fill, headOf, floatBand, needLeft, beside } from './dm.js?v=a089d641';
 
 /* ---------- shared parts ---------- */
 const SVG = 'http://www.w3.org/2000/svg';
@@ -113,7 +113,7 @@ export const checklist = {
     const ready = () => { doneBtn.disabled = !marked.size; label.textContent = marked.size ? ui.buttons.done : ui.dm.chooseFirst; };
     const rows = screen.challenges.map((it) => {
       const b = h('button', { class: 'd2-cl-row', type: 'button', 'aria-pressed': String(marked.has(it.id)), dataset: { item: it.id } },
-        h('span', { class: 'd2-cl-box', 'aria-hidden': 'true' }, glyph('g-check-b', { size: 14 })), it.icon ? h('span', { class: 'd2-disc', 'aria-hidden': 'true' }, icon(it.icon, { size: 18 })) : null, h('span', { class: 'd2-cl-text' }, it.text), h('span', { class: 'd2-cl-tag' }, ui.dm.seen));
+        h('span', { class: 'd2-cl-box', 'aria-hidden': 'true' }, glyph('g-check-b', { size: 14 })), it.icon ? h('span', { class: 'd2-disc', 'aria-hidden': 'true' }, icon(it.icon, { size: 18 })) : null, h('span', { class: 'd2-cl-text' }, it.text), h('span', { class: 'd2-cl-tag w-sr-only' }, ui.dm.seen)); // (20 Nov 2026) the tiles carry a check box; the words stay for screen readers
       b.addEventListener('click', () => {
         if (marked.has(it.id)) marked.delete(it.id); else marked.add(it.id);
         b.setAttribute('aria-pressed', String(marked.has(it.id)));
@@ -268,7 +268,15 @@ export const stages = {
     let n = ctx.revisit ? L : Math.min(L, Math.max(1, ctx.flags.get('n') || 1));
     const items = screen.stages.map((t, i) => h('li', { class: 'd2-stage', tabindex: '-1' }, h('span', { class: 'd2-stage-n', 'aria-hidden': 'true' }, String(i + 1)), h('span', {}, t)));
     const more = btn('w-btn d2-more', 'more', h('span', {}, ui.buttons[screen.more]), glyph('g-arrow', { size: 19.2 }));
-    const paint = () => { items.forEach((li, i) => { li.hidden = i >= n; }); more.hidden = n >= L; };
+    // (Noy, 20 Nov 2026, S16: "space, something more interesting, a lot of text on the right") screen.flow "row": the
+    // stages are a row of steps that fill in one by one (a step still to come shows its number only), and the box
+    // beside them comes after the last step, under the row, so the screen never shows both at once
+    const row = screen.flow === 'row';
+    const paint = () => {
+      items.forEach((li, i) => { if (row) li.dataset.wait = String(i >= n); else li.hidden = i >= n; });
+      more.hidden = n >= L;
+      if (row && side) side.hidden = n < L;
+    };
     more.addEventListener('click', () => { n += 1; ctx.flags.set('n', n); paint(); (n >= L ? items[n - 1] : more).focus({ preventScroll: true }); });
     let board = null, side = null;
     if (screen.board) { board = boardEl(ctx, screen.board); side = h('div', { class: 'd-close-board d2-stage-side' }, board.el); }
@@ -277,7 +285,7 @@ export const stages = {
       side = h('aside', { class: 'd2-box d2-stage-side' }, h('p', { class: 'd2-box-label' }, b.label), keyLine(b.keyLine), b.lines.map((t) => h('p', { class: 'd2-box-line' }, t)));
     }
     layout(ctx, 'dm2-stages', headOf(ctx, screen.eyebrow),
-      body('stages', h('div', { class: 'd2-stage-col' }, h('ol', { class: 'd2-stage-list', 'aria-live': 'polite' }, items), more), side), floatBand(ctx));
+      body('stages' + (row ? ' d2-stages-row' : ''), h('div', { class: 'd2-stage-col' }, h('ol', { class: 'd2-stage-list', 'aria-live': 'polite' }, items), more), side), floatBand(ctx));
     ctx.zones.setFeedback({ state: 'hint', text: '' });
     paint();
     return { unmount() { board?.stop(); } };
@@ -300,6 +308,8 @@ export const builder = {
     const cells = screen.rows.map((r) => r.map((t, i) => (i ? h('td', {}, h('span', {}, t)) : h('th', { scope: 'row' }, t))));
     const totalCell = h('td', {}, h('span', {}, screen.total.value));
     const totalRow = h('tr', { class: 'd2-b-total' }, h('th', { scope: 'row' }, screen.total.label), C.slice(1, -1).map(() => h('td', {})), totalCell);
+    const ctaText = h('span', {});
+    const cta = btn('w-btn w-btn-action d2-cl-done d2-b-cta', 'addColumn', icon('plus', { size: 20 }), ctaText);
     const table = h('table', { class: 'd2-b' }, h('caption', { class: 'w-sr-only' }, screen.eyebrow),
       h('thead', {}, h('tr', {}, heads.map((x) => x.th))), h('tbody', {}, cells.map((r) => h('tr', {}, r)), totalRow));
     function paint() {
@@ -313,8 +323,19 @@ export const builder = {
       });
       totalCell.dataset.filled = String(n >= last);
       totalRow.dataset.filled = String(n >= last);
+      cta.hidden = n >= last;
+      if (n < last) ctaText.textContent = fmt(screen.cta, { name: C[n + 1].label });
       if (n >= last) finish(ctx, false); else needLeft(ctx, last - n);
     }
+    // (Noy, 20 Nov 2026: "the learner does not understand what to do here") one button under the table says the
+    // next move by name ("Add the next column: Goal"); the column headings stay clickable, but read as headings
+    cta.addEventListener('click', () => {
+      if (n >= last) return;
+      n += 1;
+      ctx.flags.set('n', n);
+      paint();
+      if (n >= last) zones.nextBtn.focus();
+    });
     heads.forEach((x, i) => x.b?.addEventListener('click', () => {
       if (i !== n + 1) return;
       n = i;
@@ -322,7 +343,7 @@ export const builder = {
       paint();
       if (n < last) heads[n + 1].b.focus({ preventScroll: true }); else zones.nextBtn.focus();
     }));
-    layout(ctx, 'dm2-builder', headOf(ctx, screen.eyebrow), body('builder', table), floatBand(ctx));
+    layout(ctx, 'dm2-builder', headOf(ctx, screen.eyebrow), body('builder', table), cta, floatBand(ctx));
     zones.setFeedback({ state: 'hint', text: screen.hint });
     paint();
     if (!ctx.revisit && !n) ctx.ghost({ type: screen.ghost?.type || 'builder', steps: () => [{ point: beside(heads[1].b, 0.86, 0.9), hold: 1100 }] });
@@ -342,12 +363,18 @@ export const caseFile = {
     const slot = h('div', { class: 'd2-slot' });
     const list = optionList(ctx, screen.options, screen.instruction);
     list.el.classList.add('d2-opts-row');
-    const facts = h('ul', { class: 'd2-bullets' }, screen.facts.map((t) => h('li', {}, t)));
+    // (Noy, 20 Nov 2026: "the bullets are crowded, no wish to read") with screen.factTags each fact is a row to scan:
+    // an icon tile, a two-word label, then the fact of the slide word for word
+    const tags = screen.factTags;
+    const facts = tags
+      ? h('ul', { class: 'd2-facts' }, screen.facts.map((t, i) => h('li', {}, h('span', { class: 'd2-fact-icon', 'aria-hidden': 'true' }, icon(tags[i].icon, { size: 22 })),
+        h('span', { class: 'd2-fact-body' }, h('b', { class: 'd2-fact-label' }, tags[i].label), h('span', { class: 'd2-fact-text' }, t)))))
+      : h('ul', { class: 'd2-bullets' }, screen.facts.map((t) => h('li', {}, t)));
     const toggleText = h('span', {});
     const toggle = btn('d2-file-toggle', 'showCase', icon('eye', { size: 18 }), toggleText);
     toggle.hidden = true;
     const file = h('section', { class: 'd2-file' },
-      h('div', { class: 'd2-file-top' }, h('div', {}, h('p', { class: 'd2-file-kicker' }, icon('folder', { size: 18 }), h('span', {}, ui.dm.caseFile + ' · ' + screen.eyebrow)), h('h2', { class: 'd2-file-title' }, screen.title)), toggle),
+      h('div', { class: 'd2-file-top' }, h('div', {}, h('p', { class: 'd2-file-kicker' }, icon('folder', { size: 20 }), h('span', {}, screen.eyebrow)), h('h2', { class: 'd2-file-title' }, screen.title)), toggle),
       facts);
     const more = h('div', { class: 'd2-answer-more', hidden: true });
     const ask = h('div', { class: 'd2-case-ask' }, zones.instruction, second, slot);
@@ -413,12 +440,15 @@ export const podcast = {
     const seek = h('input', { class: 'd2-pod-seek', type: 'range', min: '0', max: String(dur), step: '0.1', value: '0', 'aria-label': a.seek });
     const time = h('span', { class: 'd2-pod-time', 'aria-hidden': 'true' }, fmt(a.seekText, { t: clock(0), d: clock(dur) }));
     const speedBtn = h('button', { class: 'd2-pod-chip', type: 'button', dataset: { action: 'audioSpeed' } });
-    const trBtn = h('button', { class: 'd2-pod-chip', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'd2-pod-tr', dataset: { action: 'transcript' } }, icon('transcript', { size: 17 }), h('span', {}, a.transcript));
-    const cap = h('p', { class: 'd2-pod-cap', 'aria-hidden': 'true' });
-    const obs = screen.observations.map((t, i) => h('li', { class: 'd2-obs', dataset: { obs: String(i + 1) } }, h('span', { class: 'd2-obs-n', 'aria-hidden': 'true' }, String(i + 1)), h('span', {}, t)));
-    const obsList = h('ol', { class: 'd2-obs-list' }, obs);
-    const transcript = h('div', { class: 'd2-pod-tr', id: 'd2-pod-tr', hidden: true, tabindex: '0', role: 'region', 'aria-label': a.transcript },
-      screen.podcast.script.map((l) => h('p', {}, h('b', {}, (l.voice === 'A' ? a.voiceA : a.voiceB) + ': '), l.text)));
+    // (Noy, 20 Nov 2026: "the list repeats the podcast; are captions and a script not the same thing?") one text
+    // beside the player, always open: the script, line by line, the line being spoken marked. The slide's seven
+    // observations are the lines with a number. No second list, no caption box, no button to open anything.
+    const lines = screen.podcast.script.map((l) => {
+      const n = screen.observations.indexOf(l.text) + 1;
+      return h('p', { class: 'd2-tr-line', dataset: n ? { obs: String(n) } : {} }, n ? h('span', { class: 'd2-obs-n', 'aria-hidden': 'true' }, String(n)) : h('span', { class: 'd2-tr-gap', 'aria-hidden': 'true' }),
+        h('span', {}, h('b', { class: 'w-sr-only' }, (l.voice === 'A' ? a.voiceA : a.voiceB) + ': '), l.text));
+    });
+    const transcript = h('div', { class: 'd2-pod-tr', id: 'd2-pod-tr', tabindex: '0', role: 'region', 'aria-label': a.transcript }, lines);
     const paintSpeed = () => { const x = SPEEDS[speed]; audio.playbackRate = x; speedBtn.textContent = fmt(a.speedChip, { x }); speedBtn.setAttribute('aria-label', fmt(a.speed, { x })); };
     const done = (live) => { heard = true; finish(ctx, live); };
     function tick() {
@@ -428,8 +458,13 @@ export const podcast = {
       seek.setAttribute('aria-valuetext', fmt(a.seekText, { t: clock(t), d: clock(dur) }));
       time.textContent = fmt(a.seekText, { t: clock(t), d: clock(dur) });
       const c = cues.find((x) => t >= x.t && t < x.end);
-      cap.textContent = c ? c.text : '';
-      obs.forEach((li, i) => { li.dataset.now = String(!!c && c.obs === i + 1); });
+      const k = c ? cues.indexOf(c) : -1;
+      lines.forEach((p, i) => {
+        const on = i === k;
+        if ((p.dataset.now === 'true') === on) return;
+        p.dataset.now = String(on);
+        if (on) transcript.scrollTop = Math.max(0, p.offsetTop - transcript.offsetTop - 60);
+      });
     }
     play.addEventListener('click', () => { if (audio.paused) audio.play().catch(() => {}); else audio.pause(); });
     const state = () => { const on = !audio.paused && !audio.ended; play.setAttribute('aria-label', on ? a.pause : a.play); playIcon.replaceChildren(icon(on ? 'pause' : 'play', { size: 30 })); };
@@ -444,18 +479,11 @@ export const podcast = {
       tick();
     });
     speedBtn.addEventListener('click', () => { speed = (speed + 1) % SPEEDS.length; paintSpeed(); });
-    trBtn.addEventListener('click', () => {
-      const on = trBtn.getAttribute('aria-expanded') !== 'true';
-      trBtn.setAttribute('aria-expanded', String(on));
-      transcript.hidden = !on;
-      obsList.hidden = on;
-    });
     fetch(m.cues).then((r) => r.json()).then((j) => { cues = j.items || []; tick(); }).catch(() => {});
     const player = h('section', { class: 'd2-pod', role: 'group', 'aria-label': a.controls }, audio,
       h('div', { class: 'd2-pod-row' }, play, h('div', { class: 'd2-pod-mid' }, seek, time)),
-      h('div', { class: 'd2-pod-row d2-pod-tools' }, speedBtn, trBtn),
-      h('div', { class: 'd2-pod-capbox' }, h('span', { class: 'd2-box-label' }, a.captions), cap));
-    layout(ctx, 'dm2-podcast', headOf(ctx, screen.eyebrow), body('podcast', player, h('div', { class: 'd2-pod-side' }, obsList, transcript)), floatBand(ctx));
+      h('div', { class: 'd2-pod-row d2-pod-tools' }, speedBtn));
+    layout(ctx, 'dm2-podcast', headOf(ctx, screen.eyebrow), body('podcast', player, h('div', { class: 'd2-pod-side' }, h('p', { class: 'd2-box-label' }, a.transcript), transcript)), floatBand(ctx));
     zones.setFeedback({ state: 'hint', text: screen.hint });
     paintSpeed();
     if (heard) done(false);
@@ -468,7 +496,14 @@ export const poll = {
   mount(ctx) {
     const { screen, zones } = ctx;
     const O = screen.options;
-    const btns = O.map((o) => h('button', { class: 'd2-poll-opt', type: 'button', role: 'radio', 'aria-checked': 'false', dataset: { id: o.id } }, o.label));
+    // (Noy, 20 Nov 2026, S33: "bullets and multiple choice again; vary it") screen.duel: "this or that". Two large
+    // cards, each an icon, its name and its second half (the label is split at its comma); the slide's lines are not
+    // beside the question: they come after the choice, as what the choice means.
+    const duel = !!screen.duel;
+    const parts = (o) => { const k = o.label.indexOf(', '); return k < 0 ? [o.label, ''] : [o.label.slice(0, k), o.label.slice(k + 2)]; };
+    const btns = O.map((o) => h('button', { class: 'd2-poll-opt' + (duel ? ' d2-duel-opt' : ''), type: 'button', role: 'radio', 'aria-checked': 'false', dataset: { id: o.id } },
+      duel ? [o.icon ? h('span', { class: 'd2-duel-icon', 'aria-hidden': 'true' }, icon(o.icon, { size: 32 })) : null, h('b', {}, parts(o)[0]), h('span', { class: 'd2-duel-sub' }, parts(o)[1])] : o.label));
+    const slideList = screen.list ? h('ul', { class: 'd2-slide-list' }, screen.list.map((t) => h('li', {}, t))) : null;
     const group = h('div', { class: 'd2-poll-opts', role: 'radiogroup', 'aria-labelledby': 'w-instruction', dataset: { n: String(O.length) } }, btns);
     arrowNav(group, { selector: '.d2-poll-opt' });
     const after = h('div', { class: 'd2-poll-after', 'aria-live': 'polite' });
@@ -477,7 +512,7 @@ export const poll = {
       btns.forEach((b, k) => b.setAttribute('aria-checked', String(k === i)));
       const text = O[i].feedback || screen.feedback?.any;
       if (text) zones.setFeedback({ state: 'neutral', text });
-      fill(after, screen.keyLine ? keyLine(screen.keyLine, 'd-keyline-s') : null,
+      fill(after, duel ? slideList : null, screen.keyLine ? keyLine(screen.keyLine, 'd-keyline-s') : null,
         af ? h('section', { class: 'd2-nextup' }, h('h2', {}, af.title), h('p', {}, af.text), h('p', { class: 'd2-nextup-coach' }, glyph('coach', { size: 26 }), h('span', {}, af.coach))) : null);
       if (live && screen.finishes && !ctx.finished()) ctx.finishLesson();
       finish(ctx, false);
@@ -486,9 +521,9 @@ export const poll = {
     const ask = h('div', { class: 'd2-poll-ask' }, screen.eyebrow ? h('p', { class: 'd-eyebrow' }, screen.eyebrow) : null,
       screen.quote ? h('blockquote', { class: 'd2-quote' }, screen.quote) : null, zones.instruction, group, after);
     const variant = screen.variant || 'plain';
-    layout(ctx, 'dm2-poll', body('poll d2-poll-' + variant,
-      screen.list ? h('ul', { class: 'd2-slide-list' }, screen.list.map((t) => h('li', {}, t))) : null,
-      variant === 'list' ? ask : h('section', { class: 'd2-panel' }, ask)), floatBand(ctx));
+    layout(ctx, 'dm2-poll', body('poll d2-poll-' + (duel ? 'duel' : variant),
+      duel ? null : slideList,
+      variant === 'list' && !duel ? ask : h('section', { class: 'd2-panel' }, ask)), floatBand(ctx));
     zones.setFeedback({ state: 'hint', text: screen.hint });
     const was = O.findIndex((o) => o.id === ctx.flags.get('p'));
     if (was >= 0) show(was, false); else if (ctx.revisit) finish(ctx, false);

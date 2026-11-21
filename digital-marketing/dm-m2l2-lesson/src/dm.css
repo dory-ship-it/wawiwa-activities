@@ -91,7 +91,7 @@
 .d-wb-open-s { min-height: 44px; padding: 6px 16px; gap: 8px; font-size: 16px; }
 
 /* ---------- S05: four question tiles ---------- */
-.d-qt { position: absolute; left: var(--d-edge); right: var(--d-edge); top: 112px; height: 404px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.d-qt { position: absolute; left: var(--d-edge); right: var(--d-edge); top: 134px; height: 404px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 16px; }
 /* (Noy, 15 Nov 2026, round 3: "the box is very big for every question") with a tile open the grid is as high as its
    content: the three closed tiles are slim rows on the right, and the open tile is as high as they are together, or
    as high as its own content when that is more (tile 1 with its screenshot). The fourth row takes any spare height. */
@@ -134,10 +134,10 @@
 .d-tile-foot { margin-top: auto; display: flex; justify-content: flex-end; }
 .d-tile-done:not(:disabled) { min-width: 130px; background: var(--wl-navy); color: var(--wl-white); }
 .d-tile-done:not(:disabled):hover { background: var(--wl-ink); }
-.w-main[data-layout="dm-tiles"] .d-closing { top: 372px; }
+.w-main[data-layout="dm-tiles"] .d-closing { top: 394px; }
 
 /* ---------- S06: six question cards ---------- */
-.d-qcs { position: absolute; left: var(--d-edge); right: var(--d-edge); top: 136px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.d-qcs { position: absolute; left: var(--d-edge); right: var(--d-edge); top: 166px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 /* (a card keeps one height before and after it is marked, so the grid never grows into the closing card) */
 .d-qc { height: 152px; display: flex; flex-direction: column; gap: 8px; padding: 14px 18px; border: 1px solid var(--wl-line); border-radius: 14px; background: var(--wl-white); box-shadow: var(--wl-float-shadow); }
 /* (Noy, 15 Nov 2026) one question in focus: the active card raised with a navy edge; the ones to come quiet */
@@ -158,7 +158,7 @@
 .d-qc-where { margin: 0; font: 400 15.5px/1.3 var(--wl-font-ui); color: var(--wl-text-2); }
 .d-qc-flip { animation: d-flip 380ms var(--wl-ease-enter); }
 @keyframes d-flip { from { transform: perspective(900px) rotateX(70deg); opacity: .3; } to { transform: none; opacity: 1; } }
-.w-main[data-layout="dm-cards"] .d-closing { top: 470px; padding: 14px 24px; gap: 6px; }
+.w-main[data-layout="dm-cards"] .d-closing { top: 500px; padding: 14px 24px; gap: 6px; }
 
 /* ---------- K1: the eight dimensions (dark ground: dark = learn) ---------- */
 .d-dim-head { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
@@ -313,7 +313,11 @@
 }
 
 /* ==================== Phase 2 (chapters 4 to 7): the styles of src/templates/dm2.js ==================== */
-.d2 { position: absolute; left: var(--d-edge); right: var(--d-edge); top: 112px; bottom: 90px; }
+/* SP1 (Noy, 20 Nov 2026: "space between the headings and the objects"): the body starts 32px under the heading block
+   (it ends at 102px), not 10px; the same step on the tiles, the question cards and the data table below */
+.d2 { position: absolute; left: var(--d-edge); right: var(--d-edge); top: 134px; bottom: 90px; }
+/* the client conversation grows downwards with its feedback: it keeps a smaller step so it stays clear of the band */
+.w-main[data-layout="dm2-client"] .d2 { top: 118px; }
 .d2 [hidden] { display: none !important; }
 /* screens that end in a feedback card stay clear of a two-line card */
 .w-main[data-layout="dm2-checklist"] .d2, .w-main[data-layout="dm2-quiz"] .d2, .w-main[data-layout="dm2-client"] .d2, .w-main[data-layout="dm2-case"] .d2, .w-main[data-layout="dm2-data"] .d2, .w-main[data-layout="dm2-poll"] .d2, .w-main[data-layout="dm2-home"] .d2 { bottom: 114px; }
@@ -543,7 +547,7 @@
 
 /* ---------- S30: the weekly report ---------- */
 .d2-data { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 26px; align-items: start; }
-.w-main[data-layout="dm2-data"] .d2 { top: 104px; }
+.w-main[data-layout="dm2-data"] .d2 { top: 114px; }
 .d2-dt-wrap { display: grid; gap: 10px; }
 .d2-dt { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--wl-line); border-radius: var(--wl-radius-card); background: var(--wl-white); box-shadow: var(--wl-card-shadow); overflow: hidden; }
 .d2-dt th, .d2-dt td { height: 46px; padding: 0 12px; text-align: right; border-bottom: 1px solid var(--wl-line); font: 400 16.5px/1.2 var(--wl-font-ui); color: var(--wl-body-ink); white-space: nowrap; }
@@ -759,3 +763,140 @@
 .w-fields-grid.w-fields-solo { grid-template-columns: minmax(0, 1fr); }
 .w-fields-solo .w-wb-field { grid-template-columns: 35.84px minmax(0, 1fr) max-content minmax(0, 1.7fr) 29.44px; min-height: 60px; }
 .w-wb-join { font: 500 16px/normal var(--wl-font-ui); color: var(--wl-muted); }.w-player-col:fullscreen .w-tr { display: none; } /* the transcript panel sits beside the column */
+
+/* ---------- CX1 (Noy, 20 Nov 2026): the context of a screen is always clear, never small print ---------- */
+/* the line over a heading (what this screen is: "Simulation one", "Example", the chapter's subject) is a tag */
+.d-eyebrow { display: inline-block; margin: 0 0 8px; padding: 4px 12px; border-radius: 8px; background: var(--wl-keypill-bg); font: 700 17px/1.25 var(--wl-font-ui); letter-spacing: .01em; color: var(--wl-teal-ink); }
+/* the result screen: the score is the heading; the pass mark is a small line under it */
+.d-pass-note { margin: 6px 0 0; font: 500 16px/1.4 var(--wl-font-ui); color: var(--wl-muted); }
+/* a film's heading sits just over the picture, not at the top of the stage */
+.w-video-head { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 16px; box-sizing: border-box; }
+/* ---------- SIM1 (Noy, 20 Nov 2026): the simulations ---------- */
+/* which simulation this is: a tag that reads at a glance, over the case title */
+.d2-file-kicker { justify-self: start; padding: 6px 14px; border-radius: 9px; background: var(--wl-navy); font: 700 17px/normal var(--wl-font-ui); letter-spacing: .01em; text-transform: none; color: var(--wl-white); }
+/* the facts of the case as rows to scan: icon tile, label, the fact */
+.d2-facts { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.d2-facts li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; align-items: start; }
+.d2-fact-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 11px; background: var(--wl-keypill-bg); color: var(--wl-teal-ink); }
+.d2-fact-body { display: grid; gap: 1px; }
+.d2-fact-label { font: 700 15px/1.3 var(--wl-font-ui); color: var(--wl-ink); }
+.d2-fact-text { font: 400 15.5px/1.38 var(--wl-font-ui); color: var(--wl-body-ink); }
+/* ---------- POD1 (Noy, 20 Nov 2026): the podcast with one text beside it ---------- */
+/* the script, always open; the line being spoken is marked; the slide's observations carry their number */
+.d2-pod-side { display: grid; gap: 10px; align-content: start; padding: 18px 20px; }
+.d2-pod-side .d2-box-label { margin: 0; }
+.d2-pod-side .d2-pod-tr { max-height: 372px; padding: 0 6px 0 0; }
+.d2-pod-tr .d2-tr-line { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 12px; align-items: start; margin: 0 0 4px; padding: 7px 10px; border: 1px solid transparent; border-radius: 12px; font: 400 16.5px/1.4 var(--wl-font-ui); color: var(--wl-body-ink); }
+.d2-pod-tr .d2-tr-line[data-now="true"] { border-color: var(--wl-turquoise); background: var(--wl-keypill-bg); color: var(--wl-ink); }
+.d2-tr-gap { width: 26px; }/* the context tag hugs its words (in a grid it would stretch) */
+.d-eyebrow { justify-self: start; width: fit-content; }
+/* a three-way stand (agree, not sure, disagree) is one row, also on a placed panel */
+.w-stage:is([data-place^="left"], [data-place^="right"]) .d2-poll:not(.d2-poll-list) .d2-poll-opts[data-n="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* ---------- DIM1 (Noy, 20 Nov 2026): one dimension of K1 as one flow ---------- */
+/* its icon and name as the title, then three steps left to right: the question, what we see, what we decide */
+.d-dim-detailview[data-list="false"] { left: var(--d-edge); right: var(--d-edge); width: auto; transform: none; top: 100px; bottom: 96px; }
+.d-dim-detailview[data-list="false"] .d-dim-flow { gap: 30px; justify-content: center; }
+.d-dim-title { display: flex; align-items: center; gap: 18px; }
+.d-dim-bigicon { flex: none; width: 68px; height: 68px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-turquoise); color: var(--wl-o1-ground); }
+.d-dim-flow .d-dim-kicker { margin: 0; font: 800 34px/1.15 var(--wl-font-ui); letter-spacing: -.5px; color: var(--wl-white); }
+.d-dim-steps { display: grid; grid-template-columns: minmax(0, 1.15fr) 26px minmax(0, .85fr) 26px minmax(0, 1.15fr); gap: 12px; align-items: stretch; }
+.d-dim-step { display: grid; gap: 14px; align-content: start; padding: 22px 24px 26px; border: 1.5px solid transparent; border-radius: 18px; background: var(--wl-bar-on-dark-disc); }
+.d-dim-step .d-dim-label { margin: 0; display: flex; align-items: center; gap: 10px; font: 700 16px/normal var(--wl-font-ui); letter-spacing: .01em; color: var(--wl-aqua-text); }
+.d-dim-stepicon { flex: none; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-bar-on-dark-disc); color: var(--wl-white); }
+.d-dim-arrow { align-self: center; display: grid; place-items: center; color: var(--wl-aqua-text); }
+.d-dim-detailview[data-list="false"] .d-dim-flow .d-dim-q { font: 700 23px/1.32 var(--wl-font-ui); letter-spacing: 0; }
+.d-dim-detailview[data-list="false"] .d-dim-flow .d-dim-insight { font: 600 21px/1.38 var(--wl-font-ui); }
+.d-dim-detailview[data-list="false"] .d-dim-flow .d-dim-chips li { font-size: 17px; padding: 6px 14px; }
+/* the third step is the point of the table: what we decide */
+.d-dim-s3 { border-color: var(--wl-turquoise); }
+.d-dim-s3 .d-dim-stepicon { background: var(--wl-turquoise); color: var(--wl-o1-ground); }
+/* the one control of the detail: back to the eight */
+.w-main[data-view="detail"] .d-dim-back { border-color: var(--wl-white); background: var(--wl-white); color: var(--wl-navy); font-weight: 700; }
+/* the key line, once, under the map */
+.d-dim-map .d-keyline { margin-top: 30px; }
+.d-dim-map .d-keyline p { color: var(--wl-white); }/* after the answer the case folds to one line: the tag and the title side by side, so the answer keeps its room */
+.d2-case[data-view="answer"] .d2-file-top > div { display: flex; align-items: center; gap: 14px; }
+.d2-case[data-view="answer"] .d2-file-kicker { flex: none; padding: 3px 10px; font-size: 14.5px; }
+/* ---------- CH1 (Noy, 20 Nov 2026): the nine channels as cards, not a table ---------- */
+/* one card per channel: its icon and name, the module that teaches it as a chip, and under them what it does for the
+   plan (closed until the card is clicked). No column headings: each card says its own three things. */
+.w-main[data-layout="dm2-table"] .d2 { top: 134px; bottom: 84px; }
+.w-main[data-layout="dm2-table"] .d2-rt { height: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 12px; }
+.w-main[data-layout="dm2-table"] .d2-rt-head { display: none; }
+.w-main[data-layout="dm2-table"] .d2-rt-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr); gap: 8px 10px; padding: 12px 14px 12px 16px; border: 1px solid var(--wl-card-line); border-radius: var(--wl-radius-card); background: var(--wl-white); box-shadow: var(--wl-card-shadow); }
+.w-main[data-layout="dm2-table"] .d2-rt-row[data-open="true"] { border-color: var(--wl-turquoise); box-shadow: inset 5px 0 0 var(--wl-turquoise), var(--wl-card-shadow); }
+.w-main[data-layout="dm2-table"] .d2-rt-ch { grid-column: 1; grid-row: 1; padding: 0; border: 0; background: none; font: 800 18px/1.2 var(--wl-font-ui); }
+.w-main[data-layout="dm2-table"] .d2-rt-ch .d2-disc { width: 36px; height: 36px; }
+.w-main[data-layout="dm2-table"] .d2-rt-chip { grid-column: 2; grid-row: 1; align-self: center; padding: 4px 10px; font-size: 14px; }
+.w-main[data-layout="dm2-table"] .d2-rt-does { grid-column: 1 / -1; grid-row: 2; align-items: flex-start; min-height: 0; padding: 0; border: 0; background: none; font: 400 16px/1.38 var(--wl-font-ui); }
+.w-main[data-layout="dm2-table"] .d2-rt-row[data-open="true"] .d2-rt-does { border: 0; background: none; }
+.w-main[data-layout="dm2-table"] .d2-rt-row[data-open="false"] .d2-rt-does { align-items: center; justify-content: center; border: 1.92px dashed var(--wl-dash); border-radius: 10px; background: var(--wl-drop-bg); }
+.w-main[data-layout="dm2-table"] .d2-rt-row[data-open="false"]:hover { border-color: var(--wl-navy); }
+/* ---------- PLAN1 (Noy, 20 Nov 2026): the example work plan, calmer ---------- */
+/* one button under the table adds the next column (it sits where the checklist's Done sits); the column headings
+   read as headings, not as fields; an empty cell is plain, with no hatching */
+.w-main[data-layout="dm2-builder"] .d2 { top: 134px; bottom: 84px; }
+.d2-b-head { border-color: transparent; background: none; padding: 5px 4px; }
+.d2-b-head[data-state="next"] { border-color: transparent; background: none; box-shadow: inset 0 -3px 0 var(--wl-navy); border-radius: 0; }
+.d2-b-head[data-state="next"] .d2-b-name { color: var(--wl-navy); }
+.d2-b-head[data-state="filled"] { border-color: transparent; }
+.d2-b td[data-filled="false"] { background: none; }
+.d2-b th, .d2-b td { padding: 6px 12px; }
+.d2-b-cta[hidden] { display: none; }.d2-b-cta { border-color: var(--wl-navy); background: var(--wl-navy); color: var(--wl-white); }
+
+/* ---------- CL1 (Noy, 20 Nov 2026): the eight challenges as tiles, not eight tight rows ---------- */
+/* four by two; a tile is its icon, a check box in the corner and the challenge; clicking the tile marks it
+   (the words "I have seen this" stay for screen readers: the heading already says it) */
+.w-main[data-layout="dm2-checklist"] .d2 { top: 134px; bottom: 96px; }
+.w-main[data-layout="dm2-checklist"] ul.d2-cl { height: 100%; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 12px; }
+.w-main[data-layout="dm2-checklist"] .d2-cl li { display: grid; }
+.w-main[data-layout="dm2-checklist"] .d2-cl-row { grid-template-columns: minmax(0, 1fr) 26px; grid-template-rows: auto minmax(0, 1fr); align-items: start; align-content: start; gap: 10px 8px; min-height: 0; padding: 14px 14px 12px 16px; border-radius: var(--wl-radius-card); box-shadow: var(--wl-card-shadow); }
+.w-main[data-layout="dm2-checklist"] .d2-cl-row .d2-disc { grid-column: 1; grid-row: 1; width: 38px; height: 38px; }
+.w-main[data-layout="dm2-checklist"] .d2-cl-box { grid-column: 2; grid-row: 1; }
+.w-main[data-layout="dm2-checklist"] .d2-cl-text { grid-column: 1 / -1; grid-row: 2; font: 500 15.5px/1.36 var(--wl-font-ui); }
+/* (the tile's "I have seen this" is for screen readers only: w-sr-only, set in the template) */.w-main[data-layout="dm2-checklist"] .d2-cl-text { font-size: 16.5px; }
+
+/* ---------- ST1 (Noy, 20 Nov 2026): the four stages of the method as a row of steps ---------- */
+.d2-stages-row { grid-template-columns: minmax(0, 1fr); gap: 20px; align-content: start; }
+.d2-stages-row .d2-stage-col { justify-items: center; gap: 18px; }
+.d2-stages-row .d2-stage-list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px; }
+.d2-stages-row .d2-stage { grid-template-columns: minmax(0, 1fr); gap: 12px; align-content: start; min-height: 132px; padding: 18px 18px 20px; font: 500 17px/1.38 var(--wl-font-ui); box-shadow: var(--wl-card-shadow); }
+.d2-stages-row .d2-stage-n { width: 40px; height: 40px; font-size: 18px; }
+.d2-stages-row .d2-stage + .d2-stage::before { left: -22px; top: 37px; width: 14px; height: 3px; }
+.d2-stages-row .d2-stage[data-wait="true"] { border-style: dashed; background: none; box-shadow: none; }
+.d2-stages-row .d2-stage[data-wait="true"] > span:last-child { visibility: hidden; }
+.d2-stages-row .d2-stage[data-wait="true"] .d2-stage-n { background: var(--wl-keypill-bg); color: var(--wl-teal-ink); box-shadow: none; }
+/* the box that follows the last stage: one wide band under the row */
+.d2-stages-row .d2-stage-side.d2-box { grid-template-columns: minmax(0, .9fr) minmax(0, 1.5fr); column-gap: 30px; row-gap: 8px; align-items: start; padding: 20px 26px; }
+.d2-stages-row .d2-stage-side.d2-box .d2-box-label, .d2-stages-row .d2-stage-side.d2-box .d-keyline { grid-column: 1; }
+.d2-stages-row .d2-stage-side.d2-box .d2-box-line { grid-column: 2; }
+.d2-stages-row .d2-stage-side.d2-box .d2-box-line:first-of-type { grid-row: 1 / span 2; align-self: end; }
+.d2-stages-row .d2-stage-side[hidden] { display: none; }/* after Done the closing card takes the bottom: the tiles give it room (their icon goes, the words stay) */
+.w-main[data-layout="dm2-checklist"]:has(.d2-cl-closing:not([hidden])) .d2 { bottom: 172px; }
+.w-main[data-layout="dm2-checklist"]:has(.d2-cl-closing:not([hidden])) .d2-cl-row .d2-disc { display: none; }
+.w-main[data-layout="dm2-checklist"]:has(.d2-cl-closing:not([hidden])) .d2-cl-row { grid-template-rows: minmax(0, 1fr); padding: 10px 12px 10px 14px; }
+.w-main[data-layout="dm2-checklist"]:has(.d2-cl-closing:not([hidden])) .d2-cl-text { grid-column: 1; grid-row: 1; font-size: 15px; line-height: 1.32; }
+/* ---------- DUEL1 (Noy, 20 Nov 2026): "this or that", two large cards ---------- */
+.d2-poll-duel .d2-panel { width: min(820px, 100%); }
+.d2-poll-duel .d2-poll-ask { display: grid; gap: 20px; justify-items: stretch; }
+.d2-poll-duel .d2-poll-opts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.d2-duel-opt { display: grid; justify-items: center; gap: 6px; min-height: 0; padding: 22px 18px 24px; border-radius: 18px; text-align: center; }
+.d2-duel-opt b { font: 800 21px/1.2 var(--wl-font-ui); color: var(--wl-ink); }
+.d2-duel-sub { font: 500 16.5px/1.3 var(--wl-font-ui); color: var(--wl-text-2); }
+.d2-duel-icon { width: 60px; height: 60px; margin-bottom: 6px; display: grid; place-items: center; border-radius: 50%; background: var(--wl-keypill-bg); color: var(--wl-teal-ink); }
+.d2-duel-opt[aria-checked="true"] .d2-duel-icon { background: var(--wl-navy); color: var(--wl-white); }
+.d2-poll-duel .d2-poll-after .d2-slide-list { padding: 0; border: 0; background: none; box-shadow: none; }
+
+/* ---------- FUN1 (Noy, 20 Nov 2026): the funnel calculator: the control first, the reading under it ---------- */
+.d2-fn-left { display: flex; flex-direction: column; gap: 16px; }
+.d2-fn-left .d2-step { order: -1; padding: 20px 22px; border-color: var(--wl-navy); background: var(--wl-navy); box-shadow: var(--wl-card-shadow); }
+.d2-fn-left .d2-step .d2-step-label { font-size: 21px; color: var(--wl-white); }
+.d2-fn-left .d2-step .d2-small { color: var(--wl-white); }
+.d2-fn-left .d2-step-btn { border-color: var(--wl-white); }
+.d2-fn-left .d2-fn-line { font-size: 15.5px; line-height: 1.42; }.d2-duel-opt[aria-checked="true"] b, .d2-duel-opt[aria-checked="true"] .d2-duel-sub { color: var(--wl-white); }
+.d2-duel-opt[aria-checked="true"] .d2-duel-icon { background: var(--wl-white); color: var(--wl-navy); }
+/* ---------- SORT1 (Noy, 20 Nov 2026): the sorted columns, lighter ---------- */
+/* the line that says why a card belongs is shown on the card placed last in its column; the cards above it keep
+   their words only, so a full column is three short lines and one reason, not three reasons */
+.w-main[data-layout="sort-deck"] .w-drops[data-count="2"] .w-drop-cards .w-placed:not(:last-child) .w-placed-tag { display: none; }
+.w-main[data-layout="sort-deck"]:has(.d-float-sort) .w-drops[data-count="2"] .w-placed { margin-top: 8px; padding: 7px 12px; }
