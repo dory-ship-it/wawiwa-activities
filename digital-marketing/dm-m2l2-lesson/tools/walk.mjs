@@ -207,6 +207,23 @@ await arrive(page, 'W3');
   expect(o.num === '3' && o.points === '' && icons === S.W3.points.length && !o.mins, `W3: the number ${o.num}, "${o.label}", ${icons} icons without words, no minutes`);
   await goNext(page);
 }
+await arrive(page, 'CALL');
+{
+  // the client's call (22 Nov 2026): the phone rings, Answer starts the recording, its lines appear as they are said
+  const s = S.CALL;
+  const start = await page.evaluate(() => ({ state: document.querySelector('.d2-call-phone').dataset.state, who: document.querySelector('.d2-call-who').textContent, shown: [...document.querySelectorAll('.d2-call-line')].filter((p) => !p.hidden).length }));
+  expect(start.state === 'ringing' && start.who === s.call.caller && start.shown === 0, `CALL: the phone rings, "${start.who}" on its screen, no line of the call shown yet`);
+  await expectLayout(page, 'CALL ringing');
+  await page.waitForFunction(() => document.querySelector('.d2-audio').readyState >= 1);
+  await act(page, '[data-action="callAnswer"]');
+  await page.evaluate(() => { const a = document.querySelector('.d2-audio'); a.muted = true; a.currentTime = a.duration - 0.4; a.play(); });
+  await page.waitForFunction(() => document.querySelector('.w-next').dataset.locked === 'false', { timeout: 15000 }).catch(() => {});
+  const end = await page.evaluate(() => ({ state: document.querySelector('.d2-call-phone').dataset.state, lines: [...document.querySelectorAll('.d2-call-line')].filter((p) => !p.hidden).map((p) => p.textContent) }));
+  expect(end.state === 'ended' && JSON.stringify(end.lines) === JSON.stringify(s.call.script), `CALL: the call ended, all ${end.lines.length} lines of the client are on screen`);
+  await expectOpen(page, 'CALL heard to the end');
+  await expectLayout(page, 'CALL ended');
+  await goNext(page);
+}
 await arrive(page, 'S05');
 {
   const tiles = S.S05.tiles;
@@ -263,6 +280,19 @@ await arrive(page, 'S06');
   await goNext(page);
 }
 await workbookStop(page, 'WB1');
+await arrive(page, 'VK1');
+{
+  // the V4 film before the map (22 Nov 2026): no stops, Next opens when the film ends
+  const s = S.VK1;
+  const head = await page.evaluate(() => ({ title: !!document.querySelector('.w-video-title'), label: document.querySelector('.w-video').getAttribute('aria-label') }));
+  expect(!head.title && head.label === s.title, `VK1: the film is named "${head.label}" for screen readers, no title line on screen`);
+  await page.waitForFunction(() => document.querySelector('.w-video').readyState >= 2);
+  await act(page, '[data-action="bigplay"]');
+  await fast(page, () => document.querySelector('.w-next').dataset.locked === 'false', 'VK1 end');
+  expect(await page.evaluate(() => document.querySelector('.w-stop-view').hidden), 'VK1: the film ran to its end with no stop');
+  await expectOpen(page, 'VK1 ended');
+  await goNext(page);
+}
 await arrive(page, 'K1');
 {
   const dims = S.K1.dimensions;
@@ -452,11 +482,15 @@ await arrive(page, 'S15B');
 }
 await arrive(page, 'S16');
 {
+  // S16 is the V3 film (22 Nov 2026): no stops, Next opens when the film ends
   const s = S.S16;
-  for (let i = 0; i < 3; i++) await act(page, '[data-action="more"]');
-  const v = await page.evaluate(() => ({ shown: [...document.querySelectorAll('.d2-stage')].filter((x) => !x.hidden).length, more: document.querySelector('[data-action="more"]').hidden, key: document.querySelector('.d2-box .d-keyline p').textContent, lines: document.querySelectorAll('.d2-box-line').length }));
-  expect(v.shown === 4 && v.more && v.key === s.box.keyLine && v.lines === 2, `S16: the four stages one by one, the box "${s.box.label}" with its key line and two lines`);
-  await expectLayout(page, 'S16 all stages');
+  const head = await page.evaluate(() => ({ title: !!document.querySelector('.w-video-title'), label: document.querySelector('.w-video').getAttribute('aria-label') }));
+  expect(!head.title && head.label === s.title, `S16: the film is named "${head.label}" for screen readers, no title line on screen`);
+  await page.waitForFunction(() => document.querySelector('.w-video').readyState >= 2);
+  await act(page, '[data-action="bigplay"]');
+  await fast(page, () => document.querySelector('.w-next').dataset.locked === 'false', 'S16 end');
+  expect(await page.evaluate(() => document.querySelector('.w-stop-view').hidden), 'S16: the film ran to its end with no stop');
+  await expectOpen(page, 'S16 ended');
   await goNext(page);
 }
 await arrive(page, 'S17');
@@ -512,10 +546,10 @@ await arrive(page, 'S26');
   expect(JSON.stringify(tr) === JSON.stringify(s.podcast.script.map((l) => l.text)), `S26: the transcript holds the whole script (${tr.length} lines)`);
   await page.waitForFunction(() => document.querySelector('.d2-audio').readyState >= 1);
   await act(page, '[data-action="audioPlay"]');
-  await page.evaluate(() => { const a = document.querySelector('.d2-audio'); a.muted = true; a.currentTime = 28.5; }); // (21 Nov 2026: the produced audio is 0:57; observation 4 is spoken at 0:27 to 0:32)
+  await page.evaluate(() => { const a = document.querySelector('.d2-audio'); a.muted = true; a.currentTime = 31.4; }); // (22 Nov 2026: the audio is 1:00; observation 4 is spoken from 29.18 s to 33.6 s)
   await wait(700);
   const now = await page.evaluate(() => ({ cap: document.querySelector('.d2-tr-line[data-now="true"]')?.textContent || '', obs: document.querySelector('.d2-tr-line[data-now="true"]')?.dataset.obs, locked: document.querySelector('.w-next').dataset.locked }));
-  expect(now.obs === '4' && now.cap.length > 0 && now.locked === 'true', `S26: at 0:28 observation ${now.obs} is highlighted, the line being spoken reads "${now.cap}", Next still locked`);
+  expect(now.obs === '4' && now.cap.length > 0 && now.locked === 'true', `S26: inside observation 4's line, observation ${now.obs} is highlighted, the line being spoken reads "${now.cap}", Next still locked`);
   await page.evaluate(() => { const a = document.querySelector('.d2-audio'); a.currentTime = a.duration - 0.4; a.play(); });
   await page.waitForFunction(() => document.querySelector('.w-next').dataset.locked === 'false', { timeout: 15000 }).catch(() => {});
   await expectOpen(page, 'S26 heard to the end');

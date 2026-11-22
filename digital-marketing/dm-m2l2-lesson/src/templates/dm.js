@@ -19,9 +19,9 @@
 // Shared parts: keyLine() (one sentence of the trainer's, in the quote style: a turquoise rule and larger
 // type; at most one per screen) and boardEl() (the four components).
 // Nothing here is graded or sent to the LMS: answers live in the screen's flags (suspend data) only.
-import { h, fmt, resolveLink, reducedMotion } from '../util.js?v=a089d641';
-import { glyph, icon } from '../icons.js?v=a089d641';
-import { layout, sheet, picture, arrowNav } from './stage.js?v=a089d641';
+import { h, fmt, resolveLink, reducedMotion } from '../util.js?v=c6cd176a';
+import { glyph, icon } from '../icons.js?v=c6cd176a';
+import { layout, sheet, picture, arrowNav } from './stage.js?v=c6cd176a';
 
 /* ---------- shared parts ---------- */
 // fill(el, ...children): replaceChildren without the empty ones (replaceChildren(null) would print "null")
@@ -245,7 +245,7 @@ export const questionTiles = {
     }
 
     grid.append(...tiles.map((x) => x.el));
-    layout(ctx, 'dm-tiles', headOf(ctx), grid, closing, floatBand(ctx));
+    layout(ctx, 'dm-tiles', headOf(ctx, screen.eyebrow), grid, closing, floatBand(ctx));
     zones.setFeedback({ state: 'hint', text: screen.hint });
     if (!ctx.revisit && !Object.keys(saved).length) ctx.ghost({ type: screen.ghost?.type || 'tiles', steps: () => [{ point: beside(tiles[0].headBtn, 0.9, 0.78), hold: 1100 }] });
     update(false);
@@ -307,7 +307,7 @@ export const questionCards = {
       ctx.unlockNext({ focus });
     }
     const grid = h('div', { class: 'd-qcs', dataset: { interaction: '' } }, cards.map((x) => x.el));
-    layout(ctx, 'dm-cards', headOf(ctx, null, screen.band ? h('p', { class: 'd-band-line' }, screen.band) : null), grid, closing, floatBand(ctx));
+    layout(ctx, 'dm-cards', headOf(ctx, screen.eyebrow, screen.band ? h('p', { class: 'd-band-line' }, screen.band) : null), grid, closing, floatBand(ctx));
     zones.setFeedback({ state: 'hint', text: screen.hint });
     if (!ctx.revisit && !Object.keys(saved).length) ctx.ghost({ type: screen.ghost?.type || 'cards', steps: () => [{ point: beside(cards[0].el, -0.035, 0.78), hold: 1100 }] }); // in the left gutter, level with the first card's buttons
     update(false);
