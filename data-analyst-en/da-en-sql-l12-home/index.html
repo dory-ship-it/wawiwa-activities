@@ -3023,14 +3023,32 @@ window.CENTER = {"skin": "rise"};
 
   /* ---------- PII detection (local warning + Phase 2 pre-redaction list) ---------- */
 
+  /* dates and one-point decimals are not phone or ID numbers (Dor, 22 Nov
+     2026). Mirror of SAFE_NUMBER_RES in engine/redact.js; feedback.js keeps
+     its own copy because it also runs in builds without the redactor. */
+  var SAFE_NUMBER_RES = [
+    /(?<![\d.\/-])(?:19|20)\d{2}([-\/.])(?:0?[1-9]|1[0-2])\1(?:0?[1-9]|[12]\d|3[01])(?:[ T]\d{1,2}:\d{2}(?::\d{2}(?:\.\d{1,7})?)?)?(?!\d)/g,
+    /(?<![\d.\/-])(?:0?[1-9]|[12]\d|3[01])([-\/.])(?:0?[1-9]|1[0-2])\1(?:19|20)\d{2}(?!\d)/g,
+    /(?<![\d.\/-])(?:0?[1-9]|1[0-2])([-\/.])(?:0?[1-9]|[12]\d|3[01])\1(?:19|20)\d{2}(?!\d)/g,
+    /(?<![\d.\/-])(?:19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])(?!\d)/g,
+    /(?<![\d.])\d{1,15}\.\d{1,12}(?!\d)(?!\.\d)/g
+  ];
+  var NUMBER_KEYS = { phone_numbers: true, long_digit_sequences: true };
+  function maskSafeNumbers(text) {
+    var out = String(text || '');
+    SAFE_NUMBER_RES.forEach(function (re) { re.lastIndex = 0; out = out.replace(re, 'N'); });
+    return out;
+  }
+
   function detectPII(text, enabledPatterns) {
     var found = [];
+    var masked = maskSafeNumbers(text);
     var keys = enabledPatterns && enabledPatterns.length
       ? enabledPatterns
       : Object.keys(PII_PATTERNS);
     for (var i = 0; i < keys.length; i++) {
       var p = PII_PATTERNS[keys[i]];
-      if (p && p.re.test(text || '')) found.push({ type: keys[i], label: p.label });
+      if (p && p.re.test(NUMBER_KEYS[keys[i]] ? masked : (text || ''))) found.push({ type: keys[i], label: p.label });
     }
     // identity patterns always run, whatever the spec asked for
     var ids = Object.keys(IDENTITY_PATTERNS);

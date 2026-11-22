@@ -3024,14 +3024,32 @@ window.ASSETS = {"media/01-orders-salesperson-year.png": "data:image/png;base64,
 
   /* ---------- PII detection (local warning + Phase 2 pre-redaction list) ---------- */
 
+  /* dates and one-point decimals are not phone or ID numbers (Dor, 22 Nov
+     2026). Mirror of SAFE_NUMBER_RES in engine/redact.js; feedback.js keeps
+     its own copy because it also runs in builds without the redactor. */
+  var SAFE_NUMBER_RES = [
+    /(?<![\d.\/-])(?:19|20)\d{2}([-\/.])(?:0?[1-9]|1[0-2])\1(?:0?[1-9]|[12]\d|3[01])(?:[ T]\d{1,2}:\d{2}(?::\d{2}(?:\.\d{1,7})?)?)?(?!\d)/g,
+    /(?<![\d.\/-])(?:0?[1-9]|[12]\d|3[01])([-\/.])(?:0?[1-9]|1[0-2])\1(?:19|20)\d{2}(?!\d)/g,
+    /(?<![\d.\/-])(?:0?[1-9]|1[0-2])([-\/.])(?:0?[1-9]|[12]\d|3[01])\1(?:19|20)\d{2}(?!\d)/g,
+    /(?<![\d.\/-])(?:19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])(?!\d)/g,
+    /(?<![\d.])\d{1,15}\.\d{1,12}(?!\d)(?!\.\d)/g
+  ];
+  var NUMBER_KEYS = { phone_numbers: true, long_digit_sequences: true };
+  function maskSafeNumbers(text) {
+    var out = String(text || '');
+    SAFE_NUMBER_RES.forEach(function (re) { re.lastIndex = 0; out = out.replace(re, 'N'); });
+    return out;
+  }
+
   function detectPII(text, enabledPatterns) {
     var found = [];
+    var masked = maskSafeNumbers(text);
     var keys = enabledPatterns && enabledPatterns.length
       ? enabledPatterns
       : Object.keys(PII_PATTERNS);
     for (var i = 0; i < keys.length; i++) {
       var p = PII_PATTERNS[keys[i]];
-      if (p && p.re.test(text || '')) found.push({ type: keys[i], label: p.label });
+      if (p && p.re.test(NUMBER_KEYS[keys[i]] ? masked : (text || ''))) found.push({ type: keys[i], label: p.label });
     }
     // identity patterns always run, whatever the spec asked for
     var ids = Object.keys(IDENTITY_PATTERNS);
@@ -3757,16 +3775,45 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
   ];
 
+  /* Numbers a data-analysis answer legitimately carries pass the phone and
+     ID-number checks (Dor, 22 Nov 2026): calendar dates (20110131,
+     2011-01-31, 2011-01-31 00:00:00.000, 31-01-2011, 31/01/2011, 01/31/2011)
+     and decimals with one point (21718.763864). Everything else is unchanged:
+     an email, a street address, a government ID, a date of birth, or a run
+     of digits that is not one of these shapes is still caught.
+     Mirrored in engine/live.js (uses this), engine/feedback.js and proxy/worker.js. */
+  var SAFE_NUMBER_RES = [
+    /(?<![\d.\/-])(?:19|20)\d{2}([-\/.])(?:0?[1-9]|1[0-2])\1(?:0?[1-9]|[12]\d|3[01])(?:[ T]\d{1,2}:\d{2}(?::\d{2}(?:\.\d{1,7})?)?)?(?!\d)/g,
+    /(?<![\d.\/-])(?:0?[1-9]|[12]\d|3[01])([-\/.])(?:0?[1-9]|1[0-2])\1(?:19|20)\d{2}(?!\d)/g,
+    /(?<![\d.\/-])(?:0?[1-9]|1[0-2])([-\/.])(?:0?[1-9]|[12]\d|3[01])\1(?:19|20)\d{2}(?!\d)/g,
+    /(?<![\d.\/-])(?:19|20)\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])(?!\d)/g,
+    /(?<![\d.])\d{1,15}\.\d{1,12}(?!\d)(?!\.\d)/g
+  ];
+
+  /* the text with every safe number replaced by a neutral letter: what the
+     number checks test */
+  function maskSafeNumbers(text) {
+    var out = String(text || '');
+    SAFE_NUMBER_RES.forEach(function (re) { re.lastIndex = 0; out = out.replace(re, 'N'); });
+    return out;
+  }
+
   function redact(text) {
     var out = String(text || '');
+    // set the safe numbers aside (private-use placeholders, no digits), scrub, put them back
+    var kept = [];
+    SAFE_NUMBER_RES.forEach(function (re) {
+      re.lastIndex = 0;
+      out = out.replace(re, function (m) { kept.push(m); return '\uE000' + String.fromCharCode(0xE100 + kept.length - 1); });
+    });
     PATTERNS.forEach(function (p) {
       p.re.lastIndex = 0;
       out = out.replace(p.re, p.sub);
     });
-    return out;
+    return out.replace(/\uE000([\uE100-\uEFFF])/g, function (_, c) { return kept[c.charCodeAt(0) - 0xE100]; });
   }
 
-  root.PracticeRedact = { redact: redact, PATTERNS: PATTERNS };
+  root.PracticeRedact = { redact: redact, PATTERNS: PATTERNS, maskSafeNumbers: maskSafeNumbers, SAFE_NUMBER_RES: SAFE_NUMBER_RES };
 })(typeof window !== 'undefined' ? window : this);
 
 </script>
@@ -4030,7 +4077,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       re: /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/ },
     { what: 'a government ID number',
       re: /\b\d{3}[-\s]\d{2,3}[-\s]\d{4}\b/ },
-    { what: 'a phone or ID number',
+    { what: 'a phone or ID number', numeric: true,
       re: /\+?\d(?:[\s().\-]?\d){6,}/ },
     { what: 'a street address',
       re: /\b\d{1,5}\s*(?:st|nd|rd|th)?[\s,]+[A-Za-z0-9.'\u2019-]+[\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)\b/i },
@@ -4050,11 +4097,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       re: /\b(?:date\s+of\s+birth|d\.?o\.?b\.?|born(?:\s+on)?)\s*(?:is|:|=)?\s*\d/i }
   ];
 
+  /* dates and one-point decimals are not phone or ID numbers (Dor, 22 Nov
+     2026): the number entry tests the text with those masked (redact.js) */
+  function maskSafe(t) {
+    var R = root.PracticeRedact;
+    return R && R.maskSafeNumbers ? R.maskSafeNumbers(t) : t;
+  }
+
   function piiHit(text) {
     var t = String(text || '');
+    var masked = maskSafe(t);
     for (var i = 0; i < PII_GATE.length; i++) {
       PII_GATE[i].re.lastIndex = 0;
-      if (PII_GATE[i].re.test(t)) return PII_GATE[i].what;
+      if (PII_GATE[i].re.test(PII_GATE[i].numeric ? masked : t)) return PII_GATE[i].what;
     }
     return null;
   }
