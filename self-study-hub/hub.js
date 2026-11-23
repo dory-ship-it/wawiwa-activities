@@ -123,17 +123,20 @@ function viewLesson(c, l) {
     root.replaceChildren(h('div', { class: 'hb-lesson-head' }, id), materialsBlock(c, l) || h('p', { class: 'hb-card-note' }, 'No materials on Drive yet.'));
     return;
   }
+  // (Noy, 23 Nov 2026) no overview framed inside the hub (its own scroll and a second menu were hard to use):
+  // the Overview button opens the lesson's familiar overview as a full page; Back returns here
+  // (Noy, 23 Nov 2026) the two ways in are the first thing to see: large, centred, under the title
   document.body.dataset.view = 'lesson';
   const learner = lessonUrl(l, 'index.html');
+  const entry = (cls, href, title, sub, blank) => h('a', { class: 'hb-entry ' + cls, href, ...(blank ? { target: '_blank', rel: 'noopener' } : {}) },
+    h('span', { class: 'hb-entry-title' }, title), h('span', { class: 'hb-entry-sub' }, sub));
   root.replaceChildren(
-    h('div', { class: 'hb-lesson-head' }, id,
-      h('div', { class: 'hb-actions' },
-        h('a', { class: 'hb-btn hb-btn-main', href: learner + '?reset=1', target: '_blank', rel: 'noopener' }, 'Open as a learner'),
-        h('a', { class: 'hb-btn', href: learner, target: '_blank', rel: 'noopener' }, 'Continue where I left off'),
-        h('a', { class: 'hb-btn', href: lessonUrl(l, 'review.html'), target: '_blank', rel: 'noopener' }, 'Overview in a new tab'))),
-    h('p', { class: 'hb-learner-link' }, 'Learner link: ', h('a', { href: learner, target: '_blank', rel: 'noopener' }, learner)),
-    materialsBlock(c, l),
-    h('iframe', { class: 'hb-overview', src: lessonUrl(l, 'review.html'), title: `${l.title}: every screen` }));
+    h('div', { class: 'hb-hero' }, id,
+      h('div', { class: 'hb-entries' },
+        entry('hb-entry-main', lessonUrl(l, 'review.html'), 'Overview', 'Every screen of the lesson at a glance'),
+        entry('', learner + '?reset=1', 'Open as a learner', 'As a student sees it, from the start', true)),
+      h('p', { class: 'hb-learner-link' }, 'Learner link: ', h('a', { href: learner, target: '_blank', rel: 'noopener' }, learner))),
+    materialsBlock(c, l));
 }
 
 function viewMissing() {

@@ -87,9 +87,20 @@ a.hb-card:hover { border-color: var(--turquoise); box-shadow: 0 0 0 1px var(--tu
 .hb-prof-how { margin: 10px 0 0; padding-left: 18px; color: var(--text-2); font-size: 15px; line-height: 1.45; }
 .hb-prof-how li + li { margin-top: 5px; }
 
-/* lesson view: the head, then the overview fills the rest of the window */
-body[data-view="lesson"] { display: flex; flex-direction: column; height: 100vh; }
-body[data-view="lesson"] main { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; width: 100%; max-width: none; padding: 20px 32px 0; }
+/* lesson view: title, then the two ways in, large and centred; the learner link under them; then the materials */
+.hb-hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 8px 0 28px; border-bottom: 1px solid var(--line); }
+.hb-hero .hb-lesson-row { justify-content: center; }
+.hb-entries { display: grid; grid-template-columns: repeat(2, minmax(0, 300px)); gap: 16px; margin-top: 26px; }
+.hb-entry { display: flex; flex-direction: column; justify-content: center; gap: 4px; min-height: 96px; padding: 16px 22px; border: 2px solid var(--navy); border-radius: 14px;
+  background: var(--white); color: var(--navy); text-decoration: none; text-align: center; }
+.hb-entry:hover { background: var(--tint); }
+.hb-entry-main { border-color: var(--turquoise); background: var(--turquoise); color: var(--ink); }
+.hb-entry-main:hover { background: #4CA59C; }
+.hb-entry-title { font-size: 22px; font-weight: 800; }
+.hb-entry-sub { font-size: 15px; color: inherit; opacity: .85; }
+.hb-hero .hb-learner-link { margin: 18px 0 0; }
+body[data-view="lesson"] .hb-materials { margin-top: 24px; }
+@media (max-width: 640px) { .hb-entries { grid-template-columns: 1fr; width: 100%; } }
 .hb-lesson-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
 .hb-lesson-head h1 { margin: 4px 0 8px; font-size: 28px; }
 .hb-lesson-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -113,10 +124,8 @@ body[data-view="planned"] .hb-materials { margin-top: 28px; }
 .hb-mat[data-students] { border-color: #F2C98E; background: #FFF8EC; }
 .hb-mat-tag { padding: 1px 7px; border-radius: 5px; background: #FFF0DB; color: #84480A; font-size: 13px; font-weight: 700; }
 .hb-check { margin: 10px 0 0; padding: 8px 12px; border-radius: 8px; background: #FFF0DB; color: #84480A; font-size: 15px; }
-.hb-overview { flex: 1 1 auto; width: 100%; min-height: 420px; border: 1px solid var(--line); border-bottom: 0; border-radius: var(--radius) var(--radius) 0 0; background: var(--white); }
 
 @media (max-width: 640px) {
   .hb-top, main { padding-left: 16px; padding-right: 16px; }
-  body[data-view="lesson"] main { padding: 16px 16px 0; }
   h1 { font-size: 28px; }
 }
