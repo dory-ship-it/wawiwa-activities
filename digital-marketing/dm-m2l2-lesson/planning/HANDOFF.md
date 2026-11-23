@@ -40,7 +40,7 @@ Last pushed commit: ac2bc43 (21 Nov). Everything below is on the computer only, 
 - New screen VK1 before K1: the V4 film (1:00.2, no stops), one dimension through the three columns. Round 2 (values joined with "or", "the first of the eight dimensions" at the start) is in; Noy has not watched round 2.
 - New screen CALL before S05: a phone rings, the learner answers, the client's recorded call plays (template `call` in `dm2.js`, style `CALL1`). Voice "Eric". S05 and S06 carry the tag "From the client's call". Noy approved the look; she has not confirmed the sound.
 - Podcast (S26): recorded again in the calm settings; opening and closing lines reworded. Noy has not heard it.
-- Tests on the final files: `check` passed, `walk` passed, `test:scorm` passed; `check:overflow` on the changed screens passed (81 states, 0 problems, before the last V4 swap); the full `check:overflow` was running when this was written: see the end of Round 12 in the report, or run it again.
+- Tests on the final files: `check` passed, `walk` passed, `test:scorm` passed; full `check:overflow` 489 states at three sizes, 0 problems (23 Nov, run chapter by chapter: two whole runs were cut by the machine, so prefer `--only=` batches); `test:review` passed.
 
 ## Open items
 1. Noy: watch V1, V2 and V4 round 2 with sound, hear the podcast and the call; then she commits and pushes.

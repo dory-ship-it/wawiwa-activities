@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; font-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="robots" content="noindex, nofollow">
+<title>Self-study hub</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="hub.css?v=20261123d">
+</head>
+<body>
+<!-- The team's home for every self-study lesson: courses, then lessons, then a lesson's overview with the learner links.
+     Built at runtime from hub.json and each lesson's own content file; it opens the lessons in their own folders. -->
+<header class="hb-top">
+  <a class="hb-home" href="#/"><img src="assets/wawiwa-logo.png" alt="Wawiwa" width="96" height="36"><span>Self-study hub</span></a>
+  <nav class="hb-crumbs" aria-label="Where you are"></nav>
+</header>
+<main id="hub" tabindex="-1"></main>
+<!-- after changing hub.js or hub.css, raise the ?v= on both links so browsers load the new files -->
+<script type="module" src="hub.js?v=20261123d"></script>
+</body>
+</html>
