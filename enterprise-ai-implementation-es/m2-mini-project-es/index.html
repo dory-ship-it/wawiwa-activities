@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EAI M2 · Mini proyecto</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ------------------------------------------------------------------
+     Wawiwa clean sheet — the M2 workbook family (header, progress bar,
+     required cards, reference disclosures, form fields, button row).
+     Same tokens, motion and restraint as the practice clean sheet.
+     NOTHING in the page's content, markup or script is changed: this
+     stylesheet is swapped in for the old one and nothing else.
+     ------------------------------------------------------------------ */
+  :root{
+    --card:#FFFFFF;
+    --ink:#17201F; --ink-2:#44514F; --muted:#667573;
+    --hair:#E2EAE9; --field:#F1F6F5;
+    --accent:#2E6E76; --accent-soft:#DFEFED; --on-accent:#FFFFFF;
+    --good:#2E6E76;
+    --shadow:0 1px 2px rgba(23,32,31,.05), 0 18px 44px -18px rgba(23,32,31,.22);
+    --shadow-soft:0 1px 2px rgba(23,32,31,.05);
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+    --card:#18211F; --ink:#EDF3F2; --ink-2:#C6D2D0; --muted:#8A9997;
+    --hair:#26312F; --field:#212B29; --accent:#5CC9BE; --accent-soft:#153330;
+    --on-accent:#0C1312; --good:#5CC9BE;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 52px -18px rgba(0,0,0,.8);
+    --shadow-soft:0 1px 2px rgba(0,0,0,.4);
+  }}
+  :root[data-theme="dark"]{
+    --card:#18211F; --ink:#EDF3F2; --ink-2:#C6D2D0; --muted:#8A9997;
+    --hair:#26312F; --field:#212B29; --accent:#5CC9BE; --accent-soft:#153330;
+    --on-accent:#0C1312; --good:#5CC9BE;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 52px -18px rgba(0,0,0,.8);
+    --shadow-soft:0 1px 2px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  /* No page ground: the cards float on whatever is behind the embed. */
+  body{background:transparent; color:var(--ink); line-height:1.6;
+    font-family:"Assistant",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;}
+
+  /* The old dark masthead becomes a quiet page head. */
+  header{background:transparent; color:var(--ink); padding:18px 16px 2px;
+    max-width:660px; margin:0 auto;}
+  .kick{font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+  header h1{margin:8px 0 6px; font-size:clamp(22px,3.2vw,26px); font-weight:700;
+    line-height:1.25; letter-spacing:-.014em; color:var(--ink)}
+  .sub{color:var(--muted); font-size:15px; line-height:1.55}
+
+  /* The progress bar: a floating pill, not a full-width rule. */
+  .bar{position:sticky; top:env(safe-area-inset-top, 0px); z-index:5;
+    max-width:660px; margin:14px auto 0; padding:11px 18px;
+    background:var(--card); border:1px solid var(--hair); border-radius:980px;
+    box-shadow:var(--shadow-soft); display:flex; align-items:center; gap:14px;
+    -webkit-backdrop-filter:saturate(1.6) blur(8px); backdrop-filter:saturate(1.6) blur(8px)}
+  .bar b{color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; white-space:nowrap}
+  .bar .track{flex:1; height:4px; background:var(--field); border-radius:980px; overflow:hidden}
+  .bar .fill{height:100%; width:0; background:var(--accent); border-radius:980px;
+    transition:width .42s var(--ease)}
+
+  .wrap{max-width:660px; margin:0 auto; padding:14px 16px 34px}
+
+  .card{background:var(--card);
+    /* !important neutralises the old inline border-left-color accents on the
+       reference cards; the markup keeps them, they simply stop showing. */
+    border:1px solid var(--hair) !important;
+    border-radius:20px; box-shadow:var(--shadow); padding:26px 30px 24px; margin:14px 0;
+    position:relative; animation:rise .42s var(--ease) both}
+  .card h2{margin:0 0 10px; font-size:19px; font-weight:700; line-height:1.3;
+    letter-spacing:-.008em; color:var(--ink); padding-inline-end:30px}
+  .card p{margin:0 0 10px; font-size:15.5px; line-height:1.62; color:var(--ink-2)}
+  .card.intro{background:var(--card)}
+
+  /* The done marker: a quiet ring that fills in, never a red or green verdict. */
+  .card.req::after{content:""; position:absolute; top:28px; inset-inline-end:26px;
+    width:16px; height:16px; border-radius:50%; border:1.5px solid var(--hair);
+    transition:border-color .3s var(--ease), background .3s var(--ease)}
+  .card.req.done::after{content:"\2713"; border-color:var(--good); background:var(--good);
+    color:var(--on-accent); font-size:10px; font-weight:700; line-height:16px; text-align:center}
+
+  label{display:block; font-size:11px; font-weight:700; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--muted); margin:16px 0 6px}
+  input[type=text], textarea, select{width:100%; background:var(--field); border:none;
+    border-radius:14px; padding:14px 16px; font-family:inherit; font-size:16px;
+    line-height:1.6; color:var(--ink); transition:box-shadow .25s var(--ease)}
+  textarea{min-height:88px; resize:none}
+  input::placeholder, textarea::placeholder{color:var(--muted)}
+  input:focus, textarea:focus, select:focus{outline:none;
+    box-shadow:0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent)}
+  select{appearance:none; -webkit-appearance:none; cursor:pointer}
+
+  .row{display:flex; gap:12px; flex-wrap:wrap}
+  .row>div{flex:1; min-width:190px}
+
+  /* Reference material: a disclosure, not a boxed card inside a card. */
+  details{background:transparent; border:none; border-top:1px solid var(--hair);
+    border-radius:0; margin:0; padding:2px 0}
+  details:last-of-type{border-bottom:1px solid var(--hair)}
+  summary{cursor:pointer; font-weight:700; font-size:15.5px; color:var(--ink);
+    padding:13px 2px; list-style:none; transition:opacity .2s var(--ease)}
+  summary:hover{opacity:.62}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"\203A"; float:inline-end; color:var(--accent); font-size:19px;
+    line-height:1; transform:rotate(90deg); transition:transform .28s var(--ease)}
+  details[open] summary::after{transform:rotate(270deg)}
+  details p{margin:6px 0 12px; font-size:15px; line-height:1.62; color:var(--ink-2)}
+
+  .tag{display:inline-block; background:var(--accent-soft); color:var(--accent);
+    font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    border-radius:980px; padding:3px 10px; margin-inline-start:8px; vertical-align:middle}
+  .hint{color:var(--muted)!important; font-size:14px!important; line-height:1.55; margin:4px 0 0}
+  .persona b{color:var(--ink)}
+
+  .btnrow{margin-top:24px; display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+  button{background:var(--accent); color:var(--on-accent); border:none; border-radius:980px;
+    padding:11px 26px; font-family:inherit; font-weight:700; font-size:15px; cursor:pointer;
+    transition:transform .18s var(--ease), filter .18s var(--ease)}
+  button:hover{filter:brightness(1.08)} button:active{transform:scale(.97)}
+  button.ghost{background:transparent; color:var(--accent); border:none; font-weight:400; padding:11px 10px}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+
+  .badge{background:transparent; border:none; color:var(--muted); font-size:13px; padding:0}
+  .foot{color:var(--muted); font-size:12.5px; line-height:1.55; margin-top:26px;
+    border-top:1px solid var(--hair); padding-top:14px}
+
+  @keyframes rise{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+  [hidden]{display:none!important}
+  @media (prefers-reduced-motion:reduce){ .card{animation:none} *{transition:none!important} }
+  @media (max-width:560px){
+    .card{padding:22px 20px 20px; border-radius:18px}
+    .wrap{padding:12px 12px 26px} header{padding:16px 12px 2px}
+    .bar{margin-inline:12px; padding:10px 14px}
+  }
+  @media print{
+    .bar,.btnrow{display:none}
+    .card{box-shadow:none; break-inside:avoid}
+    details{border:none} details p{display:block}
+  }
+
+
+
+/* >>> WAWIWA LOGO >>> */
+:root{
+  --w-logo: url("data:image/png;base64,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");
+  --w-logo-h: 34px;
+  --w-logo-w: 90px;
+}
+header::before{
+  background-image: var(--w-logo);
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: contain;
+  background-color: transparent;
+  width: var(--w-logo-w);
+  height: var(--w-logo-h);
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  filter: none;
+  content: "";
+  display: block;
+  margin: 0 0 14px;
+}
+/* <<< WAWIWA LOGO <<< */
+</style>
+<style id="wawiwa-print-fix">@media print{@page{margin:0 !important}body{padding:12mm !important;box-sizing:border-box}}</style>
+<style>/* >>> BLANK PDF >>> */
+.w-blank-tag{display:none}
+@media print{.w-blank-tag{display:block;margin:0 0 10px;font:600 12px/1.4 sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#2E6E76}}
+/* <<< BLANK PDF <<< */</style>
+</head>
+<body>
+<header>
+  <div class="kick">Enterprise AI Implementation Specialist</div>
+  <h1>Módulo 2 · Mini proyecto: proyecto de consultoría de mapeo de necesidades de IA</h1>
+  <div class="sub">Entregable culminante del Módulo 2 · 5 entregables + revisión ejecutiva simulada · 60% de la calificación del módulo</div>
+</header>
+
+<div class="bar"><b id="count">0 / 7 planeados</b><div class="track"><div class="fill" id="fill"></div></div></div>
+
+<div class="wrap">
+
+  <div class="card intro">
+    <h2>Qué vas a producir</h2>
+    <p>Llevas a un cliente ficticio a lo largo de un proyecto completo de mapeo de necesidades de IA, de principio a fin, y produces el conjunto de entregables que un especialista en implementación en activo entrega después de un descubrimiento de 4 semanas: un mapa de oportunidades de IA, una lista corta priorizada, una hoja de ruta por fases, una hipótesis de ROI (retorno de la inversión) y una presentación ejecutiva de 10 diapositivas. Después lo defiendes en una revisión ejecutiva simulada de 20 minutos.</p>
+    <p class="hint">Usa esta página para planear y dar seguimiento a tus cinco entregables. Cada recuadro de planeación muestra una palomita verde cuando está lleno. Los entregables reales se construyen en Excel / Notion / PowerPoint y se entregan en tu carpeta compartida; esta página es tu tablero de control, no la entrega.</p>
+  </div>
+
+  <div class="card req" id="client">
+    <h2>Tu cliente y tu postura en el proyecto</h2>
+    <label>Paquete del caso asignado</label>
+    <select data-req>
+      <option value="">Selecciona tu caso…</option>
+      <option>NorthRiver Holdings: firma de inversión inmobiliaria</option>
+      <option>Mi propia organización (anonimizada)</option>
+    </select>
+    <label>Postura de manejo de datos del proyecto (memorando al inicio de la entrega)</label>
+    <textarea data-req placeholder="¿Qué herramientas pueden tocar los datos del cliente y con qué nivel de sensibilidad? ¿Qué anonimizaste antes de usar una cuenta personal de IA, y cómo? (Regla de manejo de datos de la Lección 1.)"></textarea>
+    <p class="hint">Trabaja dentro del paquete del caso: 5 transcripciones de entrevistas, organigrama, panorama de sistemas y mandato del CEO. No inventes nuevas áreas ni partes interesadas.</p>
+  </div>
+
+  <div class="card req" id="a1">
+    <h2>Entregable 1 · Mapa de oportunidades de IA <span class="pill">40%</span></h2>
+    <ul>
+      <li>De 12 a 20 tarjetas de oportunidad, que cubran al menos 4 de las 5 áreas.</li>
+      <li>Cada tarjeta: ID, Proceso, Punto de dolor (vinculado a una cita de entrevista), Causa raíz (5 porqués / espina de pescado), Oportunidad, Categoría de solución (Agente / Automatización / BI / IA documental), Herramientas (catálogo de abril de 2026), Sensibilidad de los datos, Esfuerzo, Valor, Responsable/patrocinador, <b>Responsable del punto de dolor (Pain Owner)</b>, Entrevista de origen.</li>
+      <li>Al menos 3 tarjetas se vinculan con puntos de dolor <b>inferidos</b> (un comportamiento que se describe, pero no se señala como problema). Las tarjetas de rediseño de procesos necesitan un diagrama de carriles AS-IS; cuando dominan las ramas Personas/Proceso/Políticas/Datos, se necesita una espina de pescado.</li>
+      <li>Formato: exportación de Notion / Airtable / Excel. No PDF ni imagen.</li>
+    </ul>
+    <label>Mi plan para el Entregable 1 (áreas, herramienta, cómo voy a llegar a 12+ tarjetas y 3 puntos de dolor inferidos)</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="a2">
+    <h2>Entregable 2 · Lista corta priorizada <span class="pill">15%</span></h2>
+    <ul>
+      <li>Las 5 oportunidades principales con todo el detalle de la tarjeta, más Justificación, Secuencia, Dependencias y Criterios de éxito a 90 días.</li>
+      <li>Al menos un quick win (logro rápido) de la Fase 1 y un proyecto estratégico de la Fase 2.</li>
+      <li>Indica cuál de las cuatro jugadas (desempate, peso por área, proyecto consentido, todo 5 / todo 1) rigió cada calibración, con la regla declarada antes de calificar.</li>
+    </ul>
+    <label>Mi plan para el Entregable 2 (método de priorización + la jugada que probablemente uses)</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="a3">
+    <h2>Entregable 3 · Hoja de ruta de 90 días <span class="pill">15%</span></h2>
+    <ul>
+      <li>Fase 1 (próximos 90 días): los 5 quick wins con fechas y responsables con nombre.</li>
+      <li>Fase 2 (meses 4-9): desarrollos estratégicos con hitos trimestrales.</li>
+      <li>Fase 3 (meses 10+): líneas de trabajo de base (fuente única de verdad, datos maestros, movilidad, cero papel).</li>
+      <li>Dependencias de la ruta crítica + una vista de hitos por trimestre. Formato: visual (Mermaid / Lucidchart / Miro / Gantt de Copilot). Incluye el archivo fuente.</li>
+    </ul>
+    <label>Mi plan para el Entregable 3 (herramienta + titulares de cada fase)</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="a4">
+    <h2>Entregable 4 · Hipótesis de ROI <span class="pill">15%</span></h2>
+    <ul>
+      <li>Las 3 oportunidades principales. Muestra de principio a fin el cálculo de los cuatro componentes: línea base de costo (horas × número de personas × costo laboral total + retrabajo + herramientas), ahorro esperado (margen del 25-30% por la brecha entre la demo y la producción), inversión (construcción + licencias + gestión del cambio) y mes de recuperación.</li>
+      <li>Tres KPI para cada una (adelantado / rezagado / de protección) y un análisis de sensibilidad con mejor, base y peor escenario.</li>
+      <li>Además, un <b>memo de ROI cualitativo</b> de una página para una oportunidad, con una de las ocho categorías (Reducción de riesgos, Experiencia del colaborador, Reducción del agotamiento laboral, Reputación de marca, Velocidad de aprendizaje, Opcionalidad, Señal de innovación, Reducción de errores).</li>
+      <li>Formato: Excel con fórmulas que funcionen (Copilot en Excel), una hoja por oportunidad. Sin valores pegados.</li>
+    </ul>
+    <label>Mi plan para el Entregable 4 (las 3 oportunidades elegidas + qué categoría cualitativa)</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="a5">
+    <h2>Entregable 5 · Presentación ejecutiva de 10 diapositivas <span class="pill">15%</span></h2>
+    <ul>
+      <li>Patrón ejecutivo de Wawiwa: Portada, Visión, Hallazgos (los 3 patrones principales), Recomendaciones (las 5 principales + el ROI en una línea), Hoja de ruta, Costos (con punto de equilibrio), Próximos pasos. Exactamente 10 diapositivas, sin anexo.</li>
+      <li>Nombra a un <b>candidato a AIBP</b> (AI Business Partner, socio de negocio de IA) real del paquete del caso (puntaje en el Triángulo Sagrado + 20-40% de un FTE) como la persona interna que llevará el trabajo adelante. Tú eres el especialista externo; el AIBP es otra persona.</li>
+      <li>Referencias a lo que sigue: una línea sobre el Centro de Excelencia (CoE, gobernanza) y otra que nombre la interfaz con InfoSec de tu oportunidad de mayor sensibilidad.</li>
+      <li>Prepárate para la revisión simulada con la simulación de preguntas y respuestas con IA del "CFO escéptico".</li>
+    </ul>
+    <label>Mi plan para el Entregable 5 (visión principal + candidato a AIBP con nombre)</label>
+    <textarea data-req></textarea>
+  </div>
+
+  <div class="card req" id="ailog">
+    <h2>Registro de uso de IA <span class="w">obligatorio en tu carpeta de entrega</span></h2>
+    <p class="hint">Usar IA es obligatorio y no se penaliza, pero documéntalo. Para cada uso: herramienta, prompt, resultado aceptado / editado / descartado, y por qué. Presentar resultados de IA sin validar como si fueran tu propio análisis es motivo de calificación reprobatoria.</p>
+    <label>Empieza tu registro (agrega filas conforme avanzas)</label>
+    <textarea data-req placeholder="Herramienta | Prompt | Aceptado / Editado / Descartado | Por qué&#10;p. ej., NotebookLM | sintetizar 5 transcripciones en puntos de dolor | Editado | inventó una cita; la eliminé"></textarea>
+  </div>
+
+  <details>
+    <summary>Referencia · Rúbrica y logística de entrega</summary>
+    <table>
+      <tr><th>Dimensión</th><th>Sólido</th></tr>
+      <tr><td>Calidad de las tarjetas: responsable del punto de dolor</td><td>Cada tarjeta nombra a un responsable del punto de dolor específico, distinto del responsable/patrocinador.</td></tr>
+      <tr><td>ROI: cuantitativo</td><td>Los cuatro componentes con supuestos calibrados; sensibilidad con 3 escenarios; mes de recuperación indicado.</td></tr>
+      <tr><td>ROI: defensa cualitativa</td><td>Un memo completo con una categoría nombrada, lenguaje calibrado y "por qué los dólares no lo capturan".</td></tr>
+      <tr><td>Presentación ejecutiva: AIBP con nombre</td><td>Candidato a AIBP con nombre, con puntaje en el Triángulo Sagrado y asignación de tiempo.</td></tr>
+      <tr><td>Detección de comportamientos</td><td>Al menos 3 tarjetas se vinculan con puntos de dolor inferidos (no expresados), con citas.</td></tr>
+    </table>
+    <p class="hint">Fecha límite: 14 días después de la última sesión del Módulo 2. Nombre de los archivos: EAI-M02-MiniProject-[NombreDelEstudiante]-[Entregable].[ext]. Entregas tardías: -5% por día; no se aceptan después de 7 días sin un acuerdo previo. Inscripción a la revisión simulada dentro de los 7 días posteriores a la entrega.</p>
+  </details>
+
+  <div class="card" style="border-left-color:var(--gold)">
+    <h2>Lista de verificación antes de entregar</h2>
+    <div class="chk"><input type="checkbox"><span>El memorando del proyecto con la postura de manejo de datos está al inicio de la entrega.</span></div>
+    <div class="chk"><input type="checkbox"><span>El mapa de oportunidades tiene 12-20 tarjetas, 4+ áreas, un responsable del punto de dolor en cada tarjeta y 3+ puntos de dolor inferidos.</span></div>
+    <div class="chk"><input type="checkbox"><span>La lista corta nombra la jugada que se usó, con la regla declarada de antemano.</span></div>
+    <div class="chk"><input type="checkbox"><span>El libro de Excel del ROI muestra el cálculo de los cuatro componentes con fórmulas que funcionan + un memo cualitativo.</span></div>
+    <div class="chk"><input type="checkbox"><span>La presentación tiene exactamente 10 diapositivas y nombra a un candidato a AIBP real.</span></div>
+    <div class="chk"><input type="checkbox"><span>El registro de uso de IA documenta las decisiones de validación (aceptado / editado / descartado + por qué).</span></div>
+    <p class="hint">La lista de verificación es tu propio filtro; no se califica, pero la rúbrica revisa cada punto.</p>
+  </div>
+
+  <div class="btnrow">
+    <button onclick="copyPlan()">Copiar mi plan del proyecto</button>
+    <button class="ghost" onclick="window.print()">Imprimir / Guardar como PDF</button>
+    <button class="ghost" id="mkblank" type="button">Imprimir en blanco / Guardar como PDF</button>
+    <span class="badge" id="copied"></span>
+  </div>
+
+</div>
+
+<script>
+  var cards=[].slice.call(document.querySelectorAll('.card.req'));
+  function filled(el){ return (el.value||'').trim()!==''; }
+  function refresh(){
+    var done=0;
+    cards.forEach(function(card){
+      var reqs=[].slice.call(card.querySelectorAll('[data-req]'));
+      var ok=reqs.every(filled);
+      card.classList.toggle('done', ok);
+      if(ok) done++;
+    });
+    document.getElementById('count').textContent=done+' / '+cards.length+' planeados';
+    document.getElementById('fill').style.width=(done/cards.length*100)+'%';
+  }
+  document.addEventListener('input', refresh);
+  document.addEventListener('change', refresh);
+  function copyPlan(){
+    var out=[];
+    cards.forEach(function(card){
+      out.push('== '+card.querySelector('h2').textContent.replace(/\s+/g,' ').trim()+' ==');
+      [].slice.call(card.querySelectorAll('label')).forEach(function(l){
+        var f=l.nextElementSibling;
+        if(f && (f.tagName==='INPUT'||f.tagName==='TEXTAREA'||f.tagName==='SELECT')) out.push(l.textContent+': '+(f.value||''));
+      });
+      out.push('');
+    });
+    var text=out.join('\n');
+    var note=document.getElementById('copied');
+    if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){note.textContent='Copiado al portapapeles.';},function(){fallback(text,note);}); }
+    else fallback(text,note);
+  }
+  function fallback(text,note){ var t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();try{document.execCommand('copy');note.textContent='Copiado.';}catch(e){note.textContent='Selecciona todo y copia.';}document.body.removeChild(t); }
+  refresh();
+</script>
+<script>
+/* >>> BLANK PDF >>> */
+/* the blank template: every field back to its authored default, the page's
+   own input/change listener recomputes what it derives from them, the
+   browser prints, and on afterprint every value comes back. Nothing is
+   saved anywhere in between (these pages do not autosave). */
+(function(){
+  'use strict';
+  function fields(){
+    return [].slice.call(document.querySelectorAll('input,textarea,select')).filter(function(e){
+      return !/^(button|submit|reset|hidden|file|image)$/.test(e.type||'');
+    });
+  }
+  function nudge(list){
+    list.forEach(function(e){
+      e.dispatchEvent(new Event('input',{bubbles:true}));
+      e.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+  }
+  function blankPrint(){
+    var list=fields();
+    var saved=list.map(function(e){
+      if(e.tagName==='SELECT') return [].map.call(e.options,function(o){ return o.selected; });
+      if(e.type==='checkbox'||e.type==='radio') return e.checked;
+      return e.value;
+    });
+    list.forEach(function(e){
+      if(e.tagName==='SELECT') [].forEach.call(e.options,function(o){ o.selected=o.defaultSelected; });
+      else if(e.type==='checkbox'||e.type==='radio') e.checked=e.defaultChecked;
+      else e.value=e.defaultValue;
+    });
+    nudge(list);
+    var tag=document.createElement('p');
+    tag.className='w-blank-tag';
+    tag.textContent='Plantilla en blanco';
+    var head=document.querySelector('header, .masthead');
+    if(head&&head.parentNode) head.parentNode.insertBefore(tag, head.nextSibling);
+    else document.body.insertBefore(tag, document.body.firstChild);
+    var done=false;
+    function restore(){
+      if(done) return; done=true;
+      list.forEach(function(e,i){
+        if(e.tagName==='SELECT') [].forEach.call(e.options,function(o,k){ o.selected=saved[i][k]; });
+        else if(e.type==='checkbox'||e.type==='radio') e.checked=saved[i];
+        else e.value=saved[i];
+      });
+      nudge(list);
+      if(tag.parentNode) tag.parentNode.removeChild(tag);
+      window.removeEventListener('afterprint',restore);
+      ['pointerdown','keydown','focusin'].forEach(function(t){ document.removeEventListener(t,restore,true); });
+    }
+    window.addEventListener('afterprint',restore);
+    /* a browser that never fires afterprint: the first touch afterwards restores */
+    setTimeout(function(){
+      ['pointerdown','keydown','focusin'].forEach(function(t){ document.addEventListener(t,restore,true); });
+    },0);
+    window.print();
+  }
+  var b=document.getElementById('mkblank');
+  if(b) b.addEventListener('click', blankPrint);
+})();
+/* <<< BLANK PDF <<< */
+</script>
+</body>
+</html>
