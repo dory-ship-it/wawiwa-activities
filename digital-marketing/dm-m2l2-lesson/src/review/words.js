@@ -34,12 +34,12 @@ export function screenViews(s, content, { options = true } = {}) {
   if (s.template === 'workbookStop') return [[s.id, [s.line, s.again]]];
   if (s.template === 'questionTiles') {
     const qs = s.tiles.map((t) => t.question);
-    return [...s.tiles.map((t) => [s.id + ' tile ' + t.n + ' open', [...qs, t.note, t.text, ...opt((t.options || []).map((o) => o.label))]]),
-      [s.id + ' done', [...qs, s.closing.keyLine, s.closing.ifMissing?.text]]];
+    return [...s.tiles.map((t) => [s.id + ' tile ' + t.n + ' open', [s.eyebrow, ...qs, t.note, t.text, ...opt((t.options || []).map((o) => o.label))]]),
+      [s.id + ' done', [s.eyebrow, ...qs, s.closing.keyLine, s.closing.ifMissing?.text]]];
   }
   if (s.template === 'questionCards') {
     const qs = s.cards.map((c) => c.question);
-    return [[s.id, [s.band, ...qs]], [s.id + ' all marked', [s.band, ...qs, ...s.cards.map((c) => c.where), s.closing.keyLine, s.closing.ifGap]]];
+    return [[s.id, [s.eyebrow, s.band, ...qs]], [s.id + ' all marked', [s.eyebrow, s.band, ...qs, ...s.cards.map((c) => c.where), s.closing.keyLine, s.closing.ifGap]]];
   }
   if (s.template === 'dimensionMap') {
     const names = s.dimensions.map((d) => d.name);
@@ -63,6 +63,8 @@ export function screenViews(s, content, { options = true } = {}) {
   }
   if (s.template === 'twoCols') return [[s.id, [...s.cols.flatMap((c) => [c.title, c.text]), s.keyLine]]];
   if (s.template === 'podcast') return [[s.id, [s.eyebrow, ...s.observations]]];
+  // the call's lines are its captions (as a film's captions, they are not counted): the screen itself shows the caller only
+  if (s.template === 'call') return [[s.id, [s.eyebrow, s.call.caller]]];
   if (s.template === 'poll') return [[s.id, [s.eyebrow, s.quote, ...(s.list || []), ...opt(s.options.map((o) => o.label))]],
     [s.id + ' chosen', [s.eyebrow, s.quote, ...(s.list || []), s.keyLine, s.after?.title, s.after?.text, s.after?.coach, ...opt(s.options.map((o) => o.label))]]];
   if (s.template === 'funnelCalc') return [[s.id, [s.eyebrow, ...s.lines, ...s.stages.flatMap((x) => [x.n, x.name, x.sub, String(x.rate)]), s.stepper.label, s.ratesLabel, s.keyLine]]];

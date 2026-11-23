@@ -19,12 +19,13 @@
 //   dataTable    (S30)  the slide's report table; three rounds answered by clicking a row.
 //   infographic  (S32)  research blocks left, plan elements right, connector lines between them.
 //   homeStop     (S36)  the home practice: the slide's five instructions and the link (new tab).
+//   call         (CALL) a phone rings; the learner answers; the client's recorded call plays, its lines shown as said.
 // Graded answers go out once (ctx.answer); everything else lives in the screen's flags (suspend data).
-import { h, fmt, resolveLink } from '../util.js?v=a089d641';
-import { glyph, icon } from '../icons.js?v=a089d641';
-import { letter } from '../tracking/index.js?v=a089d641';
-import { layout, picture, arrowNav } from './stage.js?v=a089d641';
-import { keyLine, boardEl, fill, headOf, floatBand, needLeft, beside } from './dm.js?v=a089d641';
+import { h, fmt, resolveLink } from '../util.js?v=c6cd176a';
+import { glyph, icon } from '../icons.js?v=c6cd176a';
+import { letter } from '../tracking/index.js?v=c6cd176a';
+import { layout, picture, arrowNav } from './stage.js?v=c6cd176a';
+import { keyLine, boardEl, fill, headOf, floatBand, needLeft, beside } from './dm.js?v=c6cd176a';
 
 /* ---------- shared parts ---------- */
 const SVG = 'http://www.w3.org/2000/svg';
@@ -725,5 +726,65 @@ export const homeStop = {
     open.addEventListener('click', () => { ctx.flags.set('o', 1); opened(true); });
     if (ctx.revisit || ctx.flags.get('o')) opened(false);
     return { unmount() {} };
+  },
+};
+
+/* ---------- call (CALL): the client rings ---------- */
+// (Noy, 22 Nov 2026) A phone rings on an otherwise empty screen; the learner answers; the client's recorded call
+// plays and its lines appear as they are said (the lines are the captions). Neutral: nothing is graded or sent.
+//   media: { src, ring, cues, duration }   call: { caller, image: { src }, script: [line, ...] }
+// The ring is short: it stops by itself after RINGS rounds and the phone goes still; the hand then shows Answer.
+const RINGS = 3;
+export const call = {
+  mount(ctx) {
+    const { screen, ui, zones } = ctx;
+    const c = ui.call, m = screen.media, k = screen.call;
+    let cues = [], heard = ctx.revisit || !!ctx.flags.get('h'), rung = 1;
+    const audio = h('audio', { class: 'd2-audio', src: m.src, preload: 'auto' });
+    const ring = h('audio', { class: 'd2-call-ring', src: m.ring, preload: 'auto' });
+    const status = h('p', { class: 'd2-call-status' }, c.ringing);
+    const phone = h('div', { class: 'd2-call-phone', dataset: { state: 'ringing', buzz: 'true' } },
+      h('img', { class: 'd2-call-img', src: k.image.src, alt: '' }),
+      h('div', { class: 'd2-call-screen' }, h('span', { class: 'd2-call-avatar', 'aria-hidden': 'true' }, icon('user', { size: 44 })),
+        h('p', { class: 'd2-call-who' }, k.caller), status));
+    const answer = btn('d2-call-answer', 'callAnswer', h('span', { class: 'd2-call-answer-icon', 'aria-hidden': 'true' }, icon('phone', { size: 26 })), h('span', {}, c.answer));
+    const again = btn('d2-call-again', 'callAgain', h('span', { 'aria-hidden': 'true' }, icon('rotate-ccw', { size: 20 })), h('span', {}, c.again));
+    const lines = k.script.map((l) => h('p', { class: 'd2-call-line' }, l));
+    const said = h('div', { class: 'd2-call-said', role: 'region', 'aria-label': c.transcript }, lines);
+    const still = () => { ring.pause(); phone.dataset.buzz = 'false'; };
+    function show(t, all = false) {
+      const now = all ? -1 : cues.findIndex((x) => t >= x.t && t < x.end);
+      lines.forEach((p, i) => { p.hidden = !all && !(cues[i] && t >= cues[i].t - 0.05); p.dataset.now = String(i === now); });
+    }
+    function talk() {
+      still();
+      answer.hidden = true; again.hidden = true;
+      phone.dataset.state = 'talking'; status.textContent = c.talking;
+      show(0);
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    }
+    function ended(live) {
+      phone.dataset.state = 'ended'; status.textContent = c.ended;
+      answer.hidden = true; again.hidden = false;
+      show(0, true);
+      if (!heard || !live) { heard = true; ctx.flags.set('h', 1); finish(ctx, live); }
+    }
+    answer.addEventListener('click', talk);
+    again.addEventListener('click', talk);
+    audio.addEventListener('timeupdate', () => { if (phone.dataset.state === 'talking') show(audio.currentTime); });
+    audio.addEventListener('ended', () => ended(true));
+    ring.addEventListener('ended', () => { if (phone.dataset.state !== 'ringing' || rung >= RINGS) return still(); rung++; ring.play().catch(still); });
+    fetch(m.cues).then((r) => r.json()).then((j) => { cues = j.items || []; }).catch(() => {});
+    layout(ctx, 'dm2-call', headOf(ctx, screen.eyebrow), body('call', audio, ring, phone, h('div', { class: 'd2-call-side' }, answer, said, again)), floatBand(ctx));
+    zones.setFeedback({ state: 'hint', text: screen.hint });
+    again.hidden = true;
+    if (heard) ended(false);
+    else {
+      show(0);
+      ring.play().catch(() => {});      // a browser may refuse sound before the first click: the phone still shakes
+      ctx.ghost({ type: screen.ghost?.type || 'call', delay: 3200, steps: () => [{ point: beside(answer, 0.82, 0.9), hold: 1100 }] });
+    }
+    return { unmount() { [audio, ring].forEach((a) => { a.pause(); a.removeAttribute('src'); a.load(); }); } };
   },
 };

@@ -17,9 +17,11 @@
       "O3",
       "WB0",
       "W3",
+      "CALL",
       "S05",
       "S06",
       "WB1",
+      "VK1",
       "K1",
       "S07",
       "WB2",
@@ -168,6 +170,7 @@
         "client": "Next, locked until you answer the three questions of the client",
         "caseFile": "Next, locked until you commit to an answer",
         "podcast": "Next, locked until the audio ends",
+        "call": "Next, locked until the call ends",
         "poll": "Next, locked until you choose",
         "funnelCalc": "Next, locked until you change the number of sales once",
         "dataTable": "Next, locked until all three rounds are answered",
@@ -196,6 +199,7 @@
         "client": "Answer the three questions to continue.",
         "caseFile": "Choose an answer, then Check.",
         "podcast": "Listen to the end to continue.",
+        "call": "Answer the call and listen to the end to continue.",
         "poll": "Choose one to continue.",
         "funnelCalc": "Change the number of sales once to continue.",
         "dataTable": "Answer all three rounds to continue.",
@@ -406,6 +410,14 @@
       "voiceB": "Voice two",
       "controls": "Audio controls",
       "seekAhead": "You can move ahead only to the part you have already heard."
+    },
+    "call": {
+      "answer": "Answer",
+      "ringing": "Incoming call",
+      "talking": "On the call",
+      "ended": "Call ended",
+      "again": "Listen again",
+      "transcript": "What the client says"
     }
   },
   "links": {
@@ -450,9 +462,11 @@
       "minutes": 50,
       "screens": [
         "W3",
+        "CALL",
         "S05",
         "S06",
         "WB1",
+        "VK1",
         "K1",
         "S07",
         "WB2",
@@ -843,6 +857,74 @@
       "r2": "Noy, 15 Nov 2026: the three names felt unnecessary; the icons stay"
     },
     {
+      "id": "CALL",
+      "chapter": "ch2",
+      "template": "call",
+      "locked": "call",
+      "step": {
+        "verb": "Call",
+        "icon": "phone"
+      },
+      "minutes": 1,
+      "coach": {
+        "kind": "idea",
+        "tip": "Listen for what the client wants to know. The next screens take those questions one at a time.",
+        "tipDrafted": true
+      },
+      "instruction": "Your client is calling.",
+      "pilotCopy": [
+        "instruction",
+        "hint",
+        "the caller's label",
+        "the whole call: the client asks, in everyday words, the questions of S05 and S06; it adds no fact (Noy's idea and approval, 22 Nov 2026)"
+      ],
+      "hint": "Press Answer to hear the call.",
+      "ground": {
+        "kind": "dots"
+      },
+      "media": {
+        "$comment": "Produced 22 Nov 2026. The call: ElevenLabs, eleven_multilingual_v2, one take, a man's voice (\"Eric\", chosen by Noy from three; the client has no name), stability 0.45, similarity 0.80, style 0.20; trimmed, loudnorm -16 LUFS, mono mp3 96 kbps; call1.cues.json and call1.en.vtt are timed from the take (voice: see the cue file). The ring: synthesised in code (four soft notes, twice, 2.6 s), played at most three times. No third-party audio.",
+        "src": "assets/audio/call1.mp3",
+        "ring": "assets/audio/ring.mp3",
+        "captions": [
+          {
+            "lang": "en",
+            "label": "English",
+            "src": "assets/audio/call1.en.vtt"
+          }
+        ],
+        "cues": "assets/audio/call1.cues.json",
+        "duration": 22.52,
+        "length": "0:23",
+        "temp": false
+      },
+      "call": {
+        "caller": "Your client",
+        "image": {
+          "src": "assets/img/m2l2/call-phone.png",
+          "alt": "",
+          "source": "Generated for this lesson (Z-Image Turbo, seed 88342, 22 Nov 2026): a phone on white, cut out of its background; the picture on its screen is drawn by the page"
+        },
+        "script": [
+          "Hi, it's me.",
+          "Before we talk about a plan, I want to understand where we stand.",
+          "Do we have a website, and what are we already doing online?",
+          "What assets do we have?",
+          "And what do we really know about the market, about our competitors and about the demand?",
+          "Take your time, and answer one question at a time.",
+          "Then call me back. Thank you."
+        ]
+      },
+      "tracking": [],
+      "suspend": [
+        "heard to the end"
+      ],
+      "sources": [
+        "s5 (the questions about our own assets, which the client asks in his words)",
+        "s6 (the questions about the market, which the client asks in his words)"
+      ]
+    },
+    {
       "id": "S05",
       "chapter": "ch2",
       "template": "questionTiles",
@@ -857,9 +939,11 @@
         "tip": "Answer for your own business. On your own website you can know almost everything.",
         "tipDrafted": true
       },
+      "eyebrow": "From the client's call",
       "instruction": "Open each question and answer it for your business.",
       "pilotCopy": [
         "instruction",
+        "the tag over the heading",
         "options of tiles 1 to 3 (drawn from the slide 5 list)",
         "tile 4 text"
       ],
@@ -959,8 +1043,8 @@
         }
       },
       "words": {
-        "max": 45,
-        "why": "the four questions are the slide 5 list word for word; an open tile adds the slide line or its own text. Standard practice budget: 35"
+        "max": 49,
+        "why": "the four questions are the slide 5 list word for word; an open tile adds the slide line or its own text. Standard practice budget: 35 (+4, 22 Nov 2026: the tag that ties the screen to the client's call)"
       },
       "tracking": [],
       "suspend": [
@@ -986,6 +1070,7 @@
         "tip": "A gap is not a failure. Naming what your research cannot answer yet is the point.",
         "tipDrafted": true
       },
+      "eyebrow": "From the client's call",
       "instruction": "Can you answer each question from your Lesson 1 files?",
       "band": "This shows where your business stands today. Take one question at a time.",
       "pilotCopy": [
@@ -1038,8 +1123,8 @@
         "ifGap": "That is the gap in your research. Naming it is the point."
       },
       "words": {
-        "max": 131,
-        "why": "the six slide 6 questions stay on screen word for word, and each marked card adds where its answer lives (work order section 5, S06). Standard practice budget: 35"
+        "max": 135,
+        "why": "the six slide 6 questions stay on screen word for word, and each marked card adds where its answer lives (work order section 5, S06). Standard practice budget: 35 (+4, 22 Nov 2026: the tag that ties the screen to the client's call)"
       },
       "tracking": [],
       "suspend": [
@@ -1112,6 +1197,59 @@
       "again": "Closed the tab?",
       "presentation": true,
       "r2": "Noy, 15 Nov 2026: the workbook is already open from WB0, so this stop sends the learner back to that tab; \"Open the workbook\" is a small button for a closed tab, and Next is open (honour system)"
+    },
+    {
+      "id": "VK1",
+      "chapter": "ch2",
+      "template": "video",
+      "step": {
+        "verb": "Watch",
+        "icon": "watch"
+      },
+      "minutes": 1,
+      "coach": {
+        "kind": "idea",
+        "tip": "Watch how one dimension goes from a question to a decision. The next screen has all eight.",
+        "tipDrafted": true
+      },
+      "instruction": "Watch the video.",
+      "pilotCopy": [
+        "instruction",
+        "the film's opening line, its title and its closing line (the rest is dimension 01 of slides 7 to 9, with joining words)"
+      ],
+      "title": "One dimension, from a question to an insight",
+      "showTitle": false,
+      "photo": false,
+      "ground": {
+        "kind": "darkblur"
+      },
+      "media": {
+        "$comment": "The V4 film (22 Nov 2026, Noy and Dor: more film in the lesson's first hour, and K1 is its most abstract screen). It walks dimension 01, Traffic volume, through the three columns; the learner then explores all eight on K1. No stops. duration comes from assets/video/v4.cues.json. Film sources and README: Self- Study/Digital Marketing/M2L2-V4-film.",
+        "src": "assets/video/v4.mp4",
+        "poster": "assets/video/v4-poster.jpg",
+        "captions": [
+          {
+            "lang": "en",
+            "label": "English",
+            "src": "assets/video/v4.en.vtt"
+          }
+        ],
+        "cues": "assets/video/v4.cues.json",
+        "duration": 60.167,
+        "length": "1:00",
+        "temp": false,
+        "captionPlaces": []
+      },
+      "stops": [],
+      "advance": "after-video-end",
+      "production": {
+        "note": "Dimension 01 of K1 as a film: its question, its possible values and its required insight, word for word on screen, and K1's key line. Same studio and founder as the other films."
+      },
+      "tracking": [],
+      "sources": [
+        "s7 (dimension 01, Traffic volume)",
+        "the film's README (Self- Study/Digital Marketing/M2L2-V4-film/README.md)"
+      ]
     },
     {
       "id": "K1",
@@ -1754,7 +1892,7 @@
         "showMe": false
       },
       "media": {
-        "$comment": "The real film (Noy approved it, 15 Nov 2026): 1920x1080, 1:43.5, with sound. Captions: the film's own file, 35 cues timed from the narration audio. duration and stops[].t come from assets/video/v1.cues.json (written by the film's build, never typed by hand): each stop sits 0.2 s after the last word before it, where the film dims and shows its \"?\" mark. Film sources and README: Self- Study/Digital Marketing/M2L2-V1-film.",
+        "$comment": "The real film, narration round 2 (22 Nov 2026: reworded into full spoken sentences and re-recorded; Noy approved the narration audio): 1920x1080, 1:40.5, with sound. Captions: the film's own file, 35 cues timed from the narration audio. duration and stops[].t come from assets/video/v1.cues.json (written by the film's build, never typed by hand): each stop sits 0.2 s after the last word before it, where the film dims and shows its \"?\" mark. Film sources and README: Self- Study/Digital Marketing/M2L2-V1-film.",
         "src": "assets/video/v1.mp4",
         "poster": "assets/video/v1-poster.jpg",
         "captions": [
@@ -1764,8 +1902,8 @@
             "src": "assets/video/v1.en.vtt"
           }
         ],
-        "duration": 103.5,
-        "length": "1:43",
+        "duration": 100.5,
+        "length": "1:40",
         "temp": false,
         "captionPlaces": [],
         "cues": "assets/video/v1.cues.json"
@@ -1779,8 +1917,8 @@
         {
           "id": "stop1",
           "cueId": "stop1",
-          "storyboardTime": "0:42",
-          "t": 42.06,
+          "storyboardTime": "0:40",
+          "t": 39.96,
           "question": "Your first dashboard is rough. What now?",
           "options": [
             {
@@ -1808,8 +1946,8 @@
         {
           "id": "stop2",
           "cueId": "stop2",
-          "storyboardTime": "1:24",
-          "t": 84.16,
+          "storyboardTime": "1:22",
+          "t": 81.94,
           "question": "When does the tracking go in?",
           "options": [
             {
@@ -1838,24 +1976,24 @@
       "advance": "after-video-end",
       "production": {
         "status": "produced. This block records the film as delivered; the film's own README has the full detail",
-        "length": "1:43.5",
+        "length": "1:40.5",
         "titleCard": "Four principles, before we plan anything",
-        "note": "The four principles and their \"what it means in practice\" lines are slide 12 and its notes, word for word. The opening and closing lines are Noy's wording. Stop 1 sits before \"Start measuring badly...\" (the first plan had it after the whole segment), so the film answers the question after the learner does.",
+        "note": "The four principles and their \"what it means in practice\" lines are slide 12 and its notes. On screen they are word for word; since narration round 2 (22 Nov 2026) the spoken lines add joining words so that each is a full sentence. The opening and closing lines are Noy's wording. Stop 1 sits before \"Start measuring badly...\" (the first plan had it after the whole segment), so the film answers the question after the learner does.",
         "segments": [
           {
             "n": 1,
             "time": "0:00",
             "part": "cold open",
-            "narration": "You have a goal: fifteen percent more orders by March, at the same cost per order. A good goal. But how will you know you bought it?",
+            "narration": "Your goal is fifteen percent more orders by March, at the same cost per order. That is a good goal. But how will you know you bought it?",
             "onScreen": [
               "15% more orders by March"
             ]
           },
           {
             "n": 2,
-            "time": "0:12",
+            "time": "0:11",
             "part": "title",
-            "narration": "Four principles, before we plan anything.",
+            "narration": "Here are four principles, before we plan anything.",
             "onScreen": [
               "Four principles, before we plan anything"
             ]
@@ -1864,7 +2002,7 @@
             "n": 3,
             "time": "0:17",
             "part": "principle 1",
-            "narration": "Principle one: measure whether the goals were met, do not only act. Activity is not evidence. If you cannot name the number that proves a goal happened, it was an aspiration.",
+            "narration": "Principle one is to measure whether the goals were met, and not only to act. Activity is not evidence. If you cannot name the number that proves a goal happened, it was an aspiration.",
             "onScreen": [
               "Measure, do not only act",
               "Activity is not evidence"
@@ -1872,9 +2010,9 @@
           },
           {
             "n": 4,
-            "time": "0:31",
+            "time": "0:30",
             "part": "principle 2",
-            "narration": "Principle two: measurement starts tactical and intuitive, then matures into precise insight. Nobody's first dashboard is right. Start measuring badly rather than not at all, and sharpen it every month.",
+            "narration": "Principle two is that measurement starts tactical and intuitive, and then matures into precise insight. Nobody's first dashboard is right. So start measuring badly rather than not at all, and sharpen it every month.",
             "onScreen": [
               "Tactical, then precise",
               "Start measuring badly"
@@ -1883,9 +2021,9 @@
           },
           {
             "n": 5,
-            "time": "0:51",
+            "time": "0:49",
             "part": "principle 3",
-            "narration": "Principle three: understand what works, what does not, which campaign failed, and which investment was profitable. All four, not just the first. A plan that only reports successes cannot be optimised.",
+            "narration": "Principle three is to understand what works, what does not, which campaign failed, and which investment was profitable. You need all four, not just the first. A plan that only reports successes cannot be optimised.",
             "onScreen": [
               "What works, what does not",
               "All four, not just the first",
@@ -1897,9 +2035,9 @@
           },
           {
             "n": 6,
-            "time": "1:06",
+            "time": "1:05",
             "part": "principle 4",
-            "narration": "Principle four: building the measurement infrastructure is a necessary step before any marketing activity begins. Set it up before the campaign. Nobody sets up tracking retroactively. Data you do not collect today cannot be analysed in the future.",
+            "narration": "Principle four is that building the measurement infrastructure is a necessary step before any marketing activity begins. Set it up before the campaign, because nobody sets up tracking retroactively. Data you do not collect today cannot be analysed in the future.",
             "onScreen": [
               "Infrastructure first",
               "Before the campaign",
@@ -1910,9 +2048,9 @@
           },
           {
             "n": 7,
-            "time": "1:26",
+            "time": "1:24",
             "part": "close",
-            "narration": "So before you spend anything, the tracking goes in. Now open your workbook: write your goal, and how and from when you will measure it.",
+            "narration": "So before you spend anything, the tracking goes in. Now open your workbook and write your goal, and how and from when you will measure it.",
             "onScreen": [
               "the four principle names again",
               "15% more orders by March"
@@ -1920,14 +2058,13 @@
           },
           {
             "n": 8,
-            "time": "1:37",
+            "time": "1:34",
             "part": "brand end card",
             "narration": "",
             "onScreen": [
               "Wawiwa logo",
-              "Skilling the World for AI",
-              "DIGITAL MARKETING SPECIALIST",
-              "M2 · L2 · SELF-STUDY"
+              "Skilling / the World / for AI (three lines under the logo, in the middle of the frame)",
+              "DIGITAL MARKETING SPECIALIST · MODULE 2 · LESSON 2 (one small line at the bottom)"
             ]
           }
         ]
@@ -2464,53 +2601,55 @@
     {
       "id": "S16",
       "chapter": "ch4",
-      "template": "stages",
+      "template": "video",
       "step": {
-        "verb": "Method",
-        "icon": "stairs"
+        "verb": "Watch",
+        "icon": "watch"
       },
-      "minutes": 4,
-      "presentation": true,
+      "minutes": 2,
       "coach": {
         "kind": "idea",
         "tip": "Admitting the limits of your research makes you more useful to a client, not less.",
         "tipDrafted": true
       },
-      "eyebrow": "Methodology: collecting information, analysing it, building a plan",
-      "instruction": "Open the four stages.",
+      "instruction": "Watch the video.",
       "pilotCopy": [
-        "the button",
-        "instruction (Noy, 20 Nov 2026: the heading says what to do; the slide title \"Collecting information, analysing it, building a plan\" is the tag)"
+        "instruction",
+        "the film's opening line, its title line and its closing line (the rest is slide 16 with joining words)"
       ],
-      "more": "nextStage",
-      "stages": [
-        "Stage one. Define our goal and our objectives.",
-        "Stage two. Analyse the competitors' online activity.",
-        "Stage three. Characterise the market, the competition and the demand.",
-        "Stage four. Formulate the strategy and the optimal course of action to reach those objectives."
-      ],
-      "box": {
-        "label": "Managing expectations",
-        "keyLine": "Do not expect to analyse all of the data.",
-        "lines": [
-          "This field carries very large quantities of information, takes a lot of experience, and involves a lot of tedious work.",
-          "Recommendation: have a professional market research conducted when the decision is large enough to justify it."
-        ]
-      },
-      "boxNote": "the first line of the slide box is \"Do not expect to analyse all of the data, or to understand every meaning in it.\"; the key line is its first half (work order)",
+      "title": "Collecting information, analysing it, building a plan",
+      "showTitle": false,
+      "photo": false,
       "ground": {
-        "kind": "dots"
+        "kind": "darkblur"
+      },
+      "media": {
+        "$comment": "The V3 film (22 Nov 2026, Noy: this screen was four stages opened one by one and a text box; it is now a film, with no stops). duration comes from assets/video/v3.cues.json, written by the film's build. Film sources and README: Self- Study/Digital Marketing/M2L2-V3-film.",
+        "src": "assets/video/v3.mp4",
+        "poster": "assets/video/v3-poster.jpg",
+        "captions": [
+          {
+            "lang": "en",
+            "label": "English",
+            "src": "assets/video/v3.en.vtt"
+          }
+        ],
+        "cues": "assets/video/v3.cues.json",
+        "duration": 70.9,
+        "length": "1:10",
+        "temp": false,
+        "captionPlaces": []
+      },
+      "stops": [],
+      "advance": "after-video-end",
+      "production": {
+        "note": "Slide 16 as a film: the four stages and the Managing expectations box, in the slide's words on screen, spoken as full sentences. The slide box's first line is spoken whole (\"Do not expect to analyse all of the data, or to understand every meaning in it.\"); on screen its first half. Same studio and founder as V1 and V2."
       },
       "tracking": [],
       "sources": [
         "s16",
-        "s16 notes"
-      ],
-      "words": {
-        "max": 95,
-        "why": "slide 16's two blocks word for word: the four stages and the managing-expectations box (+7, 20 Nov 2026: the heading says what to do, the slide title is the tag over it)"
-      },
-      "flow": "row"
+        "the film's README (Self- Study/Digital Marketing/M2L2-V3-film/README.md)"
+      ]
     },
     {
       "id": "S17",
@@ -3331,7 +3470,7 @@
         "It is difficult to get results if the website or the online activity does not have a clear purpose."
       ],
       "media": {
-        "$comment": "Produced 21 Nov 2026 (ElevenLabs, eleven_multilingual_v2). Voice A: \"Laura - a top narration voice\" (GZ4PpFJV8ikEGUtBrjK7), the voice of the lesson's two films, stability 0.30, similarity 0.80, style 0.50. Voice B: \"Roger - Laid-Back, Casual, Resonant\" (CwhRBWXzGAHq8TQ4Fs17), stability 0.40, similarity 0.80, style 0.30. One take per script line, edge silence trimmed, joined with a breath between lines, loudnorm -16 LUFS, mono mp3 96 kbps. p1.en.vtt and p1.cues.json are timed from the takes. No music.",
+        "$comment": "Recorded again on 22 Nov 2026 with the calmer settings of the films' round 2 (ElevenLabs, eleven_multilingual_v2). Voice A: \"Laura - a top narration voice\" (GZ4PpFJV8ikEGUtBrjK7), the voice of the lesson's films. Voice B: \"Roger - Laid-Back, Casual, Resonant\" (CwhRBWXzGAHq8TQ4Fs17). Both: stability 0.50, similarity 0.80, style 0.15. The seven observations keep slide 26's words; the opening and closing lines are now full sentences. One take per script line, edge silence trimmed, joined with a breath between lines, loudnorm -16 LUFS, mono mp3 96 kbps. p1.en.vtt and p1.cues.json are timed from the takes. No music.",
         "src": "assets/audio/p1.mp3",
         "captions": [
           {
@@ -3341,8 +3480,8 @@
           }
         ],
         "cues": "assets/audio/p1.cues.json",
-        "duration": 56.62,
-        "length": "0:57",
+        "duration": 60.41,
+        "length": "1:00",
         "temp": false
       },
       "podcast": {
@@ -3354,7 +3493,7 @@
         "script": [
           {
             "voice": "A",
-            "text": "A few broad observations, and things worth arguing about."
+            "text": "Here are a few broad observations, and some things worth arguing about."
           },
           {
             "voice": "A",
@@ -3399,7 +3538,7 @@
           {
             "voice": "A",
             "obs": 7,
-            "text": "Next module you build that website."
+            "text": "In the next module, you will build that website."
           }
         ]
       },
@@ -3569,8 +3708,8 @@
           }
         ],
         "cues": "assets/video/v2.cues.json",
-        "duration": 122.767,
-        "length": "2:02",
+        "duration": 118.633,
+        "length": "1:58",
         "temp": false,
         "captionPlaces": []
       },
@@ -3584,7 +3723,7 @@
           "id": "stop1",
           "cueId": "stop1",
           "storyboardTime": "0:58",
-          "t": 58.66,
+          "t": 58.08,
           "question": "To get 6 sales at these rates, how many impressions do you need?",
           "options": [
             {
@@ -3618,8 +3757,8 @@
         {
           "id": "stop2",
           "cueId": "stop2",
-          "storyboardTime": "1:38",
-          "t": 98.76,
+          "storyboardTime": "1:35",
+          "t": 95.32,
           "question": "A sale costs $150 in marketing. The customer is worth $120. Does the channel work?",
           "options": [
             {
@@ -3647,7 +3786,7 @@
       ],
       "advance": "after-video-end",
       "production": {
-        "note": "The film as delivered on 16 Nov 2026 (folder M2L2-V2-film, see its README for the narration, the sources and the licence note). The stops come from v2.cues.json."
+        "note": "The film, narration round 2 of 22 Nov 2026: reworded into full spoken sentences and recorded again, with the new end card (folder M2L2-V2-film, see its README for the narration, the sources and the licence note). The stops come from v2.cues.json."
       },
       "sources": [
         "s28",
