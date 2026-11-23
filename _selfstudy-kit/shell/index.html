@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="{{lang}}" dir="{{dir}}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; media-src 'self'; font-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; frame-src {{frameSrc}}; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="robots" content="noindex, nofollow">
+<title>{{title}}</title>
+<link rel="icon" href="data:,">
+<!-- Written by the kit (tools/sync.mjs from _selfstudy-kit/shell/index.html): do not edit here. -->
+<link rel="stylesheet" href="src/tokens.css">
+<link rel="stylesheet" href="src/fonts.css">
+<link rel="stylesheet" href="src/base.css">
+<link rel="stylesheet" href="src/profiles/{{profile}}.css">
+{{lessonCss}}</head>
+<body>
+<div id="app"></div>
+<div id="boot-error" role="alert" hidden></div>
+<!-- Fallback for when the content file itself cannot load (file:// or network). Must equal ui.boot in the content file (tools/check.mjs asserts it). -->
+<template id="boot-fallback">{{bootFallback}}</template>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Image slot: ch2-dimensions
+
+Status: DROPPED (17 Nov 2026). K1 and K2 have no photo (Noy). The placeholder file is no longer used.
+
+## Where it is used
+Chapter 2: the ground of K1 (the eight dimensions) and S07.
+
+## Subject
+Eight small objects of the studio laid in a neat line on the table, seen from above: a bottle, a jar, a parcel, the phone on its tripod, a tape dispenser, a notebook, a stack of cards, a ruler.
+
+## People
+No people.
+
+## Placement
+The line of objects across the lower third; calm surface above.
+
+## Shared setting (the same for every image of this lesson, and for its films V1 and V2)
+One place: the bright studio of a small direct-to-consumer skincare brand. A packing table, plain unlabelled bottles and jars, kraft parcels, a laptop whose online store is blurred, a phone on a small tripod.
+Hands at work. No faces, no names, no logos, no text in the image (no words, letters, digits or UI labels: screens show blurred blocks and abstract charts only).
+Realistic editorial photography, natural window light, calm and bright. Palette: muted teal, deep navy, warm stone, kraft brown and off-white; one small warm accent at most.
+Shallow depth of field, 35 to 50 mm look, slightly from above or at table level. Tidy, uncluttered, room to breathe.
+Rules: near-sharp (the lesson adds its own light blur where needed), no real brands, no watermarks, no illustration, no 3D render, no glowing network lines.
+Format: 16:9, 1920 x 1080, JPG. The subject sits where the slot says, so the lesson's panel never covers it.

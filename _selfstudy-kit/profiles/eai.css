@@ -1,0 +1,81 @@
+/*
+ * Course profile: Enterprise AI Implementation Specialist ("Implementor", EAI), STANDARD.md section 2.1.
+ * Story-led: a case and the learner's own process. Dark tech accents on a light working surface: key ideas
+ * and openers on dark navy glass with a turquoise glow at the panel's edge; practice on light grounds with
+ * blurred photos; turquoise Next with an ink label; coral only for the problem side, on dark grounds.
+ *
+ * The kit's base (src/base.css, src/tokens.css) IS the Implementor look: it was built from EAI M1 L4 v3
+ * (frame.css, fx8.css, v2.css). This file holds what EAI M1 L4 styled by screen id, made into options a
+ * lesson's content chooses (screen.styles). No rule here names a screen id. Each option says where it came
+ * from (the screen of EAI M1 L4 v3) so the EAI lesson can name it on the same screen when it moves onto the
+ * kit (KIT-PLAN.md step 3).
+ *
+ * Options (screen.styles):
+ *   rise-line       (flags, variant line) the process line draws, then its steps rise one by one   [S13]
+ *   rise-rows       (keyColumns) the good-fit row, then the poor-fit row                             [K4]
+ *   opener-left     (opener) the card on the left so the photo shows on the right, the veil darker
+ *                   on the card's side, the photo kept at 5 px blur                                  [W4, W6]
+ *   tree-glow       (sortDeck on the dots ground) a glow behind the deck and a branching line from
+ *                   the card to the two piles                                                         [S03]
+ *   soft-panel      (a right-hand sheet) the soft ground's centred, glowing panel without the soft
+ *                   tone                                                                              [S19C]
+ *   stack           (soft tone) two blocks stacked in reading order in the middle                     [S15, S22]
+ *   stack-bridge    (with stack) the bridge card under the question                                   [S22]
+ *   stack-pair      (with stack) the proof beside the question after the right answer, as a pair     [S15]
+ *   case-heading    is in the kit's base (both profiles use it)                                      [S01, S14, S15, S18]
+ * The title screen's softened photo is in the base, keyed to the title template                     [O1]
+ *
+ * EAI-FIX-LIST A5 (Core, kit 0.1.0), for every screen of the profile, not per screen:
+ *   - real space under the heading block: the body starts about 32 px under the heading (it was 15 to 20)
+ *   - the context line over a heading ("Keep your PDF open.", "It goes into workbook Field 8") is a tag, not small
+ *     grey print (DM's CX1 tag); a case line kept at the heading's weight (case-heading) stays as it is
+ */
+
+/* ---------- A5: space under the heading block ---------- */
+.w-main .w-sheet > .w-head-row:not(:last-child) { margin-bottom: 32px; }
+.w-main .w-sheet > .w-handoff-head { margin-bottom: 32px; }
+.w-main .w-sheet > .w-instruction:not(:last-child) { margin-bottom: 32px; }
+.w-main .w-sheet > .w-instruction + .w-kc-body { margin-top: 0; }
+
+/* ---------- A5: the context line over a heading as a tag ---------- */
+.w-stage:not([data-styles~="case-heading"]) .w-main .w-context { display: inline-block; flex: 0 1 auto; margin: 0 0 8px; padding: 4px 12px; border-radius: 8px;
+  background: var(--wl-keypill-bg); font: 700 17px/1.25 var(--wl-font-ui); letter-spacing: .01em; color: var(--wl-teal-ink); }
+
+/* ---------- motion, only where it shows something ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .w-stage[data-styles~="rise-line"] .w-board-flags[data-variant="line"] .w-line::before { transform-origin: left center; animation: v2-grow .8s var(--wl-ease-enter) both; }
+  .w-stage[data-styles~="rise-line"] .w-line-cell { animation: v2-rise .42s var(--wl-ease-enter) both; }
+  .w-stage[data-styles~="rise-line"] .w-line-cell:nth-of-type(2) { animation-delay: .12s; }
+  .w-stage[data-styles~="rise-line"] .w-line-cell:nth-of-type(3) { animation-delay: .24s; }
+  .w-stage[data-styles~="rise-line"] .w-line-cell:nth-of-type(4) { animation-delay: .36s; }
+  .w-stage[data-styles~="rise-line"] .w-line-cell:nth-of-type(5) { animation-delay: .48s; }
+  .w-stage[data-styles~="rise-rows"] .w-kcol { animation: v2-rise .45s var(--wl-ease-enter) both; }
+  .w-stage[data-styles~="rise-rows"] .w-kcol + .w-kcol { animation-delay: .35s; }
+}
+
+/* ---------- opener-left (LP1, Noy 15 Nov 2026; BL2: these openers keep 5px, approved) ---------- */
+.w-stage[data-styles~="opener-left"]:has(.w-main[data-layout="opener"]) .w-g-full { filter: blur(5px) saturate(1.05) brightness(.86); }
+.w-stage[data-styles~="opener-left"] .w-main[data-layout="opener"] .w-opener-card { left: 64px; transform: translateY(-50%); }
+.w-stage[data-styles~="opener-left"]:has(.w-main[data-layout="opener"]) .w-scene::after {
+  background: linear-gradient(90deg, rgba(8, 20, 30, .6) 0%, rgba(8, 20, 30, .38) 45%, rgba(8, 20, 30, .1) 100%); }
+
+/* ---------- tree-glow ---------- */
+.w-stage[data-styles~="tree-glow"] .w-g-dots { background-image: radial-gradient(ellipse 46% 42% at 50% 38%, rgba(90, 179, 170, .3), transparent 72%), radial-gradient(var(--wl-line-mid) 1.3px, transparent 1.4px);
+  background-size: 100% 100%, 24px 24px; background-repeat: no-repeat, repeat; }
+.w-stage[data-styles~="tree-glow"] .w-deck-card { box-shadow: 0 0 0 2px rgba(90, 179, 170, .7), 0 12px 34px rgba(90, 179, 170, .38); }
+.w-stage[data-styles~="tree-glow"] .w-drops::before { content: ""; position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); height: 104px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 104' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='rgb(90,179,170)' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M500 0 V34 Q500 52 482 52 H268 Q250 52 250 70 V100'/%3E%3Cpath d='M500 34 Q500 52 518 52 H732 Q750 52 750 70 V100'/%3E%3C/g%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 0 6px rgba(90, 179, 170, .7)); opacity: .75; }
+.w-stage[data-styles~="tree-glow"] .w-main:not(:has(.w-deck-card)) .w-drops::before { opacity: 0; }
+
+/* ---------- soft-panel ---------- */
+.w-stage[data-styles~="soft-panel"] .w-main > .w-sheet-right { box-shadow: 0 24px 60px rgba(0, 0, 0, .4), 0 0 0 1px rgba(90, 179, 170, .45), 0 0 48px -4px rgba(90, 179, 170, .45);
+  left: 50%; right: auto; top: 50%; width: 720px; transform: translate(-50%, calc(-50% - 20px)); }
+
+/* ---------- stack, stack-bridge, stack-pair (the soft tone's two blocks in reading order) ---------- */
+.w-stage[data-tone="soft"][data-styles~="stack"] .w-main { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding-bottom: 76px; }
+.w-stage[data-tone="soft"][data-styles~="stack"] .w-main > .w-sheet-right { position: relative; left: auto; top: auto; transform: none; order: 1; }
+.w-stage[data-tone="soft"][data-styles~="stack-bridge"] .w-main > .w-bridge-card { position: relative; left: auto; top: auto; width: 720px; order: 2; }
+.w-stage[data-tone="soft"][data-styles~="stack-pair"] .w-main { flex-direction: row; gap: 18px; }
+.w-stage[data-tone="soft"][data-styles~="stack-pair"] .w-main > .w-sheet-right { width: 820px; } /* QH1: wider for the larger case line */
+.w-stage[data-tone="soft"][data-styles~="stack-pair"] .w-proof { position: relative; right: auto; bottom: auto; width: 320px; order: 2; }
