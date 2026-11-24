@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wawiwa · Práctica en casa de la Lección 3: 5 tarjetas de oportunidad adicionales</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ------------------------------------------------------------------
+     Wawiwa clean sheet — the M2 HOMEWORK family (masthead, instructions,
+     numbered sections, the AI prompt card, builder tables, the ROI grid,
+     the checklist and the sticky controls).
+     Six pages share one stylesheet; this replaces it. Same tokens and
+     restraint as _clean-sheet-m2-workbook.css.
+     NOTHING in the page's content, markup or script is changed: the
+     stylesheet is swapped in and nothing else.
+     ------------------------------------------------------------------ */
+  :root{
+    --card:#FFFFFF;
+    --ink:#17201F; --ink-2:#44514F; --muted:#667573;
+    --hair:#E2EAE9; --field:#F1F6F5;
+    --accent:#2E6E76; --accent-soft:#DFEFED; --on-accent:#FFFFFF;
+    --good:#2E6E76;
+    --brand-red:#EE3124;
+    --shadow:0 1px 2px rgba(23,32,31,.05), 0 18px 44px -18px rgba(23,32,31,.22);
+    --shadow-soft:0 1px 2px rgba(23,32,31,.05);
+    --ease:cubic-bezier(.2,.7,.2,1);
+    /* names the page markup still refers to inline, kept so nothing breaks */
+    --turq:#2E6E76; --red:#EE3124; --char:#17201F; --slate:#44514F; --slateL:#667573;
+    --line:#E2EAE9; --amber:#667573; --green:#2E6E76; --purple:#667573; --tint:#DFEFED;
+  }
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+    --card:#18211F; --ink:#EDF3F2; --ink-2:#C6D2D0; --muted:#8A9997;
+    --hair:#26312F; --field:#212B29; --accent:#5CC9BE; --accent-soft:#153330;
+    --on-accent:#0C1312; --good:#5CC9BE;
+    --turq:#5CC9BE; --char:#EDF3F2; --slate:#C6D2D0; --slateL:#8A9997;
+    --line:#26312F; --amber:#8A9997; --green:#5CC9BE; --purple:#8A9997; --tint:#153330;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 52px -18px rgba(0,0,0,.8);
+    --shadow-soft:0 1px 2px rgba(0,0,0,.4);
+  }}
+  :root[data-theme="dark"]{
+    --card:#18211F; --ink:#EDF3F2; --ink-2:#C6D2D0; --muted:#8A9997;
+    --hair:#26312F; --field:#212B29; --accent:#5CC9BE; --accent-soft:#153330;
+    --on-accent:#0C1312; --good:#5CC9BE;
+    --turq:#5CC9BE; --char:#EDF3F2; --slate:#C6D2D0; --slateL:#8A9997;
+    --line:#26312F; --amber:#8A9997; --green:#5CC9BE; --purple:#8A9997; --tint:#153330;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 52px -18px rgba(0,0,0,.8);
+    --shadow-soft:0 1px 2px rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  /* No page ground: the sheet floats on whatever is behind the embed. */
+  body{background:transparent; color:var(--ink-2); line-height:1.6; font-size:15.5px;
+    font-family:"Assistant",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  .container{max-width:720px; margin:0 auto; padding:22px 16px 56px}
+
+  /* ---------- masthead: the Wawiwa mark stays, the red rule goes ---------- */
+  .masthead{display:flex; align-items:center; gap:14px; border-bottom:1px solid var(--hair);
+    padding-bottom:16px; margin-bottom:22px}
+  .logo{background:var(--brand-red); color:#fff; font-weight:700; font-size:18px;
+    letter-spacing:.3px; padding:7px 12px; border-radius:6px; line-height:1}
+  .mast-text .kick{color:var(--muted); font-weight:700; font-size:11px;
+    letter-spacing:.12em; text-transform:uppercase}
+  .mast-text h1{margin:6px 0 0; font-size:clamp(20px,3vw,24px); color:var(--ink);
+    font-weight:700; line-height:1.25; letter-spacing:-.014em}
+  .tag-home{display:inline-block; background:transparent; border:1px solid var(--hair);
+    color:var(--muted); font-size:11px; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; padding:4px 11px; border-radius:980px;
+    margin-left:auto; white-space:nowrap}
+
+  /* ---------- the opening instructions ---------- */
+  .instructions{background:var(--card); border:1px solid var(--hair); border-left:1px solid var(--hair);
+    border-radius:16px; box-shadow:var(--shadow-soft); padding:18px 22px; margin:0 0 26px}
+  .instructions h2{margin:0 0 8px; font-size:11px; color:var(--muted); font-weight:700;
+    letter-spacing:.12em; text-transform:uppercase}
+  .instructions p{margin:8px 0; color:var(--ink-2)}
+  .meta-row{display:flex; gap:20px; flex-wrap:wrap; font-size:13px; color:var(--muted); margin-top:12px}
+  .meta-row b{color:var(--ink); font-weight:600}
+
+  /* ---------- numbered sections ---------- */
+  .section-title{display:flex; align-items:center; gap:12px; margin:36px 0 12px;
+    font-size:19px; color:var(--ink); font-weight:700; letter-spacing:-.008em;
+    border-bottom:1px solid var(--hair); padding-bottom:10px}
+  .section-title .n{background:var(--accent-soft); color:var(--accent); width:26px; height:26px;
+    border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; flex:0 0 auto}
+  .guidance{color:var(--muted); font-size:14px; margin:0 0 12px}
+  .step{margin:0 0 16px}
+  .step-lead{font-weight:600; color:var(--ink)}
+
+  /* ---------- the AI prompt card: a quiet card, not a black terminal ---------- */
+  .prompt{background:var(--field); border:1px solid var(--hair); border-radius:16px;
+    padding:0; margin:14px 0 18px; overflow:hidden}
+  .prompt-head{display:flex; align-items:center; gap:10px; padding:11px 16px;
+    background:transparent; border-bottom:1px solid var(--hair); color:var(--ink)}
+  .prompt-head .ai{background:transparent; border:1px solid var(--hair); color:var(--muted);
+    font-size:10px; font-weight:700; letter-spacing:.08em; padding:3px 8px;
+    border-radius:980px; text-transform:uppercase}
+  .prompt-head .ttl{font-size:13px; font-weight:600; color:var(--ink)}
+  .prompt-head .copy{margin-left:auto; background:var(--accent); color:var(--on-accent);
+    border:0; border-radius:980px; padding:6px 14px; font-size:12px; font-weight:600;
+    cursor:pointer; font-family:inherit; transition:background .2s var(--ease)}
+  .prompt-head .copy:hover{background:#255C63}
+  .prompt pre{margin:0; padding:16px; color:var(--ink-2); background:transparent;
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:12.5px; line-height:1.6; white-space:pre-wrap; word-break:break-word}
+  .prompt .why{padding:0 16px 14px; color:var(--muted); font-size:12px}
+
+  /* ---------- fields ---------- */
+  label.fl{display:block; font-weight:600; color:var(--ink); font-size:14px; margin:14px 0 6px}
+  input.tf,textarea.ta,select.sf{width:100%; border:1px solid var(--hair); border-radius:12px;
+    padding:11px 13px; font:inherit; font-size:15px; color:var(--ink); background:var(--card);
+    transition:border-color .2s var(--ease), box-shadow .2s var(--ease)}
+  textarea.ta{min-height:88px; resize:vertical; line-height:1.6}
+  input.tf:focus,textarea.ta:focus,select.sf:focus{outline:none; border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft)}
+  .print-only{display:none}
+
+  /* ---------- builder table ---------- */
+  table.build{width:100%; border-collapse:separate; border-spacing:0; margin:10px 0 8px;
+    font-size:14px; border:1px solid var(--hair); border-radius:14px; overflow:hidden}
+  table.build th{background:var(--field); color:var(--muted); text-align:left; padding:10px 12px;
+    font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    border-bottom:1px solid var(--hair)}
+  table.build td{border-top:1px solid var(--hair); padding:6px 8px; vertical-align:top}
+  table.build tr:first-child td{border-top:0}
+  table.build input,table.build textarea,table.build select{width:100%; border:0; padding:6px;
+    font:inherit; font-size:14px; color:var(--ink); background:transparent; resize:vertical}
+  table.build input:focus,table.build textarea:focus,table.build select:focus{
+    outline:2px solid var(--accent-soft); border-radius:8px}
+  .rowdel{background:none; border:0; color:var(--muted); font-size:16px; cursor:pointer; line-height:1}
+  .rowdel:hover{color:var(--ink)}
+  .req-cell.miss input{background:var(--field)}
+  .req-watch{}
+  .addbtn{background:transparent; color:var(--accent); border:1px dashed var(--hair);
+    border-radius:12px; padding:9px 16px; font-weight:600; font-size:13.5px; cursor:pointer;
+    margin:6px 0 12px; font-family:inherit; transition:border-color .2s var(--ease)}
+  .addbtn:hover{border-color:var(--accent)}
+
+  /* ---------- the ROI readout ---------- */
+  .roi-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 22px; margin:12px 0}
+  .roi-out{background:var(--card); border:1px solid var(--hair); border-radius:16px;
+    box-shadow:var(--shadow-soft); padding:16px 18px; margin:12px 0;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px; text-align:center}
+  .roi-out .k{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em;
+    font-weight:700}
+  .roi-out .v{font-size:24px; font-weight:700; color:var(--accent); margin-top:5px;
+    letter-spacing:-.02em}
+
+  /* ---------- checklist ---------- */
+  .checklist{background:var(--card); border:1px solid var(--hair); border-radius:20px;
+    box-shadow:var(--shadow-soft); padding:20px 24px; margin:20px 0}
+  .checklist h3{margin:0 0 6px; font-size:11px; color:var(--muted); font-weight:700;
+    letter-spacing:.12em; text-transform:uppercase}
+  .chkbar{height:4px; background:var(--field); border-radius:980px; overflow:hidden; margin:10px 0 14px}
+  .chkbar > i{display:block; height:100%; width:0; background:var(--accent); border-radius:980px;
+    transition:width .42s var(--ease)}
+  .chk{display:flex; align-items:flex-start; gap:11px; margin:9px 0; font-size:15px; color:var(--ink-2)}
+  .chk input{width:17px; height:17px; margin-top:2px; accent-color:var(--accent); flex:0 0 auto}
+
+  .capstone-note,
+  .callout{background:var(--field); border:1px solid var(--hair); border-left:1px solid var(--hair);
+    border-radius:14px; padding:14px 18px; margin:18px 0; font-size:14.5px; color:var(--ink-2)}
+
+  /* ---------- the sticky controls ---------- */
+  .controls{position:sticky; bottom:0; z-index:5;
+    background:color-mix(in srgb, var(--card) 88%, transparent);
+    border-top:1px solid var(--hair); padding:14px 0; margin-top:30px;
+    display:flex; gap:12px; flex-wrap:wrap;
+    -webkit-backdrop-filter:saturate(1.6) blur(8px); backdrop-filter:saturate(1.6) blur(8px)}
+  .btn{border:0; border-radius:980px; padding:11px 22px; font-weight:600; font-size:14.5px;
+    cursor:pointer; font-family:inherit; transition:background .2s var(--ease)}
+  .btn-print{background:var(--accent); color:var(--on-accent)}
+  .btn-print:hover{background:#255C63}
+  .btn-clear{background:transparent; color:var(--muted); border:1px solid var(--hair)}
+  .btn-clear:hover{color:var(--ink)}
+  .foot{margin-top:26px; color:var(--muted); font-size:12px; text-align:center}
+
+  @media (max-width:640px){
+    .container{padding:18px 16px 48px}
+    .roi-grid{grid-template-columns:1fr}
+    .roi-out{grid-template-columns:1fr 1fr}
+    .tag-home{margin-left:0}
+  }
+
+  /* ---------- print: ink on paper, the same quiet sheet ---------- */
+  @page{margin:14mm}
+  @media print{
+    .controls,.copy,.addbtn,.rowdel,.tag-home{display:none !important}
+    body{font-size:12px; background:#fff; color:#000}
+    .container{max-width:none; padding:0}
+    .instructions,.checklist,.roi-out,.prompt,.capstone-note,.callout{box-shadow:none; border:1px solid #ccc}
+    .prompt pre{color:#222}
+    input.tf,textarea.ta,select.sf,table.build input,table.build textarea,table.build select{border-color:#bbb}
+    table.build{border:1px solid #bbb}
+    .print-only{display:block}
+    textarea.ta{min-height:0}
+    .section-title{break-after:avoid}
+    .prompt,.checklist,.roi-out,table.build{break-inside:avoid}
+  }
+
+
+
+
+/* >>> WAWIWA LOGO >>> */
+:root{
+  --w-logo: url("data:image/png;base64,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");
+  --w-logo-h: 34px;
+  --w-logo-w: 90px;
+}
+.masthead .logo{
+  background-image: var(--w-logo);
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: contain;
+  background-color: transparent;
+  width: var(--w-logo-w);
+  height: var(--w-logo-h);
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  filter: none;
+  font-size: 0;
+  color: transparent;
+  line-height: 0;
+}
+.masthead{ align-items: center; }
+/* <<< WAWIWA LOGO <<< */
+</style>
+<style id="wawiwa-print-fix">@media print{@page{margin:0 !important}body{padding:12mm !important;box-sizing:border-box}}</style>
+<style>/* >>> BLANK PDF >>> */
+.w-blank-tag{display:none}
+@media print{.w-blank-tag{display:block;margin:0 0 10px;font:600 12px/1.4 sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#2E6E76}}
+/* <<< BLANK PDF <<< */</style>
+</head>
+<body>
+<div class="container">
+<div class="masthead">
+  <div class="logo">wawiwa</div>
+  <div class="mast-text">
+    <div class="kick">Enterprise AI Implementation Specialist · Módulo 2</div>
+    <h1>5 tarjetas de oportunidad adicionales</h1>
+  </div>
+  <span class="tag-home">Práctica en casa</span>
+</div>
+<div class="instructions"><h2>Cómo funciona</h2><p>Después de la Lección 3, amplías tu registro de oportunidades a 15 tarjetas y lo pones a prueba con dos verificaciones con IA.</p><div class="meta-row"><span><b>Tiempo:</b> 75 min</span><span><b>Entregable:</b> 15 tarjetas de oportunidad en total, notas de clasificación + sensibilidad</span><span><b>Calificación:</b> alimenta el proyecto final (capstone); no se califica por separado</span></div></div><div class="callout"><b>Recordatorio de la rúbrica.</b> Cada tarjeta debe nombrar a un <b>responsable del punto de dolor (Pain Owner)</b>: el rol que de verdad siente el dolor, distinto del responsable de la acción / patrocinador que financia el trabajo. Las tarjetas sin responsable del punto de dolor se califican como <b>Débil</b>.</div><div class="section-title"><span class="n">1</span>Agrega 5 tarjetas de oportunidad más</div><p class="guidance">Usa puntos de dolor del mapeo de tu segundo departamento. El campo Responsable del punto de dolor es obligatorio: las celdas vacías se resaltan.</p><table class="build"><thead><tr><th>Punto de dolor / oportunidad</th><th>Responsable del punto de dolor</th><th>Patrocinador</th><th>Categoría de solución</th><th>Notas</th><th></th></tr></thead><tbody id="l3_cards" class=" req-watch"><tr class="tmpl" style="display:none"><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Agentes y copilotos de IA">Agentes y copilotos de IA</option><option value="Automatización de flujos de trabajo">Automatización de flujos de trabajo</option><option value="Inteligencia de negocios (BI)">Inteligencia de negocios (BI)</option><option value="IA documental/OCR">IA documental/OCR</option><option value="Rediseño de procesos">Rediseño de procesos</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Eliminar" aria-label="Eliminar">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Agentes y copilotos de IA">Agentes y copilotos de IA</option><option value="Automatización de flujos de trabajo">Automatización de flujos de trabajo</option><option value="Inteligencia de negocios (BI)">Inteligencia de negocios (BI)</option><option value="IA documental/OCR">IA documental/OCR</option><option value="Rediseño de procesos">Rediseño de procesos</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Eliminar" aria-label="Eliminar">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Agentes y copilotos de IA">Agentes y copilotos de IA</option><option value="Automatización de flujos de trabajo">Automatización de flujos de trabajo</option><option value="Inteligencia de negocios (BI)">Inteligencia de negocios (BI)</option><option value="IA documental/OCR">IA documental/OCR</option><option value="Rediseño de procesos">Rediseño de procesos</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Eliminar" aria-label="Eliminar">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Agentes y copilotos de IA">Agentes y copilotos de IA</option><option value="Automatización de flujos de trabajo">Automatización de flujos de trabajo</option><option value="Inteligencia de negocios (BI)">Inteligencia de negocios (BI)</option><option value="IA documental/OCR">IA documental/OCR</option><option value="Rediseño de procesos">Rediseño de procesos</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Eliminar" aria-label="Eliminar">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Agentes y copilotos de IA">Agentes y copilotos de IA</option><option value="Automatización de flujos de trabajo">Automatización de flujos de trabajo</option><option value="Inteligencia de negocios (BI)">Inteligencia de negocios (BI)</option><option value="IA documental/OCR">IA documental/OCR</option><option value="Rediseño de procesos">Rediseño de procesos</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Eliminar" aria-label="Eliminar">&times;</button></td></tr><tr><td><input type="text" placeholder=""></td><td class="req-cell"><input type="text" placeholder=""></td><td><input type="text" placeholder=""></td><td><select><option value="—">—</option><option value="Agentes y copilotos de IA">Agentes y copilotos de IA</option><option value="Automatización de flujos de trabajo">Automatización de flujos de trabajo</option><option value="Inteligencia de negocios (BI)">Inteligencia de negocios (BI)</option><option value="IA documental/OCR">IA documental/OCR</option><option value="Rediseño de procesos">Rediseño de procesos</option></select></td><td><textarea rows="2"></textarea></td><td><button class="rowdel" onclick="delRow(this)" title="Eliminar" aria-label="Eliminar">&times;</button></td></tr></tbody></table><button class="addbtn" onclick="addRow('l3_cards')">+ Agregar fila</button><div class="section-title"><span class="n">2</span>Verificación de la clasificación con IA</div><div class="prompt"><div class="prompt-head"><span class="ai">Prompt de IA</span><span class="ttl">Clasifica el registro</span><button class="copy" onclick="copyPrompt(this)">Copiar</button></div><pre>Estas son mis 15 tarjetas de oportunidad. Clasifica cada una en una de cinco categorías de solución: Agentes y copilotos de IA, Automatización de flujos de trabajo, Inteligencia de negocios (BI), IA documental/OCR, Rediseño de procesos. Para cada una, da una oración que explique tu razonamiento. Enumera las tarjetas en las que tengas dudas.</pre><div class="why">Compara el resultado con tu clasificación manual y anota abajo los desacuerdos.</div></div><label class="fl">Desacuerdos entre la IA y tu clasificación manual</label><textarea class="ta" data-print="p_l3_class" placeholder=""></textarea><span class="print-only" id="p_l3_class">—</span><div class="section-title"><span class="n">3</span>Verificación de alertas de sensibilidad con IA</div><div class="prompt"><div class="prompt-head"><span class="ai">Prompt de IA</span><span class="ttl">Revisión de la sensibilidad de los datos</span><button class="copy" onclick="copyPrompt(this)">Copiar</button></div><pre>Revisa estas transcripciones de entrevistas y tarjetas de oportunidad en busca de riesgos de sensibilidad de los datos: datos personales, registros financieros, contenido legal o de RH, o cualquier cosa que no deba salir de la organización. Para cada tarjeta, marca el nivel de sensibilidad y el control que necesitaría.</pre><div class="why">Actualiza cualquier tarjeta en la que la IA detecte un riesgo que se te haya pasado.</div></div><label class="fl">Tarjetas que actualizaste después de la revisión de sensibilidad</label><textarea class="ta" data-print="p_l3_sens" placeholder=""></textarea><span class="print-only" id="p_l3_sens">—</span><div class="checklist"><h3>Lleva a la próxima clase</h3><div class="chkbar"><i></i></div><label class="chk"><input type="checkbox">15 tarjetas de oportunidad en total</label><label class="chk"><input type="checkbox">Cada tarjeta tiene un responsable del punto de dolor</label><label class="chk"><input type="checkbox">Clasificación con IA hecha, desacuerdos anotados</label><label class="chk"><input type="checkbox">Revisión de sensibilidad con IA hecha, tarjetas actualizadas</label></div>
+<div class="controls">
+  <button class="btn btn-print" onclick="savePDF()">⬇ Guardar como PDF / Entregar</button>
+  <button class="btn btn-clear" id="mkblank" type="button">Imprimir en blanco / Guardar como PDF</button>
+  <button class="btn btn-clear" onclick="clearAll()">Borrar todo</button>
+</div>
+<div class="foot">Wawiwa Tech · Enterprise AI Implementation Specialist · Práctica en casa del Módulo 2. Llénala, expórtala a PDF y súbela en Blossom > Módulo 2 > entrega de la tarea de la Lección 3.</div>
+</div>
+<script>
+/* copy prompt to clipboard, with fallback */
+function copyPrompt(btn){
+  var pre=btn.closest('.prompt').querySelector('pre');
+  var txt=pre.innerText;
+  function done(){var o=btn.innerText;btn.innerText='Copiado ✓';setTimeout(function(){btn.innerText=o;},1400);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback);}
+  else{fallback();}
+  function fallback(){var r=document.createRange();r.selectNode(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy');done();}catch(e){}s.removeAllRanges();}
+}
+/* mirror text inputs into a print-only span so answers show in the PDF */
+function mirror(el){var t=el.getAttribute('data-print');if(!t)return;var o=document.getElementById(t);if(o)o.textContent=el.value||'—';}
+document.addEventListener('input',function(e){
+  if(e.target.matches('[data-print]'))mirror(e.target);
+  if(e.target.closest('.req-watch'))validateReq(e.target.closest('tr'));
+  updateChecklist();roiCalc();
+});
+document.addEventListener('change',function(e){updateChecklist();});
+/* repeatable builder rows */
+function addRow(tblId){
+  var tb=document.getElementById(tblId);var tmpl=tb.querySelector('tr.tmpl');
+  var r=tmpl.cloneNode(true);r.classList.remove('tmpl');r.style.display='';
+  tb.appendChild(r);
+}
+function delRow(btn){var tr=btn.closest('tr');var tb=tr.parentNode;
+  if(tb.querySelectorAll('tr:not(.tmpl)').length>1||true){tr.remove();}updateChecklist();}
+/* required-field highlight (e.g. Pain Owner) */
+function validateReq(tr){tr.querySelectorAll('.req-cell').forEach(function(td){
+  var i=td.querySelector('input,textarea,select');td.classList.toggle('miss',i&&!i.value.trim());});}
+/* checklist progress */
+function updateChecklist(){document.querySelectorAll('.checklist').forEach(function(cl){
+  var b=cl.querySelectorAll('.chk input');var n=cl.querySelectorAll('.chk input:checked').length;
+  var bar=cl.querySelector('.chkbar > i');if(bar&&b.length)bar.style.width=(100*n/b.length)+'%';});}
+/* ROI calculator (present only on L5) */
+function roiCalc(){
+  var g=document.getElementById('roi');if(!g)return;
+  function num(id){var e=document.getElementById(id);return e?parseFloat(e.value)||0:0;}
+  var save=num('roi_save'), buf=save*0.75, inv=num('roi_inv');
+  var payback = buf>0 ? (inv/(buf/12)) : 0;
+  var setv=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  setv('out_buf', buf? ('$'+Math.round(buf).toLocaleString()) : '—');
+  setv('out_pay', (buf>0&&inv>0)? (payback<1?'<1':Math.ceil(payback))+' meses' : '—');
+  var base=num('roi_inv'); var best=num('roi_save')*0.9, worst=num('roi_save')*0.5;
+  setv('out_sens', save? ('$'+Math.round(worst).toLocaleString()+' – $'+Math.round(best).toLocaleString()) : '—');
+}
+function savePDF(){window.print();}
+function clearAll(){if(!confirm('¿Borrar todas tus respuestas de esta página?'))return;
+  document.querySelectorAll('input.tf,textarea.ta,select.sf,table.build input,table.build textarea,table.build select').forEach(function(e){if(e.type==='checkbox')e.checked=false;else e.value='';});
+  document.querySelectorAll('[data-print]').forEach(mirror);updateChecklist();roiCalc();}
+window.addEventListener('DOMContentLoaded',function(){updateChecklist();roiCalc();
+  document.querySelectorAll('[data-print]').forEach(mirror);});
+</script>
+<script>
+/* >>> BLANK PDF >>> */
+/* the blank template: every field back to its authored default, the page's
+   own input/change listener recomputes what it derives from them, the
+   browser prints, and on afterprint every value comes back. Nothing is
+   saved anywhere in between (these pages do not autosave). */
+(function(){
+  'use strict';
+  function fields(){
+    return [].slice.call(document.querySelectorAll('input,textarea,select')).filter(function(e){
+      return !/^(button|submit|reset|hidden|file|image)$/.test(e.type||'');
+    });
+  }
+  function nudge(list){
+    list.forEach(function(e){
+      e.dispatchEvent(new Event('input',{bubbles:true}));
+      e.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+  }
+  function blankPrint(){
+    var list=fields();
+    var saved=list.map(function(e){
+      if(e.tagName==='SELECT') return [].map.call(e.options,function(o){ return o.selected; });
+      if(e.type==='checkbox'||e.type==='radio') return e.checked;
+      return e.value;
+    });
+    list.forEach(function(e){
+      if(e.tagName==='SELECT') [].forEach.call(e.options,function(o){ o.selected=o.defaultSelected; });
+      else if(e.type==='checkbox'||e.type==='radio') e.checked=e.defaultChecked;
+      else e.value=e.defaultValue;
+    });
+    nudge(list);
+    var tag=document.createElement('p');
+    tag.className='w-blank-tag';
+    tag.textContent='Plantilla en blanco';
+    var head=document.querySelector('header, .masthead');
+    if(head&&head.parentNode) head.parentNode.insertBefore(tag, head.nextSibling);
+    else document.body.insertBefore(tag, document.body.firstChild);
+    var done=false;
+    function restore(){
+      if(done) return; done=true;
+      list.forEach(function(e,i){
+        if(e.tagName==='SELECT') [].forEach.call(e.options,function(o,k){ o.selected=saved[i][k]; });
+        else if(e.type==='checkbox'||e.type==='radio') e.checked=saved[i];
+        else e.value=saved[i];
+      });
+      nudge(list);
+      if(tag.parentNode) tag.parentNode.removeChild(tag);
+      window.removeEventListener('afterprint',restore);
+      ['pointerdown','keydown','focusin'].forEach(function(t){ document.removeEventListener(t,restore,true); });
+    }
+    window.addEventListener('afterprint',restore);
+    /* a browser that never fires afterprint: the first touch afterwards restores */
+    setTimeout(function(){
+      ['pointerdown','keydown','focusin'].forEach(function(t){ document.addEventListener(t,restore,true); });
+    },0);
+    window.print();
+  }
+  var b=document.getElementById('mkblank');
+  if(b) b.addEventListener('click', blankPrint);
+})();
+/* <<< BLANK PDF <<< */
+</script>
+</body>
+</html>
