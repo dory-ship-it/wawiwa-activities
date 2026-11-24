@@ -659,6 +659,7 @@
       "instruction": "Open your notes from Lessons 1 and 2",
       "people": {
         "title": "Who you met",
+        "building": "NorthRiver Holdings",
         "link": {
           "label": "Persona cards",
           "href": "https://dory-ship-it.github.io/wawiwa-activities/enterprise-ai-implementation/m2l1-pair-interview/"
@@ -695,16 +696,19 @@
       "have": [
         {
           "icon": "file-text",
+          "art": "log",
           "label": "Interview Log",
           "from": "Lesson 1"
         },
         {
           "icon": "list",
+          "art": "inventory",
           "label": "Process inventory",
           "from": "Lesson 2"
         },
         {
           "icon": "target",
+          "art": "topTen",
           "label": "Top ten pains",
           "from": "Lesson 2"
         }
@@ -895,6 +899,9 @@
         "L3 deck slide 3 and notes (every recommendation traces to a pain, every pain to a quote, every quote to a meeting)",
         "Booklet persona D (Robert Pak)"
       ],
+      "styles": [
+        "committee"
+      ],
       "hint": "Look for what stands behind each one: a pain, a person, their words, a date."
     },
     {
@@ -915,61 +922,156 @@
       "eyebrow": "Your card",
       "instruction": "Meet the card you fill today",
       "line": "Your pain is already on it. Each chapter fills the next fields.",
-      "cardTitle": "Your opportunity card",
+      "cardTitle": "Opportunity Card",
+      "cardId": "OP-01",
+      "client": "NorthRiver Holdings",
+      "cardState": "Draft",
+      "meter": "{n} of {total}",
+      "zones": {
+        "problem": "The problem",
+        "people": "The people",
+        "opportunity": "The opportunity",
+        "readiness": "Readiness"
+      },
+      "why": "Why?",
+      "tiers": [
+        "Public",
+        "Internal",
+        "Confidential",
+        "Restricted"
+      ],
+      "categories": [
+        {
+          "name": "Process Redesign",
+          "cat": "pr",
+          "art": "redesign"
+        },
+        {
+          "name": "AI Agents & Copilots",
+          "cat": "agent",
+          "art": "agent"
+        },
+        {
+          "name": "Workflow Automation",
+          "cat": "auto",
+          "art": "automation"
+        },
+        {
+          "name": "Business Intelligence",
+          "cat": "bi",
+          "art": "bi"
+        },
+        {
+          "name": "Document AI / OCR",
+          "cat": "doc",
+          "art": "docai"
+        }
+      ],
+      "laterSr": "Empty.",
       "rows": [
         {
           "id": "process",
           "label": "Process",
-          "store": "ownProcess"
+          "store": "ownProcess",
+          "when": "Fills in: The card"
         },
         {
           "id": "pain",
           "label": "Pain",
-          "store": "ownPain"
+          "store": "ownPain",
+          "when": "Fills in: Before you start"
         },
         {
           "id": "painOwner",
           "label": "Pain Owner",
-          "store": "ownPainOwner"
+          "store": "ownPainOwner",
+          "when": "Fills in: Who hurts?"
         },
         {
           "id": "root",
           "label": "Root Cause",
-          "store": "ownRoot"
+          "store": "ownRoot",
+          "when": "Fills in: Who hurts?"
         },
         {
           "id": "opportunity",
           "label": "Opportunity",
-          "store": "ownOpportunity"
+          "store": "ownOpportunity",
+          "when": "Fills in: The card"
         },
         {
           "id": "category",
           "label": "Solution Category",
-          "store": "ownCategory"
+          "store": "ownCategory",
+          "when": "Fills in: The use-case library"
         },
         {
           "id": "tools",
           "label": "Tools",
-          "store": "ownTools"
+          "store": "ownTools",
+          "when": "Fills in: The use-case library"
         },
         {
           "id": "sensitivity",
           "label": "Data Sensitivity",
-          "store": "ownSensitivity"
+          "store": "ownSensitivity",
+          "when": "Fills in: Can it ship?"
         },
         {
           "id": "effort",
           "label": "Effort / Value",
-          "store": "ownEffort"
+          "store": "ownEffort",
+          "when": "Fills in: The card"
         },
         {
           "id": "owner",
           "label": "Owner / Sponsor",
-          "store": "ownSponsor"
+          "store": "ownSponsor",
+          "when": "Fills in: Who hurts?"
         }
       ],
       "later": "Later in the lesson",
       "save": "save",
+      "sections": [
+        {
+          "id": "problem",
+          "title": "The problem",
+          "art": "problem",
+          "rows": [
+            "process",
+            "pain",
+            "root"
+          ]
+        },
+        {
+          "id": "people",
+          "title": "The people",
+          "art": "people",
+          "rows": [
+            "painOwner",
+            "owner"
+          ]
+        },
+        {
+          "id": "opportunity",
+          "title": "The opportunity",
+          "art": "opportunity",
+          "rows": [
+            "opportunity",
+            "category",
+            "tools"
+          ]
+        },
+        {
+          "id": "readiness",
+          "title": "Readiness",
+          "art": "readiness",
+          "rows": [
+            "sensitivity",
+            "effort"
+          ]
+        }
+      ],
       "ground": {
         "kind": "dots"
       },
@@ -1144,6 +1246,9 @@
         "Booklet personas A, C, D",
         "Knowledge check key Q11 (Henrik: a quick win, formalize) and Q12 (Robert: Document AI, metadata only)"
       ],
+      "styles": [
+        "process-or-tool"
+      ],
       "hint": "Ask: does a process change solve it without any tool? In doubt, show both paths."
     },
     {
@@ -1196,6 +1301,9 @@
         "L3 deck slide 6 (kept from the slide: the four cards, their lines and tools)",
         "Knowledge check key Q1 (one example per category)"
       ],
+      "styles": [
+        "categories"
+      ],
       "hint": "One line each: what kind of work fits the category."
     },
     {
@@ -1219,7 +1327,8 @@
       "photo": false,
       "layout": "sort-deck",
       "styles": [
-        "five-piles"
+        "five-piles",
+        "categories"
       ],
       "columns": [
         {
@@ -1411,6 +1520,7 @@
       },
       "instruction": "Find the closest case in the library",
       "styles": [
+        "library-match",
         "wrap-answers"
       ],
       "situations": [
@@ -1527,23 +1637,32 @@
       "parts": [
         {
           "label": "Problem",
-          "text": "Reps spend 30 to 50% of the week finding leads."
+          "text": "Reps spend 30 to 50% of the week finding leads.",
+          "art": "problem"
         },
         {
           "label": "Solution",
-          "text": "An agent scans sources, scores matches, sends alerts."
+          "text": "An agent scans sources, scores matches, sends alerts.",
+          "art": "agent"
         },
         {
           "label": "Stack",
-          "text": "Claude, n8n or Zapier, the CRM."
+          "text": "Claude, n8n or Zapier, the CRM.",
+          "art": "tool"
         },
         {
           "label": "ROI",
-          "text": "$10K in, $16K a year back: month 8."
+          "text": "$10K in, $16K a year back: month 8.",
+          "art": "bars",
+          "timeline": {
+            "months": 12,
+            "mark": 8
+          }
         },
         {
           "label": "Watch-out",
-          "text": "The scoring rubric drifts. Retrain monthly."
+          "text": "The scoring rubric drifts. Retrain monthly.",
+          "art": "readiness"
         }
       ],
       "button": "part",
@@ -1576,61 +1695,156 @@
       "eyebrow": "Your card",
       "instruction": "Add a category and tools to your card",
       "line": "Use the library for the closest case and its tools.",
-      "cardTitle": "Your opportunity card",
+      "cardTitle": "Opportunity Card",
+      "cardId": "OP-01",
+      "client": "NorthRiver Holdings",
+      "cardState": "Draft",
+      "meter": "{n} of {total}",
+      "zones": {
+        "problem": "The problem",
+        "people": "The people",
+        "opportunity": "The opportunity",
+        "readiness": "Readiness"
+      },
+      "why": "Why?",
+      "tiers": [
+        "Public",
+        "Internal",
+        "Confidential",
+        "Restricted"
+      ],
+      "categories": [
+        {
+          "name": "Process Redesign",
+          "cat": "pr",
+          "art": "redesign"
+        },
+        {
+          "name": "AI Agents & Copilots",
+          "cat": "agent",
+          "art": "agent"
+        },
+        {
+          "name": "Workflow Automation",
+          "cat": "auto",
+          "art": "automation"
+        },
+        {
+          "name": "Business Intelligence",
+          "cat": "bi",
+          "art": "bi"
+        },
+        {
+          "name": "Document AI / OCR",
+          "cat": "doc",
+          "art": "docai"
+        }
+      ],
+      "laterSr": "Empty.",
       "rows": [
         {
           "id": "process",
           "label": "Process",
-          "store": "ownProcess"
+          "store": "ownProcess",
+          "when": "Fills in: The card"
         },
         {
           "id": "pain",
           "label": "Pain",
-          "store": "ownPain"
+          "store": "ownPain",
+          "when": "Fills in: Before you start"
         },
         {
           "id": "painOwner",
           "label": "Pain Owner",
-          "store": "ownPainOwner"
+          "store": "ownPainOwner",
+          "when": "Fills in: Who hurts?"
         },
         {
           "id": "root",
           "label": "Root Cause",
-          "store": "ownRoot"
+          "store": "ownRoot",
+          "when": "Fills in: Who hurts?"
         },
         {
           "id": "opportunity",
           "label": "Opportunity",
-          "store": "ownOpportunity"
+          "store": "ownOpportunity",
+          "when": "Fills in: The card"
         },
         {
           "id": "category",
           "label": "Solution Category",
-          "store": "ownCategory"
+          "store": "ownCategory",
+          "when": "Fills in: The use-case library"
         },
         {
           "id": "tools",
           "label": "Tools",
-          "store": "ownTools"
+          "store": "ownTools",
+          "when": "Fills in: The use-case library"
         },
         {
           "id": "sensitivity",
           "label": "Data Sensitivity",
-          "store": "ownSensitivity"
+          "store": "ownSensitivity",
+          "when": "Fills in: Can it ship?"
         },
         {
           "id": "effort",
           "label": "Effort / Value",
-          "store": "ownEffort"
+          "store": "ownEffort",
+          "when": "Fills in: The card"
         },
         {
           "id": "owner",
           "label": "Owner / Sponsor",
-          "store": "ownSponsor"
+          "store": "ownSponsor",
+          "when": "Fills in: Who hurts?"
         }
       ],
       "later": "Later in the lesson",
       "save": "save",
+      "sections": [
+        {
+          "id": "problem",
+          "title": "The problem",
+          "art": "problem",
+          "rows": [
+            "process",
+            "pain",
+            "root"
+          ]
+        },
+        {
+          "id": "people",
+          "title": "The people",
+          "art": "people",
+          "rows": [
+            "painOwner",
+            "owner"
+          ]
+        },
+        {
+          "id": "opportunity",
+          "title": "The opportunity",
+          "art": "opportunity",
+          "rows": [
+            "opportunity",
+            "category",
+            "tools"
+          ]
+        },
+        {
+          "id": "readiness",
+          "title": "Readiness",
+          "art": "readiness",
+          "rows": [
+            "sensitivity",
+            "effort"
+          ]
+        }
+      ],
       "fill": [
         {
           "row": "category",
@@ -1688,7 +1902,7 @@
     {
       "id": "F0",
       "chapter": "ch6",
-      "template": "keyParts",
+      "template": "tools3",
       "step": {
         "verb": "Three tools",
         "icon": "key-idea"
@@ -1707,19 +1921,22 @@
           "id": "p1",
           "title": "5-Whys",
           "text": "Ask why five times.",
-          "case": "From symptom to root."
+          "case": "From symptom to root.",
+          "draw": "chain"
         },
         {
           "id": "p2",
           "title": "Fishbone",
           "text": "Six kinds of cause.",
-          "case": "Looks past tools first."
+          "case": "Looks past tools first.",
+          "draw": "fish"
         },
         {
           "id": "p3",
           "title": "Pareto",
           "text": "Most pain, few causes.",
-          "case": "Focus on heavy branches."
+          "case": "Focus on heavy branches.",
+          "draw": "bars"
         }
       ],
       "caseToggle": "What each one does",
@@ -2214,6 +2431,9 @@
         "Knowledge check key Q13 (master data and scheduling first, an AI agent layer on top, not AI first)",
         "Booklet L3 (the dominant branch decides the category)"
       ],
+      "styles": [
+        "focus-chart"
+      ],
       "hint": "Focus on the heavy bones. Which fix removes the clash itself?"
     },
     {
@@ -2325,6 +2545,9 @@
         "L3 deck slide 17 (OP-014: Henrik feels every late close; sponsor Sarah Chen)",
         "Knowledge check key Q19 (Pain Owner vs Owner / Sponsor)"
       ],
+      "styles": [
+        "two-people"
+      ],
       "hint": "One feels it when it hits. The other funds the fix."
     },
     {
@@ -2344,61 +2567,156 @@
       "eyebrow": "Your card",
       "instruction": "Add the root cause and the people to your card",
       "line": "Name roles, not teams. In the executive deck they appear by name.",
-      "cardTitle": "Your opportunity card",
+      "cardTitle": "Opportunity Card",
+      "cardId": "OP-01",
+      "client": "NorthRiver Holdings",
+      "cardState": "Draft",
+      "meter": "{n} of {total}",
+      "zones": {
+        "problem": "The problem",
+        "people": "The people",
+        "opportunity": "The opportunity",
+        "readiness": "Readiness"
+      },
+      "why": "Why?",
+      "tiers": [
+        "Public",
+        "Internal",
+        "Confidential",
+        "Restricted"
+      ],
+      "categories": [
+        {
+          "name": "Process Redesign",
+          "cat": "pr",
+          "art": "redesign"
+        },
+        {
+          "name": "AI Agents & Copilots",
+          "cat": "agent",
+          "art": "agent"
+        },
+        {
+          "name": "Workflow Automation",
+          "cat": "auto",
+          "art": "automation"
+        },
+        {
+          "name": "Business Intelligence",
+          "cat": "bi",
+          "art": "bi"
+        },
+        {
+          "name": "Document AI / OCR",
+          "cat": "doc",
+          "art": "docai"
+        }
+      ],
+      "laterSr": "Empty.",
       "rows": [
         {
           "id": "process",
           "label": "Process",
-          "store": "ownProcess"
+          "store": "ownProcess",
+          "when": "Fills in: The card"
         },
         {
           "id": "pain",
           "label": "Pain",
-          "store": "ownPain"
+          "store": "ownPain",
+          "when": "Fills in: Before you start"
         },
         {
           "id": "painOwner",
           "label": "Pain Owner",
-          "store": "ownPainOwner"
+          "store": "ownPainOwner",
+          "when": "Fills in: Who hurts?"
         },
         {
           "id": "root",
           "label": "Root Cause",
-          "store": "ownRoot"
+          "store": "ownRoot",
+          "when": "Fills in: Who hurts?"
         },
         {
           "id": "opportunity",
           "label": "Opportunity",
-          "store": "ownOpportunity"
+          "store": "ownOpportunity",
+          "when": "Fills in: The card"
         },
         {
           "id": "category",
           "label": "Solution Category",
-          "store": "ownCategory"
+          "store": "ownCategory",
+          "when": "Fills in: The use-case library"
         },
         {
           "id": "tools",
           "label": "Tools",
-          "store": "ownTools"
+          "store": "ownTools",
+          "when": "Fills in: The use-case library"
         },
         {
           "id": "sensitivity",
           "label": "Data Sensitivity",
-          "store": "ownSensitivity"
+          "store": "ownSensitivity",
+          "when": "Fills in: Can it ship?"
         },
         {
           "id": "effort",
           "label": "Effort / Value",
-          "store": "ownEffort"
+          "store": "ownEffort",
+          "when": "Fills in: The card"
         },
         {
           "id": "owner",
           "label": "Owner / Sponsor",
-          "store": "ownSponsor"
+          "store": "ownSponsor",
+          "when": "Fills in: Who hurts?"
         }
       ],
       "later": "Later in the lesson",
       "save": "save",
+      "sections": [
+        {
+          "id": "problem",
+          "title": "The problem",
+          "art": "problem",
+          "rows": [
+            "process",
+            "pain",
+            "root"
+          ]
+        },
+        {
+          "id": "people",
+          "title": "The people",
+          "art": "people",
+          "rows": [
+            "painOwner",
+            "owner"
+          ]
+        },
+        {
+          "id": "opportunity",
+          "title": "The opportunity",
+          "art": "opportunity",
+          "rows": [
+            "opportunity",
+            "category",
+            "tools"
+          ]
+        },
+        {
+          "id": "readiness",
+          "title": "Readiness",
+          "art": "readiness",
+          "rows": [
+            "sensitivity",
+            "effort"
+          ]
+        }
+      ],
       "fill": [
         {
           "row": "root",

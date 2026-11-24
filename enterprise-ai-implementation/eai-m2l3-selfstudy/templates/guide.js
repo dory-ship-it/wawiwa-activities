@@ -3,9 +3,9 @@
 // (new tab). Right: the screenshot with the same numbers placed on it. A step opens with its marker lit (click the
 // step or the marker). Presentation: Next is open (the library is optional here; the next screen uses it).
 // Content: eyebrow, text, steps [{ n, text, at: [x%, y%] }], image { src, alt }, open { label, href }.
-import { h } from '../src/util.js?v=f95774b5';
-import { icon } from '../src/icons.js?v=f95774b5';
-import { layout, focusHead } from '../src/templates/stage.js?v=f95774b5';
+import { h } from '../src/util.js?v=db863ef1';
+import { icon } from '../src/icons.js?v=db863ef1';
+import { layout, focusHead } from '../src/templates/stage.js?v=db863ef1';
 
 export const guide = {
   scene: () => 'focus',

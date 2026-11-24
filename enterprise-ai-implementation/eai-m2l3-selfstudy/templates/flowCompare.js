@@ -4,19 +4,23 @@
 // second lane (a lit box); its result changes, and the key line opens under the lanes. Next after the button.
 // Motion: the tool box drops into the lane once; none with reduced motion.
 // Content: label (the key pill), lanes [{ name, steps: [text], result, tone }], add { button, step, result }, keyLine.
-import { h, reducedMotion } from '../src/util.js?v=f95774b5';
-import { glyph, icon } from '../src/icons.js?v=f95774b5';
-import { layout } from '../src/templates/stage.js?v=f95774b5';
+import { h, reducedMotion } from '../src/util.js?v=db863ef1';
+import { glyph, icon } from '../src/icons.js?v=db863ef1';
+import { art } from './art.js?v=db863ef1';
+import { layout } from '../src/templates/stage.js?v=db863ef1';
 
 export const flowCompare = {
   scene: () => 'focus',
   mount(ctx) {
     const { screen, ui, zones } = ctx;
-    const arrow = () => h('span', { class: 'm-flow-arrow', 'aria-hidden': 'true' }, glyph('g-arrow', { size: 20 }));
+    // design pass (24 Nov 2026): each region is a route: its name with a pin, the steps as stations on one line, and the
+    // result as the route's large end mark (the comparison reads from the two results, 14 minutes against 11 hours)
+    const arrow = () => h('span', { class: 'm-flow-arrow', 'aria-hidden': 'true' });
+    const station = (text, cls = '') => h('li', { class: 'm-flow-step ' + cls }, h('i', { class: 'm-flow-dot', 'aria-hidden': 'true' }), h('span', {}, text));
     const lanes = screen.lanes.map((l) => {
       const result = h('b', { class: 'm-flow-result', dataset: { tone: l.tone || 'good' } }, l.result);
-      const steps = h('ol', { class: 'm-flow-steps' }, l.steps.map((s, i) => [i ? arrow() : null, h('li', { class: 'm-flow-step' }, s)]), arrow(), h('li', { class: 'm-flow-end' }, result));
-      return { l, steps, result, el: h('div', { class: 'm-flow-lane', dataset: { tone: l.tone || 'good' } }, h('span', { class: 'm-flow-name' }, l.name), steps) };
+      const steps = h('ol', { class: 'm-flow-steps' }, l.steps.map((s) => station(s)), h('li', { class: 'm-flow-end' }, art('clock', 26), result));
+      return { l, steps, result, el: h('div', { class: 'm-flow-lane', dataset: { tone: l.tone || 'good' } }, h('span', { class: 'm-flow-name' }, art('pin', 24), h('span', {}, l.name)), steps) };
     });
     const key = h('p', { class: 'm-flow-key', hidden: true }, screen.keyLine);
     const btn = h('button', { class: 'm-why-btn m-flow-btn', type: 'button', dataset: { action: 'add' } }, icon('spark', { size: 22 }), h('span', {}, ui.buttons[screen.add.button] || screen.add.button));
@@ -29,9 +33,9 @@ export const flowCompare = {
     const target = lanes[lanes.length - 1];
     const add = (focus) => {
       if (btn.hidden) return;
-      const box = h('li', { class: 'm-flow-step m-flow-tool' }, icon('spark', { size: 18 }), h('span', {}, screen.add.step));
+      const box = h('li', { class: 'm-flow-step m-flow-tool' }, h('i', { class: 'm-flow-dot', 'aria-hidden': 'true' }, art('agent', 22)), h('span', {}, screen.add.step));
       const end = target.steps.querySelector('.m-flow-end');
-      end.before(box, arrow());
+      end.before(box);
       if (!reducedMotion() && focus) box.classList.add('m-enter');
       target.result.textContent = screen.add.result;
       target.el.dataset.added = 'true';

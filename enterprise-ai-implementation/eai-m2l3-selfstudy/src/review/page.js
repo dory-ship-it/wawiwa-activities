@@ -3,11 +3,11 @@
 // index.html?screen=ID&review=1 at 1280 x 720, scaled to 25%), loaded only when it nears the viewport.
 // Under each: id, template, word count (red over 45). A click opens the screen full size in review
 // mode in a new tab. Filters: All, one chapter, Over word limit, Paths (PP1). Review-only strings live here.
-import { h, chapterNo } from '../util.js?v=f95774b5';
-import { reviewOrder, loadContent } from '../engine.js?v=f95774b5';
-import { cfg, localKey } from '../config.js?v=f95774b5';
-import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=f95774b5';
-import { JOURNEYS, variantOf } from '../adapt.js?v=f95774b5';
+import { h, chapterNo } from '../util.js?v=db863ef1';
+import { reviewOrder, loadContent } from '../engine.js?v=db863ef1';
+import { cfg, localKey } from '../config.js?v=db863ef1';
+import { screenWords, MAX_SCREEN_WORDS, MAX_FEEDBACK_WORDS } from './words.js?v=db863ef1';
+import { JOURNEYS, variantOf } from '../adapt.js?v=db863ef1';
 
 const root = document.getElementById('review');
 const content = await loadContent(new URL('../', import.meta.url).href); // kit.json, then the content, both asked fresh on every load (FX3: "{ch5}" -> 6, as in the lesson)

@@ -8,9 +8,9 @@
 // Content: label (the key pill), cardField (which field of the learner's card this fills), surface
 // { label, text }, whys [text], root { label, text }, button (a ui.buttons key).
 // Kit candidate: written for this lesson's templates/; noted in _selfstudy-kit/REPORT.md for the catalog.
-import { h, reducedMotion } from '../src/util.js?v=f95774b5';
-import { glyph } from '../src/icons.js?v=f95774b5';
-import { layout } from '../src/templates/stage.js?v=f95774b5';
+import { h, reducedMotion } from '../src/util.js?v=db863ef1';
+import { glyph } from '../src/icons.js?v=db863ef1';
+import { layout } from '../src/templates/stage.js?v=db863ef1';
 
 export const whys = {
   scene: () => 'focus',

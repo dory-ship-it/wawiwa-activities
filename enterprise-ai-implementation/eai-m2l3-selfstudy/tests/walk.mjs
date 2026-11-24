@@ -46,7 +46,7 @@ await arrive(page, 'B2');
 }
 await arrive(page, 'B3');
 {
-  const pain = await page.evaluate(() => [...document.querySelectorAll('.m-card-row')].find((r) => r.textContent.startsWith('Pain'))?.querySelector('.m-card-value')?.textContent);
+  const pain = await page.evaluate(() => document.querySelector('.m-op-field[data-row="pain"] .m-op-value')?.textContent);
   expect(pain === 'Month-end close takes 14 days', 'B3: the card shows the learner\'s pain');
   await goNext(page);
 }

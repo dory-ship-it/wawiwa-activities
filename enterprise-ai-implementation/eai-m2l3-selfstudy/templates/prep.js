@@ -8,10 +8,11 @@
 // Tracking: one neutral fill-in (the pain, trimmed), kept under screen.field.store for later screens and the coach.
 // Content: people { title, items: [{ initials, name, role }], link: { label, href } }, have [{ icon, label, from }],
 // field { label, store, trackingId, maxLength, placeholder }, save (a ui.buttons key), feedback { saved, empty }.
-import { h } from '../src/util.js?v=f95774b5';
-import { glyph, icon } from '../src/icons.js?v=f95774b5';
-import { layout, focusHead } from '../src/templates/stage.js?v=f95774b5';
-import { field } from '../src/templates/input.js?v=f95774b5';
+import { h } from '../src/util.js?v=db863ef1';
+import { glyph, icon } from '../src/icons.js?v=db863ef1';
+import { art } from './art.js?v=db863ef1';
+import { layout, focusHead } from '../src/templates/stage.js?v=db863ef1';
+import { field } from '../src/templates/input.js?v=db863ef1';
 
 export const prep = {
   scene: () => 'focus',
@@ -24,9 +25,16 @@ export const prep = {
         h('h2', { id: 'm-prep-people-h' }, screen.people.title),
         screen.people.link ? h('a', { class: 'm-prep-link', href: screen.people.link.href, target: '_blank', rel: 'noopener' },
           h('span', {}, screen.people.link.label), icon('external-link', { size: 16 })) : null),
-      h('ul', { class: 'm-people' }, screen.people.items.map((p) => h('li', {},
-        h('span', { class: 'm-initials', 'aria-hidden': 'true' }, p.initials),
-        h('span', { class: 'm-person' }, h('b', {}, p.name), h('span', {}, p.role))))));
+      // design pass 2 (24 Nov 2026): the people you met, as the NorthRiver building in cross-section: a roof with the
+      // company's name, then one floor per person and department, windows drawn on each floor (a real organization,
+      // not a list). Read only, as before.
+      h('div', { class: 'm-bldg' },
+        screen.people.building ? h('span', { class: 'm-bldg-roof' }, h('b', {}, screen.people.building)) : null,
+        h('ul', { class: 'm-people m-bldg-floors' }, screen.people.items.map((p) => h('li', { class: 'm-bldg-floor' },
+          h('span', { class: 'm-initials', 'aria-hidden': 'true' }, p.initials),
+          h('span', { class: 'm-person' }, h('b', {}, p.name), h('span', {}, p.role)),
+          h('i', { class: 'm-bldg-windows', 'aria-hidden': 'true' })))),
+        h('span', { class: 'm-bldg-ground', 'aria-hidden': 'true' })));
 
     // the field's help line (Noy, 23 Nov 2026): this pain goes with the learner through the lesson
     const helpId = 'm-prep-help';
@@ -43,7 +51,7 @@ export const prep = {
     const have = h('section', { class: 'm-prep-card m-prep-have', 'aria-labelledby': 'm-prep-have-h' },
       h('div', { class: 'm-prep-card-head' }, h('h2', { id: 'm-prep-have-h' }, screen.haveTitle)),
       h('ul', { class: 'm-have' }, screen.have.map((x) => h('li', {},
-        h('span', { class: 'm-have-icon', 'aria-hidden': 'true' }, icon(x.icon, { size: 22 })),
+        h('span', { class: 'm-have-icon', 'aria-hidden': 'true' }, x.art ? art(x.art, 34) : icon(x.icon, { size: 22 })),
         h('b', {}, x.label), h('span', { class: 'm-have-from' }, x.from)))),
       h('div', { class: 'm-prep-thread' }, f.el, help),
       zones.band);

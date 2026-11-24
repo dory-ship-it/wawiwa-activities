@@ -25,10 +25,10 @@
 // iframe (src/coach/live.js), kept mounted across screens and hidden on S21; it gets the screen's
 // context on every screen change. If the page does not answer, the offline tips above for the launch.
 // No learner-facing text here: every string arrives from content ui.coach.
-import { h, reducedMotion } from '../util.js?v=f95774b5';
-import { glyph } from '../icons.js?v=f95774b5';
-import { ask } from './transport.js?v=f95774b5';
-import { createLiveFrame, buildContext, caseLabels } from './live.js?v=f95774b5';
+import { h, reducedMotion } from '../util.js?v=db863ef1';
+import { glyph } from '../icons.js?v=db863ef1';
+import { ask } from './transport.js?v=db863ef1';
+import { createLiveFrame, buildContext, caseLabels } from './live.js?v=db863ef1';
 
 const HINT_CODE = 'a';
 const TOP = 96, BOTTOM = 632; // the panel's box in stage px

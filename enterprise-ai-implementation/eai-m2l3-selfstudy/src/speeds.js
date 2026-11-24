@@ -1,7 +1,7 @@
 // Film and audio speeds (Noy, 23 Nov 2026; standard 1.7): 0.5, 0.75, Normal, 1.25, 1.5, 2, the same in the
 // film player's speed menu and the podcast's speed chip. The learner's last choice is kept for the session
 // (every film and audio plays at it; sessionStorage when allowed, else this page's memory).
-import { localKey } from './config.js?v=f95774b5';
+import { localKey } from './config.js?v=db863ef1';
 
 export const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 let sessionRate = null;

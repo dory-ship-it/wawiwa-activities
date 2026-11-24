@@ -7,9 +7,9 @@
 //          says why. One graded matching interaction: each card's first bone ("1.people,2.process").
 // Content: head, bones [{ id, name, hint }] (top three first), cards [{ n, text, bone, feedback: { correct, wrong } }],
 // closing (the line after the last card), label (the key pill).
-import { h, reducedMotion } from '../src/util.js?v=f95774b5';
-import { glyph } from '../src/icons.js?v=f95774b5';
-import { layout } from '../src/templates/stage.js?v=f95774b5';
+import { h, reducedMotion } from '../src/util.js?v=db863ef1';
+import { glyph } from '../src/icons.js?v=db863ef1';
+import { layout } from '../src/templates/stage.js?v=db863ef1';
 
 const W = 1000, H = 300, SPINE = 150;
 // the bones' outer ends (label boxes) and where they meet the spine
@@ -51,7 +51,7 @@ export const fishbone = {
         head.classList.add('m-enter');
         spine.classList.add('m-draw'); spine.style.animationDelay = '250ms';
         boneLines.forEach((l, i) => { l.classList.add('m-draw'); l.style.animationDelay = 700 + i * 380 + 'ms'; });
-        boneEls.forEach((x, i) => { x.el.classList.add('m-enter'); x.el.style.animationDelay = 850 + i * 380 + 'ms'; });
+        boneEls.forEach((x, i) => { x.el.classList.add('m-fade'); x.el.style.animationDelay = 850 + i * 380 + 'ms'; });
       }
       return { unmount() {} };
     }

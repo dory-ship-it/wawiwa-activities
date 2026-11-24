@@ -10,7 +10,7 @@
 // Every storage access sits in try/catch (store.js pattern from genai-for-marketing/s1-ai-awareness),
 // so private windows and blocked storage never break the page.
 // The storage key and the interaction id prefix are the lesson's (kit.json storageKey, idPrefix).
-import { cfg } from './config.js?v=f95774b5';
+import { cfg } from './config.js?v=db863ef1';
 
 const key = () => cfg().storageKey;
 export const SUSPEND_MAX = 4096;   // SCORM 1.2 cmi.suspend_data limit

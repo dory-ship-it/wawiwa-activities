@@ -3,18 +3,25 @@
 // dark ground. Each part is a row: its label, then its line. "Next part" sits where the next row will open; after the
 // last one the key line shows and Next unlocks. Not tracked.
 // Content: label (the key pill), parts [{ label, text }], button (a ui.buttons key), keyLine.
-import { h, reducedMotion } from '../src/util.js?v=f95774b5';
-import { glyph } from '../src/icons.js?v=f95774b5';
-import { layout } from '../src/templates/stage.js?v=f95774b5';
+import { h, reducedMotion } from '../src/util.js?v=db863ef1';
+import { glyph } from '../src/icons.js?v=db863ef1';
+import { art } from './art.js?v=db863ef1';
+import { layout } from '../src/templates/stage.js?v=db863ef1';
 
 export const reveal = {
   scene: () => 'focus',
   mount(ctx) {
     const { screen, ui, zones } = ctx;
     const live = h('p', { class: 'w-sr-only', 'aria-live': 'polite' });
+    // design pass (24 Nov 2026): a dissection of one card. A spine runs down the left through numbered nodes; each part
+    // has its drawing; the ROI part carries a twelve-month line with its break-even month marked (p.timeline)
+    const timeline = (t) => h('span', { class: 'm-part-tl', 'aria-hidden': 'true' },
+      Array.from({ length: t.months }, (_, k) => h('i', { dataset: { at: k + 1 < t.mark ? 'before' : k + 1 === t.mark ? 'mark' : 'after' } })));
     const rows = screen.parts.map((p, i) => h('li', { class: 'm-part-row', hidden: true },
       h('span', { class: 'm-part-n', 'aria-hidden': 'true' }, String(i + 1)),
-      h('span', { class: 'm-part-label' }, p.label), h('span', { class: 'm-part-text' }, p.text)));
+      p.art ? h('span', { class: 'm-part-art' }, art(p.art, 30)) : null,
+      h('span', { class: 'm-part-label' }, p.label),
+      h('span', { class: 'm-part-text' }, p.text, p.timeline ? timeline(p.timeline) : null)));
     const btn = h('button', { class: 'm-why-btn', type: 'button', dataset: { action: 'part' } }, h('span', {}, ui.buttons[screen.button] || 'Next part'));
     const slot = h('li', { class: 'm-part-slot' }, btn);
     const key = h('p', { class: 'm-flow-key', hidden: true }, screen.keyLine);
