@@ -61,6 +61,9 @@ const walk = (v) => {
   else if (v && typeof v === 'object') Object.values(v).forEach(walk);
 };
 walk(content);
+// files a sibling folder holds (kit.json siblings: ../<folder>/...) cannot go into the zip: the packaged lesson would not find them
+const outside = [];
+(function w(v) { if (typeof v === 'string') { if (/^\.\.\/\S+\.\w+$/.test(v)) outside.push(v); } else if (Array.isArray(v)) v.forEach(w); else if (v && typeof v === 'object') Object.values(v).forEach(w); })(content);
 
 if (missing.length) { console.error('package: missing files\n  ' + missing.join('\n  ')); process.exit(1); }
 const list = [...files].sort();
@@ -145,6 +148,7 @@ writeFileSync(OUT, zip);
 const temp = list.filter((f) => f.includes('/temp/'));
 console.log(`package: ${entries.length} files (imsmanifest.xml + ${list.length})`);
 console.log(`  ${list.filter((f) => f.startsWith('src/')).length} src modules and styles, ${list.filter((f) => f.startsWith('assets/')).length} assets`);
+if (outside.length) console.log(`  WARNING ${outside.length} files from a sibling folder are NOT in the zip (the films of a copy that loads them from ../): in an LMS they will not load. Copy them into this lesson before a release:\n    ${[...new Set(outside)].join('\n    ')}`);
 if (temp.length) console.log(`  WARNING ${temp.length} temp assets packaged (placeholders, replace before release):\n    ${temp.join('\n    ')}`);
 if (!existsSync(join(ROOT, 'tools', 'scorm12-schemas'))) console.log('  note: no SCORM 1.2 .xsd files in tools/scorm12-schemas, the manifest names them but they are not packaged');
 console.log(`  ${posix.relative(ROOT.replace(/\\/g, '/'), OUT.replace(/\\/g, '/'))} ${(zip.length / 1024 / 1024).toFixed(2)} MB (${zip.length} bytes)`);

@@ -107,7 +107,9 @@ async function act(st) {
       const btns = [...document.querySelectorAll('.w-ans')];
       btns.forEach((b, i) => { if (b.getAttribute('aria-pressed') === 'true') b.click(); });
       const wrong = s.options.map((o, i) => (!o.correct ? i : -1)).filter((i) => i >= 0);
-      [wrong[0], s.options.findIndex((o) => o.correct)].forEach((i) => btns[i].click());
+      // as many picks as there are right answers: one wrong, the rest right (v2: S14 asks for four of six)
+      const rights = s.options.map((o, i) => (o.correct ? i : -1)).filter((i) => i >= 0);
+      [wrong[0], ...rights.slice(0, rights.length - 1)].forEach((i) => btns[i].click());
       document.querySelector('[data-action="check"]')?.click();
       return 'multi checked';
     });

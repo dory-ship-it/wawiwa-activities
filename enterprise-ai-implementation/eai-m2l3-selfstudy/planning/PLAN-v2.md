@@ -17,7 +17,8 @@
 ## Part A. The bridge (before slide 2)
 - **A1 Title.** Kept from slide 1 (the deck's cover and its photo).
 - **A2 "Where you are in the engagement"** (a screen of its own). The module as one engagement at NorthRiver in five stations: Walk in, Listen, Map, Prioritize, Pitch (L1 slide 4). The learner opens the past stations: L1, the Interview Log (three pains, each with a quote and a Pain Owner); L2, the swimlane, the inventory and "your top ten pains, ranked by gut feel". Today: each pain becomes a card. Next: L4 prioritizes those cards.
-- **A3 "Before you start"** (one screen, two halves).
+  Taste check round 1 (Noy, 23 Nov 2026): no "Walk in. Listen..." line, no "Click to open" tag, nothing builds up on arrival (option `calm`); the hand taps one station once.
+- **A3 "Before you start"** (one screen, two halves; built as O3, template `prep`).
   - Left, **"Who you met"**: the five NorthRiver people as a quiet strip, face, name, role and the pain they told in one line. Read only, no task.
   - Right, **"Have these open"**: the Interview Log, the inventory, the top ten pains, each with a small picture of its worksheet. If they have fewer than ten pains, a link to the persona cards. Then one field: the pain they will carry through the lesson.
 

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use-case library · Module 2 · Lesson 3</title>
+<link rel="stylesheet" href="../src/fonts.css">
+<link rel="stylesheet" href="../src/tokens.css">
+<style>
+  /* The use-case library of EAI M2 L3 (deck slides 7 to 11), kept from the slides: each slide is a department tab
+     with its two lists; each case keeps the deck's own tag in brackets. Filters by department and by solution
+     category; the spotlights (slides 8 and 10) in full; print, and a list file for NotebookLM (slide 20). */
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--wl-stone); color: var(--wl-ink); font: 400 16px/1.5 var(--wl-font-ui); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 24px 48px; }
+  header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 22px; }
+  .kick { margin: 0 0 6px; font: 700 14px/1 var(--wl-font-label); letter-spacing: 1.2px; text-transform: uppercase; color: var(--wl-teal-ink); }
+  h1 { margin: 0 0 8px; font: 800 40px/1.1 var(--wl-font-ui); letter-spacing: -1px; }
+  .lead { margin: 0; max-width: 640px; color: var(--wl-text-2); font-size: 18px; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  button, .btn { min-height: 44px; padding: 0 18px; border-radius: 9px; border: 1px solid var(--wl-card-line); background: var(--wl-white); color: var(--wl-ink);
+    font: 700 16px/1 var(--wl-font-ui); cursor: pointer; }
+  .btn-primary { background: var(--wl-navy); border-color: var(--wl-navy); color: var(--wl-white); }
+  button:focus-visible { outline: 3px solid var(--wl-navy); outline-offset: 2px; }
+  .filters { display: grid; gap: 12px; padding: 16px 18px; background: var(--wl-white); border: 1px solid var(--wl-line); border-radius: 14px; margin-bottom: 20px; }
+  .frow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .flabel { width: 170px; font: 700 15px/1.2 var(--wl-font-label); color: var(--wl-muted); }
+  .chip { min-height: 40px; padding: 0 14px; border-radius: 999px; font-weight: 600; }
+  .chip[aria-pressed="true"] { background: var(--wl-navy); border-color: var(--wl-navy); color: var(--wl-white); }
+  .count { margin: 0 0 12px; color: var(--wl-muted); font-weight: 600; }
+  .dept { margin: 0 0 22px; }
+  .dept h2 { margin: 0 0 10px; font: 800 22px/1.2 var(--wl-font-ui); }
+  .dept .note { margin: -4px 0 10px; color: var(--wl-teal-ink); font-weight: 600; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .list { background: var(--wl-white); border: 1px solid var(--wl-line); border-radius: 14px; padding: 14px 18px; }
+  .list h3 { margin: 0 0 8px; font: 800 17px/1.2 var(--wl-font-ui); color: var(--wl-teal-ink); }
+  .list ul { list-style: none; margin: 0; padding: 0; display: grid; }
+  .list li { padding: 9px 0; border-top: 1px solid var(--wl-line); display: grid; gap: 4px; }
+  .list li:first-child { border-top: 0; }
+  .case { font-weight: 700; }
+  .tag { color: var(--wl-muted); font-size: 15px; }
+  .cats { display: flex; gap: 6px; flex-wrap: wrap; }
+  .cat { font: 700 13px/1 var(--wl-font-label); padding: 5px 8px; border-radius: 999px; background: var(--wl-keypill-bg); color: var(--wl-teal-ink); }
+  .spot { background: var(--wl-white); border: 1px solid var(--wl-line); border-left: 5px solid var(--wl-teal); border-radius: 14px; padding: 16px 20px; margin-bottom: 14px; }
+  .spot h3 { margin: 0 0 8px; font: 800 19px/1.2 var(--wl-font-ui); }
+  .spot dl { margin: 0; display: grid; grid-template-columns: 130px 1fr; gap: 6px 14px; }
+  .spot dt { font: 700 14px/1.4 var(--wl-font-label); text-transform: uppercase; letter-spacing: 1px; color: var(--wl-teal-ink); }
+  .spot dd { margin: 0; }
+  .src { margin-top: 26px; color: var(--wl-muted); font-size: 14px; }
+  [hidden] { display: none !important; }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } .flabel { width: 100%; } h1 { font-size: 32px; } }
+  @media print { .filters, .actions { display: none; } body { background: #fff; } .list, .spot { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <p class="kick">Enterprise AI Implementation Specialist · Module 2 · Lesson 3</p>
+      <h1>Use-case library</h1>
+      <p class="lead">Thirty proven AI use cases by department. Find the closest one to your pain, then adapt it. Grow your own library in every engagement.</p>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn-primary" id="dl">Download the list for NotebookLM</button>
+      <button type="button" id="pr">Print or save as PDF</button>
+    </div>
+  </header>
+
+  <section class="filters" aria-label="Filters">
+    <div class="frow" role="group" aria-label="Department"><span class="flabel">1 · Department</span><span id="fdept"></span></div>
+    <div class="frow" role="group" aria-label="Solution category"><span class="flabel">2 · Solution category</span><span id="fcat"></span></div>
+  </section>
+  <p class="count" id="count" aria-live="polite"></p>
+  <main id="lists"></main>
+
+  <h2 style="font:800 26px/1.2 var(--wl-font-ui);margin:28px 0 12px">3 · Spotlights: how deep a card goes</h2>
+  <div id="spots"></div>
+  <p class="src">Source: EAI-M02-L03 deck, slides 7 to 11 and their notes. The tags in brackets are the deck's own.</p>
+</div>
+<script>
+// [department, list title, case, the deck's tag, categories]
+const A = 'Agents & Copilots', W = 'Workflow Automation', B = 'Business Intelligence', D = 'Document AI / OCR', O = 'Other (ML, LLM)';
+const CASES = [
+  ['Marketing & Sales', 'Marketing', 'Lead enrichment from public data', 'Agent + RPA', [A, W]],
+  ['Marketing & Sales', 'Marketing', 'Brand-voice copy generation', 'Copilot, Claude, ChatGPT', [A]],
+  ['Marketing & Sales', 'Marketing', 'Campaign performance dashboard', 'BI', [B]],
+  ['Marketing & Sales', 'Marketing', 'Asset versioning + auto-localization', 'Doc AI + Agent', [D, A]],
+  ['Marketing & Sales', 'Marketing', 'Personalization at scale', 'Agent + warehouse', [A]],
+  ['Marketing & Sales', 'Sales', 'AI BDR / outreach drafting', 'Agent', [A]],
+  ['Marketing & Sales', 'Sales', 'Pipeline hygiene + missing-field detection', 'BI + RPA', [B, W]],
+  ['Marketing & Sales', 'Sales', 'Proposal generator from CRM data', 'Doc AI + Copilot', [D, A]],
+  ['Marketing & Sales', 'Sales', 'Conversation intelligence', 'Gong-class transcription + AI', [A]],
+  ['Marketing & Sales', 'Sales', 'Deal-risk scoring', 'BI / ML model', [B, O]],
+  ['HR & Finance', 'HR', 'Onboarding assistant', 'Agent + RAG', [A]],
+  ['HR & Finance', 'HR', 'Resume screening + interview scheduling', 'Agent', [A]],
+  ['HR & Finance', 'HR', 'Internal-policy chatbot', 'Agent + RAG', [A]],
+  ['HR & Finance', 'HR', 'Comp planning + leveling', 'BI', [B]],
+  ['HR & Finance', 'HR', 'Engagement-survey synthesis', 'LLM summarization', [O]],
+  ['HR & Finance', 'Finance', 'Invoice OCR + 3-way match', 'Doc AI + RPA', [D, W]],
+  ['HR & Finance', 'Finance', 'Month-end close acceleration', 'RPA + BI', [W, B]],
+  ['HR & Finance', 'Finance', 'AR / collections prioritization', 'BI + Agent', [B, A]],
+  ['HR & Finance', 'Finance', 'Contract review + clause extraction', 'Doc AI', [D]],
+  ['HR & Finance', 'Finance', 'Variance commentary auto-draft', 'Copilot in Excel', [A]],
+  ['CS, Ops, Legal & Product', 'CS / Ops', 'Ticket triage + routing', 'Agent', [A]],
+  ['CS, Ops, Legal & Product', 'CS / Ops', 'Top-10 query auto-answer', 'Agent + RAG', [A]],
+  ['CS, Ops, Legal & Product', 'CS / Ops', 'KB freshness scanner', 'Agent', [A]],
+  ['CS, Ops, Legal & Product', 'CS / Ops', 'Anomaly monitoring on ops data', 'Agent + alerting', [A]],
+  ['CS, Ops, Legal & Product', 'CS / Ops', 'Shift / scheduling optimization', 'ML', [O]],
+  ['CS, Ops, Legal & Product', 'Legal & Product', 'Contract clause extraction & compare', 'Doc AI', [D]],
+  ['CS, Ops, Legal & Product', 'Legal & Product', 'Compliance-checklist auto-fill', 'Doc AI + Agent', [D, A]],
+  ['CS, Ops, Legal & Product', 'Legal & Product', 'Feature-idea synthesis from CS tickets', 'LLM', [O]],
+  ['CS, Ops, Legal & Product', 'Legal & Product', 'User-research synthesis', 'NotebookLM', [O]],
+  ['CS, Ops, Legal & Product', 'Legal & Product', 'Release-notes auto-draft', 'Copilot', [A]],
+];
+const NOTES = {
+  'HR & Finance': 'Finance is where Document AI shows the fastest measurable ROI: the cost baseline is clear.',
+  'CS, Ops, Legal & Product': 'Legal is the most data-sensitive function: check the sensitivity tier early.',
+};
+const SPOTS = [
+  { title: 'Sales: the lead-prospecting agent (slide 8)', rows: [
+    ['Problem', 'BDRs spend 30 to 50 percent of their week scanning LinkedIn, news sites and directories for leads that match the ICP.'],
+    ['Solution', 'An agent monitors defined sources on a schedule, scores matches against an ICP rubric, and alerts the team when a profile crosses the threshold.'],
+    ['Stack', 'Claude or GPT-4 for the scoring, n8n or Zapier for the orchestration, the CRM for the alert.'],
+    ['ROI', 'About $10K in year one (build plus license); about $16K a year of recovered time. Break-even about month 8. Calibrate to the client.'],
+    ['Watch-out', 'The ICP rubric drifts. Build in a monthly retraining loop with the BDR team.']] },
+  { title: 'Finance: authority and tax payment workflows (slide 10)', rows: [
+    ['What', 'Automated submission, tracking and reconciliation against tax authority portals.'], ['Effort / value', 'Medium effort. High value in regulated environments.']] },
+  { title: 'Finance: bank reconciliation (slide 10)', rows: [
+    ['What', 'Match incoming bank transactions to invoices and payments automatically; surface the exceptions for human review.'], ['Effort / value', 'Medium effort. High value: a standard finance pain.']] },
+  { title: 'HR: policy and guideline RAG bot (slide 10)', rows: [
+    ['What', 'A chatbot on top of HR policies, handbooks and guidelines that answers recurring questions with citations.'], ['Effort / value', 'Low to medium effort. High value: HR time back, faster answers.'],
+    ['Watch-out', 'Classify the data before launch. Some policies are confidential: tier the bot\'s access by role.']] },
+];
+const DEPTS = ['All', ...new Set(CASES.map((c) => c[0]))];
+const CATS = ['All', A, W, B, D, O];
+let dept = 'All', cat = 'All';
+const el = (t, a = {}, ...k) => { const e = document.createElement(t); Object.entries(a).forEach(([n, v]) => e.setAttribute(n, v)); e.append(...k.flat()); return e; };
+const chips = (host, list, get, set) => {
+  host.replaceChildren(...list.map((x) => { const b = el('button', { type: 'button', class: 'chip', 'aria-pressed': String(get() === x) }, x); b.onclick = () => { set(x); render(); }; return b; }));
+};
+function render() {
+  chips(document.getElementById('fdept'), DEPTS, () => dept, (x) => { dept = x; });
+  chips(document.getElementById('fcat'), CATS, () => cat, (x) => { cat = x; });
+  const show = CASES.filter((c) => (dept === 'All' || c[0] === dept) && (cat === 'All' || c[4].includes(cat)));
+  document.getElementById('count').textContent = `${show.length} of ${CASES.length} cases`;
+  const host = document.getElementById('lists');
+  host.replaceChildren(...DEPTS.slice(1).filter((d) => show.some((c) => c[0] === d)).map((d) => {
+    const titles = [...new Set(CASES.filter((c) => c[0] === d).map((c) => c[1]))];
+    return el('section', { class: 'dept' }, el('h2', {}, d), NOTES[d] ? el('p', { class: 'note' }, NOTES[d]) : '',
+      el('div', { class: 'cols' }, titles.map((t) => el('div', { class: 'list' }, el('h3', {}, t),
+        el('ul', {}, show.filter((c) => c[0] === d && c[1] === t).map((c) => el('li', {}, el('span', { class: 'case' }, c[2]), el('span', { class: 'tag' }, '(' + c[3] + ')'),
+          el('span', { class: 'cats' }, c[4].map((x) => el('span', { class: 'cat' }, x))))))))));
+  }));
+}
+document.getElementById('spots').append(...SPOTS.map((s) => el('article', { class: 'spot' }, el('h3', {}, s.title), el('dl', {}, s.rows.map(([k, v]) => [el('dt', {}, k), el('dd', {}, v)])))));
+document.getElementById('pr').onclick = () => window.print();
+document.getElementById('dl').onclick = () => {
+  const lines = ['Department,List,Use case,Deck tag,Categories', ...CASES.map((c) => [c[0], c[1], c[2], c[3], c[4].join(' / ')].map((x) => '"' + x.replace(/"/g, '""') + '"').join(','))];
+  const a = el('a', { href: URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' })), download: 'use-case-library.csv' });
+  document.body.append(a); a.click(); a.remove();
+};
+render();
+</script>
+</body>
+</html>

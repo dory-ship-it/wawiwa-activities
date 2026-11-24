@@ -6,13 +6,14 @@ A copy of `enterprise-ai-implementation/eai-m1l4-selfstudy-v3` (the live lesson,
 
 | Path | What it holds |
 |---|---|
-| `kit.json` | the kit version and profile, and this lesson's settings (content file, storage key `wawiwa.eai.l4.slice`, id prefix `L4_`, the live coach page and the ten case fields, port 8131, hub ids `eai/m1l4`, the photo manifest, `siblings`) |
+| `kit.json` | the kit version and profile, and this lesson's settings (content file, storage key `wawiwa.eai.l4.slice`, id prefix `L4_`, the live coach page and the ten case fields, port 8131, hub ids `eai/m1l4`, the photo manifest) |
 | `content/l4-slice.json` | every word the learner sees; `content/coach/grounding-pack.md` |
 | `tests/` | `states.mjs` (every screen state, the personal path's levels too), `walk.mjs` (the keyboard walk), `adapt.mjs` (the personal path scenario) |
 | `assets/img/` | the photos the content names and their prompt notes (`prompts/v2/PHOTO-SET.md`) |
+| `assets/video/` | the round-12 films V1 and V2 (Noy approved, 23 Nov 2026; from `EAI film upgrade/full/r12/lesson` and `v2/r12/lesson`): mp4, captions, poster, cues |
 | `planning/` | the v3 lesson's notes (text only) |
 
-The films are not copied: the content loads them from `../eai-m1l4-selfstudy-v2/assets/video/`, as the live v3 lesson does (kit.json `siblings`; the local server maps it).
+The films are the lesson's own (round 12, in `assets/video/`), so they are in the SCORM zip; the live v3 lesson still loads the old ones from `../eai-m1l4-selfstudy-v2/`. Screenshots of each film and stop: `planning/shots-films/`.
 
 Everything else (`src/`, `tools/`, `index.html`, `review.html`, fonts, logo) is the kit's copy: change `_selfstudy-kit`, then `npm run kit:sync`.
 

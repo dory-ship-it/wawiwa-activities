@@ -15,8 +15,7 @@ Plan and rules: `Desktop\Wawiwa\Self- Study\Self-Study Standard\KIT-PLAN.md` and
 | `profiles/` | one file per course: its tokens and look, and the options its lessons may choose. `dm.css` (Digital Marketing), `eai.css` (Implementor) |
 | `shell/` | `index.html` and `review.html`, filled from the lesson's `kit.json` and content by `kit:sync` |
 | `assets/` | the fonts and the Wawiwa logo |
-| `tools/` | `check`, `stamp`, `serve`, `test-fit`, `check-overflow`, `walk` (+ `walk-lib`), `test-review`, `shots`, `states` (+ `state-helpers`), `package-scorm`, the SCORM mock, `sync` |
-| `tools/eai/` | the EAI pilot's own tests (coach, live coach, personal path, LMS origin, wrong-answer walk), kept here until EAI moves onto the kit (step 3); not copied into lessons yet |
+| `tools/` | `check`, `stamp`, `serve`, `test-fit`, `check-overflow`, `walk` (+ `walk-lib`), `test-review`, `shots`, `states` (+ `state-helpers`), `test-coach`, `test-coach-live` (+ `coach-stub.html`), `test-adapt`, `test-lms-origin`, `walk-wrong`, `package-scorm`, the SCORM mock, `sync` |
 
 ## A lesson on the kit
 
@@ -27,7 +26,7 @@ Plan and rules: `Desktop\Wawiwa\Self- Study\Self-Study Standard\KIT-PLAN.md` and
   content/<x>.json  every word the learner sees
   lesson.css        this lesson's own look, as named options (screen.styles), never by screen id
   templates/        only screen types this lesson invents (none in DM M2 L2)
-  tests/            states.mjs (its screen states), walk.mjs (its keyboard walk), check.mjs (its own rules), review.mjs (optional)
+  tests/            states.mjs (its screen states), walk.mjs (its keyboard walk), check.mjs (its own rules), adapt.mjs (personal path), review.mjs (optional)
   assets/           photos, films, audio
   src/, tools/, index.html, review.html, assets/fonts, assets/logo   the kit's copy: never edit
 ```
@@ -57,6 +56,9 @@ Plan and rules: `Desktop\Wawiwa\Self- Study\Self-Study Standard\KIT-PLAN.md` and
 | `coach.url`, `coach.caseKeys` | the live coach page (empty: offline tips only; framed only after the live-AI gate in wawiwa-policies) and the store keys of the learner's own case fields sent to it |
 | `review.coachScreen`, `review.coachNote` | the screen review.html shows the coach states on, and the line under that row |
 | `templates` | the lesson's own screen-type modules (paths from the lesson root) |
+| `siblings` | folders next to the lesson whose files the content names as `../<folder>/...` (EAI M1 L4 v3 loads its films from `../eai-m1l4-selfstudy-v2/`); the local server maps them. They are not in the SCORM zip |
+| `photoManifest` | the lesson's photo record (generator, settings, prompt, seed, crop: STANDARD 1.9); with it a final photo needs no `source` of its own |
+| `coach.groundingPack` | the coach pack's grounding file, checked by test:coach |
 
 ### Get the kit, update the kit
 
@@ -83,6 +85,11 @@ A fix to shared code is made here, in `_selfstudy-kit`, the version in `package.
 | `npm run test:scorm` | the same walk against a mock SCORM 1.2 API, then a relaunch |
 | `npm run test:review` | review mode writes nothing; review.html shows every screen and its slim top line |
 | `npm run shots` | a screenshot of every state into `planning/shots/` |
+| `npm run test:coach` | the offline coach: no network code, tips, locked on the final check, dock, demo, nothing written |
+| `npm run test:coach-live` | the live coach page framed (a local stub, no network): the context message, case notes, fallback |
+| `npm run test:adapt` | the personal path, when the lesson has one (its scenario is the lesson's `tests/adapt.mjs`) |
+| `npm run test:lms-origin` | after `npm run package`: the zip in a mock LMS on another origin, the real coach page (network) |
+| `node tools/walk-wrong.mjs` | a learner who answers wrong everywhere, in a Blossom-like frame: never stuck |
 | `npm run package` | `dist/<id>-scorm12.zip` |
 
 After a change to `content/`, `lesson.css` or `templates/`: `npm run stamp`, then `npm run check`.

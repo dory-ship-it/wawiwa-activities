@@ -34,12 +34,26 @@
 /* ---------- A5: space under the heading block ---------- */
 .w-main .w-sheet > .w-head-row:not(:last-child) { margin-bottom: 32px; }
 .w-main .w-sheet > .w-handoff-head { margin-bottom: 32px; }
+/* (the hand-off with its six copy cards keeps its 18 px: at full length the notes need the room, check:overflow) */
+.w-main .w-sheet-open1 > .w-handoff-head { margin-bottom: 17.92px; }
 .w-main .w-sheet > .w-instruction:not(:last-child) { margin-bottom: 32px; }
 .w-main .w-sheet > .w-instruction + .w-kc-body { margin-top: 0; }
+/* the context line (and a field label) over the heading belong to the heading block: 8 px to the heading, not 15 */
+.w-main .w-sheet > :is(.w-context, .w-label, .w-case-row) + .w-head-row { margin-top: 8px; }
 
 /* ---------- A5: the context line over a heading as a tag ---------- */
-.w-stage:not([data-styles~="case-heading"]) .w-main .w-context { display: inline-block; flex: 0 1 auto; margin: 0 0 8px; padding: 4px 12px; border-radius: 8px;
+.w-stage:not([data-styles~="case-heading"]) .w-main .w-context { display: inline-block; flex: 0 1 auto; align-self: flex-start; width: fit-content; max-width: 100%; box-sizing: border-box; margin: 0 0 8px; padding: 4px 12px; border-radius: 8px;
   background: var(--wl-keypill-bg); font: 700 17px/1.25 var(--wl-font-ui); letter-spacing: .01em; color: var(--wl-teal-ink); }
+
+/* ---------- the profile's tokens ---------- */
+:root {
+  /* coral as TEXT on the dark cards (K1 "Without mapping", K4's poor-fit caption): --wl-coral is 4.16:1 on the
+     dark fig card (#20394B), under 4.5; this lighter coral is 4.82:1 there (kit 0.1.0, found by the walk's
+     contrast check; lines, icons and rings keep --wl-coral) */
+  --wl-coral-text: #F58474;
+}
+.w-stage[data-ground="darkblur"] .w-figs:not(.w-figs-two) .w-fig[data-kind="mess"] .w-fig-label,
+.w-stage[data-ground="darkblur"] .w-kcol[data-kind="mess"] .w-fig-caption { color: var(--wl-coral-text); }
 
 /* ---------- motion, only where it shows something ---------- */
 @media (prefers-reduced-motion: no-preference) {

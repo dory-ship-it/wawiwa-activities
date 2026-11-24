@@ -128,8 +128,12 @@ for (const [j, persona] of Object.entries(PERSONAS)) {
       const want = plan[tid];
       if (CLICK.has(id)) {
         const x = variantOf(S[id], shown[id]);
-        const pick = x.options.find((o) => o.correct === (want === 'correct')).id;
-        await p.click(`.w-opt[data-id="${pick}"]`);
+        // (kit port: FX7 made a choice "select, then Check", so the persona presses Check after its pick; a
+        // multi-select picks every right option, or all but one plus a wrong one)
+        const keys = x.options.filter((o) => o.correct).map((o) => o.id), wrongs = x.options.filter((o) => !o.correct).map((o) => o.id);
+        const picks = x.variant === 'multi' ? (want === 'correct' ? keys : [...keys.slice(0, -1), wrongs[0]]) : [want === 'correct' ? keys[0] : wrongs[0]];
+        for (const pick of picks) await p.click(`.w-opt[data-id="${pick}"]`);
+        if (await p.$('[data-action="check"]:not([disabled])')) await p.click('[data-action="check"]:not([disabled])');
         const ev = await p.evaluate((x) => window.__l4.tracking.events.filter((e) => e.kind === 'answer' && e.trackingId === x).pop(), tid);
         sent.push(ev && ev.result === want && ev.correctResponse === x.tracking[0].correctResponse ? null : `${id}: sent ${ev && ev.result} / ${ev && ev.correctResponse}, want ${want} / ${x.tracking[0].correctResponse}`);
       } else {

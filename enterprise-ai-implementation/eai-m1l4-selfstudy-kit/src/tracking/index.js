@@ -18,9 +18,9 @@
 // attempt is an 'answer' again (one more cmi.interactions entry per item and attempt).
 // persist(): the encoded state to suspend_data and the screen to lesson_location (SCORM) on every
 // change. ?debug=1 logs every call to the console (calls keeps them for the tests).
-import { encode } from '../state.js?v=ef0fa094';
-import { findAPI, createScorm12 } from './scorm12.js?v=ef0fa094';
-import { createLocal } from './local.js?v=ef0fa094';
+import { encode } from '../state.js?v=c918cfd7';
+import { findAPI, createScorm12 } from './scorm12.js?v=c918cfd7';
+import { createLocal } from './local.js?v=c918cfd7';
 
 export function createTracking({ debug = false, force = null, off = false } = {}) {
   const events = [];
