@@ -11,8 +11,8 @@
 // No SCORM call, nothing stored: the learner's own-case fields go to the page as they are (raw: the page
 // gates and redacts them), only on own-case screens. Never in review mode or with ?live=0 (the tests
 // that run without the network).
-import { h, chapterNo } from '../util.js?v=db863ef1';
-import { cfg } from '../config.js?v=db863ef1';
+import { h, chapterNo } from '../util.js?v=34b6caae';
+import { cfg } from '../config.js?v=34b6caae';
 
 // The lesson's own coach page (kit.json coach.url, built in Practice Studio; empty = offline tips only).
 // It is framed only after the live-AI gate in wawiwa-policies is cleared for the program.

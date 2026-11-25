@@ -27,9 +27,10 @@ export const STATES = [
   ['B1', 'arrival', shift],
   ['B1', 'ended', async (p) => { await shift(p); await toEnd(p); }],
   ['B2', 'arrival', shift],
-  ['B2', 'wrong', async (p) => { await shift(p); await pick(p, 'a'); }],
-  ['B2', 'right', async (p) => { await shift(p); await pick(p, 'b'); }],
-  ['B3', 'the card', shift],
+  ['B2', 'wrong', async (p) => { await shift(p); await pick(p, 'a'); await sleep(1800); }],
+  ['B2', 'right', async (p) => { await shift(p); await pick(p, 'b'); await sleep(1800); }],
+  ['B3', 'the list', shift],
+  ['B3', 'the card', async (p) => { await shift(p); await click(p, '[data-action="cards"]'); await sleep(2800); }],
   /* Process before tool */
   ['C1', 'two lanes', shift],
   ['C1', 'agent added', async (p) => { await shift(p); await click(p, '[data-action="add"]'); }],

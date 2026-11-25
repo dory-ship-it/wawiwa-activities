@@ -38,16 +38,22 @@ await fast(page, () => document.querySelector('.w-next').dataset.locked === 'fal
 await goNext(page);
 await arrive(page, 'B2');
 {
+  // round 2 (24 Nov 2026, templates/survive.js): the template's decision panel, the chain inside the feedback card
   await pickKey('a');
   const b = await band(page);
   expect(b.state === 'wrong' && b.text === S.B2.options[0].feedback, 'B2: a wrong pick says why that pick is not it');
   expect(!(await locked()), 'B2: one try, then Next');
+  expect(await page.evaluate(() => document.querySelectorAll('.w-strip .m-ch .m-ch-link').length === 4), 'B2: the feedback card shows the four links behind the right answer');
   await goNext(page);
 }
 await arrive(page, 'B3');
 {
-  const pain = await page.evaluate(() => document.querySelector('.m-op-field[data-row="pain"] .m-op-value')?.textContent);
-  expect(pain === 'Month-end close takes 14 days', 'B3: the card shows the learner\'s pain');
+  // redesign 24 Nov 2026 (templates/tenCards.js): the top ten list, one button, then card 1 with the learner's pain
+  expect(await text(page, '.m-tc-row[data-mine="true"] .m-tc-text') === 'Month-end close takes 14 days', 'B3: line 1 of the list is the learner\'s pain');
+  expect(await locked(), 'B3: Next locked until the pains turn into cards');
+  await act(page, '[data-action="cards"]');
+  await page.waitForFunction(() => document.querySelector('.w-next').dataset.locked === 'false', { timeout: 5000 });
+  expect(await text(page, '.m-tc-pain p') === 'Month-end close takes 14 days', 'B3: card 1 opens with the learner\'s pain');
   await goNext(page);
 }
 

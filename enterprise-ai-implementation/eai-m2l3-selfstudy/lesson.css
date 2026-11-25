@@ -713,3 +713,96 @@
   --m-art-check: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'black'%20stroke-width%3D'1.75'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%3E%3Cpath%20d%3D%22M5%2012.5l4.5%204.5L19%207.5%22%2F%3E%3C%2Fsvg%3E");
 }
 /* <<< lesson art masks <<< */
+
+/* =====================================================================================================
+   Chapter 2 redesign (24 Nov 2026, Noy: "flat, crowded, does not crack the idea"). Two lesson templates:
+   survive (B2) and tenCards (B3). Big type as in the reference lesson (EAI M1 L4 v3), few big parts, the
+   case's room as the ground, motion only where it shows the idea (a chain that traces back; a pain that
+   becomes a card), once, none with reduced motion.
+   ===================================================================================================== */
+
+/* ---------- survive (templates/survive.js, B2): the template's decision panel; the chain inside its feedback card ---------- */
+.m-ch { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(22, 41, 58, .12); display: grid; gap: 4px; }
+/* chain-fit (B2): the approved answers are long, so this panel is a little wider (answers on one line) and a little
+   tighter, so the panel and its feedback card with the chain stay between the bar and the Previous / Next row */
+.w-stage[data-styles~="chain-fit"][data-tone="soft"] .w-sheet-right.w-sheet-one { width: min(880px, calc(100% - 128px)); }
+.w-stage[data-styles~="chain-fit"] .w-sheet-one .w-instruction { margin-bottom: 16px; }
+.w-stage[data-styles~="chain-fit"] .w-sheet-one .w-options { gap: 6px; }
+.m-ch-row { display: flex; align-items: center; gap: 14px; }
+.m-ch-label { margin: 0; font: 700 15px/1.2 var(--wl-font-ui); color: var(--wl-ink); }
+.m-ch-links { margin: 0; padding: 0; list-style: none; display: flex; align-items: center; gap: 30px; }
+.m-ch-link { position: relative; display: flex; align-items: center; gap: 6px; font: 700 15px/1.2 var(--wl-font-ui); color: var(--wl-teal-ink); }
+.m-ch-link + .m-ch-link::before { content: ""; position: absolute; left: -26px; width: 22px; top: 50%; height: 2px; background: var(--wl-teal); }
+.m-ch-link i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--wl-teal); color: var(--wl-white); }
+.m-ch-trace { margin: 0; font: 600 15px/1.35 var(--wl-font-ui); color: var(--wl-body-ink); }@media (prefers-reduced-motion: no-preference) {
+  
+  .m-ch-anim .m-ch-link { animation: m-sv-node .3s var(--wl-ease-enter) var(--d, 0ms) both; }
+  .m-ch-anim .m-ch-trace { animation: m-sv-in .35s ease-out 1.15s both; }
+}
+@keyframes m-sv-in { from { opacity: 0; translate: 0 -8px; } to { opacity: 1; translate: 0 0; } }
+@keyframes m-sv-draw { from { scale: 0 1; } to { scale: 1 1; } }
+@keyframes m-sv-node { from { opacity: 0; scale: .6; } to { opacity: 1; scale: 1; } }
+
+/* ---------- tenCards (templates/tenCards.js, B3): the dark blur over the fanned cards ---------- */
+.m-tc-head { top: 34px; }
+.w-main[data-layout="tenCards"] .w-instruction { margin: 0; font: 800 46px/1.06 var(--wl-font-ui); letter-spacing: -1.2px; color: var(--wl-white); }
+.m-tc { position: absolute; left: max(64px, calc((100% - 1152px) / 2)); right: max(64px, calc((100% - 1152px) / 2)); top: 128px; height: 370px; }
+/* beat 1: the list on the left, the fan and the button on the right */
+.m-tc-list { position: absolute; left: 0; top: 0; width: 520px; padding: 20px 26px 18px; border-radius: 18px; background: rgba(10, 22, 32, .72);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12); }
+.m-tc-list-h { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font: 700 18px/1.2 var(--wl-font-ui); color: var(--wl-aqua-text); }
+.m-tc-list ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.m-tc-row { display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: center; min-height: 28px; }
+.m-tc-n { font: 700 15px/1 var(--wl-font-label); color: var(--wl-on-glass); }
+.m-tc-text { font: 700 18px/1.25 var(--wl-font-ui); color: var(--wl-white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-tc-row[data-mine="true"] { margin-bottom: 4px; padding: 6px 0; border-bottom: 1px solid rgba(255, 255, 255, .16); }
+.m-tc-row[data-mine="true"] .m-tc-n { color: var(--wl-turquoise); }
+.m-tc-bar { display: block; width: var(--w); height: 8px; border-radius: 4px; background: rgba(255, 255, 255, .22); }
+.m-tc-right { position: absolute; left: 672px; right: 0; top: 0; height: 100%; display: grid; place-items: center; }
+.m-tc-fan { position: absolute; left: 50%; top: 40px; width: 0; height: 0; }
+.m-tc-mini { position: absolute; left: -64px; top: 0; width: 128px; height: 168px; border-radius: 10px; background: var(--wl-white);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .35); transform-origin: 50% 160%; rotate: calc((var(--i) - 4.5) * 7deg); opacity: 0;
+  transition: opacity .3s ease;
+  display: grid; align-content: start; gap: 10px; padding: 18px 16px; }
+.m-tc-mini i { display: block; height: 7px; border-radius: 4px; background: var(--wl-line); }
+.m-tc-mini i:first-child { width: 60%; background: var(--wl-teal); }
+/* beat 1: the ten places are drawn as faint outlines, so the eye knows where the cards will land */
+.m-tc[data-beat="1"] .m-tc-mini { opacity: 1; background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .28); }
+.m-tc[data-beat="1"] .m-tc-mini i { visibility: hidden; }
+.m-tc-btn { position: relative; z-index: 2; margin-top: 290px; }
+/* beat 2: the rows leave the list one by one, a card lands in the fan for each */
+.m-tc[data-beat="2"] .m-tc-row { animation: m-tc-leave .5s ease-in calc(var(--n, 0) * 0ms) both; }
+.m-tc[data-beat="2"] .m-tc-mini, .m-tc[data-beat="3"] .m-tc-mini { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .m-tc[data-beat="2"] .m-tc-mini { animation: m-tc-land .45s var(--wl-ease-enter) calc(var(--i) * 130ms + 120ms) both; }
+  .m-tc[data-beat="2"] .m-tc-row:nth-child(1) { animation-delay: 0ms; } .m-tc[data-beat="2"] .m-tc-row:nth-child(2) { animation-delay: 130ms; }
+  .m-tc[data-beat="2"] .m-tc-row:nth-child(3) { animation-delay: 260ms; } .m-tc[data-beat="2"] .m-tc-row:nth-child(4) { animation-delay: 390ms; }
+  .m-tc[data-beat="2"] .m-tc-row:nth-child(5) { animation-delay: 520ms; } .m-tc[data-beat="2"] .m-tc-row:nth-child(6) { animation-delay: 650ms; }
+  .m-tc[data-beat="2"] .m-tc-row:nth-child(7) { animation-delay: 780ms; } .m-tc[data-beat="2"] .m-tc-row:nth-child(8) { animation-delay: 910ms; }
+  .m-tc[data-beat="2"] .m-tc-row:nth-child(9) { animation-delay: 1040ms; } .m-tc[data-beat="2"] .m-tc-row:nth-child(10) { animation-delay: 1170ms; }
+  .m-tc[data-beat="3"] .m-tc-card { animation: m-tc-open .55s var(--wl-ease-enter) both; }
+  .m-tc[data-beat="3"] .m-tc-fan { transition: translate .55s var(--wl-ease-enter), scale .55s var(--wl-ease-enter); }
+}
+@media (prefers-reduced-motion: reduce) { .m-tc[data-beat="2"] .m-tc-row { animation: none; opacity: 0; } }
+@keyframes m-tc-leave { to { opacity: 0; translate: 80px 0; } }
+@keyframes m-tc-land { from { opacity: 0; translate: -160px 40px; rotate: 0deg; } to { opacity: 1; translate: 0 0; } }
+@keyframes m-tc-open { from { opacity: 0; scale: .5; translate: 300px 0; } to { opacity: 1; scale: 1; translate: 0 0; } }
+/* beat 3: card 1 open on the left; the other nine as a stack on the right */
+.m-tc[data-beat="3"] .m-tc-list { display: none; }
+.m-tc[data-beat="3"] .m-tc-fan { translate: 40px 10px; scale: .8; }
+.m-tc[data-beat="3"] .m-tc-mini:last-child { opacity: 0; }
+.m-tc-stack-note { position: absolute; left: 0; right: 0; top: 262px; margin: 0; text-align: center; font: 600 17px/1.3 var(--wl-font-ui); color: var(--wl-glass-text); }
+.m-tc-card { position: absolute; left: 0; top: 0; width: 640px; border-radius: 18px; overflow: hidden; background: var(--wl-white);
+  box-shadow: 0 0 0 1px rgba(90, 179, 170, .55), 0 0 36px rgba(90, 179, 170, .28), 0 24px 48px rgba(0, 0, 0, .4); }
+.m-tc-band { display: flex; align-items: center; gap: 10px; padding: 14px 26px; background: var(--wl-ink); color: var(--wl-turquoise); }
+.m-tc-band b { font: 800 19px/1 var(--wl-font-ui); color: var(--wl-white); }
+.m-tc-id { margin-left: auto; font: 700 15px/1 var(--wl-font-label); color: var(--wl-aqua-text); }
+.m-tc-pain { padding: 22px 26px 20px; display: grid; gap: 8px; background: var(--wl-keypill-bg); box-shadow: inset 5px 0 0 var(--wl-teal); }
+.m-tc-label { font: 700 15px/1.2 var(--wl-font-ui); color: var(--wl-teal-ink); }
+.m-tc-pain p { margin: 0; font: 800 28px/1.2 var(--wl-font-ui); color: var(--wl-ink); }
+.m-tc-parts { margin: 0; padding: 18px 26px 22px; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 32px; }
+.m-tc-parts li { display: grid; gap: 8px; }
+.m-tc-part-h { font: 700 16px/1.2 var(--wl-font-ui); color: var(--wl-muted); }
+.m-tc-parts li i { display: block; height: 7px; width: 82%; border-radius: 4px; background: var(--wl-line); }
+.m-tc-parts li i + i { width: 56%; }
+.m-tc-line { position: absolute; left: max(64px, calc((100% - 1152px) / 2)); width: 640px; top: 512px; }

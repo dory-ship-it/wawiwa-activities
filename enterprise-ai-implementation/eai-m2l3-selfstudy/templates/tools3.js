@@ -5,9 +5,9 @@
 // one does" opens each column's case line under a short rule. Presentation; not tracked.
 // Content (as keyParts): label, instruction, parts [{ id, title, text, case }], caseToggle, caseLabel; parts[i].draw
 // names the drawing ('chain' | 'fish' | 'bars').
-import { h } from '../src/util.js?v=db863ef1';
-import { glyph } from '../src/icons.js?v=db863ef1';
-import { layout } from '../src/templates/stage.js?v=db863ef1';
+import { h } from '../src/util.js?v=34b6caae';
+import { glyph } from '../src/icons.js?v=34b6caae';
+import { layout } from '../src/templates/stage.js?v=34b6caae';
 
 const NS = 'http://www.w3.org/2000/svg';
 const DRAW = {

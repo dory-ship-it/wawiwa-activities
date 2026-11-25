@@ -159,7 +159,9 @@
         "whysPractice": "Next, locked until you reach the root",
         "fishbone": "Next, locked until every cause is on its bone",
         "pair": "Next, locked until you answer every situation",
-        "tiles": "Next, locked until you open all four categories"
+        "tiles": "Next, locked until you open all four categories",
+        "survive": "Next, locked until you check your answer",
+        "tenCards": "Next, locked until you turn your pains into cards"
       },
       "need": {
         "single": "Choose an answer, then Check.",
@@ -196,7 +198,9 @@
         "whysPractice": "Pick the next why at every level.",
         "fishbone": "Place every cause on its bone.",
         "pair": "Answer every situation to continue.",
-        "tiles": "Open all four categories to continue."
+        "tiles": "Open all four categories to continue.",
+        "survive": "Pick one recommendation, then Check.",
+        "tenCards": "Turn your pains into cards to continue."
       },
       "needCards": "Place {n} more cards.",
       "needCards1": "Place the last card.",
@@ -425,8 +429,11 @@
       "n": 1,
       "title": "Every pain becomes a card",
       "photo": {
-        "src": null,
-        "temp": true
+        "src": "assets/img/ch2-laptop-paperwork.jpg",
+        "position": "60% 50%",
+        "temp": false,
+        "alt": "",
+        "source": "Implementor course photo: EAI M1 L4 v3 assets/img/l4/v2/ch2-w1-laptop-paperwork.jpg (its film screen V1 ground), reused as is"
       },
       "minutes": 5,
       "screens": [
@@ -762,9 +769,15 @@
       },
       "instruction": "Watch: six weeks into the engagement",
       "title": "Six weeks later",
-      "guidingLabel": "Watch for",
+      "guidingLabel": "Watch for:",
       "guidingQuestion": "What lets one answer survive the question?",
-      "photo": false,
+      "photo": {
+        "src": "assets/img/ch2-laptop-paperwork.jpg",
+        "position": "60% 50%",
+        "temp": false,
+        "alt": "",
+        "source": "Implementor course photo: EAI M1 L4 v3 assets/img/l4/v2/ch2-w1-laptop-paperwork.jpg (its film screen V1 ground), reused as is"
+      },
       "ground": {
         "kind": "darkblur"
       },
@@ -832,14 +845,12 @@
         "L3 deck slides 2, 3, 4 and their notes (the traceable chain; \"why this and not that\"; the bookend line)",
         "Booklet persona D (Robert Pak: two auto-renewals, one cost $40k)"
       ],
-      "hint": "Watch for what lets one answer survive the question."
+      "hint": "Watch for what lets one answer survive the question.",
+      "showTitle": false
     },
     {
       "id": "B2",
       "chapter": "ch2",
-      "template": "decision",
-      "variant": "single",
-      "attempts": 1,
       "step": {
         "verb": "Decide",
         "icon": "decide"
@@ -849,11 +860,34 @@
         "kind": "practice",
         "tip": "Look for what stands behind each one: a pain, a person, their words, a date."
       },
+      "tracking": [
+        {
+          "id": "M2L3_B2_1",
+          "type": "choice",
+          "correctResponse": "b",
+          "scored": true,
+          "bloom": "Evaluate",
+          "result": "graded"
+        }
+      ],
+      "sources": [
+        "L3 deck slide 3 and notes (every recommendation traces to a pain, every pain to a quote, every quote to a meeting)",
+        "Booklet persona D (Robert Pak)"
+      ],
+      "hint": "Look for what stands behind each one: a pain, a person, their words, a date.",
+      "template": "survive",
+      "variant": "single",
+      "attempts": 1,
+      "scene": "stage",
+      "look": "wide",
+      "layout": "stage-decision",
+      "onePanel": true,
       "instruction": "Pick the recommendation that survives Sarah's question",
       "stage": {
         "top": {
           "kind": "line",
-          "text": "Sarah asks: why this and not that? Which one can you defend?"
+          "text": "At the steering committee, Sarah Chen, CFO, asks: why this, and not that?",
+          "highlight": "why this, and not that?"
         },
         "bottom": {
           "kind": "options",
@@ -880,209 +914,93 @@
           "feedback": "No pain stands behind it at all. That is a guess, not a recommendation."
         }
       ],
-      "advance": "after-correct",
-      "ground": {
-        "kind": "dots"
+      "chain": {
+        "label": "Behind it:",
+        "links": [
+          "Pain",
+          "Person",
+          "Words",
+          "Meeting"
+        ],
+        "trace": "Robert Pak, General Counsel. Two contracts renewed by themselves; one cost $40k."
       },
-      "photo": false,
-      "tracking": [
-        {
-          "id": "M2L3_B2_1",
-          "type": "choice",
-          "correctResponse": "b",
-          "scored": true,
-          "bloom": "Evaluate",
-          "result": "graded"
-        }
-      ],
-      "sources": [
-        "L3 deck slide 3 and notes (every recommendation traces to a pain, every pain to a quote, every quote to a meeting)",
-        "Booklet persona D (Robert Pak)"
-      ],
+      "advance": "after-correct",
+      "photo": {
+        "src": "assets/img/ch2-laptop-paperwork.jpg",
+        "position": "60% 50%",
+        "temp": false,
+        "alt": "",
+        "source": "Implementor course photo: EAI M1 L4 v3 assets/img/l4/v2/ch2-w1-laptop-paperwork.jpg (its film screen V1 ground), reused as is"
+      },
+      "ground": {
+        "kind": "darkblur",
+        "tone": "soft"
+      },
       "styles": [
-        "committee"
-      ],
-      "hint": "Look for what stands behind each one: a pain, a person, their words, a date."
+        "chain-fit"
+      ]
     },
     {
       "id": "B3",
       "chapter": "ch2",
-      "template": "card",
-      "variant": "intro",
       "step": {
         "verb": "Your card",
         "icon": "write"
       },
       "minutes": 1,
-      "presentation": true,
       "coach": {
         "kind": "idea",
         "tip": "This is the format from the deck. Each chapter fills more of it."
       },
-      "eyebrow": "Your card",
-      "instruction": "Meet the card you fill today",
-      "line": "Your pain is already on it. Each chapter fills the next fields.",
-      "cardTitle": "Opportunity Card",
-      "cardId": "OP-01",
-      "client": "NorthRiver Holdings",
-      "cardState": "Draft",
-      "meter": "{n} of {total}",
-      "zones": {
-        "problem": "The problem",
-        "people": "The people",
-        "opportunity": "The opportunity",
-        "readiness": "Readiness"
-      },
-      "why": "Why?",
-      "tiers": [
-        "Public",
-        "Internal",
-        "Confidential",
-        "Restricted"
-      ],
-      "categories": [
-        {
-          "name": "Process Redesign",
-          "cat": "pr",
-          "art": "redesign"
-        },
-        {
-          "name": "AI Agents & Copilots",
-          "cat": "agent",
-          "art": "agent"
-        },
-        {
-          "name": "Workflow Automation",
-          "cat": "auto",
-          "art": "automation"
-        },
-        {
-          "name": "Business Intelligence",
-          "cat": "bi",
-          "art": "bi"
-        },
-        {
-          "name": "Document AI / OCR",
-          "cat": "doc",
-          "art": "docai"
-        }
-      ],
-      "laterSr": "Empty.",
-      "rows": [
-        {
-          "id": "process",
-          "label": "Process",
-          "store": "ownProcess",
-          "when": "Fills in: The card"
-        },
-        {
-          "id": "pain",
-          "label": "Pain",
-          "store": "ownPain",
-          "when": "Fills in: Before you start"
-        },
-        {
-          "id": "painOwner",
-          "label": "Pain Owner",
-          "store": "ownPainOwner",
-          "when": "Fills in: Who hurts?"
-        },
-        {
-          "id": "root",
-          "label": "Root Cause",
-          "store": "ownRoot",
-          "when": "Fills in: Who hurts?"
-        },
-        {
-          "id": "opportunity",
-          "label": "Opportunity",
-          "store": "ownOpportunity",
-          "when": "Fills in: The card"
-        },
-        {
-          "id": "category",
-          "label": "Solution Category",
-          "store": "ownCategory",
-          "when": "Fills in: The use-case library"
-        },
-        {
-          "id": "tools",
-          "label": "Tools",
-          "store": "ownTools",
-          "when": "Fills in: The use-case library"
-        },
-        {
-          "id": "sensitivity",
-          "label": "Data Sensitivity",
-          "store": "ownSensitivity",
-          "when": "Fills in: Can it ship?"
-        },
-        {
-          "id": "effort",
-          "label": "Effort / Value",
-          "store": "ownEffort",
-          "when": "Fills in: The card"
-        },
-        {
-          "id": "owner",
-          "label": "Owner / Sponsor",
-          "store": "ownSponsor",
-          "when": "Fills in: Who hurts?"
-        }
-      ],
-      "later": "Later in the lesson",
-      "save": "save",
-      "sections": [
-        {
-          "id": "problem",
-          "title": "The problem",
-          "art": "problem",
-          "rows": [
-            "process",
-            "pain",
-            "root"
-          ]
-        },
-        {
-          "id": "people",
-          "title": "The people",
-          "art": "people",
-          "rows": [
-            "painOwner",
-            "owner"
-          ]
-        },
-        {
-          "id": "opportunity",
-          "title": "The opportunity",
-          "art": "opportunity",
-          "rows": [
-            "opportunity",
-            "category",
-            "tools"
-          ]
-        },
-        {
-          "id": "readiness",
-          "title": "Readiness",
-          "art": "readiness",
-          "rows": [
-            "sensitivity",
-            "effort"
-          ]
-        }
-      ],
-      "ground": {
-        "kind": "dots"
-      },
-      "photo": false,
-      "tracking": [],
       "sources": [
         "L3 deck slide 17 (the Opportunity Card format, its fields in order)",
         "L3 deck slide 4 (\"Every pain becomes a card\")",
-        "Noy, 23 Nov 2026: the growing card"
+        "Noy, 23 Nov 2026: the growing card",
+        "L2 deck slide 16 (your top ten pains)"
       ],
-      "hint": "This is the format from the deck. Each chapter fills more of it."
+      "hint": "This is the format from the deck. Each chapter fills more of it.",
+      "tracking": [],
+      "template": "tenCards",
+      "instruction": "Every pain becomes a card. No exceptions.",
+      "list": {
+        "title": "Your top ten pains",
+        "others": "Lines 2 to 10 are the other nine pains in your notes from Lesson 2."
+      },
+      "button": "Turn each pain into a card",
+      "cardTitle": "Opportunity Card",
+      "cardId": "OP-01",
+      "painLabel": "Your pain",
+      "parts": [
+        {
+          "art": "problem",
+          "title": "The problem"
+        },
+        {
+          "art": "people",
+          "title": "The people"
+        },
+        {
+          "art": "opportunity",
+          "title": "The opportunity"
+        },
+        {
+          "art": "readiness",
+          "title": "Readiness"
+        }
+      ],
+      "stack": "Cards 2 to 10 wait in the workbook.",
+      "line": "Your pain is already on card 1. Each chapter fills the next fields.",
+      "fallback": "The pain you chose before you started",
+      "ground": {
+        "kind": "darkblur"
+      },
+      "photo": {
+        "src": "assets/img/ch2-cards.jpg",
+        "position": "60% 50%",
+        "temp": true,
+        "alt": "",
+        "prompt": "assets/img/prompts/ch2-cards.txt"
+      }
     },
     {
       "id": "C1",

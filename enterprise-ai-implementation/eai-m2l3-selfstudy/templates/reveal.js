@@ -3,10 +3,10 @@
 // dark ground. Each part is a row: its label, then its line. "Next part" sits where the next row will open; after the
 // last one the key line shows and Next unlocks. Not tracked.
 // Content: label (the key pill), parts [{ label, text }], button (a ui.buttons key), keyLine.
-import { h, reducedMotion } from '../src/util.js?v=db863ef1';
-import { glyph } from '../src/icons.js?v=db863ef1';
-import { art } from './art.js?v=db863ef1';
-import { layout } from '../src/templates/stage.js?v=db863ef1';
+import { h, reducedMotion } from '../src/util.js?v=34b6caae';
+import { glyph } from '../src/icons.js?v=34b6caae';
+import { art } from './art.js?v=34b6caae';
+import { layout } from '../src/templates/stage.js?v=34b6caae';
 
 export const reveal = {
   scene: () => 'focus',

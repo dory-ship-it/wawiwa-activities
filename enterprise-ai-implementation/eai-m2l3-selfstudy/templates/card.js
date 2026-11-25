@@ -12,9 +12,9 @@
 // the store (one neutral fill-in each) and unlocks Next.
 // Content: eyebrow, line, cardTitle, cardId, client, meter, zones, why, rows [{ id, label, store, when }], tiers,
 // categories [{ name, cat, art }], fill [...], save, feedback { saved, empty }, laterSr.
-import { h, fmt } from '../src/util.js?v=db863ef1';
-import { layout, focusHead } from '../src/templates/stage.js?v=db863ef1';
-import { art } from './art.js?v=db863ef1';
+import { h, fmt } from '../src/util.js?v=34b6caae';
+import { layout, focusHead } from '../src/templates/stage.js?v=34b6caae';
+import { art } from './art.js?v=34b6caae';
 
 const NS = 'http://www.w3.org/2000/svg';
 function ring(done, total) {
