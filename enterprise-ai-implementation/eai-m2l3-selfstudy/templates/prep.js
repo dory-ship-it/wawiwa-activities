@@ -8,11 +8,11 @@
 // Tracking: one neutral fill-in (the pain, trimmed), kept under screen.field.store for later screens and the coach.
 // Content: people { title, items: [{ initials, name, role }], link: { label, href } }, have [{ icon, label, from }],
 // field { label, store, trackingId, maxLength, placeholder }, save (a ui.buttons key), feedback { saved, empty }.
-import { h } from '../src/util.js?v=34b6caae';
-import { glyph, icon } from '../src/icons.js?v=34b6caae';
-import { art } from './art.js?v=34b6caae';
-import { layout, focusHead } from '../src/templates/stage.js?v=34b6caae';
-import { field } from '../src/templates/input.js?v=34b6caae';
+import { h } from '../src/util.js?v=c6cdc63e';
+import { glyph, icon } from '../src/icons.js?v=c6cdc63e';
+import { art } from './art.js?v=c6cdc63e';
+import { layout, focusHead } from '../src/templates/stage.js?v=c6cdc63e';
+import { field } from '../src/templates/input.js?v=c6cdc63e';
 
 export const prep = {
   scene: () => 'focus',
@@ -25,16 +25,12 @@ export const prep = {
         h('h2', { id: 'm-prep-people-h' }, screen.people.title),
         screen.people.link ? h('a', { class: 'm-prep-link', href: screen.people.link.href, target: '_blank', rel: 'noopener' },
           h('span', {}, screen.people.link.label), icon('external-link', { size: 16 })) : null),
-      // design pass 2 (24 Nov 2026): the people you met, as the NorthRiver building in cross-section: a roof with the
-      // company's name, then one floor per person and department, windows drawn on each floor (a real organization,
-      // not a list). Read only, as before.
-      h('div', { class: 'm-bldg' },
-        screen.people.building ? h('span', { class: 'm-bldg-roof' }, h('b', {}, screen.people.building)) : null,
-        h('ul', { class: 'm-people m-bldg-floors' }, screen.people.items.map((p) => h('li', { class: 'm-bldg-floor' },
-          h('span', { class: 'm-initials', 'aria-hidden': 'true' }, p.initials),
-          h('span', { class: 'm-person' }, h('b', {}, p.name), h('span', {}, p.role)),
-          h('i', { class: 'm-bldg-windows', 'aria-hidden': 'true' })))),
-        h('span', { class: 'm-bldg-ground', 'aria-hidden': 'true' })));
+      // round 3 (25 Nov 2026, Noy: the building read as unrelated): the people you met as a phone's contacts list, a
+      // coloured initials circle, the name and the role on each row, so it reads at once as "people you were in
+      // contact with". Read only.
+      h('ul', { class: 'm-contacts' }, screen.people.items.map((p, i) => h('li', { class: 'm-contact', dataset: { tone: String(i % 5) } },
+        h('span', { class: 'm-avatar', 'aria-hidden': 'true' }, p.initials),
+        h('span', { class: 'm-person' }, h('b', {}, p.name), h('span', {}, p.role))))));
 
     // the field's help line (Noy, 23 Nov 2026): this pain goes with the learner through the lesson
     const helpId = 'm-prep-help';

@@ -7,10 +7,11 @@
 // The motion is the idea itself (a pain becomes a card), once; reduced motion and a revisit show the end state.
 // Content: list { title, mine, others }, button, cardTitle, cardId, painLabel, parts [{ art, title }], stack, line,
 // fallback (when the learner wrote no pain).
-import { h, reducedMotion } from '../src/util.js?v=34b6caae';
-import { icon } from '../src/icons.js?v=34b6caae';
-import { layout } from '../src/templates/stage.js?v=34b6caae';
-import { art } from './art.js?v=34b6caae';
+import { h, reducedMotion } from '../src/util.js?v=c6cdc63e';
+import { icon } from '../src/icons.js?v=c6cdc63e';
+import { layout } from '../src/templates/stage.js?v=c6cdc63e';
+import { art } from './art.js?v=c6cdc63e';
+import { cardDoc } from './card.js?v=c6cdc63e';
 
 // a custom property set through the CSSOM (the page's CSP allows no style attribute)
 const prop = (el, name, value) => { el.style.setProperty(name, value); return el; };
@@ -36,14 +37,10 @@ export const tenCards = {
     const fan = h('div', { class: 'm-tc-fan', 'aria-hidden': 'true' },
       Array.from({ length: 10 }, (_, i) => prop(h('span', { class: 'm-tc-mini' }, h('i'), h('i')), '--i', String(i))));
 
-    // beat 2: card 1, open
-    const card = h('article', { class: 'm-tc-card', 'aria-label': screen.cardTitle + ' ' + screen.cardId, hidden: true },
-      h('header', { class: 'm-tc-band' }, art('card', 22), h('b', {}, screen.cardTitle), h('span', { class: 'm-tc-id' }, screen.cardId)),
-      h('div', { class: 'm-tc-pain' }, h('span', { class: 'm-tc-label' }, screen.painLabel), h('p', {}, pain)),
-      // round 2 (Noy: dashed boxes read as "answer me"): each part is a quiet preview, its name and two faint lines,
-      // like the blank lines on the small cards; nothing in it looks clickable or fillable
-      h('ul', { class: 'm-tc-parts' }, screen.parts.map((p) => h('li', {}, h('span', { class: 'm-tc-part-h' }, p.title),
-        h('i', { 'aria-hidden': 'true' }), h('i', { 'aria-hidden': 'true' })))));
+    // beat 2: card 1, open. Round 3 (25 Nov 2026): the same card the learner meets again later (templates/card.js), with
+    // no current step: the pain ticked, the next steps numbered, and quiet lines where they will be written
+    const card = h('div', { class: 'm-tc-card', hidden: true },
+      cardDoc(ctx, { body: [h('div', { class: 'm-oc-quiet', 'aria-hidden': 'true' }, h('i'), h('i'), h('i'))] }));
     const stackNote = h('p', { class: 'm-tc-stack-note', hidden: true }, screen.stack);
     const line = h('p', { class: 'm-flow-key m-tc-line', hidden: true }, screen.line);
 
@@ -55,7 +52,7 @@ export const tenCards = {
     const open = (focus) => {
       stage.dataset.beat = '3';
       card.hidden = false; stackNote.hidden = false; line.hidden = false;
-      live.textContent = screen.cardTitle + ' ' + screen.cardId + '. ' + screen.painLabel + ': ' + pain + '. ' + screen.line;
+      live.textContent = ctx.content.card.title + '. ' + ctx.content.card.painLabel + ': ' + pain + '. ' + screen.line;
       ctx.complete();
       ctx.unlockNext({ focus });
     };

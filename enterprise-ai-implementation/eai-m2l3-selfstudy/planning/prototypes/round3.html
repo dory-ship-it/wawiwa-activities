@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>M2 L3 round 3 prototypes</title>
+<link rel="stylesheet" href="../../src/fonts.css">
+<style>
+/* Round 3 prototypes (25 Nov 2026, for Noy's approval; not part of the lesson): the Opportunity Card that slides out of
+   a folder (refs: DNB stepper form, 3D folder, files flying out) and G1 as voice messages to two people (ref: team cards). */
+:root { --ink: #16293A; --navy: #255777; --deep: #0F2A3D; --teal: #3E868F; --teal-ink: #2F6A72; --tq: #5AB3AA; --aqua: #9FD3CD;
+  --paper: #FFFFFF; --stone: #F7F5F1; --line: #E2DED6; --muted: #55626C; --mint: #E1EFEE; --font: "Assistant", Arial, sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #2b3640; font-family: var(--font); color: var(--ink); display: grid; gap: 24px; padding: 24px; justify-content: center; }
+.stage { width: 1280px; height: 720px; position: relative; overflow: hidden; border-radius: 6px; }
+.label { color: #fff; font: 700 18px/1.2 var(--font); margin: 0; }
+button.replay { position: absolute; right: 16px; bottom: 16px; z-index: 9; font: 700 15px var(--font); padding: 8px 14px; border-radius: 8px; border: 0; background: var(--tq); color: var(--deep); cursor: pointer; }
+
+/* ---------- 1. the card ---------- */
+#card-stage { background: linear-gradient(rgba(10, 26, 38, .72), rgba(10, 26, 38, .72)), url(../../assets/img/ch2-laptop-paperwork.jpg) center / cover; perspective: 1600px; }
+.bar { position: absolute; inset: 0 0 auto; height: 80px; background: rgba(12, 28, 40, .84); }
+.hint { position: absolute; left: 64px; top: 104px; font: 700 17px var(--font); color: var(--aqua); }
+/* the folder: a back panel, a tab, the papers, a front panel, all CSS */
+.folder { position: absolute; left: 70px; top: 270px; width: 230px; height: 200px; transform-style: preserve-3d; transform: rotateY(18deg) rotateX(4deg); }
+.folder .back { position: absolute; inset: 22px 0 0; border-radius: 14px; background: linear-gradient(160deg, #2f6f97, #173f5c); }
+.folder .tab { position: absolute; left: 0; top: 0; width: 96px; height: 36px; border-radius: 12px 12px 0 0; background: #2a6a91; }
+.folder .papers i { position: absolute; left: 18px; right: 18px; height: 150px; border-radius: 8px; }
+.folder .papers i:nth-child(1) { top: 30px; background: #cfe6e4; transform: rotate(-3deg); }
+.folder .papers i:nth-child(2) { top: 38px; background: #9fd3cd; transform: rotate(2deg); }
+.folder .papers i:nth-child(3) { top: 46px; background: #fff; }
+.folder .front { position: absolute; inset: 70px -6px 0; border-radius: 14px; background: linear-gradient(170deg, rgba(64, 140, 180, .96), rgba(24, 66, 98, .98)); box-shadow: 0 18px 30px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .35); }
+/* the card itself: a stepper pane and a paper pane, a file tab on top, a real shadow, a slight tilt at rest */
+.ocard { position: absolute; left: 50%; top: 150px; width: 860px; height: 470px; margin-left: -430px; transform-style: preserve-3d; transform: rotateX(3deg); }
+.ocard .ftab { position: absolute; left: 28px; top: -30px; height: 34px; padding: 0 18px; display: flex; align-items: center; gap: 8px; border-radius: 12px 12px 0 0; background: var(--deep); color: #fff; font: 800 15px var(--font); }
+.ocard .ftab b { width: 10px; height: 10px; border-radius: 50%; background: var(--tq); }
+.ocard .body { position: absolute; inset: 0; display: grid; grid-template-columns: 270px 1fr; border-radius: 4px 18px 18px 18px; overflow: hidden;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, .45), 0 0 0 1px rgba(90, 179, 170, .5), 0 0 40px rgba(90, 179, 170, .25); }
+.steps { background: linear-gradient(165deg, #1d4a6b 0%, #163a54 55%, #12465a 100%); padding: 30px 26px; color: #fff; display: grid; align-content: start; gap: 0; }
+.steps h3 { margin: 0 0 26px; font: 800 22px/1.15 var(--font); }
+.step { display: grid; grid-template-columns: 36px 1fr; column-gap: 14px; align-items: center; min-height: 64px; position: relative; font: 700 17px var(--font); color: rgba(255, 255, 255, .55); }
+.step::before { content: ""; position: absolute; left: 17px; top: 46px; height: 30px; width: 2px; background: rgba(255, 255, 255, .2); }
+.step:last-child::before { display: none; }
+.step i { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 800 15px var(--font); font-style: normal; background: rgba(255, 255, 255, .1); border: 1.5px solid rgba(255, 255, 255, .3); }
+.step.done { color: #fff; } .step.done i { background: var(--tq); border-color: var(--tq); color: var(--deep); } .step.done::before { background: var(--tq); }
+.step.now { color: #fff; } .step.now i { background: #fff; color: var(--deep); border-color: #fff; box-shadow: 0 0 0 5px rgba(90, 179, 170, .45); }
+.paper { background: var(--paper); padding: 30px 36px; display: grid; align-content: start; gap: 18px; }
+.mine { padding: 16px 20px; border-radius: 12px; background: var(--mint); }
+.mine span { display: block; font: 700 14px var(--font); color: var(--teal-ink); margin-bottom: 4px; }
+.mine p { margin: 0; font: 800 24px/1.2 var(--font); color: var(--ink); }
+.done-line { font: 400 16px/1.4 var(--font); color: var(--muted); }
+.done-line b { color: var(--ink); }
+.now-h { margin: 6px 0 0; font: 800 22px var(--font); }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field span { display: block; font: 700 14px var(--font); color: var(--teal-ink); margin-bottom: 6px; }
+.field div { height: 48px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--stone); padding: 12px 14px; font: 400 17px var(--font); color: #8a949b; }
+.save { justify-self: end; padding: 12px 26px; border-radius: 10px; background: var(--deep); color: #fff; font: 800 16px var(--font); }
+/* the motion: the card rises out of the folder, slides to the centre and turns to face the learner; the folder leaves */
+.play .ocard { animation: card-in 1.25s cubic-bezier(.2, .75, .2, 1) both; }
+.play .folder { animation: folder-out 1.6s ease both; }
+@keyframes card-in {
+  0% { transform: translate(-560px, 140px) scale(.24) rotateY(28deg) rotateZ(-6deg); opacity: 0; }
+  18% { opacity: 1; transform: translate(-560px, 40px) scale(.3) rotateY(28deg) rotateZ(-6deg); }
+  100% { transform: translate(0, 0) scale(1) rotateX(3deg); opacity: 1; } }
+@keyframes folder-out { 0%, 35% { opacity: 1; transform: rotateY(18deg) rotateX(4deg); } 100% { opacity: 0; transform: translateX(-120px) rotateY(18deg) rotateX(4deg); } }
+.rest .folder { opacity: 0; }
+
+/* ---------- 2. G1 ---------- */
+#g1-stage { background: var(--stone); }
+#g1-stage .bar { background: rgba(12, 28, 40, .84); }
+.g1-h { position: absolute; left: 64px; top: 112px; margin: 0; font: 800 34px/1.1 var(--font); color: var(--ink); }
+.people { position: absolute; left: 0; right: 0; top: 200px; display: flex; justify-content: center; gap: 360px; }
+.person { position: relative; width: 250px; height: 250px; }
+.person .tilt { position: absolute; inset: 18px 10px -6px 14px; border-radius: 22px; transform: rotate(-7deg); }
+.person.pain .tilt { background: linear-gradient(160deg, #5AB3AA, #3E868F); }
+.person.sponsor .tilt { background: linear-gradient(160deg, #3a78a3, #255777); transform: rotate(7deg); }
+.person .face { position: absolute; left: 50%; top: -34px; margin-left: -46px; width: 92px; height: 92px; border-radius: 50%; border: 5px solid #fff; display: grid; place-items: center; font: 800 28px var(--font); color: #fff; z-index: 2; box-shadow: 0 8px 20px rgba(0, 0, 0, .15); }
+.person.pain .face { background: #2F6A72; } .person.sponsor .face { background: #255777; }
+.person .front { position: absolute; inset: 0; border-radius: 22px; background: #fff; box-shadow: 0 24px 40px rgba(15, 42, 61, .16); display: grid; justify-items: center; align-content: end; padding: 0 20px 26px; text-align: center; }
+.person h4 { margin: 0; font: 800 22px var(--font); }
+.person .role { font: 400 15px var(--font); color: var(--muted); margin: 2px 0 12px; }
+.person .tag { font: 800 15px var(--font); padding: 8px 14px; border-radius: 999px; }
+.person.pain .tag { background: var(--mint); color: var(--teal-ink); } .person.sponsor .tag { background: #e3edf5; color: var(--navy); }
+.person .got { position: absolute; right: -14px; top: 20px; width: 34px; height: 34px; border-radius: 50%; background: var(--teal); color: #fff; display: grid; place-items: center; font: 800 15px var(--font); z-index: 3; }
+.voice { position: absolute; left: 50%; top: 250px; width: 330px; margin-left: -165px; padding: 16px 18px; border-radius: 18px 18px 18px 4px; background: #fff; box-shadow: 0 18px 36px rgba(15, 42, 61, .18); display: grid; gap: 10px; }
+.voice .who { font: 700 14px var(--font); color: var(--muted); }
+.voice .row { display: flex; align-items: center; gap: 12px; }
+.voice .play { width: 44px; height: 44px; border-radius: 50%; background: var(--deep); flex: none; position: relative; }
+.voice .play::after { content: ""; position: absolute; left: 17px; top: 13px; border: 9px solid transparent; border-left: 14px solid #fff; border-right: 0; }
+.voice .wave { flex: 1; height: 30px; background: repeating-linear-gradient(90deg, var(--tq) 0 3px, transparent 3px 7px); -webkit-mask: linear-gradient(90deg, #000 40%, rgba(0,0,0,.35) 40%); mask: linear-gradient(90deg, #000 40%, rgba(0,0,0,.35) 40%); border-radius: 4px; clip-path: polygon(0 40%, 6% 20%, 12% 55%, 18% 10%, 24% 60%, 30% 25%, 36% 70%, 42% 15%, 48% 50%, 54% 30%, 60% 65%, 66% 20%, 72% 55%, 78% 35%, 84% 60%, 90% 25%, 100% 45%, 100% 100%, 0 100%); }
+.voice .quote { margin: 0; font: 600 17px/1.35 var(--font); color: var(--ink); }
+.voice .q2 { font: 400 14px var(--font); color: var(--muted); }
+.arrows { position: absolute; left: 50%; top: 452px; margin-left: -165px; width: 330px; text-align: center; font: 700 15px var(--font); color: var(--muted); }
+.dots { position: absolute; left: 50%; top: 490px; transform: translateX(-50%); display: flex; gap: 8px; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; background: #cfc8bb; } .dots i.d { background: var(--teal); } .dots i.c { background: #fff; box-shadow: 0 0 0 2px var(--teal); }
+.pitch { position: absolute; left: 50%; bottom: 56px; width: 900px; margin-left: -450px; padding: 16px 22px; border-radius: 14px; background: #fff; border: 1px dashed #cfc8bb; font: 600 17px/1.5 var(--font); color: var(--muted); text-align: center; }
+.pitch b { display: inline-block; min-width: 80px; border-bottom: 2px solid var(--teal); color: var(--teal-ink); }
+</style>
+</head>
+<body>
+<p class="label">1. The Opportunity Card: out of the folder, into the centre (press Replay)</p>
+<div class="stage play" id="card-stage">
+  <div class="bar"></div>
+  <p class="hint">Back to your card</p>
+  <div class="folder" aria-hidden="true"><div class="tab"></div><div class="back"></div><div class="papers"><i></i><i></i><i></i></div><div class="front"></div></div>
+  <div class="ocard">
+    <div class="ftab"><b></b>Your Opportunity Card</div>
+    <div class="body">
+      <div class="steps">
+        <h3>Build it step by step</h3>
+        <div class="step done"><i>&#10003;</i>The problem</div>
+        <div class="step now"><i>2</i>The people</div>
+        <div class="step"><i>3</i>The opportunity</div>
+        <div class="step"><i>4</i>Readiness</div>
+      </div>
+      <div class="paper">
+        <div class="mine"><span>Your pain</span><p>Month-end close takes 14 days</p></div>
+        <p class="done-line"><b>Root cause:</b> ownership of the close was never set</p>
+        <p class="now-h">Who hurts, and who pays for the fix?</p>
+        <div class="fields"><div class="field"><span>Pain Owner</span><div>The person who feels it</div></div><div class="field"><span>Owner / Sponsor</span><div>The person who funds it</div></div></div>
+        <span class="save">Save to your card</span>
+      </div>
+    </div>
+  </div>
+  <button class="replay" type="button" onclick="const s=document.getElementById('card-stage'); s.classList.remove('play'); void s.offsetWidth; s.classList.add('play');">Replay</button>
+</div>
+
+<p class="label">2. G1: voice messages to two people, then the pitch sentence</p>
+<div class="stage" id="g1-stage">
+  <div class="bar"></div>
+  <h2 class="g1-h">Listen. Who is speaking: the one who feels it, or the one who funds it?</h2>
+  <div class="people">
+    <div class="person pain"><div class="tilt"></div><div class="face">H</div><div class="got">2</div><div class="front"><h4>Henrik</h4><p class="role">Finance analyst</p><span class="tag">Feels the pain</span></div></div>
+    <div class="person sponsor"><div class="tilt"></div><div class="face">SC</div><div class="got">1</div><div class="front"><h4>Sarah Chen</h4><p class="role">CFO</p><span class="tag">Funds the fix</span></div></div>
+  </div>
+  <div class="voice"><span class="who">Voice message 4 of 6</span><div class="row"><span class="play"></span><span class="wave"></span></div><p class="quote">"Every close I'm here till midnight, fixing the same three numbers by hand."</p></div>
+  <p class="arrows">Tap the person who said it</p>
+  <div class="dots"><i class="d"></i><i class="d"></i><i class="d"></i><i class="c"></i><i></i><i></i></div>
+  <div class="pitch">Here is the pain. Here is who feels it: <b>&nbsp;</b>. Here is what we propose. Here is who carries it: <b>&nbsp;</b>.</div>
+</div>
+<p class="label">3. G1, option B: the meeting room; the speaker's bubble lights up (press Next voice)</p>
+<style>
+#meet { background: url(g1-meeting.jpg) center / cover; }
+#meet::after { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(247, 245, 241, .35), rgba(247, 245, 241, 0) 45%); pointer-events: none; }
+#meet .bar { z-index: 3; }
+.m-h { position: absolute; left: 64px; top: 104px; z-index: 3; margin: 0; font: 800 30px/1.15 var(--font); color: var(--ink); max-width: 760px; }
+.tag-p { position: absolute; z-index: 3; transform: translate(-50%, -100%); padding: 5px 11px; border-radius: 999px; background: rgba(255, 255, 255, .82); font: 700 13px var(--font); color: var(--muted); white-space: nowrap; transition: opacity .3s; }
+.bubble { position: absolute; z-index: 4; width: 360px; padding: 14px 16px 16px; border-radius: 18px; background: #fff; display: grid; gap: 8px;
+  box-shadow: 0 20px 40px rgba(15, 42, 61, .22), 0 0 0 2px var(--tq), 0 0 30px rgba(90, 179, 170, .45); transition: left .45s cubic-bezier(.2, .75, .2, 1), top .45s cubic-bezier(.2, .75, .2, 1); }
+.bubble::after { content: ""; position: absolute; left: var(--tail, 40px); bottom: -14px; border: 14px solid transparent; border-top-color: #fff; border-bottom: 0; }
+.bubble .who { font: 800 15px var(--font); color: var(--ink); }
+.bubble .who span { font-weight: 400; color: var(--muted); }
+.bubble .row { display: flex; align-items: center; gap: 12px; }
+.bubble .play { width: 40px; height: 40px; border-radius: 50%; background: var(--deep); flex: none; position: relative; }
+.bubble .play::after { content: ""; position: absolute; left: 15px; top: 12px; border: 8px solid transparent; border-left: 13px solid #fff; border-right: 0; }
+.bubble .wave { flex: 1; height: 26px; background: repeating-linear-gradient(90deg, var(--tq) 0 3px, transparent 3px 7px); clip-path: polygon(0 40%, 6% 20%, 12% 55%, 18% 10%, 24% 60%, 30% 25%, 36% 70%, 42% 15%, 48% 50%, 54% 30%, 60% 65%, 66% 20%, 72% 55%, 78% 35%, 84% 60%, 90% 25%, 100% 45%, 100% 100%, 0 100%); }
+.bubble p { margin: 0; font: 600 17px/1.35 var(--font); color: var(--ink); }
+.speaker-ring { position: absolute; z-index: 2; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; box-shadow: 0 0 0 3px var(--tq), 0 0 40px rgba(90, 179, 170, .6); transition: left .45s, top .45s; }
+.roles { position: absolute; z-index: 4; left: 50%; bottom: 40px; transform: translateX(-50%); display: flex; gap: 18px; padding: 12px; border-radius: 20px; background: rgba(255, 255, 255, .9); box-shadow: 0 18px 36px rgba(15, 42, 61, .18); }
+.roles span { display: flex; align-items: center; gap: 10px; min-width: 230px; justify-content: center; padding: 14px 22px; border-radius: 14px; font: 800 18px var(--font); }
+.roles .r1 { background: var(--mint); color: var(--teal-ink); } .roles .r2 { background: #e3edf5; color: var(--navy); }
+.roles small { display: block; font: 400 14px var(--font); color: var(--muted); }
+.mdots { position: absolute; z-index: 4; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 8px; }
+.mdots i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.6); } .mdots i.d { background: var(--teal); } .mdots i.c { background: #fff; box-shadow: 0 0 0 2px var(--teal); }
+</style>
+<div class="stage" id="meet">
+  <div class="bar"></div>
+  <h2 class="m-h">Listen to each one. Does this person feel the pain, or fund the fix?</h2>
+  <span class="tag-p" style="left:221px;top:280px">Sarah Chen · CFO</span>
+  <span class="tag-p" style="left:352px;top:322px">Diana · Leasing</span>
+  <span class="tag-p" id="t-henrik" style="left:590px;top:322px">Henrik · Finance</span>
+  <span class="tag-p" style="left:850px;top:292px">Marcus · Operations</span>
+  <span class="tag-p" style="left:1020px;top:236px">Lin · IT</span>
+  <div class="speaker-ring" id="ring"></div>
+  <div class="bubble" id="bub"><span class="who" id="who"></span><div class="row"><span class="play"></span><span class="wave"></span></div><p id="line"></p></div>
+  <div class="roles"><span class="r1">Feels the pain</span><span class="r2">Funds the fix</span></div>
+  <div class="mdots" id="mdots"></div>
+  <button class="replay" type="button" id="nextv">Next voice</button>
+</div>
+<script>
+// three example speakers (lines written for the prototype, in the spirit of the persona cards)
+const V = [
+  { who: 'Henrik', role: 'finance analyst', line: '"Every close I\'m here till midnight, fixing the same three numbers by hand."', head: [590, 372], bub: [470, 132], tail: 110 },
+  { who: 'Sarah Chen', role: 'CFO', line: '"Get us to a five-day close and I\'ll take it to the board."', head: [221, 334], bub: [64, 100], tail: 150 },
+  { who: 'Marcus', role: 'property operations', line: '"When the heating fails, it\'s my phone that rings at night."', head: [850, 342], bub: [700, 102], tail: 140 },
+];
+let k = 0;
+const show = () => { const v = V[k % V.length];
+  document.getElementById('who').innerHTML = v.who + ' <span>· ' + v.role + '</span>';
+  document.getElementById('line').textContent = v.line;
+  const b = document.getElementById('bub'); b.style.left = v.bub[0] + 'px'; b.style.top = v.bub[1] + 'px'; b.style.setProperty('--tail', v.tail + 'px');
+  const r = document.getElementById('ring'); r.style.left = v.head[0] + 'px'; r.style.top = v.head[1] + 'px';
+  document.getElementById('mdots').innerHTML = Array.from({ length: 6 }, (_, i) => `<i class="${i < k % 6 ? 'd' : i === k % 6 ? 'c' : ''}"></i>`).join('');
+  document.querySelector('.m-h').style.opacity = v.bub[1] < 200 && v.bub[0] < 760 ? '0' : '1'; };
+document.getElementById('nextv').onclick = () => { k++; show(); };
+show();
+</script>
+<script>setTimeout(() => document.getElementById('card-stage').classList.add('rest'), 1700);</script>
+</body>
+</html>

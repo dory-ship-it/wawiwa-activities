@@ -15,8 +15,8 @@
       "O2",
       "O3",
       "B1",
-      "B2",
       "B3",
+      "C0",
       "C1",
       "C2",
       "D1",
@@ -50,7 +50,7 @@
       "hint": "Hint",
       "continue": "Continue",
       "open": "Open the workbook",
-      "play": "Play video",
+      "play": "Play",
       "replay": "Replay segment",
       "close": "Close",
       "resume": "Resume",
@@ -86,7 +86,9 @@
       "nextSituation": "Next situation",
       "add": "Add an AI agent to the Northeast",
       "part": "Next part",
-      "openLibrary": "Open the library"
+      "openLibrary": "Open the library",
+      "nextIdea": "Next idea",
+      "addAuto": "Add payment automation"
     },
     "attempts": {
       "label": "Attempt {i} of {n}"
@@ -160,8 +162,9 @@
         "fishbone": "Next, locked until every cause is on its bone",
         "pair": "Next, locked until you answer every situation",
         "tiles": "Next, locked until you open all four categories",
-        "survive": "Next, locked until you check your answer",
-        "tenCards": "Next, locked until you turn your pains into cards"
+        "tenCards": "Next, locked until you turn your pains into cards",
+        "gate": "Next, locked until you see all three ideas",
+        "meeting": "Next, locked until you answer every voice and the sentence"
       },
       "need": {
         "single": "Choose an answer, then Check.",
@@ -199,8 +202,9 @@
         "fishbone": "Place every cause on its bone.",
         "pair": "Answer every situation to continue.",
         "tiles": "Open all four categories to continue.",
-        "survive": "Pick one recommendation, then Check.",
-        "tenCards": "Turn your pains into cards to continue."
+        "tenCards": "Turn your pains into cards to continue.",
+        "gate": "Open the next idea to continue.",
+        "meeting": "Answer every voice, then the sentence."
       },
       "needCards": "Place {n} more cards.",
       "needCards1": "Place the last card.",
@@ -438,7 +442,6 @@
       "minutes": 5,
       "screens": [
         "B1",
-        "B2",
         "B3"
       ],
       "inSlice": true,
@@ -454,6 +457,7 @@
       },
       "minutes": 5,
       "screens": [
+        "C0",
         "C1",
         "C2"
       ],
@@ -666,7 +670,6 @@
       "instruction": "Open your notes from Lessons 1 and 2",
       "people": {
         "title": "Who you met",
-        "building": "NorthRiver Holdings",
         "link": {
           "label": "Persona cards",
           "href": "https://dory-ship-it.github.io/wawiwa-activities/enterprise-ai-implementation/m2l1-pair-interview/"
@@ -767,10 +770,10 @@
         "kind": "idea",
         "tip": "Watch for what lets one answer survive the question."
       },
-      "instruction": "Watch: six weeks into the engagement",
+      "instruction": "Watch: what lets one answer survive the steering committee?",
       "title": "Six weeks later",
       "guidingLabel": "Watch for:",
-      "guidingQuestion": "What lets one answer survive the question?",
+      "guidingQuestion": "",
       "photo": {
         "src": "assets/img/ch2-laptop-paperwork.jpg",
         "position": "60% 50%",
@@ -796,7 +799,42 @@
         "temp": true,
         "captionPlaces": []
       },
-      "stops": [],
+      "stops": [
+        {
+          "id": "stop1",
+          "cueId": "stop1",
+          "t": 27,
+          "question": "Pick the recommendation that survives Sarah's question",
+          "options": [
+            {
+              "id": "a",
+              "label": "A leads agent. It saves the team 30 percent of its week.",
+              "correct": false,
+              "feedback": "A strong number, but no pain, person or interview behind it. Nobody can trace it."
+            },
+            {
+              "id": "b",
+              "label": "Contract metadata extraction. Behind it: Robert's pain, his words, the interview date.",
+              "correct": true,
+              "feedback": "Every link is there: the pain, who feels it, his words, the meeting. It survives the room."
+            },
+            {
+              "id": "c",
+              "label": "A tenant chatbot. Every modern company has one.",
+              "correct": false,
+              "feedback": "No pain stands behind it at all. That is a guess, not a recommendation."
+            }
+          ],
+          "tracking": {
+            "id": "M2L3_B1_1",
+            "type": "choice",
+            "correctResponse": "b",
+            "scored": true,
+            "bloom": "Evaluate",
+            "result": "graded"
+          }
+        }
+      ],
       "advance": "after-video-end",
       "production": {
         "status": "placeholder: script for review; the film is made at the media stage (a separate session), NorthRiver cast, voice Laura (EAI settings)",
@@ -843,102 +881,13 @@
       "tracking": [],
       "sources": [
         "L3 deck slides 2, 3, 4 and their notes (the traceable chain; \"why this and not that\"; the bookend line)",
-        "Booklet persona D (Robert Pak: two auto-renewals, one cost $40k)"
+        "Booklet persona D (Robert Pak: two auto-renewals, one cost $40k)",
+        "L3 deck slide 3 and notes (every recommendation traces to a pain, every pain to a quote, every quote to a meeting)",
+        "Booklet persona D (Robert Pak)",
+        "Round 3 (25 Nov 2026): B2 moved into the film as its stop, before the card answers the question"
       ],
       "hint": "Watch for what lets one answer survive the question.",
       "showTitle": false
-    },
-    {
-      "id": "B2",
-      "chapter": "ch2",
-      "step": {
-        "verb": "Decide",
-        "icon": "decide"
-      },
-      "minutes": 2,
-      "coach": {
-        "kind": "practice",
-        "tip": "Look for what stands behind each one: a pain, a person, their words, a date."
-      },
-      "tracking": [
-        {
-          "id": "M2L3_B2_1",
-          "type": "choice",
-          "correctResponse": "b",
-          "scored": true,
-          "bloom": "Evaluate",
-          "result": "graded"
-        }
-      ],
-      "sources": [
-        "L3 deck slide 3 and notes (every recommendation traces to a pain, every pain to a quote, every quote to a meeting)",
-        "Booklet persona D (Robert Pak)"
-      ],
-      "hint": "Look for what stands behind each one: a pain, a person, their words, a date.",
-      "template": "survive",
-      "variant": "single",
-      "attempts": 1,
-      "scene": "stage",
-      "look": "wide",
-      "layout": "stage-decision",
-      "onePanel": true,
-      "instruction": "Pick the recommendation that survives Sarah's question",
-      "stage": {
-        "top": {
-          "kind": "line",
-          "text": "At the steering committee, Sarah Chen, CFO, asks: why this, and not that?",
-          "highlight": "why this, and not that?"
-        },
-        "bottom": {
-          "kind": "options",
-          "arrange": "stack"
-        }
-      },
-      "options": [
-        {
-          "id": "a",
-          "label": "A leads agent. It saves the team 30 percent of its week.",
-          "correct": false,
-          "feedback": "A strong number, but no pain, person or interview behind it. Nobody can trace it."
-        },
-        {
-          "id": "b",
-          "label": "Contract metadata extraction. Behind it: Robert's pain, his words, the interview date.",
-          "correct": true,
-          "feedback": "Every link is there: the pain, who feels it, his words, the meeting. It survives the room."
-        },
-        {
-          "id": "c",
-          "label": "A tenant chatbot. Every modern company has one.",
-          "correct": false,
-          "feedback": "No pain stands behind it at all. That is a guess, not a recommendation."
-        }
-      ],
-      "chain": {
-        "label": "Behind it:",
-        "links": [
-          "Pain",
-          "Person",
-          "Words",
-          "Meeting"
-        ],
-        "trace": "Robert Pak, General Counsel. Two contracts renewed by themselves; one cost $40k."
-      },
-      "advance": "after-correct",
-      "photo": {
-        "src": "assets/img/ch2-laptop-paperwork.jpg",
-        "position": "60% 50%",
-        "temp": false,
-        "alt": "",
-        "source": "Implementor course photo: EAI M1 L4 v3 assets/img/l4/v2/ch2-w1-laptop-paperwork.jpg (its film screen V1 ground), reused as is"
-      },
-      "ground": {
-        "kind": "darkblur",
-        "tone": "soft"
-      },
-      "styles": [
-        "chain-fit"
-      ]
     },
     {
       "id": "B3",
@@ -967,29 +916,8 @@
         "others": "Lines 2 to 10 are the other nine pains in your notes from Lesson 2."
       },
       "button": "Turn each pain into a card",
-      "cardTitle": "Opportunity Card",
-      "cardId": "OP-01",
-      "painLabel": "Your pain",
-      "parts": [
-        {
-          "art": "problem",
-          "title": "The problem"
-        },
-        {
-          "art": "people",
-          "title": "The people"
-        },
-        {
-          "art": "opportunity",
-          "title": "The opportunity"
-        },
-        {
-          "art": "readiness",
-          "title": "Readiness"
-        }
-      ],
-      "stack": "Cards 2 to 10 wait in the workbook.",
-      "line": "Your pain is already on card 1. Each chapter fills the next fields.",
+      "stack": "",
+      "line": "This is your card. You build it step by step through the lesson.",
       "fallback": "The pain you chose before you started",
       "ground": {
         "kind": "darkblur"
@@ -1001,6 +929,48 @@
         "alt": "",
         "prompt": "assets/img/prompts/ch2-cards.txt"
       }
+    },
+    {
+      "id": "C0",
+      "chapter": "ch3",
+      "template": "gate",
+      "step": {
+        "verb": "Ask first",
+        "icon": "overview"
+      },
+      "minutes": 2,
+      "coach": {
+        "kind": "idea",
+        "tip": "Before any tool, ask: would a change in how the work runs solve it?"
+      },
+      "label": "Process before tool",
+      "instruction": "Before you choose a tool, ask one question",
+      "question": "Does a change in how the work runs solve this, with no tool at all?",
+      "ideas": [
+        {
+          "draw": "crooked",
+          "text": "A tool on a broken process makes the flaw run faster."
+        },
+        {
+          "draw": "front",
+          "text": "If yes, that is the recommendation: Process Redesign, before any tool."
+        },
+        {
+          "draw": "fork",
+          "text": "In doubt? Show the steering committee both paths."
+        }
+      ],
+      "button": "nextIdea",
+      "ground": {
+        "kind": "darkblur"
+      },
+      "photo": false,
+      "tracking": [],
+      "sources": [
+        "L3 deck slide 5 (the question; paving the cow path; Process Redesign as the fifth category, at the front; when in doubt, light the trade-off)",
+        "Noy, 25 Nov 2026 (round 3: context first, the two missing ideas)"
+      ],
+      "hint": "Before any tool, ask: would a change in how the work runs solve it?"
     },
     {
       "id": "C1",
@@ -1016,48 +986,49 @@
         "tip": "Same CRM in both regions. What is really different?"
       },
       "label": "Process before tool",
-      "instruction": "Same CRM, two regions",
+      "instruction": "Add the automation. Watch what speeds up.",
       "lanes": [
         {
-          "name": "Pacific Heights",
+          "name": "Vendor payments at NorthRiver",
           "steps": [
-            "Leads from 6 portals",
-            "CRM used well"
+            "Invoice in",
+            "Matched to a list with 6 errors",
+            "Paid"
           ],
-          "result": "Reply in 14 minutes",
-          "tone": "good"
-        },
-        {
-          "name": "Northeast",
-          "steps": [
-            "Leads from 6 portals",
-            "CRM not used"
-          ],
-          "result": "Reply in 11 hours",
+          "result": "A wrong payment, now and then",
           "tone": "bad"
         }
       ],
       "add": {
-        "button": "add",
-        "step": "AI agent",
-        "result": "Faster replies, still no CRM"
+        "button": "addAuto",
+        "step": "Auto-pay",
+        "art": "automation",
+        "result": "Wrong payments, every day"
       },
-      "keyLine": "Automating a flawed workflow just makes the flaw run faster.",
+      "keyLine": "Automating a flawed workflow makes the flaw run faster. Fix the vendor list first.",
       "ground": {
         "kind": "darkblur"
       },
       "photo": false,
       "tracking": [],
       "sources": [
-        "Booklet persona C (Diana Vasquez: 6 portals plus walk-ins; CRM used well in Pacific Heights, not at all in the Northeast; 14 minutes vs 11 hours)",
-        "L3 deck slide 5 (\"Automating a flawed workflow just makes the flaw run faster\"; paving the cow path)"
+        "Booklet persona A (Sarah Chen: the audit flagged six vendor-master inconsistencies; paper checks to 30% of vendors)",
+        "L3 deck slide 5 (\"Automating a flawed workflow just makes the flaw run faster\")",
+        "Round 3: the duplicate or wrong payment is an illustration of the flaw, not a fact of the case"
       ],
-      "hint": "Same CRM in both regions. What is really different?"
+      "hint": "Watch the red payments once the automation is in.",
+      "stream": {
+        "dots": 9,
+        "bad": [
+          2,
+          6
+        ]
+      }
     },
     {
       "id": "C2",
       "chapter": "ch3",
-      "template": "decision",
+      "template": "pairPlus",
       "variant": "pair",
       "attempts": 1,
       "step": {
@@ -1069,7 +1040,7 @@
         "kind": "practice",
         "tip": "Ask: does a process change solve it without any tool? In doubt, show both paths."
       },
-      "instruction": "Decide what comes first: a process change or a tool",
+      "instruction": "Decide what comes first: a process change, a tool, or both paths",
       "situations": [
         {
           "id": "r1",
@@ -1087,8 +1058,15 @@
               "label": "A tool first",
               "correct": false,
               "feedback": "Pacific Heights has the same CRM. A tool on top would speed up a broken flow."
+            },
+            {
+              "id": "c",
+              "label": "Show both paths",
+              "correct": false,
+              "feedback": "No need: the same CRM works next door. Fix the Northeast process."
             }
-          ]
+          ],
+          "doneLabel": "Northeast leads"
         },
         {
           "id": "r2",
@@ -1106,27 +1084,41 @@
               "label": "A tool first",
               "correct": true,
               "feedback": "Right: metadata extraction with Document AI. The card says what it must not do."
+            },
+            {
+              "id": "c",
+              "label": "Show both paths",
+              "correct": false,
+              "feedback": "No process change reads 800 contracts. The tool is the clear answer."
             }
-          ]
+          ],
+          "doneLabel": "Robert's contracts"
         },
         {
           "id": "r3",
-          "text": "Henrik drafts variance commentary with ChatGPT, saving 3 hours per close.",
+          "text": "Off-boarding is manual and leaks access across 8+ systems.",
           "trackingId": "M2L3_C2_3",
           "options": [
             {
               "id": "a",
               "label": "A process change first",
               "correct": false,
-              "feedback": "The work already flows. The card formalizes the tool he uses, with shared prompts and rules."
+              "feedback": "A checklist helps now, but with no SSO across 8+ systems it stays slow and leaky."
             },
             {
               "id": "b",
               "label": "A tool first",
+              "correct": false,
+              "feedback": "SSO and automated off-boarding fix it, but cost months and a budget decision."
+            },
+            {
+              "id": "c",
+              "label": "Show both paths",
               "correct": true,
-              "feedback": "A quick win: it already works. Formalize it for the team, with governance."
+              "feedback": "Both are real: a checklist now, SSO later. Let the committee weigh them."
             }
-          ]
+          ],
+          "doneLabel": "Lin's off-boarding"
         }
       ],
       "ground": {
@@ -1153,7 +1145,7 @@
         {
           "id": "M2L3_C2_3",
           "type": "choice",
-          "correctResponse": "b",
+          "correctResponse": "c",
           "scored": true,
           "bloom": "Apply",
           "result": "graded"
@@ -1162,18 +1154,18 @@
       "sources": [
         "L3 deck slide 5 (the question; \"when in doubt, light the trade-off\")",
         "Booklet personas A, C, D",
-        "Knowledge check key Q11 (Henrik: a quick win, formalize) and Q12 (Robert: Document AI, metadata only)"
+        "Knowledge check key Q11 (Henrik: a quick win, formalize) and Q12 (Robert: Document AI, metadata only)",
+        "Booklet persona E (Lin Zhao: no SSO across 8+ systems; manual off-boarding leaks access)"
       ],
       "styles": [
-        "process-or-tool"
+        "process-or-tool",
+        "three-way"
       ],
       "hint": "Ask: does a process change solve it without any tool? In doubt, show both paths."
     },
     {
       "id": "D1",
       "chapter": "ch4",
-      "template": "explorer",
-      "variant": "tiles",
       "step": {
         "verb": "Explore",
         "icon": "explore"
@@ -1183,46 +1175,68 @@
         "kind": "idea",
         "tip": "One line each: what kind of work fits the category."
       },
-      "instruction": "Open the four solution categories",
-      "tiles": [
-        {
-          "n": 1,
-          "icon": "write",
-          "title": "AI Agents & Copilots",
-          "back": "Multi-step, conversational work. Example: an HR onboarding chatbot."
-        },
-        {
-          "n": 2,
-          "icon": "sort",
-          "title": "Workflow Automation",
-          "back": "Deterministic flows: n8n, Zapier, Make. Example: lead routing."
-        },
-        {
-          "n": 3,
-          "icon": "overview",
-          "title": "Business Intelligence",
-          "back": "Dashboards and reports: Power BI, Tableau. Example: monthly KPIs."
-        },
-        {
-          "n": 4,
-          "icon": "label",
-          "title": "Document AI / OCR",
-          "back": "Structured data out of documents. Example: invoice OCR."
-        }
-      ],
       "ground": {
         "kind": "dots"
       },
-      "photo": false,
-      "tracking": [],
       "sources": [
         "L3 deck slide 6 (kept from the slide: the four cards, their lines and tools)",
         "Knowledge check key Q1 (one example per category)"
       ],
-      "styles": [
-        "categories"
-      ],
-      "hint": "One line each: what kind of work fits the category."
+      "hint": "One line each: what kind of work fits the category.",
+      "template": "categories",
+      "presentation": true,
+      "instruction": "One category for each pain",
+      "photo": false,
+      "tracking": [],
+      "cards": [
+        {
+          "id": "pr",
+          "name": "Process Redesign",
+          "tag": "Before any tool",
+          "line": "Change how the work runs.",
+          "photo": {
+            "src": "assets/img/d1-process-redesign.jpg",
+            "position": "60% 50%"
+          },
+          "first": true
+        },
+        {
+          "id": "agent",
+          "name": "Agents & Copilots",
+          "line": "Conversations and multi-step work.",
+          "photo": {
+            "src": "assets/img/d1-agents.jpg",
+            "position": "45% 50%"
+          }
+        },
+        {
+          "id": "auto",
+          "name": "Workflow Automation",
+          "line": "The same steps, every time.",
+          "photo": {
+            "src": "assets/img/d1-automation.jpg",
+            "position": "50% 50%"
+          }
+        },
+        {
+          "id": "bi",
+          "name": "Business Intelligence",
+          "line": "Dashboards and reports.",
+          "photo": {
+            "src": "assets/img/d1-bi.jpg",
+            "position": "60% 40%"
+          }
+        },
+        {
+          "id": "doc",
+          "name": "Document AI / OCR",
+          "line": "Data out of documents.",
+          "photo": {
+            "src": "assets/img/d1-document-ai.jpg",
+            "position": "60% 50%"
+          }
+        }
+      ]
     },
     {
       "id": "D2",
@@ -1364,67 +1378,47 @@
         "icon": "explore"
       },
       "minutes": 2,
-      "presentation": true,
       "coach": {
         "kind": "idea",
         "tip": "Keep the library open in its own tab. You will use it on the next screens."
       },
+      "presentation": true,
       "eyebrow": "The use-case library",
-      "instruction": "Start from a pattern, not a blank page",
-      "text": "Thirty proven cases by department. Grow your own library in every engagement.",
-      "steps": [
-        {
-          "n": 1,
-          "text": "Filter by department",
-          "at": [
-            14.5,
-            50
-          ]
-        },
-        {
-          "n": 2,
-          "text": "Filter by solution category",
-          "at": [
-            17.5,
-            59.5
-          ]
-        },
-        {
-          "n": 3,
-          "text": "Download the list for NotebookLM",
-          "at": [
-            27.5,
-            35.5
-          ]
-        }
-      ],
-      "image": {
-        "src": "assets/img/library-guide.png",
-        "alt": "The use-case library page: filters at the top, the cases in lists by department.",
-        "prompt": null,
-        "temp": false,
-        "source": "Screenshot of this lesson's library page (library/index.html), taken 23 Nov 2026"
-      },
-      "open": {
-        "label": "Open the library",
-        "href": "library/"
-      },
       "ground": {
         "kind": "dots"
       },
       "photo": false,
       "tracking": [],
+      "hint": "Keep the library open in its own tab. You will use it on the next screens.",
+      "instruction": "Start from a pattern, not a blank page",
+      "video": {
+        "src": "assets/video/e1-library-demo.mp4",
+        "poster": "assets/video/e1-library-demo-poster.jpg",
+        "label": "How to search it",
+        "alt": "A silent demo of the library page: filters by department and category, the cases, the spotlights and the download."
+      },
+      "open": {
+        "label": "Open the library",
+        "href": "library/"
+      },
       "sources": [
         "L3 deck slides 7, 9, 11 (the library) and the notes of slide 7 (\"the curated library\"; the live lookup)",
         "L3 deck slide 20 and notes (a library you grow; NotebookLM)",
-        "Noy, 23 Nov 2026 (a guide on our own screenshot)"
+        "Noy, 23 Nov 2026 (a guide on our own screenshot)",
+        "Round 3: a silent screen recording of library/ (planning/prototypes/_record-library.mjs)"
       ],
-      "hint": "Keep the library open in its own tab. You will use it on the next screens."
+      "lead": "A library of 30 AI cases that already worked, sorted by department. For each of your pains, find the closest case and adapt it.",
+      "steps": [
+        "Filter by department",
+        "Filter by solution category",
+        "Open the closest case and adapt it"
+      ],
+      "delay": 2600
     },
     {
       "id": "E2",
       "chapter": "ch5",
-      "template": "decision",
+      "template": "pairPlus",
       "variant": "pair",
       "attempts": 1,
       "step": {
@@ -1436,7 +1430,7 @@
         "kind": "practice",
         "tip": "Use the library filters: the department first, then the category."
       },
-      "instruction": "Find the closest case in the library",
+      "instruction": "Open the library and find the closest case for each pain",
       "styles": [
         "library-match",
         "wrap-answers"
@@ -1459,7 +1453,8 @@
               "correct": false,
               "feedback": "Close, but it fills checklists. Robert needs renewal dates and terms out of contracts."
             }
-          ]
+          ],
+          "doneLabel": "Robert"
         },
         {
           "id": "r2",
@@ -1478,7 +1473,8 @@
               "correct": true,
               "feedback": "An exact match in Finance. He already drafts it with ChatGPT."
             }
-          ]
+          ],
+          "doneLabel": "Henrik"
         },
         {
           "id": "r3",
@@ -1497,7 +1493,8 @@
               "correct": true,
               "feedback": "The closest match. Adapt it to listing descriptions in the brand voice."
             }
-          ]
+          ],
+          "doneLabel": "Diana"
         }
       ],
       "ground": {
@@ -1550,7 +1547,7 @@
         "kind": "idea",
         "tip": "This is the depth a good card reaches. The other spotlights are on the library page."
       },
-      "label": "Sales spotlight",
+      "label": "Worked example",
       "instruction": "See how deep one card goes",
       "parts": [
         {
@@ -1575,6 +1572,26 @@
           "timeline": {
             "months": 12,
             "mark": 8
+          },
+          "ask": {
+            "question": "Guess first: when does it pay back?",
+            "options": [
+              {
+                "id": "a",
+                "label": "Month 3"
+              },
+              {
+                "id": "b",
+                "label": "Month 8",
+                "correct": true
+              },
+              {
+                "id": "c",
+                "label": "Month 12"
+              }
+            ],
+            "right": "Right: about $10K in, $16K a year back.",
+            "wrong": "It pays back in month 8: about $10K in, $16K a year back."
           }
         },
         {
@@ -1594,7 +1611,8 @@
         "L3 deck slide 8 (kept from the slide: problem, solution, stack, ROI math, watch-out) and its notes",
         "Trainer guide L3 block C (the spotlights show the depth a single card should reach)"
       ],
-      "hint": "This is the depth a good card reaches. The other spotlights are on the library page."
+      "hint": "This is the depth a good card reaches. The other spotlights are on the library page.",
+      "context": "One library case, in depth: the sales spotlight."
     },
     {
       "id": "E4",
@@ -1610,159 +1628,7 @@
         "kind": "own",
         "tip": "Choose the dominant category. Then find its closest case in the library and name the tools."
       },
-      "eyebrow": "Your card",
-      "instruction": "Add a category and tools to your card",
-      "line": "Use the library for the closest case and its tools.",
-      "cardTitle": "Opportunity Card",
-      "cardId": "OP-01",
-      "client": "NorthRiver Holdings",
-      "cardState": "Draft",
-      "meter": "{n} of {total}",
-      "zones": {
-        "problem": "The problem",
-        "people": "The people",
-        "opportunity": "The opportunity",
-        "readiness": "Readiness"
-      },
-      "why": "Why?",
-      "tiers": [
-        "Public",
-        "Internal",
-        "Confidential",
-        "Restricted"
-      ],
-      "categories": [
-        {
-          "name": "Process Redesign",
-          "cat": "pr",
-          "art": "redesign"
-        },
-        {
-          "name": "AI Agents & Copilots",
-          "cat": "agent",
-          "art": "agent"
-        },
-        {
-          "name": "Workflow Automation",
-          "cat": "auto",
-          "art": "automation"
-        },
-        {
-          "name": "Business Intelligence",
-          "cat": "bi",
-          "art": "bi"
-        },
-        {
-          "name": "Document AI / OCR",
-          "cat": "doc",
-          "art": "docai"
-        }
-      ],
-      "laterSr": "Empty.",
-      "rows": [
-        {
-          "id": "process",
-          "label": "Process",
-          "store": "ownProcess",
-          "when": "Fills in: The card"
-        },
-        {
-          "id": "pain",
-          "label": "Pain",
-          "store": "ownPain",
-          "when": "Fills in: Before you start"
-        },
-        {
-          "id": "painOwner",
-          "label": "Pain Owner",
-          "store": "ownPainOwner",
-          "when": "Fills in: Who hurts?"
-        },
-        {
-          "id": "root",
-          "label": "Root Cause",
-          "store": "ownRoot",
-          "when": "Fills in: Who hurts?"
-        },
-        {
-          "id": "opportunity",
-          "label": "Opportunity",
-          "store": "ownOpportunity",
-          "when": "Fills in: The card"
-        },
-        {
-          "id": "category",
-          "label": "Solution Category",
-          "store": "ownCategory",
-          "when": "Fills in: The use-case library"
-        },
-        {
-          "id": "tools",
-          "label": "Tools",
-          "store": "ownTools",
-          "when": "Fills in: The use-case library"
-        },
-        {
-          "id": "sensitivity",
-          "label": "Data Sensitivity",
-          "store": "ownSensitivity",
-          "when": "Fills in: Can it ship?"
-        },
-        {
-          "id": "effort",
-          "label": "Effort / Value",
-          "store": "ownEffort",
-          "when": "Fills in: The card"
-        },
-        {
-          "id": "owner",
-          "label": "Owner / Sponsor",
-          "store": "ownSponsor",
-          "when": "Fills in: Who hurts?"
-        }
-      ],
-      "later": "Later in the lesson",
       "save": "save",
-      "sections": [
-        {
-          "id": "problem",
-          "title": "The problem",
-          "art": "problem",
-          "rows": [
-            "process",
-            "pain",
-            "root"
-          ]
-        },
-        {
-          "id": "people",
-          "title": "The people",
-          "art": "people",
-          "rows": [
-            "painOwner",
-            "owner"
-          ]
-        },
-        {
-          "id": "opportunity",
-          "title": "The opportunity",
-          "art": "opportunity",
-          "rows": [
-            "opportunity",
-            "category",
-            "tools"
-          ]
-        },
-        {
-          "id": "readiness",
-          "title": "Readiness",
-          "art": "readiness",
-          "rows": [
-            "sensitivity",
-            "effort"
-          ]
-        }
-      ],
       "fill": [
         {
           "row": "category",
@@ -1782,7 +1648,8 @@
           "kind": "text",
           "maxLength": 140,
           "placeholder": "From the closest library case",
-          "trackingId": "M2L3_E4_2"
+          "trackingId": "M2L3_E4_2",
+          "library": true
         }
       ],
       "feedback": {
@@ -1790,9 +1657,15 @@
         "empty": "Fill both lit rows first."
       },
       "ground": {
-        "kind": "dots"
+        "kind": "darkblur"
       },
-      "photo": false,
+      "photo": {
+        "src": "assets/img/ch2-cards.jpg",
+        "position": "60% 50%",
+        "temp": true,
+        "alt": "",
+        "prompt": "assets/img/prompts/ch2-cards.txt"
+      },
       "tracking": [
         {
           "id": "M2L3_E4_1",
@@ -1815,7 +1688,10 @@
         "L3 deck slides 6 and 17 (Solution Category, Tools)",
         "L3 deck slide 20 (find the closest case, adapt it)"
       ],
-      "hint": "Choose the dominant category. Then find its closest case in the library and name the tools."
+      "hint": "Choose the dominant category. Then find its closest case in the library and name the tools.",
+      "cardStep": "category",
+      "intro": "Now build the card for your own pain.",
+      "instruction": "Choose a category and the tools for your pain"
     },
     {
       "id": "F0",
@@ -1874,7 +1750,7 @@
       "chapter": "ch6",
       "template": "whys",
       "step": {
-        "verb": "Dig down",
+        "verb": "5-Whys",
         "icon": "stairs"
       },
       "minutes": 2,
@@ -1921,7 +1797,7 @@
       "template": "whys",
       "variant": "practice",
       "step": {
-        "verb": "Your turn",
+        "verb": "Try it",
         "icon": "decide"
       },
       "minutes": 3,
@@ -2026,7 +1902,8 @@
         "L3 deck slide 12 speaker notes (the invoice 5-Whys, word for word for the right answers)",
         "L3 deck slide 17 (OP-014: OCR vendor not re-evaluated since 2020)"
       ],
-      "hint": "At each level pick the answer that explains the level above it."
+      "hint": "At each level pick the answer that explains the level above it.",
+      "context": "Practice on an example from class: Finance's slow invoices."
     },
     {
       "id": "F3",
@@ -2034,7 +1911,7 @@
       "template": "fishbone",
       "variant": "learn",
       "step": {
-        "verb": "Six bones",
+        "verb": "Fishbone",
         "icon": "learn"
       },
       "minutes": 2,
@@ -2095,7 +1972,7 @@
       "chapter": "ch6",
       "template": "video",
       "step": {
-        "verb": "Watch",
+        "verb": "The Boston case",
         "icon": "watch"
       },
       "minutes": 2,
@@ -2103,10 +1980,10 @@
         "kind": "idea",
         "tip": "Listen for every kind of cause in the story."
       },
-      "instruction": "Watch: one cold building in Boston",
+      "instruction": "Watch: listen for every kind of cause in Marcus's story",
       "title": "One cold building in Boston",
       "guidingLabel": "Watch for",
-      "guidingQuestion": "Every cause you can hear, of every kind.",
+      "guidingQuestion": "",
       "photo": false,
       "ground": {
         "kind": "darkblur"
@@ -2148,7 +2025,7 @@
             "n": 3,
             "time": "0:17",
             "part": "the lists",
-            "narration": "Each region books from its own list. The vendor master is split across three systems and an Excel file."
+            "narration": "Each region books from its own list. The vendor list lives in three systems that don't talk to each other, plus an Excel file, and the same vendor is listed differently in each."
           },
           {
             "n": 4,
@@ -2170,7 +2047,8 @@
         "Booklet persona A (the audit: six vendor-master inconsistencies)",
         "Knowledge check key Q13"
       ],
-      "hint": "Listen for every kind of cause in the story."
+      "hint": "Listen for every kind of cause in the story.",
+      "showTitle": false
     },
     {
       "id": "F5",
@@ -2237,20 +2115,20 @@
         },
         {
           "n": 3,
-          "text": "Vendor list in 3 systems and Excel",
+          "text": "Three systems that don't talk to each other",
           "bone": "tools",
           "feedback": {
-            "correct": "Tools: the systems do not connect.",
-            "wrong": "It is about the systems holding the list: the Tools bone."
+            "correct": "Tools: the systems do not connect, so no one sees every booking.",
+            "wrong": "It is about systems that do not connect: the Tools bone."
           }
         },
         {
           "n": 4,
-          "text": "Six vendor-master inconsistencies in the audit",
+          "text": "The same vendor, listed differently: six errors in the audit",
           "bone": "data",
           "feedback": {
-            "correct": "Data: the records do not agree.",
-            "wrong": "It is about the records themselves: the Data bone."
+            "correct": "Data: one vendor, several versions of the truth.",
+            "wrong": "It is about what the list says, not the systems: the Data bone."
           }
         }
       ],
@@ -2357,9 +2235,8 @@
     {
       "id": "G1",
       "chapter": "ch7",
-      "template": "sortDeck",
       "step": {
-        "verb": "Sort",
+        "verb": "Listen",
         "icon": "sort"
       },
       "minutes": 3,
@@ -2367,87 +2244,205 @@
         "kind": "practice",
         "tip": "One feels it when it hits. The other funds the fix."
       },
-      "instruction": "Sort: Pain Owner or Sponsor?",
-      "band": "On the deck's model card: Henrik feels every late close. Sarah Chen funds the fix.",
-      "ground": {
-        "kind": "dots"
+      "sources": [
+        "L3 deck slide 13 (the Pain Owner: who feels it; the cleanest signal of value; the change-management ally)",
+        "L3 deck slide 17 (OP-014: Henrik feels every late close; sponsor Sarah Chen)",
+        "Knowledge check key Q19 (Pain Owner vs Owner / Sponsor)",
+        "Round 3 (25 Nov 2026): the meeting room; the six lines are written for the lesson in the spirit of the persona cards (not quotes from the materials)"
+      ],
+      "template": "meeting",
+      "instruction": "Listen to each one: feels the pain, or funds the fix?",
+      "photo": {
+        "src": "assets/img/g1-meeting.jpg",
+        "position": "50% 50%",
+        "temp": true,
+        "alt": "",
+        "prompt": "assets/img/prompts/g1-meeting.txt"
       },
-      "photo": false,
-      "layout": "sort-deck",
-      "columns": [
+      "ground": {
+        "kind": "full"
+      },
+      "people": [
         {
-          "id": "pain",
-          "label": "Pain Owner",
-          "icon": "person"
+          "id": "sarah",
+          "name": "Sarah Chen",
+          "role": "CFO",
+          "tag": [
+            221,
+            280
+          ],
+          "head": [
+            221,
+            334
+          ]
         },
         {
-          "id": "sponsor",
-          "label": "Owner / Sponsor",
-          "icon": "coin"
+          "id": "diana",
+          "name": "Diana",
+          "role": "Leasing",
+          "tag": [
+            352,
+            322
+          ],
+          "head": [
+            350,
+            367
+          ]
+        },
+        {
+          "id": "henrik",
+          "name": "Henrik",
+          "role": "Finance",
+          "tag": [
+            590,
+            322
+          ],
+          "head": [
+            590,
+            372
+          ]
+        },
+        {
+          "id": "marcus",
+          "name": "Marcus",
+          "role": "Operations",
+          "tag": [
+            850,
+            292
+          ],
+          "head": [
+            850,
+            342
+          ]
+        },
+        {
+          "id": "lin",
+          "name": "Lin",
+          "role": "IT",
+          "tag": [
+            1020,
+            236
+          ],
+          "head": [
+            1017,
+            292
+          ]
         }
       ],
-      "cards": [
+      "lines": [
         {
-          "n": 1,
-          "text": "Feels the pain when it hits",
-          "column": "pain",
-          "tag": "The person who actually feels it.",
+          "who": "henrik",
+          "text": "Every close, I'm here till midnight fixing the same three numbers by hand.",
+          "role": "pain",
+          "bubble": [
+            400,
+            132
+          ],
+          "tail": 190,
           "feedback": {
-            "correct": "The person who actually feels it.",
-            "wrong": "Feeling the pain is the Pain Owner. The sponsor funds the fix."
+            "correct": "He lives with it every month: the Pain Owner.",
+            "wrong": "He does not fund anything: he lives with it every close. Pain Owner."
           }
         },
         {
-          "n": 2,
-          "text": "Funds the work and backs it politically",
-          "column": "sponsor",
-          "tag": "The executive behind the fix.",
+          "who": "sarah",
+          "text": "Get us to a five-day close and I'll take it to the board.",
+          "role": "funds",
+          "bubble": [
+            64,
+            100
+          ],
+          "tail": 150,
           "feedback": {
-            "correct": "The executive behind the fix.",
-            "wrong": "Funding and backing is the sponsor's role, not the Pain Owner's."
+            "correct": "She backs it and funds it: the sponsor.",
+            "wrong": "She does not feel it daily: she offers to fund and back it."
           }
         },
         {
-          "n": 3,
-          "text": "Puts a number on the pain, often unasked",
-          "column": "pain",
-          "tag": "The cleanest signal of value.",
+          "who": "marcus",
+          "text": "When the heating fails, it's my phone that rings at night.",
+          "role": "pain",
+          "bubble": [
+            560,
+            110
+          ],
+          "tail": 290,
           "feedback": {
-            "correct": "The cleanest signal of value.",
-            "wrong": "The one who hurts quantifies it: the Pain Owner."
+            "correct": "The calls land on him: he feels it.",
+            "wrong": "Nothing here funds a fix: the pain lands on him."
           }
         },
         {
-          "n": 4,
-          "text": "Makes the change stick in the field",
-          "column": "pain",
-          "tag": "Your change-management ally.",
+          "who": "lin",
+          "text": "Close the access gaps and I'll put it in next year's IT budget.",
+          "role": "funds",
+          "bubble": [
+            700,
+            90
+          ],
+          "tail": 320,
           "feedback": {
-            "correct": "Your change-management ally.",
-            "wrong": "Fixes stick when the one who hurts is enrolled: the Pain Owner."
+            "correct": "She puts budget behind it: a sponsor.",
+            "wrong": "She offers budget: that is the sponsor's role."
           }
         },
         {
-          "n": 5,
-          "text": "Henrik, finance analyst",
-          "column": "pain",
-          "tag": "He feels every late close.",
+          "who": "diana",
+          "text": "Our Northeast leads wait eleven hours. I see every one we lose.",
+          "role": "pain",
+          "bubble": [
+            300,
+            120
+          ],
+          "tail": 50,
           "feedback": {
-            "correct": "He feels every late close.",
-            "wrong": "Henrik feels the late close himself: the Pain Owner."
+            "correct": "She sees every lost lead: the Pain Owner.",
+            "wrong": "She offers no budget: she feels each lost lead."
           }
         },
         {
-          "n": 6,
-          "text": "Sarah Chen, CFO",
-          "column": "sponsor",
-          "tag": "She sponsors the fix.",
+          "who": "sarah",
+          "text": "The audit found six errors in our vendor list. That lands on my desk.",
+          "role": "pain",
+          "bubble": [
+            64,
+            100
+          ],
+          "tail": 150,
           "feedback": {
-            "correct": "She sponsors the fix.",
-            "wrong": "On the model card Sarah Chen is the sponsor."
+            "correct": "Here Sarah feels it: the role follows what is said.",
+            "wrong": "She funds nothing here: the problem lands on her desk."
           }
         }
       ],
+      "roles": {
+        "pain": "Feels the pain",
+        "funds": "Funds the fix"
+      },
+      "nextVoice": "Next voice",
+      "pitchButton": "To the executive sentence",
+      "pitch": {
+        "instruction": "Complete the sentence for the executive deck",
+        "before": "Here is the pain: month-end close takes 14 days. Here is who feels it:",
+        "mid": ". Here is what we propose. Here is who carries it:",
+        "after": ".",
+        "blanks": [
+          {
+            "id": "feels",
+            "answer": "henrik",
+            "label": "Who feels it"
+          },
+          {
+            "id": "carries",
+            "answer": "sarah",
+            "label": "Who carries it"
+          }
+        ],
+        "feedback": {
+          "correct": "That is the deck's line: who hurts, and who funds and carries the fix.",
+          "wrong": "Henrik feels the close every month. Sarah funds the fix and carries it."
+        }
+      },
       "tracking": [
         {
           "id": "M2L3_G1_1",
@@ -2456,17 +2451,17 @@
           "scored": true,
           "bloom": "Understand",
           "result": "graded"
+        },
+        {
+          "id": "M2L3_G1_2",
+          "type": "choice",
+          "correctResponse": "henrik,sarah",
+          "scored": false,
+          "bloom": "Apply",
+          "result": "graded"
         }
       ],
-      "sources": [
-        "L3 deck slide 13 (the Pain Owner: who feels it; the cleanest signal of value; the change-management ally)",
-        "L3 deck slide 17 (OP-014: Henrik feels every late close; sponsor Sarah Chen)",
-        "Knowledge check key Q19 (Pain Owner vs Owner / Sponsor)"
-      ],
-      "styles": [
-        "two-people"
-      ],
-      "hint": "One feels it when it hits. The other funds the fix."
+      "hint": "Listen to what each one says. Does it hurt them, or do they pay for the fix?"
     },
     {
       "id": "G2",
@@ -2482,159 +2477,7 @@
         "kind": "own",
         "tip": "A named role, never a team or TBD. In the deck, the Pain Owner sits beside the action owner."
       },
-      "eyebrow": "Your card",
-      "instruction": "Add the root cause and the people to your card",
-      "line": "Name roles, not teams. In the executive deck they appear by name.",
-      "cardTitle": "Opportunity Card",
-      "cardId": "OP-01",
-      "client": "NorthRiver Holdings",
-      "cardState": "Draft",
-      "meter": "{n} of {total}",
-      "zones": {
-        "problem": "The problem",
-        "people": "The people",
-        "opportunity": "The opportunity",
-        "readiness": "Readiness"
-      },
-      "why": "Why?",
-      "tiers": [
-        "Public",
-        "Internal",
-        "Confidential",
-        "Restricted"
-      ],
-      "categories": [
-        {
-          "name": "Process Redesign",
-          "cat": "pr",
-          "art": "redesign"
-        },
-        {
-          "name": "AI Agents & Copilots",
-          "cat": "agent",
-          "art": "agent"
-        },
-        {
-          "name": "Workflow Automation",
-          "cat": "auto",
-          "art": "automation"
-        },
-        {
-          "name": "Business Intelligence",
-          "cat": "bi",
-          "art": "bi"
-        },
-        {
-          "name": "Document AI / OCR",
-          "cat": "doc",
-          "art": "docai"
-        }
-      ],
-      "laterSr": "Empty.",
-      "rows": [
-        {
-          "id": "process",
-          "label": "Process",
-          "store": "ownProcess",
-          "when": "Fills in: The card"
-        },
-        {
-          "id": "pain",
-          "label": "Pain",
-          "store": "ownPain",
-          "when": "Fills in: Before you start"
-        },
-        {
-          "id": "painOwner",
-          "label": "Pain Owner",
-          "store": "ownPainOwner",
-          "when": "Fills in: Who hurts?"
-        },
-        {
-          "id": "root",
-          "label": "Root Cause",
-          "store": "ownRoot",
-          "when": "Fills in: Who hurts?"
-        },
-        {
-          "id": "opportunity",
-          "label": "Opportunity",
-          "store": "ownOpportunity",
-          "when": "Fills in: The card"
-        },
-        {
-          "id": "category",
-          "label": "Solution Category",
-          "store": "ownCategory",
-          "when": "Fills in: The use-case library"
-        },
-        {
-          "id": "tools",
-          "label": "Tools",
-          "store": "ownTools",
-          "when": "Fills in: The use-case library"
-        },
-        {
-          "id": "sensitivity",
-          "label": "Data Sensitivity",
-          "store": "ownSensitivity",
-          "when": "Fills in: Can it ship?"
-        },
-        {
-          "id": "effort",
-          "label": "Effort / Value",
-          "store": "ownEffort",
-          "when": "Fills in: The card"
-        },
-        {
-          "id": "owner",
-          "label": "Owner / Sponsor",
-          "store": "ownSponsor",
-          "when": "Fills in: Who hurts?"
-        }
-      ],
-      "later": "Later in the lesson",
       "save": "save",
-      "sections": [
-        {
-          "id": "problem",
-          "title": "The problem",
-          "art": "problem",
-          "rows": [
-            "process",
-            "pain",
-            "root"
-          ]
-        },
-        {
-          "id": "people",
-          "title": "The people",
-          "art": "people",
-          "rows": [
-            "painOwner",
-            "owner"
-          ]
-        },
-        {
-          "id": "opportunity",
-          "title": "The opportunity",
-          "art": "opportunity",
-          "rows": [
-            "opportunity",
-            "category",
-            "tools"
-          ]
-        },
-        {
-          "id": "readiness",
-          "title": "Readiness",
-          "art": "readiness",
-          "rows": [
-            "sensitivity",
-            "effort"
-          ]
-        }
-      ],
       "fill": [
         {
           "row": "root",
@@ -2663,9 +2506,15 @@
         "empty": "Fill the three lit rows first."
       },
       "ground": {
-        "kind": "dots"
+        "kind": "darkblur"
       },
-      "photo": false,
+      "photo": {
+        "src": "assets/img/ch2-cards.jpg",
+        "position": "60% 50%",
+        "temp": true,
+        "alt": "",
+        "prompt": "assets/img/prompts/ch2-cards.txt"
+      },
       "tracking": [
         {
           "id": "M2L3_G2_1",
@@ -2697,7 +2546,112 @@
         "L3 deck slide 13 (Pain Owner by name, beside the action owner in the executive deck)",
         "Booklet checklist (a named role, not \"Finance team\" or \"TBD\")"
       ],
-      "hint": "A named role, never a team or TBD. In the deck, the Pain Owner sits beside the action owner."
+      "hint": "A named role, never a team or TBD. In the deck, the Pain Owner sits beside the action owner.",
+      "cardStep": "people",
+      "intro": "Back to your card",
+      "instruction": "Add the root cause and the people behind your pain"
     }
-  ]
+  ],
+  "card": {
+    "title": "Your card",
+    "back": "Back to your card",
+    "painLabel": "Your pain",
+    "painFallback": "The pain you chose before you started",
+    "library": {
+      "label": "Open the library"
+    },
+    "steps": [
+      {
+        "id": "pain",
+        "label": "Your pain",
+        "rows": [
+          "pain"
+        ]
+      },
+      {
+        "id": "category",
+        "label": "Category and tools",
+        "rows": [
+          "category",
+          "tools"
+        ]
+      },
+      {
+        "id": "people",
+        "label": "Root cause and people",
+        "rows": [
+          "root",
+          "painOwner",
+          "owner"
+        ]
+      },
+      {
+        "id": "data",
+        "label": "Data sensitivity",
+        "rows": [
+          "sensitivity"
+        ]
+      },
+      {
+        "id": "opportunity",
+        "label": "The opportunity",
+        "rows": [
+          "opportunity",
+          "effort"
+        ]
+      }
+    ],
+    "rows": [
+      {
+        "id": "process",
+        "label": "Process",
+        "store": "ownProcess"
+      },
+      {
+        "id": "pain",
+        "label": "Pain",
+        "store": "ownPain"
+      },
+      {
+        "id": "painOwner",
+        "label": "Pain Owner",
+        "store": "ownPainOwner"
+      },
+      {
+        "id": "root",
+        "label": "Root Cause",
+        "store": "ownRoot"
+      },
+      {
+        "id": "opportunity",
+        "label": "Opportunity",
+        "store": "ownOpportunity"
+      },
+      {
+        "id": "category",
+        "label": "Solution Category",
+        "store": "ownCategory"
+      },
+      {
+        "id": "tools",
+        "label": "Tools",
+        "store": "ownTools"
+      },
+      {
+        "id": "sensitivity",
+        "label": "Data Sensitivity",
+        "store": "ownSensitivity"
+      },
+      {
+        "id": "effort",
+        "label": "Effort / Value",
+        "store": "ownEffort"
+      },
+      {
+        "id": "owner",
+        "label": "Owner / Sponsor",
+        "store": "ownSponsor"
+      }
+    ]
+  }
 }

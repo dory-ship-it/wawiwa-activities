@@ -21,12 +21,12 @@
 //   homeStop     (S36)  the home practice: the slide's five instructions and the link (new tab).
 //   call         (CALL) a phone rings; the learner answers; the client's recorded call plays, its lines shown as said.
 // Graded answers go out once (ctx.answer); everything else lives in the screen's flags (suspend data).
-import { h, fmt, resolveLink } from '../util.js?v=34b6caae';
-import { glyph, icon } from '../icons.js?v=34b6caae';
-import { letter } from '../tracking/index.js?v=34b6caae';
-import { layout, picture, arrowNav } from './stage.js?v=34b6caae';
-import { keyLine, boardEl, fill, headOf, floatBand, needLeft, beside } from './dm.js?v=34b6caae';
-import { SPEEDS, readRate, keepRate } from '../speeds.js?v=34b6caae';
+import { h, fmt, resolveLink } from '../util.js?v=c6cdc63e';
+import { glyph, icon } from '../icons.js?v=c6cdc63e';
+import { letter } from '../tracking/index.js?v=c6cdc63e';
+import { layout, picture, arrowNav } from './stage.js?v=c6cdc63e';
+import { keyLine, boardEl, fill, headOf, floatBand, needLeft, beside } from './dm.js?v=c6cdc63e';
+import { SPEEDS, readRate, keepRate } from '../speeds.js?v=c6cdc63e';
 
 /* ---------- shared parts ---------- */
 const SVG = 'http://www.w3.org/2000/svg';

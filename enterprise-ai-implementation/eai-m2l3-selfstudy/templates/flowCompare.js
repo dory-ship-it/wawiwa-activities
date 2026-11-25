@@ -4,10 +4,10 @@
 // second lane (a lit box); its result changes, and the key line opens under the lanes. Next after the button.
 // Motion: the tool box drops into the lane once; none with reduced motion.
 // Content: label (the key pill), lanes [{ name, steps: [text], result, tone }], add { button, step, result }, keyLine.
-import { h, reducedMotion } from '../src/util.js?v=34b6caae';
-import { glyph, icon } from '../src/icons.js?v=34b6caae';
-import { art } from './art.js?v=34b6caae';
-import { layout } from '../src/templates/stage.js?v=34b6caae';
+import { h, reducedMotion } from '../src/util.js?v=c6cdc63e';
+import { glyph, icon } from '../src/icons.js?v=c6cdc63e';
+import { art } from './art.js?v=c6cdc63e';
+import { layout } from '../src/templates/stage.js?v=c6cdc63e';
 
 export const flowCompare = {
   scene: () => 'focus',
@@ -20,7 +20,15 @@ export const flowCompare = {
     const lanes = screen.lanes.map((l) => {
       const result = h('b', { class: 'm-flow-result', dataset: { tone: l.tone || 'good' } }, l.result);
       const steps = h('ol', { class: 'm-flow-steps' }, l.steps.map((s) => station(s)), h('li', { class: 'm-flow-end' }, art('clock', 26), result));
-      return { l, steps, result, el: h('div', { class: 'm-flow-lane', dataset: { tone: l.tone || 'good' } }, h('span', { class: 'm-flow-name' }, art('pin', 24), h('span', {}, l.name)), steps) };
+      // round 3 (25 Nov 2026, C1's new example): the payments as dots along the lane, a few of them wrong (red). Still at
+      // first; once the tool is added they run, faster, three times, and the wrong ones go out with them: the flaw
+      // running faster, shown rather than said
+      const stream = screen.stream ? h('div', { class: 'm-flow-stream', 'aria-hidden': 'true' }, Array.from({ length: screen.stream.dots }, (_, k) => {
+        const d = h('i', { dataset: { bad: String(screen.stream.bad.includes(k)) } });
+        d.style.setProperty('--k', String(k));
+        return d;
+      })) : null;
+      return { l, steps, result, el: h('div', { class: 'm-flow-lane', dataset: { tone: l.tone || 'good' } }, h('span', { class: 'm-flow-name' }, art('pin', 24), h('span', {}, l.name)), steps, stream) };
     });
     const key = h('p', { class: 'm-flow-key', hidden: true }, screen.keyLine);
     const btn = h('button', { class: 'm-why-btn m-flow-btn', type: 'button', dataset: { action: 'add' } }, icon('spark', { size: 22 }), h('span', {}, ui.buttons[screen.add.button] || screen.add.button));
@@ -33,7 +41,7 @@ export const flowCompare = {
     const target = lanes[lanes.length - 1];
     const add = (focus) => {
       if (btn.hidden) return;
-      const box = h('li', { class: 'm-flow-step m-flow-tool' }, h('i', { class: 'm-flow-dot', 'aria-hidden': 'true' }, art('agent', 22)), h('span', {}, screen.add.step));
+      const box = h('li', { class: 'm-flow-step m-flow-tool' }, h('i', { class: 'm-flow-dot', 'aria-hidden': 'true' }, art(screen.add.art || 'agent', 22)), h('span', {}, screen.add.step));
       const end = target.steps.querySelector('.m-flow-end');
       end.before(box);
       if (!reducedMotion() && focus) box.classList.add('m-enter');

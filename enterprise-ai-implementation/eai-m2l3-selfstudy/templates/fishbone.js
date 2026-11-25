@@ -7,9 +7,10 @@
 //          says why. One graded matching interaction: each card's first bone ("1.people,2.process").
 // Content: head, bones [{ id, name, hint }] (top three first), cards [{ n, text, bone, feedback: { correct, wrong } }],
 // closing (the line after the last card), label (the key pill).
-import { h, reducedMotion } from '../src/util.js?v=34b6caae';
-import { glyph } from '../src/icons.js?v=34b6caae';
-import { layout } from '../src/templates/stage.js?v=34b6caae';
+import { h, reducedMotion } from '../src/util.js?v=c6cdc63e';
+import { glyph } from '../src/icons.js?v=c6cdc63e';
+import { layout } from '../src/templates/stage.js?v=c6cdc63e';
+import { dragDrop } from '../src/drag.js?v=c6cdc63e';
 
 const W = 1000, H = 300, SPINE = 150;
 // the bones' outer ends (label boxes) and where they meet the spine
@@ -25,8 +26,15 @@ export const fishbone = {
     const NS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('class', 'm-fish-svg'); svg.setAttribute('aria-hidden', 'true');
+    // the drawing fills its box exactly, so the head outline and the labels (placed in %) line up at any height
+    svg.setAttribute('preserveAspectRatio', 'none');
     const line = (x1, y1, x2, y2, cls) => { const l = document.createElementNS(NS, 'line'); Object.entries({ x1, y1, x2, y2 }).forEach(([k, v]) => l.setAttribute(k, v)); l.setAttribute('class', cls); svg.append(l); return l; };
-    const spine = line(40, SPINE, 800, SPINE, 'm-fish-spine');
+    // round 3 (25 Nov 2026, Noy's references): a fish you recognise at once: the tail and the head drawn as outlines,
+    // the pain written inside the head; each bone's label has its own colour (CSS, by data-bone)
+    const path = (d, cls) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('class', cls); svg.append(p); return p; };
+    path('M58 150 L8 92 Q22 150 8 208 Z', 'm-fish-tail');
+    path('M792 58 Q930 60 992 150 Q930 240 792 242 Q826 150 792 58 Z', 'm-fish-headline');
+    const spine = line(54, SPINE, 800, SPINE, 'm-fish-spine');
     const boneLines = screen.bones.map((b, i) => line(ENDS[i][0] + 60, ENDS[i][1] < SPINE ? 46 : 254, ...JOIN(i), 'm-fish-bone'));
     const head = h('div', { class: 'm-fish-head' }, h('b', {}, screen.head));
     const boneEls = screen.bones.map((b, i) => {
@@ -61,9 +69,9 @@ export const fishbone = {
     const first = {}, misses = {};
     let picked = null;
     const tray = h('div', { class: 'm-fish-tray', role: 'group', 'aria-label': screen.trayLabel });
+    // round 3 (Noy: "is it a drag? it does not work"): a real drag (the kit's dragDrop: pointer, click then click, keys)
     const cards = screen.cards.map((c) => {
       const b = h('button', { class: 'm-fish-card', type: 'button', 'aria-pressed': 'false', dataset: { n: String(c.n) } }, c.text);
-      b.addEventListener('click', () => { picked = picked === c ? null : c; cards.forEach((x) => x.b.setAttribute('aria-pressed', String(x.c === picked))); fish.dataset.picking = String(!!picked); });
       tray.append(b);
       return { c, b };
     });
@@ -80,20 +88,33 @@ export const fishbone = {
       ctx.complete();
       ctx.unlockNext({ focus: true });
     };
-    boneEls.forEach((x) => x.el.addEventListener('click', () => {
-      if (!picked) return;
-      const c = picked; picked = null; fish.dataset.picking = 'false';
-      cards.forEach((y) => y.b.setAttribute('aria-pressed', 'false'));
+    // a drop on a bone: judged at once (Rise style). Returns what the drag module does with the card.
+    const drop = (cardEl, x) => {
+      const c = cards.find((y) => y.b === cardEl).c;
       first[c.n] ??= x.b.id;
-      if (x.b.id === c.bone) { place(c, c.bone, true); zones.setFeedback({ state: 'correct', text: c.feedback.correct }); live.textContent = c.feedback.correct; }
+      let res;
+      if (x.b.id === c.bone) { place(c, c.bone, true); zones.setFeedback({ state: 'correct', text: c.feedback.correct }); live.textContent = c.feedback.correct; res = 'placed'; }
       else {
         misses[c.n] = (misses[c.n] || 0) + 1;
         x.el.classList.add('m-flash'); setTimeout(() => x.el.classList.remove('m-flash'), 700);
-        if (misses[c.n] >= 2) { place(c, c.bone, false); zones.setFeedback({ state: 'wrong', verdict: ui.feedback.revealed, text: c.feedback.wrong }); }
-        else zones.setFeedback({ state: 'wrong', text: c.feedback.wrong });
+        if (misses[c.n] >= 2) { place(c, c.bone, false); zones.setFeedback({ state: 'wrong', verdict: ui.feedback.revealed, text: c.feedback.wrong }); res = 'placed'; }
+        else { zones.setFeedback({ state: 'wrong', text: c.feedback.wrong }); res = 'returned'; }
       }
-      if (!tray.children.length) done(); else tray.querySelector('button')?.focus();
-    }));
+      if (!tray.children.length) done(); else if (res === 'placed') tray.querySelector('button')?.focus();
+      return res;
+    };
+    boneEls.forEach((x) => { x.id = x.b.id; }); // the drag module passes the target's id
+    const dd = dragDrop({ ui, live, targets: boneEls, nameOf: (el) => el.textContent, onDrop: (el, id) => drop(el, boneEls.find((x) => x.id === id)), picked: ui.drag.pickedPlace || ui.drag.picked });
+    cards.forEach((y) => dd.add(y.b));
+    // the hand, on arrival: it takes the first cause and carries it up to the fish (to the spine, not to a bone)
+    const g = !ctx.revisit ? ctx.ghost({ type: 'drag', steps: () => {
+      const first = tray.querySelector('button');
+      if (!first) return [];
+      const r = first.getBoundingClientRect(), s = svg.getBoundingClientRect();
+      const grab = { x: r.left + r.width * 0.8, y: r.top + r.height * 0.6 };
+      return [{ point: () => grab, carry: first, hold: 120 }, { point: () => ({ x: s.left + s.width * 0.45, y: s.top + s.height * 0.5 }), hold: 700 }];
+    } }) : null;
+    if (g) headEl.append(h('span', { class: 'w-head-tools m-fish-tools' }, g.button));
     layout(ctx, 'fish', headEl, h('div', { class: 'm-fish-wrap m-fish-sort' }, fish, h('div', { class: 'm-fish-row' }, tray, h('div', { class: 'm-fish-bandbox' }, zones.band))), live);
     zones.setHintVisible(false);
     zones.setFeedback({ state: 'hint', text: screen.hint });

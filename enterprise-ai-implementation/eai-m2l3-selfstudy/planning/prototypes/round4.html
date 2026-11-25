@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>M2 L3 round 4 sketches</title>
+<link rel="stylesheet" href="../../src/fonts.css">
+<style>
+/* Round 4 sketches (25 Nov 2026, for Noy's approval before building; not part of the lesson): slides 14 to 23, chapters
+   Can it ship? (H0 to H4), The card (I1, I2), AI Spots (J1, J2) and the close (K1 to K3). Content in the sketches
+   follows FACTS.md and PLAN-v2.md; example wording marked as a draft is to be checked against the deck. */
+:root { --ink: #16293A; --navy: #255777; --deep: #0F2A3D; --teal: #3E868F; --teal-ink: #2F6A72; --tq: #5AB3AA; --aqua: #9FD3CD;
+  --paper: #FFFFFF; --stone: #F7F5F1; --line: #E2DED6; --muted: #55626C; --mint: #E1EFEE; --coral: #E0795F; --coral-ink: #A9432C;
+  --t1: #CFE9E5; --t2: #5AB3AA; --t3: #2E6A93; --t4: #E0795F; --font: "Assistant", Arial, sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #2b3640; font-family: var(--font); color: var(--ink); display: grid; gap: 14px; padding: 24px; justify-content: center; }
+.label { color: #fff; font: 700 19px/1.4 var(--font); margin: 26px 0 0; max-width: 1280px; }
+.label small { display: block; font-weight: 400; font-size: 16px; color: #c9d3da; }
+.stage { width: 1280px; height: 720px; position: relative; overflow: hidden; border-radius: 6px; background: var(--stone); }
+.bar { position: absolute; inset: 0 0 auto; height: 80px; background: rgba(12, 28, 40, .9); z-index: 5; }
+.replay { position: absolute; right: 16px; bottom: 16px; z-index: 9; font: 700 15px var(--font); padding: 8px 14px; border-radius: 8px; border: 0; background: var(--tq); color: var(--deep); cursor: pointer; }
+.dark { background: linear-gradient(rgba(10, 26, 38, .8), rgba(10, 26, 38, .86)), url(../../assets/img/ch2-laptop-paperwork.jpg) center / cover; color: #fff; }
+.dark2 { background: linear-gradient(rgba(10, 26, 38, .78), rgba(10, 26, 38, .9)), url(../../assets/img/ch2-cards.jpg) center / cover; color: #fff; }
+.head { position: absolute; left: 64px; top: 104px; right: 64px; z-index: 3; }
+.eyebrow { margin: 0 0 6px; font: 800 16px var(--font); letter-spacing: .02em; color: var(--teal-ink); }
+.dark .eyebrow, .dark2 .eyebrow { color: var(--aqua); }
+.h1 { margin: 0; font: 800 32px/1.15 var(--font); }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 10px; background: var(--deep); color: #fff; font: 800 16px var(--font); }
+.dark .btn, .dark2 .btn { background: var(--tq); color: var(--deep); }
+/* motion helpers: elements with .in rise in order, by --d */
+.play .in { animation: rise .7s cubic-bezier(.2, .75, .2, 1) both; animation-delay: var(--d, 0ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+
+/* ---------- H0 the four tiers ---------- */
+.scale { position: absolute; left: 64px; right: 64px; top: 196px; height: 10px; border-radius: 6px; background: linear-gradient(90deg, var(--t1), var(--t2), var(--t3), var(--t4)); }
+.scale span { position: absolute; top: 16px; font: 700 14px var(--font); color: var(--aqua); }
+.scale span:last-child { right: 0; color: #f3b6a6; }
+.tiers { position: absolute; left: 64px; right: 64px; top: 246px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+.tier { border-radius: 16px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .14); padding: 20px 20px 22px; display: grid; gap: 10px; align-content: start; height: 300px; position: relative; overflow: hidden; }
+.tier::before { content: ""; position: absolute; inset: 0 0 auto; height: 5px; background: var(--c); }
+.tier svg { width: 92px; height: 78px; }
+.tier h3 { margin: 0; font: 800 24px var(--font); color: #fff; }
+.tier .ex { margin: 0; font: 400 16px/1.4 var(--font); color: #d6e1e6; }
+.tier .run { margin-top: auto; padding: 10px 12px; border-radius: 10px; background: rgba(255, 255, 255, .1); font: 700 15px/1.3 var(--font); color: #fff; }
+.tier .run small { display: block; font: 700 12px var(--font); color: var(--aqua); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 2px; }
+.h0-line { position: absolute; left: 64px; right: 64px; bottom: 38px; margin: 0; font: 700 20px var(--font); color: #fff; text-align: center; }
+.h0-line b { color: var(--aqua); }
+
+/* ---------- H1 stamp the documents ---------- */
+.pile { position: absolute; left: 64px; top: 250px; width: 170px; height: 220px; }
+.pile i { position: absolute; inset: 0; border-radius: 8px; background: #fff; box-shadow: 0 6px 14px rgba(15, 42, 61, .12); }
+.pile i:nth-child(1) { transform: rotate(-6deg) translate(-6px, 10px); } .pile i:nth-child(2) { transform: rotate(4deg) translate(4px, 6px); } .pile i:nth-child(3) { transform: rotate(-2deg); }
+.pile b { position: absolute; left: 0; right: 0; bottom: -40px; text-align: center; font: 700 15px var(--font); color: var(--muted); }
+.doc { position: absolute; left: 330px; top: 196px; width: 420px; height: 330px; border-radius: 10px; background: #fff; padding: 28px 30px; box-shadow: 0 30px 60px rgba(15, 42, 61, .2); }
+.doc .kind { font: 700 14px var(--font); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.doc h3 { margin: 8px 0 10px; font: 800 28px/1.15 var(--font); }
+.doc p { margin: 0; font: 400 17px/1.45 var(--font); color: var(--muted); }
+.doc .lines i { display: block; height: 9px; border-radius: 5px; background: #ece8e1; margin-top: 12px; }
+.doc .lines i:nth-child(2) { width: 80%; } .doc .lines i:nth-child(3) { width: 64%; }
+.imprint { position: absolute; right: 26px; bottom: 30px; padding: 8px 16px; border: 4px solid var(--t4); border-radius: 10px; color: var(--t4); font: 800 26px var(--font); letter-spacing: .08em; transform: rotate(-12deg); opacity: 0; }
+.stamps { position: absolute; left: 300px; top: 560px; width: 480px; display: flex; justify-content: space-between; }
+.stamp { width: 108px; display: grid; justify-items: center; gap: 6px; font: 800 15px var(--font); color: var(--ink); }
+.stamp .h { width: 26px; height: 34px; border-radius: 13px 13px 6px 6px; background: #6b5a4a; }
+.stamp .f { width: 92px; height: 26px; border-radius: 8px; background: var(--c); margin-top: -4px; box-shadow: 0 4px 0 rgba(0, 0, 0, .15); }
+.trays { position: absolute; right: 64px; top: 196px; width: 330px; display: grid; gap: 14px; }
+.tray { height: 76px; border-radius: 14px; background: #fff; border-left: 8px solid var(--c); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 8px 18px rgba(15, 42, 61, .08); font: 800 19px var(--font); }
+.tray span { display: flex; gap: 4px; } .tray span i { width: 22px; height: 28px; border-radius: 3px; background: var(--stone); border: 1.5px solid var(--line); }
+.play #h1-stamp-r { animation: press 1.6s .6s both; }
+@keyframes press { 0% { transform: translate(0, 0); } 35% { transform: translate(-6px, -250px); } 50% { transform: translate(-6px, -212px); } 65% { transform: translate(-6px, -250px); } 100% { transform: translate(0, 0); } }
+.play .imprint { animation: imp .3s 1.4s both; }
+@keyframes imp { from { opacity: 0; transform: rotate(-12deg) scale(1.4); } to { opacity: 1; transform: rotate(-12deg) scale(1); } }
+.play .doc { animation: fly 1s 2.6s cubic-bezier(.5, 0, .3, 1) both; }
+@keyframes fly { to { transform: translate(560px, 270px) scale(.08); opacity: .2; } }
+.play #tray4 i.new { animation: pop .3s 3.5s both; }
+@keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+/* ---------- H2 week 6 ---------- */
+.week { position: absolute; left: 64px; top: 120px; display: flex; gap: 6px; z-index: 3; }
+.week i { width: 54px; height: 54px; border-radius: 10px; background: rgba(255, 255, 255, .1); display: grid; place-items: center; font: 800 18px var(--font); font-style: normal; color: #c9d3da; }
+.week i.now { background: var(--coral); color: #fff; box-shadow: 0 0 0 4px rgba(224, 121, 95, .3); }
+.week span { align-self: center; margin-left: 10px; font: 700 16px var(--font); color: #c9d3da; }
+.mail { position: absolute; left: 64px; top: 206px; width: 620px; border-radius: 14px; background: #fff; color: var(--ink); box-shadow: 0 30px 70px rgba(0, 0, 0, .45); overflow: hidden; }
+.mail .top { height: 40px; background: #eef1f3; display: flex; align-items: center; gap: 7px; padding: 0 14px; font: 700 14px var(--font); color: var(--muted); }
+.mail .top i { width: 11px; height: 11px; border-radius: 50%; background: #cdd4d9; }
+.mail .top b { margin-left: 10px; font-weight: 700; }
+.mail .from { display: flex; gap: 14px; align-items: center; padding: 20px 26px 0; }
+.mail .av { width: 50px; height: 50px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font: 800 18px var(--font); }
+.mail .from b { display: block; font: 800 18px var(--font); } .mail .from div span { font: 400 15px var(--font); color: var(--muted); }
+.mail h3 { margin: 16px 26px 8px; font: 800 23px var(--font); }
+.mail p { margin: 0 26px 12px; font: 400 18px/1.5 var(--font); }
+.mail .chip { display: inline-block; margin: 0 26px 22px; padding: 6px 12px; border-radius: 8px; background: #fbe9e3; color: var(--coral-ink); font: 800 15px var(--font); }
+.play .mail { animation: drop .8s .5s cubic-bezier(.2, .8, .2, 1.1) both; }
+@keyframes drop { from { opacity: 0; transform: translateY(-60px) scale(.96); } to { opacity: 1; transform: none; } }
+.ask { position: absolute; left: 730px; right: 64px; top: 206px; display: grid; gap: 14px; }
+.ask h2 { margin: 0 0 6px; font: 800 26px/1.2 var(--font); }
+.opt { padding: 16px 18px; border-radius: 12px; background: rgba(255, 255, 255, .08); border: 1.5px solid rgba(255, 255, 255, .22); font: 600 17px/1.35 var(--font); display: grid; grid-template-columns: 28px 1fr; gap: 12px; }
+.opt i { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--aqua); font-style: normal; display: grid; place-items: center; font: 800 14px var(--font); color: var(--aqua); }
+.play .ask { animation: rise .7s 1.6s both; }
+
+/* ---------- H3 podcast + four corners ---------- */
+.pod { position: absolute; left: 64px; top: 200px; width: 380px; border-radius: 18px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .16); padding: 24px; display: grid; gap: 16px; }
+.cover { height: 170px; border-radius: 12px; background: linear-gradient(140deg, #2E6A93, #0F2A3D 70%); position: relative; overflow: hidden; }
+.cover b { position: absolute; left: 18px; bottom: 16px; font: 800 24px/1.1 var(--font); color: #fff; max-width: 240px; }
+.cover i { position: absolute; top: 18px; width: 54px; height: 54px; border-radius: 50%; border: 3px solid #fff; display: grid; place-items: center; font: 800 17px var(--font); font-style: normal; color: #fff; }
+.cover i:nth-of-type(1) { right: 70px; background: var(--teal); } .cover i:nth-of-type(2) { right: 26px; background: var(--coral); }
+.pod .row { display: flex; align-items: center; gap: 14px; }
+.pod .pl { width: 52px; height: 52px; border-radius: 50%; background: var(--tq); position: relative; flex: none; }
+.pod .pl::after { content: ""; position: absolute; left: 19px; top: 15px; border: 11px solid transparent; border-left: 16px solid var(--deep); border-right: 0; }
+.pod .wave { flex: 1; height: 36px; background: repeating-linear-gradient(90deg, var(--aqua) 0 3px, transparent 3px 7px); clip-path: polygon(0 40%, 6% 20%, 12% 55%, 18% 10%, 24% 60%, 30% 25%, 36% 70%, 42% 15%, 48% 50%, 54% 30%, 60% 65%, 66% 20%, 72% 55%, 78% 35%, 84% 60%, 90% 25%, 100% 45%, 100% 100%, 0 100%); opacity: .9; }
+.pod .t { font: 700 15px var(--font); color: #c9d3da; display: flex; justify-content: space-between; }
+.chap { display: flex; gap: 6px; } .chap i { flex: 1; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .18); } .chap i.d { background: var(--tq); } .chap i.c { background: linear-gradient(90deg, var(--tq) 45%, rgba(255, 255, 255, .18) 45%); }
+.corners { position: absolute; left: 500px; right: 64px; top: 200px; height: 400px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 16px; }
+.corner { border-radius: 16px; background: rgba(255, 255, 255, .06); border: 1.5px solid rgba(255, 255, 255, .14); padding: 22px; display: grid; align-content: start; gap: 8px; position: relative; color: #a9b7c0; }
+.corner small { font: 800 13px var(--font); letter-spacing: .05em; text-transform: uppercase; }
+.corner h3 { margin: 0; font: 800 24px/1.2 var(--font); }
+.corner.done { color: #fff; } .corner.done small { color: var(--aqua); }
+.corner.now { color: #fff; background: rgba(90, 179, 170, .16); border-color: var(--tq); box-shadow: 0 0 34px rgba(90, 179, 170, .35); }
+.corner.now small { color: var(--aqua); }
+.sticky { position: absolute; right: -10px; bottom: -14px; width: 220px; padding: 12px 14px; background: #fff4b8; color: var(--ink); font: 600 15px/1.35 var(--font); transform: rotate(3deg); box-shadow: 0 10px 20px rgba(0, 0, 0, .3); }
+.sticky b { display: block; font: 800 13px var(--font); color: var(--muted); margin-bottom: 2px; }
+.forward { position: absolute; left: 500px; bottom: 50px; margin: 0; font: 600 17px var(--font); color: #c9d3da; }
+
+/* ---------- H4 integration gauge ---------- */
+.opp { position: absolute; left: 64px; top: 196px; width: 700px; padding: 14px 18px; border-radius: 12px; background: var(--mint); font: 700 18px/1.35 var(--font); }
+.opp span { display: block; font: 700 13px var(--font); color: var(--teal-ink); text-transform: uppercase; letter-spacing: .05em; }
+.dims { position: absolute; left: 64px; top: 290px; width: 700px; display: grid; gap: 12px; }
+.dim { display: grid; grid-template-columns: 1fr 210px; align-items: center; gap: 16px; padding: 12px 16px; border-radius: 12px; background: #fff; box-shadow: 0 6px 14px rgba(15, 42, 61, .06); }
+.dim h4 { margin: 0; font: 800 18px var(--font); } .dim p { margin: 2px 0 0; font: 400 15px/1.35 var(--font); color: var(--muted); }
+.dim p.q { color: var(--teal-ink); font-weight: 600; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr) 1.3fr; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--line); }
+.seg i { height: 40px; display: grid; place-items: center; font: 800 16px var(--font); font-style: normal; color: var(--muted); border-right: 1.5px solid var(--line); }
+.seg i:last-child { border: 0; font-size: 14px; }
+.seg i.on { background: var(--deep); color: #fff; } .seg i.it.on { background: #fff4b8; color: var(--ink); }
+.gauge { position: absolute; right: 64px; top: 196px; width: 380px; display: grid; justify-items: center; gap: 4px; }
+.gauge svg { width: 300px; height: 170px; }
+.gauge .n { margin-top: -6px; font: 800 54px/1 var(--font); } .gauge .n small { font-size: 24px; color: var(--muted); }
+.gauge .cap { font: 700 16px var(--font); color: var(--muted); }
+.time { position: absolute; right: 64px; top: 480px; width: 380px; }
+.time b { display: block; font: 800 15px var(--font); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 10px; }
+.time .track { height: 16px; border-radius: 8px; background: #e8e3da; position: relative; }
+.time .fill { position: absolute; inset: 0 auto 0 0; width: 92%; border-radius: 8px; background: linear-gradient(90deg, var(--tq), var(--coral)); }
+.time .ticks { display: flex; justify-content: space-between; font: 700 15px var(--font); color: var(--muted); margin-top: 8px; }
+.time p { margin: 14px 0 0; font: 600 16px/1.4 var(--font); }
+.play .time .fill { animation: stretch 2.4s .8s cubic-bezier(.3, .6, .2, 1) both; }
+@keyframes stretch { from { width: 22%; } }
+.play .gauge .needle { animation: swing 2.4s .8s cubic-bezier(.3, .6, .2, 1) both; transform-origin: 150px 150px; }
+@keyframes swing { from { transform: rotate(150deg); } }
+
+/* ---------- I1 the card table ---------- */
+.sheet { position: absolute; left: 64px; right: 64px; top: 186px; bottom: 76px; border-radius: 14px; background: #fff; box-shadow: 0 20px 44px rgba(15, 42, 61, .12); overflow: hidden; }
+.sheet table { width: 100%; border-collapse: collapse; font: 400 15.5px/1.3 var(--font); }
+.sheet th { text-align: left; padding: 12px 16px; font: 800 15px var(--font); background: var(--deep); color: #fff; }
+.sheet th:nth-child(2) { color: var(--aqua); }
+.sheet td { padding: 7px 16px; border-bottom: 1px solid #efebe4; vertical-align: middle; }
+.sheet td:first-child { font-weight: 800; width: 170px; }
+.sheet td:nth-child(2) { color: var(--muted); width: 440px; }
+.pick { display: flex; align-items: center; justify-content: space-between; height: 34px; padding: 0 12px; border-radius: 8px; border: 1.5px solid var(--tq); background: var(--mint); font: 700 15px var(--font); color: var(--teal-ink); }
+.pick::after { content: "\25BE"; }
+.check { position: absolute; right: 64px; bottom: 22px; }
+
+/* ---------- I2 the card is stamped and filed ---------- */
+#i2 { perspective: 1600px; }
+.ocard { position: absolute; left: 50%; top: 150px; width: 860px; height: 470px; margin-left: -430px; transform: rotateX(3deg); }
+.ocard .ftab { position: absolute; left: 28px; top: -30px; height: 34px; padding: 0 18px; display: flex; align-items: center; gap: 8px; border-radius: 12px 12px 0 0; background: var(--deep); color: #fff; font: 800 15px var(--font); }
+.ocard .ftab b { width: 10px; height: 10px; border-radius: 50%; background: var(--tq); }
+.ocard .body { position: absolute; inset: 0; display: grid; grid-template-columns: 270px 1fr; border-radius: 4px 18px 18px 18px; overflow: hidden; box-shadow: 0 40px 80px rgba(0, 0, 0, .45), 0 0 0 1px rgba(90, 179, 170, .5); }
+.steps { background: linear-gradient(165deg, #1d4a6b, #163a54 55%, #12465a); padding: 34px 26px; color: #fff; display: grid; align-content: start; }
+.step { display: grid; grid-template-columns: 36px 1fr; column-gap: 14px; align-items: center; min-height: 66px; position: relative; font: 700 17px var(--font); }
+.step::before { content: ""; position: absolute; left: 17px; top: 46px; height: 32px; width: 2px; background: var(--tq); }
+.step:last-child::before { display: none; }
+.step i { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 800 15px var(--font); font-style: normal; background: var(--tq); color: var(--deep); }
+.paper { background: #fff; padding: 30px 36px; display: grid; align-content: start; gap: 12px; color: var(--ink); position: relative; }
+.mine { padding: 14px 18px; border-radius: 12px; background: var(--mint); }
+.mine span { display: block; font: 700 14px var(--font); color: var(--teal-ink); }
+.mine p { margin: 0; font: 800 22px/1.2 var(--font); }
+.done-line { margin: 0; font: 400 16px/1.4 var(--font); color: var(--muted); } .done-line b { color: var(--ink); }
+.big-stamp { position: absolute; right: 40px; bottom: 50px; padding: 12px 20px; border: 5px solid var(--teal); border-radius: 14px; color: var(--teal); font: 800 26px/1.05 var(--font); text-align: center; transform: rotate(-10deg); opacity: 0; background: rgba(255, 255, 255, .8); }
+.big-stamp small { display: block; font-size: 15px; letter-spacing: .08em; }
+.folder2 { position: absolute; right: 90px; top: 400px; width: 230px; height: 200px; opacity: 0; transform: rotateY(-18deg) rotateX(4deg); }
+.folder2 .back { position: absolute; inset: 22px 0 0; border-radius: 14px; background: linear-gradient(160deg, #2f6f97, #173f5c); }
+.folder2 .tab { position: absolute; right: 0; top: 0; width: 96px; height: 36px; border-radius: 12px 12px 0 0; background: #2a6a91; }
+.folder2 .front { position: absolute; inset: 70px -6px 0; border-radius: 14px; background: linear-gradient(170deg, rgba(64, 140, 180, .96), rgba(24, 66, 98, .98)); box-shadow: 0 18px 30px rgba(0, 0, 0, .35); z-index: 3; }
+.folder2 .n { position: absolute; left: 0; right: 0; bottom: 30px; z-index: 4; text-align: center; font: 800 18px var(--font); color: #fff; }
+.play .big-stamp { animation: imp2 .35s .9s both; }
+@keyframes imp2 { from { opacity: 0; transform: rotate(-10deg) scale(1.6); } to { opacity: 1; transform: rotate(-10deg) scale(1); } }
+.play .folder2 { animation: fin .5s 2.1s both; }
+@keyframes fin { to { opacity: 1; } }
+.play .ocard { animation: file 1.3s 2.4s cubic-bezier(.5, 0, .3, 1) both; }
+@keyframes file { to { transform: translate(410px, 330px) scale(.2) rotateY(-20deg); opacity: 0; } }
+.i2-line { position: absolute; left: 0; right: 0; top: 300px; text-align: center; margin: 0; font: 800 34px var(--font); color: #fff; opacity: 0; }
+.play .i2-line { animation: fin .7s 3.6s both; }
+
+/* ---------- J1 the AI draft ---------- */
+.prompt { position: absolute; left: 64px; top: 196px; width: 430px; border-radius: 16px 16px 16px 4px; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .2); padding: 18px 20px; font: 500 16px/1.5 var(--font); color: #e6eef1; }
+.prompt b { display: block; font: 800 13px var(--font); color: var(--aqua); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 6px; }
+.flags { position: absolute; left: 64px; top: 384px; width: 430px; display: grid; gap: 10px; }
+.flags p { margin: 0 0 4px; font: 700 17px var(--font); }
+.flag { display: inline-flex; align-items: center; gap: 10px; width: fit-content; padding: 10px 16px; border-radius: 10px; background: var(--coral); color: #fff; font: 800 16px var(--font); box-shadow: 0 8px 18px rgba(0, 0, 0, .3); }
+.flag::before { content: ""; width: 4px; height: 20px; background: #fff; border-radius: 2px; box-shadow: 9px -6px 0 -0px transparent; }
+.flag.used { opacity: .3; }
+.aicard { position: absolute; left: 540px; right: 64px; top: 186px; border-radius: 16px; background: #fff; color: var(--ink); overflow: hidden; box-shadow: 0 30px 60px rgba(0, 0, 0, .45); }
+.aicard .top { display: flex; align-items: center; gap: 10px; padding: 12px 20px; background: #eef1f3; font: 800 15px var(--font); color: var(--muted); }
+.aicard .top i { width: 22px; height: 22px; border-radius: 6px; background: linear-gradient(135deg, var(--tq), var(--navy)); }
+.f { display: grid; grid-template-columns: 150px 1fr; gap: 14px; padding: 13px 20px; border-bottom: 1px solid #efebe4; position: relative; }
+.f span { font: 800 15px var(--font); color: var(--teal-ink); }
+.f p { margin: 0; font: 400 17px/1.35 var(--font); overflow: hidden; white-space: nowrap; }
+.f.flagged { background: #fdf0eb; }
+.f .pin { position: absolute; right: 14px; top: 9px; padding: 4px 10px; border-radius: 7px; background: var(--coral); color: #fff; font: 800 13px var(--font); }
+.play .f p { animation: type 1s steps(30) both; animation-delay: var(--d); }
+@keyframes type { from { width: 0; } to { width: 100%; } }
+.play .f .pin { animation: pop .3s 5.6s both; }
+.j1-line { position: absolute; left: 540px; right: 64px; bottom: 30px; margin: 0; font: 700 18px var(--font); color: var(--aqua); text-align: center; }
+
+/* ---------- J2 film storyboard ---------- */
+.frame { position: absolute; left: 64px; top: 120px; width: 760px; height: 428px; border-radius: 12px; background: #0b1f2d; overflow: hidden; box-shadow: 0 30px 60px rgba(0, 0, 0, .4); }
+.frame .lab { position: absolute; left: 24px; top: 20px; font: 800 14px var(--font); color: var(--aqua); letter-spacing: .06em; text-transform: uppercase; }
+.cmp { position: absolute; left: 40px; right: 40px; top: 70px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cmp div { border-radius: 10px; background: rgba(255, 255, 255, .06); padding: 14px; display: grid; gap: 8px; }
+.cmp b { font: 800 16px var(--font); color: #fff; }
+.cmp i { display: flex; justify-content: space-between; padding: 7px 10px; border-radius: 6px; background: rgba(255, 255, 255, .08); font: 600 14px var(--font); font-style: normal; color: #dbe5ea; }
+.cmp i.x { background: rgba(224, 121, 95, .25); box-shadow: inset 0 0 0 1.5px var(--coral); }
+.frame .sub { position: absolute; left: 0; right: 0; bottom: 20px; text-align: center; font: 600 18px var(--font); color: #fff; }
+.frame .sub span { background: rgba(0, 0, 0, .55); padding: 4px 10px; border-radius: 6px; }
+.tl { position: absolute; left: 64px; width: 760px; top: 570px; }
+.tl .bar2 { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, .2); position: relative; }
+.tl .bar2 i { position: absolute; top: -6px; width: 20px; height: 20px; border-radius: 50%; margin-left: -10px; }
+.tl .bar2 i.ch { background: var(--aqua); } .tl .bar2 i.stop { background: var(--coral); box-shadow: 0 0 0 4px rgba(224, 121, 95, .35); }
+.tl .lbls { position: relative; height: 40px; margin-top: 12px; font: 700 14px var(--font); color: #c9d3da; }
+.tl .lbls span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.board { position: absolute; left: 860px; right: 64px; top: 120px; display: grid; gap: 12px; }
+.shot { border-radius: 10px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .16); padding: 12px 14px; display: grid; gap: 4px; }
+.shot b { font: 800 16px var(--font); color: #fff; } .shot span { font: 400 14.5px/1.35 var(--font); color: #c9d3da; }
+.shot.stopb { border-color: var(--coral); background: rgba(224, 121, 95, .12); }
+
+/* ---------- K1 workbook ---------- */
+.path { position: absolute; left: 64px; top: 220px; width: 760px; display: grid; gap: 0; }
+.ps { display: grid; grid-template-columns: 56px 1fr; gap: 18px; min-height: 100px; position: relative; }
+.ps::before { content: ""; position: absolute; left: 27px; top: 56px; bottom: 0; width: 2px; background: var(--tq); }
+.ps:last-child::before { display: none; }
+.ps i { width: 56px; height: 56px; border-radius: 50%; background: var(--deep); color: #fff; display: grid; place-items: center; font: 800 22px var(--font); font-style: normal; }
+.ps h4 { margin: 4px 0 2px; font: 800 21px var(--font); } .ps p { margin: 0; font: 400 16px/1.4 var(--font); color: var(--muted); }
+.wb { position: absolute; right: 64px; top: 210px; width: 340px; display: grid; gap: 18px; justify-items: center; }
+.wb .thumb { width: 340px; height: 230px; border-radius: 12px; background: #fff; box-shadow: 0 24px 50px rgba(15, 42, 61, .18); padding: 16px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.wb .thumb i { border-radius: 6px; background: var(--mint); } .wb .thumb i:nth-child(-n+3) { background: var(--tq); }
+.wb p { margin: 0; font: 600 16px var(--font); color: var(--muted); }
+
+/* ---------- K2 self-check ---------- */
+.list { position: absolute; left: 64px; right: 64px; top: 196px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 30px; }
+.ck { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; padding: 14px 18px; border-radius: 12px; background: #fff; box-shadow: 0 6px 14px rgba(15, 42, 61, .06); font: 600 17px/1.35 var(--font); }
+.yn { display: flex; border-radius: 9px; overflow: hidden; border: 1.5px solid var(--line); } .yn i { padding: 8px 14px; font: 800 14px var(--font); font-style: normal; color: var(--muted); }
+.yn i.y { background: var(--teal); color: #fff; } .yn i.n { background: #fff4b8; color: var(--ink); }
+.fix { grid-column: 1 / -1; margin: 0; font: 600 15px var(--font); color: var(--coral-ink); }
+.k2-foot { position: absolute; left: 64px; right: 64px; bottom: 40px; display: flex; justify-content: space-between; align-items: center; font: 700 18px var(--font); }
+
+/* ---------- K3 bridge to L4 ---------- */
+.k3-h { position: absolute; left: 64px; top: 150px; width: 470px; z-index: 3; }
+.k3-h h2 { margin: 0 0 16px; font: 800 38px/1.12 var(--font); color: #fff; }
+.k3-h p:not(.eyebrow) { margin: 0 0 12px; font: 400 19px/1.45 var(--font); color: #d6e1e6; }
+.matrix { position: absolute; left: 640px; top: 150px; width: 520px; height: 440px; border-left: 3px solid var(--aqua); border-bottom: 3px solid var(--aqua); display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.matrix div { border: 1px dashed rgba(255, 255, 255, .2); padding: 12px; font: 800 16px var(--font); color: var(--aqua); }
+.matrix .ax { position: absolute; font: 700 15px var(--font); color: #c9d3da; }
+.mc { position: absolute; width: 74px; height: 50px; border-radius: 6px; background: #fff; box-shadow: 0 6px 14px rgba(0, 0, 0, .35); border-top: 6px solid var(--c, var(--tq)); }
+.play .mc { animation: deal 1s cubic-bezier(.2, .75, .2, 1) both; animation-delay: var(--d); }
+@keyframes deal { from { transform: translate(var(--fx), var(--fy)) rotate(-8deg); opacity: 0; } 15% { opacity: 1; } to { transform: none; opacity: 1; } }
+</style>
+</head>
+<body>
+
+<!-- ======================= H0 ======================= -->
+<p class="label" dir="rtl">H0 · שקופית 14 · ארבע רמות רגישות של מידע (לימוד)
+<small>סולם אחד מפתוח לסגור. ארבע הרמות עולות אחת אחרי השנייה משמאל לימין, וכל רמה מצוירת כמקום אחסון שנעשה סגור יותר: מדף פתוח, ארון, חדר נעול, כספת. מתחת לכל רמה: מה יש בה, ואיפה מותר להריץ עליה AI. השורה של השקופית בתחתית.</small></p>
+<div class="stage dark play" id="h0">
+  <div class="bar"></div>
+  <div class="head"><p class="eyebrow">Learn</p><h2 class="h1">Four levels of sensitive data</h2></div>
+  <div class="scale in" style="--d:0ms"><span>Open</span><span>Closed</span></div>
+  <div class="tiers">
+    <section class="tier in" style="--c:var(--t1);--d:300ms">
+      <svg viewBox="0 0 92 78" fill="none" stroke="#CFE9E5" stroke-width="3"><path d="M6 6v66M86 6v66M6 28h80M6 52h80"/><rect x="14" y="10" width="8" height="18" fill="#CFE9E5"/><rect x="25" y="13" width="8" height="15" fill="#CFE9E5"/><rect x="50" y="34" width="8" height="18" fill="#CFE9E5"/><rect x="61" y="36" width="10" height="16" fill="#CFE9E5"/></svg>
+      <h3>Public</h3><p class="ex">Listings, marketing copy, the company website</p>
+      <p class="run"><small>Where AI may run</small>Any tool, no constraints</p></section>
+    <section class="tier in" style="--c:var(--t2);--d:700ms">
+      <svg viewBox="0 0 92 78" fill="none" stroke="#5AB3AA" stroke-width="3"><rect x="14" y="4" width="64" height="70" rx="4"/><path d="M14 27h64M14 50h64M38 15h16M38 38h16M38 61h16"/></svg>
+      <h3>Internal</h3><p class="ex">Process documents, org charts, internal policies</p>
+      <p class="run"><small>Where AI may run</small>A vendor with a signed DPA</p></section>
+    <section class="tier in" style="--c:var(--t3);--d:1100ms">
+      <svg viewBox="0 0 92 78" fill="none" stroke="#7FB1D6" stroke-width="3"><rect x="20" y="4" width="52" height="70" rx="3"/><rect x="38" y="34" width="18" height="14" rx="3" fill="#7FB1D6"/><path d="M41 34v-6a6 6 0 0 1 12 0v6"/></svg>
+      <h3>Confidential</h3><p class="ex">HR records, performance reviews, financials</p>
+      <p class="run"><small>Where AI may run</small>A private cloud</p></section>
+    <section class="tier in" style="--c:var(--t4);--d:1500ms">
+      <svg viewBox="0 0 92 78" fill="none" stroke="#F0A08B" stroke-width="3"><rect x="10" y="4" width="72" height="70" rx="8"/><circle cx="46" cy="39" r="18"/><path d="M46 21v36M28 39h36M33 26l26 26M59 26L33 52"/></svg>
+      <h3>Restricted</h3><p class="ex">Tenant payment details, bank accounts, contract terms</p>
+      <p class="run"><small>Where AI may run</small>On-prem or compliant cloud, legal review first</p></section>
+  </div>
+  <p class="h0-line in" style="--d:2100ms">Every card carries the flag. <b>The flag decides the tool and the timeline.</b></p>
+  <button class="replay" type="button" data-replay="h0">Replay</button>
+</div>
+
+<!-- ======================= H1 ======================= -->
+<p class="label" dir="rtl">H1 · שקופית 14 · להחתים את המסמכים (שאלה עם ציון)
+<small>במקום לגרור: ערימת מסמכים של NorthRiver משמאל, מסמך אחד גדול באמצע, וארבע חותמות מתחתיו. הלומד לוחץ על חותמת, היא יורדת על המסמך, מופיע הטבע, והמסמך עף למגש של הרמה שלו מימין. שישה מסמכים בסך הכול. ההחלטה על משוב מיידי או בסוף נשארת לסיכום.</small></p>
+<div class="stage play" id="h1">
+  <div class="bar"></div>
+  <div class="head"><p class="eyebrow">Sort the data</p><h2 class="h1">Stamp each document with its level</h2></div>
+  <div class="pile" aria-hidden="true"><i></i><i></i><i></i><b>5 more to go</b></div>
+  <div class="doc"><span class="kind">From the rent portal</span><h3>Tenant payment details</h3><p>Card numbers and bank accounts for 2,400 tenants</p><div class="lines"><i></i><i></i><i></i></div><span class="imprint">RESTRICTED</span></div>
+  <div class="stamps">
+    <span class="stamp" style="--c:var(--t1)"><i class="h"></i><i class="f"></i>Public</span>
+    <span class="stamp" style="--c:var(--t2)"><i class="h"></i><i class="f"></i>Internal</span>
+    <span class="stamp" style="--c:var(--t3)"><i class="h"></i><i class="f"></i>Confidential</span>
+    <span class="stamp" id="h1-stamp-r" style="--c:var(--t4)"><i class="h"></i><i class="f"></i>Restricted</span>
+  </div>
+  <div class="trays">
+    <div class="tray" style="--c:var(--t1)">Public<span></span></div>
+    <div class="tray" style="--c:var(--t2)">Internal<span><i></i></span></div>
+    <div class="tray" style="--c:var(--t3)">Confidential<span></span></div>
+    <div class="tray" id="tray4" style="--c:var(--t4)">Restricted<span><i class="new"></i></span></div>
+  </div>
+  <button class="replay" type="button" data-replay="h1">Replay</button>
+</div>
+
+<!-- ======================= H2 ======================= -->
+<p class="label" dir="rtl">H2 · שקופית 14 (ההערות) · "שבוע 6" (שאלה עם ציון)
+<small>פס של שבועות למעלה, ושבוע 6 נדלק באדום. מייל מרוברט, היועץ המשפטי, נוחת משמאל: הכרטיס נעצר כי סומן Internal. רק אחרי זה מגיעה השאלה מימין, עם שלוש תשובות. (הנוסח של המייל הוא טיוטה שלי.)</small></p>
+<div class="stage dark play" id="h2">
+  <div class="bar"></div>
+  <div class="week"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i class="now">6</i><span>Week 6 of the project</span></div>
+  <div class="mail">
+    <div class="top"><i></i><i></i><i></i><b>Inbox</b></div>
+    <div class="from"><span class="av">RP</span><div><b>Robert Pak</b><span>General Counsel</span></div></div>
+    <h3>We have to stop the rent reconciliation card</h3>
+    <p>The tool sends tenant payment details to a cloud vendor. Your card said <b>Internal</b>. Legal cannot sign this. We start again.</p>
+    <span class="chip">Card tagged: Internal</span>
+  </div>
+  <div class="ask">
+    <h2>What should the card have said, and what would that have changed?</h2>
+    <div class="opt"><i>A</i>Restricted: on-prem or a compliant cloud, with legal in from day one</div>
+    <div class="opt"><i>B</i>Confidential: a private cloud would have been enough</div>
+    <div class="opt"><i>C</i>Internal was right; legal should simply have been asked sooner</div>
+  </div>
+  <button class="replay" type="button" data-replay="h2">Replay</button>
+</div>
+
+<!-- ======================= H3 ======================= -->
+<p class="label" dir="rtl">H3 · שקופית 15 · ממשל AI: ארבע פינות (פודקאסט, בלי ציון)
+<small>פודקאסט של כשתי דקות משמאל, עם פרקים. מימין לוח של ארבע פינות, כל פינה שאלה אחת. כשהפודקאסט מגיע לפינה, היא נדלקת, ומה שכבר דובר נשאר לבן. פתק אחד של NorthRiver מודבק על פינה: מדיניות ה-AI של לין עדיין אצל המחלקה המשפטית. בתחתית: מודולים 3 ו-6 מעמיקים.</small></p>
+<div class="stage dark2" id="h3">
+  <div class="bar"></div>
+  <div class="head"><p class="eyebrow">Listen</p><h2 class="h1">Who decides about AI here?</h2></div>
+  <div class="pod">
+    <div class="cover"><i>A</i><i>B</i><b>Four corners of AI governance</b></div>
+    <div class="row"><span class="pl"></span><span class="wave"></span></div>
+    <div class="chap"><i class="d"></i><i class="c"></i><i></i><i></i></div>
+    <div class="t"><span>0:48</span><span>2:10</span></div>
+  </div>
+  <div class="corners">
+    <div class="corner done"><small>Build</small><h3>Who may build AI tools?</h3></div>
+    <div class="corner now"><small>Tools</small><h3>Which tools are approved?</h3><p class="sticky"><b>NorthRiver</b>Lin: our AI policy is still in legal review.</p></div>
+    <div class="corner"><small>Demand</small><h3>Who collects the requests?</h3></div>
+    <div class="corner"><small>Approval</small><h3>Who signs off?</h3></div>
+  </div>
+  <p class="forward">Modules 3 and 6 go deeper into each corner.</p>
+</div>
+
+<!-- ======================= H4 ======================= -->
+<p class="label" dir="rtl">H4 · שקופית 16 · מד ההיתכנות (בלי ציון)
+<small>הזדמנות אחת של דיאנה. ארבעה ממדים, כל אחד 0 עד 2. איפה שהתיק אומר משהו, הוא כתוב ליד השורה (לין: אין SSO, אז 0). איפה שהתיק שותק, הלומד בוחר "Ask IT", וזה עצמו השיעור. מימין: המחוג זז לסכום, ופס הזמן נמתח משישה שבועות לשישה חודשים.</small></p>
+<div class="stage play" id="h4">
+  <div class="bar"></div>
+  <div class="head"><p class="eyebrow">Integration</p><h2 class="h1">Score it before it reaches the shortlist</h2></div>
+  <div class="opp"><span>Diana's opportunity</span>Route every portal lead to the right agent within minutes</div>
+  <div class="dims">
+    <div class="dim"><div><h4>API</h4><p>Can the systems talk to each other?</p></div><div class="seg"><i>0</i><i class="on">1</i><i>2</i><i class="it">Ask IT</i></div></div>
+    <div class="dim"><div><h4>Bulk data</h4><p>Can you pull the history out?</p></div><div class="seg"><i>0</i><i>1</i><i>2</i><i class="it on">Ask IT</i></div></div>
+    <div class="dim"><div><h4>SSO</h4><p class="q">Lin: "No SSO across 8+ systems."</p></div><div class="seg"><i class="on">0</i><i>1</i><i>2</i><i class="it">Ask IT</i></div></div>
+    <div class="dim"><div><h4>Deploy</h4><p>Can it ship without the change board?</p></div><div class="seg"><i>0</i><i>1</i><i>2</i><i class="it on">Ask IT</i></div></div>
+  </div>
+  <div class="gauge">
+    <svg viewBox="0 0 300 170"><path d="M20 150 A130 130 0 0 1 280 150" fill="none" stroke="#e8e3da" stroke-width="22" stroke-linecap="round"/><path d="M20 150 A130 130 0 0 1 85 37" fill="none" stroke="#E0795F" stroke-width="22" stroke-linecap="round"/><g class="needle"><path d="M150 150 L60 110" stroke="#0F2A3D" stroke-width="6" stroke-linecap="round"/></g><circle cx="150" cy="150" r="10" fill="#0F2A3D"/></svg>
+    <div class="n">1<small> / 8</small></div><div class="cap">Integration score · 2 rows open</div>
+  </div>
+  <div class="time"><b>Time to ship</b><div class="track"><div class="fill"></div></div><div class="ticks"><span>6 weeks</span><span>6 months</span></div>
+    <p>A 9 out of 10 idea with this score takes six months, not six weeks.</p></div>
+  <button class="replay" type="button" data-replay="h4">Replay</button>
+</div>
+
+<!-- ======================= I1 ======================= -->
+<p class="label" dir="rtl">I1 · שקופית 17 · הכרטיס של רוברט (שאלה עם ציון)
+<small>הטבלה של השקופית עצמה: שדה, הדוגמה OP-014 (באפור, לקריאה), ועמודה של רוברט. רוב השדות כבר מלאים, והלומד בוחר רק בחמישה הצבועים (כולל שורת "Do not"). בדיקה אחת בסוף.</small></p>
+<div class="stage" id="i1">
+  <div class="bar"></div>
+  <div class="head"><p class="eyebrow">The card</p><h2 class="h1">Finish Robert's card, field by field</h2></div>
+  <div class="sheet"><table>
+    <tr><th>Field</th><th>OP-014 · the example</th><th>Robert's card</th></tr>
+    <tr><td>Pain</td><td>Vendor invoices keyed in by hand</td><td><span class="pick">Choose</span></td></tr>
+    <tr><td>Pain Owner</td><td>Henrik, finance analyst</td><td>Robert Pak, General Counsel</td></tr>
+    <tr><td>Root cause</td><td>OCR at 60%, vendor not reviewed since 2020</td><td>800+ contracts with no metadata</td></tr>
+    <tr><td>Opportunity</td><td>Extract invoice fields automatically</td><td><span class="pick">Choose</span></td></tr>
+    <tr><td>Category</td><td>Document AI / OCR</td><td><span class="pick">Choose</span></td></tr>
+    <tr><td>Data sensitivity</td><td>Confidential</td><td><span class="pick">Choose</span></td></tr>
+    <tr><td>Do not</td><td>(none)</td><td><span class="pick">Choose</span></td></tr>
+    <tr><td>Effort / Value</td><td>M / High · $340k a year</td><td>S / Medium</td></tr>
+    <tr><td>Sponsor</td><td>Sarah Chen, CFO</td><td>Robert Pak</td></tr>
+  </table></div>
+  <span class="btn check">Check</span>
+</div>
+
+<!-- ======================= I2 ======================= -->
+<p class="label" dir="rtl">I2 · שקופית 17 · הכרטיס שלך מוכן (בלי ציון)
+<small>הכרטיס האישי חוזר בפעם האחרונה. כל הצעדים מסומנים, הלומד ממלא את השדות האחרונים (ההזדמנות במשפט אחד, Effort, Value) ושומר. אז נוחתת חותמת "Ready for Lesson 4", הכרטיס חוזר לתיקייה, ומופיעה שורה אחת. כאן אני מציג רק את הרגע שאחרי השמירה.</small></p>
+<div class="stage dark play" id="i2">
+  <div class="bar"></div>
+  <div class="ocard">
+    <div class="ftab"><b></b>Your Opportunity Card</div>
+    <div class="body">
+      <div class="steps">
+        <div class="step"><i>&#10003;</i>Your pain</div><div class="step"><i>&#10003;</i>Category and tools</div><div class="step"><i>&#10003;</i>Root cause and people</div><div class="step"><i>&#10003;</i>Data sensitivity</div><div class="step"><i>&#10003;</i>The opportunity</div>
+      </div>
+      <div class="paper">
+        <div class="mine"><span>Your pain</span><p>Month-end close takes 14 days</p></div>
+        <p class="done-line"><b>Category:</b> Workflow Automation</p>
+        <p class="done-line"><b>Root cause:</b> ownership of the close was never set</p>
+        <p class="done-line"><b>Pain Owner:</b> Henrik · <b>Sponsor:</b> Sarah Chen</p>
+        <p class="done-line"><b>Data:</b> Confidential</p>
+        <p class="done-line"><b>Opportunity:</b> one close checklist with owners and automatic hand-offs</p>
+        <p class="done-line"><b>Effort / Value:</b> M / High</p>
+        <span class="big-stamp"><small>READY FOR</small>LESSON 4</span>
+      </div>
+    </div>
+  </div>
+  <div class="folder2" aria-hidden="true"><div class="tab"></div><div class="back"></div><div class="front"></div><span class="n">1 of 10</span></div>
+  <p class="i2-line">Card 1 is in the folder. Nine to go, in the workbook.</p>
+  <button class="replay" type="button" data-replay="i2">Replay</button>
+</div>
+
+<!-- ======================= J1 ======================= -->
+<p class="label" dir="rtl">J1 · שקופית 18 · לבדוק את הטיוטה של ה-AI (שאלה עם ציון)
+<small>משמאל הפרומפט, כמו בשקופית. מימין ה-AI "מקליד" את הכרטיס מול העיניים, שדה אחרי שדה. אחר כך הלומד גורר שלושה דגלים לשדות שצריך לתקן (ההזדמנות חוזרת על הכאב, ה-Owner הוא TBD, נתוני תשלום מסומנים Internal). כאן רואים דגל אחד שכבר ננעץ.</small></p>
+<div class="stage dark2 play" id="j1">
+  <div class="bar"></div>
+  <div class="head"><p class="eyebrow">AI Spot</p><h2 class="h1">The AI drafted a card. Flag what it got wrong.</h2></div>
+  <div class="prompt"><b>Your prompt</b>Turn this pain into an Opportunity Card with the fields pain, opportunity, category, Pain Owner, owner and data sensitivity: "Rent payments are matched to tenants by hand every month."</div>
+  <div class="flags"><p>Drag a flag onto each field that needs a fix</p><span class="flag used">Needs a fix</span><span class="flag">Needs a fix</span><span class="flag">Needs a fix</span></div>
+  <div class="aicard">
+    <div class="top"><i></i>AI draft</div>
+    <div class="f"><span>Pain</span><p style="--d:400ms">Rent payments are matched to tenants by hand</p></div>
+    <div class="f"><span>Opportunity</span><p style="--d:1400ms">Match rent payments to tenants faster</p></div>
+    <div class="f"><span>Category</span><p style="--d:2400ms">Workflow Automation</p></div>
+    <div class="f"><span>Pain Owner</span><p style="--d:3000ms">Accounts receivable clerk</p></div>
+    <div class="f flagged"><span>Owner</span><p style="--d:3600ms">TBD</p><b class="pin">Needs a fix</b></div>
+    <div class="f"><span>Data sensitivity</span><p style="--d:4200ms">Internal</p></div>
+  </div>
+  <p class="j1-line">AI is fast at draft, slower at calibration.</p>
+  <button class="replay" type="button" data-replay="j1">Replay</button>
+</div>
+
+<!-- ======================= J2 ======================= -->
+<p class="label" dir="rtl">J2 · שקופיות 19–21 · סרט "watch it happen": שלוש בדיקות AI (כדקה וחצי)
+<small>במקום שלוש לשוניות טקסט: סרט קצר שמראה את שלוש הבדיקות קורות על מסך אמיתי. משמאל פריים לדוגמה (את מול Claude, ההבדלים נדלקים), מתחת ציר הזמן עם עצירה אחת לשאלה. מימין התסריט בשלושה פרקים. הכלל מ-L1 (בלי מידע של לקוח בחשבון AI פרטי) נאמר בסרט.</small></p>
+<div class="stage dark" id="j2">
+  <div class="bar"></div>
+  <div class="frame">
+    <span class="lab">1 · Classify, then compare</span>
+    <div class="cmp">
+      <div><b>You</b><i>Leads from 6 portals<span>Workflow</span></i><i>Close takes 14 days<span>Workflow</span></i><i class="x">Listing copy for 84 homes<span>BI</span></i><i>Contracts, no metadata<span>Document AI</span></i></div>
+      <div><b>Claude</b><i>Leads from 6 portals<span>Workflow</span></i><i>Close takes 14 days<span>Workflow</span></i><i class="x">Listing copy for 84 homes<span>Agents</span></i><i>Contracts, no metadata<span>Document AI</span></i></div>
+    </div>
+    <p class="sub"><span>Where you disagree is where you learn.</span></p>
+  </div>
+  <div class="tl"><div class="bar2"><i class="ch" style="left:0%"></i><i class="ch" style="left:36%"></i><i class="stop" style="left:56%"></i><i class="ch" style="left:68%"></i></div>
+    <div class="lbls"><span style="left:4%">Classify</span><span style="left:36%">Library lookup</span><span style="left:56%">Stop: one question</span><span style="left:72%">Sensitivity flags</span></div></div>
+  <div class="board">
+    <div class="shot"><b>1 · Classify, then compare</b><span>Classify ten pains yourself, ask Claude, put both side by side. Look only at the rows where you disagree.</span></div>
+    <div class="shot"><b>2 · Find the closest case</b><span>NotebookLM with the library: "find the 3 closest cases", then adapt the closest one.</span></div>
+    <div class="shot stopb"><b>Stop</b><span>Which of the three closest cases fits Robert's contracts, and why?</span></div>
+    <div class="shot"><b>3 · Flag the sensitive data</b><span>Scan a transcript for personal data, accounts and contract terms. A flag report before any recommendation.</span></div>
+  </div>
+</div>
+
+<!-- ======================= K1 ======================= -->
+<p class="label" dir="rtl">K1 · שקופית 22 · ה-workbook (מעבר לתרגול)
+<small>ארבעת הצעדים של השקופית כמסלול אחד, מותאמים לעבודה לבד. מימין תמונה קטנה של ה-workbook וכפתור הפתיחה. צד שמאל עולה קודם, ואז הצד הימני.</small></p>
+<div class="stage" id="k1">
+  <div class="bar"></div>
+  <div class="head"><p class="eyebrow">Your workbook</p><h2 class="h1">Nine more cards, then check them</h2></div>
+  <div class="path">
+    <div class="ps"><i>1</i><div><h4>Write the cards</h4><p>From the NorthRiver pains: 4 departments, 3 categories, 2 Restricted, 1 process redesign</p></div></div>
+    <div class="ps"><i>2</i><div><h4>Review them yourself</h4><p>Go through the checklist, card by card</p></div></div>
+    <div class="ps"><i>3</i><div><h4>Count by category</h4><p>Where are most of your cards? Where are none?</p></div></div>
+    <div class="ps"><i>4</i><div><h4>Mark two boundary cases</h4><p>Two cards that sit between two categories, one line on why</p></div></div>
+  </div>
+  <div class="wb"><div class="thumb"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><p>Card 1 is already in it</p><span class="btn">Open the workbook</span></div>
+</div>
+
+<!-- ======================= K2 ======================= -->
+<p class="label" dir="rtl">K2 · בדיקה עצמית (בלי ציון)
+<small>רשימת הבדיקה של החוברת (כאן שש שורות לדוגמה; בבנייה ייכנסו תשע השורות המדויקות מהחוברת), Yes או Not yet. על כל Not yet מופיעה שורת תיקון אחת, וכפתור שפותח שוב את ה-workbook.</small></p>
+<div class="stage" id="k2">
+  <div class="bar"></div>
+  <div class="head"><p class="eyebrow">Check your cards</p><h2 class="h1">Is every card ready for Lesson 4?</h2></div>
+  <div class="list">
+    <div class="ck">Every pain is a pain, not a solution<span class="yn"><i class="y">Yes</i><i>Not yet</i></span></div>
+    <div class="ck">Every card names a Pain Owner, never "TBD"<span class="yn"><i>Yes</i><i class="n">Not yet</i></span><p class="fix">Name one person or role for each card.</p></div>
+    <div class="ck">The root cause is written, not guessed<span class="yn"><i class="y">Yes</i><i>Not yet</i></span></div>
+    <div class="ck">One dominant category per card<span class="yn"><i class="y">Yes</i><i>Not yet</i></span></div>
+    <div class="ck">Every card carries a sensitivity flag<span class="yn"><i class="y">Yes</i><i>Not yet</i></span></div>
+    <div class="ck">Effort and Value are filled in<span class="yn"><i>Yes</i><i>Not yet</i></span></div>
+  </div>
+  <div class="k2-foot"><span>4 of 6 ready</span><span class="btn">Reopen the workbook</span></div>
+</div>
+
+<!-- ======================= K3 ======================= -->
+<p class="label" dir="rtl">K3 · שקופית 23 · גשר לשיעור 4
+<small>הקלפים שהלומד בנה "נשלפים" מהתיקייה ונוחתים על מטריצת Value מול Effort, שהיא הכלי של שיעור 4. השורה של השקופית: מביאים את כל הקלפים, גם החלשים, עם Effort ו-Value. אחר כך מסך הסיום של התבנית.</small></p>
+<div class="stage dark play" id="k3">
+  <div class="bar"></div>
+  <div class="k3-h"><p class="eyebrow">Next: Lesson 4</p><h2>In Lesson 4, every card goes on the map.</h2>
+    <p>Bring all of them, the weak ones too. A weak card is still a choice the steering committee can see.</p>
+    <p>Check that each one has Effort and Value filled in.</p><span class="btn">Open the home practice</span></div>
+  <div class="matrix"><div>Quick wins</div><div>Strategic</div><div></div><div></div>
+    <span class="ax" style="left:-60px;top:-28px">Value</span><span class="ax" style="right:0;bottom:-30px">Effort</span>
+    <i class="mc" style="left:40px;top:60px;--d:300ms;--fx:-420px;--fy:200px"></i>
+    <i class="mc" style="left:140px;top:120px;--d:500ms;--fx:-520px;--fy:150px;--c:var(--coral)"></i>
+    <i class="mc" style="left:320px;top:50px;--d:700ms;--fx:-700px;--fy:230px"></i>
+    <i class="mc" style="left:400px;top:140px;--d:900ms;--fx:-780px;--fy:130px;--c:#7FB1D6"></i>
+    <i class="mc" style="left:60px;top:280px;--d:1100ms;--fx:-440px;--fy:-20px;--c:#7FB1D6"></i>
+    <i class="mc" style="left:170px;top:330px;--d:1300ms;--fx:-550px;--fy:-60px"></i>
+    <i class="mc" style="left:300px;top:260px;--d:1500ms;--fx:-680px;--fy:10px;--c:var(--coral)"></i>
+    <i class="mc" style="left:420px;top:320px;--d:1700ms;--fx:-800px;--fy:-40px"></i>
+  </div>
+  <button class="replay" type="button" data-replay="k3">Replay</button>
+</div>
+
+<script>
+document.querySelectorAll('[data-replay]').forEach((b) => b.addEventListener('click', () => {
+  const s = document.getElementById(b.dataset.replay); s.classList.remove('play'); void s.offsetWidth; s.classList.add('play');
+}));
+</script>
+</body>
+</html>

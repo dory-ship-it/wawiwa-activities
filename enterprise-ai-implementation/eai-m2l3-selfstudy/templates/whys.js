@@ -8,9 +8,9 @@
 // Content: label (the key pill), cardField (which field of the learner's card this fills), surface
 // { label, text }, whys [text], root { label, text }, button (a ui.buttons key).
 // Kit candidate: written for this lesson's templates/; noted in _selfstudy-kit/REPORT.md for the catalog.
-import { h, reducedMotion } from '../src/util.js?v=34b6caae';
-import { glyph } from '../src/icons.js?v=34b6caae';
-import { layout } from '../src/templates/stage.js?v=34b6caae';
+import { h, reducedMotion } from '../src/util.js?v=c6cdc63e';
+import { glyph } from '../src/icons.js?v=c6cdc63e';
+import { layout } from '../src/templates/stage.js?v=c6cdc63e';
 
 export const whys = {
   scene: () => 'focus',
@@ -42,7 +42,10 @@ export const whys = {
     const head = h('div', { class: 'w-focus-head' },
       h('div', { class: 'm-head-row' },
         h('p', { class: 'w-key-label' }, glyph('learn', { size: 23.04 }), h('span', {}, screen.label)),
-        screen.cardField ? h('p', { class: 'm-card-field' }, h('span', { class: 'm-card-icon', 'aria-hidden': 'true' }), h('span', {}, screen.cardField)) : null),
+        screen.cardField ? h('p', { class: 'm-card-field' }, h('span', { class: 'm-card-icon', 'aria-hidden': 'true' }), h('span', {}, screen.cardField)) : null,
+        // round 3 (Noy: "shouldn't it say this is an example?"): whose case this is, before the heading (eye order),
+        // on the chips' row so the shaft keeps its place
+        screen.context ? h('p', { class: 'm-context-line m-context-inrow' }, screen.context) : null),
       zones.instruction);
     // the depth gauge: the slide's own words, "from symptom to root cause"
     const gauge = screen.depth ? h('div', { class: 'm-depth', 'aria-hidden': 'true' }, h('span', {}, screen.depth.top), h('i'), h('span', {}, screen.depth.bottom)) : null;

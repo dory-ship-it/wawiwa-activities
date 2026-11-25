@@ -152,7 +152,7 @@ function render() {
           el('span', { class: 'cats' }, c[4].map((x) => el('span', { class: 'cat' }, x))))))))));
   }));
 }
-document.getElementById('spots').append(...SPOTS.map((s) => el('article', { class: 'spot' }, el('h3', {}, s.title), el('dl', {}, s.rows.map(([k, v]) => [el('dt', {}, k), el('dd', {}, v)])))));
+document.getElementById('spots').append(...SPOTS.map((s) => el('article', { class: 'spot' }, el('h3', {}, s.title), el('dl', {}, s.rows.flatMap(([k, v]) => [el('dt', {}, k), el('dd', {}, v)])))));
 document.getElementById('pr').onclick = () => window.print();
 document.getElementById('dl').onclick = () => {
   const lines = ['Department,List,Use case,Deck tag,Categories', ...CASES.map((c) => [c[0], c[1], c[2], c[3], c[4].join(' / ')].map((x) => '"' + x.replace(/"/g, '""') + '"').join(','))];
