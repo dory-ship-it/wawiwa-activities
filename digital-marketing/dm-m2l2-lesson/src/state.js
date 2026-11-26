@@ -15,7 +15,7 @@ const SUSPEND_DROP_AT = 3800;      // over this, the retry counts (x) go first
 const ID_PREFIX = 'M2L2_';          // interaction ids lose the shared prefix inside suspend data
 
 export function emptyState() {
-  return { v: 1, s: null, d: [], a: {}, r: {}, f: {}, x: {}, g: {}, h: '', fin: null, k: null, p: null };
+  return { v: 1, s: null, d: [], a: {}, r: {}, f: {}, x: {}, g: {}, h: '', fin: null, k: null, p: null, m: 0 };
 }
 
 // fill the gaps of a parsed state (older shapes, missing keys); null when it is not ours
@@ -27,6 +27,7 @@ function normalize(s) {
   if (typeof state.h !== 'string') state.h = '';
   if (!state.k || typeof state.k !== 'object') state.k = null;
   if (!state.p || typeof state.p !== 'object') state.p = null;
+  state.m = state.m ? 1 : 0; // 1 = the learner muted the lesson's sound effects (the bar's sound button, src/sfx.js)
   return state;
 }
 
@@ -41,6 +42,7 @@ export function encode(state) {
   if (state.h) out.h = state.h;
   if (state.k) out.k = state.k;
   if (state.p) out.p = state.p;
+  if (state.m) out.m = 1;
   for (const k of ['r', 'f', 'x', 'g']) if (!Object.keys(out[k] || {}).length) delete out[k];
   let str = JSON.stringify(out);
   if (str.length > SUSPEND_DROP_AT) { delete out.x; str = JSON.stringify(out); }

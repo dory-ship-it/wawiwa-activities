@@ -21,11 +21,11 @@
 //   homeStop     (S36)  the home practice: the slide's five instructions and the link (new tab).
 //   call         (CALL) a phone rings; the learner answers; the client's recorded call plays, its lines shown as said.
 // Graded answers go out once (ctx.answer); everything else lives in the screen's flags (suspend data).
-import { h, fmt, resolveLink } from '../util.js?v=c6cd176a';
-import { glyph, icon } from '../icons.js?v=c6cd176a';
-import { letter } from '../tracking/index.js?v=c6cd176a';
-import { layout, picture, arrowNav } from './stage.js?v=c6cd176a';
-import { keyLine, boardEl, fill, headOf, floatBand, needLeft, beside } from './dm.js?v=c6cd176a';
+import { h, fmt, resolveLink } from '../util.js?v=9b389715';
+import { glyph, icon } from '../icons.js?v=9b389715';
+import { letter } from '../tracking/index.js?v=9b389715';
+import { layout, picture, arrowNav } from './stage.js?v=9b389715';
+import { keyLine, boardEl, fill, headOf, floatBand, needLeft, beside } from './dm.js?v=9b389715';
 
 /* ---------- shared parts ---------- */
 const SVG = 'http://www.w3.org/2000/svg';
@@ -741,7 +741,10 @@ export const call = {
     const c = ui.call, m = screen.media, k = screen.call;
     let cues = [], heard = ctx.revisit || !!ctx.flags.get('h'), rung = 1;
     const audio = h('audio', { class: 'd2-audio', src: m.src, preload: 'auto' });
-    const ring = h('audio', { class: 'd2-call-ring', src: m.ring, preload: 'auto' });
+    // (Noy, 26 Nov 2026) the ring is a sound effect of this screen (ctx.sound, src/sfx.js): only here, never in a
+    // review thumbnail, quiet while the bar's sound button is muted. The call itself is content: not muted by it.
+    const ringEl = h('audio', { class: 'd2-call-ring', src: m.ring, preload: 'auto' });
+    const ring = ctx.sound(ringEl);
     const status = h('p', { class: 'd2-call-status' }, c.ringing);
     const phone = h('div', { class: 'd2-call-phone', dataset: { state: 'ringing', buzz: 'true' } },
       h('img', { class: 'd2-call-img', src: k.image.src, alt: '' }),
@@ -751,7 +754,7 @@ export const call = {
     const again = btn('d2-call-again', 'callAgain', h('span', { 'aria-hidden': 'true' }, icon('rotate-ccw', { size: 20 })), h('span', {}, c.again));
     const lines = k.script.map((l) => h('p', { class: 'd2-call-line' }, l));
     const said = h('div', { class: 'd2-call-said', role: 'region', 'aria-label': c.transcript }, lines);
-    const still = () => { ring.pause(); phone.dataset.buzz = 'false'; };
+    const still = () => { ring.stop(); phone.dataset.buzz = 'false'; };
     function show(t, all = false) {
       const now = all ? -1 : cues.findIndex((x) => t >= x.t && t < x.end);
       lines.forEach((p, i) => { p.hidden = !all && !(cues[i] && t >= cues[i].t - 0.05); p.dataset.now = String(i === now); });
@@ -774,17 +777,17 @@ export const call = {
     again.addEventListener('click', talk);
     audio.addEventListener('timeupdate', () => { if (phone.dataset.state === 'talking') show(audio.currentTime); });
     audio.addEventListener('ended', () => ended(true));
-    ring.addEventListener('ended', () => { if (phone.dataset.state !== 'ringing' || rung >= RINGS) return still(); rung++; ring.play().catch(still); });
+    ringEl.addEventListener('ended', () => { if (phone.dataset.state !== 'ringing' || rung >= RINGS) return still(); rung++; ring.play(); });
     fetch(m.cues).then((r) => r.json()).then((j) => { cues = j.items || []; }).catch(() => {});
-    layout(ctx, 'dm2-call', headOf(ctx, screen.eyebrow), body('call', audio, ring, phone, h('div', { class: 'd2-call-side' }, answer, said, again)), floatBand(ctx));
+    layout(ctx, 'dm2-call', headOf(ctx, screen.eyebrow), body('call', audio, ringEl, phone, h('div', { class: 'd2-call-side' }, answer, said, again)), floatBand(ctx));
     zones.setFeedback({ state: 'hint', text: screen.hint });
     again.hidden = true;
     if (heard) ended(false);
     else {
       show(0);
-      ring.play().catch(() => {});      // a browser may refuse sound before the first click: the phone still shakes
+      ring.play(); // (a browser may refuse sound before the first click: it then starts on that click; the phone shakes either way)
       ctx.ghost({ type: screen.ghost?.type || 'call', delay: 3200, steps: () => [{ point: beside(answer, 0.82, 0.9), hold: 1100 }] });
     }
-    return { unmount() { [audio, ring].forEach((a) => { a.pause(); a.removeAttribute('src'); a.load(); }); } };
+    return { unmount() { ring.stop(); [audio, ringEl].forEach((a) => { a.pause(); a.removeAttribute('src'); a.load(); }); } };
   },
 };

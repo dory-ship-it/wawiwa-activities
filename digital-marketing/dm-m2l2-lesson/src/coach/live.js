@@ -11,7 +11,7 @@
 // No SCORM call, nothing stored: the learner's own-case fields go to the page as they are (raw: the page
 // gates and redacts them), only on own-case screens. Never in review mode or with ?live=0 (the tests
 // that run without the network).
-import { h, chapterNo } from '../util.js?v=c6cd176a';
+import { h, chapterNo } from '../util.js?v=9b389715';
 
 // DM M2 L2 (Noy, 18 Nov 2026: wired; she reports Dor's approval): the lesson's own coach page, built in Practice
 // Studio from activities/dm-m2l2-coach (the pack is planning/coach-pack-for-dor.md).

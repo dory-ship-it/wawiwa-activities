@@ -19,9 +19,9 @@
 // Shared parts: keyLine() (one sentence of the trainer's, in the quote style: a turquoise rule and larger
 // type; at most one per screen) and boardEl() (the four components).
 // Nothing here is graded or sent to the LMS: answers live in the screen's flags (suspend data) only.
-import { h, fmt, resolveLink, reducedMotion } from '../util.js?v=c6cd176a';
-import { glyph, icon } from '../icons.js?v=c6cd176a';
-import { layout, sheet, picture, arrowNav } from './stage.js?v=c6cd176a';
+import { h, fmt, resolveLink, reducedMotion } from '../util.js?v=9b389715';
+import { glyph, icon } from '../icons.js?v=9b389715';
+import { layout, sheet, picture, arrowNav } from './stage.js?v=9b389715';
 
 /* ---------- shared parts ---------- */
 // fill(el, ...children): replaceChildren without the empty ones (replaceChildren(null) would print "null")

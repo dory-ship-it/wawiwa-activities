@@ -15,11 +15,11 @@
 // shuffled option reports the same letter as before. A revisit shows the review from the first item;
 // a reload in the middle of an attempt goes on from the first item not answered yet.
 // FX3: version b of every item on a retake (its own interaction ids, L4_S21_1b ...), a again after that.
-import { h, fmt } from '../util.js?v=c6cd176a';
-import { glyph } from '../icons.js?v=c6cd176a';
-import { checkButton } from './decision.js?v=c6cd176a';
-import { letter } from '../tracking/index.js?v=c6cd176a';
-import { layout, sheet, progressDots, arrowNav } from './stage.js?v=c6cd176a';
+import { h, fmt } from '../util.js?v=9b389715';
+import { glyph } from '../icons.js?v=9b389715';
+import { checkButton } from './decision.js?v=9b389715';
+import { letter } from '../tracking/index.js?v=9b389715';
+import { layout, sheet, progressDots, arrowNav } from './stage.js?v=9b389715';
 
 export const check = {
   mount(ctx) {

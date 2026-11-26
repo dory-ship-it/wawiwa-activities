@@ -8,30 +8,31 @@
 // screen of every chapter in order, nothing is tracked or saved (no SCORM calls, no localStorage
 // writes; the state lives in memory and starts empty), and a slim review toolbar (src/review/) shows
 // the screen's id, template, chapter and word count. Works with ?screen=ID.
-import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=c6cd176a';
-import { createZones } from './zones.js?v=c6cd176a';
-import { createMenu, openDialog } from './menu.js?v=c6cd176a';
-import { initTooltips, applyTerms } from './tooltip.js?v=c6cd176a';
-import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=c6cd176a';
-import { decision } from './templates/decision.js?v=c6cd176a';
-import { input } from './templates/input.js?v=c6cd176a';
-import { sortDeck } from './templates/sortdeck.js?v=c6cd176a';
-import { bpmn } from './templates/bpmn.js?v=c6cd176a';
-import { flags } from './templates/flags.js?v=c6cd176a';
-import { explorer } from './templates/explorer.js?v=c6cd176a';
-import { video } from './templates/video.js?v=c6cd176a';
-import { handoff } from './templates/handoff.js?v=c6cd176a';
-import { check } from './templates/check.js?v=c6cd176a';
-import { result } from './templates/result.js?v=c6cd176a';
-import { end } from './templates/end.js?v=c6cd176a';
-import { title, moduleMap, goals, warmup, opener, deliverable, concept, keyParts, keyColumns } from './templates/intro.js?v=c6cd176a';
-import { createGhost, stopGhost } from './ghost.js?v=c6cd176a';
-import { createTracking } from './tracking/index.js?v=c6cd176a';
-import { describe } from './tracking/describe.js?v=c6cd176a';
-import { createCoach } from './coach/coach.js?v=c6cd176a';
-import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=c6cd176a';
-import { bring, workbookStop, questionTiles, questionCards, dimensionMap, goalCards, closing } from './templates/dm.js?v=c6cd176a';
-import { checklist, revealTable, quiz, client, stages, builder, caseFile, twoCols, podcast, poll, funnelCalc, dataTable, infographic, homeStop, call } from './templates/dm2.js?v=c6cd176a';
+import { h, fmt, chapterNo, resolveChapterRefs } from './util.js?v=9b389715';
+import { createZones } from './zones.js?v=9b389715';
+import { createMenu, openDialog } from './menu.js?v=9b389715';
+import { initTooltips, applyTerms } from './tooltip.js?v=9b389715';
+import { loadState, saveState, clearState, emptyState, decode } from './state.js?v=9b389715';
+import { decision } from './templates/decision.js?v=9b389715';
+import { input } from './templates/input.js?v=9b389715';
+import { sortDeck } from './templates/sortdeck.js?v=9b389715';
+import { bpmn } from './templates/bpmn.js?v=9b389715';
+import { flags } from './templates/flags.js?v=9b389715';
+import { explorer } from './templates/explorer.js?v=9b389715';
+import { video } from './templates/video.js?v=9b389715';
+import { handoff } from './templates/handoff.js?v=9b389715';
+import { check } from './templates/check.js?v=9b389715';
+import { result } from './templates/result.js?v=9b389715';
+import { end } from './templates/end.js?v=9b389715';
+import { title, moduleMap, goals, warmup, opener, deliverable, concept, keyParts, keyColumns } from './templates/intro.js?v=9b389715';
+import { createGhost, stopGhost } from './ghost.js?v=9b389715';
+import { createTracking } from './tracking/index.js?v=9b389715';
+import { describe } from './tracking/describe.js?v=9b389715';
+import { createCoach } from './coach/coach.js?v=9b389715';
+import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=9b389715';
+import { bring, workbookStop, questionTiles, questionCards, dimensionMap, goalCards, closing } from './templates/dm.js?v=9b389715';
+import { checklist, revealTable, quiz, client, stages, builder, caseFile, twoCols, podcast, poll, funnelCalc, dataTable, infographic, homeStop, call } from './templates/dm2.js?v=9b389715';
+import { createSfx } from './sfx.js?v=9b389715';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -114,7 +115,11 @@ class Lesson {
       onNext: () => this.nextAction(),
       // FX4: a first wrong answer brings "Show me how" out on screens that have one
       onWrong: () => this.ghosts.forEach((g) => g.reveal && g.reveal()),
+      // the sound button (Noy, 26 Nov 2026): the lesson's sound effects on or off, kept in the state (m)
+      onSound: () => { this.state.m = this.state.m ? 0 : 1; this.persist(); this.sfx.refresh(); this.showSound(); },
     });
+    // the lesson's sound effects (src/sfx.js): only on their own screen, never in a review thumbnail, silent while muted
+    this.sfx = createSfx({ isMuted: () => !!this.state?.m, silent: this.thumb });
     this.menu = createMenu(this.stage, content, {
       zones: this.zones,
       getMenu: () => this.menuModel(),
@@ -229,7 +234,7 @@ class Lesson {
       // The toolbar is a dynamic import: src/review/ stays out of the SCORM package (no toolbar there).
       const jump = q.get('screen');
       this.go(jump && this.screens[jump] ? jump : this.order[0]);
-      import('./review/toolbar.js?v=c6cd176a').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
+      import('./review/toolbar.js?v=9b389715').then((m) => { this.toolbar = m.createToolbar(this); this.toolbar.show(this.current); }).catch(() => {});
       return;
     }
     if (q.get('reset') === '1') { clearState(); this.state = emptyState(); }
@@ -332,6 +337,8 @@ class Lesson {
       finished: () => !!this.state.fin,
       // the ghost hand (src/ghost.js): a once-per-interaction-type demo with a "Show me" replay
       ghost: (opts) => this.ghostFor(opts),
+      // a sound effect of this screen (src/sfx.js): ctx.sound(audioElement) -> { play(), stop() }
+      sound: (el) => this.sfx.add(el),
     });
     // FX8 (Noy, 8 Nov 2026: "go back to my design in Artifacts"): the FX7 composer is retired; every screen
     // is laid out by its template on its scene, as in the boards (L4 Screens Intro to Ch2, planning/fx8-board)
@@ -340,6 +347,7 @@ class Lesson {
     if (screen.presentation) { this.complete(id); this.zones.setNext(false); }
     applyTerms(this.zones.main, screen.terms, this.content.tooltips);
     this.renderBar();
+    this.showSound();
     this.coach.show(screen, chapter);
     if (this.toolbar) this.toolbar.show(id);
     if (focus && !this.thumb) this.zones.instruction.focus({ preventScroll: true });
@@ -534,6 +542,7 @@ class Lesson {
   }
 
   unmount() {
+    this.sfx.clear();
     if (this.mounted && this.mounted.unmount) this.mounted.unmount();
     this.mounted = null;
     this.ghosts.forEach((g) => g.cancel());
@@ -587,7 +596,9 @@ class Lesson {
 
   startOver() {
     if (!this.review) clearState();
+    const muted = this.state.m; // (the sound choice is the learner's, not the lesson's progress: it stays)
     this.state = emptyState();
+    this.state.m = muted;
     this.backTo = null;
     this.go(this.order[0]);
   }
@@ -599,6 +610,9 @@ class Lesson {
     const sent = this.tracking.persist(this.state);
     this.zones.setSaved(this.lms ? sent : saveState(this.state));
   }
+
+  // the sound button: shown only while the screen on view has a sound effect
+  showSound() { this.zones.setSound({ shown: this.sfx.count() > 0, muted: !!this.state.m }); }
 
   /* ---- progress model (top bar and menu) ---- */
   // Done screens, plus the screens a fast-track jump skipped (route "skip"): they count as done,
