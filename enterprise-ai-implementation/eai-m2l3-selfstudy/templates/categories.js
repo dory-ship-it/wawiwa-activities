@@ -5,8 +5,8 @@
 // before any tool), an arrow, then the four tool categories, each with its photo, its name and one line. The cards come
 // in once, in reading order (the order of the decision: process first, then a tool); none with reduced motion.
 // Content: instruction, cards [{ id, name, line, photo: { src, position }, tag, first }].
-import { h, reducedMotion } from '../src/util.js?v=c6cdc63e';
-import { layout } from '../src/templates/stage.js?v=c6cdc63e';
+import { h, reducedMotion } from '../src/util.js?v=044f9db2';
+import { layout } from '../src/templates/stage.js?v=044f9db2';
 
 export const categories = {
   scene: () => 'focus',

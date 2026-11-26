@@ -33,7 +33,11 @@
       "F5",
       "F6",
       "G1",
-      "G2"
+      "G2",
+      "H0",
+      "H1",
+      "H3",
+      "H4"
     ],
     "completion": {
       "rule": "finish",
@@ -164,7 +168,10 @@
         "tiles": "Next, locked until you open all four categories",
         "tenCards": "Next, locked until you turn your pains into cards",
         "gate": "Next, locked until you see all three ideas",
-        "meeting": "Next, locked until you answer every voice and the sentence"
+        "meeting": "Next, locked until you answer every voice and the sentence",
+        "tiers": "Next, locked until you finish this screen",
+        "stamps": "Next, locked until every document is stamped",
+        "gauge": "Next, locked until every row has an answer"
       },
       "need": {
         "single": "Choose an answer, then Check.",
@@ -204,7 +211,9 @@
         "tiles": "Open all four categories to continue.",
         "tenCards": "Turn your pains into cards to continue.",
         "gate": "Open the next idea to continue.",
-        "meeting": "Answer every voice, then the sentence."
+        "meeting": "Answer every voice, then the sentence.",
+        "stamps": "Stamp every document to continue.",
+        "gauge": "Give every row a score, or Ask IT."
       },
       "needCards": "Place {n} more cards.",
       "needCards1": "Place the last card.",
@@ -398,7 +407,22 @@
       "done": "done"
     },
     "chooseCard": "Choose a card",
-    "counter": "{n} / {max}"
+    "counter": "{n} / {max}",
+    "audio": {
+      "play": "Play",
+      "pause": "Pause",
+      "seek": "Seek",
+      "seekText": "{t} of {d}",
+      "speed": "Playback speed {x} times. Press to change.",
+      "speedChip": "{x}×",
+      "transcript": "Transcript",
+      "captions": "Captions",
+      "now": "Now",
+      "voiceA": "Voice one",
+      "voiceB": "Voice two",
+      "controls": "Audio controls",
+      "seekAhead": "You can move ahead only to the part you have already heard."
+    }
   },
   "links": {
     "library": "https://dory-ship-it.github.io/wawiwa-activities/enterprise-ai-implementation/eai-m2l3-selfstudy/library/",
@@ -531,6 +555,24 @@
       "screens": [
         "G1",
         "G2"
+      ],
+      "inSlice": true,
+      "pauseMarker": null
+    },
+    {
+      "id": "ch8",
+      "n": 7,
+      "title": "Can it ship?",
+      "photo": {
+        "src": null,
+        "temp": true
+      },
+      "minutes": 12,
+      "screens": [
+        "H0",
+        "H1",
+        "H3",
+        "H4"
       ],
       "inSlice": true,
       "pauseMarker": null
@@ -945,7 +987,7 @@
       },
       "label": "Process before tool",
       "instruction": "Before you choose a tool, ask one question",
-      "question": "Does a change in how the work runs solve this, with no tool at all?",
+      "question": "Can a change to the process fix this, without any tool?",
       "ideas": [
         {
           "draw": "crooked",
@@ -1016,7 +1058,7 @@
         "L3 deck slide 5 (\"Automating a flawed workflow just makes the flaw run faster\")",
         "Round 3: the duplicate or wrong payment is an illustration of the flaw, not a fact of the case"
       ],
-      "hint": "Watch the red payments once the automation is in.",
+      "hint": "Same CRM in both regions. What is really different?",
       "stream": {
         "dots": 9,
         "bad": [
@@ -1395,7 +1437,8 @@
         "src": "assets/video/e1-library-demo.mp4",
         "poster": "assets/video/e1-library-demo-poster.jpg",
         "label": "How to search it",
-        "alt": "A silent demo of the library page: filters by department and category, the cases, the spotlights and the download."
+        "alt": "A silent demo of the library page: filters by department and category, the cases, the spotlights and the download.",
+        "duration": 13
       },
       "open": {
         "label": "Open the library",
@@ -1413,7 +1456,7 @@
         "Filter by solution category",
         "Open the closest case and adapt it"
       ],
-      "delay": 2600
+      "delay": 3800
     },
     {
       "id": "E2",
@@ -1714,26 +1757,37 @@
         {
           "id": "p1",
           "title": "5-Whys",
-          "text": "Ask why five times.",
+          "text": "Ask why until you reach the root.",
           "case": "From symptom to root.",
-          "draw": "chain"
+          "draw": "chain",
+          "labels": [
+            "The pain",
+            "Root cause"
+          ]
         },
         {
           "id": "p2",
           "title": "Fishbone",
-          "text": "Six kinds of cause.",
+          "text": "Head: the pain. Bones: the causes.",
           "case": "Looks past tools first.",
-          "draw": "fish"
+          "draw": "fish",
+          "labels": [
+            "Pain",
+            "Kinds of cause"
+          ]
         },
         {
           "id": "p3",
           "title": "Pareto",
-          "text": "Most pain, few causes.",
+          "text": "A few causes make most of the pain.",
           "case": "Focus on heavy branches.",
-          "draw": "bars"
+          "draw": "bars",
+          "labels": [
+            "80%",
+            "Few causes"
+          ]
         }
       ],
-      "caseToggle": "What each one does",
       "caseLabel": "In short",
       "ground": {
         "kind": "darkblur"
@@ -1922,6 +1976,7 @@
       },
       "label": "Fishbone",
       "instruction": "Six kinds of cause, one pain",
+      "headLabel": "The pain",
       "head": "Support reply takes more than 48 hours",
       "bones": [
         {
@@ -2056,7 +2111,7 @@
       "template": "fishbone",
       "variant": "sort",
       "step": {
-        "verb": "Place",
+        "verb": "Drag",
         "icon": "sort"
       },
       "minutes": 4,
@@ -2065,7 +2120,8 @@
         "tip": "Ask of each cause: is it about people, steps, systems, data, rules, or the outside?"
       },
       "label": "Fishbone",
-      "instruction": "Place each cause on its bone",
+      "instruction": "Drag each cause onto its bone",
+      "headLabel": "The pain",
       "head": "Heating failure in Boston",
       "bones": [
         {
@@ -2248,7 +2304,8 @@
         "L3 deck slide 13 (the Pain Owner: who feels it; the cleanest signal of value; the change-management ally)",
         "L3 deck slide 17 (OP-014: Henrik feels every late close; sponsor Sarah Chen)",
         "Knowledge check key Q19 (Pain Owner vs Owner / Sponsor)",
-        "Round 3 (25 Nov 2026): the meeting room; the six lines are written for the lesson in the spirit of the persona cards (not quotes from the materials)"
+        "Round 3 (25 Nov 2026): the meeting room; the six lines are written for the lesson in the spirit of the persona cards (not quotes from the materials)",
+        "Round 4 (26 Nov 2026): the six lines voiced with ElevenLabs (one voice per speaker; Sarah the same voice twice), assets/audio/g1"
       ],
       "template": "meeting",
       "instruction": "Listen to each one: feels the pain, or funds the fix?",
@@ -2272,9 +2329,10 @@
             280
           ],
           "head": [
-            221,
-            334
-          ]
+            238,
+            350
+          ],
+          "ring": 128
         },
         {
           "id": "diana",
@@ -2285,9 +2343,10 @@
             322
           ],
           "head": [
-            350,
-            367
-          ]
+            362,
+            374
+          ],
+          "ring": 112
         },
         {
           "id": "henrik",
@@ -2298,9 +2357,10 @@
             322
           ],
           "head": [
-            590,
-            372
-          ]
+            592,
+            378
+          ],
+          "ring": 124
         },
         {
           "id": "marcus",
@@ -2311,9 +2371,10 @@
             292
           ],
           "head": [
-            850,
-            342
-          ]
+            840,
+            358
+          ],
+          "ring": 128
         },
         {
           "id": "lin",
@@ -2324,9 +2385,10 @@
             236
           ],
           "head": [
-            1017,
-            292
-          ]
+            982,
+            326
+          ],
+          "ring": 136
         }
       ],
       "lines": [
@@ -2342,7 +2404,8 @@
           "feedback": {
             "correct": "He lives with it every month: the Pain Owner.",
             "wrong": "He does not fund anything: he lives with it every close. Pain Owner."
-          }
+          },
+          "audio": "assets/audio/g1/g1-1-henrik.mp3"
         },
         {
           "who": "sarah",
@@ -2356,7 +2419,8 @@
           "feedback": {
             "correct": "She backs it and funds it: the sponsor.",
             "wrong": "She does not feel it daily: she offers to fund and back it."
-          }
+          },
+          "audio": "assets/audio/g1/g1-2-sarah.mp3"
         },
         {
           "who": "marcus",
@@ -2370,7 +2434,8 @@
           "feedback": {
             "correct": "The calls land on him: he feels it.",
             "wrong": "Nothing here funds a fix: the pain lands on him."
-          }
+          },
+          "audio": "assets/audio/g1/g1-3-marcus.mp3"
         },
         {
           "who": "lin",
@@ -2384,7 +2449,8 @@
           "feedback": {
             "correct": "She puts budget behind it: a sponsor.",
             "wrong": "She offers budget: that is the sponsor's role."
-          }
+          },
+          "audio": "assets/audio/g1/g1-4-lin.mp3"
         },
         {
           "who": "diana",
@@ -2398,7 +2464,8 @@
           "feedback": {
             "correct": "She sees every lost lead: the Pain Owner.",
             "wrong": "She offers no budget: she feels each lost lead."
-          }
+          },
+          "audio": "assets/audio/g1/g1-5-diana.mp3"
         },
         {
           "who": "sarah",
@@ -2412,7 +2479,8 @@
           "feedback": {
             "correct": "Here Sarah feels it: the role follows what is said.",
             "wrong": "She funds nothing here: the problem lands on her desk."
-          }
+          },
+          "audio": "assets/audio/g1/g1-6-sarah.mp3"
         }
       ],
       "roles": {
@@ -2447,21 +2515,23 @@
         {
           "id": "M2L3_G1_1",
           "type": "matching",
-          "correctResponse": "1.pain,2.sponsor,3.pain,4.pain,5.pain,6.sponsor",
+          "correctResponse": "",
           "scored": true,
           "bloom": "Understand",
-          "result": "graded"
+          "result": "graded",
+          "key": "1.pain,2.funds,3.pain,4.funds,5.pain,6.pain"
         },
         {
           "id": "M2L3_G1_2",
           "type": "choice",
-          "correctResponse": "henrik,sarah",
+          "correctResponse": "",
           "scored": false,
           "bloom": "Apply",
-          "result": "graded"
+          "result": "graded",
+          "key": "henrik,sarah"
         }
       ],
-      "hint": "Listen to what each one says. Does it hurt them, or do they pay for the fix?"
+      "hint": "One feels it when it hits. The other funds the fix."
     },
     {
       "id": "G2",
@@ -2550,6 +2620,397 @@
       "cardStep": "people",
       "intro": "Back to your card",
       "instruction": "Add the root cause and the people behind your pain"
+    },
+    {
+      "id": "H0",
+      "chapter": "ch8",
+      "template": "tiers",
+      "step": {
+        "verb": "Four levels",
+        "icon": "key-idea"
+      },
+      "minutes": 2,
+      "presentation": true,
+      "coach": {
+        "kind": "idea",
+        "tip": "The more closed the data, the fewer places AI may run on it."
+      },
+      "label": "Data sensitivity",
+      "instruction": "Four levels of sensitive data",
+      "ground": {
+        "kind": "darkblur"
+      },
+      "photo": false,
+      "tracking": [],
+      "sources": [
+        "L3 deck slide 14 (the four tiers and what each needs); BRIEF: Public no constraints, Internal vendor with DPA, Confidential private cloud (HR records), Restricted on-prem or compliant cloud plus legal review; PLAN.md examples (listing copy, org chart, performance reviews, tenant payment details). The slide's own example lists still to be checked against the deck."
+      ],
+      "hint": "The more closed the data, the fewer places AI may run on it.",
+      "scale": {
+        "open": "Open",
+        "closed": "Closed"
+      },
+      "runLabel": "Where AI may run",
+      "tiers": [
+        {
+          "id": "public",
+          "name": "Public",
+          "examples": "Listing copy, the public website",
+          "run": "Any tool, no constraints",
+          "draw": "shelf"
+        },
+        {
+          "id": "internal",
+          "name": "Internal",
+          "examples": "The org chart, the process inventory",
+          "run": "A vendor with a signed DPA",
+          "draw": "cabinet"
+        },
+        {
+          "id": "confidential",
+          "name": "Confidential",
+          "examples": "HR records, performance reviews",
+          "run": "A private cloud",
+          "draw": "door"
+        },
+        {
+          "id": "restricted",
+          "name": "Restricted",
+          "examples": "Tenant payment details",
+          "run": "On-prem or a compliant cloud, legal review first",
+          "draw": "vault"
+        }
+      ],
+      "keyLine": "Every card carries the flag. The flag decides the tool and the timeline."
+    },
+    {
+      "id": "H1",
+      "chapter": "ch8",
+      "template": "stamps",
+      "step": {
+        "verb": "Stamp",
+        "icon": "sort"
+      },
+      "minutes": 3,
+      "coach": {
+        "kind": "practice",
+        "tip": "Ask: who would be hurt if this leaked? Nobody, the company, people, or people and money?"
+      },
+      "label": "Data sensitivity",
+      "instruction": "Stamp each document with its level",
+      "ground": {
+        "kind": "dots"
+      },
+      "photo": false,
+      "tracking": [
+        {
+          "id": "M2L3_H1_1",
+          "type": "matching",
+          "correctResponse": "",
+          "scored": true,
+          "bloom": "Apply",
+          "result": "graded",
+          "key": "1.public,2.internal,3.confidential,4.restricted,5.internal,6.confidential"
+        }
+      ],
+      "sources": [
+        "L3 deck slide 14 (the four tiers and what each needs); BRIEF: Public no constraints, Internal vendor with DPA, Confidential private cloud (HR records), Restricted on-prem or compliant cloud plus legal review; PLAN.md examples (listing copy, org chart, performance reviews, tenant payment details). The slide's own example lists still to be checked against the deck.",
+        "Knowledge check key Q4 (HR records are Confidential)"
+      ],
+      "hint": "Ask: who would be hurt if this leaked? Nobody, the company, people, or people and money?",
+      "from": "{n} more to go",
+      "stampsLabel": "Stamps",
+      "traysLabel": "Stamped documents",
+      "tiers": [
+        {
+          "id": "public",
+          "name": "Public"
+        },
+        {
+          "id": "internal",
+          "name": "Internal"
+        },
+        {
+          "id": "confidential",
+          "name": "Confidential"
+        },
+        {
+          "id": "restricted",
+          "name": "Restricted"
+        }
+      ],
+      "docs": [
+        {
+          "n": 1,
+          "kind": "Leasing team",
+          "title": "Listing copy",
+          "line": "Descriptions of 84 properties, already on the portals",
+          "tier": "public",
+          "feedback": {
+            "correct": "Public: it is already on the portals for anyone to read.",
+            "wrong": "Anyone can read it on the portals already: Public."
+          }
+        },
+        {
+          "n": 2,
+          "kind": "HR",
+          "title": "The org chart",
+          "line": "Who reports to whom, across the regions",
+          "tier": "internal",
+          "feedback": {
+            "correct": "Internal: for staff, harmless outside but not for publishing.",
+            "wrong": "It is for staff, not secret: Internal."
+          }
+        },
+        {
+          "n": 3,
+          "kind": "HR",
+          "title": "Performance reviews",
+          "line": "Ratings and notes for every manager",
+          "tier": "confidential",
+          "feedback": {
+            "correct": "Confidential: personal records about people.",
+            "wrong": "Records about people, like HR files: Confidential."
+          }
+        },
+        {
+          "n": 4,
+          "kind": "The rent portal",
+          "title": "Tenant payment details",
+          "line": "Card numbers and bank accounts for every tenant",
+          "tier": "restricted",
+          "feedback": {
+            "correct": "Restricted: people and their money. On-prem or a compliant cloud, legal first.",
+            "wrong": "Card numbers and bank accounts: the closed end, Restricted."
+          }
+        },
+        {
+          "n": 5,
+          "kind": "Lesson 2",
+          "title": "The process inventory",
+          "line": "Processes, owners, systems and pains",
+          "tier": "internal",
+          "feedback": {
+            "correct": "Internal: how the company works, for staff.",
+            "wrong": "A working document for staff, no personal data: Internal."
+          }
+        },
+        {
+          "n": 6,
+          "kind": "HR",
+          "title": "Salary bands",
+          "line": "Pay ranges for every role",
+          "tier": "confidential",
+          "feedback": {
+            "correct": "Confidential: pay is about people, like HR records.",
+            "wrong": "Pay is about people: Confidential, like HR records."
+          }
+        }
+      ],
+      "closing": "Six documents, four levels. The same question decides each one: who would be hurt if it leaked?"
+    },
+    {
+      "id": "H3",
+      "chapter": "ch8",
+      "template": "podcast",
+      "locked": "podcast",
+      "step": {
+        "verb": "Listen",
+        "icon": "volume"
+      },
+      "minutes": 3,
+      "coach": {
+        "kind": "idea",
+        "tip": "Press Play and listen to the end. The transcript is beside the player."
+      },
+      "eyebrow": "AI governance",
+      "instruction": "Listen: who decides about AI here?",
+      "hint": "Press Play and listen to the end. The transcript is beside the player.",
+      "ground": {
+        "kind": "dots"
+      },
+      "photo": false,
+      "observations": [
+        "Who may build AI tools?",
+        "Which tools are approved?",
+        "Who collects the requests?",
+        "Who signs off?"
+      ],
+      "media": {
+        "$comment": "Recorded 26 Nov 2026 with ElevenLabs (eleven_multilingual_v2), the DM S26 settings: voice A \"Laura - a top narration voice\" (GZ4PpFJV8ikEGUtBrjK7, the course voice, speed 0.85), voice B \"Roger - Laid-Back, Casual, Resonant\" (CwhRBWXzGAHq8TQ4Fs17, speed 0.9); stability 0.50, similarity 0.80, style 0.15. One take per script line (assets/audio/h3-takes), edge silence trimmed, a 0.6 s breath between lines, loudnorm -16 LUFS, mono mp3 96 kbps (planning/_build-h3-audio.mjs). No music.",
+        "src": "assets/audio/h3.mp3",
+        "captions": [
+          {
+            "lang": "en",
+            "label": "English",
+            "src": "assets/audio/h3.en.vtt"
+          }
+        ],
+        "cues": "assets/audio/h3.cues.json",
+        "duration": 79.34,
+        "length": "1:19",
+        "temp": false
+      },
+      "podcast": {
+        "voices": {
+          "A": "explains the four corners of slide 15",
+          "B": "only asks the next question"
+        },
+        "note": "Two voices, no names. The four corner questions are slide 15's four corners as questions.",
+        "script": [
+          {
+            "voice": "A",
+            "text": "Before a card goes anywhere, someone has to be allowed to build it. That is governance, and every client has four corners of it."
+          },
+          {
+            "voice": "B",
+            "text": "Four corners. Where do we start?"
+          },
+          {
+            "voice": "A",
+            "obs": 1,
+            "text": "Who may build AI tools?"
+          },
+          {
+            "voice": "A",
+            "text": "In some companies anyone can build an assistant over a weekend. In others only IT may. Your card has to fit that rule."
+          },
+          {
+            "voice": "B",
+            "text": "And the second corner?"
+          },
+          {
+            "voice": "A",
+            "obs": 2,
+            "text": "Which tools are approved?"
+          },
+          {
+            "voice": "A",
+            "text": "If the tool on your card is not on the approved list, add the approval time to your plan. At NorthRiver, Lin's AI policy is still in legal review, so nothing is approved yet."
+          },
+          {
+            "voice": "B",
+            "text": "So the tool question waits on legal."
+          },
+          {
+            "voice": "A",
+            "obs": 3,
+            "text": "Who collects the requests?"
+          },
+          {
+            "voice": "A",
+            "text": "When every department sends its own AI requests, the same idea gets built three times. One place should collect them, and your cards go there."
+          },
+          {
+            "voice": "B",
+            "text": "And the last corner?"
+          },
+          {
+            "voice": "A",
+            "obs": 4,
+            "text": "Who signs off?"
+          },
+          {
+            "voice": "A",
+            "text": "Name who approves a card before it ships: security, legal, the sponsor. If nobody can, that is a finding too."
+          },
+          {
+            "voice": "B",
+            "text": "Is that the whole of governance?"
+          },
+          {
+            "voice": "A",
+            "text": "No. Modules 3 and 6 go deeper. For now, check the four corners for every card, and write down what you do not know."
+          }
+        ]
+      },
+      "tracking": [],
+      "suspend": [
+        "heard to the end"
+      ],
+      "sources": [
+        "L3 deck slide 15 (four corners: build authorization, tool authorization, demand centralization, review and approval flow; light, Modules 3 and 6 teach it)",
+        "Persona card Lin Zhao (the AI policy is still in legal review)",
+        "Round 4: the explanation lines are written for the lesson, to be checked"
+      ]
+    },
+    {
+      "id": "H4",
+      "chapter": "ch8",
+      "template": "gauge",
+      "step": {
+        "verb": "Integration",
+        "icon": "explore"
+      },
+      "minutes": 4,
+      "coach": {
+        "kind": "practice",
+        "tip": "Score only what the case tells you. Everything else is a question for IT, before the card goes on."
+      },
+      "label": "Integration",
+      "instruction": "Score it before it reaches the shortlist",
+      "ground": {
+        "kind": "dots"
+      },
+      "photo": false,
+      "tracking": [
+        {
+          "id": "M2L3_H4_1",
+          "type": "fill-in",
+          "correctResponse": null,
+          "scored": false,
+          "bloom": "Evaluate",
+          "result": "neutral"
+        }
+      ],
+      "sources": [
+        "L3 deck slide 16 (integration feasibility, \"the silent killer of AI POCs\": API, bulk data, SSO, deploy without the change board, 0 to 2 each, summed on the card; a 9 out of 10 opportunity can take six months, not six weeks)",
+        "Persona card Lin Zhao (no SSO across 8+ systems)",
+        "Persona card Diana Vasquez (leads from 6 portals)"
+      ],
+      "hint": "Score only what the case tells you. Everything else is a question for IT, before the card goes on.",
+      "oppLabel": "Diana's opportunity",
+      "opportunity": "Route every portal lead to the right agent within minutes",
+      "ask": "Ask IT",
+      "rows": [
+        {
+          "id": "api",
+          "name": "API",
+          "question": "Can the systems talk to each other?",
+          "expect": "ask"
+        },
+        {
+          "id": "bulk",
+          "name": "Bulk data",
+          "question": "Can you pull the history out?",
+          "expect": "ask"
+        },
+        {
+          "id": "sso",
+          "name": "SSO",
+          "fact": "Lin: \"No SSO across 8+ systems.\"",
+          "expect": 0
+        },
+        {
+          "id": "deploy",
+          "name": "Deploy",
+          "question": "Can it ship without the change board?",
+          "expect": "ask"
+        }
+      ],
+      "max": 8,
+      "scoreLabel": "Integration score",
+      "openLine": "{n} rows still open",
+      "timeLabel": "Time to ship",
+      "ticks": [
+        "6 weeks",
+        "6 months"
+      ],
+      "keyLine": "A top idea with a weak score takes six months, not six weeks.",
+      "feedback": {
+        "done": "SSO is 0: Lin said so. The case says nothing on the other three: ask IT before prioritization.",
+        "off": "Where you scored without a fact from the case, ask IT first."
+      }
     }
   ],
   "card": {

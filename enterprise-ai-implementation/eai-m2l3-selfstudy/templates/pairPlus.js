@@ -3,9 +3,9 @@
 // third one is done"). When the last situation is answered, it too becomes a done box like the others, so the row ends
 // as identical boxes, all ticked. The rest is the template's own (one try, the feedback card, Next).
 // Three answers (C2: process, tool, or both paths) get a three-way fork in CSS (lesson.css, "three-way").
-import { h } from '../src/util.js?v=c6cdc63e';
-import { glyph } from '../src/icons.js?v=c6cdc63e';
-import { decision } from '../src/templates/decision.js?v=c6cdc63e';
+import { h } from '../src/util.js?v=044f9db2';
+import { glyph } from '../src/icons.js?v=044f9db2';
+import { decision } from '../src/templates/decision.js?v=044f9db2';
 
 export const pairPlus = {
   scene: (screen) => decision.scene(screen),

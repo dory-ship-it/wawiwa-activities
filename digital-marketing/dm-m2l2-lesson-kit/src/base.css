@@ -2009,3 +2009,12 @@ a.w-btn { text-decoration: none; }
 /* the result screen: the score is the heading; the pass mark is a small line under it (Noy, 20 Nov 2026; Core,
    EAI-FIX-LIST A6; screen.passNote) */
 .d-pass-note { margin: 6px 0 0; font: 500 16px/1.4 var(--wl-font-ui); color: var(--wl-muted); }
+
+/* the sound button in the bar (Noy, 26 Nov 2026; src/sfx.js): a 44 px speaker disc after the coach launcher, on
+   a screen with a sound effect only; pressed = the lesson's sound effects muted */
+.w-bar-sound { flex: none; width: 44px; height: 44px; margin-left: 4px; padding: 0; display: grid; place-items: center; border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, .55); background: rgba(255, 255, 255, .1); color: var(--wl-white); cursor: pointer; }
+.w-bar-sound[hidden] { display: none; }
+.w-bar-sound:hover { background: rgba(255, 255, 255, .2); }
+.w-bar-sound[aria-pressed="true"] { border-color: var(--wl-white); background: var(--wl-white); color: var(--wl-ink); }
+.w-bar-sound:focus-visible { outline: 3px solid var(--wl-white); outline-offset: 3px; }

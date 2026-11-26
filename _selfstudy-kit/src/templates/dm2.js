@@ -735,6 +735,9 @@ export const homeStop = {
 // plays and its lines appear as they are said (the lines are the captions). Neutral: nothing is graded or sent.
 //   media: { src, ring, cues, duration }   call: { caller, image: { src }, script: [line, ...] }
 // The ring is short: it stops by itself after RINGS rounds and the phone goes still; the hand then shows Answer.
+// (Noy, 26 Nov 2026) The ring is a sound effect of this screen (ctx.sound, src/sfx.js): it sounds only here, starts on
+// the learner's first click or key when the browser refused it on arrival, and keeps quiet when the bar's sound
+// button is muted. The call itself is the screen's content: its own audio, not muted by that button.
 const RINGS = 3;
 export const call = {
   mount(ctx) {
@@ -742,7 +745,8 @@ export const call = {
     const c = ui.call, m = screen.media, k = screen.call;
     let cues = [], heard = ctx.revisit || !!ctx.flags.get('h'), rung = 1;
     const audio = h('audio', { class: 'd2-audio', src: m.src, preload: 'auto' });
-    const ring = h('audio', { class: 'd2-call-ring', src: m.ring, preload: 'auto' });
+    const ringEl = h('audio', { class: 'd2-call-ring', src: m.ring, preload: 'auto' });
+    const ring = ctx.sound(ringEl);
     const status = h('p', { class: 'd2-call-status' }, c.ringing);
     const phone = h('div', { class: 'd2-call-phone', dataset: { state: 'ringing', buzz: 'true' } },
       h('img', { class: 'd2-call-img', src: k.image.src, alt: '' }),
@@ -752,7 +756,7 @@ export const call = {
     const again = btn('d2-call-again', 'callAgain', h('span', { 'aria-hidden': 'true' }, icon('rotate-ccw', { size: 20 })), h('span', {}, c.again));
     const lines = k.script.map((l) => h('p', { class: 'd2-call-line' }, l));
     const said = h('div', { class: 'd2-call-said', role: 'region', 'aria-label': c.transcript }, lines);
-    const still = () => { ring.pause(); phone.dataset.buzz = 'false'; };
+    const still = () => { ring.stop(); phone.dataset.buzz = 'false'; };
     function show(t, all = false) {
       const now = all ? -1 : cues.findIndex((x) => t >= x.t && t < x.end);
       lines.forEach((p, i) => { p.hidden = !all && !(cues[i] && t >= cues[i].t - 0.05); p.dataset.now = String(i === now); });
@@ -775,17 +779,17 @@ export const call = {
     again.addEventListener('click', talk);
     audio.addEventListener('timeupdate', () => { if (phone.dataset.state === 'talking') show(audio.currentTime); });
     audio.addEventListener('ended', () => ended(true));
-    ring.addEventListener('ended', () => { if (phone.dataset.state !== 'ringing' || rung >= RINGS) return still(); rung++; ring.play().catch(still); });
+    ringEl.addEventListener('ended', () => { if (phone.dataset.state !== 'ringing' || rung >= RINGS) return still(); rung++; ring.play(); });
     fetch(m.cues).then((r) => r.json()).then((j) => { cues = j.items || []; }).catch(() => {});
-    layout(ctx, 'dm2-call', headOf(ctx, screen.eyebrow), body('call', audio, ring, phone, h('div', { class: 'd2-call-side' }, answer, said, again)), floatBand(ctx));
+    layout(ctx, 'dm2-call', headOf(ctx, screen.eyebrow), body('call', audio, ringEl, phone, h('div', { class: 'd2-call-side' }, answer, said, again)), floatBand(ctx));
     zones.setFeedback({ state: 'hint', text: screen.hint });
     again.hidden = true;
     if (heard) ended(false);
     else {
       show(0);
-      ring.play().catch(() => {});      // a browser may refuse sound before the first click: the phone still shakes
+      ring.play(); // (refused before the first click or key: it starts on that gesture; the phone shakes either way)
       ctx.ghost({ type: screen.ghost?.type || 'call', delay: 3200, steps: () => [{ point: beside(answer, 0.82, 0.9), hold: 1100 }] });
     }
-    return { unmount() { [audio, ring].forEach((a) => { a.pause(); a.removeAttribute('src'); a.load(); }); } };
+    return { unmount() { ring.stop(); [audio, ringEl].forEach((a) => { a.pause(); a.removeAttribute('src'); a.load(); }); } };
   },
 };

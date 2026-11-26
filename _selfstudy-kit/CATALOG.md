@@ -459,6 +459,9 @@ tracked** (interactive, nothing sent; state kept in the screen's flags), **Prese
 - Fields: `media`* `{ src, ring, cues }`, `call`* `{ caller, image: { src }, script }` (script lines are the
   captions, not counted), `eyebrow`, `hint`, `ghost`.
 - Kind: Not tracked. Words: 35.
+- Sound: the ring is a sound effect (`ctx.sound`, src/sfx.js): only on this screen, started on the learner's first
+  click or key when the browser refused it, silent while the bar's sound button is muted. A lesson with this type
+  needs `ui.sound: { mute, unmute }` (the button's name and its "on" tooltip). The call itself is content: not muted.
 - Used: DM CALL.
 - See it: `digital-marketing/dm-m2l2-lesson-kit/index.html?screen=CALL&review=1`
 

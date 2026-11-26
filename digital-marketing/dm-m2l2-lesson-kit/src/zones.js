@@ -2,7 +2,8 @@
 // in stage px (the stage is 720 high, 1280 to 1600 wide, scaled as a whole):
 //   scene   the whole stage, behind everything: the chapter photo below the bar (Stage mode, push-in
 //           once), the blurred photo under a stone veil (Focus mode), or O1's photo under its veil
-//   bar     y 0 to 80.64, every screen (FX2 C: O1 and END too): logo | menu button | chapter name;
+//   bar     y 0 to 80.64, every screen (FX2 C: O1 and END too): logo | menu button | chapter name | (the coach
+//           launcher, coach.js) | the sound button (only on a screen with a sound effect, src/sfx.js);
 //           right, the chapter's steps (disc + verb; done / current / next)
 //   main    y 80.64 to 720, the screen's own layout
 //   footer  Previous bottom-left, Next bottom-right, floating over main (O1: none; END: Previous only)
@@ -10,8 +11,8 @@
 // every new screen) and the band: the hint row (hint text, the band's tool such as Check or Resume)
 // and the feedback strip (aria-live polite) flush to the bottom edges of the panel it sits in.
 // No learner-facing text here: every string arrives from the content JSON.
-import { h, fmt, reducedMotion } from './util.js?v=39343a95';
-import { glyph, icon } from './icons.js?v=39343a95';
+import { h, fmt, reducedMotion } from './util.js?v=4fd882f5';
+import { glyph, icon } from './icons.js?v=4fd882f5';
 
 const TONE = { correct: 'correct', neutral: 'neutral', wrong: 'wrong', notice: 'neutral', guess: 'neutral', partial: 'neutral', pause: 'neutral' };
 const LEAD = { correct: 'g-ok-disc', wrong: 'g-no-disc', neutral: 'guess' };
@@ -19,7 +20,7 @@ const LEAD = { correct: 'g-ok-disc', wrong: 'g-no-disc', neutral: 'guess' };
 // verdict word shows its first sentence as the strip's head (the frames' S02 strips)
 const splitHead = (t) => { const m = /^(.+?[.?!])\s+(\S[\s\S]*)$/.exec(t || ''); return m ? [m[1], m[2]] : [t || '', '']; };
 
-export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = () => {} }) {
+export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = () => {}, onSound = () => {} }) {
   const ui = content.ui;
 
   /* ---- scene ---- */
@@ -85,9 +86,22 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
   const steps = h('ol', { class: 'w-steps-bar', 'aria-label': ui.rail.steps });
   const savedText = h('span', { class: 'w-saved-text' });
   const saved = h('span', { class: 'w-saved', role: 'status', hidden: true }, savedText);
+  // the lesson's sound effects on or off (Noy, 26 Nov 2026): a speaker toggle, pressed = muted. Its name stays
+  // ui.sound.mute ("Mute sounds") with aria-pressed; the tooltip says what a click does now. Shown only on a screen
+  // that has a sound effect (setSound): elsewhere it would be a control that does nothing.
+  const soundBtn = ui.sound ? h('button', { class: 'w-bar-sound', type: 'button', hidden: true, 'aria-pressed': 'false', 'aria-label': ui.sound.mute, title: ui.sound.mute,
+    dataset: { action: 'sound' }, onclick: () => onSound() }) : null;
   const bar = h('nav', { class: 'w-bar', 'aria-label': ui.rail.label },
     h('img', { class: 'w-bar-logo', src: 'assets/logo/wawiwa-logo.png', alt: ui.logoAlt, width: '271', height: '102' }),
-    h('span', { class: 'w-bar-rule', 'aria-hidden': 'true' }), menuBtn, chapterName, saved, steps);
+    h('span', { class: 'w-bar-rule', 'aria-hidden': 'true' }), menuBtn, chapterName, soundBtn, saved, steps);
+  // { shown: the screen has a sound effect, muted }
+  function setSound({ shown, muted }) {
+    if (!soundBtn) return;
+    soundBtn.hidden = !shown;
+    soundBtn.setAttribute('aria-pressed', String(!!muted));
+    soundBtn.title = muted ? ui.sound.unmute : ui.sound.mute;
+    soundBtn.replaceChildren(icon(muted ? 'volume-x' : 'volume', { size: 24 }));
+  }
 
   // model: { chapter: title, of: "Chapter 2 of 7", steps: [{ verb, icon, state: done | current | next }] }
   function setBar(model) {
@@ -305,5 +319,5 @@ export function createZones(stage, content, { onMenu, onPrev, onNext, onWrong = 
     setFeedback({ state: 'hint', text: '' });
   }
 
-  return { scene, bar, main, footer, logo, instruction, band, attempts: bTries, menuBtn, nextBtn, nextWhy, prevBtn, setScene, setFeedback, setTool, setHintVisible, setAttempts, setNext, setNeed, setPrev, setBack, setBar, setSaved, clearScreen };
+  return { scene, bar, main, footer, logo, instruction, band, attempts: bTries, menuBtn, nextBtn, nextWhy, prevBtn, setScene, setFeedback, setTool, setHintVisible, setAttempts, setNext, setNeed, setPrev, setBack, setBar, setSaved, setSound, soundBtn, clearScreen };
 }

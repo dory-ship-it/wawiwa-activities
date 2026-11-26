@@ -47,6 +47,8 @@ export const STATES = [
   ['CALL', 'ringing', async () => {}],
   ['CALL', 'on the call', async (p) => { await click(p, '[data-action="callAnswer"]'); await audioAt(p, 12); }],
   ['CALL', 'ended', async (p) => { await click(p, '[data-action="callAnswer"]'); await audioEnd(p); }],
+  // (Noy, 26 Nov 2026) the bar's sound button, pressed: the lesson's sound effects muted
+  ['CALL', 'sound muted', async (p) => { await click(p, '.w-bar-sound'); }],
   ['S05', 'four tiles', shift],
   ['S05', 'tile 1 open', async (p) => { await shift(p); await click(p, '.d-tile-head[data-tile="1"]'); }],
   ['S05', 'tile 1 answered, proof', async (p) => { await shift(p); await click(p, '.d-tile-head[data-tile="1"]'); await click(p, '.d-chip[data-value="y"]'); }],

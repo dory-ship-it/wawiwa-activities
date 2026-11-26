@@ -1,0 +1,10 @@
+﻿import puppeteer from 'puppeteer-core';
+import { chromePath } from '../../tools/lib.mjs';
+import { startServer } from '../../tools/serve.mjs';
+const server = await startServer(0);
+const browser = await puppeteer.launch({ executablePath: chromePath() });
+const page = await browser.newPage(); await page.setViewport({ width: 1280, height: 720 });
+await page.goto(`http://127.0.0.1:${server.address().port}/index.html?reset=1&live=0&screen=G1`); await new Promise((r) => setTimeout(r, 1500));
+const r = () => page.evaluate(() => ['.m-mt-ring', '.m-mt-panel', '.w-nav, .w-foot, footer'].map((s) => { const e = document.querySelector(s); if (!e) return s + ' none'; const b = e.getBoundingClientRect(); return s + ' ' + [b.left, b.top, b.right, b.bottom].map(Math.round).join(','); }));
+console.log(await r()); await page.click('.m-mt-role-btn'); await new Promise((r) => setTimeout(r, 500)); console.log(await r());
+await browser.close(); server.close();

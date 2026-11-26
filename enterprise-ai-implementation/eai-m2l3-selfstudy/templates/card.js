@@ -11,9 +11,9 @@
 // rows [{ id, label, store }], library { label } }. A screen: variant "build", cardStep (the current step id), intro
 // (the line over the card), fill [{ row, kind: text|select, options, placeholder, maxLength, trackingId, library }],
 // save, feedback. cardDoc() is also used by tenCards (B3), with no current step: the card as it starts.
-import { h, reducedMotion } from '../src/util.js?v=c6cdc63e';
-import { glyph, icon } from '../src/icons.js?v=c6cdc63e';
-import { layout } from '../src/templates/stage.js?v=c6cdc63e';
+import { h, reducedMotion } from '../src/util.js?v=044f9db2';
+import { glyph, icon } from '../src/icons.js?v=044f9db2';
+import { layout } from '../src/templates/stage.js?v=044f9db2';
 
 export function cardDoc(ctx, { current = null, head = null, body = [] } = {}) {
   const C = ctx.content.card;

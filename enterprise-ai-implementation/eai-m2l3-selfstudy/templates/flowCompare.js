@@ -4,10 +4,10 @@
 // second lane (a lit box); its result changes, and the key line opens under the lanes. Next after the button.
 // Motion: the tool box drops into the lane once; none with reduced motion.
 // Content: label (the key pill), lanes [{ name, steps: [text], result, tone }], add { button, step, result }, keyLine.
-import { h, reducedMotion } from '../src/util.js?v=c6cdc63e';
-import { glyph, icon } from '../src/icons.js?v=c6cdc63e';
-import { art } from './art.js?v=c6cdc63e';
-import { layout } from '../src/templates/stage.js?v=c6cdc63e';
+import { h, reducedMotion } from '../src/util.js?v=044f9db2';
+import { glyph, icon } from '../src/icons.js?v=044f9db2';
+import { art } from './art.js?v=044f9db2';
+import { layout } from '../src/templates/stage.js?v=044f9db2';
 
 export const flowCompare = {
   scene: () => 'focus',

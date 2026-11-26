@@ -7,10 +7,10 @@
 //   3 in doubt, show the steering committee both paths  (a fork)
 // Motion: each idea comes in once; none with reduced motion or a revisit. Next unlocks after the third idea.
 // Content: label, question, ideas [{ draw: crooked|front|fork, text }], button (a ui.buttons key).
-import { h, reducedMotion } from '../src/util.js?v=c6cdc63e';
-import { glyph } from '../src/icons.js?v=c6cdc63e';
-import { layout } from '../src/templates/stage.js?v=c6cdc63e';
-import { art } from './art.js?v=c6cdc63e';
+import { h, reducedMotion } from '../src/util.js?v=044f9db2';
+import { glyph } from '../src/icons.js?v=044f9db2';
+import { layout } from '../src/templates/stage.js?v=044f9db2';
+import { art } from './art.js?v=044f9db2';
 
 const NS = 'http://www.w3.org/2000/svg';
 const svgOf = (inner) => { const s = document.createElementNS(NS, 'svg'); s.setAttribute('viewBox', '0 0 200 110'); s.setAttribute('aria-hidden', 'true'); s.setAttribute('class', 'm-gate-svg'); s.innerHTML = inner; return s; };

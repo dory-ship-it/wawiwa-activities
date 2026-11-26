@@ -1,0 +1,15 @@
+﻿import puppeteer from 'puppeteer-core';
+import { join } from 'node:path';
+import { chromePath } from '../../tools/lib.mjs';
+import { startServer, ROOT } from '../../tools/serve.mjs';
+const server = await startServer(0);
+const browser = await puppeteer.launch({ executablePath: chromePath(), args: ['--autoplay-policy=no-user-gesture-required'] });
+const page = await browser.newPage(); await page.setViewport({ width: 1280, height: 720 });
+const errs = []; page.on('pageerror', (e) => errs.push(e.message));
+await page.goto(`http://127.0.0.1:${server.address().port}/index.html?reset=1&live=0&screen=H3`); await new Promise((r) => setTimeout(r, 1500));
+await page.click('[data-action="audioPlay"]'); await new Promise((r) => setTimeout(r, 29000));
+const now = await page.evaluate(() => ({ t: document.querySelector('.d2-audio').currentTime, line: document.querySelector('.d2-tr-line[data-now="true"]')?.textContent }));
+console.log(JSON.stringify(now));
+await page.screenshot({ path: join(ROOT, 'planning/shots-r4fix/ch8b/h3-playing.png') });
+console.log(errs.length ? errs.join('\n') : 'no errors');
+await browser.close(); server.close();

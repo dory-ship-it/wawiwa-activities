@@ -4,6 +4,7 @@
 import { shift, click, deck, pick, tile, toEnd, toStop, stop, sleep } from '../tools/state-helpers.mjs';
 const voices = (picks) => async (p) => { await shift(p); for (let i = 0; i < picks.length; i++) { await click(p, `.m-mt-role-btn[data-role="${picks[i]}"]`); if (i < picks.length - 1) await click(p, '[data-action="nextVoice"]'); } };
 
+const stampIt = (p, tier) => click(p, `.m-st-stamp[data-tier="${tier}"]`);
 const whys = (n) => async (p) => { await shift(p); for (let i = 0; i < n; i++) await click(p, '[data-action="why"]'); };
 const nextSit = (p) => click(p, '[data-action="nextSituation"]');
 const pairs = (ids) => async (p) => { await shift(p); for (let i = 0; i < ids.length; i++) { await pick(p, ids[i]); if (i < ids.length - 1) await nextSit(p); } };
@@ -59,7 +60,6 @@ export const STATES = [
   ['E4', 'saved', fillCard(['', 'Month-end close acceleration: RPA plus Power BI'])],
   /* Find the root cause */
   ['F0', 'parts', shift],
-  ['F0', 'case lines on', async (p) => { await shift(p); await click(p, '[data-action="caseToggle"]'); }],
   ['F1', 'the pain only', shift],
   ['F1', 'two whys', whys(2)],
   ['F1', 'the root', whys(5)],
@@ -81,4 +81,12 @@ export const STATES = [
   ['G1', 'the sentence', async (p) => { await voices(['pain', 'funds', 'pain', 'funds', 'pain', 'pain'])(p); await click(p, '[data-action="nextVoice"]'); }],
   ['G2', 'empty rows', async (p) => { await shift(p); await sleep(3000); }],
   ['G2', 'saved', fillCard(['Ownership of the close was never formalized', 'Henrik, finance analyst', 'Sarah Chen, CFO'])],
+  /* Can it ship? */
+  ['H0', 'four levels', shift],
+  ['H1', 'first document', shift],
+  ['H1', 'one wrong', async (p) => { await shift(p); await stampIt(p, 'internal'); }],
+  ['H1', 'all stamped', async (p) => { await shift(p); for (const t of ['public', 'internal', 'confidential', 'restricted', 'internal', 'confidential']) { await stampIt(p, t); await sleep(1700); } }],
+  ['H3', 'ready', shift],
+  ['H4', 'no scores', shift],
+  ['H4', 'all rows', async (p) => { await shift(p); for (const [r, v] of [['api', 'ask'], ['bulk', 'ask'], ['sso', '0'], ['deploy', 'ask']]) await click(p, `.m-ga-row:has(#m-ga-${r}) .m-ga-opt[data-v="${v}"]`); await sleep(900); }],
 ];

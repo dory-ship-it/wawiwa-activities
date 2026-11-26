@@ -7,10 +7,10 @@
 //          says why. One graded matching interaction: each card's first bone ("1.people,2.process").
 // Content: head, bones [{ id, name, hint }] (top three first), cards [{ n, text, bone, feedback: { correct, wrong } }],
 // closing (the line after the last card), label (the key pill).
-import { h, reducedMotion } from '../src/util.js?v=c6cdc63e';
-import { glyph } from '../src/icons.js?v=c6cdc63e';
-import { layout } from '../src/templates/stage.js?v=c6cdc63e';
-import { dragDrop } from '../src/drag.js?v=c6cdc63e';
+import { h, reducedMotion } from '../src/util.js?v=044f9db2';
+import { glyph } from '../src/icons.js?v=044f9db2';
+import { layout } from '../src/templates/stage.js?v=044f9db2';
+import { dragDrop } from '../src/drag.js?v=044f9db2';
 
 const W = 1000, H = 300, SPINE = 150;
 // the bones' outer ends (label boxes) and where they meet the spine
@@ -36,7 +36,8 @@ export const fishbone = {
     path('M792 58 Q930 60 992 150 Q930 240 792 242 Q826 150 792 58 Z', 'm-fish-headline');
     const spine = line(54, SPINE, 800, SPINE, 'm-fish-spine');
     const boneLines = screen.bones.map((b, i) => line(ENDS[i][0] + 60, ENDS[i][1] < SPINE ? 46 : 254, ...JOIN(i), 'm-fish-bone'));
-    const head = h('div', { class: 'm-fish-head' }, h('b', {}, screen.head));
+    // round 4 (26 Nov 2026, Noy: "what is the head, what are the bones?"): a small "The pain" over the head's text; the bones carry their names
+    const head = h('div', { class: 'm-fish-head' }, screen.headLabel ? h('span', { class: 'm-fish-headlabel' }, screen.headLabel) : null, h('b', {}, screen.head));
     const boneEls = screen.bones.map((b, i) => {
       const placed = h('ul', { class: 'm-fish-placed' });
       const el = sort
@@ -106,13 +107,16 @@ export const fishbone = {
     boneEls.forEach((x) => { x.id = x.b.id; }); // the drag module passes the target's id
     const dd = dragDrop({ ui, live, targets: boneEls, nameOf: (el) => el.textContent, onDrop: (el, id) => drop(el, boneEls.find((x) => x.id === id)), picked: ui.drag.pickedPlace || ui.drag.picked });
     cards.forEach((y) => dd.add(y.b));
-    // the hand, on arrival: it takes the first cause and carries it up to the fish (to the spine, not to a bone)
+    // the hand, on arrival: it takes the first cause and carries it into a bone's box (round 4, Noy: "the hand must show
+    // that it goes inside"). Not the card's own bone: the hand shows the move, never the answer.
     const g = !ctx.revisit ? ctx.ghost({ type: 'drag', steps: () => {
       const first = tray.querySelector('button');
       if (!first) return [];
-      const r = first.getBoundingClientRect(), s = svg.getBoundingClientRect();
+      const own = screen.cards.find((c) => c.text === first.textContent)?.bone;
+      const box = (boneEls.find((x, i) => i === 1 && x.b.id !== own) || boneEls.find((x) => x.b.id !== own)).el.getBoundingClientRect();
+      const r = first.getBoundingClientRect();
       const grab = { x: r.left + r.width * 0.8, y: r.top + r.height * 0.6 };
-      return [{ point: () => grab, carry: first, hold: 120 }, { point: () => ({ x: s.left + s.width * 0.45, y: s.top + s.height * 0.5 }), hold: 700 }];
+      return [{ point: () => grab, carry: first, hold: 120 }, { point: () => ({ x: box.left + box.width * 0.5, y: box.top + box.height * 0.62 }), hold: 900 }];
     } }) : null;
     if (g) headEl.append(h('span', { class: 'w-head-tools m-fish-tools' }, g.button));
     layout(ctx, 'fish', headEl, h('div', { class: 'm-fish-wrap m-fish-sort' }, fish, h('div', { class: 'm-fish-row' }, tray, h('div', { class: 'm-fish-bandbox' }, zones.band))), live);

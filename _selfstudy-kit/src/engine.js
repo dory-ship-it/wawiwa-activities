@@ -34,6 +34,7 @@ import { LEVELS, JOURNEYS, tally, levelAt, variantOf } from './adapt.js?v=c6cd17
 import { bring, workbookStop, questionTiles, questionCards, dimensionMap, goalCards, closing } from './templates/dm.js?v=c6cd176a';
 import { checklist, revealTable, quiz, client, stages, builder, caseFile, twoCols, podcast, poll, funnelCalc, dataTable, infographic, homeStop, call } from './templates/dm2.js?v=c6cd176a';
 import { loadConfig, cfg } from './config.js?v=c6cd176a';
+import { createSfx } from './sfx.js?v=c6cd176a';
 
 const STAGE_W = 1280, STAGE_H = 720;
 const STAGE_W_MAX = 1600; // a wide window widens the stage up to this (about 2.2:1); wider still is letterboxed
@@ -131,7 +132,12 @@ class Lesson {
       onNext: () => this.nextAction(),
       // FX4: a first wrong answer brings "Show me how" out on screens that have one
       onWrong: () => this.ghosts.forEach((g) => g.reveal && g.reveal()),
+      // the sound button (Noy, 26 Nov 2026): the lesson's sound effects on or off, kept in the state (m)
+      onSound: () => { this.state.m = this.state.m ? 0 : 1; this.persist(); this.sfx.refresh(); this.showSound(); },
     });
+    // the lesson's sound effects (src/sfx.js): only on their own screen, a retry on the first gesture when the
+    // browser refused, never in a review thumbnail, silent while muted
+    this.sfx = createSfx({ isMuted: () => !!this.state?.m, silent: this.thumb });
     this.menu = createMenu(this.stage, content, {
       zones: this.zones,
       getMenu: () => this.menuModel(),
@@ -352,6 +358,8 @@ class Lesson {
       finished: () => !!this.state.fin,
       // the ghost hand (src/ghost.js): a once-per-interaction-type demo with a "Show me" replay
       ghost: (opts) => this.ghostFor(opts),
+      // a sound effect of this screen (src/sfx.js): ctx.sound(audioElement) -> { play(), stop() }
+      sound: (el) => this.sfx.add(el),
     });
     // FX8 (Noy, 8 Nov 2026: "go back to my design in Artifacts"): the FX7 composer is retired; every screen
     // is laid out by its template on its scene, as in the boards (L4 Screens Intro to Ch2, planning/fx8-board)
@@ -365,6 +373,7 @@ class Lesson {
     if (screen.presentation) { this.complete(id); this.zones.setNext(false); }
     applyTerms(this.zones.main, screen.terms, this.content.tooltips);
     this.renderBar();
+    this.showSound();
     this.coach.show(screen, chapter);
     if (this.toolbar) this.toolbar.show(id);
     if (focus && !this.thumb) this.zones.instruction.focus({ preventScroll: true });
@@ -582,6 +591,7 @@ class Lesson {
   }
 
   unmount() {
+    this.sfx.clear();
     if (this.mounted && this.mounted.unmount) this.mounted.unmount();
     this.mounted = null;
     this.ghosts.forEach((g) => g.cancel());
@@ -635,7 +645,9 @@ class Lesson {
 
   startOver() {
     if (!this.review) clearState();
+    const muted = this.state.m; // (the sound choice is the learner's, not the lesson's progress: it stays)
     this.state = emptyState();
+    this.state.m = muted;
     this.backTo = null;
     this.go(this.order[0]);
   }
@@ -647,6 +659,9 @@ class Lesson {
     const sent = this.tracking.persist(this.state);
     this.zones.setSaved(this.lms ? sent : saveState(this.state));
   }
+
+  // the sound button: shown only while the screen on view has a sound effect
+  showSound() { this.zones.setSound({ shown: this.sfx.count() > 0, muted: !!this.state.m }); }
 
   /* ---- progress model (top bar and menu) ---- */
   // Done screens, plus the screens a fast-track jump skipped (route "skip"): they count as done,

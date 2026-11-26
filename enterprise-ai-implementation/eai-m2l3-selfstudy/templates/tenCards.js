@@ -7,11 +7,11 @@
 // The motion is the idea itself (a pain becomes a card), once; reduced motion and a revisit show the end state.
 // Content: list { title, mine, others }, button, cardTitle, cardId, painLabel, parts [{ art, title }], stack, line,
 // fallback (when the learner wrote no pain).
-import { h, reducedMotion } from '../src/util.js?v=c6cdc63e';
-import { icon } from '../src/icons.js?v=c6cdc63e';
-import { layout } from '../src/templates/stage.js?v=c6cdc63e';
-import { art } from './art.js?v=c6cdc63e';
-import { cardDoc } from './card.js?v=c6cdc63e';
+import { h, reducedMotion } from '../src/util.js?v=044f9db2';
+import { icon } from '../src/icons.js?v=044f9db2';
+import { layout } from '../src/templates/stage.js?v=044f9db2';
+import { art } from './art.js?v=044f9db2';
+import { cardDoc } from './card.js?v=044f9db2';
 
 // a custom property set through the CSSOM (the page's CSP allows no style attribute)
 const prop = (el, name, value) => { el.style.setProperty(name, value); return el; };

@@ -1,0 +1,18 @@
+﻿import puppeteer from 'puppeteer-core';
+import { join } from 'node:path';
+import { chromePath } from '../../tools/lib.mjs';
+import { startServer, ROOT } from '../../tools/serve.mjs';
+const server = await startServer(0);
+const url = `http://127.0.0.1:${server.address().port}/index.html`;
+const browser = await puppeteer.launch({ executablePath: chromePath() });
+const page = await browser.newPage(); await page.setViewport({ width: 1280, height: 720 });
+await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);
+const errs = []; page.on('pageerror', (e) => errs.push(e.message)); page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const out = (n) => join(ROOT, 'planning/shots-r4fix/ch8b/' + n + '.png');
+await page.goto(url + '?reset=1&live=0&screen=H0'); await sleep(1300); await page.screenshot({ path: out('m-h0-1300') });
+await page.goto(url + '?live=0&screen=H1'); await sleep(1500); await page.keyboard.press('Escape');
+await page.click('.m-st-stamp[data-tier="public"]'); await sleep(650); await page.screenshot({ path: out('m-h1-stamp') });
+await sleep(1100); await page.screenshot({ path: out('m-h1-next') });
+console.log(errs.length ? errs.join('\n') : 'no errors');
+await browser.close(); server.close();

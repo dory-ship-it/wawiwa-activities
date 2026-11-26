@@ -8,11 +8,11 @@
 // Tracking: one neutral fill-in (the pain, trimmed), kept under screen.field.store for later screens and the coach.
 // Content: people { title, items: [{ initials, name, role }], link: { label, href } }, have [{ icon, label, from }],
 // field { label, store, trackingId, maxLength, placeholder }, save (a ui.buttons key), feedback { saved, empty }.
-import { h } from '../src/util.js?v=c6cdc63e';
-import { glyph, icon } from '../src/icons.js?v=c6cdc63e';
-import { art } from './art.js?v=c6cdc63e';
-import { layout, focusHead } from '../src/templates/stage.js?v=c6cdc63e';
-import { field } from '../src/templates/input.js?v=c6cdc63e';
+import { h } from '../src/util.js?v=044f9db2';
+import { glyph, icon } from '../src/icons.js?v=044f9db2';
+import { art } from './art.js?v=044f9db2';
+import { layout, focusHead } from '../src/templates/stage.js?v=044f9db2';
+import { field } from '../src/templates/input.js?v=044f9db2';
 
 export const prep = {
   scene: () => 'focus',

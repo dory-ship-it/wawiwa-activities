@@ -19,13 +19,13 @@
 // media.duration, stops[].t. Swapping the real film in is a change of those paths and times only.
 // Seeking forward never passes the part already watched or the next unanswered stop (the slider
 // clamps, a polite note says why).
-import { h, fmt, nextId } from '../util.js?v=c6cdc63e';
-import { glyph, icon } from '../icons.js?v=c6cdc63e';
-import { letter } from '../tracking/index.js?v=c6cdc63e';
-import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=c6cdc63e';
-import { targetSteps } from '../ghost.js?v=c6cdc63e';
-import { checkButton } from './decision.js?v=c6cdc63e';
-import { SPEEDS, readRate, keepRate } from '../speeds.js?v=c6cdc63e';
+import { h, fmt, nextId } from '../util.js?v=044f9db2';
+import { glyph, icon } from '../icons.js?v=044f9db2';
+import { letter } from '../tracking/index.js?v=044f9db2';
+import { layout, sheet, glassKicker, arrowNav, paintAnswer } from './stage.js?v=044f9db2';
+import { targetSteps } from '../ghost.js?v=044f9db2';
+import { checkButton } from './decision.js?v=044f9db2';
+import { SPEEDS, readRate, keepRate } from '../speeds.js?v=044f9db2';
 
 const SEEK_STEP = 5, SEEK_PAGE = 15, AT_STOP = 0.05, AT_END = 0.3;
 // FX4 (Dor): playback speed in the player bar, kept for the session (src/speeds.js: 0.5 to 2, Noy 23 Nov

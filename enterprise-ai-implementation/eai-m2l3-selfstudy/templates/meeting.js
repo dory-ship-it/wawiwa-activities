@@ -8,9 +8,9 @@
 // Content: people [{ id, name, role, tag: [x, y], head: [x, y] }] (stage px), lines [{ who, text, audio, role,
 // bubble: [x, y], tail, feedback: { correct, wrong } }], roles { pain, funds }, nextVoice, pitch { before, mid, after,
 // blanks: [{ id, answer, label }], check, feedback: { correct, wrong } }.
-import { h, reducedMotion } from '../src/util.js?v=c6cdc63e';
-import { layout } from '../src/templates/stage.js?v=c6cdc63e';
-import { checkButton } from '../src/templates/decision.js?v=c6cdc63e';
+import { h, reducedMotion } from '../src/util.js?v=044f9db2';
+import { layout } from '../src/templates/stage.js?v=044f9db2';
+import { checkButton } from '../src/templates/decision.js?v=044f9db2';
 
 const BAR = 80.64; // the stage's top bar: the content positions are stage px, the main zone starts under the bar
 const at = (el, [x, y]) => { el.style.left = x + 'px'; el.style.top = (y - BAR) + 'px'; return el; };
@@ -31,6 +31,8 @@ export const meeting = {
     const said = h('p', { class: 'm-mt-line' });
     const bubble = h('div', { class: 'm-mt-bubble', role: 'group', 'aria-live': 'polite' }, who, sound, said);
     play.addEventListener('click', () => { audio.currentTime = 0; audio.play().catch(() => {}); });
+    audio.addEventListener('play', () => { sound.dataset.playing = 'true'; });
+    ['pause', 'ended'].forEach((e) => audio.addEventListener(e, () => { sound.dataset.playing = 'false'; }));
     const r1 = h('button', { class: 'm-mt-role-btn', type: 'button', dataset: { role: 'pain' } }, screen.roles.pain);
     const r2 = h('button', { class: 'm-mt-role-btn', type: 'button', dataset: { role: 'funds' } }, screen.roles.funds);
     const roles = h('div', { class: 'm-mt-roles', role: 'group', 'aria-labelledby': 'w-instruction' }, r1, r2);
@@ -52,9 +54,14 @@ export const meeting = {
       sound.hidden = !l.audio;
       if (l.audio) audio.src = l.audio;
       at(bubble, l.bubble); bubble.style.setProperty('--tail', l.tail + 'px');
-      at(ring, p.head);
+      at(ring, p.head); ring.style.setProperty('--r', (p.ring || 140) + 'px');
+      // round 4 (26 Nov 2026, Noy: "are we meant to hear it? the ring does not mark who speaks"): the line plays as it
+      // arrives (after the first, a click on Next voice started it); the ring sits on the speaker's face, sized to it,
+      // and the rest of the room dims (CSS), so the speaker is unmistakable. The play button replays the line.
+      if (l.audio && i > 0 && !still) { audio.currentTime = 0; audio.play().catch(() => {}); }
       if (!still) { bubble.classList.remove('m-mt-pop'); void bubble.offsetWidth; bubble.classList.add('m-mt-pop'); }
       [r1, r2].forEach((b) => { b.disabled = false; b.dataset.result = ''; });
+      panel.dataset.answered = 'false';
       paintDots();
     };
     const judge = (role) => {
@@ -62,10 +69,11 @@ export const meeting = {
       const right = role === l.role;
       picks.push(`${i + 1}.${role}`);
       [r1, r2].forEach((b) => { b.disabled = true; b.dataset.result = b.dataset.role === l.role ? 'correct' : b.dataset.role === role ? 'wrong' : ''; });
+      panel.dataset.answered = 'true'; // round 4: the feedback beside the two choices, so the panel does not grow over the faces
       // (no role tag stays on the person: Sarah speaks twice, once funding and once feeling a pain; the role belongs
       // to what is said)
       const last = i === screen.lines.length - 1;
-      const next = { id: 'nextVoice', label: last ? screen.pitchButton : screen.nextVoice, onClick: () => { i++; if (last) pitch(); else { zones.setFeedback({ state: 'hint', text: screen.hint }); speak(); r1.focus(); } } };
+      const next = { id: 'nextVoice', label: last ? screen.pitchButton : screen.nextVoice, onClick: () => { audio.pause(); i++; if (last) pitch(); else { zones.setFeedback({ state: 'hint', text: screen.hint }); speak(); r1.focus(); } } };
       zones.setFeedback(right ? { state: 'correct', text: l.feedback.correct, actions: [next] } : { state: 'wrong', verdict: ui.feedback.revealed, text: l.feedback.wrong, actions: [next] });
       if (last) ctx.answer({ trackingId: screen.tracking[0].id, response: picks.join(','), result: picks.every((x, k) => x.endsWith('.' + screen.lines[k].role)) ? 'correct' : 'wrong' });
       zones.band.querySelector('[data-action="nextVoice"]')?.focus();
@@ -85,6 +93,7 @@ export const meeting = {
       const sync = () => { check.disabled = !(s1.value && s2.value); };
       [s1, s2].forEach((s) => s.addEventListener('change', sync));
       panel.classList.add('m-mt-panel-pitch');
+      panel.dataset.answered = 'false';
       zones.instruction.after(sentence);
       zones.setFeedback({ state: 'hint', text: screen.hint });
       zones.setTool(check);
